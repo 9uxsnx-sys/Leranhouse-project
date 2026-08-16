@@ -20,7 +20,7 @@ services:
       - POSTGRES_PASSWORD=learnhouse
       - POSTGRES_DB=learnhouse
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
       - learnhouse_db_dev_data:/var/lib/postgresql/data
     healthcheck:
