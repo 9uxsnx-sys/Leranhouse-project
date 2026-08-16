@@ -214,7 +214,7 @@ function OrgUsersAdd() {
             <button
               onClick={sendInvites}
               disabled={isLoading || !invitedUsers.trim()}
-              className="flex items-center gap-2 px-4 py-2 bg-green-700 hover:bg-green-800 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg font-semibold text-sm text-white transition-all"
+              className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg font-semibold text-sm text-primary-foreground transition-all"
             >
               <UserPlus className="w-4 h-4" />
               <span>{t('dashboard.users.invite_members.send_button')}</span>

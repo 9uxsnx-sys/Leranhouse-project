@@ -300,7 +300,7 @@ const OrgEditLanding = () => {
               variant="default" 
               onClick={handleSave}
               disabled={isSaving}
-              className="bg-black hover:bg-black/90"
+              className="bg-primary hover:bg-primary/90"
             >
               <Save className="h-4 w-4 mr-2" />
               {isSaving ? t('dashboard.organization.landing.saving') : t('dashboard.organization.landing.save_changes')}
@@ -412,7 +412,7 @@ const OrgEditLanding = () => {
                   >
                     <SelectTrigger className="w-full p-0 border-0 bg-black ">
                       <div className="w-full">
-                        <Button variant="default" className="w-full bg-black hover:bg-black/90 text-white">
+                        <Button variant="default" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
                           <Plus className="h-4 w-4 mr-2" />
                           {t('dashboard.organization.landing.add_section')}
                         </Button>
@@ -1603,7 +1603,7 @@ const FeaturedCoursesEditor: React.FC<{
                           : [...section.courses, course.course_uuid]
                         onChange({ ...section, courses: newCourses })
                       }}
-                      className={section.courses.includes(course.course_uuid) ? "bg-black hover:bg-black/90" : ""}
+                      className={section.courses.includes(course.course_uuid) ? "bg-primary hover:bg-primary/90" : ""}
                     >
                       {section.courses.includes(course.course_uuid) ? t('dashboard.organization.landing.courses_editor.selected') : t('dashboard.organization.landing.courses_editor.select')}
                     </Button>

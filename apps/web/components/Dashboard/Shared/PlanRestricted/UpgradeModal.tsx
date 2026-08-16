@@ -139,7 +139,7 @@ export default function UpgradeModal({ open, onClose }: UpgradeModalProps) {
                         href={upgradeUrl || '#'}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-5 w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold rounded-lg transition-colors bg-black hover:bg-gray-800 text-white"
+                        className="mt-5 w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold rounded-lg transition-colors bg-primary hover:bg-primary/90 text-primary-foreground"
                       >
                         {t('upgrade_modal.choose_plan', { plan: 'Standard' })}
                         <ArrowRight size={14} weight="bold" />
@@ -185,7 +185,7 @@ export default function UpgradeModal({ open, onClose }: UpgradeModalProps) {
                         href={upgradeUrl || '#'}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-5 w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold rounded-lg transition-colors bg-black hover:bg-gray-800 text-white"
+                        className="mt-5 w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold rounded-lg transition-colors bg-primary hover:bg-primary/90 text-primary-foreground"
                       >
                         {t('upgrade_modal.choose_plan', { plan: 'Pro' })}
                         <ArrowRight size={14} weight="bold" />

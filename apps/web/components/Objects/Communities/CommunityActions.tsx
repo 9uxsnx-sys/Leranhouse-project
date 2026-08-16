@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { Users, MessageCircle, Plus, Globe, Lock, Settings } from 'lucide-react'
+import { Users, MessageCircle, Globe, Lock, Settings } from 'lucide-react'
 import { Community } from '@services/communities/communities'
 import { useCommunityRights } from '@components/Hooks/useCommunityRights'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -111,10 +111,10 @@ export function CommunityActions({
         {canCreateDiscussion && onCreateDiscussion && (
           <button
             onClick={onCreateDiscussion}
-            className="w-full py-3 rounded-lg nice-shadow font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer bg-neutral-900 text-white hover:bg-neutral-800"
+            className="w-full py-3 rounded-lg nice-shadow font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90"
           >
-            <Plus className="w-5 h-5" />
-            <span>New Discussion</span>
+            <span>New Discussion </span>
+            <span className="text-md bg-white/20 px-1 rounded-full">+</span>
           </button>
         )}
 

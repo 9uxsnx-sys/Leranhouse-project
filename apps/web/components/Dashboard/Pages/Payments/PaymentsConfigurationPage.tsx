@@ -245,7 +245,7 @@ const ProviderCard: React.FC<ProviderCardProps> = ({ provider, config, orgId, ac
               onClick={handleConnect}
               disabled={isConnecting}
               size="sm"
-              className="text-xs bg-gray-900 text-white hover:bg-gray-800"
+              className="text-xs bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {isConnecting ? (
                 <Loader2 size={12} className="animate-spin mr-1" />

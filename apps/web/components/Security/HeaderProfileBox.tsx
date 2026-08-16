@@ -2,12 +2,21 @@
 import React, { useEffect, useMemo } from 'react'
 
 import Link from 'next/link'
-import { Package, Crown, Shield, User, Users, SignOut, CaretDown, Globe, Check, ShoppingBag } from '@phosphor-icons/react'
-import UserAvatar from '@components/Objects/UserAvatar'
+import {
+  ArrowRightOnRectangle,
+  Check,
+  ChevronDownMini,
+  CreditCard,
+  GridLayout,
+  IdBadge,
+  Language,
+} from '@components/Objects/Icons/MedusaIcons'
+import { Avatar } from '@components/ui/avatar'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getUriWithOrg } from '@services/config/config'
+import { getUserAvatarMediaDirectory } from '@services/media/media'
 import Tooltip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import {
   DropdownMenu,
@@ -30,7 +39,6 @@ import { getMenuColorClasses } from '@services/utils/ts/colorUtils'
 
 interface RoleInfo {
   name: string;
-  icon: React.ReactNode;
   bgColor: string;
   textColor: string;
   description: string;
@@ -77,28 +85,24 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
     const roleConfigs: { [key: string]: RoleInfo } = {
       'role_global_admin': {
         name: t('roles.role_admin'),
-        icon: <Crown size={12} weight="fill" />,
         bgColor: 'bg-purple-600',
         textColor: 'text-white',
         description: t('roles.role_admin_desc')
       },
       'role_global_maintainer': {
         name: t('roles.role_maintainer'),
-        icon: <Shield size={12} weight="fill" />,
         bgColor: 'bg-blue-600',
         textColor: 'text-white',
         description: t('roles.role_maintainer_desc')
       },
       'role_global_instructor': {
         name: t('roles.role_instructor'),
-        icon: <Users size={12} weight="fill" />,
         bgColor: 'bg-green-600',
         textColor: 'text-white',
         description: t('roles.role_instructor_desc')
       },
       'role_global_user': {
         name: t('roles.role_user'),
-        icon: <User size={12} weight="fill" />,
         bgColor: 'bg-gray-500',
         textColor: 'text-white',
         description: t('roles.role_user_desc')
@@ -145,6 +149,16 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
     }));
   }, [userRoles, org?.id]);
 
+  // Medusa Avatar source (mirrors UserAvatar resolution for the current session user)
+  const avatarSrc = useMemo((): string | undefined => {
+    const avatarImage = session?.data?.user?.avatar_image
+    if (!avatarImage) return undefined
+    if (avatarImage.startsWith('http://') || avatarImage.startsWith('https://')) return avatarImage
+    return getUserAvatarMediaDirectory(session.data.user.user_uuid, avatarImage)
+  }, [session])
+
+  const avatarFallback = (session?.data?.user?.username || '?').slice(0, 2).toUpperCase()
+
   return (
     <div className="flex items-stretch items-center">
       {session.status == 'unauthenticated' && (
@@ -169,90 +183,87 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
           <div className="flex items-center space-x-3">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className={`cursor-pointer flex items-center space-x-3 rounded-lg p-2 transition-colors ${colors.profileHover}`}>
-                  <UserAvatar border="border-2" rounded="rounded-lg" width={30} shadow={primaryColor ? '' : undefined} />
-                  <div className="flex flex-col items-start space-y-0">
-                    <div className="flex items-center space-x-2">
-                      <p className={`text-sm font-semibold capitalize ${colors.profileName}`}>{session.data.user.username}</p>
-                      {userRoleInfo && userRoleInfo.name !== 'USER' && (
-                        <Tooltip 
-                          content={userRoleInfo.description}
-                          sideOffset={15}
-                          side="bottom"
-                        >
-                          <div className={`text-[6px] ${userRoleInfo.bgColor} ${userRoleInfo.textColor} px-1 py-0.5 font-medium rounded-full flex items-center gap-0.5 w-fit`}>
-                            {userRoleInfo.icon}
-                            {userRoleInfo.name}
-                          </div>
-                        </Tooltip>
-                      )}
-                      {/* Custom roles */}
-                      {customRoles.map((customRole, index) => (
-                        <Tooltip 
-                          key={index}
-                          content={customRole.description || `${t('roles.custom_role')}: ${customRole.name}`}
-                          sideOffset={15}
-                          side="bottom"
-                        >
-                          <div className="text-[6px] bg-gray-500 text-white px-1 py-0.5 font-medium rounded-full flex items-center gap-0.5 w-fit">
-                            <Shield size={12} weight="fill" />
-                            {customRole.name}
-                          </div>
-                        </Tooltip>
-                      ))}
-                    </div>
-                    <p className={`text-xs ${colors.profileMuted}`}>{session.data.user.email}</p>
-                  </div>
-                  <CaretDown aria-hidden="true" size={16} weight="fill" className={colors.profileMuted} />
+                <button className="cursor-pointer flex items-center gap-2 rounded-md py-1.5 pl-1.5 pr-2 text-gray-700 transition-colors hover:bg-gray-100">
+                  <Avatar src={avatarSrc} fallback={avatarFallback} variant="rounded" size="xsmall" />
+                  <span className="hidden text-[13px] font-medium capitalize sm:block">
+                    {session.data.user.username}
+                  </span>
+                  {userRoleInfo && (
+                    <Tooltip content={userRoleInfo.description} sideOffset={10} side="bottom">
+                      <span className="hidden h-1.5 w-1.5 rounded-full bg-gray-300 sm:block" />
+                    </Tooltip>
+                  )}
+                  <ChevronDownMini className="text-gray-400" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end">
+              <DropdownMenuContent className="w-60" align="end">
                 <DropdownMenuLabel>
-                  <div className="flex items-center space-x-2">
-                    <UserAvatar border="border-2" rounded="rounded-full" width={24} />
-                    <div>
-                      <p className="text-sm font-medium">{session.data.user.username}</p>
-                      <p className="text-xs text-gray-500 capitalize">{session.data.user.email}</p>
+                  <div className="flex items-center gap-2.5">
+                    <Avatar src={avatarSrc} fallback={avatarFallback} variant="rounded" size="base" />
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-medium capitalize leading-tight text-gray-900">
+                        {session.data.user.username}
+                      </p>
+                      <p className="truncate text-xs text-muted-foreground">{session.data.user.email}</p>
+                      {customRoles.length > 0 && (
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {customRoles.map((customRole, index) => (
+                            <span
+                              key={index}
+                              className="inline-flex items-center rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-700"
+                            >
+                              {customRole.name}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
+                    {userRoleInfo && (
+                      <Tooltip content={userRoleInfo.description} sideOffset={10} side="bottom">
+                        <span className="ml-auto inline-flex items-center rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-700">
+                          {userRoleInfo.name}
+                        </span>
+                      </Tooltip>
+                    )}
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {rights?.dashboard?.action_access && (
                   <DropdownMenuItem asChild>
-                    <Link href="/dash" className="flex items-center space-x-2">
-                      <Shield size={16} weight="fill" />
+                    <Link href="/dash" className="flex items-center gap-2">
+                      <GridLayout className="h-4 w-4" />
                       <span>{t('common.dashboard')}</span>
                     </Link>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem asChild>
-                  <Link href="/account/general" className="flex items-center space-x-2">
-                    <User size={16} weight="fill" />
+                  <Link href="/account/general" className="flex items-center gap-2">
+                    <IdBadge className="h-4 w-4" />
                     <span>{t('user.user_settings')}</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href={getUriWithOrg(org?.slug, '/account/purchases')} className="flex items-center space-x-2">
-                    <ShoppingBag size={16} weight="fill" />
+                  <Link href={getUriWithOrg(org?.slug, '/account/purchases')} className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4" />
                     <span>{t('account.purchases')}</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className="flex items-center space-x-2">
-                    <Globe size={14} weight="fill" />
+                  <DropdownMenuSubTrigger className="flex items-center gap-2">
+                    <Language className="h-4 w-4" />
                     <span>{t('common.language')}</span>
                   </DropdownMenuSubTrigger>
                   <DropdownMenuPortal>
                     <DropdownMenuSubContent>
                       {AVAILABLE_LANGUAGES.map((language) => (
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           key={language.code}
                           onClick={() => changeLanguage(language.code)}
                           className="flex items-center justify-between"
                         >
                           <span>{t(language.translationKey)} ({language.nativeName})</span>
-                          {i18n.language.split('-')[0] === language.code && <Check size={14} weight="bold" />}
+                          {i18n.language.split('-')[0] === language.code && <Check className="h-4 w-4" />}
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuSubContent>
@@ -261,9 +272,9 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => signOut({ callbackUrl: '/' })}
-                  className="flex items-center space-x-2 text-red-600 focus:text-red-600"
+                  className="flex items-center gap-2 text-red-600 data-[highlighted]:text-red-600 data-[highlighted]:bg-red-50"
                 >
-                  <SignOut size={16} weight="fill" />
+                  <ArrowRightOnRectangle className="h-4 w-4" />
                   <span>Sign Out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>

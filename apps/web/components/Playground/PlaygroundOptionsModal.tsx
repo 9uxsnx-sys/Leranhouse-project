@@ -346,7 +346,7 @@ function AccessTab({
                 />
               }
               dialogTrigger={
-                <button className="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-neutral-800 hover:bg-neutral-900 text-white text-xs font-black nice-shadow transition-all">
+                <button className="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-black nice-shadow transition-all">
                   <Plus size={12} weight="bold" />
                   Add group
                 </button>

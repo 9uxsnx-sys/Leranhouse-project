@@ -493,7 +493,7 @@ function SubmissionRow({
                 dialogTitle={t('dashboard.assignments.submissions.evaluate_modal.title', { username: user?.username })}
                 dialogDescription={t('dashboard.assignments.submissions.evaluate_modal.description')}
                 dialogTrigger={
-                    <div className="bg-black hover:bg-gray-800 text-white font-bold py-1.5 px-3.5 rounded-md text-xs cursor-pointer nice-shadow transition-colors">
+                    <div className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-1.5 px-3.5 rounded-md text-xs cursor-pointer nice-shadow transition-colors">
                         {t('dashboard.assignments.submissions.evaluate')}
                     </div>
                 }

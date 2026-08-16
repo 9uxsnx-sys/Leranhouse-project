@@ -114,7 +114,7 @@ const FeatureDisabledView: React.FC<FeatureDisabledViewProps> = ({
 
               <Link
                 href={getUriWithOrg(orgslug, '/dash/org/settings/features')}
-                className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
               >
                 <Settings size={16} />
                 {t('common.features.disabled.enable_feature')}

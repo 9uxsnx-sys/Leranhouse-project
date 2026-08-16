@@ -266,7 +266,7 @@ const WebPreviewComponent: React.FC<WebPreviewProps> = ({ node, updateAttributes
                         size="sm"
                         aria-pressed={alignment === opt.value}
                         onClick={() => handleAlignmentChange(opt.value)}
-                        className={`rounded-full px-2 py-1 ${alignment === opt.value ? 'bg-black text-white' : ''}`}
+                        className={`rounded-full px-2 py-1 ${alignment === opt.value ? 'bg-primary text-primary-foreground' : ''}`}
                       >
                         {opt.label}
                       </Button>

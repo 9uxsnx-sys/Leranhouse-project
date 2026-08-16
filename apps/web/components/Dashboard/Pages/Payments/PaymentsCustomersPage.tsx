@@ -404,7 +404,7 @@ function SubscriptionsTab({ orgId, accessToken }: { orgId: number; accessToken: 
             key={s}
             onClick={() => setStatus(s)}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors capitalize ${
-              status === s ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              status === s ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
             {s}

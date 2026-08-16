@@ -261,7 +261,7 @@ function LearnHouseCourseImport({
                     index < currentStepIndex
                       ? 'bg-green-500 text-white'
                       : index === currentStepIndex
-                        ? 'bg-black text-white'
+                        ? 'bg-primary text-primary-foreground'
                         : 'bg-gray-200 text-gray-500'
                   }`}
                 >
@@ -350,7 +350,7 @@ function LearnHouseCourseImport({
               <Button
                 type="submit"
                 disabled={!importFile || isAnalyzing}
-                className="bg-black text-white hover:bg-gray-800 px-6 h-11"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 h-11"
               >
                 {isAnalyzing ? (
                   <div className="flex items-center space-x-2">
@@ -524,7 +524,7 @@ function LearnHouseCourseImport({
               type="button"
               onClick={handleImport}
               disabled={selectedCount === 0 || isImporting}
-              className="bg-black text-white hover:bg-gray-800 px-6 h-11"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 h-11"
             >
               <div className="flex items-center space-x-2">
                 <span>
@@ -640,7 +640,7 @@ function LearnHouseCourseImport({
             <Button
               type="button"
               onClick={handleComplete}
-              className="bg-black text-white hover:bg-gray-800 px-6 h-11"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 h-11"
             >
               {t('courses.import.done')}
             </Button>

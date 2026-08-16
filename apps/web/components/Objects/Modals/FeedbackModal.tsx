@@ -327,7 +327,7 @@ export function FeedbackModal({
                 'flex items-center gap-2 px-4 py-2 text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed',
                 isDark
                   ? 'bg-white text-black hover:bg-white/90'
-                  : 'bg-black text-white hover:bg-gray-800'
+                  : 'bg-primary text-primary-foreground hover:bg-primary/90'
               )}
             >
               {feedbackSubmitting ? (

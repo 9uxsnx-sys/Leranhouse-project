@@ -213,10 +213,10 @@ export default function PlaygroundsListClient({ org_id, orgslug }: PlaygroundsLi
                 <button
                   onClick={openCreateModal}
                   disabled={isCreating}
-                  className="rounded-lg bg-black transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-white nice-shadow flex space-x-2 items-center hover:scale-105 disabled:opacity-50"
+                  className="rounded-lg bg-primary transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-primary-foreground nice-shadow flex space-x-2 items-center hover:bg-primary/90 hover:scale-105 disabled:opacity-50"
                 >
                   <div>New Playground</div>
-                  <div className="text-md bg-neutral-800 px-1 rounded-full">+</div>
+                  <div className="text-md bg-white/20 px-1 rounded-full">+</div>
                 </button>
               </AuthenticatedClientElement>
             </div>
@@ -357,7 +357,7 @@ export default function PlaygroundsListClient({ org_id, orgslug }: PlaygroundsLi
                           onClick={() => goToPage(page as number)}
                           className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                             currentPage === page
-                              ? 'bg-black text-white'
+                              ? 'bg-primary text-primary-foreground'
                               : 'bg-white text-gray-600 nice-shadow hover:bg-gray-50'
                           }`}
                         >
@@ -418,7 +418,7 @@ export default function PlaygroundsListClient({ org_id, orgslug }: PlaygroundsLi
               <button
                 onClick={handleCreate}
                 disabled={isCreating}
-                className="px-4 py-2 bg-black text-white text-sm font-bold rounded-lg hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                className="px-4 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
               >
                 {isCreating ? 'Creating…' : 'Create'}
               </button>
@@ -499,7 +499,7 @@ function PlaygroundCard({
       <div
         className={`absolute top-2 right-2 z-20 w-5 h-5 rounded flex items-center justify-center transition-all border ${
           selected
-            ? 'bg-black border-black'
+            ? 'bg-primary border-primary'
             : 'bg-white/80 border-gray-300 opacity-0 group-hover:opacity-100'
         }`}
       >

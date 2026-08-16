@@ -137,7 +137,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
             </div>
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-black hover:bg-black/90 rounded-lg transition-colors"
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg transition-colors"
             >
               <Plus size={16} className="mr-2" />
               {t('podcasts.dashboard.episodes.new_episode')}
@@ -155,7 +155,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
               </p>
               <button
                 onClick={() => setIsCreateModalOpen(true)}
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-black hover:bg-black/90 rounded-lg transition-colors"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg transition-colors"
               >
                 <Plus size={16} className="mr-2" />
                 {t('podcasts.dashboard.episodes.create_first')}
@@ -473,7 +473,7 @@ function CreateEpisodeModal({
             <button
               type="submit"
               disabled={isSubmitting || !title.trim()}
-              className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-black/90 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
               {t('podcasts.dashboard.episodes.create')}
@@ -627,7 +627,7 @@ function EditEpisodeModal({
             <button
               type="submit"
               disabled={isSubmitting || !title.trim()}
-              className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-black/90 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
               {t('podcasts.dashboard.episodes.save')}

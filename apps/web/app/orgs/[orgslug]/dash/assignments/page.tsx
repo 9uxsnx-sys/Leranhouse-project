@@ -222,7 +222,7 @@ function AssignmentsHome() {
             <FilterPill
               label={t('dashboard.assignments.home.filters.drafts')}
               active={statusFilter === 'drafts'}
-              activeClass='bg-gray-700 text-white'
+              activeClass='bg-primary text-white'
               onClick={() => setStatusFilter('drafts')}
             />
           </div>
@@ -392,7 +392,7 @@ function CourseCard({
             query: { subpage: 'editor' },
           }}
           prefetch
-          className='bg-black font-semibold text-xs text-zinc-100 rounded-lg flex space-x-1.5 nice-shadow items-center px-3 py-1.5 flex-none hover:bg-gray-800 transition-colors'
+          className='bg-primary font-semibold text-xs text-primary-foreground rounded-lg flex space-x-1.5 nice-shadow items-center px-3 py-1.5 flex-none hover:bg-primary/90 transition-colors'
         >
           <GalleryVerticalEnd size={14} />
           <p>{t('dashboard.assignments.home.course_editor')}</p>

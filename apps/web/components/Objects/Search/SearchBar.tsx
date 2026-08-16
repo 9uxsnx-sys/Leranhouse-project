@@ -11,7 +11,6 @@ import { removeCoursePrefix } from '../Thumbnails/CourseThumbnail';
 import UserAvatar from '../UserAvatar';
 import { useTranslation } from 'react-i18next';
 import { useAnalytics } from '@/hooks/useAnalytics';
-import { getMenuColorClasses } from '@services/utils/ts/colorUtils';
 
 interface User {
   username: string;
@@ -99,12 +98,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   className = '',
   isMobile = false,
   showSearchSuggestions = false,
-  primaryColor = '',
 }) => {
   const { t } = useTranslation();
   const org = useOrg() as any;
   const { track } = useAnalytics();
-  const colors = getMenuColorClasses(primaryColor);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResults>({
     courses: [],
@@ -371,12 +368,12 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           onFocus={() => setShowResults(true)}
           aria-label={t('search.search_placeholder')}
           placeholder={t('search.search_placeholder')}
-          className={`w-full h-9 pl-11 pr-4 rounded-xl
-                     focus:outline-none focus:ring-1 transition-all text-sm
-                     ${colors.searchBg}`}
+          className={`w-full h-8 pl-9 pr-3 rounded-md border border-border bg-background
+                     text-[13px] placeholder:text-muted-foreground
+                     focus:outline-none focus:border-(--brand) focus:ring-2 focus:ring-(--brand)/20 transition-all`}
         />
-        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-          <Search className={`${colors.searchIcon} transition-colors`} size={18} />
+        <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+          <Search className="text-gray-400 transition-colors h-4 w-4" />
         </div>
       </div>
 

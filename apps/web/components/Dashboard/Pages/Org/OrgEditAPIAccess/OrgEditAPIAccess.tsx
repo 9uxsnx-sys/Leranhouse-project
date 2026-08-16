@@ -255,7 +255,7 @@ const OrgEditAPIAccess: React.FC = () => {
               </p>
               <Button
                 onClick={() => setIsCreateDialogOpen(true)}
-                className="bg-black text-white hover:bg-black/90"
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 <Plus size={16} className="mr-2" />
                 Create Token

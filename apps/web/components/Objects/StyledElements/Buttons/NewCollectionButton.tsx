@@ -1,13 +1,16 @@
 'use client'
 import { useTranslation } from 'react-i18next'
+import { PlusMini } from '@components/Objects/Icons/MedusaIcons'
+import { buttonVariants } from '@components/ui/button'
+import { cn } from '@/lib/utils'
 
 function NewCollectionButton() {
   const { t } = useTranslation()
   return (
-    <button className="rounded-lg bg-black hover:scale-105 transition-all duration-100 ease-linear antialiased ring-offset-purple-800 p-2 px-5 my-auto font text-xs font-bold text-white drop-shadow-lg flex space-x-2 items-center">
-      <div>{t('collections.new_collection')} </div>
-      <div className="text-md bg-neutral-800 px-1 rounded-full">+</div>
-    </button>
+    <div className={cn(buttonVariants({ variant: 'default', size: 'sm' }), 'inline-flex w-fit cursor-pointer')}>
+      <PlusMini className="h-4 w-4" />
+      {t('collections.new_collection')}
+    </div>
   )
 }
 

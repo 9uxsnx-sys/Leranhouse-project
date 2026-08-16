@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import {
   MessageCircle,
-  Plus,
   Globe,
   Lock,
   Settings,
@@ -168,10 +167,10 @@ export function CommunitySidebar({
           {canCreateDiscussion && onCreateDiscussion && (
             <button
               onClick={onCreateDiscussion}
-              className="w-full py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer bg-neutral-900 text-white hover:bg-neutral-800 text-sm"
+              className="w-full py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 text-sm"
             >
-              <Plus className="w-4 h-4" />
-              <span>{t('communities.new_discussion')}</span>
+              <span>{t('communities.new_discussion')} </span>
+              <span className="text-md bg-white/20 px-1 rounded-full">+</span>
             </button>
           )}
 

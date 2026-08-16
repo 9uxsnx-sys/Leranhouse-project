@@ -76,7 +76,7 @@ function BoardGeneralTab({ board, boardUuid, boardKey }: BoardGeneralTabProps) {
               <button
                 onClick={handleSave}
                 disabled={isSaving || !name.trim()}
-                className="flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
               >
                 <Save size={14} />
                 {isSaving ? t('boards.general.saving') : t('boards.general.save_changes')}

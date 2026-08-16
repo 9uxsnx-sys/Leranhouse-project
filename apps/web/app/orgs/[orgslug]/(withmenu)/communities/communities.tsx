@@ -9,7 +9,8 @@ import CommunityCard from '@components/Objects/Communities/CommunityCard'
 import { CreateCommunityModal } from '@components/Objects/Modals/Communities/CreateCommunityModal'
 import { EditCommunityModal } from '@components/Objects/Modals/Communities/EditCommunityModal'
 import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder'
-import { Users, Plus, MessagesSquare } from 'lucide-react'
+import { Users, MessagesSquare } from 'lucide-react'
+import NewCommunityButton from '@components/Objects/StyledElements/Buttons/NewCommunityButton'
 import { Community } from '@services/communities/communities'
 import FeatureDisabledView from '@components/Dashboard/Shared/FeatureDisabled/FeatureDisabledView'
 
@@ -43,10 +44,8 @@ const CommunitiesClient = ({ communities, orgslug, org_id }: CommunitiesClientPr
           >
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-black hover:bg-black/90 text-white rounded-lg transition-colors text-sm font-medium"
             >
-              <Plus size={16} />
-              {t('communities.new_community')}
+              <NewCommunityButton />
             </button>
           </AuthenticatedClientElement>
         </div>
@@ -84,10 +83,8 @@ const CommunitiesClient = ({ communities, orgslug, org_id }: CommunitiesClientPr
                 >
                   <button
                     onClick={() => setIsCreateModalOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-black hover:bg-black/90 text-white rounded-lg transition-colors text-sm font-medium"
                   >
-                    <Plus size={16} />
-                    {t('communities.new_community')}
+                    <NewCommunityButton />
                   </button>
                 </AuthenticatedClientElement>
               </div>

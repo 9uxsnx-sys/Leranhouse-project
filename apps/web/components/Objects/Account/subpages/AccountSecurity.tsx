@@ -120,7 +120,7 @@ function AccountSecurity() {
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="bg-black text-white hover:bg-black/90"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90"
                   >
                     {isSubmitting ? t('user.settings.password.updating') : t('user.settings.password.update_password')}
                   </Button>

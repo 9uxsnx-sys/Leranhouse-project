@@ -39,7 +39,7 @@ export default function BoardTopBar({
         </ToolTip>
 
         <Link href={getUriWithOrg(orgslug, '/boards')}>
-          <div className="bg-black rounded-md w-[25px] h-[25px] flex items-center justify-center hover:opacity-80 transition-opacity">
+          <div className="bg-primary rounded-md w-[25px] h-[25px] flex items-center justify-center hover:opacity-80 transition-opacity">
             <Image
               src="/lrn.svg"
               alt="LearnHouse"

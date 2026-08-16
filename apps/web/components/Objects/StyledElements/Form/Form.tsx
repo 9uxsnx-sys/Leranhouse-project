@@ -92,7 +92,7 @@ export const ButtonBlack = React.forwardRef<HTMLButtonElement, React.ButtonHTMLA
   ({ className, state, ...props }, ref) => (
     <button
       ref={ref}
-      className={`inline-flex items-center justify-center rounded-lg px-[15px] text-[15px] leading-none font-medium h-[35px] bg-black text-white hover:bg-[#181818] hover:cursor-pointer focus:shadow-[0_0_0_2px_black] outline-none border-none ${
+      className={`inline-flex items-center justify-center rounded-lg px-[15px] text-[15px] leading-none font-medium h-[35px] bg-primary text-primary-foreground hover:bg-primary/90 hover:cursor-pointer focus:shadow-[0_0_0_2px_black] outline-none border-none ${
         state === 'loading' ? 'pointer-events-none bg-[#808080]' : ''
       } ${className || ''}`}
       {...props}

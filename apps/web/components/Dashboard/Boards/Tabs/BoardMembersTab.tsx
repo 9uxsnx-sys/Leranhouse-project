@@ -156,7 +156,7 @@ function BoardMembersTab({ boardUuid, orgId }: BoardMembersTabProps) {
               dialogTitle={t('boards.members.add_member')}
               dialogDescription={t('boards.members.add_member_description')}
               dialogTrigger={
-                <button className="flex items-center gap-1 px-3 py-1.5 bg-black text-white rounded-md font-bold text-sm hover:bg-gray-800 transition-colors">
+                <button className="flex items-center gap-1 px-3 py-1.5 bg-primary text-primary-foreground rounded-md font-bold text-sm hover:bg-primary/90 transition-colors">
                   <UserPlus className="w-4 h-4" />
                   <span>{t('boards.members.add_member')}</span>
                 </button>
@@ -311,7 +311,7 @@ function AddBoardMember({ boardUuid, orgId, accessToken, setModalOpen, membersKe
             onClick={() => setActiveGroup(null)}
             className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-colors ${
               activeGroup === null
-                ? 'bg-gray-900 text-white'
+                ? 'bg-primary text-white'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
@@ -323,7 +323,7 @@ function AddBoardMember({ boardUuid, orgId, accessToken, setModalOpen, membersKe
               onClick={() => setActiveGroup(g.usergroup_uuid === activeGroup ? null : g.usergroup_uuid)}
               className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-colors ${
                 activeGroup === g.usergroup_uuid
-                  ? 'bg-gray-900 text-white'
+                  ? 'bg-primary text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
@@ -372,7 +372,7 @@ function AddBoardMember({ boardUuid, orgId, accessToken, setModalOpen, membersKe
                     key={u.id}
                     onClick={() => toggleUser(u.id)}
                     className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                      isSelected ? 'bg-gray-900' : 'hover:bg-gray-50'
+                      isSelected ? 'bg-primary' : 'hover:bg-gray-50'
                     }`}
                   >
                     <input
@@ -395,7 +395,7 @@ function AddBoardMember({ boardUuid, orgId, accessToken, setModalOpen, membersKe
                           {getUserDisplayName(u)}
                         </span>
                         <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
-                          isSelected ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-500'
+                          isSelected ? 'bg-primary/80 text-white' : 'bg-gray-100 text-gray-500'
                         }`}>
                           @{u.username}
                         </span>
@@ -457,7 +457,7 @@ function AddBoardMember({ boardUuid, orgId, accessToken, setModalOpen, membersKe
         <button
           onClick={handleAdd}
           disabled={selectedUserIds.size === 0 || isAdding}
-          className="inline-flex items-center gap-2 bg-black text-white font-semibold px-5 py-2 rounded-lg text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-800 transition-all"
+          className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-semibold px-5 py-2 rounded-lg text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary/90 transition-all"
         >
           <UserPlus className="w-4 h-4" />
           {isAdding

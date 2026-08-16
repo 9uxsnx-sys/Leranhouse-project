@@ -165,7 +165,7 @@ const CommunityEditGeneral: React.FC = () => {
                   <Button
                     type="submit"
                     disabled={isSubmitting || !isValid || !dirty}
-                    className="bg-black text-white hover:bg-black/90"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90"
                   >
                     {isSubmitting ? (
                       <>

@@ -363,7 +363,7 @@ const UserProfileBuilder = () => {
             variant="default"
             onClick={handleSave}
             disabled={isSaving}
-            className="bg-black hover:bg-black/90"
+            className="bg-primary hover:bg-primary/90"
           >
             {isSaving ? t('user.settings.profile_builder.saving') : t('user.settings.profile_builder.save_changes')}
           </Button>
@@ -473,7 +473,7 @@ const UserProfileBuilder = () => {
               >
                 <SelectTrigger className="w-full p-0 border-0 bg-black">
                   <div className="w-full">
-                    <Button variant="default" className="w-full bg-black hover:bg-black/90 text-white">
+                    <Button variant="default" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
                       <Plus className="h-4 w-4 mr-2" />
                       {t('user.settings.profile_builder.add_section')}
                     </Button>

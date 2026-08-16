@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MessageCircle, Plus, Loader2, Search, X, Trash2, CheckSquare, Square } from 'lucide-react'
+import { MessageCircle, Loader2, Search, X, Trash2, CheckSquare, Square } from 'lucide-react'
 import { DiscussionCard } from './DiscussionCard'
 import { SortDropdown } from './SortDropdown'
 import { LabelFilter } from './LabelFilter'
@@ -241,10 +241,10 @@ export function DiscussionList({
             {canCreateDiscussion && onCreateClick && !isSelectMode && (
               <button
                 onClick={onCreateClick}
-                className="hidden md:flex items-center gap-2 px-3 py-2 h-8 bg-neutral-900 hover:bg-neutral-800 text-white rounded-md transition-colors text-xs font-medium"
+                className="hidden md:flex rounded-lg bg-primary transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-primary-foreground nice-shadow flex space-x-2 items-center hover:bg-primary/90 hover:scale-105"
               >
-                <Plus size={14} />
-                {t('communities.discussion_list.new_discussion')}
+                <div>{t('communities.discussion_list.new_discussion')} </div>
+                <div className="text-md bg-white/20 px-1 rounded-full">+</div>
               </button>
             )}
           </div>
@@ -319,10 +319,10 @@ export function DiscussionList({
                 {canCreateDiscussion && onCreateClick && (
                   <button
                     onClick={onCreateClick}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition-colors text-sm font-medium"
+                    className="rounded-lg bg-primary transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-primary-foreground nice-shadow flex space-x-2 items-center hover:bg-primary/90 hover:scale-105"
                   >
-                    <Plus size={16} />
-                    {t('communities.discussion_list.start_discussion')}
+                    <div>{t('communities.discussion_list.start_discussion')} </div>
+                    <div className="text-md bg-white/20 px-1 rounded-full">+</div>
                   </button>
                 )}
               </>

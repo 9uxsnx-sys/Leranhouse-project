@@ -344,7 +344,7 @@ const CommunityEditModeration: React.FC = () => {
                       type="button"
                       onClick={handleAddWord}
                       disabled={!newWord.trim()}
-                      className="bg-gray-900 hover:bg-gray-800"
+                      className="bg-primary hover:bg-primary/90"
                     >
                       <Plus size={16} className="mr-2" />
                       {t('dashboard.courses.communities.moderation.add_button')}
@@ -373,7 +373,7 @@ const CommunityEditModeration: React.FC = () => {
                     type="button"
                     onClick={handleBatchAdd}
                     disabled={!batchWords.trim()}
-                    className="mt-2 bg-gray-900 hover:bg-gray-800"
+                    className="mt-2 bg-primary hover:bg-primary/90"
                   >
                     <Plus size={16} className="mr-2" />
                     {t('dashboard.courses.communities.moderation.add_all_button')}
@@ -422,7 +422,7 @@ const CommunityEditModeration: React.FC = () => {
             <Button
               onClick={handleSave}
               disabled={isSubmitting || !hasChanges}
-              className="bg-black text-white hover:bg-black/90"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {isSubmitting ? (
                 <>

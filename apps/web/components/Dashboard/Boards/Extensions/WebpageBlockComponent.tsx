@@ -158,7 +158,7 @@ export default function WebpageBlockComponent({ node, updateAttributes, selected
               <button
                 onClick={handleUrlSubmit}
                 disabled={!urlInput.trim()}
-                className="px-3.5 py-2 text-[11px] font-medium rounded-lg bg-neutral-900 text-white hover:bg-neutral-700 transition-colors disabled:opacity-30 shrink-0"
+                className="px-3.5 py-2 text-[11px] font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-30 shrink-0"
               >
                 {t('boards.webpage_block.add')}
               </button>

@@ -188,7 +188,7 @@ function ResetPasswordClient({ org }: ResetPasswordClientProps) {
 
                                 <div className="pt-2">
                                     <Form.Submit asChild>
-                                        <button className="w-full bg-black text-white font-semibold text-center py-2.5 rounded-lg hover:bg-gray-800 transition-colors">
+                                        <button className="w-full bg-primary text-primary-foreground font-semibold text-center py-2.5 rounded-lg hover:bg-primary/90 transition-colors">
                                             {isSubmitting ? t('common.loading') : t('auth.change_password')}
                                         </button>
                                     </Form.Submit>

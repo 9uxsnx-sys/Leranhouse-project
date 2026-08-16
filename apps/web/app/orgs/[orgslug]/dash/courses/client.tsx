@@ -454,7 +454,7 @@ function CoursesHome(params: CourseProps) {
                 dialogTrigger={
                   <button
                     disabled={courseLimitReached}
-                    className={`rounded-lg bg-black transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-white nice-shadow flex space-x-2 items-center ${
+                    className={`rounded-lg bg-primary transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-primary-foreground nice-shadow flex space-x-2 items-center hover:bg-primary/90 ${
                       courseLimitReached ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
                     }`}
                   >
@@ -713,7 +713,7 @@ function CoursesHome(params: CourseProps) {
                     onClick={() => goToPage(page as number)}
                     className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                       currentPage === page
-                        ? 'bg-black text-white'
+                        ? 'bg-primary text-primary-foreground'
                         : 'bg-white text-gray-600 nice-shadow hover:bg-gray-50'
                     }`}
                   >

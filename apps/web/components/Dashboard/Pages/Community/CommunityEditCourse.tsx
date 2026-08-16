@@ -229,7 +229,7 @@ const CommunityEditCourse: React.FC = () => {
                 <Button
                   onClick={handleLink}
                   disabled={isSubmitting || !selectedCourse}
-                  className="bg-black text-white hover:bg-black/90"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90"
                 >
                   {isSubmitting ? (
                     <Loader2 size={16} className="animate-spin mr-2" />

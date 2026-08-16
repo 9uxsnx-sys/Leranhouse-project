@@ -229,7 +229,7 @@ export default function WelcomeModal() {
               {!showFeatures ? (
                 <motion.button
                   onClick={() => setStep('features')}
-                  className="w-full flex items-center justify-center gap-2 py-3 text-sm font-semibold text-white bg-black rounded-lg hover:bg-gray-800 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-3 text-sm font-semibold text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors"
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6, duration: 0.4, ease }}
@@ -240,7 +240,7 @@ export default function WelcomeModal() {
               ) : (
                 <button
                   onClick={() => markWelcomeSeen()}
-                  className="w-full flex items-center justify-center gap-2 py-3 text-sm font-semibold text-white bg-black rounded-lg hover:bg-gray-800 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-3 text-sm font-semibold text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors"
                 >
                   {t('onboarding.welcome.lets_go')}
                   <ArrowRight size={16} weight="bold" />

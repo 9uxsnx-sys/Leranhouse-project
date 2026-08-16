@@ -101,7 +101,7 @@ function EmbedActivityModal({ submitActivity, chapterId, course }: any) {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex items-center justify-center h-9 px-5 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+            className="inline-flex items-center justify-center h-9 px-5 text-sm font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
           >
             {isSubmitting ? (
               <BarLoader

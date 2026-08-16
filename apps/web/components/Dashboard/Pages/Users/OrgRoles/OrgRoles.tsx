@@ -240,7 +240,7 @@ function OrgRoles() {
                                                 dialogTitle={t('dashboard.users.roles.modals.edit.title')}
                                                 dialogDescription={t('dashboard.users.roles.modals.edit.description')}
                                                 dialogTrigger={
-                                                    <button className="flex-1 flex justify-center space-x-2 hover:cursor-pointer p-2 bg-black rounded-md font-bold items-center text-sm text-white hover:bg-gray-800 transition-colors shadow-sm">
+                                                    <button className="flex-1 flex justify-center space-x-2 hover:cursor-pointer p-2 bg-primary rounded-md font-bold items-center text-sm text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm">
                                                         <Pencil className="w-4 h-4" />
                                                         <span>{t('dashboard.users.roles.actions.edit')}</span>
                                                     </button>
@@ -350,7 +350,7 @@ function OrgRoles() {
                                                                 dialogTitle={t('dashboard.users.roles.modals.edit.title')}
                                                                 dialogDescription={t('dashboard.users.roles.modals.edit.description')}
                                                                 dialogTrigger={
-                                                                    <button className="flex space-x-2 hover:cursor-pointer p-1 px-3 bg-black rounded-md font-bold items-center text-sm text-white hover:bg-gray-800 transition-colors shadow-sm">
+                                                                    <button className="flex space-x-2 hover:cursor-pointer p-1 px-3 bg-primary rounded-md font-bold items-center text-sm text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm">
                                                                         <Pencil className="w-4 h-4" />
                                                                         <span>{t('dashboard.users.roles.actions.edit')}</span>
                                                                     </button>
@@ -399,7 +399,7 @@ function OrgRoles() {
                             dialogTitle={t('dashboard.users.roles.modals.create.title')}
                             dialogDescription={t('dashboard.users.roles.modals.create.description')}
                             dialogTrigger={
-                                <button className="flex space-x-2 hover:cursor-pointer p-2 sm:p-1 sm:px-3 bg-black rounded-md font-bold items-center text-sm text-white w-full sm:w-auto justify-center hover:bg-gray-800 transition-colors shadow-sm">
+                                <button className="flex space-x-2 hover:cursor-pointer p-2 sm:p-1 sm:px-3 bg-primary rounded-md font-bold items-center text-sm text-primary-foreground w-full sm:w-auto justify-center hover:bg-primary/90 transition-colors shadow-sm">
                                     <Shield className="w-4 h-4" />
                                     <span>{t('dashboard.users.roles.actions.create')}</span>
                                 </button>

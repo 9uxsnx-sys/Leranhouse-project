@@ -423,7 +423,7 @@ export default function BoardTopRight({ provider, ydoc }: BoardTopRightProps) {
                   />
                   <button
                     onClick={handleCopyLink}
-                    className="flex items-center justify-center w-8 h-8 rounded-lg bg-neutral-900 text-white hover:bg-neutral-700 transition-colors shrink-0"
+                    className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shrink-0"
                   >
                     {copied ? <Check size={14} /> : <Copy size={14} />}
                   </button>

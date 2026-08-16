@@ -256,7 +256,7 @@ export default function OnboardingBar() {
                 <div className="flex items-center gap-2 mt-1">
                   <div className="h-1.5 w-24 bg-gray-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-black rounded-full transition-all duration-300"
+                      className="h-full bg-primary rounded-full transition-all duration-300"
                       style={{ width: `${progress * 100}%` }}
                     />
                   </div>
@@ -305,7 +305,7 @@ export default function OnboardingBar() {
                         setShowFarewell(false)
                         dismiss()
                       }}
-                      className="mt-4 px-6 py-2.5 text-xs font-semibold text-white bg-black rounded-lg hover:bg-gray-800 transition-colors"
+                      className="mt-4 px-6 py-2.5 text-xs font-semibold text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors"
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.3, duration: 0.3, ease }}
@@ -364,7 +364,7 @@ export default function OnboardingBar() {
                 {/* Progress */}
                 <div className="mx-4 h-1 bg-gray-100 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-black rounded-full transition-all duration-300"
+                    className="h-full bg-primary rounded-full transition-all duration-300"
                     style={{ width: `${progress * 100}%` }}
                   />
                 </div>
@@ -508,7 +508,7 @@ export default function OnboardingBar() {
                                       {!step.completed && !isLocked && actionHref && (
                                         <button
                                           onClick={() => navigateTo(actionHref)}
-                                          className="relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-black rounded-lg hover:bg-gray-800 transition-colors shrink-0"
+                                          className="relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors shrink-0"
                                         >
                                           <PlusCircle size={14} weight="bold" />
                                           {t(`onboarding.steps.${step.id}.action`)}
@@ -548,7 +548,7 @@ export default function OnboardingBar() {
                                       <div className="relative px-3 pb-3">
                                         <div className="flex items-center gap-2">
                                           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white nice-shadow flex-1">
-                                            <div className="flex items-center justify-center w-5 h-5 rounded-full bg-gray-900 text-white text-[10px] font-bold shrink-0">
+                                            <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold shrink-0">
                                               1
                                             </div>
                                             <PlusCircle
@@ -564,7 +564,7 @@ export default function OnboardingBar() {
                                           <span className="text-gray-300 shrink-0">→</span>
 
                                           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white nice-shadow flex-1">
-                                            <div className="flex items-center justify-center w-5 h-5 rounded-full bg-gray-900 text-white text-[10px] font-bold shrink-0">
+                                            <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold shrink-0">
                                               2
                                             </div>
                                             <Browsers
@@ -580,7 +580,7 @@ export default function OnboardingBar() {
                                           <span className="text-gray-300 shrink-0">→</span>
 
                                           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white nice-shadow flex-1">
-                                            <div className="flex items-center justify-center w-5 h-5 rounded-full bg-gray-900 text-white text-[10px] font-bold shrink-0">
+                                            <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold shrink-0">
                                               3
                                             </div>
                                             <FilePenLine
@@ -704,7 +704,7 @@ export default function OnboardingBar() {
                                             completeStep('teach_the_world')
                                             setShowFarewell(true)
                                           }}
-                                          className="w-full flex items-center justify-center gap-2 py-2.5 mt-1 text-xs font-semibold text-white bg-black nice-shadow rounded-lg hover:bg-gray-800 transition-colors"
+                                          className="w-full flex items-center justify-center gap-2 py-2.5 mt-1 text-xs font-semibold text-primary-foreground bg-primary nice-shadow rounded-lg hover:bg-primary/90 transition-colors"
                                         >
                                           <Check size={14} weight="bold" />
                                           {t('onboarding.done')}

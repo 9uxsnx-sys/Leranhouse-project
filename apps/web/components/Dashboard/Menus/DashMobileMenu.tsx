@@ -1,7 +1,7 @@
 'use client'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { signOut } from '@components/Contexts/AuthContext'
-import { Backpack, BadgeDollarSign, BookCopy, Headphones, Home, MessagesSquare, School, Settings, Users } from 'lucide-react'
+import { Backpack, BookOpen, Buildings, ChatsCircle, CurrencyCircleDollar, Gear, Headphones, House, SignOut, Users } from '@phosphor-icons/react'
 import Link from 'next/link'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -22,18 +22,18 @@ function DashMobileMenu() {
   const showPayments = isEnabled('payments')
 
   return (
-    <nav aria-label="Dashboard mobile actions" className="fixed bottom-4 left-4 right-4 bg-black/90 backdrop-blur-lg text-white shadow-xl rounded-2xl">
+    <nav aria-label="Dashboard mobile actions" className="fixed bottom-4 left-4 right-4 bg-black/90 backdrop-blur-lg text-white border border-white/10 rounded-2xl">
       <div className="flex justify-around items-center h-16 px-2">
         <AdminAuthorization authorizationMode="component">
           <ToolTip content={t('common.home')} slateBlack sideOffset={8} side="top">
             <Link href={`/`} className="flex flex-col items-center p-2" aria-label="Go to dashboard home">
-              <Home size={20} />
+              <House size={20} weight="bold" />
               <span className="text-xs mt-1">{t('common.home')}</span>
             </Link>
           </ToolTip>
           <ToolTip content={t('courses.courses')} slateBlack sideOffset={8} side="top">
             <Link href={`/dash/courses`} className="flex flex-col items-center p-2" aria-label="Manage courses">
-              <BookCopy size={20} />
+              <BookOpen size={20} weight="bold" />
               <span className="text-xs mt-1">{t('courses.courses')}</span>
             </Link>
           </ToolTip>
@@ -46,7 +46,7 @@ function DashMobileMenu() {
           {showCommunities && (
             <ToolTip content={t('communities.title')} slateBlack sideOffset={8} side="top">
               <Link href={`/dash/communities`} className="flex flex-col items-center p-2" aria-label="Manage communities">
-                <MessagesSquare size={20} />
+                <ChatsCircle size={20} weight="bold" />
                 <span className="text-xs mt-1">{t('communities.title')}</span>
               </Link>
             </ToolTip>
@@ -54,7 +54,7 @@ function DashMobileMenu() {
           {showPodcasts && (
             <ToolTip content={t('podcasts.podcasts')} slateBlack sideOffset={8} side="top">
               <Link href={`/dash/podcasts`} className="flex flex-col items-center p-2" aria-label="Manage podcasts">
-                <Headphones size={20} />
+                <Headphones size={20} weight="bold" />
                 <span className="text-xs mt-1">{t('podcasts.podcasts')}</span>
               </Link>
             </ToolTip>
@@ -62,29 +62,39 @@ function DashMobileMenu() {
           {showPayments && (
             <ToolTip content={t('common.payments')} slateBlack sideOffset={8} side="top">
               <Link href={`/dash/payments/overview`} className="flex flex-col items-center p-2" aria-label="Manage payments and billing">
-                <BadgeDollarSign size={20} />
+                <CurrencyCircleDollar size={20} weight="bold" />
                 <span className="text-xs mt-1">{t('common.payments')}</span>
               </Link>
             </ToolTip>
           )}
           <ToolTip content={t('common.users')} slateBlack sideOffset={8} side="top">
             <Link href={`/dash/users/settings/users`} className="flex flex-col items-center p-2" aria-label="Manage users">
-              <Users size={20} />
+              <Users size={20} weight="bold" />
               <span className="text-xs mt-1">{t('common.users')}</span>
             </Link>
           </ToolTip>
           <ToolTip content={t('common.organization')} slateBlack sideOffset={8} side="top">
             <Link href={`/dash/org/settings/general`} className="flex flex-col items-center p-2" aria-label="Organization settings">
-              <School size={20} />
+              <Buildings size={20} weight="bold" />
               <span className="text-xs mt-1">{t('common.organization')}</span>
             </Link>
           </ToolTip>
         </AdminAuthorization>
         <ToolTip content={t('common.settings')} slateBlack sideOffset={8} side="top">
           <Link href={'/account/general'} className="flex flex-col items-center p-2" aria-label="User account settings">
-            <Settings size={20} />
+            <Gear size={20} weight="bold" />
             <span className="text-xs mt-1">{t('common.settings')}</span>
           </Link>
+        </ToolTip>
+        <ToolTip content={t('user.sign_out')} slateBlack sideOffset={8} side="top">
+          <button
+            onClick={() => signOut({ callbackUrl: '/' })}
+            className="flex flex-col items-center p-2 text-white/60 hover:text-white transition-colors"
+            aria-label="Sign out"
+          >
+            <SignOut size={20} weight="bold" />
+            <span className="text-xs mt-1">{t('user.sign_out')}</span>
+          </button>
         </ToolTip>
       </div>
     </nav>

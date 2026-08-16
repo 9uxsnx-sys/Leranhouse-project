@@ -155,7 +155,7 @@ function EvaluateAssignment({ user_id }: any) {
                         {/* Task header */}
                         <div className='flex items-center justify-between pb-3'>
                             <div className='flex items-center space-x-2'>
-                                <div className='bg-gray-900 text-white text-[10px] font-bold px-2 py-0.5 rounded-full'>
+                                <div className='bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full'>
                                     {index + 1}
                                 </div>
                                 <p className='text-sm font-semibold text-gray-800'>{task.description || t('dashboard.assignments.submissions.task_label', { number: index + 1 })}</p>
@@ -282,7 +282,7 @@ function EvaluateAssignment({ user_id }: any) {
                     <div className='flex items-center space-x-1.5'>
                         <button
                             onClick={finalizeAndComplete}
-                            className='flex items-center space-x-1.5 px-3.5 py-2 text-xs font-bold bg-black text-white rounded-lg nice-shadow hover:bg-gray-800 transition-colors cursor-pointer'
+                            className='flex items-center space-x-1.5 px-3.5 py-2 text-xs font-bold bg-primary text-primary-foreground rounded-lg nice-shadow hover:bg-primary/90 transition-colors cursor-pointer'
                         >
                             <Check size={14} />
                             <span>{t('dashboard.assignments.submissions.actions.finalize')}</span>

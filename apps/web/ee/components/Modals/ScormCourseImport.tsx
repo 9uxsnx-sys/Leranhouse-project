@@ -242,7 +242,7 @@ function ScormCourseImport({ orgId, orgslug, closeModal }: ScormCourseImportProp
         <div className="flex items-center space-x-3">
           <div className={`flex items-center space-x-2 ${step === 'upload' ? 'text-black' : 'text-gray-400'}`}>
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-              step === 'upload' ? 'bg-black text-white' : 'bg-green-500 text-white'
+              step === 'upload' ? 'bg-primary text-primary-foreground' : 'bg-green-500 text-white'
             }`}>
               {step === 'configure' ? <CheckCircle2 size={16} /> : '1'}
             </div>
@@ -253,7 +253,7 @@ function ScormCourseImport({ orgId, orgslug, closeModal }: ScormCourseImportProp
           </div>
           <div className={`flex items-center space-x-2 ${step === 'configure' ? 'text-black' : 'text-gray-400'}`}>
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-              step === 'configure' ? 'bg-black text-white' : 'bg-gray-200 text-gray-500'
+              step === 'configure' ? 'bg-primary text-primary-foreground' : 'bg-gray-200 text-gray-500'
             }`}>
               2
             </div>
@@ -337,7 +337,7 @@ function ScormCourseImport({ orgId, orgslug, closeModal }: ScormCourseImportProp
               <Button
                 type="submit"
                 disabled={!scormFile || isAnalyzing}
-                className="bg-black text-white hover:bg-gray-800 px-6 h-11"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 h-11"
               >
                 {isAnalyzing ? (
                   <div className="flex items-center space-x-2">
@@ -477,7 +477,7 @@ function ScormCourseImport({ orgId, orgslug, closeModal }: ScormCourseImportProp
               type="button"
               onClick={handleImport}
               disabled={selectedCount === 0 || isImporting || !courseName.trim()}
-              className="bg-black text-white hover:bg-gray-800 px-6 h-11"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 h-11"
             >
               {isImporting ? (
                 <BarLoader width={60} color="#ffffff" cssOverride={{ borderRadius: 60 }} />

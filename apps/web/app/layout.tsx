@@ -2,12 +2,12 @@ import '../styles/globals.css'
 import { getLEARNHOUSE_TOP_DOMAIN_VAL, getLEARNHOUSE_TELEMETRY_DISABLED_VAL } from '@services/config/config'
 import Script from 'next/script'
 import Providers from '@components/Providers'
-import { Wix_Madefor_Text } from 'next/font/google'
+import { Inter } from 'next/font/google'
 
 const isDevEnv = getLEARNHOUSE_TOP_DOMAIN_VAL() === 'localhost'
 const isTelemetryDisabled = getLEARNHOUSE_TELEMETRY_DISABLED_VAL() === 'true'
 
-const wixMadeforText = Wix_Madefor_Text({
+const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-default',
@@ -19,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html className={wixMadeforText.variable} lang="en" suppressHydrationWarning>
+    <html className={inter.variable} lang="en" suppressHydrationWarning>
       <head>
         {/* Synchronous script — blocks parsing to guarantee window.__RUNTIME_CONFIG__ exists before any JS runs.
             Next.js <Script strategy="beforeInteractive"> is not truly blocking in all browsers (Safari). */}

@@ -224,7 +224,7 @@ export default function OrgEditSocials() {
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
-                  className="bg-black text-white hover:bg-black/90"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90"
                 >
                   {isSubmitting ? t('dashboard.organization.settings.saving') : t('dashboard.organization.settings.save_changes')}
                 </Button>

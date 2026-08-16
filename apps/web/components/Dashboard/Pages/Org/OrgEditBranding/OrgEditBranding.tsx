@@ -714,7 +714,7 @@ export default function OrgEditBranding() {
                                     <div
                                       {...provided.dragHandleProps}
                                       className={cn(
-                                        "absolute -top-2 -left-2 bg-gray-600 hover:bg-gray-700 text-white rounded-full p-1.5",
+                                        "absolute -top-2 -left-2 bg-primary hover:bg-primary/80 text-white rounded-full p-1.5",
                                         "opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing z-10 shadow-xs",
                                         "transition-opacity duration-200"
                                       )}
@@ -999,7 +999,7 @@ export default function OrgEditBranding() {
             <Button
               onClick={handleThemeSave}
               disabled={isThemeSaving}
-              className="bg-black text-white hover:bg-black/90"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {isThemeSaving ? t('dashboard.organization.settings.saving') : t('dashboard.organization.settings.save_changes')}
             </Button>
@@ -1163,7 +1163,7 @@ export default function OrgEditBranding() {
                     <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="bg-black text-white hover:bg-black/90"
+                      className="bg-primary text-primary-foreground hover:bg-primary/90"
                     >
                       {isSubmitting ? t('dashboard.organization.settings.saving') : t('dashboard.organization.settings.save_changes')}
                     </Button>

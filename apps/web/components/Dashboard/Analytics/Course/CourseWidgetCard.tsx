@@ -246,7 +246,7 @@ export function PaginationBar({
               onClick={() => setPage(p)}
               className={`min-w-[28px] h-7 rounded-lg text-xs font-medium transition-colors ${
                 p === page
-                  ? 'bg-gray-900 text-white'
+                  ? 'bg-primary text-white'
                   : 'text-gray-500 hover:bg-gray-100'
               }`}
             >

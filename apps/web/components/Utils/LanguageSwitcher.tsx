@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Languages, ChevronDown, Check } from 'lucide-react'
+import { Language, ChevronDownMini, Check } from '@components/Objects/Icons/MedusaIcons'
 import { AVAILABLE_LANGUAGES } from '@/lib/languages'
 import { changeLanguage } from '@/lib/i18n'
 import {
@@ -22,10 +22,10 @@ const LanguageSwitcher = ({ primaryColor = '' }: { primaryColor?: string }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className={`flex items-center space-x-1.5 px-2.5 py-2 rounded-lg transition-colors text-sm font-bold outline-none ${colors.iconBtn}`}>
-          <Languages size={16} strokeWidth={2.5} />
+        <button className={`flex items-center gap-1.5 px-2 py-1.5 rounded-md text-[13px] font-medium transition-colors outline-none ${colors.iconBtn}`}>
+          <Language className="h-4 w-4" />
           <span>{currentLangCode}</span>
-          <ChevronDown size={12} className="opacity-50" />
+          <ChevronDownMini className="text-gray-400" />
         </button>
       </DropdownMenuTrigger>
 
@@ -48,7 +48,7 @@ const LanguageSwitcher = ({ primaryColor = '' }: { primaryColor?: string }) => {
               <span className="text-xs font-mono text-gray-400 w-5">{language.code.toUpperCase()}</span>
               <span>{language.nativeName}</span>
             </span>
-            {i18n.language.split('-')[0] === language.code && <Check size={14} className="text-black" />}
+            {i18n.language.split('-')[0] === language.code && <Check className="h-4 w-4 text-black" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

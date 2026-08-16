@@ -2,13 +2,24 @@
 import { useOrg } from '@components/Contexts/OrgContext'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
-import { getUriWithOrg, getAPIUrl } from '@services/config/config'
+import { getUriWithOrg } from '@services/config/config'
 import { deleteCourseFromBackend, cloneCourse } from '@services/courses/courses'
 import { exportCourse, downloadBlob, ExportStatus } from '@services/courses/transfer'
 import { exportToast } from '@components/Objects/StyledElements/Toast/ExportToast'
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media'
 import { mutate } from 'swr'
-import { BookMinus, FilePenLine, Settings2, MoreVertical, Copy, Download, CheckSquare, Square } from 'lucide-react'
+import { CheckSquare, Square } from 'lucide-react'
+import {
+  EllipsisHorizontal,
+  PencilSquare,
+  CogSixTooth,
+  SquareTwoStack,
+  ArrowDownTray,
+  Trash,
+} from '@components/Objects/Icons/MedusaIcons'
+import { Badge } from '@components/ui/badge'
+import { Text } from '@components/ui/text'
+import { IconButton } from '@components/ui/icon-button'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import Link from 'next/link'
 import React from 'react'
@@ -130,22 +141,20 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
   const courseLink = customLink ? customLink : getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)
 
   return (
-    <div className={`group relative flex flex-col bg-white rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01] ${isSelected ? 'ring-2 ring-black ring-offset-2' : ''}`}>
+    <div className={`group relative flex flex-col bg-white rounded-lg card-shadow-rest hover:card-shadow-hover overflow-hidden w-full transition-shadow duration-200 ${isSelected ? 'ring-2 ring-black ring-offset-2' : ''}`}>
       {/* Selection checkbox - visible on hover or when selected (dashboard only) */}
       {isDashboard && onToggleSelect && (
-        <button
-          onClick={handleSelectClick}
-          aria-label={isSelected ? 'Deselect course' : 'Select course'}
-          className={`absolute top-2 left-2 z-20 p-1.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md ${
-            isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-          }`}
-        >
-          {isSelected ? (
-            <CheckSquare className="w-4 h-4 text-black" />
-          ) : (
-            <Square className="w-4 h-4 text-gray-500" />
-          )}
-        </button>
+        <div className={`absolute top-2 left-2 z-20 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+          <IconButton
+            variant="transparent"
+            size="small"
+            onClick={handleSelectClick}
+            aria-label={isSelected ? 'Deselect course' : 'Select course'}
+            className="bg-white/90 backdrop-blur-sm"
+          >
+            {isSelected ? <CheckSquare className="h-4 w-4 text-black" /> : <Square className="h-4 w-4 text-gray-500" />}
+          </IconButton>
+        </div>
       )}
 
       {/* Options menu - visible on hover or when dropdown is open */}
@@ -167,36 +176,34 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
         {isDashboard && (
           <div className="absolute bottom-2 left-2">
             {course.published ? (
-              <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-green-100 text-green-700 rounded-full">
-                {t('courses.published')}
-              </span>
+              <Badge variant="green">{t('courses.published')}</Badge>
             ) : (
-              <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-yellow-100 text-yellow-700 rounded-full">
-                {t('courses.unpublished')}
-              </span>
+              <Badge variant="orange">{t('courses.unpublished')}</Badge>
             )}
           </div>
         )}
       </Link>
 
-      <div className="p-3 flex flex-col space-y-1.5">
+      <div className="p-3 flex flex-col gap-y-1.5">
         <div className="flex items-start justify-between">
-          <Link
-            prefetch={false}
-            href={courseLink}
-            className="text-base font-bold text-gray-900 leading-tight hover:text-black transition-colors line-clamp-1"
-          >
-            {course.name}
-          </Link>
+          <Text asChild size="base" weight="plus" className="text-gray-900 leading-tight">
+            <Link
+              prefetch={false}
+              href={courseLink}
+              className="hover:text-black transition-colors line-clamp-1"
+            >
+              {course.name}
+            </Link>
+          </Text>
         </div>
         
         {course.description && (
-          <p className="text-[11px] text-gray-500 line-clamp-2 min-h-[1.5rem]">
+          <Text size="small" className="text-gray-500 line-clamp-2 min-h-[1.5rem]">
             {course.description}
-          </p>
+          </Text>
         )}
 
-        <div className="pt-1.5 flex items-center justify-between border-t border-gray-100">
+        <div className="pt-1.5 flex items-center justify-between border-t border-[#e4e4e7]">
           <div className="flex items-center gap-2">
             {displayedAuthors.length > 0 && (
               <div className="flex -space-x-2 items-center">
@@ -219,28 +226,26 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
                 ))}
                 {hasMoreAuthors && (
                   <div className="relative z-0">
-                    <div className="flex items-center justify-center w-[20px] h-[20px] text-[8px] font-bold text-gray-600 bg-gray-100 border-2 border-white rounded-full">
+                    <Badge variant="grey" className="h-5 w-5 justify-center rounded-full p-0 text-[10px]">
                       +{remainingAuthorsCount}
-                    </div>
+                    </Badge>
                   </div>
                 )}
               </div>
             )}
             
             {course.update_date && (
-              <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+              <Text size="xsmall" className="text-gray-400">
                 {new Date(course.update_date).toLocaleDateString(i18n.language === 'fr' ? 'fr-FR' : 'en-US', { month: 'short', day: 'numeric' })}
-              </span>
+              </Text>
             )}
           </div>
           
-          <Link
-            prefetch={false}
-            href={courseLink}
-            className="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
-          >
-            {t('courses.start_learning')}
-          </Link>
+          <Text asChild size="xsmall" weight="plus" className="text-primary hover:underline">
+            <Link prefetch={false} href={courseLink}>
+              {t('courses.start_learning')}
+            </Link>
+          </Text>
         </div>
       </div>
     </div>
@@ -270,19 +275,24 @@ const AdminEditOptions = ({ course, orgSlug, deleteCourse, cloneCourse, exportCo
       }`}>
         <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
           <DropdownMenuTrigger asChild>
-            <button aria-label="Course actions"className="p-1.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md">
-              <MoreVertical size={18} className="text-gray-700" />
-            </button>
+            <IconButton
+              variant="transparent"
+              size="small"
+              aria-label="Course actions"
+              className="bg-white/90 backdrop-blur-sm"
+            >
+              <EllipsisHorizontal />
+            </IconButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-52">
             <DropdownMenuItem asChild>
-              <Link prefetch={false} href={getUriWithOrg(orgSlug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/content`)} className="flex items-center cursor-pointer">
-                <FilePenLine className="mr-2 h-4 w-4" /> {t('courses.edit_content')}
+              <Link prefetch={false} href={getUriWithOrg(orgSlug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/content`)}>
+                <PencilSquare /> {t('courses.edit_content')}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link prefetch={false} href={getUriWithOrg(orgSlug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/general`)} className="flex items-center cursor-pointer">
-                <Settings2 className="mr-2 h-4 w-4" /> {t('common.settings')}
+              <Link prefetch={false} href={getUriWithOrg(orgSlug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/general`)}>
+                <CogSixTooth /> {t('common.settings')}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
@@ -291,8 +301,8 @@ const AdminEditOptions = ({ course, orgSlug, deleteCourse, cloneCourse, exportCo
                 confirmationMessage={t('courses.clone_course_confirm')}
                 dialogTitle={t('courses.clone_course_title', { name: course.name })}
                 dialogTrigger={
-                  <button className="w-full text-left flex items-center px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors">
-                    <Copy className="mr-2 h-4 w-4" /> {t('courses.clone_course')}
+                  <button className="w-full text-left flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] font-medium text-gray-700 hover:bg-gray-100 transition-colors">
+                    <SquareTwoStack /> {t('courses.clone_course')}
                   </button>
                 }
                 functionToExecute={cloneCourse}
@@ -302,9 +312,9 @@ const AdminEditOptions = ({ course, orgSlug, deleteCourse, cloneCourse, exportCo
             <DropdownMenuItem asChild>
               <button
                 onClick={exportCourse}
-                className="w-full text-left flex items-center px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                className="w-full text-left flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] font-medium text-gray-700 hover:bg-gray-100 transition-colors"
               >
-                <Download className="mr-2 h-4 w-4" /> {t('courses.export_course')}
+                <ArrowDownTray /> {t('courses.export_course')}
               </button>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
@@ -313,8 +323,8 @@ const AdminEditOptions = ({ course, orgSlug, deleteCourse, cloneCourse, exportCo
                 confirmationMessage={t('courses.delete_course_confirm')}
                 dialogTitle={t('courses.delete_course_title', { name: course.name })}
                 dialogTrigger={
-                  <button className="w-full text-left flex items-center px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors">
-                    <BookMinus className="mr-2 h-4 w-4" /> {t('courses.delete_course')}
+                  <button className="w-full text-left flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] font-medium text-red-600 hover:bg-red-50 transition-colors">
+                    <Trash /> {t('courses.delete_course')}
                   </button>
                 }
                 functionToExecute={deleteCourse}

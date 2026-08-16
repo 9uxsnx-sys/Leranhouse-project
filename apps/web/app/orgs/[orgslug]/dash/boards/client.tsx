@@ -84,7 +84,7 @@ function CreateBoardForm({ onCreated, orgId, accessToken }: {
         <button
           type="submit"
           disabled={!name.trim()}
-          className="rounded-lg bg-black px-5 py-2 text-sm font-medium text-white disabled:opacity-50 hover:bg-gray-800 transition-colors"
+          className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50 hover:bg-primary/90 transition-colors"
         >
           {t('boards.create_board')}
         </button>
@@ -277,9 +277,9 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
                   />
                 }
                 dialogTrigger={
-                  <button className="rounded-lg bg-black transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-white nice-shadow flex space-x-2 items-center hover:scale-105">
+                  <button className="rounded-lg bg-primary transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-primary-foreground nice-shadow flex space-x-2 items-center hover:bg-primary/90 hover:scale-105">
                     <div>{t('boards.new_board')}</div>
-                    <div className="text-md bg-neutral-800 px-1 rounded-full">+</div>
+                    <div className="text-md bg-white/20 px-1 rounded-full">+</div>
                   </button>
                 }
               />
@@ -441,7 +441,7 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
                       onClick={() => goToPage(page as number)}
                       className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                         currentPage === page
-                          ? 'bg-black text-white'
+                          ? 'bg-primary text-primary-foreground'
                           : 'bg-white text-gray-600 nice-shadow hover:bg-gray-50'
                       }`}
                     >

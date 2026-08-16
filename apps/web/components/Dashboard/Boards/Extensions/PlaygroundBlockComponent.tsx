@@ -279,7 +279,7 @@ export default function PlaygroundBlockComponent({
           <div className="w-12 h-px bg-neutral-200/80" />
           <button
             onClick={handleOpenModal}
-            className="flex items-center gap-2 px-4 py-2.5 text-[11px] font-semibold rounded-xl bg-neutral-900 text-white hover:bg-neutral-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 text-[11px] font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             <Wand2 size={12} />
             {t('boards.playground_block.generate')}

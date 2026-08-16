@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Plus, Mic2, Headphones } from 'lucide-react'
+import { Mic2, Headphones } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { PodcastWithEpisodeCount } from '@services/podcasts/podcasts'
@@ -58,10 +58,10 @@ const PodcastsDashClient = ({
           >
             <button
               onClick={() => setIsCreateModalOpen(true)}
-              className="rounded-lg bg-black hover:scale-105 transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-white nice-shadow flex space-x-2 items-center"
+              className="rounded-lg bg-primary transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-primary-foreground nice-shadow flex space-x-2 items-center hover:bg-primary/90 hover:scale-105"
             >
-              <Plus className="w-4 h-4" />
-              <span>{t('podcasts.new_podcast')}</span>
+              <div>{t('podcasts.new_podcast')} </div>
+              <div className="text-md bg-white/20 px-1 rounded-full">+</div>
             </button>
           </AuthenticatedClientElement>
         </div>
@@ -100,10 +100,10 @@ const PodcastsDashClient = ({
                 >
                   <button
                     onClick={() => setIsCreateModalOpen(true)}
-                    className="rounded-lg bg-black hover:scale-105 transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-white nice-shadow flex space-x-2 items-center"
+                    className="rounded-lg bg-primary transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-primary-foreground nice-shadow flex space-x-2 items-center hover:bg-primary/90 hover:scale-105"
                   >
-                    <Plus className="w-4 h-4" />
-                    <span>{t('podcasts.new_podcast')}</span>
+                    <div>{t('podcasts.new_podcast')} </div>
+                    <div className="text-md bg-white/20 px-1 rounded-full">+</div>
                   </button>
                 </AuthenticatedClientElement>
               </div>

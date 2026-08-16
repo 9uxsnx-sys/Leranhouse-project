@@ -55,7 +55,7 @@ function OrgNotFound() {
             <button
               type="submit"
               disabled={!orgSlug.trim() || isNavigating}
-              className="w-full flex items-center justify-center gap-2 bg-black text-white py-3 px-4 rounded-xl font-medium hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 px-4 rounded-xl font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isNavigating ? (
                 'Redirecting...'

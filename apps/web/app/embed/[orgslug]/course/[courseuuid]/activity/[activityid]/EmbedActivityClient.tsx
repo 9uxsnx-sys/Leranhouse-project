@@ -153,7 +153,7 @@ function EmbedActivityClient({ activity, course, activityId, orgslug }: EmbedAct
             href={getActivityUrl()}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block bg-gray-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors"
+            className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:bg-primary/90 transition-colors"
           >
             {t('embed.visit_activity')}
           </a>

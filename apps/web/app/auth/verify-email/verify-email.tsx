@@ -118,7 +118,7 @@ function VerifyEmailClient({ org }: VerifyEmailClientProps) {
                                 </p>
                                 <Link
                                     href="/login"
-                                    className="block w-full bg-black text-white font-semibold text-center py-2.5 rounded-lg hover:bg-gray-800 transition-colors"
+                                    className="block w-full bg-primary text-primary-foreground font-semibold text-center py-2.5 rounded-lg hover:bg-primary/90 transition-colors"
                                 >
                                     {t('auth.back_to_login')}
                                 </Link>
@@ -141,7 +141,7 @@ function VerifyEmailClient({ org }: VerifyEmailClientProps) {
                                 </div>
                                 <Link
                                     href="/login"
-                                    className="block w-full bg-black text-white font-semibold text-center py-2.5 rounded-lg hover:bg-gray-800 transition-colors"
+                                    className="block w-full bg-primary text-primary-foreground font-semibold text-center py-2.5 rounded-lg hover:bg-primary/90 transition-colors"
                                 >
                                     {t('auth.proceed_to_login')}
                                 </Link>

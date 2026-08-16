@@ -546,7 +546,7 @@ export default function OrgEditImages() {
                                 <div
                                   {...provided.dragHandleProps}
                                   className={cn(
-                                    "absolute -top-2 -left-2 bg-gray-600 hover:bg-gray-700 text-white rounded-full p-1.5",
+                                    "absolute -top-2 -left-2 bg-primary hover:bg-primary/80 text-white rounded-full p-1.5",
                                     "opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing z-10 shadow-xs",
                                     "transition-opacity duration-200"
                                   )}

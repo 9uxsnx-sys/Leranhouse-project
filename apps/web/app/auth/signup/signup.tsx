@@ -179,7 +179,7 @@ const LoggedInJoinScreen = ({ inviteCode, org }: JoinScreenProps) => {
                 <button
                   onClick={join}
                   disabled={isSubmitting}
-                  className="w-full bg-black text-white font-semibold text-center py-2.5 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full bg-primary text-primary-foreground font-semibold text-center py-2.5 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
                     <Loader2 size={18} className="animate-spin" />
@@ -289,7 +289,7 @@ const NoTokenScreen = ({ org }: NoTokenScreenProps) => {
                 <Form.Submit asChild>
                   <button
                     disabled={isSubmitting || !inviteCode}
-                    className="w-full bg-black text-white font-semibold text-center py-2.5 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="w-full bg-primary text-primary-foreground font-semibold text-center py-2.5 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? (
                       <Loader2 size={18} className="animate-spin" />

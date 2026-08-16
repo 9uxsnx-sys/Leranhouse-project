@@ -274,6 +274,11 @@ export default async function proxy(req: NextRequest) {
     return NextResponse.rewrite(new URL(`${pathname}${search}`, req.url))
   }
 
+  // Temporary demo page — pass through without org rewrite
+  if (pathname.startsWith('/demo-header')) {
+    return NextResponse.rewrite(new URL(`${pathname}${search}`, req.url))
+  }
+
   // -------------------------------------------------------------------------
   // 3. Auth pages — resolve tenant for cookie context, rewrite to /auth
   // -------------------------------------------------------------------------

@@ -244,6 +244,9 @@ function DashLeftMenu() {
       <div className="flex-1 flex flex-col justify-center py-4 px-3">
         <AdminAuthorization authorizationMode="component">
           <div className="space-y-1">
+            <div className={cn("px-3 pt-4 pb-1 text-[11px] font-medium uppercase tracking-wider text-white/40", isCollapsed && "hidden")}>
+              General
+            </div>
             <MenuLink
               href="/dash"
               icon={<House size={20} weight="fill" />}
@@ -252,6 +255,10 @@ function DashLeftMenu() {
               active={isActivePath('/dash')}
             />
 
+            {/* Content group label */}
+            <div className={cn("px-3 pt-5 pb-1 text-[11px] font-medium uppercase tracking-wider text-white/40", isCollapsed && "hidden")}>
+              Content
+            </div>
             {/* Courses with hover menu */}
             <HoverMenu
               content={
@@ -432,6 +439,10 @@ function DashLeftMenu() {
                 active={isActivePath('/dash/playgrounds')}
               />
             )}
+            {/* Administration group label */}
+            <div className={cn("px-3 pt-5 pb-1 text-[11px] font-medium uppercase tracking-wider text-white/40", isCollapsed && "hidden")}>
+              Administration
+            </div>
             {/* Users with hover menu */}
             <HoverMenu
               content={

@@ -256,7 +256,7 @@ export default function MigrationClient({ orgslug }: MigrationClientProps) {
                     index < currentStepIndex
                       ? 'bg-green-500 text-white'
                       : index === currentStepIndex
-                        ? 'bg-black text-white'
+                        ? 'bg-primary text-primary-foreground'
                         : 'bg-gray-200 text-gray-500'
                   }`}
                 >
@@ -306,7 +306,7 @@ export default function MigrationClient({ orgslug }: MigrationClientProps) {
                     <button
                       onClick={() => handleUploadAndOrganize(true)}
                       disabled={!canProceedToUpload || uploading}
-                      className={`rounded-lg bg-black transition-all duration-100 ease-linear antialiased p-2 px-5 text-xs font-bold text-white nice-shadow flex space-x-2 items-center ${
+                      className={`rounded-lg bg-primary transition-all duration-100 ease-linear antialiased p-2 px-5 text-xs font-bold text-primary-foreground nice-shadow flex space-x-2 items-center hover:bg-primary/90 ${
                         !canProceedToUpload || uploading
                           ? 'opacity-50 cursor-not-allowed'
                           : 'hover:scale-105'
@@ -356,7 +356,7 @@ export default function MigrationClient({ orgslug }: MigrationClientProps) {
           <div className="flex justify-end mt-4">
             <button
               onClick={handleCreate}
-              className="rounded-lg bg-black transition-all duration-100 ease-linear antialiased p-2 px-5 text-xs font-bold text-white nice-shadow flex space-x-2 items-center hover:scale-105"
+              className="rounded-lg bg-primary transition-all duration-100 ease-linear antialiased p-2 px-5 text-xs font-bold text-primary-foreground nice-shadow flex space-x-2 items-center hover:bg-primary/90 hover:scale-105"
             >
               <span>{t('migration.create_course')}</span>
             </button>

@@ -58,7 +58,7 @@ function UnconfiguredPaymentsDisclaimer() {
         {/* CTA */}
         <Link
           href="./configuration"
-          className="inline-flex items-center space-x-1.5 bg-gray-900 hover:bg-gray-800 text-white text-xs font-medium px-4 py-2 rounded-lg transition-colors duration-150"
+          className="inline-flex items-center space-x-1.5 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-medium px-4 py-2 rounded-lg transition-colors duration-150"
         >
           <Settings size={13} />
           <span>Go to Payment Configuration</span>

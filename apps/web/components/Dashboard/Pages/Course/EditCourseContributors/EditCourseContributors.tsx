@@ -461,7 +461,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                                                             </Button>
                                                             <Button
                                                                 onClick={handleAddContributors}
-                                                                className="bg-gray-900 text-white hover:bg-gray-800 text-sm"
+                                                                className="bg-primary text-primary-foreground hover:bg-primary/90 text-sm"
                                                             >
                                                                 {t('dashboard.courses.contributors.actions.add_selected')}
                                                             </Button>
