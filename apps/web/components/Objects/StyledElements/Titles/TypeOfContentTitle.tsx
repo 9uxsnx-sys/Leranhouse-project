@@ -8,7 +8,7 @@ interface TypeOfContentTitleProps {
 
 function TypeOfContentTitle({ title }: TypeOfContentTitleProps) {
   return (
-    <Heading level="h2" className="text-gray-900 text-xl">
+    <Heading level="h2" className="text-ui-fg-base">
       {title}
     </Heading>
   )

@@ -1,12 +1,13 @@
 'use client'
 import React, { useEffect, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 
 import Link from 'next/link'
 import {
   ArrowRightOnRectangle,
   Check,
-  ChevronDownMini,
   CreditCard,
+  EllipsisHorizontal,
   GridLayout,
   IdBadge,
   Language,
@@ -34,8 +35,6 @@ import { signOut } from '@components/Contexts/AuthContext'
 import { useTranslation } from 'react-i18next'
 import { changeLanguage } from '@/lib/i18n'
 import { AVAILABLE_LANGUAGES } from '@/lib/languages'
-import LanguageSwitcher from '@components/Utils/LanguageSwitcher'
-import { getMenuColorClasses } from '@services/utils/ts/colorUtils'
 
 interface RoleInfo {
   name: string;
@@ -54,11 +53,15 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
   const { isAdmin, loading, userRoles, rights } = useAdminStatus()
   const org = useOrg() as any
   const { t, i18n } = useTranslation()
-  const colors = getMenuColorClasses(primaryColor)
+  const router = useRouter()
 
 
-  useEffect(() => { }
-    , [session])
+  useEffect(() => {
+    // Not signed in — the org shell is authenticated only, send to login
+    if (session?.status === 'unauthenticated' && org?.slug) {
+      router.push(getUriWithOrg(org.slug, '/login'))
+    }
+  }, [session?.status, org?.slug, router])
 
   const userRoleInfo = useMemo((): RoleInfo | null => {
     if (!userRoles || userRoles.length === 0) return null;
@@ -161,126 +164,105 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
 
   return (
     <div className="flex items-stretch items-center">
-      {session.status == 'unauthenticated' && (
-        <div className="flex items-stretch grow items-center">
-          <ul className="flex space-x-0.5 sm:space-x-1 items-center">
-            <li>
-              <LanguageSwitcher primaryColor={primaryColor} />
-            </li>
-            <li>
-              <Link
-                className={`px-3 py-2 rounded-lg transition-colors text-sm font-bold ${colors.hoverBg} ${colors.text}`}
-                href={getUriWithOrg(org?.slug, '/login')} >{t('auth.login')}</Link>
-            </li>
-            <li className={`rounded-lg shadow-sm transition-colors px-4 py-2 text-xs sm:text-sm font-bold ml-1 sm:ml-2 ${colors.signUpBtn}`}>
-              <Link href={getUriWithOrg(org?.slug, '/signup')}>{t('auth.sign_up')}</Link>
-            </li>
-          </ul>
-        </div>
-      )}
+      {session.status == 'unauthenticated' && null}
       {session.status == 'authenticated' && (
-        <div className="flex items-center space-x-0">
-          <div className="flex items-center space-x-3">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="cursor-pointer flex items-center gap-2 rounded-md py-1.5 pl-1.5 pr-2 text-gray-700 transition-colors hover:bg-gray-100">
-                  <Avatar src={avatarSrc} fallback={avatarFallback} variant="rounded" size="xsmall" />
-                  <span className="hidden text-[13px] font-medium capitalize sm:block">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="bg-ui-bg-subtle grid w-full cursor-pointer grid-cols-[24px_1fr_15px] items-center gap-2 rounded-md py-1 pe-2 ps-0.5 text-ui-fg-base outline-none transition-fg hover:bg-ui-bg-subtle-hover data-[state=open]:bg-ui-bg-subtle-hover focus-visible:shadow-borders-focus">
+              <div className="flex size-6 items-center justify-center">
+                <Avatar src={avatarSrc} fallback={avatarFallback} variant="rounded" size="xsmall" />
+              </div>
+              <div className="flex items-center overflow-hidden">
+                <span className="txt-compact-small-plus truncate capitalize">
+                  {session.data.user.username}
+                </span>
+              </div>
+              <EllipsisHorizontal className="text-ui-fg-muted" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuLabel>
+              <div className="flex items-center gap-x-3 overflow-hidden px-2 py-1">
+                <Avatar src={avatarSrc} fallback={avatarFallback} variant="rounded" size="small" />
+                <div className="block min-w-0 max-w-[187px] overflow-hidden whitespace-nowrap">
+                  <p className="txt-compact-medium-plus truncate capitalize">
                     {session.data.user.username}
-                  </span>
-                  {userRoleInfo && (
-                    <Tooltip content={userRoleInfo.description} sideOffset={10} side="bottom">
-                      <span className="hidden h-1.5 w-1.5 rounded-full bg-gray-300 sm:block" />
-                    </Tooltip>
-                  )}
-                  <ChevronDownMini className="text-gray-400" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-60" align="end">
-                <DropdownMenuLabel>
-                  <div className="flex items-center gap-2.5">
-                    <Avatar src={avatarSrc} fallback={avatarFallback} variant="rounded" size="base" />
-                    <div className="min-w-0">
-                      <p className="text-[13px] font-medium capitalize leading-tight text-gray-900">
-                        {session.data.user.username}
-                      </p>
-                      <p className="truncate text-xs text-muted-foreground">{session.data.user.email}</p>
-                      {customRoles.length > 0 && (
-                        <div className="mt-1 flex flex-wrap gap-1">
-                          {customRoles.map((customRole, index) => (
-                            <span
-                              key={index}
-                              className="inline-flex items-center rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-700"
-                            >
-                              {customRole.name}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    {userRoleInfo && (
-                      <Tooltip content={userRoleInfo.description} sideOffset={10} side="bottom">
-                        <span className="ml-auto inline-flex items-center rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-700">
-                          {userRoleInfo.name}
-                        </span>
-                      </Tooltip>
-                    )}
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {rights?.dashboard?.action_access && (
-                  <DropdownMenuItem asChild>
-                    <Link href="/dash" className="flex items-center gap-2">
-                      <GridLayout className="h-4 w-4" />
-                      <span>{t('common.dashboard')}</span>
-                    </Link>
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem asChild>
-                  <Link href="/account/general" className="flex items-center gap-2">
-                    <IdBadge className="h-4 w-4" />
-                    <span>{t('user.user_settings')}</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href={getUriWithOrg(org?.slug, '/account/purchases')} className="flex items-center gap-2">
-                    <CreditCard className="h-4 w-4" />
-                    <span>{t('account.purchases')}</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className="flex items-center gap-2">
-                    <Language className="h-4 w-4" />
-                    <span>{t('common.language')}</span>
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuPortal>
-                    <DropdownMenuSubContent>
-                      {AVAILABLE_LANGUAGES.map((language) => (
-                        <DropdownMenuItem
-                          key={language.code}
-                          onClick={() => changeLanguage(language.code)}
-                          className="flex items-center justify-between"
+                  </p>
+                  <p className="txt-compact-small text-ui-fg-subtle truncate">{session.data.user.email}</p>
+                  {customRoles.length > 0 && (
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {customRoles.map((customRole, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-700"
                         >
-                          <span>{t(language.translationKey)} ({language.nativeName})</span>
-                          {i18n.language.split('-')[0] === language.code && <Check className="h-4 w-4" />}
-                        </DropdownMenuItem>
+                          {customRole.name}
+                        </span>
                       ))}
-                    </DropdownMenuSubContent>
-                  </DropdownMenuPortal>
-                </DropdownMenuSub>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => signOut({ callbackUrl: '/' })}
-                  className="flex items-center gap-2 text-red-600 data-[highlighted]:text-red-600 data-[highlighted]:bg-red-50"
-                >
-                  <ArrowRightOnRectangle className="h-4 w-4" />
-                  <span>Sign Out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
+                    </div>
+                  )}
+                </div>
+                {userRoleInfo && (
+                  <Tooltip content={userRoleInfo.description} sideOffset={10} side="bottom">
+                    <span className="ml-auto inline-flex items-center rounded-full bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-700">
+                      {userRoleInfo.name}
+                    </span>
+                  </Tooltip>
+                )}
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {rights?.dashboard?.action_access && (
+              <DropdownMenuItem asChild>
+                <Link href="/dash" className="flex items-center gap-2">
+                  <GridLayout className="h-4 w-4" />
+                  <span>{t('common.dashboard')}</span>
+                </Link>
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem asChild>
+              <Link href="/account/general" className="flex items-center gap-2">
+                <IdBadge className="h-4 w-4" />
+                <span>{t('user.user_settings')}</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href={getUriWithOrg(org?.slug, '/account/purchases')} className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4" />
+                <span>{t('account.purchases')}</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger className="flex items-center gap-2">
+                <Language className="h-4 w-4" />
+                <span>{t('common.language')}</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  {AVAILABLE_LANGUAGES.map((language) => (
+                    <DropdownMenuItem
+                      key={language.code}
+                      onClick={() => changeLanguage(language.code)}
+                      className="flex items-center justify-between"
+                    >
+                      <span>{t(language.translationKey)} ({language.nativeName})</span>
+                      {i18n.language.split('-')[0] === language.code && <Check className="h-4 w-4" />}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => signOut({ callbackUrl: '/' })}
+              className="flex items-center gap-2 text-red-600 data-[highlighted]:text-red-600 data-[highlighted]:bg-red-50"
+            >
+              <ArrowRightOnRectangle className="h-4 w-4" />
+              <span>Sign Out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
     </div>
   )

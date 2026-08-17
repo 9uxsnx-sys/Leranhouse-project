@@ -2,6 +2,12 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Medusa Table — table.tsx (ported 1:1, light mode tokens).
+ * Text fg-subtle txt-compact-small, rows bg-base hover bg-base-hover,
+ * header rows bg-subtle, cells h-12.
+ */
+
 const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>
@@ -9,7 +15,7 @@ const Table = React.forwardRef<
   <div className="relative w-full overflow-auto">
     <table
       ref={ref}
-      className={cn("w-full caption-bottom text-sm", className)}
+      className={cn("text-ui-fg-subtle txt-compact-small w-full", className)}
       {...props}
     />
   </div>
@@ -20,7 +26,14 @@ const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn("[&_tr]:border-b", className)} {...props} />
+  <thead
+    ref={ref}
+    className={cn(
+      "border-ui-border-base txt-compact-small-plus [&_tr]:bg-ui-bg-subtle [&_tr]:hover:bg-ui-bg-subtle border-y",
+      className
+    )}
+    {...props}
+  />
 ))
 TableHeader.displayName = "TableHeader"
 
@@ -30,7 +43,7 @@ const TableBody = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <tbody
     ref={ref}
-    className={cn("[&_tr:last-child]:border-0", className)}
+    className={cn("border-ui-border-base border-b", className)}
     {...props}
   />
 ))
@@ -43,7 +56,7 @@ const TableFooter = React.forwardRef<
   <tfoot
     ref={ref}
     className={cn(
-      "border-t bg-muted/50 font-medium last:[&>tr]:border-b-0",
+      "border-ui-border-base txt-compact-small-plus border-t bg-ui-bg-subtle font-medium [&>tr]:last:border-b-0",
       className
     )}
     {...props}
@@ -58,7 +71,10 @@ const TableRow = React.forwardRef<
   <tr
     ref={ref}
     className={cn(
-      "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
+      "bg-ui-bg-base hover:bg-ui-bg-base-hover border-ui-border-base transition-fg border-b",
+      "[&_td:last-child]:pr-6 [&_th:last-child]:pr-6",
+      "[&_td:first-child]:pl-6 [&_th:first-child]:pl-6",
+      "data-[state=selected]:bg-ui-bg-subtle",
       className
     )}
     {...props}
@@ -73,7 +89,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-9 px-3 text-left align-middle text-[11px] font-semibold uppercase tracking-wide text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+      "txt-compact-small-plus h-12 py-0 pl-0 pr-6 text-left font-medium",
       className
     )}
     {...props}
@@ -87,10 +103,7 @@ const TableCell = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <td
     ref={ref}
-    className={cn(
-      "px-3 py-2.5 align-middle [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
-      className
-    )}
+    className={cn("h-12 py-0 pl-0 pr-6 align-middle", className)}
     {...props}
   />
 ))
@@ -102,7 +115,7 @@ const TableCaption = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <caption
     ref={ref}
-    className={cn("mt-4 text-sm text-muted-foreground", className)}
+    className={cn("text-ui-fg-muted mt-4 text-left text-sm", className)}
     {...props}
   />
 ))

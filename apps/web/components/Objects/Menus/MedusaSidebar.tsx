@@ -26,14 +26,14 @@ import { Text } from '@components/ui/text'
 
 /**
  * LearnHouse port of the Medusa v2.18.0 main sidebar (main-layout.tsx + nav-item.tsx).
- * - Grey `#fafafa` canvas, white active nav chip with the elevation-card ring.
- * - Header (org) -> nav -> user block pinned at the bottom, hairline dividers.
+ * - Transparent canvas (#fafafa), white active nav chip with the elevation-card ring.
+ * - Header (org) -> nav -> user block pinned at the bottom, hairline dashed dividers.
  */
 
-// nav-item.tsx: BASE_NAV_LINK_CLASSES + ACTIVE_NAV_LINK_CLASSES
+// nav-item.tsx: BASE_NAV_LINK_CLASSES + ACTIVE_NAV_LINK_CLASSES (exact)
 const NAV_BASE =
-  'text-gray-500 transition-colors hover:bg-gray-100 flex items-center gap-x-2 rounded-md py-0.5 pl-0.5 pr-2 outline-none'
-const NAV_ACTIVE = 'bg-white card-shadow-rest text-gray-900 hover:bg-white'
+  'text-ui-fg-subtle transition-fg hover:bg-ui-bg-subtle-hover flex items-center gap-x-2 rounded-md py-0.5 pl-0.5 pr-2 outline-none [&>svg]:text-ui-fg-subtle focus-visible:shadow-borders-focus'
+const NAV_ACTIVE = 'bg-ui-bg-base shadow-elevation-card-rest text-ui-fg-base hover:bg-ui-bg-base'
 
 interface NavEntry {
   to: string
@@ -55,12 +55,14 @@ const NAV_ITEMS: NavEntry[] = [
   { to: '/boards', label: 'Boards', icon: GridList, feature: 'boards' },
 ]
 
+// divider.tsx — exact dashed recipe
 const Divider = () => (
   <div className="px-3">
-    <div className="border-t border-dashed border-border" />
+    <div className="h-px w-full bg-[linear-gradient(90deg,var(--color-ui-border-strong)_1px,transparent_1px)] bg-[length:4px_1px]" />
   </div>
 )
 
+// main-layout.tsx Header — org selector trigger (exact classes)
 function OrgHeader({ org, orgslug }: { org: any; orgslug: string }) {
   const name = org?.name || 'LearnHouse'
   const fallback = (name || 'L').slice(0, 1).toUpperCase()
@@ -69,10 +71,10 @@ function OrgHeader({ org, orgslug }: { org: any; orgslug: string }) {
     : undefined
 
   return (
-    <div className="p-3">
+    <div className="w-full p-3">
       <Link
         href={getUriWithOrg(orgslug, '/')}
-        className="grid w-full grid-cols-[24px_1fr_15px] items-center gap-x-3 rounded-md p-0.5 pe-2 outline-none transition-colors hover:bg-gray-100"
+        className="bg-ui-bg-subtle transition-fg grid w-full grid-cols-[24px_1fr_15px] items-center gap-x-3 rounded-md p-0.5 pe-2 outline-none hover:bg-ui-bg-subtle-hover focus-visible:shadow-borders-focus"
       >
         {logoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -82,16 +84,16 @@ function OrgHeader({ org, orgslug }: { org: any; orgslug: string }) {
             className="h-6 w-6 rounded-md object-cover"
           />
         ) : (
-          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gray-200 text-xs font-medium text-gray-600">
+          <div className="shadow-borders-base flex h-6 w-6 items-center justify-center rounded-md bg-ui-bg-base text-xs font-medium text-ui-fg-muted">
             {fallback}
           </div>
         )}
         <div className="block overflow-hidden text-start">
-          <Text size="small" weight="plus" leading="compact" className="truncate text-gray-900">
+          <Text size="small" weight="plus" leading="compact" className="truncate text-ui-fg-base">
             {name}
           </Text>
         </div>
-        <EllipsisHorizontal className="h-4 w-4 text-gray-400" />
+        <EllipsisHorizontal className="text-ui-fg-muted" />
       </Link>
     </div>
   )
@@ -144,33 +146,35 @@ export function MedusaSidebarContent({ orgslug }: { orgslug: string }) {
   }
 
   return (
-    <aside className="flex h-full flex-1 flex-col justify-between overflow-y-auto">
+    <aside className="flex flex-1 flex-col justify-between overflow-x-hidden overflow-y-auto">
       <div className="flex flex-1 flex-col">
-        {/* Header: org selector (Medusa Header) */}
-        <div className="sticky top-0">
+        {/* Header: org selector (main-layout.tsx Header) */}
+        <div className="bg-ui-bg-subtle sticky top-0">
           <OrgHeader org={org} orgslug={orgslug} />
           <Divider />
         </div>
 
-        {/* Nav (Medusa SidebarRoutes) */}
+        {/* Nav (main-layout.tsx SidebarRoutes) */}
         <nav className="py-3">
-          <div className="flex flex-col gap-y-1 px-3">
-            {visible.map((item) => (
-              <NavLinkItem
-                key={item.to}
-                item={item}
-                orgslug={orgslug}
-                active={isActive(item.to)}
-              />
-            ))}
+          <div className="px-3">
+            <div className="flex flex-col gap-y-1">
+              {visible.map((item) => (
+                <NavLinkItem
+                  key={item.to}
+                  item={item}
+                  orgslug={orgslug}
+                  active={isActive(item.to)}
+                />
+              ))}
+            </div>
           </div>
         </nav>
       </div>
 
-      {/* Bottom: dashboard shortcut + user (Medusa UtilitySection + UserSection) */}
-      <div className="sticky bottom-0">
+      {/* Bottom: dashboard shortcut + user (main-layout.tsx UtilitySection + UserSection) */}
+      <div className="bg-ui-bg-subtle sticky bottom-0">
         {rights?.dashboard?.action_access && (
-          <div className="flex flex-col gap-y-0.5 px-3 pb-3">
+          <div className="flex flex-col gap-y-0.5 px-3 py-3">
             <NavLinkItem
               item={{
                 to: '/dash',

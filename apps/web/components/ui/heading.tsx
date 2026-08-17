@@ -7,20 +7,19 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 /**
- * Medusa-style Heading (ported from @medusajs/ui `heading.tsx`).
- * Medusa headings are always `font-medium` (not bold); sizes map to
- * h1-core 24px / h2-core 18px / h3-core 16px.
+ * Medusa Heading — heading.tsx (ported 1:1).
+ * Always font-medium. h1-core 18/28, h2-core 16/24, h3-core 14/20.
  */
 const headingVariants = cva("font-sans font-medium", {
   variants: {
     level: {
-      h1: "text-2xl leading-8",
-      h2: "text-lg leading-7",
-      h3: "text-base leading-6",
+      h1: "h1-core",
+      h2: "h2-core",
+      h3: "h3-core",
     },
   },
   defaultVariants: {
-    level: "h2",
+    level: "h1",
   },
 })
 
@@ -32,7 +31,7 @@ export interface HeadingProps
 
 const Heading = React.forwardRef<HTMLHeadingElement, HeadingProps>(
   ({ className, level, asChild = false, ...props }, ref) => {
-    const Component = asChild ? Slot : level ?? "h2"
+    const Component = asChild ? Slot : level ?? "h1"
     return (
       <Component
         ref={ref}

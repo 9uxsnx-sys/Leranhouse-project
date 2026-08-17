@@ -64,3 +64,6 @@ apps/api/ee
 
 # Claude Code
 .claude/
+
+# Local Medusa v2.18.0 reference source (read-only copy, never committed)
+/medusa/

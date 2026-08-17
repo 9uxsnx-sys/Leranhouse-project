@@ -110,6 +110,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   });
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const session = useLHSession() as any;
   const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -121,6 +122,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setShowResults(false);
+        setIsExpanded(false);
       }
     };
 
@@ -359,30 +361,43 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   }, []);
 
   return (
-    <div ref={searchRef} className={`relative ${className}`}>
+    <div
+      ref={searchRef}
+      className={`relative ${
+        isMobile
+          ? 'w-full'
+          : isExpanded
+            ? 'lg:w-80 xl:w-96'
+            : 'w-56'
+      } transition-[width] duration-200 ease-in-out ${className}`}
+    >
       <div className="relative group">
         <input
           type="text"
           value={searchQuery}
           onChange={handleSearchChange}
-          onFocus={() => setShowResults(true)}
+          onFocus={() => {
+            setShowResults(true);
+            setIsExpanded(true);
+          }}
           aria-label={t('search.search_placeholder')}
           placeholder={t('search.search_placeholder')}
-          className={`w-full h-8 pl-9 pr-3 rounded-md border border-border bg-background
-                     text-[13px] placeholder:text-muted-foreground
-                     focus:outline-none focus:border-(--brand) focus:ring-2 focus:ring-(--brand)/20 transition-all`}
+          className={`bg-ui-bg-field hover:bg-ui-bg-field-hover shadow-borders-base placeholder-ui-fg-muted text-ui-fg-base caret-ui-fg-base txt-compact-small w-full h-8 pl-8 pr-2 rounded-md outline-none transition-fg
+                     focus-visible:shadow-borders-interactive-with-active
+                     [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden`}
         />
-        <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
-          <Search className="text-gray-400 transition-colors h-4 w-4" />
+        <div className="text-ui-fg-muted pointer-events-none absolute bottom-0 left-0 flex h-8 w-8 items-center justify-center" role="img">
+          <Search className="h-4 w-4" />
         </div>
       </div>
 
       <div 
-        className={`absolute z-dropdown w-full mt-2 bg-white rounded-xl nice-shadow 
+        className={`absolute end-0 w-full mt-2 bg-ui-bg-component shadow-elevation-flyout rounded-lg 
                    overflow-hidden divide-y divide-black/5
                    transition-all duration-200 ease-in-out transform
                    ${showResults ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'}
                    ${isMobile ? 'max-w-full' : 'min-w-[400px]'}`}
+        style={{ zIndex: 'var(--z-dropdown)' }}
       >
         {(!searchQuery.trim() || isInitialLoad) ? (
           MemoizedEmptyState

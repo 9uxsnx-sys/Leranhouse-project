@@ -2,9 +2,9 @@
 
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { Cross2Icon } from "@radix-ui/react-icons"
 
 import { cn } from "@/lib/utils"
+import { XMark } from "@components/Objects/Icons/MedusaIcons"
 
 const Dialog = DialogPrimitive.Root
 
@@ -20,8 +20,8 @@ const DialogOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
-    className={cn("lh-modal-overlay fixed inset-0 bg-black/40", className)}
-    style={{ zIndex: 'var(--z-modal-backdrop)', willChange: 'opacity' }}
+    className={cn("lh-modal-overlay bg-ui-bg-overlay fixed inset-0", className)}
+    style={{ zIndex: "var(--z-modal-backdrop)", willChange: "opacity" }}
     {...props}
   />
 ))
@@ -45,32 +45,32 @@ const DialogContent = React.forwardRef<
       // without ever touching the centering translate. Keeps shrink-to-fit
       // sizing (`w-auto`) working with `position: fixed`.
       style={{
-        zIndex: 'var(--z-modal)' as any,
-        translate: '-50% -50%',
-        willChange: 'scale, opacity',
-        backfaceVisibility: 'hidden',
-        WebkitBackfaceVisibility: 'hidden',
+        zIndex: "var(--z-modal)" as any,
+        translate: "-50% -50%",
+        willChange: "scale, opacity",
+        backfaceVisibility: "hidden",
+        WebkitBackfaceVisibility: "hidden",
       }}
       onKeyDown={(e) => {
         // Prevent Radix from swallowing keystrokes (e.g. "D") inside form inputs
         const target = e.target as HTMLElement
         const tag = target.tagName
-        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target.isContentEditable) {
+        if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || target.isContentEditable) {
           e.stopPropagation()
         }
       }}
       className={cn(
-        "lh-modal-content fixed left-[50%] top-[50%] grid w-full max-w-lg gap-0 border border-border bg-background shadow-xl shadow-black/5 sm:rounded-xl",
+        "lh-modal-content bg-ui-bg-base shadow-elevation-modal fixed left-[50%] top-[50%] grid w-full max-w-lg gap-0 rounded-lg border border-ui-border-base outline-none",
         className
       )}
       {...props}
     >
       {children}
       <DialogPrimitive.Close
-        className="absolute right-4 top-4 p-1.5 rounded-lg bg-accent text-muted-foreground hover:bg-accent/80 hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
+        className="text-ui-fg-muted hover:bg-ui-bg-subtle-hover absolute right-4 top-4 rounded-md p-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none"
         aria-label="Close dialog"
       >
-        <Cross2Icon className="h-4 w-4" />
+        <XMark className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
@@ -113,7 +113,7 @@ const DialogTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      "text-lg font-semibold leading-tight tracking-tight text-foreground",
+      "text-ui-fg-base font-medium",
       className
     )}
     {...props}
@@ -127,7 +127,7 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-ui-fg-muted text-sm", className)}
     {...props}
   />
 ))

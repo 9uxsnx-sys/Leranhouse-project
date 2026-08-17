@@ -14,6 +14,7 @@ import { getUriWithOrg } from '@services/config/config'
 import { useTranslation } from 'react-i18next'
 import { ExclamationCircle, ArrowRightMini } from '@components/Objects/Icons/MedusaIcons'
 import { Text } from '@components/ui/text'
+import { Container } from '@components/ui/container'
 
 interface LandingClassicProps {
   courses: any[]
@@ -35,7 +36,7 @@ function LandingClassic({ courses, collections, orgslug, org_id }: LandingClassi
         <div className="flex flex-col gap-y-3">
           {/* Collections */}
           <div className="flex flex-col gap-y-3">
-            <div className="bg-white rounded-lg card-shadow-rest px-6 py-4">
+            <Container>
               <div className="flex items-center justify-between pb-4">
                 <TypeOfContentTitle title={t('collections.collections')} type="col" />
                 <AuthenticatedClientElement
@@ -73,12 +74,12 @@ function LandingClassic({ courses, collections, orgslug, org_id }: LandingClassi
                   </div>
                 )}
               </div>
-            </div>
+            </Container>
           </div>
 
           {/* Courses */}
           <div className="flex flex-col gap-y-3">
-            <div className="bg-white rounded-lg card-shadow-rest px-6 py-4">
+            <Container>
               <div className="flex items-center justify-between pb-4">
                 <TypeOfContentTitle title={t('courses.courses')} type="cou" />
                 <AuthenticatedClientElement
@@ -116,14 +117,14 @@ function LandingClassic({ courses, collections, orgslug, org_id }: LandingClassi
                     href={getUriWithOrg(orgslug, '/courses')}
                     className="group inline-flex items-center gap-1"
                   >
-                    <Text size="small" weight="plus" className="text-primary group-hover:underline">
+                    <Text size="small" weight="plus" className="text-ui-fg-interactive group-hover:underline">
                       {t('courses.view_all_courses')} ({courses.length})
                     </Text>
-                    <ArrowRightMini className="h-3.5 w-3.5 text-primary transition-transform group-hover:translate-x-0.5" />
+                    <ArrowRightMini className="h-3.5 w-3.5 text-ui-fg-interactive transition-transform group-hover:translate-x-0.5" />
                   </Link>
                 </div>
               )}
-            </div>
+            </Container>
           </div>
         </div>
       </GeneralWrapperStyled>

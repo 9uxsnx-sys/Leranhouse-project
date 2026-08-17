@@ -165,6 +165,368 @@
   --color-chart-5: hsl(var(--chart-5));
 }
 
+/* Medusa UI design tokens — ui-preset theme/tokens/colors.ts (light mode).
+   Generates bg-ui-*, text-ui-*, border-ui-* utility classes in Tailwind v4. */
+@theme {
+  --color-ui-bg-base: #ffffff;
+  --color-ui-bg-base-hover: #f4f4f5;
+  --color-ui-bg-subtle: #fafafa;
+  --color-ui-bg-subtle-hover: #f4f4f5;
+  --color-ui-bg-subtle-pressed: #e4e4e7;
+  --color-ui-bg-interactive: #3b82f6;
+  --color-ui-bg-overlay: rgba(24, 24, 27, 0.4);
+  --color-ui-bg-component: #fafafa;
+  --color-ui-bg-component-hover: #f4f4f5;
+  --color-ui-bg-component-pressed: #e4e4e7;
+  --color-ui-bg-field: #fafafa;
+  --color-ui-bg-field-hover: #f4f4f5;
+  --color-ui-bg-disabled: #f4f4f5;
+  --color-ui-bg-highlight: #eff6ff;
+  --color-ui-bg-switch-off: #e4e4e7;
+  --color-ui-bg-switch-off-hover: #d4d4d8;
+  --color-ui-fg-base: #18181b;
+  --color-ui-fg-subtle: #52525b;
+  --color-ui-fg-muted: #71717a;
+  --color-ui-fg-on-color: #ffffff;
+  --color-ui-fg-on-inverted: #ffffff;
+  --color-ui-fg-interactive: #3b82f6;
+  --color-ui-fg-interactive-hover: #2563eb;
+  --color-ui-fg-disabled: #a1a1aa;
+  --color-ui-fg-error: #e11d48;
+  --color-ui-border-base: #e4e4e7;
+  --color-ui-border-strong: #d4d4d8;
+  --color-ui-border-interactive: #3b82f6;
+  --color-ui-border-error: #e11d48;
+  --color-ui-border-danger: #be123c;
+  --color-ui-border-loud: rgba(24, 24, 27, 1);
+  --color-ui-border-menu-top: #e4e4e7;
+  --color-ui-border-menu-bot: #ffffff;
+  /* buttons — colors.ts button-* (light) */
+  --color-ui-button-inverted: #27272a;
+  --color-ui-button-inverted-hover: #3f3f46;
+  --color-ui-button-inverted-pressed: #52525b;
+  --color-ui-button-neutral: #ffffff;
+  --color-ui-button-neutral-hover: #f4f4f5;
+  --color-ui-button-neutral-pressed: #e4e4e7;
+  --color-ui-button-transparent: rgba(255, 255, 255, 0);
+  --color-ui-button-transparent-hover: #f4f4f5;
+  --color-ui-button-transparent-pressed: #e4e4e7;
+  --color-ui-button-danger: #e11d48;
+  --color-ui-button-danger-hover: #be123c;
+  --color-ui-button-danger-pressed: #9f1239;
+  /* contrast — colors.ts contrast-* (light) */
+  --color-ui-contrast-fg-primary: rgba(255, 255, 255, 0.88);
+  --color-ui-contrast-fg-secondary: rgba(255, 255, 255, 0.56);
+  --color-ui-contrast-bg-base: #18181b;
+  /* tags — status-badge / tag chips (light) */
+  --color-ui-tag-neutral-bg: #f4f4f5;
+  --color-ui-tag-neutral-text: #52525b;
+  --color-ui-tag-neutral-border: #e4e4e7;
+  --color-ui-tag-neutral-icon: #a1a1aa;
+  --color-ui-tag-green-bg: #d1fae5;
+  --color-ui-tag-green-text: #065f46;
+  --color-ui-tag-green-border: #a7f3d0;
+  --color-ui-tag-green-icon: #10b981;
+  --color-ui-tag-red-bg: #ffe4e6;
+  --color-ui-tag-red-text: #9f1239;
+  --color-ui-tag-red-border: #fecdd3;
+  --color-ui-tag-red-icon: #f43f5e;
+  --color-ui-tag-blue-bg: #dbeafe;
+  --color-ui-tag-blue-text: #1e40af;
+  --color-ui-tag-blue-border: #bfdbfe;
+  --color-ui-tag-blue-icon: #60a5fa;
+  --color-ui-tag-orange-bg: #ffedd5;
+  --color-ui-tag-orange-text: #9a3412;
+  --color-ui-tag-orange-border: #fed7aa;
+  --color-ui-tag-orange-icon: #f97316;
+  --color-ui-tag-purple-bg: #ede9fe;
+  --color-ui-tag-purple-text: #5b21b6;
+  --color-ui-tag-purple-border: #ddd6fe;
+  --color-ui-tag-purple-icon: #a78bfa;
+}
+
+/* Medusa UI effect utilities — ui-preset theme/tokens/effects.ts (light mode).
+   Defined as @utility so hover:/focus-visible: variants work. */
+
+/* transitions-fg */
+@utility transition-fg {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* elevation-card-rest */
+@utility shadow-elevation-card-rest {
+  box-shadow:
+    0px 0px 0px 1px rgba(0, 0, 0, 0.08),
+    0px 1px 2px -1px rgba(0, 0, 0, 0.08),
+    0px 2px 4px 0px rgba(0, 0, 0, 0.04);
+}
+
+/* elevation-card-hover */
+@utility shadow-elevation-card-hover {
+  box-shadow:
+    0px 0px 0px 1px rgba(0, 0, 0, 0.08),
+    0px 1px 2px -1px rgba(0, 0, 0, 0.08),
+    0px 2px 8px 0px rgba(0, 0, 0, 0.1);
+}
+
+/* elevation-flyout */
+@utility shadow-elevation-flyout {
+  box-shadow:
+    0px 0px 0px 1px rgba(0, 0, 0, 0.08),
+    0px 4px 8px 0px rgba(0, 0, 0, 0.08),
+    0px 8px 16px 0px rgba(0, 0, 0, 0.08);
+}
+
+/* elevation-modal */
+@utility shadow-elevation-modal {
+  box-shadow:
+    0px 0px 0px 1px rgba(255, 255, 255, 1) inset,
+    0px 0px 0px 1.5px rgba(228, 228, 231, 0.6) inset,
+    0px 0px 0px 1px rgba(0, 0, 0, 0.08),
+    0px 8px 16px 0px rgba(0, 0, 0, 0.08),
+    0px 16px 32px 0px rgba(0, 0, 0, 0.08);
+}
+
+/* elevation-tooltip */
+@utility shadow-elevation-tooltip {
+  box-shadow:
+    0px 0px 0px 1px rgba(0, 0, 0, 0.08),
+    0px 2px 4px 0px rgba(0, 0, 0, 0.08),
+    0px 4px 8px 0px rgba(0, 0, 0, 0.08);
+}
+
+/* borders-focus — focus ring (white gap + blue ring) */
+@utility shadow-borders-focus {
+  box-shadow:
+    0px 0px 0px 1px rgba(255, 255, 255, 1),
+    0px 0px 0px 3px rgba(59, 130, 246, 0.6);
+}
+
+/* borders-base — inputs/buttons resting border */
+@utility shadow-borders-base {
+  box-shadow:
+    0px 1px 2px 0px rgba(0, 0, 0, 0.12),
+    0px 0px 0px 1px rgba(0, 0, 0, 0.08);
+}
+
+/* borders-error — invalid inputs */
+@utility shadow-borders-error {
+  box-shadow:
+    0px 0px 0px 1px rgba(225, 29, 72, 1),
+    0px 0px 0px 3px rgba(225, 29, 72, 0.15);
+}
+
+/* switch — effects.ts details-switch-* (light mode) */
+@utility shadow-details-switch-background {
+  box-shadow:
+    0px 1px 1px 0px rgba(0, 0, 0, 0.04) inset,
+    0px 2px 4px 0px rgba(0, 0, 0, 0.04) inset,
+    0px 0px 0px 0.75px rgba(0, 0, 0, 0.06) inset,
+    0px 0px 8px 0px rgba(0, 0, 0, 0.02) inset,
+    0px 2px 4px 0px rgba(0, 0, 0, 0.04);
+}
+
+@utility shadow-details-switch-background-focus {
+  box-shadow:
+    0px 0px 0px 1px rgba(255, 255, 255, 1),
+    0px 0px 0px 3px rgba(59, 130, 246, 0.6),
+    0px 1px 1px 0px rgba(0, 0, 0, 0.04) inset,
+    0px 2px 4px 0px rgba(0, 0, 0, 0.04) inset,
+    0px 0px 0px 0.75px rgba(0, 0, 0, 0.06) inset,
+    0px 0px 8px 0px rgba(0, 0, 0, 0.02) inset,
+    0px 2px 4px 0px rgba(0, 0, 0, 0.04);
+}
+
+@utility shadow-details-switch-handle {
+  box-shadow:
+    0px 0px 2px 1px rgba(255, 255, 255, 1) inset,
+    0px 1px 0px 0px rgba(255, 255, 255, 1) inset,
+    0px 0px 0px 0.5px rgba(0, 0, 0, 0.02),
+    0px 5px 4px 0px rgba(0, 0, 0, 0.02),
+    0px 3px 3px 0px rgba(0, 0, 0, 0.04),
+    0px 1px 2px 0px rgba(0, 0, 0, 0.12),
+    0px 0px 1px 0px rgba(0, 0, 0, 0.08);
+}
+
+@utility bg-switch-off-hover-gradient {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+@utility bg-switch-on-gradient {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+/* borders-interactive-with-active — inputs focus ring (blue-600) */
+@utility shadow-borders-interactive-with-active {
+  box-shadow:
+    0px 0px 0px 4px rgba(37, 99, 235, 0.2),
+    0px 0px 0px 1px rgba(37, 99, 235, 1);
+}
+
+/* typography — typography.ts */
+@utility txt-compact-small-plus {
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 500;
+}
+
+@utility txt-compact-xsmall {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+}
+
+@utility txt-compact-xsmall-plus {
+  font-size: 12px;
+  line-height: 20px;
+  font-weight: 500;
+}
+
+@utility txt-small {
+  font-size: 13px;
+  line-height: 20.8px;
+  font-weight: 400;
+}
+
+@utility txt-compact-small {
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 400;
+}
+
+@utility txt-compact-medium-plus {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+}
+
+@utility txt-compact-large-plus {
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 500;
+}
+
+@utility txt-medium-plus {
+  font-size: 14px;
+  line-height: 22.4px;
+  font-weight: 500;
+}
+
+/* headings — typography.ts h*-core */
+@utility h1-core {
+  font-size: 18px;
+  line-height: 28px;
+  font-weight: 500;
+}
+
+@utility h2-core {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+}
+
+@utility h3-core {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+}
+
+/* buttons — effects.ts buttons-* (light mode) */
+@utility shadow-buttons-inverted {
+  box-shadow:
+    0px 0.75px 0px 0px rgba(255, 255, 255, 0.2) inset,
+    0px 1px 2px 0px rgba(0, 0, 0, 0.4),
+    0px 0px 0px 1px rgba(24, 24, 27, 1);
+}
+
+@utility shadow-buttons-inverted-focus {
+  box-shadow:
+    0px 0.75px 0px 0px rgba(255, 255, 255, 0.2) inset,
+    0px 1px 2px 0px rgba(0, 0, 0, 0.4),
+    0px 0px 0px 1px rgba(24, 24, 27, 1),
+    0px 0px 0px 2px rgba(255, 255, 255, 1),
+    0px 0px 0px 4px rgba(59, 130, 246, 0.6);
+}
+
+@utility shadow-buttons-neutral {
+  box-shadow:
+    0px 1px 2px 0px rgba(0, 0, 0, 0.12),
+    0px 0px 0px 1px rgba(0, 0, 0, 0.08);
+}
+
+@utility shadow-buttons-neutral-focus {
+  box-shadow:
+    0px 1px 2px 0px rgba(0, 0, 0, 0.12),
+    0px 0px 0px 1px rgba(0, 0, 0, 0.08),
+    0px 0px 0px 2px rgba(255, 255, 255, 1),
+    0px 0px 0px 4px rgba(59, 130, 246, 0.6);
+}
+
+@utility shadow-buttons-danger {
+  box-shadow:
+    0px 0.75px 0px 0px rgba(255, 255, 255, 0.2) inset,
+    0px 1px 2px 0px rgba(190, 18, 60, 0.4),
+    0px 0px 0px 1px rgba(190, 18, 60, 1);
+}
+
+@utility shadow-buttons-danger-focus {
+  box-shadow:
+    0px 0.75px 0px 0px rgba(255, 255, 255, 0.2) inset,
+    0px 1px 2px 0px rgba(190, 18, 60, 0.4),
+    0px 0px 0px 1px rgba(190, 18, 60, 1),
+    0px 0px 0px 2px rgba(255, 255, 255, 1),
+    0px 0px 0px 4px rgba(59, 130, 246, 0.6);
+}
+
+/* buttons — micro top-sheen overlay (after: element) */
+@utility button-inverted-gradient {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+@utility button-inverted-hover-gradient {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+@utility button-inverted-pressed-gradient {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+@utility button-neutral-gradient {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+@utility button-neutral-hover-gradient {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+@utility button-neutral-pressed-gradient {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+@utility button-danger-gradient {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+@utility button-danger-hover-gradient {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+@utility button-danger-pressed-gradient {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+/* progress-bar.tsx — top route-change bar (0% -> 90% linear 2s, 0.2s delay) */
+@keyframes medusa-progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 90%;
+  }
+}
+
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still

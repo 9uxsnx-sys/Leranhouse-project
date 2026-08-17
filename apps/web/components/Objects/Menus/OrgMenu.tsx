@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import CopilotBubble from '@components/Copilot/CopilotBubble'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -17,9 +17,11 @@ import {
   BarsThree,
   Book,
   ChatBubble,
+  BellAlert,
+  BellAlertDone,
   GlobeEurope,
-  GridLayout,
   QuestionMark,
+  SidebarLeft,
   TriangleRightMini,
   XMark,
 } from '@components/Objects/Icons/MedusaIcons'
@@ -34,8 +36,6 @@ import {
 } from '@components/ui/dropdown-menu'
 import { IconButton } from '@components/ui/icon-button'
 import { FeedbackModal } from '@components/Objects/Modals/FeedbackModal'
-import { DASHBOARD_MENU_ITEMS, DashboardMenuItem } from '@/lib/dashboard-menu-items'
-import { isFeatureAvailable } from '@services/plans/plans'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import { useJoinBannerVisible, JOIN_BANNER_HEIGHT } from '@components/Objects/Banners/OrgJoinBanner'
 import { usePlan } from '@components/Hooks/usePlan'
@@ -49,11 +49,40 @@ import {
 
 /**
  * LearnHouse port of the Medusa v2.18.0 shell (shell.tsx + main-layout.tsx):
- * grey #fafafa canvas, white nav chip on the active item, 220px sidebar,
- * slim topbar with breadcrumb, white content blocks.
+ * h-screen overflow-hidden, grey #fafafa canvas, 220px sidebar, slim grid topbar
+ * with breadcrumb + notifications, centered max-w-[1600px] gutter with 12px padding.
  */
 
-// Medusa shell.tsx: Breadcrumbs — muted 13px medium, TriangleRightMini separators
+// shell.tsx NavigationBar + progress-bar.tsx — top route-change bar
+const ProgressBar = () => (
+  <div
+    className="bg-ui-fg-subtle size-full"
+    style={{ animation: 'medusa-progress 2s linear 0.2s forwards' }}
+  />
+)
+
+const NavigationBar = () => {
+  const pathname = usePathname()
+  const prevPath = useRef(pathname)
+  const [show, setShow] = useState(false)
+
+  useEffect(() => {
+    if (prevPath.current !== pathname) {
+      prevPath.current = pathname
+      setShow(true)
+      const timeout = setTimeout(() => setShow(false), 2400)
+      return () => clearTimeout(timeout)
+    }
+  }, [pathname])
+
+  return (
+    <div className="fixed inset-x-0 top-0 z-50 h-1">
+      {show ? <ProgressBar /> : null}
+    </div>
+  )
+}
+
+// shell.tsx Breadcrumbs — muted 13px medium, TriangleRightMini separators, mobile `...`
 const BreadcrumbNav = ({ orgslug }: { orgslug: string }) => {
   const pathname = usePathname()
   const { t } = useTranslation()
@@ -87,8 +116,10 @@ const BreadcrumbNav = ({ orgslug }: { orgslug: string }) => {
     crumbs.push({ label })
   }
 
+  const isSingle = crumbs.length === 1
+
   return (
-    <ol className="flex min-w-0 select-none items-center">
+    <ol className="text-ui-fg-muted txt-compact-small-plus flex select-none items-center">
       {crumbs.map((crumb, index) => {
         const isLast = index === crumbs.length - 1
         return (
@@ -96,24 +127,101 @@ const BreadcrumbNav = ({ orgslug }: { orgslug: string }) => {
             {!isLast && crumb.href ? (
               <Link
                 href={crumb.href}
-                className="truncate text-[13px] font-medium text-gray-500 transition-colors hover:text-gray-900"
+                className="transition-fg hover:text-ui-fg-subtle"
               >
                 {crumb.label}
               </Link>
             ) : (
-              <span className="truncate text-[13px] font-medium text-gray-500">
-                {crumb.label}
-              </span>
+              <div>
+                {!isSingle && <span className="block lg:hidden">...</span>}
+                <span className={isSingle ? '' : 'hidden lg:block'}>
+                  {crumb.label}
+                </span>
+              </div>
             )}
             {!isLast && (
               <span className="mx-2">
-                <TriangleRightMini className="h-3.5 w-3.5 text-gray-300 rtl:rotate-180" />
+                <TriangleRightMini className="rtl:rotate-180" />
               </span>
             )}
           </li>
         )
       })}
     </ol>
+  )
+}
+
+// shell.tsx ToggleSidebar — desktop collapses the sidebar, mobile opens the drawer
+const ToggleSidebar = ({
+  isMenuOpen,
+  onMobileToggle,
+  onDesktopToggle,
+}: {
+  isMenuOpen: boolean
+  onMobileToggle: () => void
+  onDesktopToggle: () => void
+}) => {
+  return (
+    <div>
+      <IconButton
+        className="hidden lg:flex"
+        variant="transparent"
+        size="small"
+        aria-label="Toggle sidebar"
+        onClick={onDesktopToggle}
+      >
+        <SidebarLeft className="text-ui-fg-muted rtl:rotate-180" />
+      </IconButton>
+      <IconButton
+        className="hidden max-lg:flex"
+        variant="transparent"
+        size="small"
+        aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+        onClick={onMobileToggle}
+      >
+        <BarsThree className="text-ui-fg-muted" />
+      </IconButton>
+    </div>
+  )
+}
+
+// notifications.tsx — bell trigger (no feed yet; unread state kept for when one lands)
+const LAST_READ_NOTIFICATION_KEY = 'notificationsLastReadAt'
+
+function NotificationsBell() {
+  const { t } = useTranslation()
+  const [hasUnread, setHasUnread] = useState(false)
+
+  useEffect(() => {
+    const lastRead = localStorage.getItem(LAST_READ_NOTIFICATION_KEY)
+    const lastReadTs = lastRead ? Date.parse(lastRead) : 0
+    setHasUnread(Date.now() > lastReadTs && !!lastRead)
+  }, [])
+
+  const handleOnOpen = () => {
+    setHasUnread(false)
+    localStorage.setItem(LAST_READ_NOTIFICATION_KEY, new Date().toISOString())
+  }
+
+  return (
+    <TooltipProvider delayDuration={0}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <IconButton
+            variant="transparent"
+            size="small"
+            className="text-ui-fg-muted hover:text-ui-fg-subtle"
+            aria-label={t('common.notifications', 'Notifications')}
+            onClick={handleOnOpen}
+          >
+            {hasUnread ? <BellAlertDone /> : <BellAlert />}
+          </IconButton>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" className="text-xs">
+          {t('common.notifications', 'Notifications')}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   )
 }
 
@@ -161,6 +269,7 @@ export const OrgMenu = ({
   const session = useLHSession() as any;
   const org = useOrg() as any;
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [isFocusMode, setIsFocusMode] = useState(false)
   const pathname = usePathname()
   const { t } = useTranslation()
@@ -195,11 +304,6 @@ export const OrgMenu = ({
 
   // Filter dashboard menu items by resolved_features from API
   const rf = config?.resolved_features
-  const visibleDashboardItems = DASHBOARD_MENU_ITEMS.filter((item: DashboardMenuItem) => {
-    if (!item.featureKey) return true
-    if (rf?.[item.featureKey]) return rf[item.featureKey].enabled
-    return isFeatureAvailable(item.featureKey)
-  })
 
   useEffect(() => {
     // Only check focus mode if we're in an activity page
@@ -246,45 +350,46 @@ export const OrgMenu = ({
     return <>{children}</>
   }
 
+  const shellHeight = topOffset ? `calc(100vh - ${topOffset}px)` : undefined
+
   return (
     <>
+      <NavigationBar />
       <div
-        className="relative flex min-h-screen w-full flex-col items-start lg:flex-row"
-        style={{ ['--brand' as string]: primaryColor || '#6366f1' }}
+        className="relative flex h-screen w-full flex-col items-start overflow-hidden lg:flex-row"
+        style={{
+          ...(shellHeight ? { height: shellHeight } : {}),
+          ['--brand' as string]: primaryColor || '#6366f1',
+        }}
       >
-        {/* Desktop sidebar — Medusa DesktopSidebarContainer (w-[220px] border-e) */}
+        {/* Desktop sidebar — shell.tsx DesktopSidebarContainer (h-screen w-[220px] border-e) */}
         <aside
-          className="bg-canvas hidden lg:flex sticky top-0 h-screen w-[220px] shrink-0 flex-col border-e border-border"
-          style={{ top: topOffset, height: topOffset ? `calc(100vh - ${topOffset}px)` : undefined }}
+          className={`hidden h-full w-[220px] shrink-0 flex-col border-e border-ui-border-base ${sidebarCollapsed ? 'lg:hidden' : 'lg:flex'}`}
         >
           <MedusaSidebarContent orgslug={orgslug} />
         </aside>
 
-        {/* Right column */}
-        <div className="flex w-full min-w-0 flex-1 flex-col">
-          {/* Topbar — Medusa shell.tsx Topbar (grid-cols-2 border-b p-3) */}
-          <header
-            className="sticky top-0 z-40 grid w-full grid-cols-2 items-center gap-x-2 border-b border-border bg-white px-4 py-3"
-            style={{ top: topOffset }}
-          >
-            <div className="flex min-w-0 items-center gap-x-1.5">
-              <div className="lg:hidden">
-                <IconButton
-                  variant="transparent"
-                  size="small"
-                  aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-                  onClick={toggleMenu}
-                >
-                  {isMenuOpen ? <XMark /> : <BarsThree />}
-                </IconButton>
-              </div>
+        {/* Right column — shell.tsx (flex h-screen w-full flex-col overflow-auto) */}
+        <div className="flex h-full w-full flex-col overflow-auto">
+          {/* Topbar — shell.tsx Topbar (grid w-full grid-cols-2 border-b p-3, canvas shows through) */}
+          <header className="grid w-full grid-cols-2 border-b p-3">
+            <div className="flex items-center gap-x-1.5">
+              <ToggleSidebar
+                isMenuOpen={isMenuOpen}
+                onMobileToggle={toggleMenu}
+                onDesktopToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+              />
               <BreadcrumbNav orgslug={orgslug} />
             </div>
 
-            <div className="flex items-center justify-end gap-x-1">
-              <div className="mr-2 hidden w-56 md:block">
-                <SearchBar orgslug={orgslug} className="w-full" />
+            <div className="flex items-center justify-end gap-x-3">
+              {/* Search bar — desktop only (mobile has it in the drawer) */}
+              <div className="hidden md:flex">
+                <SearchBar orgslug={orgslug} />
               </div>
+
+              {/* Notifications bell */}
+              <NotificationsBell />
 
               {/* AI Copilot */}
               {rf?.ai?.enabled && config?.admin_toggles?.ai?.copilot_enabled !== false && (
@@ -301,50 +406,6 @@ export const OrgMenu = ({
                 </AuthenticatedClientElement>
               )}
 
-              {/* Dashboard Dropdown - Only visible to admins */}
-              {session?.status === 'authenticated' && rights?.dashboard?.action_access && (
-                <div className="hidden md:flex">
-                  <DropdownMenu>
-                    <TooltipProvider delayDuration={0}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <DropdownMenuTrigger asChild>
-                            <IconButton
-                              variant="transparent"
-                              size="small"
-                              aria-label={t('common.dashboard')}
-                            >
-                              <GridLayout />
-                            </IconButton>
-                          </DropdownMenuTrigger>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom" className="text-xs">
-                          {t('common.dashboard')}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    <DropdownMenuContent align="end" className="w-56">
-                      <DropdownMenuLabel className="flex items-center gap-2">
-                        <GridLayout className="h-4 w-4" />
-                        <span>{t('common.dashboard')}</span>
-                      </DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      {visibleDashboardItems.map((item) => {
-                        const IconComponent = item.icon
-                        return (
-                          <DropdownMenuItem key={item.id} asChild>
-                            <Link href={item.href} className="flex items-center gap-2">
-                              <IconComponent size={16} weight="fill" />
-                              <span>{t(item.labelKey)}</span>
-                            </Link>
-                          </DropdownMenuItem>
-                        )
-                      })}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              )}
-
               {/* Help Dropdown - Only visible to admins/maintainers/instructors */}
               {session?.status === 'authenticated' && rights?.dashboard?.action_access && (
                 <div className="hidden md:flex">
@@ -356,6 +417,7 @@ export const OrgMenu = ({
                             <IconButton
                               variant="transparent"
                               size="small"
+                              className="text-ui-fg-muted hover:text-ui-fg-subtle"
                               aria-label={t('common.help')}
                             >
                               <QuestionMark />
@@ -421,35 +483,50 @@ export const OrgMenu = ({
             </div>
           </header>
 
-          {/* Content */}
-          <div className="flex-1 relative" style={{ zIndex: 'var(--z-content)' }}>
-            {children}
-          </div>
-
-          {/* Footer + watermark */}
-          {!isFullBleedPage && <OrgFooter />}
-          {!isFullBleedPage && <Watermark />}
+          {/* Content — shell.tsx main + Gutter (max-w-[1600px] p-3 gap-y-2) */}
+          <main className="flex h-full w-full flex-col items-center overflow-y-auto">
+            <div className="flex w-full max-w-[1600px] flex-col gap-y-2 p-3">
+              <div className="flex-1 relative" style={{ zIndex: 'var(--z-content)' }}>
+                {children}
+              </div>
+              {!isFullBleedPage && <OrgFooter />}
+              {!isFullBleedPage && <Watermark />}
+            </div>
+          </main>
         </div>
       </div>
 
-      {/* Mobile drawer — Medusa MobileSidebarContainer */}
+      {/* Mobile drawer — shell.tsx MobileSidebarContainer */}
       <div
         className={`fixed inset-0 z-50 lg:hidden ${isMenuOpen ? '' : 'pointer-events-none'}`}
         style={{ zIndex: 'var(--z-nav-menu)' }}
       >
         <div
-          className={`absolute inset-0 bg-black/40 transition-opacity duration-200 ${
+          className={`bg-ui-bg-overlay absolute inset-0 transition-opacity duration-200 ${
             isMenuOpen ? 'opacity-100' : 'opacity-0'
           }`}
           onClick={() => setIsMenuOpen(false)}
         />
         <div
-          className={`bg-canvas absolute inset-y-0 left-0 flex w-[280px] max-w-[85vw] flex-col shadow-2xl transition-transform duration-200 ${
+          className={`bg-ui-bg-subtle shadow-elevation-modal fixed inset-y-2 start-2 flex w-full max-w-[304px] flex-col overflow-hidden rounded-lg border-r transition-transform duration-200 ${
             isMenuOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
-          style={{ top: topOffset }}
         >
-          <div className="p-3 pb-0">
+          <div className="p-3">
+            <div className="flex items-center">
+              <IconButton
+                size="small"
+                variant="transparent"
+                className="text-ui-fg-subtle"
+                onClick={() => setIsMenuOpen(false)}
+                aria-label="Close menu"
+              >
+                <XMark />
+              </IconButton>
+              <h2 className="sr-only">{t('app.nav.accessibility.title', 'Navigation')}</h2>
+            </div>
+          </div>
+          <div className="px-3 pb-1">
             <SearchBar orgslug={orgslug} isMobile={true} />
           </div>
           <MedusaSidebarContent orgslug={orgslug} />
@@ -512,7 +589,7 @@ const CopilotMenuButton = ({
                 variant="transparent"
                 size="small"
                 aria-label="Copilot"
-                className="relative"
+                className="relative text-ui-fg-muted hover:text-ui-fg-subtle"
               >
                 <ChatBubble />
                 {/* Active indicator dot */}
@@ -544,13 +621,13 @@ const CopilotMenuButton = ({
                   onSelect={() => onOpenBubble(s.aichat_uuid)}
                   className="flex items-center gap-2 cursor-pointer"
                 >
-                  <ChatBubble className="h-3.5 w-3.5 shrink-0 text-gray-400" />
+                  <ChatBubble className="h-3.5 w-3.5 shrink-0 text-ui-fg-muted" />
                   <span className="truncate text-[13px]">{s.title || 'Untitled'}</span>
                 </DropdownMenuItem>
               ) : (
                 <DropdownMenuItem key={s.aichat_uuid} asChild>
                   <Link href={getUriWithOrg(orgslug, `/copilot?chat=${s.aichat_uuid}`)} className="flex items-center gap-2">
-                    <ChatBubble className="h-3.5 w-3.5 shrink-0 text-gray-400" />
+                    <ChatBubble className="h-3.5 w-3.5 shrink-0 text-ui-fg-muted" />
                     <span className="truncate text-[13px]">{s.title || 'Untitled'}</span>
                   </Link>
                 </DropdownMenuItem>
@@ -560,7 +637,7 @@ const CopilotMenuButton = ({
           </>
         ) : (
           <div className="px-2 py-3 text-center">
-            <p className="text-xs text-gray-400">No conversations yet</p>
+            <p className="text-xs text-ui-fg-muted">No conversations yet</p>
           </div>
         )}
 
@@ -587,14 +664,14 @@ const CopilotMenuButton = ({
         {/* Bubble mode toggle */}
         <button
           onClick={() => onToggleBubbleMode(!isBubbleMode)}
-          className="w-full flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-gray-100 transition-colors group"
+          className="w-full flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-ui-bg-subtle-hover transition-fg group"
         >
-          <span className="text-[13px] text-gray-600 group-hover:text-gray-900 transition-colors">
+          <span className="text-[13px] text-ui-fg-subtle group-hover:text-ui-fg-base transition-fg">
             Open in bubble
           </span>
           <span
             className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors flex-shrink-0 ${
-              isBubbleMode ? 'bg-primary' : 'bg-gray-200'
+              isBubbleMode ? 'bg-primary' : 'bg-ui-bg-disabled'
             }`}
           >
             <span

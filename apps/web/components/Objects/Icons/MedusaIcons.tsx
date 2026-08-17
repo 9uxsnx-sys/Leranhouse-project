@@ -64,6 +64,18 @@ export const ChevronDownMini = React.forwardRef<SVGSVGElement, MedusaIconProps>(
 )
 ChevronDownMini.displayName = "ChevronDownMini"
 
+export const TrianglesMini = React.forwardRef<SVGSVGElement, MedusaIconProps>(
+  ({ color = "currentColor", ...props }, ref) => (
+    <svg {...base} ref={ref} {...props}>
+      <path
+        fill={color}
+        d="M4.91 5.75c-.163 0-.323-.037-.464-.108a.85.85 0 0 1-.334-.293A.7.7 0 0 1 4 4.952a.7.7 0 0 1 .142-.39l2.59-3.454c.082-.11.195-.2.33-.263a1.04 1.04 0 0 1 .876 0 .9.9 0 0 1 .33.263l2.59 3.455a.7.7 0 0 1 .141.39.7.7 0 0 1-.111.396.85.85 0 0 1-.335.293c-.14.07-.3.108-.464.108zM10.09 9.25c.163 0 .323.037.463.108.14.07.256.172.335.293a.7.7 0 0 1 .111.397.7.7 0 0 1-.141.39l-2.59 3.454a.9.9 0 0 1-.33.263 1.04 1.04 0 0 1-.876 0 .9.9 0 0 1-.33-.263l-2.59-3.455a.7.7 0 0 1-.142-.39.7.7 0 0 1 .112-.396.85.85 0 0 1 .335-.293c.14-.07.3-.108.463-.108z"
+      />
+    </svg>
+  )
+)
+TrianglesMini.displayName = "TrianglesMini"
+
 export const XMark = React.forwardRef<SVGSVGElement, MedusaIconProps>(
   ({ color = "currentColor", ...props }, ref) => (
     <svg {...base} ref={ref} {...props}>
@@ -575,3 +587,49 @@ export const PlaySolid = React.forwardRef<SVGSVGElement, MedusaIconProps>(
   )
 )
 PlaySolid.displayName = "PlaySolid"
+
+export const SidebarLeft = React.forwardRef<SVGSVGElement, MedusaIconProps>(
+  ({ color = "currentColor", ...props }, ref) => (
+    <svg {...base} ref={ref} {...props}>
+      <g stroke={color} strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}>
+        <path d="M12.167 1.75H2.833c-.982 0-1.777.824-1.777 1.84v7.82c0 1.016.795 1.84 1.777 1.84h9.334c.982 0 1.777-.824 1.777-1.84V3.59c0-1.016-.796-1.84-1.777-1.84M3.9 4.5v6" />
+      </g>
+    </svg>
+  )
+)
+SidebarLeft.displayName = "SidebarLeft"
+
+export const BellAlert = React.forwardRef<SVGSVGElement, MedusaIconProps>(
+  ({ color = "currentColor", ...props }, ref) => (
+    <svg {...base} ref={ref} {...props}>
+      <path
+        fill={color}
+        fillRule="evenodd"
+        d="M7.5.347A4.973 4.973 0 0 0 2.528 5.32v4.222c0 .568-.46 1.027-1.028 1.027a.75.75 0 0 0 0 1.5h12a.75.75 0 0 0 0-1.5c-.568 0-1.028-.46-1.028-1.027V5.32A4.973 4.973 0 0 0 7.5.347m3.472 9.195c0 .366.078.713.218 1.027H3.81a2.5 2.5 0 0 0 .218-1.027V5.32a3.473 3.473 0 0 1 6.944 0zm-2.405 3.333a.444.444 0 0 1 .435.536c-.154.73-.771 1.242-1.501 1.242S6.153 14.142 6 13.41a.445.445 0 0 1 .434-.536z"
+        clipRule="evenodd"
+      />
+    </svg>
+  )
+)
+BellAlert.displayName = "BellAlert"
+
+export const BellAlertDone = React.forwardRef<SVGSVGElement, MedusaIconProps>(
+  ({ color = "currentColor", ...props }, ref) => (
+    <svg {...base} ref={ref} {...props}>
+      <circle cx={12.5} cy={2.5} r={2.5} fill="#2563EB" />
+      <circle
+        cx={12.5}
+        cy={2.5}
+        r={2.25}
+        stroke={color}
+        strokeOpacity={0.24}
+        strokeWidth={0.5}
+      />
+      <path
+        fill={color}
+        d="M8.993.575A4.973 4.973 0 0 0 2.528 5.32v4.223c0 .568-.46 1.028-1.028 1.028a.75.75 0 0 0 0 1.5h12a.75.75 0 0 0 0-1.5c-.568 0-1.028-.46-1.028-1.028V6.5a4 4 0 0 1-1.5-.302v3.344c0 .366.078.714.218 1.028H3.81a2.5 2.5 0 0 0 .218-1.028V5.32A3.473 3.473 0 0 1 8.53 2.003c.063-.512.223-.994.462-1.428M8.912 13.04a.44.44 0 0 0-.345-.165H6.434a.444.444 0 0 0-.434.536c.153.73.771 1.242 1.5 1.242.73 0 1.348-.511 1.502-1.242a.45.45 0 0 0-.09-.372"
+      />
+    </svg>
+  )
+)
+BellAlertDone.displayName = "BellAlertDone"
