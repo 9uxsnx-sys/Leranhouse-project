@@ -476,9 +476,7 @@ function CoursesHome(params: CourseProps) {
                 dialogTitle={getNewCourseModalTitle()}
                 dialogDescription={getNewCourseModalDescription()}
                 dialogTrigger={
-                  <button disabled={courseLimitReached}>
-                    <NewCourseButton disabled={courseLimitReached} />
-                  </button>
+                  <NewCourseButton disabled={courseLimitReached} />
                 }
               />
               <AICourseCreationModal
@@ -680,9 +678,7 @@ function CoursesHome(params: CourseProps) {
                     checkMethod="roles"
                     orgId={params.org_id}
                   >
-                    <button onClick={() => setNewCourseModal(true)}>
-                      <NewCourseButton />
-                    </button>
+                    <NewCourseButton onClick={() => setNewCourseModal(true)} />
                   </AuthenticatedClientElement>
                 </div>
               )}

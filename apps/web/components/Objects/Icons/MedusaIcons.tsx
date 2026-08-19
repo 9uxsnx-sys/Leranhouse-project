@@ -633,3 +633,80 @@ export const BellAlertDone = React.forwardRef<SVGSVGElement, MedusaIconProps>(
   )
 )
 BellAlertDone.displayName = "BellAlertDone"
+
+export const InformationCircleSolid = React.forwardRef<
+  SVGSVGElement,
+  MedusaIconProps
+>(({ color = "currentColor", ...props }, ref) => (
+  <svg {...base} ref={ref} {...props}>
+    <path
+      fill={color}
+      d="M7.5.389A7.12 7.12 0 0 0 .389 7.5 7.12 7.12 0 0 0 7.5 14.611 7.12 7.12 0 0 0 14.611 7.5c0-3.921-3.19-7.111-7.111-7.111m.667 10.444a.667.667 0 0 1-1.334 0V7.944H6.39a.667.667 0 0 1 0-1.333h.667c.612 0 1.11.498 1.11 1.111zM7.5 5.5a.89.89 0 0 1 0-1.778.89.89 0 0 1 0 1.778"
+    />
+  </svg>
+))
+InformationCircleSolid.displayName = "InformationCircleSolid"
+
+export const ExclamationCircleSolid = React.forwardRef<
+  SVGSVGElement,
+  MedusaIconProps
+>(({ color = "currentColor", ...props }, ref) => (
+  <svg {...base} ref={ref} {...props}>
+    <path
+      fill={color}
+      d="M7.5.389C3.58.389.389 3.579.389 7.5s3.19 7.111 7.111 7.111 7.111-3.19 7.111-7.111S11.421.389 7.5.389m-.667 3.939a.667.667 0 0 1 1.334 0v3.679a.667.667 0 0 1-1.334 0zm.667 7.098a.89.89 0 0 1 0-1.778.89.89 0 0 1 0 1.778"
+    />
+  </svg>
+))
+ExclamationCircleSolid.displayName = "ExclamationCircleSolid"
+
+export const DotsSix = React.forwardRef<SVGSVGElement, MedusaIconProps>(
+  ({ color = "currentColor", ...props }, ref) => (
+    <svg {...base} ref={ref} {...props}>
+      <path
+        fill={color}
+        fillRule="evenodd"
+        d="M4.306 7.5a1.194 1.194 0 1 1 2.389 0 1.194 1.194 0 0 1-2.39 0M4.306 2.833a1.194 1.194 0 1 1 2.389 0 1.194 1.194 0 0 1-2.39 0M4.306 12.167a1.194 1.194 0 1 1 2.389 0 1.194 1.194 0 0 1-2.39 0M8.306 7.5a1.194 1.194 0 1 1 2.389 0 1.194 1.194 0 0 1-2.39 0M8.306 2.833a1.194 1.194 0 1 1 2.389 0 1.194 1.194 0 0 1-2.39 0M8.306 12.167a1.194 1.194 0 1 1 2.389 0 1.194 1.194 0 0 1-2.39 0"
+        clipRule="evenodd"
+      />
+    </svg>
+  )
+)
+DotsSix.displayName = "DotsSix"
+
+export const ThumbnailBadge = React.forwardRef<SVGSVGElement, MedusaIconProps>(
+  ({ color = "currentColor", ...props }, ref) => (
+    <svg {...base} ref={ref} {...props}>
+      <circle cx={7.5} cy={7.5} r={7.5} fill="#2563EB" />
+      <circle cx={7.5} cy={7.5} r={7.5} fill="url(#a)" fillOpacity={0.2} />
+      <circle
+        cx={7.5}
+        cy={7.5}
+        r={7.25}
+        stroke={color}
+        strokeOpacity={0.24}
+        strokeWidth={0.5}
+      />
+      <g fill="#fff" clipPath="url(#b)">
+        <path d="M3.75 9.892a.696.696 0 0 1-.694-.694V5.802a.696.696 0 0 1 .914-.659l.467.156a.417.417 0 0 1-.264.79l-.285-.094v3.01l.285-.095a.416.416 0 1 1 .264.791l-.467.156a.7.7 0 0 1-.22.036M5.972 10.972a.695.695 0 0 1-.694-.694V4.722a.693.693 0 0 1 .961-.64l.45.186a.417.417 0 0 1-.321.77l-.256-.107v5.139l.256-.107a.417.417 0 0 1 .32.77l-.449.186a.7.7 0 0 1-.267.053M11.38 4.473 8.485 3.137a.694.694 0 0 0-.986.63v7.466a.69.69 0 0 0 .694.695.7.7 0 0 0 .292-.065l2.893-1.335a.98.98 0 0 0 .565-.883v-4.29a.98.98 0 0 0-.565-.882" />
+      </g>
+      <defs>
+        <linearGradient
+          id="a"
+          x1={7.5}
+          x2={7.5}
+          y1={0}
+          y2={15}
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#fff" />
+          <stop offset={1} stopColor="#fff" stopOpacity={0} />
+        </linearGradient>
+        <clipPath id="b">
+          <path fill="#fff" d="M2.5 2.5h10v10h-10z" />
+        </clipPath>
+      </defs>
+    </svg>
+  )
+)
+ThumbnailBadge.displayName = "ThumbnailBadge"

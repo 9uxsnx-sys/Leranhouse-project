@@ -62,19 +62,19 @@ const FormTagInput = ({
 					placeholder={placeholder}
 					styleClasses={{
 						inlineTagsContainer:
-							'border-input rounded-lg bg-background shadow-2xs transition-shadow focus-within:border-ring/40 focus-within:outline-hidden focus-within:ring-[3px] ring-ring/8 dark:ring-ring/12 p-1 gap-1',
+							'bg-ui-bg-field hover:bg-ui-bg-field-hover shadow-borders-base focus-within:shadow-borders-interactive-with-active transition-fg p-1 gap-1 rounded-md',
 						input:
-							'w-full min-w-[80px] focus-visible:outline-hidden shadow-none px-2 h-7',
+							'w-full min-w-[80px] focus-visible:outline-hidden shadow-none px-2 h-7 txt-compact-small text-ui-fg-base',
 						tag: {
-							body: 'h-7 relative bg-background border border-input hover:bg-background rounded-md font-medium text-xs ps-2 pe-7',
+							body: 'h-7 bg-ui-bg-component shadow-borders-base rounded-md txt-compact-small-plus text-ui-fg-subtle ps-2 pe-7',
 							closeButton:
-								'absolute -inset-y-px -end-px p-0 rounded-e-lg flex size-7 transition-colors outline-hidden focus-visible:ring-2 focus-visible:ring-ring/30 dark:focus-visible:ring-ring/40 text-muted-foreground/80 hover:text-foreground',
+								'text-ui-fg-muted hover:text-ui-fg-subtle transition-fg absolute -inset-y-px -end-px p-0 flex size-7 items-center justify-center rounded-e-md outline-hidden hover:bg-ui-bg-component-hover',
 						},
 					}}
 					activeTagIndex={activeTagIndex}
 					setActiveTagIndex={setActiveTagIndex}
 				/>
-				{error && <p className="text-sm font-medium text-destructive">{error}</p>}
+				{error && <p className="txt-small text-ui-fg-error">{error}</p>}
 			</div>
 		</div>
   )

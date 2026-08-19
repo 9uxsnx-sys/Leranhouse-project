@@ -2,39 +2,30 @@
 import { Input } from "@components/ui/input"
 import { Textarea } from "@components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select"
-import FormLayout, {
-  FormField,
-  FormLabelAndMessage,
-} from '@components/Objects/StyledElements/Form/Form'
-import * as Form from '@radix-ui/react-form'
+import { Button } from "@components/ui/button"
+import { IconButton } from "@components/ui/icon-button"
+import { Form } from "@components/ui/form"
+import { FileUpload, FileType } from "@components/ui/file-upload"
 import { createNewCourse } from '@services/courses/courses'
 import { getOrganizationContextInfoWithoutCredentials } from '@services/organizations/orgs'
 import React, { useEffect } from 'react'
-import { BarLoader } from 'react-spinners'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { useRouter } from 'next/navigation'
 import { mutate } from 'swr'
-import { getAPIUrl } from '@services/config/config'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import toast from 'react-hot-toast'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
-import {  UploadCloud, Image as ImageIcon } from 'lucide-react'
 import UnsplashImagePicker from "@components/Dashboard/Pages/Course/EditCourseGeneral/UnsplashImagePicker"
 import FormTagInput from "@components/Objects/StyledElements/Form/TagInput"
+import { XMark } from "@components/Objects/Icons/MedusaIcons"
 import { useTranslation } from "react-i18next"
 
-const validationSchema = Yup.object().shape({
-  name: Yup.string()
-    .required('Course name is required')
-    .max(100, 'Must be 100 characters or less'),
-  description: Yup.string()
-    .max(1000, 'Must be 1000 characters or less'),
-  learnings: Yup.string(),
-  tags: Yup.string(),
-  visibility: Yup.boolean(),
-  thumbnail: Yup.mixed().nullable()
-})
+const formatFileSize = (bytes: number): string => {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
 
 function CreateCourseModal({ closeModal, orgslug }: any) {
   const { t } = useTranslation()
@@ -43,6 +34,7 @@ function CreateCourseModal({ closeModal, orgslug }: any) {
   const [orgId, setOrgId] = React.useState(null) as any
   const [showUnsplashPicker, setShowUnsplashPicker] = React.useState(false)
   const [isUploading, setIsUploading] = React.useState(false)
+  const [thumbnailFile, setThumbnailFile] = React.useState<FileType | null>(null)
 
   const validationSchema = Yup.object().shape({
     name: Yup.string()
@@ -125,11 +117,16 @@ function CreateCourseModal({ closeModal, orgslug }: any) {
     }
   }, [orgslug])
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      formik.setFieldValue('thumbnail', file)
+  const handleFileUploaded = (files: FileType[]) => {
+    if (files.length > 0) {
+      formik.setFieldValue('thumbnail', files[0].file)
+      setThumbnailFile(files[0])
     }
+  }
+
+  const handleRemoveThumbnail = () => {
+    formik.setFieldValue('thumbnail', null)
+    setThumbnailFile(null)
   }
 
   const handleUnsplashSelect = async (imageUrl: string) => {
@@ -139,6 +136,7 @@ function CreateCourseModal({ closeModal, orgslug }: any) {
       const blob = await response.blob()
       const file = new File([blob], 'unsplash_image.jpg', { type: 'image/jpeg' })
       formik.setFieldValue('thumbnail', file)
+      setThumbnailFile({ id: 'unsplash', url: imageUrl, file })
     } catch (error) {
       toast.error('Failed to load image from Unsplash')
     }
@@ -146,146 +144,147 @@ function CreateCourseModal({ closeModal, orgslug }: any) {
   }
 
   return (
-    <FormLayout onSubmit={formik.handleSubmit} >
-      <FormField name="name">
-        <FormLabelAndMessage
-          label={t('courses.course_name')}
-          message={formik.errors.name}
-        />
-        <Form.Control asChild>
-          <Input
-            onChange={formik.handleChange}
-            value={formik.values.name}
-            type="text"
-            required
-          />
-        </Form.Control>
-      </FormField>
+    <form onSubmit={formik.handleSubmit} className="flex flex-col">
+      <div className="flex flex-col">
+        {/* Section: General */}
+        <div className="border-ui-border-base flex flex-col gap-y-4 border-b px-6 py-5">
+          {/* Name */}
+          <Form.Item>
+            <Form.Label>{t('courses.course_name')}</Form.Label>
+            <Form.Control>
+              <Input
+                name="name"
+                onChange={formik.handleChange}
+                value={formik.values.name}
+                type="text"
+                aria-invalid={!!formik.errors.name && !!formik.touched.name}
+              />
+            </Form.Control>
+            <Form.ErrorMessage>{formik.touched.name && formik.errors.name}</Form.ErrorMessage>
+          </Form.Item>
 
-      <FormField name="description">
-        <FormLabelAndMessage
-          label={t('collections.description')}
-          message={formik.errors.description}
-        />
-        <Form.Control asChild>
-          <Textarea
-            onChange={formik.handleChange}
-            value={formik.values.description}
-            required
-          />
-        </Form.Control>
-      </FormField>
-
-      <FormField name="thumbnail">
-        <FormLabelAndMessage
-          label={t('courses.course_thumbnail')}
-          message={formik.errors.thumbnail}
-        />
-        <div className="w-auto bg-gray-50 rounded-xl outline outline-1 outline-gray-200 h-[200px] shadow-sm">
-          <div className="flex flex-col justify-center items-center h-full">
-            <div className="flex flex-col justify-center items-center">
-              {formik.values.thumbnail ? (
-                <img
-                  src={URL.createObjectURL(formik.values.thumbnail)}
-                  className={`${isUploading ? 'animate-pulse' : ''} shadow-sm w-[200px] h-[100px] rounded-md`}
-                />
-              ) : (
-                <img
-                  src="/empty_thumbnail.png"
-                  className="shadow-sm w-[200px] h-[100px] rounded-md bg-gray-200"
-                />
-              )}
-              <div className="flex justify-center items-center space-x-2">
-                <input
-                  type="file"
-                  id="fileInput"
-                  style={{ display: 'none' }}
-                  onChange={handleFileChange}
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                />
-                <button
-                  type="button"
-                  className="font-bold antialiased items-center text-gray text-sm rounded-md px-4 mt-6 flex"
-                  onClick={() => document.getElementById('fileInput')?.click()}
-                >
-                  <UploadCloud size={16} className="mr-2" />
-                  <span>{t('courses.upload_image')}</span>
-                </button>
-                <button
-                  type="button"
-                  className="font-bold antialiased items-center text-gray text-sm rounded-md px-4 mt-6 flex"
-                  onClick={() => setShowUnsplashPicker(true)}
-                >
-                  <ImageIcon size={16} className="mr-2" />
-                  <span>{t('courses.choose_from_gallery')}</span>
-                </button>
-              </div>
-            </div>
-          </div>
+          {/* Description */}
+          <Form.Item>
+            <Form.Label optional>{t('collections.description')}</Form.Label>
+            <Form.Control>
+              <Textarea
+                name="description"
+                onChange={formik.handleChange}
+                value={formik.values.description}
+                aria-invalid={!!formik.errors.description && !!formik.touched.description}
+              />
+            </Form.Control>
+            <Form.ErrorMessage>{formik.touched.description && formik.errors.description}</Form.ErrorMessage>
+          </Form.Item>
         </div>
-      </FormField>
 
-			<FormField name="learnings">
-				<FormLabelAndMessage
-					label={t('courses.course_learnings')}
-					message={formik.errors.learnings}
-				/>
-				<FormTagInput
-					placeholder={t('courses.enter_to_add')}
-					value={formik.values.learnings}
-					onChange={(value) => formik.setFieldValue('learnings', value)}
-					error={formik.errors.learnings}
-				/>
-			</FormField>
+        {/* Section: Media */}
+        <div className="border-ui-border-base flex flex-col gap-y-4 border-b px-6 py-5">
+          {/* Thumbnail */}
+          <Form.Item>
+            <Form.Label optional>{t('courses.course_thumbnail')}</Form.Label>
+            {!thumbnailFile ? (
+              <>
+                <FileUpload
+                  label={t('courses.upload_image')}
+                  hint={t('courses.thumbnail_recommended')}
+                  multiple={false}
+                  formats={['image/jpeg', 'image/png', 'image/webp', 'image/gif']}
+                  onUploaded={handleFileUploaded}
+                  hasError={!!formik.errors.thumbnail && !!formik.touched.thumbnail}
+                  className="p-6"
+                />
+                <Button
+                  variant="transparent"
+                  size="small"
+                  type="button"
+                  onClick={() => setShowUnsplashPicker(true)}
+                  className="mt-1 text-ui-fg-muted active:text-ui-fg-subtle"
+                >
+                  {t('courses.choose_from_gallery')}
+                </Button>
+              </>
+            ) : (
+              <div className="bg-ui-bg-component shadow-elevation-card-rest flex items-center justify-between rounded-lg px-3 py-2">
+                <div className="flex items-center gap-x-2">
+                  <div className="bg-ui-bg-base shadow-borders-base flex items-center justify-center overflow-hidden rounded-md">
+                    <img src={thumbnailFile.url} className="h-10 w-[30px] object-cover" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="txt-small-plus text-ui-fg-base">{thumbnailFile.file.name}</span>
+                    <span className="txt-small text-ui-fg-muted">{formatFileSize(thumbnailFile.file.size)}</span>
+                  </div>
+                </div>
+                <IconButton
+                  variant="transparent"
+                  size="small"
+                  type="button"
+                  onClick={handleRemoveThumbnail}
+                  className="text-ui-fg-muted hover:bg-ui-bg-subtle-hover active:text-ui-fg-subtle"
+                  aria-label="Remove thumbnail"
+                >
+                  <XMark />
+                </IconButton>
+              </div>
+            )}
+            <Form.ErrorMessage>{formik.touched.thumbnail && formik.errors.thumbnail}</Form.ErrorMessage>
+          </Form.Item>
+        </div>
 
-			<FormField name="tags">
-				<FormLabelAndMessage
-					label={t('courses.course_tags')}
-					message={formik.errors.tags}
-				/>
-				<FormTagInput
-					placeholder={t('courses.enter_to_add')}
-					value={formik.values.tags}
-					onChange={(value) => formik.setFieldValue('tags', value)}
-					error={formik.errors.tags}
-				/>
-			</FormField>
-
-      <FormField name="visibility">
-        <FormLabelAndMessage
-          label={t('courses.course_visibility')}
-          message={formik.errors.visibility}
-        />
-        <Select
-          value={formik.values.visibility.toString()}
-          onValueChange={(value) => formik.setFieldValue('visibility', value === 'true')}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder={t('courses.select_visibility')} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="true">{t('courses.public')} ({t('courses.public_desc')})</SelectItem>
-            <SelectItem value="false">{t('courses.private')} ({t('courses.private_desc')})</SelectItem>
-          </SelectContent>
-        </Select>
-      </FormField>
-
-      <div className="flex justify-end mt-6">
-        <button
-          type="submit"
-          disabled={formik.isSubmitting}
-          className="px-4 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-md"
-        >
-          {formik.isSubmitting ? (
-            <BarLoader
-              cssOverride={{ borderRadius: 60 }}
-              width={60}
-              color="#ffffff"
+        {/* Section: Organize */}
+        <div className="flex flex-col gap-y-4 px-6 py-5">
+          {/* Learnings */}
+          <Form.Item>
+            <Form.Label optional>{t('courses.course_learnings')}</Form.Label>
+            <FormTagInput
+              placeholder={t('courses.enter_to_add')}
+              value={formik.values.learnings}
+              onChange={(value) => formik.setFieldValue('learnings', value)}
+              error={formik.errors.learnings}
             />
-          ) : (
-            t('courses.create_course_btn')
-          )}
-        </button>
+            <Form.ErrorMessage>{formik.errors.learnings}</Form.ErrorMessage>
+          </Form.Item>
+
+          {/* Tags */}
+          <Form.Item>
+            <Form.Label optional>{t('courses.course_tags')}</Form.Label>
+            <FormTagInput
+              placeholder={t('courses.enter_to_add')}
+              value={formik.values.tags}
+              onChange={(value) => formik.setFieldValue('tags', value)}
+              error={formik.errors.tags}
+            />
+            <Form.ErrorMessage>{formik.errors.tags}</Form.ErrorMessage>
+          </Form.Item>
+
+          {/* Visibility */}
+          <Form.Item>
+            <Form.Label>{t('courses.course_visibility')}</Form.Label>
+            <Select
+              value={formik.values.visibility ? 'true' : 'false'}
+              onValueChange={(value) => formik.setFieldValue('visibility', value === 'true')}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={t('courses.select_visibility')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="true">{t('courses.public')}</SelectItem>
+                <SelectItem value="false">{t('courses.private')}</SelectItem>
+              </SelectContent>
+            </Select>
+            <Form.ErrorMessage>{formik.errors.visibility}</Form.ErrorMessage>
+          </Form.Item>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="border-ui-border-base flex shrink-0 items-center justify-end gap-x-2 border-t p-4">
+        <Button variant="secondary" size="small" type="button" onClick={closeModal}>
+          {t('common.cancel')}
+        </Button>
+        <Button variant="primary" size="small" type="submit" isLoading={formik.isSubmitting}>
+          {t('courses.create_course_btn')}
+        </Button>
       </div>
 
       {showUnsplashPicker && (
@@ -294,7 +293,7 @@ function CreateCourseModal({ closeModal, orgslug }: any) {
           onClose={() => setShowUnsplashPicker(false)}
         />
       )}
-    </FormLayout>
+    </form>
   )
 }
 

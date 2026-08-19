@@ -1,14 +1,14 @@
 "use client"
 
 import * as React from "react"
-import * as SelectPrimitive from "@radix-ui/react-select"
+import * as RadixSelect from "@radix-ui/react-select"
 import { cva } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 import { Check, TrianglesMini } from "@components/Objects/Icons/MedusaIcons"
 
-interface SelectRootProps
-  extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root> {
+interface SelectProps
+  extends React.ComponentPropsWithoutRef<typeof RadixSelect.Root> {
   size?: "base" | "small"
 }
 
@@ -29,62 +29,67 @@ const useSelectContext = () => {
 }
 
 /**
- * Medusa Select — select.tsx (ported 1:1).
- * Trigger: field bg + buttons-neutral shadow, TrianglesMini chevron.
- * Content: bg-component + elevation-flyout, 15px check column on items.
+ * Medusa Select — select.tsx (ported 1:1 from @medusajs/ui, light mode tokens).
+ * Based on [Radix UI Select](https://www.radix-ui.com/primitives/docs/components/select).
  */
-const Root = ({ children, size = "base", ...props }: SelectRootProps) => {
+const Root = ({ children, size = "base", ...props }: SelectProps) => {
   return (
     <SelectContext.Provider value={React.useMemo(() => ({ size }), [size])}>
-      <SelectPrimitive.Root {...props}>{children}</SelectPrimitive.Root>
+      <RadixSelect.Root {...props}>{children}</RadixSelect.Root>
     </SelectContext.Provider>
   )
 }
 Root.displayName = "Select"
 
-const Group = SelectPrimitive.Group
+const Group = RadixSelect.Group
 Group.displayName = "Select.Group"
 
-const Value = SelectPrimitive.Value
+const Value = RadixSelect.Value
 Value.displayName = "Select.Value"
 
 const triggerVariants = cva({
-  base: "bg-ui-bg-field shadow-buttons-neutral transition-fg flex w-full select-none items-center justify-between rounded-md outline-none data-[placeholder]:text-ui-fg-muted text-ui-fg-base hover:bg-ui-bg-field-hover focus-visible:shadow-borders-interactive-with-active data-[state=open]:!shadow-borders-interactive-with-active aria-[invalid=true]:border-ui-border-error aria-[invalid=true]:shadow-borders-error invalid:border-ui-border-error invalid:shadow-borders-error disabled:!bg-ui-bg-disabled disabled:!text-ui-fg-disabled group/trigger",
+  base: cn(
+    "bg-ui-bg-field shadow-buttons-neutral transition-fg flex w-full select-none items-center justify-between rounded-md outline-none",
+    "data-[placeholder]:text-ui-fg-muted text-ui-fg-base",
+    "hover:bg-ui-bg-field-hover",
+    "focus-visible:shadow-borders-interactive-with-active data-[state=open]:!shadow-borders-interactive-with-active",
+    "aria-[invalid=true]:border-ui-border-error aria-[invalid=true]:shadow-borders-error",
+    "invalid:border-ui-border-error invalid:shadow-borders-error",
+    "disabled:!bg-ui-bg-disabled disabled:!text-ui-fg-disabled",
+    "group/trigger"
+  ),
   variants: {
     size: {
       base: "h-8 px-2 py-1.5 txt-compact-small",
       small: "h-7 px-2 py-1 txt-compact-small",
     },
   },
-  defaultVariants: {
-    size: "base",
-  },
 })
 
 const Trigger = React.forwardRef<
-  React.ElementRef<typeof SelectPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
+  React.ElementRef<typeof RadixSelect.Trigger>,
+  React.ComponentPropsWithoutRef<typeof RadixSelect.Trigger>
 >(({ className, children, ...props }, ref) => {
   const { size } = useSelectContext()
 
   return (
-    <SelectPrimitive.Trigger
+    <RadixSelect.Trigger
       ref={ref}
       className={cn(triggerVariants({ size }), className)}
       {...props}
     >
       {children}
-      <SelectPrimitive.Icon asChild>
+      <RadixSelect.Icon asChild>
         <TrianglesMini className="text-ui-fg-muted group-disabled/trigger:text-ui-fg-disabled" />
-      </SelectPrimitive.Icon>
-    </SelectPrimitive.Trigger>
+      </RadixSelect.Icon>
+    </RadixSelect.Trigger>
   )
 })
 Trigger.displayName = "Select.Trigger"
 
 const Content = React.forwardRef<
-  React.ElementRef<typeof SelectPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
+  React.ElementRef<typeof RadixSelect.Content>,
+  React.ComponentPropsWithoutRef<typeof RadixSelect.Content>
 >(
   (
     {
@@ -98,8 +103,8 @@ const Content = React.forwardRef<
     },
     ref
   ) => (
-    <SelectPrimitive.Portal>
-      <SelectPrimitive.Content
+    <RadixSelect.Portal>
+      <RadixSelect.Content
         ref={ref}
         className={cn(
           "bg-ui-bg-component text-ui-fg-base shadow-elevation-flyout relative max-h-[200px] min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-lg",
@@ -115,10 +120,9 @@ const Content = React.forwardRef<
         position={position}
         sideOffset={sideOffset}
         collisionPadding={collisionPadding}
-        style={{ zIndex: "var(--z-modal-content)" }}
         {...props}
       >
-        <SelectPrimitive.Viewport
+        <RadixSelect.Viewport
           className={cn(
             "p-1",
             position === "popper" &&
@@ -127,58 +131,63 @@ const Content = React.forwardRef<
           onScroll={onScroll}
         >
           {children}
-        </SelectPrimitive.Viewport>
-      </SelectPrimitive.Content>
-    </SelectPrimitive.Portal>
+        </RadixSelect.Viewport>
+      </RadixSelect.Content>
+    </RadixSelect.Portal>
   )
 )
 Content.displayName = "Select.Content"
 
 const Label = React.forwardRef<
-  React.ElementRef<typeof SelectPrimitive.Label>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Label>
+  React.ElementRef<typeof RadixSelect.Label>,
+  React.ComponentPropsWithoutRef<typeof RadixSelect.Label>
 >(({ className, ...props }, ref) => (
-  <SelectPrimitive.Label
+  <RadixSelect.Label
     ref={ref}
-    className={cn("txt-compact-xsmall-plus text-ui-fg-muted px-2 py-1.5", className)}
+    className={cn(
+      "txt-compact-xsmall-plus text-ui-fg-muted px-2 py-1.5",
+      className
+    )}
     {...props}
   />
 ))
 Label.displayName = "Select.Label"
 
 const Item = React.forwardRef<
-  React.ElementRef<typeof SelectPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
->(({ className, children, ...props }, ref) => (
-  <SelectPrimitive.Item
-    ref={ref}
-    className={cn(
-      "bg-ui-bg-component txt-compact-small grid cursor-pointer grid-cols-[15px_1fr] items-center gap-x-2 rounded-[4px] px-2 py-1.5 outline-none transition-colors",
-      "focus-visible:bg-ui-bg-component-hover",
-      "active:bg-ui-bg-component-pressed",
-      "data-[state=checked]:txt-compact-small-plus",
-      "disabled:text-ui-fg-disabled",
-      className
-    )}
-    {...props}
-  >
-    <span className="flex h-[15px] w-[15px] items-center justify-center">
-      <SelectPrimitive.ItemIndicator className="flex items-center justify-center">
-        <Check className="h-[15px] w-[15px]" />
-      </SelectPrimitive.ItemIndicator>
-    </span>
-    <SelectPrimitive.ItemText className="flex-1 truncate">
-      {children}
-    </SelectPrimitive.ItemText>
-  </SelectPrimitive.Item>
-))
+  React.ElementRef<typeof RadixSelect.Item>,
+  React.ComponentPropsWithoutRef<typeof RadixSelect.Item>
+>(({ className, children, ...props }, ref) => {
+  return (
+    <RadixSelect.Item
+      ref={ref}
+      className={cn(
+        "bg-ui-bg-component txt-compact-small grid cursor-pointer grid-cols-[15px_1fr] items-center gap-x-2 rounded-[4px] px-2 py-1.5 outline-none transition-colors",
+        "focus-visible:bg-ui-bg-component-hover",
+        "active:bg-ui-bg-component-pressed",
+        "data-[state=checked]:txt-compact-small-plus",
+        "disabled:text-ui-fg-disabled",
+        className
+      )}
+      {...props}
+    >
+      <span className="flex h-[15px] w-[15px] items-center justify-center">
+        <RadixSelect.ItemIndicator className="flex items-center justify-center">
+          <Check />
+        </RadixSelect.ItemIndicator>
+      </span>
+      <RadixSelect.ItemText className="flex-1 truncate">
+        {children}
+      </RadixSelect.ItemText>
+    </RadixSelect.Item>
+  )
+})
 Item.displayName = "Select.Item"
 
 const Separator = React.forwardRef<
-  React.ElementRef<typeof SelectPrimitive.Separator>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Separator>
+  React.ElementRef<typeof RadixSelect.Separator>,
+  React.ComponentPropsWithoutRef<typeof RadixSelect.Separator>
 >(({ className, ...props }, ref) => (
-  <SelectPrimitive.Separator
+  <RadixSelect.Separator
     ref={ref}
     className={cn(
       "bg-ui-border-component border-t-ui-border-menu-top border-b-ui-border-menu-bot -mx-1 my-1 h-0.5 border-b border-t",
@@ -201,11 +210,11 @@ const Select = Object.assign(Root, {
 
 export {
   Select,
-  SelectGroup,
-  SelectValue,
-  SelectTrigger,
-  SelectContent,
-  SelectLabel,
-  SelectItem,
-  SelectSeparator,
+  Group as SelectGroup,
+  Value as SelectValue,
+  Trigger as SelectTrigger,
+  Content as SelectContent,
+  Label as SelectLabel,
+  Item as SelectItem,
+  Separator as SelectSeparator,
 }

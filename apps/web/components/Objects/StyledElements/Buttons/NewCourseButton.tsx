@@ -1,26 +1,17 @@
 'use client'
 import { useTranslation } from 'react-i18next'
 import { PlusMini } from '@components/Objects/Icons/MedusaIcons'
-import { buttonVariants } from '@components/ui/button'
-import { cn } from '@/lib/utils'
+import { Button, ButtonProps } from '@components/ui/button'
 
-interface NewCourseButtonProps {
-  disabled?: boolean
-}
+interface NewCourseButtonProps extends ButtonProps {}
 
-function NewCourseButton({ disabled = false }: NewCourseButtonProps) {
+function NewCourseButton({ disabled, className, ...props }: NewCourseButtonProps) {
   const { t } = useTranslation()
   return (
-    <div
-      className={cn(
-        buttonVariants({ variant: 'default', size: 'sm' }),
-        'inline-flex w-fit cursor-pointer',
-        disabled && 'pointer-events-none opacity-50'
-      )}
-    >
+    <Button variant="default" size="sm" disabled={disabled} className={className} {...props}>
       <PlusMini className="h-4 w-4" />
       {t('courses.new_course')}
-    </div>
+    </Button>
   )
 }
 

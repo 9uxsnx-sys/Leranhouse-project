@@ -52,9 +52,6 @@ const Modal = (params: ModalParams) => {
         "flex flex-col",
         "w-[95vw] max-w-[95vw]",
         "max-h-[90vh]",
-        "bg-white",
-        "border border-gray-200",
-        "shadow-lg",
         "p-0",
         "overflow-hidden",
         "sm:w-[90vw] sm:max-w-[90vw]",
@@ -68,12 +65,12 @@ const Modal = (params: ModalParams) => {
       )}>
         {/* Header */}
         {params.dialogTitle ? (
-          <DialogHeader className="shrink-0 px-5 py-4 border-b border-gray-100 space-y-0">
-            <DialogTitle className="text-xl font-semibold text-gray-900">
+          <DialogHeader className="shrink-0 px-4 py-2 border-b border-ui-border-base space-y-0">
+            <DialogTitle className="txt-compact-medium-plus text-ui-fg-base">
               {params.dialogTitle}
             </DialogTitle>
             {params.dialogDescription && (
-              <DialogDescription className="text-sm text-gray-500">
+              <DialogDescription className="text-ui-fg-muted text-sm">
                 {params.dialogDescription}
               </DialogDescription>
             )}
@@ -84,7 +81,7 @@ const Modal = (params: ModalParams) => {
 
         {/* Content */}
         <div className={cn(
-          "flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent hover:scrollbar-thumb-gray-300",
+          "flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
           !params.noPadding && "p-5"
         )}>
           {params.dialogContent}
@@ -92,7 +89,7 @@ const Modal = (params: ModalParams) => {
 
         {/* Footer */}
         {hasFooter && (
-          <DialogFooter className="shrink-0 px-5 py-3 border-t border-gray-100 flex flex-row justify-end gap-2">
+          <DialogFooter className="shrink-0 border-t border-ui-border-base p-4 flex flex-row items-center justify-end gap-x-2">
             {params.dialogClose}
             {params.addDefCloseButton && (
               <button

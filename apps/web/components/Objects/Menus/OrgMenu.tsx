@@ -483,9 +483,9 @@ export const OrgMenu = ({
             </div>
           </header>
 
-          {/* Content — shell.tsx main + Gutter (max-w-[1600px] p-3 gap-y-2) */}
+          {/* Content — shell.tsx main + Gutter (max-w-[1600px] p-3 gap-y-3) */}
           <main className="flex h-full w-full flex-col items-center overflow-y-auto">
-            <div className="flex w-full max-w-[1600px] flex-col gap-y-2 p-3">
+            <div className="flex w-full max-w-[1600px] flex-col gap-y-3 p-3">
               <div className="flex-1 relative" style={{ zIndex: 'var(--z-content)' }}>
                 {children}
               </div>

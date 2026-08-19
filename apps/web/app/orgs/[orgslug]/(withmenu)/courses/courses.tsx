@@ -184,8 +184,9 @@ function Courses(props: CourseProps) {
               <Modal
                 isDialogOpen={newCourseModal}
                 onOpenChange={setNewCourseModal}
-                minHeight="md"
-                minWidth="lg"
+                minWidth="sm"
+                customWidth="md:max-w-[640px]"
+                noPadding
                 dialogContent={
                   <CreateCourseModal
                     closeModal={closeNewCourseModal}
@@ -194,11 +195,7 @@ function Courses(props: CourseProps) {
                 }
                 dialogTitle={t('courses.create_course')}
                 dialogDescription={t('courses.create_new_course')}
-                dialogTrigger={
-                  <button>
-                    <NewCourseButton />
-                  </button>
-                }
+                dialogTrigger={<NewCourseButton />}
               />
             </AuthenticatedClientElement>
           </div>
@@ -308,9 +305,7 @@ function Courses(props: CourseProps) {
                       checkMethod="roles"
                       orgId={props.org_id}
                     >
-                      <button onClick={() => setNewCourseModal(true)}>
-                        <NewCourseButton />
-                      </button>
+                      <NewCourseButton onClick={() => setNewCourseModal(true)} />
                     </AuthenticatedClientElement>
                   </div>
                 )}
