@@ -1,7 +1,6 @@
 'use client'
 import { Input } from "@components/ui/input"
 import { Textarea } from "@components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select"
 import { Button } from "@components/ui/button"
 import { IconButton } from "@components/ui/icon-button"
 import { Form } from "@components/ui/form"
@@ -45,7 +44,6 @@ function CreateCourseModal({ closeModal, orgslug }: any) {
       .max(1000, 'Must be 1000 characters or less'),
     learnings: Yup.string(),
     tags: Yup.string(),
-    visibility: Yup.boolean(),
     thumbnail: Yup.mixed().nullable()
   })
 
@@ -54,7 +52,6 @@ function CreateCourseModal({ closeModal, orgslug }: any) {
       name: '',
       description: '',
       learnings: '',
-      visibility: true,
       tags: '',
       thumbnail: null
     },
@@ -69,8 +66,7 @@ function CreateCourseModal({ closeModal, orgslug }: any) {
             name: values.name,
             description: values.description,
             learnings: values.learnings,
-            tags: values.tags,
-            visibility: values.visibility
+            tags: values.tags
           },
           values.thumbnail,
           session.data?.tokens?.access_token
@@ -255,24 +251,6 @@ function CreateCourseModal({ closeModal, orgslug }: any) {
               error={formik.errors.tags}
             />
             <Form.ErrorMessage>{formik.errors.tags}</Form.ErrorMessage>
-          </Form.Item>
-
-          {/* Visibility */}
-          <Form.Item>
-            <Form.Label>{t('courses.course_visibility')}</Form.Label>
-            <Select
-              value={formik.values.visibility ? 'true' : 'false'}
-              onValueChange={(value) => formik.setFieldValue('visibility', value === 'true')}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={t('courses.select_visibility')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="true">{t('courses.public')}</SelectItem>
-                <SelectItem value="false">{t('courses.private')}</SelectItem>
-              </SelectContent>
-            </Select>
-            <Form.ErrorMessage>{formik.errors.visibility}</Form.ErrorMessage>
           </Form.Item>
         </div>
       </div>

@@ -3,12 +3,11 @@
 import React from 'react'
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail'
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail'
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import ContentPlaceHolderIfUserIsNotAdmin from '@components/Objects/ContentPlaceHolder'
 import Link from 'next/link'
 import { getUriWithOrg } from '@services/config/config'
 import { useTranslation } from 'react-i18next'
-import { ExclamationCircle, ArrowRightMini, PlusMini } from '@components/Objects/Icons/MedusaIcons'
+import { ExclamationCircle, ArrowRightMini } from '@components/Objects/Icons/MedusaIcons'
 import { Text } from '@components/ui/text'
 import { Container } from '@components/ui/container'
 import { Heading } from '@components/ui/heading'
@@ -31,32 +30,8 @@ function LandingClassic({ courses, collections, orgslug, org_id }: LandingClassi
     <div className="flex w-full flex-col gap-y-3">
       {/* Collections Section */}
       <Container>
-        <div className="flex items-center justify-between pb-4">
-          <div className="flex items-center gap-3">
-            <Heading level="h2">{t('collections.collections')}</Heading>
-            <span className="text-ui-fg-muted text-sm">({collections.length})</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button asChild variant="secondary" size="small">
-              <Link href={getUriWithOrg(orgslug, '/collections')}>
-                {t('common.view_all')}
-                <ArrowRightMini className="ml-1 h-3.5 w-3.5" />
-              </Link>
-            </Button>
-            <AuthenticatedClientElement
-              checkMethod="roles"
-              ressourceType="collections"
-              action="create"
-              orgId={org_id}
-            >
-              <Button asChild variant="default" size="sm">
-                <Link href={getUriWithOrg(orgslug, '/collections/new')}>
-                  <PlusMini className="h-4 w-4" />
-                  {t('collections.new_collection')}
-                </Link>
-              </Button>
-            </AuthenticatedClientElement>
-          </div>
+        <div className="flex items-center justify-between pb-8">
+          <Heading level="h1" className="!text-[25px]">{t('collections.collections')}</Heading>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {collections.map((collection: any) => (
@@ -86,32 +61,8 @@ function LandingClassic({ courses, collections, orgslug, org_id }: LandingClassi
 
       {/* Courses Section */}
       <Container>
-        <div className="flex items-center justify-between pb-4">
-          <div className="flex items-center gap-3">
-            <Heading level="h2">{t('courses.courses')}</Heading>
-            <span className="text-ui-fg-muted text-sm">({courses.length})</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button asChild variant="secondary" size="small">
-              <Link href={getUriWithOrg(orgslug, '/courses')}>
-                {t('common.view_all')}
-                <ArrowRightMini className="ml-1 h-3.5 w-3.5" />
-              </Link>
-            </Button>
-            <AuthenticatedClientElement
-              ressourceType="courses"
-              action="create"
-              checkMethod="roles"
-              orgId={org_id}
-            >
-              <Button asChild variant="default" size="sm">
-                <Link href={getUriWithOrg(orgslug, '/courses?new=true')}>
-                  <PlusMini className="h-4 w-4" />
-                  {t('courses.new_course')}
-                </Link>
-              </Button>
-            </AuthenticatedClientElement>
-          </div>
+        <div className="flex items-center justify-between pb-8">
+          <Heading level="h1" className="!text-[25px]">{t('courses.courses')}</Heading>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {displayedCourses.map((course: any) => (
