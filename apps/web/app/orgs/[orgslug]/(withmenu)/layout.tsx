@@ -60,7 +60,7 @@ function LayoutContent({ children, orgslug }: { children: React.ReactNode; orgsl
       <PageViewTracker />
       <OrgJoinBanner />
       <OrgMenu orgslug={orgslug}>
-        <div className="flex-1 relative" style={{ zIndex: 'var(--z-content)' }}>
+        <div className="flex-1 relative w-full" style={{ zIndex: 'var(--z-content)' }}>
           {children}
         </div>
       </OrgMenu>

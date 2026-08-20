@@ -30,12 +30,12 @@ function LandingClassic({ courses, collections, orgslug, org_id }: LandingClassi
     <div className="flex w-full flex-col gap-y-3">
       {/* Collections Section */}
       <Container>
-        <div className="flex items-center justify-between pb-8">
-          <Heading level="h1" className="!text-[25px]">{t('collections.collections')}</Heading>
+        <div className="-mx-6 px-6 pb-3 mb-8 border-b border-gray-200">
+          <Heading level="h2" className="!text-[22px]">{t('collections.collections')}</Heading>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {collections.map((collection: any) => (
-            <div key={collection.collection_id} className="flex flex-col">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-4">
+          {collections.map((collection: any, index: number) => (
+            <div key={collection.collection_id || index} className="flex flex-col">
               <CollectionThumbnail
                 collection={collection}
                 orgslug={orgslug}
@@ -61,12 +61,12 @@ function LandingClassic({ courses, collections, orgslug, org_id }: LandingClassi
 
       {/* Courses Section */}
       <Container>
-        <div className="flex items-center justify-between pb-8">
-          <Heading level="h1" className="!text-[25px]">{t('courses.courses')}</Heading>
+        <div className="-mx-6 px-6 pb-3 mb-8 border-b border-gray-200">
+          <Heading level="h2" className="!text-[22px]">{t('courses.courses')}</Heading>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {displayedCourses.map((course: any) => (
-            <div key={course.course_uuid} className="flex">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-4">
+          {displayedCourses.map((course: any, index: number) => (
+            <div key={course.course_uuid || index} className="flex justify-center">
               <CourseThumbnail course={course} orgslug={orgslug} />
             </div>
           ))}

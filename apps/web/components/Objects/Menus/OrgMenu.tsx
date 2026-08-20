@@ -370,7 +370,7 @@ export const OrgMenu = ({
         </aside>
 
         {/* Right column — shell.tsx (flex h-screen w-full flex-col overflow-auto) */}
-        <div className="flex h-full w-full flex-col overflow-auto">
+        <div className="flex h-full w-full flex-col overflow-auto scrollbar-hide">
           {/* Topbar — shell.tsx Topbar (grid w-full grid-cols-2 border-b p-3, canvas shows through) */}
           <header className="grid w-full grid-cols-2 border-b p-3">
             <div className="flex items-center gap-x-1.5">
@@ -484,8 +484,8 @@ export const OrgMenu = ({
           </header>
 
           {/* Content — shell.tsx main + Gutter (max-w-[1600px] p-3 gap-y-3) */}
-          <main className="flex h-full w-full flex-col items-center overflow-y-auto">
-            <div className="flex w-full max-w-[1600px] flex-col gap-y-3 p-3">
+          <main className="flex h-full w-full flex-col items-center">
+            <div className="flex w-full max-w-[1600px] flex-col gap-y-3 px-1 py-3">
               <div className="flex-1 relative" style={{ zIndex: 'var(--z-content)' }}>
                 {children}
               </div>

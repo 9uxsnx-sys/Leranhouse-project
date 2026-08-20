@@ -6,7 +6,7 @@ import { getUriWithOrg } from '@services/config/config'
 import { deleteCourseFromBackend, cloneCourse } from '@services/courses/courses'
 import { exportCourse, downloadBlob, ExportStatus } from '@services/courses/transfer'
 import { exportToast } from '@components/Objects/StyledElements/Toast/ExportToast'
-import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media'
+import { getCourseThumbnailMediaDirectory } from '@services/media/media'
 import { mutate } from 'swr'
 import { CheckSquare, Square } from 'lucide-react'
 import {
@@ -17,14 +17,11 @@ import {
   ArrowDownTray,
   Trash,
 } from '@components/Objects/Icons/MedusaIcons'
-import { Badge } from '@components/ui/badge'
-import { Text } from '@components/ui/text'
 import { IconButton } from '@components/ui/icon-button'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import Link from 'next/link'
 import React from 'react'
 import toast from 'react-hot-toast'
-import UserAvatar from '@components/Objects/UserAvatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,7 +65,6 @@ type PropsType = {
 export const removeCoursePrefix = (course_uuid: string) => course_uuid.replace('course_', '')
 
 function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isSelected = false, onToggleSelect }: PropsType) {
-  const { t, i18n } = useTranslation()
   const org = useOrg() as any
   const session = useLHSession() as any
 
@@ -77,11 +73,6 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
     e.stopPropagation()
     onToggleSelect?.(course.course_uuid)
   }
-
-  const activeAuthors = course.authors?.filter(author => author.authorship_status === 'ACTIVE') || []
-  const displayedAuthors = activeAuthors.slice(0, 3)
-  const hasMoreAuthors = activeAuthors.length > 3
-  const remainingAuthorsCount = activeAuthors.length - 3
 
   const deleteCourse = async () => {
     const toastId = toast.loading(t('courses.deleting_course'))
@@ -141,7 +132,7 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
   const courseLink = customLink ? customLink : getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)
 
   return (
-    <div className={`group relative flex flex-col bg-white rounded-lg card-shadow-rest hover:card-shadow-hover overflow-hidden w-full transition-shadow duration-200 ${isSelected ? 'ring-2 ring-black ring-offset-2' : ''}`}>
+    <div className={`group relative bg-ui-bg-base rounded-lg shadow-elevation-card-rest hover:shadow-elevation-card-hover transition-shadow overflow-hidden ${isSelected ? 'ring-2 ring-black ring-offset-2' : ''}`}>
       {/* Selection checkbox - visible on hover or when selected (dashboard only) */}
       {isDashboard && onToggleSelect && (
         <div className={`absolute top-2 left-2 z-20 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
@@ -157,96 +148,31 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
         </div>
       )}
 
-      {/* Options menu - visible on hover or when dropdown is open */}
-      <AdminEditOptions
-        course={course}
-        orgSlug={orgslug}
-        deleteCourse={deleteCourse}
-        cloneCourse={handleCloneCourse}
-        exportCourse={handleExportCourse}
-        isDashboard={isDashboard}
-      />
-
-      <Link prefetch={false} href={courseLink} className="block relative aspect-video overflow-hidden bg-gray-50">
-        <div
-          className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-          style={{ backgroundImage: `url(${thumbnailImage})` }}
+      {/* 16:9 Image */}
+      <Link prefetch={false} href={courseLink} className="block relative aspect-video overflow-hidden bg-ui-bg-component">
+        <img
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          src={thumbnailImage}
+          alt={course.name}
         />
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
-        {isDashboard && (
-          <div className="absolute bottom-2 left-2">
-            {course.published ? (
-              <Badge variant="green">{t('courses.published')}</Badge>
-            ) : (
-              <Badge variant="orange">{t('courses.unpublished')}</Badge>
-            )}
-          </div>
-        )}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/[0.02] transition-colors duration-300" />
       </Link>
 
-      <div className="p-3 flex flex-col gap-y-1.5">
-        <div className="flex items-start justify-between">
-          <Text asChild size="base" weight="plus" className="text-gray-900 leading-tight">
-            <Link
-              prefetch={false}
-              href={courseLink}
-              className="hover:text-black transition-colors line-clamp-1"
-            >
-              {course.name}
-            </Link>
-          </Text>
-        </div>
-        
-        {course.description && (
-          <Text size="small" className="text-gray-500 line-clamp-2 min-h-[1.5rem]">
-            {course.description}
-          </Text>
-        )}
+      {/* Content */}
+      <div className="p-3 flex flex-col gap-y-2">
+        {/* Title */}
+        <Link prefetch={false} href={courseLink} className="hover:opacity-80 transition-opacity">
+          <h3 className="text-ui-fg-base font-semibold text-sm leading-tight line-clamp-1">
+            {course.name}
+          </h3>
+        </Link>
 
-        <div className="pt-1.5 flex items-center justify-between border-t border-[#e4e4e7]">
-          <div className="flex items-center gap-2">
-            {displayedAuthors.length > 0 && (
-              <div className="flex -space-x-2 items-center">
-                {displayedAuthors.map((author, index) => (
-                  <div 
-                    key={author.user.user_uuid} 
-                    className="relative"
-                    style={{ zIndex: displayedAuthors.length - index }}
-                  >
-                    <UserAvatar
-                      border="border-2"
-                      rounded="rounded-full"
-                      avatar_url={author.user.avatar_image ? getUserAvatarMediaDirectory(author.user.user_uuid, author.user.avatar_image) : ''}
-                      predefined_avatar={author.user.avatar_image ? undefined : 'empty'}
-                      width={20}
-                      showProfilePopup={true}
-                      userId={author.user.id}
-                    />
-                  </div>
-                ))}
-                {hasMoreAuthors && (
-                  <div className="relative z-0">
-                    <Badge variant="grey" className="h-5 w-5 justify-center rounded-full p-0 text-[10px]">
-                      +{remainingAuthorsCount}
-                    </Badge>
-                  </div>
-                )}
-              </div>
-            )}
-            
-            {course.update_date && (
-              <Text size="xsmall" className="text-gray-400">
-                {new Date(course.update_date).toLocaleDateString(i18n.language === 'fr' ? 'fr-FR' : 'en-US', { month: 'short', day: 'numeric' })}
-              </Text>
-            )}
-          </div>
-          
-          <Text asChild size="xsmall" weight="plus" className="text-primary hover:underline">
-            <Link prefetch={false} href={courseLink}>
-              {t('courses.start_learning')}
-            </Link>
-          </Text>
-        </div>
+        {/* Description */}
+        {course.description && (
+          <p className="text-ui-fg-subtle text-xs leading-relaxed line-clamp-3">
+            {course.description}
+          </p>
+        )}
       </div>
     </div>
   )

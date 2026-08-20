@@ -40,7 +40,7 @@ function CollectionThumbnail(props: PropsType) {
 
   return (
     <div 
-      className="group relative flex flex-col bg-white rounded-lg card-shadow-rest hover:card-shadow-hover overflow-hidden w-full transition-shadow duration-200"
+      className="group relative flex flex-col bg-ui-bg-field rounded-lg card-shadow-rest hover:card-shadow-hover overflow-hidden w-full transition-shadow duration-200"
     >
       <CollectionAdminEditsArea
         orgslug={props.orgslug}
@@ -51,7 +51,7 @@ function CollectionThumbnail(props: PropsType) {
 
       <Link 
         href={getUriWithOrg(props.orgslug, `/collection/${collectionId}`)}
-        className="block relative aspect-video overflow-hidden bg-gray-50"
+        className="block relative aspect-video overflow-hidden bg-black rounded-lg"
       >
         {courses.length > 0 ? (
           <div className="flex items-center justify-center h-full w-full bg-gray-100/50 relative p-4">
