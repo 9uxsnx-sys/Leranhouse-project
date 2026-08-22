@@ -274,8 +274,8 @@ const CourseClient = (props: any) => {
               {/* ═══════════════ LEFT COLUMN ═══════════════ */}
               <div className="flex-1 min-w-0 space-y-8">
 
-                {/* ── 1. HERO IMAGE (16:9) ── */}
-                <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-gray-100 ring-1 ring-inset ring-black/5">
+                {/* ── 1. HERO IMAGE (21:9 cinematic) ── */}
+                <div className="relative w-full aspect-[21/9] rounded-xl overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-gray-100 ring-1 ring-inset ring-black/5">
                   {course.thumbnail_image ? (
                     <img
                       src={getCourseThumbnailMediaDirectory(org?.org_uuid, course?.course_uuid, course?.thumbnail_image)}
