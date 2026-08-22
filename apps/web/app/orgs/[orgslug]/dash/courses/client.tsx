@@ -64,7 +64,6 @@ function CoursesHome(params: CourseProps) {
     (url) => swrFetcher(url, access_token),
     { fallbackData: params.courses, revalidateOnFocus: false, dedupingInterval: 30000 }
   )
-
   const allCourses = coursesData || params.courses
 
   // Fetch usage limits from backend
@@ -177,7 +176,6 @@ function CoursesHome(params: CourseProps) {
   }
 
   const router = useRouter()
-
   const handleCreationTypeSelect = (type: 'scratch' | 'ai' | 'migrate') => {
     if (type === 'ai') {
       setNewCourseModal(false)
