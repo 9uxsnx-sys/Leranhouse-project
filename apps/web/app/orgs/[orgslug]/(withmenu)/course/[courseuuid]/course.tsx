@@ -269,16 +269,8 @@ const CourseClient = (props: any) => {
       ) : (
         <>
           <GeneralWrapperStyled>
-            {/* Breadcrumbs */}
-            <div className="pb-4">
-              <Breadcrumbs items={[
-                { label: t('courses.courses'), href: getUriWithOrg(orgslug, '/courses'), icon: <BookCopy size={14} /> },
-                { label: course.name }
-              ]} />
-            </div>
-
             {/* ── TWO-COLUMN LAYOUT ── */}
-            <div className="flex flex-col lg:flex-row gap-10 mt-2">
+            <div className="flex flex-col lg:flex-row gap-10">
               {/* ═══════════════ LEFT COLUMN ═══════════════ */}
               <div className="flex-1 min-w-0 space-y-8">
 
@@ -291,10 +283,12 @@ const CourseClient = (props: any) => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center">
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500/5 via-white to-indigo-500/10">
                       <div className="text-center">
-                        <BookOpen className="w-16 h-16 text-gray-300 mx-auto" />
-                        <Text size="small" className="text-gray-400 mt-2">Course thumbnail</Text>
+                        <div className="w-20 h-20 rounded-2xl bg-white shadow-sm ring-1 ring-black/5 flex items-center justify-center mx-auto">
+                          <BookOpen className="w-10 h-10 text-indigo-400" />
+                        </div>
+                        <Text size="small" className="text-gray-400 mt-3">Course thumbnail</Text>
                       </div>
                     </div>
                   )}
@@ -319,7 +313,7 @@ const CourseClient = (props: any) => {
                 {/* ── 2. COURSE TITLE + DESCRIPTION + STATS ── */}
                 <div>
                   <div className="flex items-start justify-between gap-4">
-                    <Heading level="h1">{course.name}</Heading>
+                    <h1 className="text-3xl md:text-4xl font-bold text-ui-fg-base leading-tight">{course.name}</h1>
                     <CourseShare
                       courseName={course.name}
                       courseUrl={getUriWithOrg(orgslug, `/course/${courseuuid}`)}
