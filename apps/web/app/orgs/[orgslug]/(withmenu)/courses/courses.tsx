@@ -246,10 +246,10 @@ function Courses(props: CourseProps) {
         </div>
       )}
 
-      {/* Grid area — flex-1 fills remaining space to push pagination down */}
-      <div className="flex-1">
+      {/* Grid area — fills remaining space, equal-height rows */}
+      <div className="flex-1 flex flex-col">
         {/* Course grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 flex-1" style={{ gridAutoRows: '1fr' }}>
           {paginatedCourses.map((course: any) => {
             const imageUrl = course.thumbnail_image
               ? getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)
