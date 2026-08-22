@@ -31,8 +31,8 @@ export function CourseCard({ id, title, description, image, lessons, duration, d
           </div>
         )}
       </div>
-      {/* Content — fills remaining space */}
-      <div className="px-4 pt-3 pb-4 flex flex-col flex-1">
+      {/* Content — fills remaining space, min-height ensures metadata stays at bottom */}
+      <div className="px-4 pt-3 pb-4 flex flex-col flex-1 min-h-[160px]">
         {/* Top section: title + description */}
         <div className="flex flex-col gap-1">
           {/* Title: 15px, 600 weight, 2-line clamp */}
