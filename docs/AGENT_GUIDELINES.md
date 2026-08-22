@@ -74,6 +74,46 @@ Read these files in order before starting work:
 
 ---
 
+## 🎨 Design Rules
+
+### Input Field Focus Effects
+
+**No focus ring, no glow, no border change on focus.**
+
+Our design follows Apple / Linear / Notion approach — when a user clicks an input field, the **blinking cursor is the only indicator**. No blue rings, no shadow changes, no border color changes.
+
+```tsx
+// ✅ CORRECT — no focus effect
+<input className="focus:outline-none" />
+
+// ❌ WRONG — don't add rings or glows
+<input className="focus:ring-2 focus:ring-blue-500" />   // NO
+<input className="focus:shadow-borders-interactive-with-active" />  // NO (Medusa default)
+```
+
+This applies to ALL input fields across the User Part redesign.
+
+### Page Layout with Fixed Pagination
+
+**Use CSS grid for pages that need pagination fixed at the bottom.**
+
+For pages with a paginated grid, use `display: grid` with `gridTemplateRows: 'auto auto 1fr auto'` and `minHeight: '100dvh'` to keep pagination at the exact same position regardless of content height:
+
+```tsx
+<div className="pt-8 px-6 pb-0" style={{ display: 'grid', gridTemplateRows: 'auto auto 1fr auto', minHeight: '100dvh' }}>
+  <h1>Page Title</h1>      {/* Row 1: auto */}
+  <div>Toolbar</div>         {/* Row 2: auto */}
+  <div className="...">      {/* Row 3: 1fr — fills remaining space */}
+    {/* Grid of items */}
+  </div>
+  <div>Pagination</div>      {/* Row 4: auto — always at bottom */}
+</div>
+```
+
+The `1fr` row absorbs all extra vertical space, pushing pagination to the bottom edge. Use `pb-0` on the container and `pt-6 pb-0` on the pagination to remove bottom gaps.
+
+---
+
 ## ❌ Common Mistakes to Avoid
 
 | Mistake | Why It's Wrong | How to Avoid |

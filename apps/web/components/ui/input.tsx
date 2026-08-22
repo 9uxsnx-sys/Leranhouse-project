@@ -33,7 +33,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         <div className="relative w-full">
           <div
             className={cn(
-              "text-ui-fg-muted pointer-events-none absolute bottom-0 left-0 flex items-center justify-center",
+              "text-gray-600 pointer-events-none absolute bottom-0 left-0 flex items-center justify-center",
               size === "base" ? "h-8 w-8" : "h-7 w-7"
             )}
             role="img"

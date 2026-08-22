@@ -121,11 +121,11 @@ const CoursesPage = async (params: any) => {
   ])
 
   return (
-    <div>
+    <>
       <JsonLd data={breadcrumbJsonLd} />
       <JsonLd data={coursesJsonLd} />
       <Courses org_id={org.id} orgslug={orgslug} courses={courses} />
-    </div>
+    </>
   )
 }
 

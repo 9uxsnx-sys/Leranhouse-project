@@ -11,7 +11,7 @@
 | Route | Page / Tab | Component File | Redesign Status |
 |-------|-----------|----------------|-----------------|
 | `/orgs/[orgslug]/` | **Home** | `(withmenu)/page.tsx` | 🔴 To do |
-| `/orgs/[orgslug]/courses` | **Courses** | `(withmenu)/courses/courses.tsx` | 🟡 In progress |
+| `/orgs/[orgslug]/courses` | **Courses** | `(withmenu)/courses/courses.tsx` | ✅ Done |
 | `/orgs/[orgslug]/course/[uuid]` | **Course Detail** | `(withmenu)/course/[uuid]/course.tsx` | 🔴 To do |
 | `/orgs/[orgslug]/collections` | **Collections** | `(withmenu)/collections/page.tsx` | 🔴 To do |
 | `/orgs/[orgslug]/collection/[id]` | **Collection Detail** | `(withmenu)/collection/[id]/collection.tsx` | 🔴 To do |
