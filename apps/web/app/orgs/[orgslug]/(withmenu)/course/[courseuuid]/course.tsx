@@ -313,7 +313,7 @@ const CourseClient = (props: any) => {
                 {/* ── 2. COURSE TITLE + DESCRIPTION + STATS ── */}
                 <div>
                   <div className="flex items-start justify-between gap-4">
-                    <h1 className="text-3xl md:text-4xl font-bold text-ui-fg-base leading-tight">{course.name}</h1>
+                    <h1 className="text-xl md:text-2xl font-bold text-ui-fg-base leading-tight">{course.name}</h1>
                     <CourseShare
                       courseName={course.name}
                       courseUrl={getUriWithOrg(orgslug, `/course/${courseuuid}`)}
