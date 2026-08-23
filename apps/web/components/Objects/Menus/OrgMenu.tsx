@@ -235,11 +235,10 @@ function OrgFooter() {
   const watermarkConfig =
     org?.config?.config?.customization?.general?.watermark ??
     org?.config?.config?.general?.watermark
-  const isFree = plan === 'free'
-  const showWatermark = isFree || watermarkConfig !== false
+  const showWatermark = false
 
   return (
-    <footer className="w-full py-8 mt-12">
+    <footer className="w-full py-0 mt-0">
       <div className="flex flex-col items-center justify-center space-y-4">
         {footerText && <p className="text-sm text-gray-500">{footerText}</p>}
         {showWatermark && (

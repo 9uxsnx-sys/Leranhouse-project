@@ -26,7 +26,6 @@ import { Container } from '@/components/ui/container'
 import { Heading } from '@/components/ui/heading'
 import { Text } from '@/components/ui/text'
 import { Badge } from '@/components/ui/badge'
-import { Avatar } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { useAnalytics } from '@/hooks/useAnalytics'
 
@@ -52,6 +51,11 @@ const MOCK_COURSE_META = {
   },
   difficulty: 'Beginner' as const,
   totalDuration: '6 hours',
+  updates: [
+    { title: 'New module added', description: 'Advanced prototyping techniques — 8 new lessons', date: 'Mar 2026' },
+    { title: 'Quiz updates', description: 'Added practice questions for modules 3 & 4', date: 'Jan 2026' },
+    { title: 'Course launched', description: 'Initial release with 5 modules', date: 'Nov 2025' },
+  ],
   learnings: [
     'Understand core UI/UX design principles and how to apply them',
     'Master Figma prototyping and design system creation',
@@ -391,7 +395,7 @@ const CourseClient = (props: any) => {
                 </div>
 
                 {/* ═══════════════ RIGHT SIDEBAR ═══════════════ */}
-                <div className="w-full lg:w-80 xl:w-96 shrink-0">
+                <div className="w-full lg:w-72 xl:w-80 shrink-0">
                   <div className="lg:sticky lg:top-8 space-y-4">
 
                   {/* ── SIDEBAR 1: Progress + Continue ── */}
@@ -401,7 +405,7 @@ const CourseClient = (props: any) => {
                       <Text size="small" className="text-ui-fg-muted">18/24</Text>
                     </div>
                     <div className="w-full h-1.5 bg-ui-bg-subtle rounded-full mt-2 overflow-hidden">
-                      <div className="h-full bg-ui-fg-interactive rounded-full transition-all" style={{ width: '75%' }} />
+                      <div className="h-full bg-black rounded-full transition-all" style={{ width: '75%' }} />
                     </div>
                     <Button variant="primary" size="large" className="w-full mt-4">
                       Continue Learning
@@ -431,36 +435,26 @@ const CourseClient = (props: any) => {
                     </div>
                   </Container>
 
-                  {/* ── SIDEBAR 3: Instructor ── */}
+                  {/* ── SIDEBAR 3: Course Updates (timeline) ── */}
                   <Container>
-                    <Heading level="h3">Instructor</Heading>
-                    <div className="mt-4 flex items-start gap-3">
-                      <Avatar
-                        fallback={MOCK_COURSE_META.instructor.name.split(' ').map(n => n[0]).join('')}
-                        size="large"
-                        variant="rounded"
-                      />
-                      <div className="min-w-0">
-                        <Text weight="plus" size="base">{MOCK_COURSE_META.instructor.name}</Text>
-                        <Text size="small" className="text-ui-fg-subtle">{MOCK_COURSE_META.instructor.title}</Text>
-                        <Text size="xsmall" className="text-ui-fg-muted mt-1 leading-relaxed">{MOCK_COURSE_META.instructor.bio}</Text>
+                    <Heading level="h3">Updates</Heading>
+                    <div className="mt-4">
+                      <div className="relative pl-5 before:absolute before:left-[3px] before:top-2 before:bottom-2 before:w-px before:bg-gray-300 space-y-4">
+                         {MOCK_COURSE_META.updates.map((update: any, idx: number) => (
+                           <div key={idx} className="relative">
+                             <Text weight="plus" size="small">{update.title}</Text>
+                            <Text size="xsmall" className="text-ui-fg-muted mt-0.5 leading-snug">{update.description}</Text>
+                            <Text size="xsmall" className="text-ui-fg-disabled mt-0.5 block">{update.date}</Text>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </Container>
-
-                  {/* ── SIDEBAR 4: Last Updated ── */}
-                  <Text size="xsmall" className="text-ui-fg-muted text-center block">
-                    Last updated: {course.update_date ? new Date(course.update_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long' }) : 'March 2026'}
-                  </Text>
                 </div>
               </div>
             </div>
             </div>
 
-            {/* Community Section */}
-            <div className="mt-12">
-              <CourseCommunitySection courseUuid={course.course_uuid} orgslug={orgslug} />
-            </div>
           </GeneralWrapperStyled>
 
           {/* Mobile Actions Box */}
