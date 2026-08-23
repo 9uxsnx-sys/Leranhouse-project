@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
-import { BookOpenCheck, CheckCircle, ChevronLeft, ChevronRight, MessageSquare, UserRoundPen, Edit2, Maximize2, Minimize2, Trophy, Sparkles, XCircle, Lock, RotateCcw, Infinity as InfinityIcon } from 'lucide-react'
+import { BookOpenCheck, ChevronLeft, ChevronRight, MessageSquare, UserRoundPen, Maximize2, Minimize2, Trophy, Sparkles, XCircle, Lock, RotateCcw, Infinity as InfinityIcon, Video, FileText, StickyNote, Backpack, Check, CheckCircle } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { markActivityAsComplete, unmarkActivityAsComplete } from '@services/courses/activity'
 import { usePathname, useRouter } from 'next/navigation'
@@ -23,8 +23,6 @@ import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationMo
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import { useMediaQuery, useWindowSize } from 'usehooks-ts'
 import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer'
-import { useContributorStatus } from '../../../../../../../../hooks/useContributorStatus'
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown'
 import ActivityShareDropdown from '@components/Pages/Activity/ActivityShareDropdown'
 import FixedActivitySecondaryBar from '@components/Pages/Activity/FixedActivitySecondaryBar'
@@ -34,7 +32,6 @@ import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import { BookCopy } from 'lucide-react'
 import MiniInfoTooltip from '@components/Objects/MiniInfoTooltip'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
-import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators'
 import UserAvatar from '@components/Objects/UserAvatar'
 import { useTranslation } from 'react-i18next'
 import { useAnalytics } from '@/hooks/useAnalytics'
@@ -46,9 +43,7 @@ const Canva = lazy(() => import('@components/Objects/Activities/DynamicCanva/Dyn
 const VideoActivity = lazy(() => import('@components/Objects/Activities/Video/Video'))
 const DocumentPdfActivity = lazy(() => import('@components/Objects/Activities/DocumentPdf/DocumentPdf'))
 const AssignmentStudentActivity = lazy(() => import('@components/Objects/Activities/Assignment/AssignmentStudentActivity'))
-const AIActivityAsk = lazy(() => import('@components/Objects/Activities/AI/AIActivityAsk'))
 const AISidePanelContentWrapper = lazy(() => import('@components/Objects/Activities/AI/AIActivityAsk').then(mod => ({ default: mod.AISidePanelContentWrapper })))
-const AISidePanelInline = lazy(() => import('@components/Objects/Activities/AI/AIActivityAsk').then(mod => ({ default: mod.AISidePanelInline })))
 const AIChatBotProvider = lazy(() => import('@components/Contexts/AI/AIChatBotContext'))
 const ScormActivity = lazy(() => import('../../../../../../../../ee/components/Activities/ScormActivity'))
 const MarkdownActivity = lazy(() => import('@components/Objects/Activities/Markdown/MarkdownActivity'))
@@ -189,7 +184,6 @@ function ActivityClient(props: ActivityClientProps) {
   const [markStatusButtonActive, setMarkStatusButtonActive] = React.useState(false);
   const [isFocusMode, setIsFocusMode] = React.useState(false);
   const isInitialRender = useRef(true);
-  const { contributorStatus } = useContributorStatus(courseuuid);
   const router = useRouter();
 
   const { track } = useAnalytics()
@@ -634,7 +628,6 @@ function ActivityClient(props: ActivityClientProps) {
               </AnimatePresence>
             ) : (
               <GeneralWrapperStyled>
-                {/* Original non-focus mode UI */}
                 {activityid === 'end' ? (
                   <CourseEndView 
                     courseName={course.name}
@@ -645,258 +638,262 @@ function ActivityClient(props: ActivityClientProps) {
                     trailData={trailData}
                   />
                 ) : (
-                  <div className="space-y-4 pt-0 relative">
-                    <div className="pt-2 pb-3 sm:pb-6">
+                  <div className="space-y-5 pt-0 relative">
+                    {/* ── Breadcrumbs ── */}
+                    <div className="pt-2 pb-1">
                       <Breadcrumbs items={[
                         { label: t('courses.courses'), href: getUriWithOrg(orgslug, '/courses'), icon: <BookCopy size={14} /> },
                         { label: course.name, href: getUriWithOrg(orgslug, `/course/${courseuuid}`) },
                         { label: activity.name }
                       ]} />
                     </div>
-                    <div className="space-y-3 sm:space-y-4 activity-info-section relative" style={{ zIndex: 'var(--z-content)' }}>
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-                          <div className="flex space-x-4 sm:space-x-6 items-center">
-                            <div className="flex shrink-0">
-                              <Link
-                                href={getUriWithOrg(orgslug, '') + `/course/${courseuuid}`}
-                              >
-                                <img
-                                  className="w-[60px] h-[34px] sm:w-[100px] sm:h-[57px] rounded-md drop-shadow-md"
-                                  src={course.thumbnail_image
-                                    ? getCourseThumbnailMediaDirectory(
-                                        org?.org_uuid,
-                                        course.course_uuid,
-                                        course.thumbnail_image
-                                      )
-                                    : '/empty_thumbnail.png'
-                                  }
-                                  alt=""
-                                />
-                              </Link>
-                            </div>
-                            <div className="flex flex-col -space-y-1">
-                              <p className="font-bold text-gray-700 text-xs sm:text-md">{t('search.course')} </p>
-                              <h1 className="font-bold text-gray-950 text-lg sm:text-3xl first-letter:uppercase">
-                                {course.name}
-                              </h1>
-                            </div>
-                          </div>
-                          <div className="hidden sm:block">
-                            <ActivityShareDropdown
-                              activityName={activity.name}
-                              activityUrl={typeof window !== 'undefined' ? window.location.href : ''}
-                              orgslug={orgslug}
-                              courseUuid={course.course_uuid}
-                              activityId={activity.activity_uuid ? activity.activity_uuid.replace('activity_', '') : activityid.replace('activity_', '')}
-                              activityType={activity.activity_type}
-                            />
-                          </div>
-                        </div>
 
-                        <ActivityIndicators
-                          course_uuid={courseuuid}
-                          current_activity={activityid}
+                    {/* ── Simplified Header ── */}
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">
+                          {getChapterNameByActivityId(course, activity.id)}
+                        </p>
+                        <h1 id="lesson-title" className="font-bold text-gray-950 text-xl sm:text-3xl first-letter:uppercase">
+                          {activity.name}
+                        </h1>
+                        {/* Authors */}
+                        {course.authors && course.authors.filter((a: any) => a.authorship_status === 'ACTIVE').length > 0 && (
+                          <div className="flex items-center gap-2 mt-1.5">
+                            <div className="flex -space-x-2">
+                              {course.authors.filter((a: any) => a.authorship_status === 'ACTIVE').slice(0, 3).map((author: any, idx: number) => (
+                                <div key={author.user.user_uuid} className="relative" style={{ zIndex: 10 - idx }}>
+                                  <UserAvatar
+                                    border="border-2"
+                                    rounded="rounded-full"
+                                    avatar_url={author.user.avatar_image ? getUserAvatarMediaDirectory(author.user.user_uuid, author.user.avatar_image) : ''}
+                                    predefined_avatar={author.user.avatar_image ? undefined : 'empty'}
+                                    width={22}
+                                    showProfilePopup={true}
+                                    userId={author.user.id}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                            <span className="text-xs text-gray-500">
+                              {course.authors.filter((a: any) => a.authorship_status === 'ACTIVE').slice(0, 2).map((a: any) => 
+                                a.user.first_name && a.user.last_name ? `${a.user.first_name} ${a.user.last_name}` : `@${a.user.username}`
+                              ).join(' & ')}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          onClick={() => setIsFocusMode(true)}
+                          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+                        >
+                          <Maximize2 size={14} />
+                          {t('activities.focus_mode')}
+                        </button>
+                        <ActivityShareDropdown
+                          activityName={activity.name}
+                          activityUrl={typeof window !== 'undefined' ? window.location.href : ''}
                           orgslug={orgslug}
-                          course={course}
-                          enableNavigation={true}
-                          trailData={trailData}
+                          courseUuid={course.course_uuid}
+                          activityId={activity.activity_uuid ? activity.activity_uuid.replace('activity_', '') : activityid.replace('activity_', '')}
+                          activityType={activity.activity_type}
                         />
+                      </div>
+                    </div>
 
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center w-full gap-3">
-                          <div className="flex flex-1 items-center space-x-3 min-w-0">
-                            <div className="flex flex-col -space-y-1 min-w-0">
-                              <p className="font-bold text-gray-700 text-xs sm:text-md">
-                                {getChapterNameByActivityId(course, activity.id)}
-                              </p>
-                              <h1 className="font-bold text-gray-950 text-base sm:text-2xl first-letter:uppercase">
-                                {activity.name}
-                              </h1>
-                              {/* Authors and Dates Section */}
-                              <div className="flex flex-wrap items-center gap-3 mt-2">
-                                {/* Avatars */}
-                                {course.authors && course.authors.length > 0 && (
-                                  <div className="flex -space-x-3">
-                                    {course.authors.filter((a: any) => a.authorship_status === 'ACTIVE').slice(0, 3).map((author: any, idx: number) => (
-                                      <div key={author.user.user_uuid} className="relative" style={{ zIndex: 10 - idx }}>
-                                        <UserAvatar
-                                          border="border-2"
-                                          rounded="rounded-full"
-                                          avatar_url={author.user.avatar_image ? getUserAvatarMediaDirectory(author.user.user_uuid, author.user.avatar_image) : ''}
-                                          predefined_avatar={author.user.avatar_image ? undefined : 'empty'}
-                                          width={26}
-                                          showProfilePopup={true}
-                                          userId={author.user.id}
-                                        />
-                                      </div>
-                                    ))}
-                                    {course.authors.filter((a: any) => a.authorship_status === 'ACTIVE').length > 3 && (
-                                      <div className="flex items-center justify-center bg-neutral-100 text-neutral-600 font-medium rounded-full border-2 border-white shadow-sm w-9 h-9 text-xs z-0">
-                                        +{course.authors.filter((a: any) => a.authorship_status === 'ACTIVE').length - 3}
-                                      </div>
-                                    )}
+                    {/* ── Unpublished / Paid Access ── */}
+                    {activity && activity.published == false && (
+                      <div className="p-5 rounded-lg bg-gray-100 border border-gray-200">
+                        <p className="text-sm font-semibold text-gray-700">{t('activities.not_published_yet')}</p>
+                      </div>
+                    )}
+                    {activity && activity.published == true && activity.content.paid_access == false && (
+                      <PaidCourseActivityDisclaimer course={course} />
+                    )}
+
+                    {/* ── TWO-COLUMN LAYOUT: Content + Sidebar ── */}
+                    {activity && activity.published == true && activity.content.paid_access != false && (
+                      <div className="flex gap-8">
+                        {/* ═══ LEFT CONTENT AREA ═══ */}
+                        <div className="flex-1 min-w-0 space-y-8">
+
+                          {/* 1. What You'll Learn */}
+                          {activity.description && (
+                            <section id="lesson-what-youll-learn">
+                              <div className="bg-gray-50 border border-gray-100 rounded-xl p-5">
+                                <h2 className="text-sm font-bold text-gray-900 mb-2">{t('activities.what_you_ll_learn', 'What You\'ll Learn')}</h2>
+                                <p className="text-sm text-gray-600 leading-relaxed">{activity.description}</p>
+                              </div>
+                            </section>
+                          )}
+
+                          {/* 2. Activity Content (Video / Document / Assignment / etc.) */}
+                          <section id="lesson-content">
+                            <div className={`relative ${activity.activity_type === 'TYPE_SCORM' ? 'rounded-xl overflow-hidden' : ''}`}>
+                              <button
+                                onClick={() => setIsFocusMode(true)}
+                                className={`absolute top-3 right-3 hidden sm:flex bg-white/90 hover:bg-white border border-gray-200 nice-shadow p-2 rounded-full cursor-pointer transition-all duration-200 group overflow-hidden pointer-events-auto`}
+                                style={{ zIndex: 'var(--z-interactive)' }}
+                                title={t('activities.focus_mode')}
+                              >
+                                <Maximize2 size={15} className="text-gray-600" />
+                              </button>
+                              {activityContent}
+                            </div>
+                          </section>
+
+                          {/* 3. Practice / Exercise (for assignments, show after content) */}
+                          {activity.activity_type === 'TYPE_ASSIGNMENT' && assignment && (
+                            <section id="lesson-exercise">
+                              <div className="border border-gray-200 rounded-xl p-5">
+                                <h2 className="text-sm font-bold text-gray-900 mb-3">{t('activities.practice', 'Practice / Exercise')}</h2>
+                                <div className="text-sm text-gray-600">
+                                  <AssignmentSubmissionProvider assignment_uuid={assignment?.assignment_uuid}>
+                                    <AssignmentProvider assignment_uuid={assignment?.assignment_uuid}>
+                                      <AssignmentsTaskProvider>
+                                        <AssignmentStudentActivity />
+                                      </AssignmentsTaskProvider>
+                                    </AssignmentProvider>
+                                  </AssignmentSubmissionProvider>
+                                </div>
+                              </div>
+                            </section>
+                          )}
+
+                          {/* 4. Downloadable Resources */}
+                          <section id="lesson-resources">
+                            <div className="border border-gray-200 rounded-xl p-5">
+                              <h2 className="text-sm font-bold text-gray-900 mb-3">{t('activities.resources', 'Downloadable Resources')}</h2>
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                  <div className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-400">
+                                    <FileText size={15} />
                                   </div>
-                                )}
-                                {/* Author names */}
-                                {course.authors && course.authors.length > 0 && (
-                                  <div className="text-xs text-gray-700 font-medium flex items-center gap-1">
-                                    {course.authors.filter((a: any) => a.authorship_status === 'ACTIVE').length > 1 && (
-                                      <span>{t('courses.co_created_by')} </span>
-                                    )}
-                                    {course.authors.filter((a: any) => a.authorship_status === 'ACTIVE').slice(0, 2).map((author: any, idx: number, arr: any[]) => (
-                                      <span key={author.user.user_uuid}>
-                                        {author.user.first_name && author.user.last_name
-                                          ? `${author.user.first_name} ${author.user.last_name}`
-                                          : `@${author.user.username}`}
-                                        {idx === 0 && arr.length > 1 ? ' & ' : ''}
-                                      </span>
-                                    ))}
-                                    {course.authors.filter((a: any) => a.authorship_status === 'ACTIVE').length > 2 && (
-                                      <ToolTip
-                                        content={
-                                          <div className="p-2">
-                                            {course.authors
-                                              .filter((a: any) => a.authorship_status === 'ACTIVE')
-                                              .slice(2)
-                                              .map((author: any) => (
-                                                <div key={author.user.user_uuid} className="text-white text-sm py-1">
-                                                  {author.user.first_name && author.user.last_name
-                                                    ? `${author.user.first_name} ${author.user.last_name}`
-                                                    : `@${author.user.username}`}
-                                                </div>
-                                              ))}
-                                          </div>
-                                        }
-                                      >
-                                        <div className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-2 py-0.5 rounded-md cursor-pointer text-xs font-medium transition-colors duration-200">
-                                          +{course.authors.filter((a: any) => a.authorship_status === 'ACTIVE').length - 2}
-                                        </div>
-                                      </ToolTip>
-                                    )}
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-semibold text-gray-700 truncate">lesson-materials.zip</p>
+                                    <p className="text-[10px] text-gray-400">2.4 MB</p>
                                   </div>
-                                )}
-                                {/* Dates */}
-                                <div className="flex flex-wrap items-center text-xs text-gray-500 gap-1 sm:gap-2">
-                                  <span>
-                                    {t('courses.created_on')} {new Date(course.creation_date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
-                                  </span>
-                                  <span className="mx-1">•</span>
-                                  <span>
-                                    {t('courses.last_updated')} {getRelativeTime(new Date(course.updated_at || course.last_updated || course.creation_date))}
-                                  </span>
+                                  <button className="text-xs font-semibold text-gray-900 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                                    {t('common.download', 'Download')}
+                                  </button>
+                                </div>
+                                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                  <div className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-400">
+                                    <FileText size={15} />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-semibold text-gray-700 truncate">exercise-template.pdf</p>
+                                    <p className="text-[10px] text-gray-400">0.8 MB</p>
+                                  </div>
+                                  <button className="text-xs font-semibold text-gray-900 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                                    {t('common.download', 'Download')}
+                                  </button>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                          <div className="hidden sm:flex space-x-2 items-center relative shrink-0" style={{ zIndex: 'var(--z-interactive)' }}>
-                            {activity && activity.published == true && activity.content.paid_access != false && (
-                              <AuthenticatedClientElement checkMethod="authentication">
-                                {activity.activity_type != 'TYPE_ASSIGNMENT' && (
-                                  <>
-                                    <AIActivityAsk activity={activity} />
-                                    <ActivityChapterDropdown
-                                      course={course}
-                                      currentActivityId={activity.activity_uuid ? activity.activity_uuid.replace('activity_', '') : activityid.replace('activity_', '')}
-                                      orgslug={orgslug}
-                                      trailData={trailData}
-                                    />
-                                    {contributorStatus === 'ACTIVE' && activity.activity_type == 'TYPE_DYNAMIC' && (
-                                      <Link
-                                        href={getUriWithOrg(orgslug, '') + `/course/${courseuuid}/activity/${activityid}/edit`}
-                                        className="bg-emerald-600 rounded-full px-5 drop-shadow-md flex items-center space-x-2 p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out"
-                                      >
-                                        <Edit2 size={17} />
-                                        <span className="text-xs font-bold">{t('courses.contribute')}</span>
-                                      </Link>
-                                    )}
-                                  </>
-                                )}
-                              </AuthenticatedClientElement>
-                            )}
+                          </section>
+
+                          {/* 5. Knowledge Check */}
+                          <section id="lesson-knowledge-check">
+                            <div className="border border-gray-200 rounded-xl p-5">
+                              <h2 className="text-sm font-bold text-gray-900 mb-3">{t('activities.knowledge_check', 'Knowledge Check')}</h2>
+                              <div className="space-y-3">
+                                <div className="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                  <p className="text-xs font-semibold text-gray-800 mb-2">1. What was the main concept covered in this lesson?</p>
+                                  <div className="space-y-1.5">
+                                    {['Option A', 'Option B', 'Option C'].map((opt) => (
+                                      <label key={opt} className="flex items-center gap-2 p-2 rounded-md hover:bg-white transition-colors cursor-pointer">
+                                        <input type="radio" name="kq1" className="w-3.5 h-3.5 accent-gray-900" />
+                                        <span className="text-xs text-gray-600">{opt}</span>
+                                      </label>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </section>
+
+                          {/* 6. What's Next */}
+                          {nextActivity && (
+                            <section id="lesson-whats-next">
+                              <div className="border border-gray-200 rounded-xl p-5">
+                                <h2 className="text-sm font-bold text-gray-900 mb-1">{t('activities.whats_next', 'What\'s Next')}</h2>
+                                <p className="text-xs text-gray-500 mb-3">{t('activities.up_next', 'Up next')}: {nextActivity.name}</p>
+                                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-semibold text-gray-800">{nextActivity.name}</p>
+                                    <p className="text-xs text-gray-500 mt-0.5">{getChapterNameByActivityId(course, nextActivity.id)}</p>
+                                  </div>
+                                  <button
+                                    onClick={() => navigateToActivity(nextActivity)}
+                                    className="flex items-center gap-1.5 text-xs font-semibold text-white bg-gray-900 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors cursor-pointer"
+                                  >
+                                    {t('activities.continue', 'Continue')}
+                                    <ChevronRight size={14} />
+                                  </button>
+                                </div>
+                              </div>
+                            </section>
+                          )}
+
+                          {/* 7. Navigation Buttons */}
+                          {activity && activity.published == true && activity.content.paid_access != false && (
+                            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 pt-2 border-t border-gray-100">
+                              <div>
+                                <PreviousActivityButton
+                                  course={course}
+                                  currentActivityId={activity.id}
+                                  orgslug={orgslug}
+                                />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <ActivityActions
+                                  activity={activity}
+                                  activityid={activityid}
+                                  course={course}
+                                  orgslug={orgslug}
+                                  assignment={assignment}
+                                  showNavigation={false}
+                                  trailData={trailData}
+                                />
+                                <NextActivityButton
+                                  course={course}
+                                  currentActivityId={activity.id}
+                                  orgslug={orgslug}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* ═══ RIGHT SIDEBAR ═══ */}
+                        <div className="w-72 shrink-0 hidden lg:block">
+                          <div className="lg:sticky lg:top-8 space-y-6">
+                            <CourseOutlineSidebar
+                              course={course}
+                              currentActivityId={activity.activity_uuid ? activity.activity_uuid.replace('activity_', '') : activityid.replace('activity_', '')}
+                              orgslug={orgslug}
+                              trailData={trailData}
+                            />
+                            <OnThisPageSidebar />
                           </div>
                         </div>
                       </div>
+                    )}
 
-                      {activity && activity.published == false && (
-                        <div className="p-7 drop-shadow-xs rounded-lg bg-gray-800">
-                          <div className="text-white">
-                            <h1 className="font-bold text-2xl">
-                              {t('activities.not_published_yet')}
-                            </h1>
-                          </div>
-                        </div>
-                      )}
-
-                      {activity && activity.published == true && (
-                        <>
-                          {activity.content.paid_access == false ? (
-                            <PaidCourseActivityDisclaimer course={course} />
-                          ) : (
-                            <div className="flex gap-6">
-                              <div className={`flex-1 min-w-0 ${activity.activity_type === 'TYPE_SCORM' ? 'rounded-xl overflow-hidden' : 'p-3 sm:p-7 drop-shadow-xs rounded-lg'} ${bgColor} relative isolate`} style={{ zIndex: 'var(--z-base)' }}>
-                                <button
-                                  onClick={() => setIsFocusMode(true)}
-                                  className={`absolute ${activity.activity_type === 'TYPE_SCORM' ? 'top-2 right-2' : 'top-4 right-4'} hidden sm:flex bg-white/80 hover:bg-white nice-shadow p-2 rounded-full cursor-pointer transition-all duration-200 group overflow-hidden pointer-events-auto`}
-                                  style={{ zIndex: 'var(--z-interactive)' }}
-                                  title={t('activities.focus_mode')}
-                                >
-                                  <div className="flex items-center">
-                                    <Maximize2 size={16} className="text-gray-700" />
-                                    <span className="text-xs font-bold text-gray-700 opacity-0 group-hover:opacity-100 transition-all duration-200 w-0 group-hover:w-auto group-hover:ml-2 whitespace-nowrap">
-                                      {t('activities.focus_mode')}
-                                    </span>
-                                  </div>
-                                </button>
-                                {activityContent}
-                              </div>
-                              <Suspense fallback={null}>
-                                <AISidePanelInline activity={activity} />
-                              </Suspense>
-                            </div>
-                          )}
-                        </>
-                      )}
-
-                      {/* Activity Actions below the content box */}
-                      {activity && activity.published == true && activity.content.paid_access != false && (
-                        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center mt-4 w-full gap-2 sm:gap-0">
-                          <div className="order-1 sm:order-none">
-                            <PreviousActivityButton
-                              course={course}
-                              currentActivityId={activity.id}
-                              orgslug={orgslug}
-                            />
-                          </div>
-                          <div className="flex items-center justify-between sm:justify-end space-x-2 order-2 sm:order-none">
-                            <ActivityActions
-                              activity={activity}
-                              activityid={activityid}
-                              course={course}
-                              orgslug={orgslug}
-                              assignment={assignment}
-                              showNavigation={false}
-                              trailData={trailData}
-                            />
-                            <NextActivityButton
-                              course={course}
-                              currentActivityId={activity.id}
-                              orgslug={orgslug}
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Fixed Activity Secondary Bar */}
-                      {activity && activity.published == true && activity.content.paid_access != false && (
-                        <FixedActivitySecondaryBar
-                          course={course}
-                          currentActivityId={activityid}
-                          orgslug={orgslug}
-                          activity={activity}
-                        />
-                      )}
-                      
-                      <div style={{ height: '100px' }}></div>
-                    </div>
+                    {/* Fixed Activity Secondary Bar */}
+                    {activity && activity.published == true && activity.content.paid_access != false && (
+                      <FixedActivitySecondaryBar
+                        course={course}
+                        currentActivityId={activityid}
+                        orgslug={orgslug}
+                        activity={activity}
+                      />
+                    )}
+                    
+                    <div style={{ height: '40px' }}></div>
+                  </div>
                 )}
               </GeneralWrapperStyled>
             )}
@@ -1291,6 +1288,172 @@ function PreviousActivityButton({ course, currentActivityId, orgslug }: { course
       <div className="flex items-center space-x-1">
         <ChevronLeft size={17} className="shrink-0" />
         <span className="text-xs sm:text-sm font-semibold truncate max-w-[120px] sm:max-w-[200px]">{previousActivity.name}</span>
+      </div>
+    </div>
+  );
+}
+
+// ─── Course Outline Sidebar ─────────────────────────────────────────
+function CourseOutlineSidebar({ course, currentActivityId, orgslug, trailData }: {
+  course: any
+  currentActivityId: string
+  orgslug: string
+  trailData?: any
+}) {
+  const { t } = useTranslation();
+
+  const cleanCourseUuid = course.course_uuid?.replace('course_', '');
+
+  const getActivityTypeIcon = (activityType: string) => {
+    switch (activityType) {
+      case 'TYPE_VIDEO': return <Video size={12} />;
+      case 'TYPE_DOCUMENT': return <FileText size={12} />;
+      case 'TYPE_DYNAMIC': return <StickyNote size={12} />;
+      case 'TYPE_ASSIGNMENT': return <Backpack size={12} />;
+      default: return <FileText size={12} />;
+    }
+  };
+
+  const getActivityTypeLabel = (activityType: string) => {
+    switch (activityType) {
+      case 'TYPE_VIDEO': return t('activities.video');
+      case 'TYPE_DOCUMENT': return t('activities.document');
+      case 'TYPE_DYNAMIC': return t('activities.page');
+      case 'TYPE_ASSIGNMENT': return t('activities.assignment');
+      default: return t('activities.learning_material');
+    }
+  };
+
+  return (
+    <div className="bg-white border border-gray-200/80 rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-gray-100">
+        <h3 className="text-sm font-semibold text-gray-900">{t('courses.course_content')}</h3>
+      </div>
+      <div className="max-h-[calc(100vh-320px)] overflow-y-auto">
+        {course.chapters.map((chapter: any, chIdx: number) => (
+          <div key={chapter.id}>
+            <div className="px-4 py-2 bg-gray-50 border-b border-gray-100">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-bold text-gray-400 bg-white border border-gray-200 rounded-full w-4 h-4 flex items-center justify-center shrink-0">
+                  {chIdx + 1}
+                </span>
+                <span className="text-xs font-semibold text-gray-700 truncate">{chapter.name}</span>
+              </div>
+            </div>
+            <div className="divide-y divide-gray-50">
+              {chapter.activities.map((activity: any) => {
+                const cleanUuid = activity.activity_uuid?.replace('activity_', '');
+                const isCurrent = cleanUuid === currentActivityId.replace('activity_', '');
+
+                const run = trailData?.runs?.find(
+                  (r: any) => r.course?.course_uuid?.replace('course_', '') === cleanCourseUuid
+                );
+                const isComplete = run?.steps?.find(
+                  (s: any) => s.activity_id === activity.id && s.complete === true
+                );
+
+                return (
+                  <Link
+                    key={activity.id}
+                    href={getUriWithOrg(orgslug, '') + `/course/${cleanCourseUuid}/activity/${cleanUuid}`}
+                    prefetch={false}
+                  >
+                    <div
+                      className={`flex items-start gap-2.5 px-4 py-2.5 transition-colors cursor-pointer ${
+                        isCurrent
+                          ? 'bg-gray-50 border-l-2 border-gray-900 pl-[14px]'
+                          : 'hover:bg-gray-50 border-l-2 border-transparent pl-4'
+                      }`}
+                    >
+                      <div className="mt-0.5 shrink-0">
+                        {isComplete ? (
+                          <Check size={13} className="stroke-[3] text-teal-600" />
+                        ) : (
+                          <div className="w-[13px] h-[13px] rounded-full border-2 border-gray-200" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-xs leading-snug ${isCurrent ? 'font-semibold text-gray-900' : 'font-medium text-gray-600'}`}>
+                          {activity.name}
+                        </p>
+                        <div className="flex items-center gap-1 mt-0.5 text-[10px] text-gray-400">
+                          {getActivityTypeIcon(activity.activity_type)}
+                          <span>{getActivityTypeLabel(activity.activity_type)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── On This Page Sidebar ──────────────────────────────────────────
+function OnThisPageSidebar() {
+  const { t } = useTranslation();
+  const [activeId, setActiveId] = React.useState<string>('');
+
+  const sections = [
+    { id: 'lesson-what-youll-learn', label: t('activities.what_you_ll_learn', 'What You\'ll Learn') },
+    { id: 'lesson-content', label: t('activities.lesson_content', 'Lesson Content') },
+    { id: 'lesson-exercise', label: t('activities.practice', 'Practice / Exercise') },
+    { id: 'lesson-resources', label: t('activities.resources', 'Resources') },
+    { id: 'lesson-knowledge-check', label: t('activities.knowledge_check', 'Knowledge Check') },
+    { id: 'lesson-whats-next', label: t('activities.whats_next', 'What\'s Next') },
+  ];
+
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveId(entry.target.id);
+          }
+        }
+      },
+      { rootMargin: '-80px 0px -60% 0px', threshold: 0.1 }
+    );
+
+    sections.forEach(({ id }) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const handleClick = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setActiveId(id);
+    }
+  };
+
+  return (
+    <div className="bg-white border border-gray-200/80 rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-gray-100">
+        <h3 className="text-sm font-semibold text-gray-900">{t('activities.on_this_page', 'On This Page')}</h3>
+      </div>
+      <div className="px-2 py-2 space-y-0.5">
+        {sections.map(({ id, label }) => (
+          <button
+            key={id}
+            onClick={() => handleClick(id)}
+            className={`w-full text-left px-2 py-1.5 rounded-md text-xs transition-colors cursor-pointer ${
+              activeId === id
+                ? 'bg-gray-100 text-gray-900 font-semibold'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50 font-medium'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
     </div>
   );

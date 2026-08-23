@@ -85,6 +85,7 @@
     "dompurify": "^3.3.1",
     "emblor": "^1.4.8",
     "formik": "^2.4.6",
+    "framer-motion": "^13.1.1",
     "get-youtube-id": "^1.0.1",
     "github-markdown-css": "^5.9.0",
     "highlight.js": "^11.11.1",
@@ -151,7 +152,6 @@
     "lodash-es": ">=4.17.23",
     "preact": ">=10.27.3",
     "js-yaml": ">=4.1.1",
-    "jspdf": ">=4.0.0",
     "prosemirror-view": "1.41.8"
   }
 }
