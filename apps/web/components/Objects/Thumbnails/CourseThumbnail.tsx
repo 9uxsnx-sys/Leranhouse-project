@@ -67,6 +67,7 @@ export const removeCoursePrefix = (course_uuid: string) => course_uuid.replace('
 function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isSelected = false, onToggleSelect }: PropsType) {
   const org = useOrg() as any
   const session = useLHSession() as any
+  const { t } = useTranslation()
 
   const handleSelectClick = (e: React.MouseEvent) => {
     e.preventDefault()

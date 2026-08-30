@@ -407,9 +407,11 @@ const CourseClient = (props: any) => {
                     <div className="w-full h-1.5 bg-ui-bg-subtle rounded-full mt-2 overflow-hidden">
                       <div className="h-full bg-black rounded-full transition-all" style={{ width: '75%' }} />
                     </div>
-                    <Button variant="primary" size="large" className="w-full mt-4">
-                      Continue Learning
-                    </Button>
+                    <Link href={getUriWithOrg(orgslug, `/course/${courseuuid}/lesson-preview`)} className="block w-full mt-4">
+                      <Button variant="primary" size="large" className="w-full">
+                        Continue Learning
+                      </Button>
+                    </Link>
                   </Container>
 
                   {/* ── SIDEBAR 2: Course Includes ── */}
