@@ -3,49 +3,47 @@
 ## Layout Overview
 
 ```
-┌──────────────────────────────────────────────────────────┐
-│  Breadcrumb / Course Title                               │
-├──────────────────────────────┬───────────────────────────┤
-│                              │                           │
-│  ┌─ LEFT CONTENT AREA ────┐  │  ┌─ RIGHT SIDEBAR ────┐  │
-│  │                         │  │  │                      │  │
-│  │  Lesson Title           │  │  │  COURSE OUTLINE      │  │
-│  │                         │  │  │                      │  │
-│  │  ┌─ What You'll Learn ─┐│  │  │  Module 1: Title    │  │
-│  │  │  • Key point 1      ││  │  │  ├─ Lesson 1        │  │
-│  │  │  • Key point 2      ││  │  │  ├─ Lesson 2  ◀     │  │
-│  │  │  • Key point 3      ││  │  │  └─ Lesson 3        │  │
-│  │  └─────────────────────┘│  │  │  Module 2: Title    │  │
-│  │                         │  │  │  ├─ Lesson 4        │  │
-│  │  ┌─ Video ────────────┐│  │  │  ├─ Lesson 5        │  │
-│  │  │  [  VIDEO PLAYER ] ││  │  │  └─ Lesson 6        │  │
-│  │  └─────────────────────┘│  │  │                      │  │
-│  │                         │  │  │  ─── ─── ─── ───    │  │
-│  │  ┌─ Exercise ──────────┐│  │  │                      │  │
-│  │  │  Hands-on task      ││  │  │  ON THIS PAGE        │  │
-│  │  └─────────────────────┘│  │  │                      │  │
-│  │                         │  │  │  • What You'll Learn │  │
-│  │  ┌─ Resources ─────────┐│  │  │  • Video             │  │
-│  │  │  📎 file.zip        ││  │  │  • Exercise          │  │
-│  │  │  📎 cheatsheet.pdf  ││  │  │  • Resources         │  │
-│  │  └─────────────────────┘│  │  │  • Knowledge Check   │  │
-│  │                         │  │  │  • What's Next       │  │
-│  │  ┌─ Knowledge Check ───┐│  │  └──────────────────────┘  │
-│  │  │  Q1: What is X?     ││  │                           │
-│  │  │  Q2: How does Y?    ││  │                           │
-│  │  └─────────────────────┘│  │                           │
-│  │                         │  │                           │
-│  │  ┌─ What's Next ───────┐│  │                           │
-│  │  │  Up next: Lesson 4  ││  │                           │
-│  │  └─────────────────────┘│  │                           │
-│  │                         │  │                           │
-│  │  ◀ Previous  │  Mark ✅ │  │                           │
-│  │                         │  │                           │
-│  └─────────────────────────┘  │                           │
-│                              │                           │
-├──────────────────────────────┴───────────────────────────┤
-│  Footer                                                   │
-└──────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│  Page Title (Lesson Title)                                   │
+├─────────────────────────────┬────────────────────────────────┤
+│                             │                                │
+│  ┌─ LEFT CONTENT AREA ───┐ │  ┌─ RIGHT SIDEBAR ──────────┐  │
+│  │                        │ │  │                           │  │
+│  │  What You'll Learn     │ │  │  COURSE OUTLINE          │  │
+│  │  • Key point 1         │ │  │  (accordion block)       │  │
+│  │  • Key point 2         │ │  │                           │  │
+│  │  • Key point 3         │ │  │  Current Lesson Title     │  │
+│  │                        │ │  │  Module X · Lesson Y of Z│  │
+│  │  Main Lesson Video     │ │  │  ▼ (expand)              │  │
+│  │  [  VIDEO PLAYER ]     │ │  │                           │  │
+│  │                        │ │  │  When expanded:           │  │
+│  │  Key Takeaways         │ │  │  Module 1                │  │
+│  │  • Main point          │ │  │    ● Lesson 1  ◀         │  │
+│  │    • Sub point         │ │  │    ○ Lesson 2            │  │
+│  │    • Sub point         │ │  │    ○ Lesson 3            │  │
+│  │  • Main point          │ │  │  Module 2                │  │
+│  │    • Sub point         │ │  │    ○ Lesson 4            │  │
+│  │                        │ │  │    ○ Lesson 5            │  │
+│  │  Resources             │ │  │                           │  │
+│  │  • File description    │ │  │  ON THIS PAGE            │  │
+│  │    [download icon]     │ │  │  (Inline Tip style)      │  │
+│  │  • File description    │ │  │                           │  │
+│  │    [download icon]     │ │  │  │ Key Takeaways         │  │
+│  │                        │ │  │  │ Resources             │  │
+│  │  Quick Check           │ │  │  │ Quick Check           │  │
+│  │  Q1: What is X?        │ │  │  │ Up Next              │  │
+│  │  Q2: How does Y?       │ │  │  │                       │  │
+│  │                        │ │  │  (active ▎ slides        │  │
+│  │  Up Next               │ │  │   smoothly on scroll)    │  │
+│  │  Preview card          │ │  │                           │  │
+│  │                        │ │  │                           │  │
+│  │  ◀ Previous            │ │  │                           │  │
+│  │  Mark as Complete      │ │  │                           │  │
+│  │  Next ▶                │ │  │                           │  │
+│  │                        │ │  │                           │  │
+│  └────────────────────────┘ │  └───────────────────────────┘  │
+│                             │                                │
+└─────────────────────────────┴────────────────────────────────┘
 ```
 
 ---
@@ -54,39 +52,43 @@
 
 | # | Block | Purpose |
 |---|-------|---------|
-| 1 | **Lesson Title** | H1 heading — what this lesson is about |
-| 2 | **What You'll Learn** | 3-5 bullet points priming the learner before the video |
-| 3 | **Video** | Main teaching content (embedded player, 5-15 min) |
-| 4 | **Practice / Exercise** | Hands-on task applying what was just learned |
-| 5 | **Downloadable Resources** | Code files, PDFs, cheatsheets, templates |
-| 6 | **Knowledge Check** | 2-3 quick quiz questions to verify understanding |
-| 7 | **What's Next** | Preview card for the next lesson (title + description) |
-| 8 | **Navigation** | ◀ Previous Lesson & Mark Complete ▶ buttons |
+| 1 | **Lesson Title** | H1 heading — `text-3xl md:text-4xl font-semibold text-ui-fg-base` |
+| 2 | **What You'll Learn** | Bullet points priming the learner before the video, in a white card with subtle border |
+| 3 | **Main Lesson Video** | Main teaching content (embedded player, aspect-video container) |
+| 4 | **Key Takeaways** | Summary of the lesson with main points and sub-points using bullet dots |
+| 5 | **Resources** | Downloadable files listed with descriptions and download icon buttons |
+| 6 | **Quick Check** | Q&A accordion cards (same style as curriculum module cards) |
+| 7 | **Up Next** | Preview card for the next lesson (book icon + title + description) |
+| 8 | **Navigation** | Previous (ghost) | Mark as Complete (primary) | Next (ghost) |
 
 ---
 
 ## Right Sidebar: Two Sections
 
-### Section 1: Course Outline (Top)
-- Full list of all modules/chapters with their lessons
-- Current lesson highlighted with active indicator
-- Completed lessons show checkmark (✅)
-- Locked lessons show lock icon (🔒)
+### Section 1: Course Outline (Accordion Block)
+- **Collapsed state**: Shows current lesson title prominently + "Module X · Lesson Y of Z" underneath
+- **Expanded state**: Lists all modules with their lessons/quizzes underneath each module name
+- **Active indicator**: Filled black circle with white dot (●) for current lesson, outlined circle (○) for others
+- Quizzes show `FileQuestion` icon instead of circle
+- Smooth expand/collapse animation (grid rows 0fr → 1fr)
 - Clicking a lesson navigates to that lesson's page
 
-### Section 2: On This Page (Bottom)
-- Anchor links to each section of the current lesson
-- Clicking scrolls smoothly to that section
-- Active section highlights as user scrolls (Intersection Observer)
-- Sections: What You'll Learn, Video, Exercise, Resources, Knowledge Check, What's Next
+### Section 2: On This Page (Inline Tip Style)
+- Plain text links (no block/container)
+- Each link shows a small vertical bar (4px wide, rounded pill) on the left when active
+- Single indicator bar slides smoothly between shortcuts on scroll (CSS transition)
+- Sections: What You'll Learn, Main Lesson Video, Key Takeaways, Resources, Quick Check, Up Next
 
 ---
 
 ## Design Principles
 
-- **Medusa style** — clean, muted grays, subtle borders, no heavy shadows
+- **Medusa style** — clean, muted grays, subtle borders (`shadow-[0_0_0_1px_rgba(0,0,0,0.08)]`), no heavy shadows
 - **Full lesson on one scrollable page** — no pagination within lesson
-- **Sticky sidebar** — curriculum + anchor links stay visible while scrolling
-- **Mobile** — sidebar collapses into a top drawer / accordion
-- **Progression** — Mark Complete unlocks next lesson, updates progress bar
-- **No focus rings on inputs** — just blinking cursor (Apple/Linear style)
+- **Two-column layout** — left content (`flex-1 min-w-0 max-w-3xl`) + right sidebar (`w-72 xl:w-80 shrink-0`)
+- **Section spacing** — `space-y-12` between sections, `mb-5` between title and content
+- **Sticky sidebar** — curriculum + anchor links stay visible while scrolling (`sticky top-8`)
+- **Mobile** — sidebar collapses into two-column flex column layout
+- **Section titles** — `!text-2xl` heading, no subtitles
+- **Navigation** — Previous/Next as ghost buttons, Mark as Complete as primary button
+- **No subtitles** under section titles for cleaner design
