@@ -12,7 +12,9 @@
 |-------|-----------|----------------|-----------------|
 | `/orgs/[orgslug]/` | **Home** | `(withmenu)/page.tsx` | 🔴 To do |
 | `/orgs/[orgslug]/courses` | **Courses** | `(withmenu)/courses/courses.tsx` | ✅ Done |
-| `/orgs/[orgslug]/course/[uuid]` | **Course Detail** | `(withmenu)/course/[uuid]/course.tsx` | 🔴 To do |
+| `/orgs/[orgslug]/course/[uuid]` | **Course Detail** | `(withmenu)/course/[uuid]/course.tsx` | 🟡 In progress |
+| `/orgs/[orgslug]/course/[uuid]/lesson-preview` | **Lesson Preview** | `(withmenu)/course/[uuid]/lesson-preview/page.tsx` | 🟡 In progress (mockup/design iteration) |
+| `/orgs/[orgslug]/course/[uuid]/activity/[activityid]` | **Activity / Lesson** | `(withmenu)/course/[uuid]/activity/[activityid]/activity.tsx` | 🔴 To do (will be replaced by lesson-preview) |
 | `/orgs/[orgslug]/collections` | **Collections** | `(withmenu)/collections/page.tsx` | 🔴 To do |
 | `/orgs/[orgslug]/collection/[id]` | **Collection Detail** | `(withmenu)/collection/[id]/collection.tsx` | 🔴 To do |
 | `/orgs/[orgslug]/communities` | **Communities** | `(withmenu)/communities/communities.tsx` | 🔴 To do |
