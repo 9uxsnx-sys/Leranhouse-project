@@ -36,6 +36,7 @@ import {
 } from '@components/ui/dropdown-menu'
 import { IconButton } from '@components/ui/icon-button'
 import { FeedbackModal } from '@components/Objects/Modals/FeedbackModal'
+import { SearchModal } from '@components/Objects/Modals/SearchModal'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import { useJoinBannerVisible, JOIN_BANNER_HEIGHT } from '@components/Objects/Banners/OrgJoinBanner'
 import { usePlan } from '@components/Hooks/usePlan'
@@ -274,6 +275,7 @@ export const OrgMenu = ({
   const { t } = useTranslation()
   const { rights } = useAdminStatus()
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false)
+  const [searchModalOpen, setSearchModalOpen] = useState(false)
   const { isVisible: isJoinBannerVisible } = useJoinBannerVisible()
 
   // Copilot bubble state
@@ -365,7 +367,7 @@ export const OrgMenu = ({
         <aside
           className={`hidden h-full w-[220px] shrink-0 flex-col border-e border-ui-border-base ${sidebarCollapsed ? 'lg:hidden' : 'lg:flex'}`}
         >
-          <MedusaSidebarContent orgslug={orgslug} />
+          <MedusaSidebarContent orgslug={orgslug} onSearchClick={() => setSearchModalOpen(true)} />
         </aside>
 
         {/* Right column — shell.tsx (flex h-screen w-full flex-col overflow-auto) */}
@@ -382,11 +384,6 @@ export const OrgMenu = ({
             </div>
 
             <div className="flex items-center justify-end gap-x-3">
-              {/* Search bar — desktop only (mobile has it in the drawer) */}
-              <div className="hidden md:flex">
-                <SearchBar orgslug={orgslug} />
-              </div>
-
               {/* Notifications bell */}
               <NotificationsBell />
 
@@ -525,10 +522,7 @@ export const OrgMenu = ({
               <h2 className="sr-only">{t('app.nav.accessibility.title', 'Navigation')}</h2>
             </div>
           </div>
-          <div className="px-3 pb-1">
-            <SearchBar orgslug={orgslug} isMobile={true} />
-          </div>
-          <MedusaSidebarContent orgslug={orgslug} />
+          <MedusaSidebarContent orgslug={orgslug} onSearchClick={() => setSearchModalOpen(true)} />
         </div>
       </div>
 
@@ -540,6 +534,9 @@ export const OrgMenu = ({
         userName={session?.data?.user?.username}
         userEmail={session?.data?.user?.email}
       />
+
+      {/* Search modal */}
+      <SearchModal open={searchModalOpen} onClose={() => setSearchModalOpen(false)} orgslug={orgslug} />
 
       {/* Copilot floating bubble */}
       {isBubbleMode && (

@@ -31,8 +31,8 @@ export function CourseCard({ id, title, description, image, lessons, duration, d
           </div>
         )}
       </div>
-      {/* Content — fills remaining space, min-height ensures metadata stays at bottom */}
-      <div className="px-4 pt-3 pb-4 flex flex-col flex-1 min-h-[160px]">
+      {/* Content */}
+      <div className="px-4 pt-3 pb-4 flex flex-col flex-1">
         {/* Top section: title + description */}
         <div className="flex flex-col gap-1">
           {/* Title: 15px, 600 weight, 2-line clamp */}
@@ -44,9 +44,7 @@ export function CourseCard({ id, title, description, image, lessons, duration, d
             {description || 'placeholder'}
           </p>
         </div>
-        {/* Spacer: pushes metadata to bottom */}
-        <div className="flex-1" />
-        {/* Metadata: always fixed at bottom */}
+        {/* Metadata: directly below description */}
         <p className="text-[12px] text-gray-400">
           {lessons} lessons &middot; {duration} &middot; {difficulty}
         </p>

@@ -40,6 +40,7 @@ export interface Podcast {
 
 export interface PodcastWithEpisodeCount extends Podcast {
   episode_count: number
+  total_duration_seconds: number
 }
 
 export interface PodcastMeta {

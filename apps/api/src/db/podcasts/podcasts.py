@@ -86,3 +86,4 @@ class PodcastRead(PodcastBase):
 
 class PodcastReadWithEpisodeCount(PodcastRead):
     episode_count: int = 0
+    total_duration_seconds: int = 0

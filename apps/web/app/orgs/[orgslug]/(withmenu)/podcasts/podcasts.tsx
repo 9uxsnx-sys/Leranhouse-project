@@ -1,20 +1,25 @@
 'use client'
-
 import React, { useState, useMemo } from 'react'
-import { useSearchParams } from 'next/navigation'
-import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
-import TypeOfContentTitle from '@components/Objects/StyledElements/Titles/TypeOfContentTitle'
-import PodcastThumbnail from '@components/Objects/Thumbnails/PodcastThumbnail'
-import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
-import Modal from '@components/Objects/StyledElements/Modal/Modal'
-import CreatePodcastModal from '@components/Objects/Modals/Podcast/Create/CreatePodcast'
-import NewPodcastButton from '@components/Objects/StyledElements/Buttons/NewPodcastButton'
-import useAdminStatus from '@components/Hooks/useAdminStatus'
-import { PodcastWithEpisodeCount } from '@services/podcasts/podcasts'
-import { Headphones, ChevronLeft, ChevronRight, Search, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import FeatureDisabledView from '@components/Dashboard/Shared/FeatureDisabled/FeatureDisabledView'
+import { Search, Headphones, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useOrg } from '@components/Contexts/OrgContext'
+import { PodcastCard } from '@components/Objects/Thumbnails/PodcastCard'
+import PodcastCardShowcase from '@components/Objects/Thumbnails/PodcastCardShowcase'
 import { searchMatchesAny } from '@/lib/search/normalize'
+import { PodcastWithEpisodeCount } from '@services/podcasts/podcasts'
+import FeatureDisabledView from '@components/Dashboard/Shared/FeatureDisabled/FeatureDisabledView'
+
+// Medusa components
+import { IconButton } from '@/components/ui/icon-button'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
+
+const removePodcastPrefix = (podcast_uuid: string) => podcast_uuid.replace('podcast_', '')
 
 interface PodcastsClientProps {
   orgslug: string
@@ -29,30 +34,43 @@ export default function PodcastsClient({
 }: PodcastsClientProps) {
   const { t } = useTranslation()
   const allPodcasts = initialPodcasts
-  const searchParams = useSearchParams()
-  const isCreatingPodcast = searchParams.get('new') ? true : false
-  const [newPodcastModal, setNewPodcastModal] = useState(isCreatingPodcast)
-  const { isAdmin: isUserAdmin } = useAdminStatus()
+  const org = useOrg() as any
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('')
 
-  // Filter podcasts based on search
+  // Filter state
+  const [filterVisibility, setFilterVisibility] = useState<string>('all')
+
+  // Filter podcasts based on search and visibility
   const filteredPodcasts = useMemo(() => {
-    if (!searchQuery.trim()) return allPodcasts
-    return allPodcasts.filter((podcast: PodcastWithEpisodeCount) =>
-      searchMatchesAny([podcast.name, podcast.description, podcast.tags], searchQuery)
-    )
-  }, [allPodcasts, searchQuery])
+    let podcasts = allPodcasts
+
+    // Visibility filter
+    if (filterVisibility === 'public') {
+      podcasts = podcasts.filter((p: any) => p.public === true)
+    } else if (filterVisibility === 'private') {
+      podcasts = podcasts.filter((p: any) => p.public === false)
+    }
+
+    // Search filter
+    if (searchQuery.trim()) {
+      podcasts = podcasts.filter((podcast: any) =>
+        searchMatchesAny([podcast.name, podcast.description, podcast.tags], searchQuery)
+      )
+    }
+
+    return podcasts
+  }, [allPodcasts, searchQuery, filterVisibility])
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 12
 
-  // Reset to page 1 when search changes
+  // Reset to page 1 when search or filter changes
   React.useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery])
+  }, [searchQuery, filterVisibility])
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredPodcasts.length / itemsPerPage)
@@ -65,6 +83,7 @@ export default function PodcastsClient({
   const goToPage = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
 
@@ -94,10 +113,6 @@ export default function PodcastsClient({
     return pages
   }
 
-  async function closeNewPodcastModal() {
-    setNewPodcastModal(false)
-  }
-
   return (
     <FeatureDisabledView
       featureName="podcasts"
@@ -105,172 +120,167 @@ export default function PodcastsClient({
       icon={Headphones}
       context="public"
     >
-    <div className="w-full">
-      <GeneralWrapperStyled>
-        <div className="flex flex-col space-y-2 mb-2">
-          <div className="flex items-center justify-between">
-            <TypeOfContentTitle title={t('podcasts.podcasts')} type="pod" />
-            <AuthenticatedClientElement
-              checkMethod="roles"
-              action="create"
-              ressourceType="podcasts"
-              orgId={org_id}
-            >
-              <Modal
-                isDialogOpen={newPodcastModal}
-                onOpenChange={setNewPodcastModal}
-                minHeight="md"
-                minWidth="lg"
-                dialogContent={
-                  <CreatePodcastModal
-                    closeModal={closeNewPodcastModal}
-                    orgslug={orgslug}
-                  />
-                }
-                dialogTitle={t('podcasts.create_podcast')}
-                dialogDescription={t('podcasts.create_new_podcast')}
-                dialogTrigger={
-                  <button>
-                    <NewPodcastButton />
-                  </button>
-                }
-              />
-            </AuthenticatedClientElement>
-          </div>
+      <div className="pt-8 px-6 pb-0" style={{ display: 'grid', gridTemplateRows: 'auto auto 1fr auto', minHeight: '100dvh' }}>
+        {/* Page title */}
+        <div className="mb-6">
+          <h1 className="text-[28px] font-semibold text-ui-fg-base">
+            {t('podcasts.podcasts')}
+          </h1>
+        </div>
 
-          {/* Search */}
-          {allPodcasts.length > 0 && (
-            <div className="relative w-full sm:w-80 mb-4">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                aria-label={t('podcasts.search_placeholder')}
-                placeholder={t('podcasts.search_placeholder')}
-                className="w-full pl-10 pr-10 py-2.5 bg-white nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0"
-              />
+        {/* Search + Filter toolbar (only if podcasts exist) */}
+        {allPodcasts.length > 0 && (
+          <div className="flex items-center gap-3 mb-8">
+            {/* Search + results count group (left side) */}
+            <div className="flex items-center gap-3">
+              {/* Search bar */}
+              <div className="relative w-80">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t('podcasts.search_placeholder')}
+                  className="w-full h-7 pl-8 pr-2 text-sm bg-white shadow-borders-base rounded-md placeholder:text-gray-400 focus:outline-none"
+                />
+              </div>
+
+              {/* Search results count */}
               {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                <span className="txt-compact-xsmall text-ui-fg-muted whitespace-nowrap">
+                  {t('podcasts.search_results', { count: filteredPodcasts.length, query: searchQuery })}
+                </span>
               )}
             </div>
-          )}
 
-          {/* Search Results Info */}
-          {searchQuery && (
-            <div className="mb-2 text-sm text-gray-500">
-              {t('podcasts.search_results', { count: filteredPodcasts.length, query: searchQuery })}
-            </div>
-          )}
+            {/* Spacer pushes filter to the right */}
+            <div className="flex-1" />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {/* Filter — Medusa IconButton + DropdownMenu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label={t('podcasts.filter_podcasts')}>
+                  <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2.5 4.5h10M4.5 7.5h6M6.5 10.5h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </IconButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-white min-w-0 w-28">
+                <DropdownMenuItem onClick={() => setFilterVisibility('all')}>
+                  {t('podcasts.all_podcasts') || 'All Podcasts'}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilterVisibility('public')}>
+                  {t('podcasts.public') || 'Public'}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setFilterVisibility('private')}>
+                  {t('podcasts.private') || 'Private'}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
+
+        {/* Card design showcase */}
+        {allPodcasts.length > 0 && (
+          <PodcastCardShowcase podcasts={allPodcasts} />
+        )}
+
+        {/* Grid area */}
+        <div className="flex-1 flex flex-col">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {paginatedPodcasts.map((podcast: PodcastWithEpisodeCount) => (
-              <div key={podcast.podcast_uuid} className="">
-                <PodcastThumbnail podcast={podcast} orgslug={orgslug} />
-              </div>
+              <PodcastCard
+                key={podcast.podcast_uuid}
+                id={removePodcastPrefix(podcast.podcast_uuid)}
+                title={podcast.name}
+                description={podcast.description || ''}
+                thumbnailImage={podcast.thumbnail_image || ''}
+                episodeCount={podcast.episode_count || 0}
+                totalDurationSeconds={podcast.total_duration_seconds || 0}
+                creationDate={podcast.creation_date || ''}
+                org_uuid={org?.org_uuid}
+                href={`/orgs/${orgslug}/podcast/${removePodcastPrefix(podcast.podcast_uuid)}`}
+              />
             ))}
+
+            {/* Empty state — search with no results */}
             {filteredPodcasts.length === 0 && searchQuery && (
-              <div className="col-span-full flex flex-col justify-center items-center py-12 px-4">
-                <Search className="w-12 h-12 text-gray-300 mb-4" />
-                <h2 className="text-xl font-semibold text-gray-600 mb-2">
+              <div className="col-span-full flex flex-col justify-center items-center py-16 px-4">
+                <div className="p-4 bg-ui-bg-base rounded-full shadow-borders-base mb-4">
+                  <Headphones className="w-8 h-8 text-ui-fg-muted" strokeWidth={1.5} />
+                </div>
+                <h2 className="text-xl font-semibold text-ui-fg-base mb-2">
                   {t('podcasts.no_search_results')}
                 </h2>
-                <p className="text-gray-400">
+                <p className="txt-compact-small text-ui-fg-muted">
                   {t('podcasts.try_different_search')}
                 </p>
               </div>
             )}
+
+            {/* Empty state — no podcasts at all */}
             {allPodcasts.length === 0 && !searchQuery && (
-              <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/30">
-                <div className="p-4 bg-white rounded-full nice-shadow mb-4">
-                  <Headphones className="w-8 h-8 text-gray-300" strokeWidth={1.5} />
+              <div className="col-span-full flex flex-col justify-center items-center py-16 px-4">
+                <div className="p-4 bg-ui-bg-base rounded-full shadow-borders-base mb-4">
+                  <Headphones className="w-8 h-8 text-ui-fg-muted" strokeWidth={1.5} />
                 </div>
-                <h1 className="text-xl font-bold text-gray-600 mb-2">
+                <h1 className="text-xl font-semibold text-ui-fg-base mb-2">
                   {t('podcasts.no_podcasts')}
                 </h1>
-                <p className="text-md text-gray-400 mb-6 text-center max-w-xs">
-                  {isUserAdmin ? (
-                    t('podcasts.create_podcasts_placeholder')
-                  ) : (
-                    t('podcasts.no_podcasts_description')
-                  )}
+                <p className="txt-compact-small text-ui-fg-muted mb-6 text-center max-w-xs">
+                  {t('podcasts.no_podcasts_description')}
                 </p>
-                {isUserAdmin && (
-                  <div className="mt-4">
-                    <AuthenticatedClientElement
-                      action="create"
-                      ressourceType="podcasts"
-                      checkMethod="roles"
-                      orgId={org_id}
-                    >
-                      <button onClick={() => setNewPodcastModal(true)}>
-                        <NewPodcastButton />
-                      </button>
-                    </AuthenticatedClientElement>
-                  </div>
-                )}
               </div>
             )}
           </div>
-
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
-            <div className="mt-8 flex items-center justify-center gap-2">
-              <button
-                onClick={() => goToPage(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 bg-white nice-shadow rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                <span className="hidden sm:inline">{t('pagination.previous')}</span>
-              </button>
-
-              <div className="flex items-center gap-1">
-                {getVisiblePageNumbers().map((page, index) => (
-                  <React.Fragment key={index}>
-                    {page === '...' ? (
-                      <span className="px-2 py-1 text-gray-400">...</span>
-                    ) : (
-                      <button
-                        onClick={() => goToPage(page as number)}
-                        className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                          currentPage === page
-                            ? 'bg-black text-white'
-                            : 'bg-white text-gray-600 nice-shadow hover:bg-gray-50'
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    )}
-                  </React.Fragment>
-                ))}
-              </div>
-
-              <button
-                onClick={() => goToPage(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 bg-white nice-shadow rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <span className="hidden sm:inline">{t('pagination.next')}</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          )}
-
-          {/* Pagination info */}
-          {totalPages > 1 && (
-            <div className="mt-2 text-center text-sm text-gray-500">
-              {t('pagination.showing_page', { current: currentPage, total: totalPages })}
-            </div>
-          )}
         </div>
-      </GeneralWrapperStyled>
-    </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-1 pt-6 pb-0">
+            <Button
+              variant="transparent"
+              size="small"
+              onClick={() => goToPage(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span className="hidden sm:inline ml-1">{t('pagination.previous')}</span>
+            </Button>
+
+            <div className="flex items-center gap-1 mx-2">
+              {getVisiblePageNumbers().map((page, index) => (
+                <React.Fragment key={index}>
+                  {page === '...' ? (
+                    <span className="px-2 py-1 txt-compact-small text-ui-fg-muted">...</span>
+                  ) : (
+                    <button
+                      onClick={() => goToPage(page as number)}
+                      className={`w-7 h-7 txt-compact-small-plus rounded-md transition-colors ${
+                        currentPage === page
+                          ? 'bg-ui-bg-base shadow-borders-base text-ui-fg-base'
+                          : 'text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-base-hover'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+
+            <Button
+              variant="transparent"
+              size="small"
+              onClick={() => goToPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              <span className="hidden sm:inline mr-1">{t('pagination.next')}</span>
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
+      </div>
     </FeatureDisabledView>
   )
 }

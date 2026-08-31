@@ -13,7 +13,6 @@ import {
   House,
   Book,
   FolderOpen,
-  PlaySolid,
   Users,
   CubeSolid,
   ShoppingCart,
@@ -21,6 +20,7 @@ import {
   GridList,
   GridLayout,
   EllipsisHorizontal,
+  MagnifyingGlass,
 } from '@components/Objects/Icons/MedusaIcons'
 import { Text } from '@components/ui/text'
 
@@ -44,10 +44,9 @@ interface NavEntry {
 }
 
 const NAV_ITEMS: NavEntry[] = [
+  { to: '/search', labelKey: 'common.search', icon: MagnifyingGlass, feature: null },
   { to: '/', labelKey: 'common.home', icon: House, feature: null },
   { to: '/courses', labelKey: 'courses.courses', icon: Book, feature: 'courses' },
-  { to: '/collections', labelKey: 'collections.collections', icon: FolderOpen, feature: 'collections' },
-  { to: '/podcasts', labelKey: 'podcasts.podcasts', icon: PlaySolid, feature: 'podcasts' },
   { to: '/communities', labelKey: 'communities.title', icon: Users, feature: 'communities' },
   { to: '/playgrounds', label: 'Playgrounds', icon: CubeSolid, feature: 'playgrounds' },
   { to: '/store', label: 'Store', icon: ShoppingCart, feature: 'payments' },
@@ -103,15 +102,33 @@ function NavLinkItem({
   item,
   orgslug,
   active,
+  onSearchClick,
 }: {
   item: NavEntry
   orgslug: string
   active: boolean
+  onSearchClick?: () => void
 }) {
   const { t } = useTranslation()
   const href = getUriWithOrg(orgslug, item.to)
   const label = item.labelKey ? t(item.labelKey) : item.label
   const Icon = item.icon
+
+  if (item.to === '/search') {
+    return (
+      <button
+        onClick={onSearchClick}
+        className={`${NAV_BASE} w-full text-left`}
+      >
+        <div className="flex size-6 items-center justify-center">
+          <Icon className="h-4 w-4" />
+        </div>
+        <Text size="small" weight="plus" leading="compact">
+          {label}
+        </Text>
+      </button>
+    )
+  }
 
   return (
     <Link href={href} className={`${NAV_BASE} ${active ? NAV_ACTIVE : ''}`}>
@@ -125,7 +142,7 @@ function NavLinkItem({
   )
 }
 
-export function MedusaSidebarContent({ orgslug }: { orgslug: string }) {
+export function MedusaSidebarContent({ orgslug, onSearchClick }: { orgslug: string; onSearchClick?: () => void }) {
   const org = useOrg() as any
   const pathname = usePathname()
   const { rights } = useAdminStatus()
@@ -164,6 +181,7 @@ export function MedusaSidebarContent({ orgslug }: { orgslug: string }) {
                   item={item}
                   orgslug={orgslug}
                   active={isActive(item.to)}
+                  onSearchClick={onSearchClick}
                 />
               ))}
             </div>

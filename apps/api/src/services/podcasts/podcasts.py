@@ -375,17 +375,25 @@ async def get_podcasts_orgslug(
             )
         )
 
-    # Get episode counts for all podcasts
-    episode_count_query = (
-        select(PodcastEpisode.podcast_id, func.count(PodcastEpisode.id))
+    # Get episode counts and total duration for all podcasts
+    episode_stats_query = (
+        select(
+            PodcastEpisode.podcast_id,
+            func.count(PodcastEpisode.id),
+            func.coalesce(func.sum(PodcastEpisode.duration_seconds), 0)
+        )
         .where(PodcastEpisode.podcast_id.in_(podcast_ids))
         .group_by(PodcastEpisode.podcast_id)
     )
-    episode_counts = {podcast_id: count for podcast_id, count in db_session.exec(episode_count_query).all()}
+    episode_stats = {
+        podcast_id: (count, duration)
+        for podcast_id, count, duration in db_session.exec(episode_stats_query).all()
+    }
 
     # Create PodcastReadWithEpisodeCount objects with authors
     podcast_reads = []
     for podcast in podcasts:
+        stats = episode_stats.get(podcast.id, (0, 0))
         podcast_read = PodcastReadWithEpisodeCount.model_validate({
             "id": podcast.id or 0,
             "org_id": podcast.org_id,
@@ -400,7 +408,8 @@ async def get_podcasts_orgslug(
             "creation_date": podcast.creation_date,
             "update_date": podcast.update_date,
             "authors": podcast_authors.get(podcast.podcast_uuid, []),
-            "episode_count": episode_counts.get(podcast.id, 0)
+            "episode_count": stats[0],
+            "total_duration_seconds": stats[1]
         })
         podcast_reads.append(podcast_read)
 
