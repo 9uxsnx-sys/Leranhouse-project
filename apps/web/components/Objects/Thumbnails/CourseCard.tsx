@@ -45,7 +45,7 @@ export function CourseCard({ id, title, description, image, lessons, duration, d
           </p>
         </div>
         {/* Metadata: directly below description */}
-        <p className="text-[12px] text-gray-400">
+        <p className="text-[12px] text-gray-400 mt-1.5">
           {lessons} lessons &middot; {duration} &middot; {difficulty}
         </p>
       </div>

@@ -1,17 +1,19 @@
 'use client'
-import { useMemo } from 'react'
 import Link from 'next/link'
-import { getCourseThumbnailMediaDirectory } from '@services/media/media'
+import { getCommunityThumbnailMediaDirectory } from '@services/media/media'
+import { Users } from 'lucide-react'
 
-export interface CollectionCardProps {
+export interface CommunityCardProps {
   id: string
   title: string
   description: string
-  courses: any[]
   org_uuid?: string
-  href?: string
+  community_uuid: string
+  course_id: number | null
   public: boolean
   creation_date: string
+  thumbnail_image?: string | null
+  href?: string
 }
 
 function formatDate(dateStr: string) {
@@ -30,25 +32,16 @@ function formatDate(dateStr: string) {
   }
 }
 
-export function CollectionCard({ id, title, description, courses, org_uuid, href, ...props }: CollectionCardProps) {
-  const firstCourse = courses?.[0]
-  const imageUrl = firstCourse?.thumbnail_image && org_uuid
-    ? getCourseThumbnailMediaDirectory(org_uuid, firstCourse.course_uuid, firstCourse.thumbnail_image)
+export function CommunityCard({ id, title, description, org_uuid, community_uuid, course_id, ...props }: CommunityCardProps) {
+  const imageUrl = props.thumbnail_image && org_uuid
+    ? getCommunityThumbnailMediaDirectory(org_uuid, community_uuid, props.thumbnail_image)
     : ''
 
-  // Derive difficulty from courses
-  const difficulty = useMemo(() => {
-    if (!courses || courses.length === 0) return null
-    const levels = courses.map((c: any) => c.difficulty || c.level || '').filter(Boolean)
-    if (levels.length === 0) return null
-    const counts: Record<string, number> = {}
-    levels.forEach((l: string) => { counts[l] = (counts[l] || 0) + 1 })
-    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0]
-  }, [courses])
+  const communityType = course_id ? 'Course' : 'General'
 
   return (
     <Link
-      href={href || `/collection/${id}`}
+      href={props.href || `/community/${id}`}
       className="flex flex-col h-full bg-white border border-[#E7E7E7] rounded-[12px] overflow-hidden transition-all duration-200 hover:-translate-y-[1px] hover:border-[#DADADA] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
       style={{ transformOrigin: 'top center' }}
     >
@@ -58,10 +51,7 @@ export function CollectionCard({ id, title, description, courses, org_uuid, href
           <img className="w-full h-full object-cover" src={imageUrl} alt={title} />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-300">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-            </svg>
+            <Users size={40} strokeWidth={1.5} />
           </div>
         )}
       </div>
@@ -76,7 +66,7 @@ export function CollectionCard({ id, title, description, courses, org_uuid, href
           </p>
         </div>
         <p className="text-[12px] text-gray-400 mt-1.5">
-          {courses?.length || 0} {courses?.length === 1 ? 'course' : 'courses'} &middot; {difficulty || 'All levels'} &middot; {formatDate(props.creation_date)}
+          {communityType} &middot; {props.public ? 'Public' : 'Private'} &middot; {formatDate(props.creation_date)}
         </p>
       </div>
     </Link>

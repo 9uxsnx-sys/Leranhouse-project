@@ -15,10 +15,16 @@ type MetadataProps = {
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const params = await props.params
-  const org = await getOrganizationContextInfo(params.orgslug, {
-    revalidate: 120,
-    tags: ['organizations'],
-  })
+  let org
+  try {
+    org = await getOrganizationContextInfo(params.orgslug, {
+      revalidate: 120,
+      tags: ['organizations'],
+    })
+  } catch (error) {
+    console.error('[generateMetadata] Failed to fetch org:', params.orgslug, error)
+    return {}
+  }
 
   const seoConfig = getOrgSeoConfig(org)
 
@@ -73,10 +79,16 @@ const CommunitiesPage = async (params: any) => {
   const session = await getServerSession()
   const access_token = session?.tokens?.access_token
   const orgslug = (await params.params).orgslug
-  const org = await getOrganizationContextInfo(orgslug, {
-    revalidate: 120,
-    tags: ['organizations'],
-  })
+  let org
+  try {
+    org = await getOrganizationContextInfo(orgslug, {
+      revalidate: 120,
+      tags: ['organizations'],
+    })
+  } catch (error) {
+    console.error('[CommunitiesPage] Failed to fetch org:', orgslug, error)
+    return <div>Error loading organization</div>
+  }
   const org_id = org.id
 
   let communities = []

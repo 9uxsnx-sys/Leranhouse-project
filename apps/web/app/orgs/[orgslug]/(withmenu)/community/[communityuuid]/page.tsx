@@ -22,7 +22,12 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
     tags: ['organizations'],
   })
 
-  const communityUuid = `community_${params.communityuuid}`
+  // Handle both URL formats: with and without the "community_" UUID prefix.
+  //   /community/community_<uuid>  → use as-is
+  //   /community/<uuid>            → prepend "community_"
+  const communityUuid = params.communityuuid.startsWith('community_')
+    ? params.communityuuid
+    : `community_${params.communityuuid}`
   let community = null
   try {
     community = await getCommunity(communityUuid, { revalidate: 120, tags: ['communities'] })
@@ -84,7 +89,10 @@ const CommunityPage = async (params: any) => {
   const session = await getServerSession()
   const access_token = session?.tokens?.access_token
   const { orgslug, communityuuid } = await params.params
-  const communityUuid = `community_${communityuuid}`
+  // Handle both URL formats: with and without the "community_" UUID prefix
+  const communityUuid = communityuuid.startsWith('community_')
+    ? communityuuid
+    : `community_${communityuuid}`
 
   const org = await getOrganizationContextInfo(orgslug, {
     revalidate: 120,
@@ -123,8 +131,15 @@ const CommunityPage = async (params: any) => {
     }
   }
 
-  // Missing, or denied-to-anon: 404 so non-public communities aren't enumerable.
-  if (!community && (!communityError || !access_token)) {
+  // If truly not found (no data and no error), show 404
+  if (!community && !communityError) {
+    notFound()
+  }
+
+  // For anonymous visitors denied access to a non-public community, pretend it
+  // doesn't exist (404) rather than showing an access-denied screen — that
+  // would otherwise confirm the community's existence and leak its URL.
+  if (!community && communityError && !access_token) {
     notFound()
   }
 
