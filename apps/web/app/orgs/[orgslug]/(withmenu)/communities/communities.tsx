@@ -1,11 +1,18 @@
 'use client'
 import React, { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, ChevronLeft, ChevronRight, MessagesSquare, Users } from 'lucide-react'
+import { Search, ChevronLeft, ChevronRight, MessagesSquare, Users, MoreVertical, Edit, Trash2 } from 'lucide-react'
 import { CommunityCard } from '@components/Objects/Thumbnails/CommunityCard'
 import { searchMatchesAny } from '@/lib/search/normalize'
-import { Community } from '@services/communities/communities'
+import { Community, deleteCommunity } from '@services/communities/communities'
 import { useOrg } from '@components/Contexts/OrgContext'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
+import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
+import FeatureDisabledView from '@components/Dashboard/Shared/FeatureDisabled/FeatureDisabledView'
+import { CreateCommunityModal } from '@components/Objects/Modals/Communities/CreateCommunityModal'
+import { EditCommunityModal } from '@components/Objects/Modals/Communities/EditCommunityModal'
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
+import { revalidateTags } from '@services/utils/ts/requests'
 
 // Medusa components
 import { IconButton } from '@/components/ui/icon-button'
@@ -25,12 +32,26 @@ interface CommunitiesClientProps {
 
 type FilterMode = 'all' | 'newest' | 'course' | 'general'
 
+const removeCommunityPrefix = (uuid: string) => uuid.replace('community_', '')
+
 function CommunitiesClient(props: CommunitiesClientProps) {
   const { t } = useTranslation()
   const orgslug = props.orgslug
   const allCommunities = props.communities
   const org = useOrg() as any
   const org_uuid = org?.org_uuid
+  const session = useLHSession() as any
+
+  const [createModalOpen, setCreateModalOpen] = useState(false)
+  const [editingCommunity, setEditingCommunity] = useState<Community | null>(null)
+
+  const handleDeleteCommunity = async (community_uuid: string) => {
+    const access_token = session?.data?.tokens?.access_token
+    if (!access_token) return
+    await deleteCommunity(community_uuid, access_token)
+    await revalidateTags(['communities'], orgslug)
+    window.location.reload()
+  }
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('')
@@ -129,11 +150,23 @@ function CommunitiesClient(props: CommunitiesClientProps) {
   }
 
   return (
+    <>
+    <FeatureDisabledView featureName="communities" orgslug={orgslug} context="public">
     <div className="pt-8 px-6 pb-0" style={{ display: 'grid', gridTemplateRows: 'auto auto 1fr auto', minHeight: '100dvh' }}>
       {/* Page title */}
-      <h1 className="text-[28px] font-semibold text-ui-fg-base mb-6">
-        {t('communities.title') || 'Communities'}
-      </h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-[28px] font-semibold text-ui-fg-base">
+          {t('communities.title') || 'Communities'}
+        </h1>
+        <AuthenticatedClientElement action="create" ressourceType="communities" orgId={props.org_id} checkMethod="roles">
+          <button
+            onClick={() => setCreateModalOpen(true)}
+            className="bg-primary text-primary-foreground rounded-lg px-4 py-2 text-sm font-medium hover:bg-primary/90 transition-colors"
+          >
+            + {t('communities.new_community') || 'New Community'}
+          </button>
+        </AuthenticatedClientElement>
+      </div>
 
       {/* Search + Filter toolbar (only if communities exist) */}
       {allCommunities.length > 0 && (
@@ -196,19 +229,55 @@ function CommunitiesClient(props: CommunitiesClientProps) {
       <div className="flex-1 flex flex-col">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {paginatedCommunities.map((community: any) => (
-            <CommunityCard
-              key={community.community_uuid}
-              id={community.community_uuid}
-              title={community.name}
-              description={community.description || ''}
-              org_uuid={org_uuid}
-              community_uuid={community.community_uuid}
-              course_id={community.course_id}
-              public={community.public || false}
-              creation_date={community.creation_date || ''}
-              thumbnail_image={community.thumbnail_image}
-              href={`/orgs/${orgslug}/community/${community.community_uuid}`}
-            />
+            <div key={community.community_uuid} className="relative group">
+              <CommunityCard
+                id={removeCommunityPrefix(community.community_uuid)}
+                title={community.name}
+                description={community.description || ''}
+                org_uuid={org_uuid}
+                community_uuid={community.community_uuid}
+                course_id={community.course_id}
+                public={community.public || false}
+                creation_date={community.creation_date || ''}
+                thumbnail_image={community.thumbnail_image}
+                href={`/orgs/${orgslug}/community/${removeCommunityPrefix(community.community_uuid)}`}
+              />
+              <AuthenticatedClientElement action="update" ressourceType="communities" orgId={props.org_id} checkMethod="roles">
+                <div className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button aria-label="Community actions" className="p-1.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md">
+                        <MoreVertical size={18} className="text-gray-700" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48 bg-white">
+                      <DropdownMenuItem asChild>
+                        <button
+                          onClick={() => setEditingCommunity(community)}
+                          className="w-full text-left flex items-center px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+                        >
+                          <Edit className="mr-2 h-4 w-4" /> {t('communities.edit') || 'Edit'}
+                        </button>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <ConfirmationModal
+                          confirmationMessage={t('communities.delete_confirmation') || 'Are you sure you want to delete this community?'}
+                          confirmationButtonText={t('communities.delete') || 'Delete'}
+                          dialogTitle={t('communities.delete_title') || 'Delete Community'}
+                          dialogTrigger={
+                            <button className="w-full text-left flex items-center px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors">
+                              <Trash2 className="mr-2 h-4 w-4" /> {t('communities.delete') || 'Delete'}
+                            </button>
+                          }
+                          functionToExecute={() => handleDeleteCommunity(community.community_uuid)}
+                          status="warning"
+                        />
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </AuthenticatedClientElement>
+            </div>
           ))}
 
           {/* Empty state — search with no results */}
@@ -304,6 +373,26 @@ function CommunitiesClient(props: CommunitiesClientProps) {
         </div>
       )}
     </div>
+    </FeatureDisabledView>
+
+    {/* Create Community Modal */}
+    <CreateCommunityModal
+      isOpen={createModalOpen}
+      onClose={() => setCreateModalOpen(false)}
+      orgId={props.org_id}
+      orgSlug={orgslug}
+    />
+
+    {/* Edit Community Modal */}
+    {editingCommunity && (
+      <EditCommunityModal
+        isOpen={!!editingCommunity}
+        onClose={() => setEditingCommunity(null)}
+        community={editingCommunity}
+        orgSlug={orgslug}
+      />
+    )}
+    </>
   )
 }
 

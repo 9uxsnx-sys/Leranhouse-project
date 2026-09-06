@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { MoreHorizontal, Pencil, Trash2, X, Check, Loader2, AlertCircle } from 'lucide-react'
+import { MoreHorizontal, Pencil, Trash2, X, Check, Loader2, AlertCircle, ChevronUp } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import {
@@ -11,6 +11,8 @@ import {
   DiscussionAuthor,
   updateComment,
   deleteComment,
+  upvoteComment,
+  removeCommentUpvote,
 } from '@services/communities/discussions'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import {
@@ -20,22 +22,15 @@ import {
   DropdownMenuTrigger,
 } from "@components/ui/dropdown-menu"
 import UserAvatar from '@components/Objects/UserAvatar'
-import { CommentUpvoteButton } from './CommentUpvoteButton'
+import { useOrgMembership } from '@components/Contexts/OrgContext'
 
 dayjs.extend(relativeTime)
 
-/**
- * Get the proper avatar URL for a user
- */
 function getAvatarUrl(author: DiscussionAuthor | null): string | null {
   if (!author?.avatar_image) return null
-
-  // If it's already a full URL (external auth like Google), use directly
   if (author.avatar_image.startsWith('http://') || author.avatar_image.startsWith('https://')) {
     return author.avatar_image
   }
-
-  // Otherwise construct the media URL
   return getUserAvatarMediaDirectory(author.user_uuid, author.avatar_image)
 }
 
@@ -46,17 +41,28 @@ interface CommentCardProps {
   onUpdated: (comment: DiscussionCommentWithAuthor) => void
 }
 
-export function CommentCard({ comment, canManage = false, onDeleted, onUpdated }: CommentCardProps) {
+export function CommentCard({
+  comment,
+  canManage = false,
+  onDeleted,
+  onUpdated,
+}: CommentCardProps) {
   const { t } = useTranslation()
   const session = useLHSession() as any
   const accessToken = session?.data?.tokens?.access_token
   const currentUserId = session?.data?.user?.id
+  const { isUserPartOfTheOrg } = useOrgMembership()
+  const isAuthenticated = session?.status === 'authenticated'
+  const canVote = isAuthenticated && isUserPartOfTheOrg
 
   const [isEditing, setIsEditing] = useState(false)
   const [editContent, setEditContent] = useState(comment.content)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [voteCount, setVoteCount] = useState(comment.upvote_count || 0)
+  const [hasVoted, setHasVoted] = useState(comment.has_voted || false)
+  const [isVoting, setIsVoting] = useState(false)
 
   const isAuthor = currentUserId === comment.author_id
   const canDelete = isAuthor || canManage
@@ -68,15 +74,10 @@ export function CommentCard({ comment, canManage = false, onDeleted, onUpdated }
 
   const handleEdit = async () => {
     if (!editContent.trim() || isSubmitting) return
-
     setIsSubmitting(true)
     setError(null)
     try {
-      const updated = await updateComment(
-        comment.comment_uuid,
-        { content: editContent.trim() },
-        accessToken
-      )
+      const updated = await updateComment(comment.comment_uuid, { content: editContent.trim() }, accessToken)
       onUpdated(updated)
       setIsEditing(false)
     } catch (err: any) {
@@ -94,7 +95,6 @@ export function CommentCard({ comment, canManage = false, onDeleted, onUpdated }
 
   const handleDelete = async () => {
     if (isSubmitting) return
-
     setIsSubmitting(true)
     try {
       await deleteComment(comment.comment_uuid, accessToken)
@@ -126,121 +126,144 @@ export function CommentCard({ comment, canManage = false, onDeleted, onUpdated }
     }
   }
 
+  const handleVote = async () => {
+    if (!canVote || isVoting) return
+    setIsVoting(true)
+    const newHasVoted = !hasVoted
+    const newVoteCount = newHasVoted ? voteCount + 1 : Math.max(0, voteCount - 1)
+    setHasVoted(newHasVoted)
+    setVoteCount(newVoteCount)
+    try {
+      if (newHasVoted) {
+        await upvoteComment(comment.comment_uuid, accessToken)
+      } else {
+        await removeCommentUpvote(comment.comment_uuid, accessToken)
+      }
+    } catch {
+      setHasVoted(!newHasVoted)
+      setVoteCount(newHasVoted ? voteCount : voteCount + 1)
+    } finally {
+      setIsVoting(false)
+    }
+  }
+
   return (
     <div
-      className="group flex items-center gap-4 py-3 px-4 transition-colors border-b border-gray-100 last:border-b-0 hover:bg-gray-50/50"
+      className="relative pl-[36px] border-b border-gray-100 last:border-b-0"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Upvote Section */}
-      <div className="flex-shrink-0 w-12">
-        <CommentUpvoteButton
-          commentUuid={comment.comment_uuid}
-          initialVoteCount={comment.upvote_count || 0}
-          initialHasVoted={comment.has_voted || false}
+      {/* Thread line - removed */}
+
+      <div className="absolute left-[3px] top-[10px] z-10">
+        <UserAvatar
+          width={28}
+          rounded="rounded-full"
+          avatar_url={getAvatarUrl(comment.author) || undefined}
+          predefined_avatar={comment.author?.avatar_image ? undefined : 'empty'}
+          showProfilePopup={true}
+          userId={comment.author?.id?.toString()}
+          shadow="shadow-none"
         />
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start gap-3">
-          {/* Avatar */}
-          <div className="flex-shrink-0">
-            <UserAvatar
-              width={32}
-              rounded="rounded-full"
-              avatar_url={getAvatarUrl(comment.author) || undefined}
-              predefined_avatar={comment.author?.avatar_image ? undefined : 'empty'}
-              showProfilePopup={true}
-              userId={comment.author?.id?.toString()}
-              shadow="shadow-none"
-            />
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            {isEditing ? (
-              <div className="space-y-2">
-                {error && (
-                  <div className="flex items-center gap-2 px-3 py-2 bg-red-50 rounded-lg text-red-700 text-sm">
-                    <AlertCircle size={14} className="flex-shrink-0" />
-                    <span>{error}</span>
-                  </div>
-                )}
-                <textarea
-                  value={editContent}
-                  onChange={(e) => {
-                    setEditContent(e.target.value)
-                    if (error) setError(null)
-                  }}
-                  onKeyDown={handleKeyDown}
-                  rows={2}
-                  autoFocus
-                  className={`w-full px-3 py-2 text-sm border rounded-lg outline-none transition-all resize-none ${
-                    error ? 'border-red-300' : 'border-gray-200 focus:border-gray-300'
-                  }`}
-                />
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handleEdit}
-                    disabled={!editContent.trim() || isSubmitting}
-                    className="px-3 py-1 text-xs font-medium text-white bg-neutral-900 hover:bg-neutral-800 rounded-md transition-colors disabled:opacity-50 flex items-center gap-1"
-                  >
-                    {isSubmitting ? <Loader2 size={12} className="animate-spin" /> : t('communities.comments.save')}
-                  </button>
-                  <button
-                    onClick={cancelEdit}
-                    disabled={isSubmitting}
-                    className="px-3 py-1 text-xs text-gray-600 hover:text-gray-900 transition-colors"
-                  >
-                    {t('communities.comments.cancel')}
-                  </button>
-                </div>
+      {/* Content */}
+      <div className="pb-3 pt-3 pl-2">
+        {isEditing ? (
+          <div className="space-y-2">
+            {error && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-red-50 rounded-lg text-red-700 text-sm">
+                <AlertCircle size={14} className="flex-shrink-0" />
+                <span>{error}</span>
               </div>
-            ) : (
-              <>
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className="font-medium text-gray-900 text-sm">{authorName}</span>
-                  <span className="text-gray-400 text-xs">{timeAgo}</span>
-                </div>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                  {comment.content}
-                </p>
-              </>
             )}
-          </div>
-        </div>
-      </div>
-
-      {/* Actions - Right side */}
-      {showMenu && !isEditing && (
-        <div className={`flex-shrink-0 transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button aria-label="Comment actions" className="p-1 hover:bg-gray-100 rounded transition-colors">
-                <MoreHorizontal size={16} className="text-gray-400" />
+            <textarea
+              value={editContent}
+              onChange={(e) => {
+                setEditContent(e.target.value)
+                if (error) setError(null)
+              }}
+              onKeyDown={handleKeyDown}
+              rows={2}
+              autoFocus
+              className={`w-full px-3 py-2 text-sm border rounded-lg outline-none transition-all resize-none ${
+                error ? 'border-red-300' : 'border-gray-200 focus:border-gray-300'
+              }`}
+            />
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleEdit}
+                disabled={!editContent.trim() || isSubmitting}
+                className="px-3 py-1 text-xs font-medium text-white bg-neutral-900 hover:bg-neutral-800 rounded-md transition-colors disabled:opacity-50 flex items-center gap-1"
+              >
+                {isSubmitting ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
+                {isSubmitting ? t('communities.comments.saving') : t('communities.comments.save')}
               </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-36">
-              {isAuthor && (
-                <DropdownMenuItem onClick={() => setIsEditing(true)}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  {t('communities.comments.edit')}
-                </DropdownMenuItem>
+              <button
+                onClick={cancelEdit}
+                disabled={isSubmitting}
+                className="px-3 py-1 text-xs text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                {t('communities.comments.cancel')}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Name + Time + Actions row */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-900">{authorName}</span>
+              <span className="text-xs text-gray-400">{timeAgo}</span>
+              <div className="flex-1" />
+              {showMenu && (
+                <div className={`transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button aria-label="Comment actions" className="p-1 hover:bg-gray-100 rounded transition-colors">
+                        <MoreHorizontal size={14} className="text-gray-400" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-36">
+                      {isAuthor && (
+                        <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          {t('communities.comments.edit')}
+                        </DropdownMenuItem>
+                      )}
+                      {canDelete && (
+                        <DropdownMenuItem
+                          onClick={handleDelete}
+                          className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          {t('communities.comments.delete')}
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               )}
-              {canDelete && (
-                <DropdownMenuItem
-                  onClick={handleDelete}
-                  className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  {t('communities.comments.delete')}
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      )}
+            </div>
+
+            {/* Content text */}
+            <p className="text-sm text-gray-700 mt-0.5 whitespace-pre-wrap">{comment.content}</p>
+
+            {/* Upvote button */}
+            <div className="flex items-center gap-4 mt-1.5">
+              <button
+                onClick={handleVote}
+                disabled={!canVote || isVoting}
+                className={`flex items-center gap-1 text-xs transition-colors ${
+                  hasVoted ? 'text-indigo-600' : 'text-gray-400 hover:text-gray-600'
+                } ${!canVote ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <ChevronUp size={14} className={isVoting ? 'animate-pulse' : ''} />
+                <span className="font-medium">{voteCount}</span>
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   )
 }

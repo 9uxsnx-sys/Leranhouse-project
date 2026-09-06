@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MessageSquare, Send, Loader2, User, AlertCircle, Lock, UserPlus } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -12,6 +12,7 @@ import {
   DiscussionCommentWithAuthor,
 } from '@services/communities/discussions'
 import { CommentCard } from './CommentCard'
+import { Button } from '@/components/ui/button'
 import UserAvatar from '@components/Objects/UserAvatar'
 
 interface CommentSectionProps {
@@ -34,7 +35,6 @@ export function CommentSection({ discussionUuid, communityUuid, isLocked = false
   const [isLoading, setIsLoading] = useState(true)
   const [newComment, setNewComment] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isFocused, setIsFocused] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -63,12 +63,13 @@ export function CommentSection({ discussionUuid, communityUuid, isLocked = false
     try {
       const comment = await createComment(
         discussionUuid,
-        { content: newComment.trim() },
+        {
+          content: newComment.trim(),
+        },
         accessToken
       )
       setComments((prev) => [...prev, comment])
       setNewComment('')
-      setIsFocused(false)
     } catch (err: any) {
       const message =
         (err?.detail && typeof err.detail === 'object' && err.detail.message) ||
@@ -88,45 +89,53 @@ export function CommentSection({ discussionUuid, communityUuid, isLocked = false
     }
   }
 
-  const handleCommentDeleted = (commentUuid: string) => {
+  const handleCommentDeleted = useCallback((commentUuid: string) => {
     setComments((prev) => prev.filter((c) => c.comment_uuid !== commentUuid))
-  }
+  }, [])
 
-  const handleCommentUpdated = (updatedComment: DiscussionCommentWithAuthor) => {
+  const handleCommentUpdated = useCallback((updatedComment: DiscussionCommentWithAuthor) => {
     setComments((prev) =>
       prev.map((c) =>
         c.comment_uuid === updatedComment.comment_uuid ? updatedComment : c
       )
     )
-  }
+  }, [])
 
   return (
-    <div>
-      {/* Replies List */}
-      {isLoading ? (
-        <div className="flex items-center justify-center py-8">
-          <Loader2 size={18} className="animate-spin text-gray-400" />
+    <div className="flex flex-col flex-1 min-h-0">
+      {/* Replies List - scrollable */}
+      <div
+        className="flex-1 overflow-y-auto"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        <style>{`.scroll-hide-${discussionUuid}::-webkit-scrollbar { display: none; }`}</style>
+        <div className={`scroll-hide-${discussionUuid}`}>
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 size={18} className="animate-spin text-gray-400" />
+            </div>
+          ) : comments.length === 0 ? (
+            <div className="py-8 text-center">
+              <p className="text-gray-400 text-sm">{t('communities.comments.no_replies')}</p>
+            </div>
+          ) : (
+            <>
+              {comments.map((comment) => (
+                <CommentCard
+                  key={comment.comment_uuid}
+                  comment={comment}
+                  canManage={canManageCommunity}
+                  onDeleted={handleCommentDeleted}
+                  onUpdated={handleCommentUpdated}
+                />
+              ))}
+            </>
+          )}
         </div>
-      ) : comments.length === 0 ? (
-        <div className="py-8 text-center">
-          <p className="text-gray-400 text-sm">{t('communities.comments.no_replies')}</p>
-        </div>
-      ) : (
-        <>
-          {comments.map((comment) => (
-            <CommentCard
-              key={comment.comment_uuid}
-              comment={comment}
-              canManage={canManageCommunity}
-              onDeleted={handleCommentDeleted}
-              onUpdated={handleCommentUpdated}
-            />
-          ))}
-        </>
-      )}
+      </div>
 
       {/* Reply Input */}
-      <div className="p-4 border-t border-gray-100">
+      <div className="border-t border-gray-100 pt-4 pb-4 px-0">
         {isLocked ? (
           <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 rounded-md">
             <Lock size={14} className="text-amber-600" />
@@ -135,51 +144,48 @@ export function CommentSection({ discussionUuid, communityUuid, isLocked = false
         ) : canComment ? (
           <div>
             {error && (
-              <div className="flex items-center gap-2 mb-2 px-3 py-2 bg-red-50 rounded-md text-red-700 text-sm">
+              <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-red-50 rounded-md text-red-700 text-sm">
                 <AlertCircle size={14} className="flex-shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
-            <form onSubmit={handleSubmit}>
-              <div className={`rounded-md border transition-all ${
-                error
-                  ? 'border-red-300'
-                  : isFocused
-                    ? 'border-gray-300'
-                    : 'border-gray-200'
-              }`}>
-                <textarea
-                  ref={textareaRef}
+            <form onSubmit={handleSubmit} className="flex items-start gap-3">
+              {/* Avatar */}
+              <div className="flex-shrink-0 mt-0.5">
+                <UserAvatar
+                  width={28}
+                  rounded="rounded-full"
+                  avatar_url={undefined}
+                  predefined_avatar="empty"
+                  showProfilePopup={false}
+                  shadow="shadow-none"
+                />
+              </div>
+
+              {/* Input + Reply row */}
+              <div className="flex-1 flex items-center gap-2">
+                <input
+                  ref={textareaRef as any}
+                  type="text"
                   value={newComment}
                   onChange={(e) => {
                     setNewComment(e.target.value)
                     if (error) setError(null)
                   }}
-                  onFocus={() => setIsFocused(true)}
-                  onBlur={() => !newComment && setIsFocused(false)}
                   onKeyDown={handleKeyDown}
                   aria-label={t('communities.comments.write_reply')}
                   placeholder={t('communities.comments.write_reply')}
-                  rows={isFocused || newComment ? 2 : 1}
-                  className="w-full px-3 py-2 text-sm bg-transparent outline-none resize-none placeholder:text-gray-400"
+                  className="flex-1 text-sm bg-transparent outline-none placeholder:text-gray-400 py-1.5"
                 />
-
-                {(isFocused || newComment) && (
-                  <div className="flex items-center justify-end px-2 py-2 border-t border-gray-100">
-                    <button
-                      type="submit"
-                      disabled={!newComment.trim() || isSubmitting}
-                      className="px-3 py-1 text-xs font-medium text-white bg-neutral-900 hover:bg-neutral-800 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
-                    >
-                      {isSubmitting ? (
-                        <Loader2 size={12} className="animate-spin" />
-                      ) : (
-                        t('communities.comments.reply')
-                      )}
-                    </button>
-                  </div>
-                )}
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="small"
+                  isLoading={isSubmitting}
+                >
+                  {t('communities.comments.reply')}
+                </Button>
               </div>
             </form>
           </div>

@@ -1,10 +1,9 @@
 'use client'
 import React, { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MessageCircle, Loader2, Search, X, Trash2, CheckSquare, Square } from 'lucide-react'
+import { MessageCircle, Loader2, Trash2, CheckSquare, Square } from 'lucide-react'
 import { DiscussionCard } from './DiscussionCard'
-import { SortDropdown } from './SortDropdown'
-import { LabelFilter } from './LabelFilter'
+import { DiscussionReplyModal } from './DiscussionReplyModal'
 import {
   deleteDiscussion,
   getCommentCount,
@@ -13,7 +12,6 @@ import {
 } from '@services/communities/discussions'
 import toast from 'react-hot-toast'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useOrgMembership } from '@components/Contexts/OrgContext'
 import { useCommunityRights } from '@components/Hooks/useCommunityRights'
 import { useDiscussions, mutateDiscussions } from '@components/Hooks/useDiscussions'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
@@ -24,6 +22,18 @@ interface DiscussionListProps {
   orgslug: string
   onCreateClick?: () => void
   initialDiscussions?: DiscussionWithAuthor[]
+  // Shared filter state from parent
+  searchQuery: string
+  onSearchChange: (query: string) => void
+  sortBy: DiscussionSortBy
+  onSortChange: (sort: DiscussionSortBy) => void
+  selectedLabel: string | null
+  onLabelChange: (label: string | null) => void
+  // Select mode (controlled from parent)
+  isSelectMode: boolean
+  onSelectModeToggle: () => void
+  // Filtered count (reported to parent)
+  onFilteredCountChange?: (count: number) => void
 }
 
 export function DiscussionList({
@@ -31,23 +41,35 @@ export function DiscussionList({
   orgslug,
   onCreateClick,
   initialDiscussions = [],
+  searchQuery,
+  onSearchChange,
+  sortBy,
+  onSortChange,
+  selectedLabel,
+  onLabelChange,
+  isSelectMode,
+  onSelectModeToggle,
+  onFilteredCountChange,
 }: DiscussionListProps) {
   const { t } = useTranslation()
   const session = useLHSession() as any
-  const { isUserPartOfTheOrg } = useOrgMembership()
   const { canCreateDiscussion: hasCreatePermission, canManageCommunity } = useCommunityRights(communityUuid)
-  const canCreateDiscussion = hasCreatePermission && isUserPartOfTheOrg
+  const canCreateDiscussion = hasCreatePermission
   const accessToken = session?.data?.tokens?.access_token
 
-  const [sortBy, setSortBy] = useState<DiscussionSortBy>('recent')
-  const [searchQuery, setSearchQuery] = useState('')
   const [commentCounts, setCommentCounts] = useState<Record<string, number>>({})
-  const [selectedLabel, setSelectedLabel] = useState<string | null>(null)
+  const [replyDiscussion, setReplyDiscussion] = useState<DiscussionWithAuthor | null>(null)
 
   // Selection state
-  const [isSelectMode, setIsSelectMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [isDeleting, setIsDeleting] = useState(false)
+
+  // Reset selection when select mode is turned off
+  useEffect(() => {
+    if (!isSelectMode) {
+      setSelectedIds(new Set())
+    }
+  }, [isSelectMode])
 
   // Use SWR for fetching discussions
   const { discussions: swrDiscussions, isLoading, mutate } = useDiscussions({
@@ -97,14 +119,6 @@ export function DiscussionList({
     }
   }, [discussions])
 
-  const handleSortChange = (newSort: DiscussionSortBy) => {
-    setSortBy(newSort)
-  }
-
-  const handleLabelChange = (label: string | null) => {
-    setSelectedLabel(label)
-  }
-
   // Filter discussions based on search query
   const filteredDiscussions = useMemo(() => {
     if (!searchQuery.trim()) return discussions
@@ -116,12 +130,12 @@ export function DiscussionList({
     )
   }, [discussions, searchQuery])
 
-  // Selection handlers
-  const toggleSelectMode = () => {
-    setIsSelectMode(!isSelectMode)
-    setSelectedIds(new Set())
-  }
+  // Report filtered count to parent
+  useEffect(() => {
+    onFilteredCountChange?.(filteredDiscussions.length)
+  }, [filteredDiscussions.length, onFilteredCountChange])
 
+  // Selection handlers
   const toggleSelection = (discussionUuid: string) => {
     const newSelected = new Set(selectedIds)
     if (newSelected.has(discussionUuid)) {
@@ -154,7 +168,7 @@ export function DiscussionList({
       // Revalidate SWR cache
       mutateDiscussions(communityUuid)
       setSelectedIds(new Set())
-      setIsSelectMode(false)
+      setIsDeleting(false)
     } catch (err: any) {
       const message =
         (err?.detail && typeof err.detail === 'object' && err.detail.message) ||
@@ -189,68 +203,6 @@ export function DiscussionList({
 
   return (
     <div>
-      {/* Header with Search and Filters */}
-      <div className="p-4 border-b border-gray-100 space-y-3">
-        {/* Search Bar */}
-        <div className="relative">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            placeholder={t('communities.discussion_list.search_placeholder')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-9 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-300 transition-all"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
-              <X size={14} />
-            </button>
-          )}
-        </div>
-
-        {/* Filters and Actions Row */}
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            <LabelFilter value={selectedLabel} onChange={handleLabelChange} />
-            <SortDropdown value={sortBy} onChange={handleSortChange} />
-            <span className="text-xs text-gray-400">
-              {filteredDiscussions.length} {filteredDiscussions.length === 1 ? t('communities.discussion') : t('communities.discussions')}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* Select Mode Toggle for Admins */}
-            {canManageCommunity && filteredDiscussions.length > 0 && (
-              <button
-                onClick={toggleSelectMode}
-                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-md transition-colors h-8 ${
-                  isSelectMode
-                    ? 'bg-indigo-100 text-indigo-700'
-                    : 'bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                <CheckSquare size={14} />
-                {isSelectMode ? t('communities.discussion_list.cancel') : t('communities.discussion_list.select')}
-              </button>
-            )}
-
-            {/* Desktop create button */}
-            {canCreateDiscussion && onCreateClick && !isSelectMode && (
-              <button
-                onClick={onCreateClick}
-                className="hidden md:flex rounded-lg bg-primary transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-primary-foreground nice-shadow flex space-x-2 items-center hover:bg-primary/90 hover:scale-105"
-              >
-                <div>{t('communities.discussion_list.new_discussion')} </div>
-                <div className="text-md bg-white/20 px-1 rounded-full">+</div>
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
       {/* Selection Action Bar */}
       {isSelectMode && selectedIds.size > 0 && (
         <div className="px-4 py-3 bg-indigo-50 border-b border-indigo-100 flex items-center justify-between">
@@ -304,7 +256,7 @@ export function DiscussionList({
                   {t('communities.discussion_list.no_results_description')}
                 </p>
                 <button
-                  onClick={() => setSearchQuery('')}
+                  onClick={() => onSearchChange('')}
                   className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
                 >
                   {t('communities.discussion_list.clear_search')}
@@ -329,7 +281,7 @@ export function DiscussionList({
             )}
           </div>
         ) : (
-          <>
+          <div className="flex flex-col gap-4">
             {isLoading && discussions.length === 0 ? (
               <div className="flex justify-center py-8">
                 <Loader2 size={24} className="animate-spin text-gray-400" />
@@ -348,12 +300,22 @@ export function DiscussionList({
                   canManage={canManageCommunity}
                   onDiscussionUpdate={handleDiscussionUpdate}
                   onDiscussionDelete={handleDiscussionDelete}
+                  onReplyClick={setReplyDiscussion}
                 />
               ))
             )}
-          </>
+          </div>
         )}
       </div>
+
+      {/* Reply Modal */}
+      {replyDiscussion && (
+        <DiscussionReplyModal
+          discussion={replyDiscussion}
+          communityUuid={communityUuid}
+          onClose={() => setReplyDiscussion(null)}
+        />
+      )}
     </div>
   )
 }

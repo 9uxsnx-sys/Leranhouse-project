@@ -6,14 +6,12 @@ import {
   MessageCircle,
   Globe,
   Lock,
-  Settings,
   Calendar,
   BookOpen,
   ChevronRight,
 } from 'lucide-react'
 import { Community } from '@services/communities/communities'
 import { getCommunityThumbnailMediaDirectory, getCourseThumbnailMediaDirectory } from '@services/media/media'
-import { useCommunityRights } from '@components/Hooks/useCommunityRights'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
@@ -26,17 +24,14 @@ interface CommunitySidebarProps {
   community: Community
   discussionCount: number
   orgslug: string
-  onCreateDiscussion?: () => void
 }
 
 export function CommunitySidebar({
   community,
   discussionCount,
   orgslug,
-  onCreateDiscussion,
 }: CommunitySidebarProps) {
   const { t } = useTranslation()
-  const { canManageCommunity, canCreateDiscussion } = useCommunityRights(community.community_uuid)
   const org = useOrg() as any
   const session = useLHSession() as any
   const accessToken = session?.data?.tokens?.access_token
@@ -161,29 +156,6 @@ export function CommunitySidebar({
             </Link>
           </div>
         )}
-
-        {/* Actions */}
-        <div className="p-4 border-t border-gray-100 space-y-2">
-          {canCreateDiscussion && onCreateDiscussion && (
-            <button
-              onClick={onCreateDiscussion}
-              className="w-full py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 text-sm"
-            >
-              <span>{t('communities.new_discussion')} </span>
-              <span className="text-md bg-white/20 px-1 rounded-full">+</span>
-            </button>
-          )}
-
-          {canManageCommunity && (
-            <Link
-              href={getUriWithOrg(orgslug, '/dash/communities')}
-              className="w-full bg-white text-neutral-600 border border-neutral-200 py-2.5 rounded-lg font-medium hover:bg-neutral-50 transition-colors flex items-center justify-center gap-2 text-sm"
-            >
-              <Settings className="w-4 h-4" />
-              {t('communities.manage')}
-            </Link>
-          )}
-        </div>
       </div>
 
       {/* Quick Tips Card */}

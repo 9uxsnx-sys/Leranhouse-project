@@ -420,6 +420,21 @@ export default async function proxy(req: NextRequest) {
   }
 
   // -------------------------------------------------------------------------
+  // 10b. Paths already under /orgs/ — pass through without double-prefixing
+  // -------------------------------------------------------------------------
+  if (pathname.startsWith('/orgs/') || pathname === '/orgs') {
+    const resolved = await resolveTenant(req, instance)
+    const requestHeaders = tenantRequestHeaders(req, resolved, instance)
+    const response = NextResponse.rewrite(
+      new URL(`${pathname}${search}`, req.url),
+      { request: { headers: requestHeaders } },
+    )
+    setOrgCookies(response, resolved, instance)
+    setInstanceCookies(response, instance)
+    return response
+  }
+
+  // -------------------------------------------------------------------------
   // 11. Tenant-scoped rewrite — the catch-all that puts us under /orgs/{slug}
   // -------------------------------------------------------------------------
   const resolved = await resolveTenant(req, instance)

@@ -19,10 +19,16 @@ type MetadataProps = {
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const params = await props.params;
   // Get Org context information
-  const org = await getOrganizationContextInfo(params.orgslug, {
-    revalidate: 120,
-    tags: ['organizations'],
-  })
+  let org
+  try {
+    org = await getOrganizationContextInfo(params.orgslug, {
+      revalidate: 120,
+      tags: ['organizations'],
+    })
+  } catch (error) {
+    console.error('[generateMetadata] Failed to fetch org:', params.orgslug, error)
+    return {}
+  }
 
   const seoConfig = getOrgSeoConfig(org)
   const ogImageUrl = seoConfig.default_og_image

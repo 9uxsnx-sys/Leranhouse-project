@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
 import { Metadata } from 'next'
 import { getServerSession } from '@/lib/auth/server'

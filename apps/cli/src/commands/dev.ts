@@ -329,7 +329,7 @@ export async function devCommand(opts: { ee?: boolean; adminEmail?: string; admi
   }
 
   const startWeb = () => {
-    return spawnService('next', ['dev', '--turbopack'], path.join(root, 'apps', 'web'), 'web', pc.cyan)
+    return spawnService('next', ['dev', '--webpack'], path.join(root, 'apps', 'web'), 'web', pc.cyan)
   }
 
   const startCollab = () => {

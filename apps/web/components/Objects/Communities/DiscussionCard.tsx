@@ -1,75 +1,22 @@
 'use client'
 import React from 'react'
-import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 
 dayjs.extend(relativeTime)
-import {
-  MessageSquare,
-  Check,
-  Pin,
-  Lock,
-  MoreVertical,
-  Trash2,
-  HelpCircle,
-  Lightbulb,
-  Megaphone,
-  Star,
-} from 'lucide-react'
-import toast from 'react-hot-toast'
-import { getUriWithOrg } from '@services/config/config'
-import {
-  DiscussionWithAuthor,
-  DiscussionAuthor,
-  getLabelInfo,
-  pinDiscussion,
-  lockDiscussion,
-  deleteDiscussion,
-} from '@services/communities/discussions'
+import { MessageSquare, Pin, Lock } from 'lucide-react'
+import { DiscussionWithAuthor, getLabelInfo } from '@services/communities/discussions'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { UpvoteButton } from './UpvoteButton'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@components/ui/dropdown-menu'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import UserAvatar from '@components/Objects/UserAvatar'
 
-/**
- * Get the proper avatar URL for a user
- */
-function getAvatarUrl(author: DiscussionAuthor | null): string | null {
+function getAvatarUrl(author: any): string | null {
   if (!author?.avatar_image) return null
-
-  // If it's already a full URL (external auth like Google), use directly
   if (author.avatar_image.startsWith('http://') || author.avatar_image.startsWith('https://')) {
     return author.avatar_image
   }
-
-  // Otherwise construct the media URL
   return getUserAvatarMediaDirectory(author.user_uuid, author.avatar_image)
-}
-
-// Get the icon component for a label
-function getLabelIcon(iconName: string, size: number = 12) {
-  switch (iconName) {
-    case 'HelpCircle':
-      return <HelpCircle size={size} />
-    case 'Lightbulb':
-      return <Lightbulb size={size} />
-    case 'Megaphone':
-      return <Megaphone size={size} />
-    case 'Star':
-      return <Star size={size} />
-    default:
-      return <MessageSquare size={size} />
-  }
 }
 
 interface DiscussionCardProps {
@@ -84,10 +31,33 @@ interface DiscussionCardProps {
   canManage?: boolean
   onDiscussionUpdate?: (updated: DiscussionWithAuthor) => void
   onDiscussionDelete?: (discussionUuid: string) => void
+  onReplyClick?: (discussion: DiscussionWithAuthor) => void
 }
 
-const removeDiscussionPrefix = (discussionId: string) => {
-  return discussionId.replace('discussion_', '')
+/** Extract plain text from TipTap JSON content (string or object) */
+function extractPlainText(content: any): string {
+  if (!content) return ''
+  
+  // If it's a JSON string, parse it
+  if (typeof content === 'string') {
+    try {
+      const parsed = JSON.parse(content)
+      return extractPlainText(parsed)
+    } catch {
+      // Not JSON, return as-is
+      return content
+    }
+  }
+  
+  if (typeof content !== 'object') return ''
+  
+  if (content.text) return content.text
+  
+  if (content.content && Array.isArray(content.content)) {
+    return content.content.map((node: any) => extractPlainText(node)).join(' ').trim()
+  }
+  
+  return ''
 }
 
 export function DiscussionCard({
@@ -102,14 +72,9 @@ export function DiscussionCard({
   canManage = false,
   onDiscussionUpdate,
   onDiscussionDelete,
+  onReplyClick,
 }: DiscussionCardProps) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
-  const accessToken = session?.data?.tokens?.access_token
-  const currentUserId = session?.data?.user?.id
-
-  const discussionId = removeDiscussionPrefix(discussion.discussion_uuid)
-  const communityId = communityUuid.replace('community_', '')
 
   const timeAgo = dayjs(discussion.creation_date).fromNow()
 
@@ -117,11 +82,7 @@ export function DiscussionCard({
     ? `${discussion.author.first_name} ${discussion.author.last_name}`.trim() || discussion.author.username
     : t('common.unknown')
 
-  const discussionLink = getUriWithOrg(orgslug, `/community/${communityId}/discussion/${discussionId}`)
-
   const labelInfo = getLabelInfo(discussion.label || 'general')
-  const isOwner = discussion.author_id === currentUserId
-  const showActions = canManage || isOwner
 
   const handleClick = (e: React.MouseEvent) => {
     if (isSelectMode && onToggleSelect) {
@@ -130,224 +91,113 @@ export function DiscussionCard({
     }
   }
 
-  const getErrorMessage = (err: any, fallback: string) =>
-    (err?.detail && typeof err.detail === 'object' && err.detail.message) ||
-    (typeof err?.detail === 'string' && err.detail) ||
-    err?.message ||
-    fallback
-
-  const handlePin = async () => {
-    if (!accessToken) return
-    try {
-      const updated = await pinDiscussion(discussion.discussion_uuid, !discussion.is_pinned, accessToken)
-      onDiscussionUpdate?.(updated)
-    } catch (err: any) {
-      toast.error(getErrorMessage(err, t('communities.discussion_card.pin_failed')))
-    }
-  }
-
-  const handleLock = async () => {
-    if (!accessToken) return
-    try {
-      const updated = await lockDiscussion(discussion.discussion_uuid, !discussion.is_locked, accessToken)
-      onDiscussionUpdate?.(updated)
-    } catch (err: any) {
-      toast.error(getErrorMessage(err, t('communities.discussion_card.lock_failed')))
-    }
-  }
-
-  const handleDelete = async () => {
-    if (!accessToken) return
-    try {
-      await deleteDiscussion(discussion.discussion_uuid, accessToken)
-      onDiscussionDelete?.(discussion.discussion_uuid)
-    } catch (err: any) {
-      toast.error(getErrorMessage(err, t('communities.discussion_card.delete_failed')))
-    }
-  }
-
   return (
     <div
       onClick={isSelectMode ? handleClick : undefined}
-      className={`flex items-center gap-4 py-3 px-4 transition-colors border-b border-gray-100 last:border-b-0 ${
+      className={`relative flex h-fit w-full flex-col gap-4 overflow-hidden rounded-xl border px-5 pt-5 pb-3 bg-white transition-colors ${
         isSelectMode ? 'cursor-pointer' : ''
       } ${
         isSelected
-          ? 'bg-indigo-50/50'
+          ? 'border-indigo-300 bg-indigo-50/50'
           : discussion.is_pinned
-          ? 'bg-amber-50/30'
-          : 'hover:bg-gray-50/50'
+          ? 'border-amber-200 bg-amber-50/30'
+          : 'border-black/10'
       }`}
     >
-      {/* Checkbox for Select Mode */}
-      {isSelectMode && (
-        <div className="flex-shrink-0">
-          <div
-            className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-              isSelected
-                ? 'bg-indigo-600 border-indigo-600'
-                : 'border-gray-300 bg-white'
-            }`}
-          >
-            {isSelected && <Check size={12} className="text-white" />}
+      {/* Header row: Avatar + Name + Username on left, Label on right */}
+      <div className="flex flex-row items-start justify-between tracking-normal">
+        <div className="flex items-center space-x-3">
+          {/* Select mode checkbox */}
+          {isSelectMode && (
+            <div className="flex-shrink-0">
+              <div
+                className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                  isSelected
+                    ? 'bg-indigo-600 border-indigo-600'
+                    : 'border-gray-300 bg-white'
+                }`}
+              >
+                {isSelected && (
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Avatar */}
+          {!isSelectMode && (
+            <div className="shrink-0">
+              <UserAvatar
+                width={48}
+                rounded="rounded-full"
+                avatar_url={getAvatarUrl(discussion.author) || undefined}
+                predefined_avatar={discussion.author?.avatar_image ? undefined : 'empty'}
+                showProfilePopup={true}
+                userId={discussion.author?.id?.toString()}
+                shadow="shadow-none"
+              />
+            </div>
+          )}
+
+          <div className="flex flex-col gap-0.5">
+            <div className="flex items-center font-medium whitespace-nowrap">
+              <span className="text-sm font-semibold text-gray-900 truncate">{authorName}</span>
+              {/* Pinned/Locked indicators inline */}
+              {discussion.is_pinned && <Pin size={14} className="ml-1 text-amber-500 flex-shrink-0" />}
+              {discussion.is_locked && <Lock size={14} className="ml-1 text-gray-400 flex-shrink-0" />}
+            </div>
+            <div className="flex items-center space-x-1">
+              <span className="text-xs text-gray-500">@{discussion.author?.username || authorName}</span>
+            </div>
           </div>
         </div>
-      )}
 
-      {/* Upvote Section */}
+        {/* Label badge - Medusa UI style */}
+        <span
+          className={`inline-flex items-center gap-x-0.5 border box-border rounded-md h-5 px-1 text-[11px] font-medium flex-shrink-0 ml-2 ${
+            labelInfo.id === 'general' ? 'bg-gray-100 text-gray-700 border-gray-200' :
+            labelInfo.id === 'question' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+            labelInfo.id === 'idea' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+            labelInfo.id === 'announcement' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+            labelInfo.id === 'showcase' ? 'bg-green-50 text-green-700 border-green-200' :
+            'bg-gray-100 text-gray-700 border-gray-200'
+          }`}
+        >
+          {t(`communities.labels.${discussion.label || 'general'}`)}
+        </span>
+      </div>
+
+      {/* Body: Content */}
+      <div className="text-[15px] leading-relaxed tracking-normal">
+        <p className="text-gray-900 whitespace-pre-wrap">{extractPlainText(discussion.content) || discussion.title}</p>
+      </div>
+
+      {/* Bottom row: Upvote · Comment · Time */}
       {!isSelectMode && (
-        <div className="flex-shrink-0 w-12">
+        <div className="flex items-center gap-4">
           <UpvoteButton
             discussionUuid={discussion.discussion_uuid}
             initialVoteCount={discussion.upvote_count}
             initialHasVoted={discussion.has_voted}
             compact
           />
-        </div>
-      )}
-
-      {/* Main Content */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start gap-3">
-          {/* Discussion Icon - Custom emoji or Label icon */}
-          <div
-            className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mt-0.5"
-            style={{ backgroundColor: discussion.emoji ? '#f3f4f6' : `${labelInfo.color}15` }}
+          <button
+            onClick={() => onReplyClick?.(discussion)}
+            className="flex items-center gap-1.5 text-gray-400 hover:text-indigo-500 transition-colors"
           >
-            {discussion.emoji ? (
-              <span className="text-base">{discussion.emoji}</span>
-            ) : (
-              <span style={{ color: labelInfo.color }}>
-                {getLabelIcon(labelInfo.icon, 14)}
-              </span>
-            )}
-          </div>
-
-          {/* Title and Meta */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              {/* Pinned indicator */}
-              {discussion.is_pinned && (
-                <Pin size={12} className="text-amber-500 flex-shrink-0" />
-              )}
-              {/* Locked indicator */}
-              {discussion.is_locked && (
-                <Lock size={12} className="text-gray-400 flex-shrink-0" />
-              )}
-
-              {isSelectMode ? (
-                <h3 className="text-sm font-medium text-gray-900 line-clamp-1">
-                  {discussion.title}
-                </h3>
-              ) : (
-                <Link
-                  href={discussionLink}
-                  onClick={onClick}
-                  className="block group flex-1 min-w-0"
-                >
-                  <h3 className="text-sm font-medium text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
-                    {discussion.title}
-                  </h3>
-                </Link>
-              )}
-            </div>
-
-            <div className="mt-1 flex items-center flex-wrap gap-x-2 gap-y-1 text-xs text-gray-500">
-              {/* Label badge */}
-              <span
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium"
-                style={{
-                  backgroundColor: `${labelInfo.color}15`,
-                  color: labelInfo.color,
-                }}
-              >
-                {t(`communities.labels.${discussion.label || 'general'}`)}
-              </span>
-              {isSelectMode ? (
-                <span>{authorName}</span>
-              ) : (
-                <Link href={discussionLink} className="hover:text-gray-700 hover:underline">
-                  {authorName}
-                </Link>
-              )}
-              <span className="text-gray-300">·</span>
-              <span>{timeAgo}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Side - Author Avatar & Comment Count */}
-      {!isSelectMode && (
-        <div className="flex items-center gap-3 flex-shrink-0">
-          {/* Author Avatar */}
-          <div className="hidden sm:block">
-            <UserAvatar
-              width={24}
-              rounded="rounded-full"
-              avatar_url={getAvatarUrl(discussion.author) || undefined}
-              predefined_avatar={discussion.author?.avatar_image ? undefined : 'empty'}
-              showProfilePopup={true}
-              userId={discussion.author?.id?.toString()}
-              shadow="shadow-none"
-              border="border-2"
-              borderColor="border-white"
-            />
-          </div>
-
-          {/* Comment Count */}
-          <div className="flex items-center gap-1 text-gray-400 min-w-[40px] justify-end">
-            <MessageSquare size={14} />
+            <MessageSquare size={15} />
             <span className="text-xs">{commentCount}</span>
-          </div>
-
-          {/* Actions Menu */}
-          {showActions && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className="p-1 hover:bg-gray-100 rounded transition-colors"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MoreVertical size={16} className="text-gray-400" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-44">
-                {canManage && (
-                  <>
-                    <DropdownMenuItem onClick={handlePin} className="cursor-pointer">
-                      <Pin size={14} className="mr-2" />
-                      {discussion.is_pinned ? t('communities.discussion_card.unpin_discussion') : t('communities.discussion_card.pin_discussion')}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleLock} className="cursor-pointer">
-                      <Lock size={14} className="mr-2" />
-                      {discussion.is_locked ? t('communities.discussion_card.unlock_discussion') : t('communities.discussion_card.lock_discussion')}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                  </>
-                )}
-                <ConfirmationModal
-                  confirmationMessage={t('communities.discussion_card.delete_confirm')}
-                  confirmationButtonText={t('communities.comments.delete')}
-                  dialogTitle={t('communities.discussion_card.delete_title')}
-                  dialogTrigger={
-                    <button className="w-full text-left flex items-center px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-sm transition-colors cursor-pointer">
-                      <Trash2 size={14} className="mr-2" />
-                      {t('communities.discussion_card.delete_discussion')}
-                    </button>
-                  }
-                  functionToExecute={handleDelete}
-                  status="warning"
-                />
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+          </button>
+          <div className="flex-1" />
+          <span className="text-xs text-gray-500">{timeAgo}</span>
         </div>
       )}
 
-      {/* Show upvote count in select mode */}
+      {/* Select mode: show upvote count */}
       {isSelectMode && (
-        <div className="flex items-center gap-1 text-gray-400 flex-shrink-0">
+        <div className="flex items-center gap-1 text-gray-400">
           <span className="text-xs">{discussion.upvote_count} {t('communities.discussion_card.votes')}</span>
         </div>
       )}

@@ -15,10 +15,15 @@ processes with hot reload:
 | Component | What it is | Runs as |
 |-----------|-----------|---------|
 | `apps/api` | FastAPI backend | local process (`uv run python app.py`) |
-| `apps/web` | Next.js frontend | local process (`next dev --turbopack`) |
+| `apps/web` | Next.js frontend | local process (`next dev --webpack`) |
 | `apps/collab` | Yjs/Hocuspocus realtime server | local process (`tsx watch src/index.ts`) |
 | `learnhouse-db-dev` | PostgreSQL (pgvector) | Docker container |
 | `learnhouse-redis-dev` | Redis | Docker container |
+
+> **Note:** `--webpack` is used instead of `--turbopack` because Next.js 16.2.6
+> has a known Turbopack bug (issue #97894) that causes all `/orgs/*` routes to
+> silently return 404. The CLI at `apps/cli/src/commands/dev.ts` already uses
+> `--webpack`. If you ever run `next dev` manually, pass `--webpack`.
 
 The CLI (`apps/cli`) orchestrates all of this: it checks env files, starts the
 containers if needed, auto-installs missing dependencies, spawns the three
@@ -33,6 +38,10 @@ servers, and gives you restart controls.
 | Docker Desktop | runs PostgreSQL + Redis containers | `docker version` |
 | Bun | installs/runs web, collab, and the CLI itself | `bun --version` |
 | uv | Python package manager for the API | `uv --version` |
+
+> **Important:** Make sure **Docker Desktop is running** before starting the
+> dev server. The CLI will try to start containers and fail if Docker is not
+> available.
 
 ---
 
@@ -65,6 +74,9 @@ Course creation and management are only visible when logged in as admin.
 
 ## 4. Start dev mode (everyday workflow)
 
+> **Before you start:** Make sure **Docker Desktop is running**. The dev server
+> needs Docker to start PostgreSQL and Redis containers.
+
 From the repository root:
 
 ```bash
@@ -74,9 +86,7 @@ bun run apps/cli/bin/learnhouse.ts dev --admin-email admin@school.dev --admin-pa
 What happens:
 
 1. Env files are validated (`checkDevEnv`).
-2. If the `learnhouse-db-dev` / `learnhouse-redis-dev` containers are **not**
-   running, they are created from `.learnhouse/docker-compose.dev.yml` and
-   started. If they are already running, they are **reused** (data preserved).
+2. Docker containers are created and started (or reused if already running).
 3. Missing `node_modules` / `.venv` are auto-installed via `bun install` /
    `uv sync`.
 4. API (port 1338), Web (port 3000), Collab (port 4000) start with hot reload.
@@ -179,12 +189,44 @@ Check that http://localhost:1338/docs loads. If not, restart the API:
 `Ctrl+C` the dev session and re-run the dev command, or press `ra` if you are
 in a real terminal.
 
+### All `/orgs/*` routes return 404 (blank page)
+
+If every route under `/orgs/default` or similar returns 404, the most likely
+cause is the **Turbopack bug** in Next.js 16.2.6. Verify the server log shows:
+
+```
+▲ Next.js 16.2.6 (webpack)     ← correct
+```
+
+If it shows `(turbo)` instead, the CLI is using `--turbopack`. Check that
+`apps/cli/src/commands/dev.ts` line 332 uses `['dev', '--webpack']` instead of
+`['dev', '--turbopack']`. Restart the dev server after fixing.
+
+A second possible cause is the proxy middleware in `apps/web/proxy.ts` — if it
+double-prefixes paths (e.g. `/orgs/default/orgs/default`), the fix is to add a
+passthrough check that skips the org-prefix rewrite for paths already starting
+with `/orgs/`.
+
+### `collab` fails with `EADDRINUSE :::4000`
+
+The collab (websocket) server can't start if port 4000 is already occupied by
+a previous instance. The web app and API will still work normally — collab is
+only needed for realtime collaboration features.
+
+To free port 4000:
+```bash
+netstat -ano | findstr :4000
+taskkill /PID <PID> /F
+```
+Then restart the dev server (or press `rc` in a real terminal).
+
 ### Port already in use
 
 | Port | Usual culprit | Fix |
 |------|---------------|-----|
-| 3000 | another Next/Vite dev server | stop it, or it will fail to bind |
+| 3000 | another Next/Vite dev server | `taskkill /PID <PID> /F` or stop it manually |
 | 1338 | another API instance | stop it |
+| 4000 | another collab instance (EADDRINUSE) | `taskkill /PID <PID> /F` or stop the old process |
 | 5432 | **native host PostgreSQL** | leave it alone — dev DB must stay on 5434 |
 
 ---
