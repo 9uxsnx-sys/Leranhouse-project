@@ -78,7 +78,6 @@ const CommunitiesDashClient = ({
               community={community}
               orgslug={orgslug}
               org_id={org_id}
-              onEdit={() => setEditingCommunity(community)}
             />
           </div>
         ))}

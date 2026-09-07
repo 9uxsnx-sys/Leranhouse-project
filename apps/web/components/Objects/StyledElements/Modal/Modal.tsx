@@ -66,11 +66,11 @@ const Modal = (params: ModalParams) => {
         {/* Header */}
         {params.dialogTitle ? (
           <DialogHeader className="shrink-0 px-4 py-2 border-b border-ui-border-base space-y-0">
-            <DialogTitle className="txt-compact-medium-plus text-ui-fg-base">
+            <DialogTitle className="txt-compact-small-plus text-ui-fg-base">
               {params.dialogTitle}
             </DialogTitle>
             {params.dialogDescription && (
-              <DialogDescription className="text-ui-fg-muted text-sm">
+              <DialogDescription className="text-ui-fg-muted text-xs">
                 {params.dialogDescription}
               </DialogDescription>
             )}

@@ -1,15 +1,16 @@
 'use client'
-import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import React, { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { createDiscussion, DISCUSSION_LABELS, DiscussionLabelId } from '@services/communities/discussions'
+import { createDiscussion, DISCUSSION_LABELS } from '@services/communities/discussions'
 import { mutateDiscussions } from '@components/Hooks/useDiscussions'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
-import { DiscussionEditor } from '@components/Objects/Communities/DiscussionEditor'
-import { EmojiPicker } from '@components/Objects/Communities/EmojiPicker'
-import { Loader2, AlertCircle, MessageSquare, HelpCircle, Lightbulb, Megaphone, Star, Check } from 'lucide-react'
+import { MessageSquare, HelpCircle, Lightbulb, Megaphone, Star, Check, OctagonAlert } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 
 interface CreateDiscussionModalProps {
   isOpen: boolean
@@ -42,14 +43,13 @@ export function CreateDiscussionModal({
 }: CreateDiscussionModalProps) {
   const { t } = useTranslation()
   const session = useLHSession() as any
-  const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [title, setTitle] = useState('')
-  const [content, setContent] = useState<any>(null)
+  const [content, setContent] = useState('')
   const [titleError, setTitleError] = useState<string | null>(null)
   const [selectedLabel, setSelectedLabel] = useState<string>('general')
-  const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null)
+  const toastRef = useRef<string | null>(null)
 
   const accessToken = session?.data?.tokens?.access_token
 
@@ -77,7 +77,21 @@ export function CreateDiscussionModal({
 
     const validationError = validateTitle(title)
     if (validationError) {
-      setTitleError(validationError)
+      if (toastRef.current) toast.remove(toastRef.current)
+      const id = toast.custom((toastId) => (
+        <div className="toast-blur-in flex gap-3 p-4 rounded-xl border shadow-xl" style={{ background: '#fff', borderColor: '#e5e7eb', minWidth: '360px', maxWidth: '400px' }}>
+          <div className="flex items-start flex-shrink-0">
+            <OctagonAlert size={18} className="text-red-500" style={{ marginTop: '1px' }} />
+          </div>
+          <div className="flex flex-col gap-0.5 min-w-0">
+            <span className="text-sm font-semibold" style={{ color: '#111827' }}>Fill info</span>
+            <span className="text-xs" style={{ color: '#6b7280', lineHeight: '1.4' }}>
+              Fill in the required fields so you can post your tweet
+            </span>
+          </div>
+        </div>
+      ), { duration: 4000 })
+      toastRef.current = id
       return
     }
 
@@ -88,21 +102,17 @@ export function CreateDiscussionModal({
         communityUuid,
         {
           title: title.trim(),
-          content: content ? JSON.stringify(content) : null,
+          content: content || null,
           label: selectedLabel,
-          emoji: selectedEmoji,
         },
         accessToken
       )
 
       if (result) {
-        // Revalidate SWR cache to show new discussion immediately
         mutateDiscussions(communityUuid)
-        // Reset form
         setTitle('')
-        setContent(null)
+        setContent('')
         setSelectedLabel('general')
-        setSelectedEmoji(null)
         onClose()
       }
     } catch (err: any) {
@@ -118,143 +128,129 @@ export function CreateDiscussionModal({
     }
   }
 
-  const isValid = !validateTitle(title)
-  const hasContent = content && content.content && content.content.length > 0
-
   return (
-    <Modal
+    <>
+      <style>{`
+        .toast-blur-in {
+          animation: toastSlideIn 0.25s ease-out;
+        }
+        @keyframes toastSlideIn {
+          0% { opacity: 0; transform: translateY(-20px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+      <Modal
       isDialogOpen={isOpen}
       onOpenChange={(open) => {
         if (!open) {
           setTitle('')
-          setContent(null)
+          setContent('')
           setError(null)
           setTitleError(null)
           setSelectedLabel('general')
-          setSelectedEmoji(null)
           onClose()
         }
       }}
+      minWidth="sm"
       dialogTitle={t('communities.create_discussion.title')}
       dialogDescription={t('communities.create_discussion.description')}
-      minWidth="lg"
       dialogContent={
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Label Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+        <form onSubmit={handleSubmit} className="flex flex-col">
+          {/* Category */}
+          <div className="border-ui-border-base flex flex-col gap-y-3 border-b px-4 py-4">
+            <Label size="small" weight="plus">
               {t('communities.create_discussion.category_label')}
-            </label>
-            <div className="flex flex-wrap gap-2">
+            </Label>
+            <div className="flex flex-wrap gap-1.5">
               {DISCUSSION_LABELS.map((label) => (
                 <button
                   key={label.id}
                   type="button"
                   onClick={() => setSelectedLabel(label.id)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-all ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-all text-sm ${
                     selectedLabel === label.id
-                      ? 'border-gray-900 bg-gray-50'
-                      : 'border-gray-200 hover:border-gray-300 bg-white'
+                      ? 'bg-gray-100 text-gray-900'
+                      : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
                   }`}
                 >
                   <span style={{ color: label.color }}>
-                    {getLabelIcon(label.icon, 16)}
+                    {getLabelIcon(label.icon, 14)}
                   </span>
-                  <span className={`text-sm ${selectedLabel === label.id ? 'font-medium text-gray-900' : 'text-gray-600'}`}>
-                    {t(`communities.labels.${label.id}`)}
-                  </span>
-                  {selectedLabel === label.id && (
-                    <Check size={14} className="text-gray-900" />
-                  )}
+                  <span>{t(`communities.labels.${label.id}`)}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Title with Emoji */}
-          <div>
-            <label
-              htmlFor="title"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              {t('communities.create_discussion.title_label')} *
-            </label>
-            <div className="flex gap-3">
-              {/* Emoji Picker */}
-              <EmojiPicker
-                value={selectedEmoji}
-                onChange={setSelectedEmoji}
-                triggerClassName={`flex items-center justify-center w-12 h-12 rounded-lg border-2 transition-colors flex-shrink-0 ${
-                  selectedEmoji
-                    ? 'border-gray-200 bg-gray-50'
-                    : 'border-dashed border-gray-300 hover:border-gray-400'
-                }`}
-              />
-              <div className="flex-1">
-                <input
-                  type="text"
-                  name="title"
-                  id="title"
-                  value={title}
-                  onChange={handleTitleChange}
-                  placeholder={t('communities.create_discussion.title_placeholder')}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all h-12"
-                />
-              </div>
-            </div>
-            <p className="mt-1.5 text-xs text-gray-500">
-              {selectedEmoji ? t('communities.create_discussion.emoji_selected') : t('communities.create_discussion.emoji_hint')}
-            </p>
-            {titleError && (
-              <p className="mt-1 text-sm text-red-500">{titleError}</p>
-            )}
-          </div>
-
-          {/* Content Editor */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+          {/* Post Details */}
+          <div className="border-ui-border-base flex flex-col gap-y-3 border-b px-4 py-4">
+            <Label size="small" weight="plus">
               {t('communities.create_discussion.details_label')}
-            </label>
-            <DiscussionEditor
-              content={content}
-              onChange={setContent}
-              placeholder={t('communities.create_discussion.details_placeholder')}
-              minHeight="180px"
-            />
-            <p className="mt-1.5 text-xs text-gray-500">
-              {t('communities.create_discussion.editor_hint')}
-            </p>
+            </Label>
+
+            {/* Title */}
+            <div>
+              <Input
+                type="text"
+                name="title"
+                id="title"
+                value={title}
+                onChange={handleTitleChange}
+                placeholder={t('communities.create_discussion.title_placeholder')}
+                size="base"
+              />
+            </div>
+
+            {/* Content Textarea */}
+            <div className="flex flex-col gap-y-2">
+              <Label size="small" weight="plus" htmlFor="content">
+                {t('communities.create_discussion.details_label')}
+              </Label>
+              <Textarea
+                name="content"
+                id="content"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder={t('communities.create_discussion.details_placeholder')}
+                className="min-h-[180px]"
+              />
+            </div>
           </div>
 
           {/* Error message */}
           {error && (
-            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-100 rounded-lg text-red-700 text-sm">
-              <AlertCircle size={16} className="flex-shrink-0" />
-              <span>{error}</span>
+            <div className="px-4 py-2">
+              <div className="flex items-center gap-2 p-3 bg-ui-bg-subtle border border-ui-border-base rounded-lg text-ui-fg-error text-sm">
+                <span>{error}</span>
+              </div>
             </div>
           )}
 
           {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-            <button
+          <div className="flex items-center justify-end gap-2 px-4 py-3">
+            <Button
               type="button"
+              variant="secondary"
+              size="small"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              className="h-7"
             >
               {t('communities.create_discussion.cancel')}
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={isSubmitting || !isValid}
-              className="px-4 py-2 text-sm font-medium text-white bg-neutral-900 hover:bg-neutral-800 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              variant="primary"
+              size="small"
+              isLoading={isSubmitting}
+              className="h-7"
             >
-              {isSubmitting && <Loader2 size={16} className="animate-spin" />}
-              {t('communities.create_discussion.submit')}
-            </button>
+              Post
+            </Button>
           </div>
         </form>
       }
     />
+    </>
   )
 }
 
