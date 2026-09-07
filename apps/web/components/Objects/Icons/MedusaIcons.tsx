@@ -710,3 +710,23 @@ export const ThumbnailBadge = React.forwardRef<SVGSVGElement, MedusaIconProps>(
   )
 )
 ThumbnailBadge.displayName = "ThumbnailBadge"
+
+export const Mic = React.forwardRef<SVGSVGElement, MedusaIconProps>(
+  ({ color = "currentColor", ...props }, ref) => (
+    <svg {...base} ref={ref} {...props}>
+      <path
+        fill={color}
+        d="M7.5 1C6.12 1 5 2.12 5 3.5V7c0 1.38 1.12 2.5 2.5 2.5S10 8.38 10 7V3.5C10 2.12 8.88 1 7.5 1Z"
+      />
+      <path
+        stroke={color}
+        fill="none"
+        strokeLinecap="round"
+        d="M11.5 6.5V7c0 2.21-1.79 4-4 4s-4-1.79-4-4V6.5"
+      />
+      <path stroke={color} fill="none" strokeLinecap="round" d="M7.5 11V14" />
+      <path stroke={color} fill="none" strokeLinecap="round" d="M5 14h5" />
+    </svg>
+  )
+)
+Mic.displayName = "Mic"

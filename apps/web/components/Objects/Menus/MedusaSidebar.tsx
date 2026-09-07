@@ -21,6 +21,7 @@ import {
   GridLayout,
   EllipsisHorizontal,
   MagnifyingGlass,
+  Mic,
 } from '@components/Objects/Icons/MedusaIcons'
 import { Text } from '@components/ui/text'
 
@@ -47,6 +48,7 @@ const NAV_ITEMS: NavEntry[] = [
   { to: '/search', labelKey: 'common.search', icon: MagnifyingGlass, feature: null },
   { to: '/', labelKey: 'common.home', icon: House, feature: null },
   { to: '/courses', labelKey: 'courses.courses', icon: Book, feature: 'courses' },
+  { to: '/podcasts', labelKey: 'podcasts.podcasts', icon: Mic, feature: 'podcasts' },
   { to: '/communities', labelKey: 'communities.title', icon: Users, feature: 'communities' },
   { to: '/playgrounds', label: 'Playgrounds', icon: CubeSolid, feature: 'playgrounds' },
   { to: '/store', label: 'Store', icon: ShoppingCart, feature: 'payments' },

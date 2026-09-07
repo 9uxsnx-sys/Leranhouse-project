@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import { Search, Headphones, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { PodcastCard } from '@components/Objects/Thumbnails/PodcastCard'
-import PodcastCardShowcase from '@components/Objects/Thumbnails/PodcastCardShowcase'
 import { searchMatchesAny } from '@/lib/search/normalize'
 import { PodcastWithEpisodeCount } from '@services/podcasts/podcasts'
 import FeatureDisabledView from '@components/Dashboard/Shared/FeatureDisabled/FeatureDisabledView'
@@ -178,11 +177,6 @@ export default function PodcastsClient({
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-        )}
-
-        {/* Card design showcase */}
-        {allPodcasts.length > 0 && (
-          <PodcastCardShowcase podcasts={allPodcasts} />
         )}
 
         {/* Grid area */}

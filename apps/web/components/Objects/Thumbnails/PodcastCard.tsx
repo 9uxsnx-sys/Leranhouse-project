@@ -79,7 +79,7 @@ export function PodcastCard({ id, title, description, thumbnailImage, episodeCou
             {description || 'placeholder'}
           </p>
         </div>
-        <p className="text-[12px] text-gray-400">
+        <p className="text-[12px] text-gray-400 mt-1.5">
           {episodeCount} {episodeCount === 1 ? 'episode' : 'episodes'} &middot; {formatDuration(totalDurationSeconds)} &middot; {creationDate ? formatDate(creationDate) : ''}
         </p>
       </div>
