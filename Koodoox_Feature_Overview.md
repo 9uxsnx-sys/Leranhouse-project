@@ -342,124 +342,6 @@ Koodoox's podcast system allows organizations to create, manage, and distribute 
 | **Update permission** | Required to edit podcast settings and episode content | A contributor can upload episodes but cannot edit the podcast name or description |
 | **Delete permission** | Required to delete podcast or episodes | Only the podcast owner can delete the entire podcast |
 
----
-
-## 3. Integrations & Existing Services
-
-Koodoox integrates with a wide range of third-party services for payments, email, storage, analytics, authentication, and more. All services are configurable via environment variables and can be enabled/disabled per deployment.
-
----
-
-#### 3.1 Payment Processing
-
-| Service | Purpose | Details |
-|---|---|---|
-| **Stripe** | Payment processing & marketplace payouts | Full Stripe Connect integration for subscriptions, one-time payments, and marketplace payouts. Supports Connect OAuth onboarding, Express accounts, and standard + Connect webhooks. |
-| **Medusa Payments** | Ecommerce payment routing | Payment processing routed through Medusa's provider system, with Stripe as the primary payment module. |
-
----
-
-#### 3.2 Email & Notifications
-
-| Service | Purpose | Details |
-|---|---|---|
-| **Resend** | Transactional emails | Primary email provider for invites, verification, notifications, and system emails. |
-| **SMTP (fallback)** | Self-hosted email | Built-in SMTP with STARTTLS support as an alternative to Resend. Supports authentication and custom ports. |
-
----
-
-#### 3.3 Storage & Content Delivery
-
-| Service | Purpose | Details |
-|---|---|---|
-| **AWS S3 (or compatible)** | File & media storage | S3-compatible storage for course content, activity files, and media. Supports any S3-compatible endpoint — AWS, Cloudflare R2, MinIO, etc. |
-| **Local filesystem** | Development/small deployments | Built-in local storage mode for development environments or small-scale self-hosted deployments. |
-| **HTTP Range streaming** | Video & audio delivery | Server-side Range request handling for efficient video/audio streaming from both local and S3 storage. |
-
----
-
-#### 3.4 Analytics & Monitoring
-
-| Service | Purpose | Details |
-|---|---|---|
-| **Tinybird** | Event analytics pipeline | Managed ClickHouse-based analytics for event tracking, course completion rates, user engagement metrics, and custom analytics queries. Uses Redis caching for optimized query performance. |
-| **Sentry** | Error tracking & monitoring | Full-stack error tracking with separate client (Next.js) and server (FastAPI) configurations. Includes session replay for frontend debugging. |
-| **OpenTelemetry** | Performance monitoring | Fastify OTEL integration for distributed tracing and performance observability. |
-
----
-
-#### 3.5 Authentication & SSO
-
-| Service | Purpose | Details |
-|---|---|---|
-| **WorkOS** | Enterprise SSO | Enterprise single sign-on supporting Keycloak, Okta, Auth0, Custom SAML, and Custom OIDC providers. |
-| **Google OAuth** | Social login | Google OAuth token verification and user info retrieval for social login. |
-| **GitHub OAuth** | Social login | GitHub OAuth provider (via Medusa auth module) for developer-focused authentication. |
-| **JWT with refresh rotation** | Session management | Cookie-based JWT authentication with automatic refresh token rotation for secure session handling. |
-| **Argon2** | Password hashing | Industry-standard Argon2 password hashing for secure credential storage. |
-
----
-
-#### 3.6 Real-Time & Collaboration
-
-| Service | Purpose | Details |
-|---|---|---|
-| **Hocuspocus + Yjs** | Real-time collaboration | CRDT-based real-time collaborative editing using Yjs. Powers collaborative boards, documents, and TipTap editor collaboration. Persists state via Redis. |
-| **Redis** | Caching & state management | In-memory data store used for: token revocation, invite validation, analytics caching, rate limiting, collaboration persistence, and session management. |
-| **TipTap Collaboration** | Rich text sync | Collaborative rich text editing with cursor position awareness and caret rendering across multiple users. |
-
----
-
-#### 3.7 Code Execution
-
-| Service | Purpose | Details |
-|---|---|---|
-| **Judge0** | Code execution sandbox | Secure, sandboxed code execution for programming exercises. Supports single execution, batch execution, and SQLite database upload. Used for in-browser coding challenges and assessments. |
-
----
-
-#### 3.8 Webhooks & Automation
-
-| Service | Purpose | Details |
-|---|---|---|
-| **Custom webhook engine** | Event-driven integrations | Full webhook system with Fernet-encrypted secrets, HMAC-SHA256 signing, async dispatch with retry (3 attempts, exponential backoff), delivery logging, and SSRF protection. |
-| **Zapier** | No-code automation | REST Hooks integration for Zapier, allowing non-technical users to connect Koodoox with 5000+ apps. Requires Pro plan and API token authentication. |
-
----
-
-#### 3.9 Media & Content
-
-| Service | Purpose | Details |
-|---|---|---|
-| **Unsplash** | Stock image picker | Built-in Unsplash image browser for course thumbnails and cover images. Supports search, category browsing, and download tracking. |
-| **Wavesurfer.js** | Audio visualization | Audio waveform visualization in the podcast player with click-to-seek functionality. |
-| **KaTeX** | Math rendering | Mathematical equation rendering for STEM course content. |
-| **QR Code** | QR generation | QR code generation for course sharing and quick access links. |
-
----
-
-#### 3.10 Platform Infrastructure
-
-| Service | Purpose | Details |
-|---|---|---|
-| **PostgreSQL** | Primary database | Relational database with SQLModel ORM, Alembic migrations, and pgvector extension for vector similarity search. |
-| **pgvector** | Vector search | PostgreSQL extension for embedding storage and similarity search, used by the RAG pipeline. |
-| **Medusa** | Ecommerce framework | Headless commerce engine powering payments, product management, and order processing with a modular provider system. |
-| **MCP (Model Context Protocol)** | API integration server | Standardized protocol for connecting AI assistants and external tools to the Koodoox API. |
-
----
-
-#### 3.11 Security
-
-| Service | Purpose | Details |
-|---|---|---|
-| **SSRF Guard** | Request security | Two-phase SSRF protection: DNS resolution + IP validation before connect, peer verification after connect to defeat DNS rebinding attacks. |
-| **Rate limiting** | Abuse prevention | Per-user and per-organization rate limiting for API endpoints to prevent abuse and ensure fair resource usage. |
-| **defusedxml** | XML security | Protection against XML external entity (XXE) attacks and other XML-based vulnerabilities. |
-| **Fernet encryption** | Secret management | Symmetric encryption for webhook secrets and sensitive configuration data. |
-
----
-
 ## 4. Platform Infrastructure
 
 Koodoox is built on a modern, production-ready tech stack designed for scalability, performance, and ease of deployment. The platform supports both self-hosted (open-source) and cloud-managed deployments.
@@ -548,10 +430,44 @@ Koodoox is built on a modern, production-ready tech stack designed for scalabili
 
 ---
 
-## 5. Roadmap / Coming Next
+## 5. Coming Up Next
 
-*(To be completed in next section)*
+### 5.1 Admin AI Assistant
 
-## 6. Business Model
+| Feature | Description | Real-World Scenario |
+|---|---|---|
+| **Analytics & insights** | Ask any question about your platform data — enrollments, completion rates, user activity — and get instant answers | An admin asks *"How many people enrolled last month and which course has the highest completion rate?"* — the AI pulls the data and gives a clear answer in seconds |
+| **Lesson content generation** | Generate full lesson content (summary, key takeaways, knowledge checks, resources) from a video — saves as draft for approval | Sarah uploads a "Understanding APIs" video and asks the AI to create the lesson content. The AI generates everything in seconds; Sarah reviews and approves. Saves 30 minutes per lesson. |
+| **Admin actions** | Invite users, publish courses, manage roles, and trigger platform actions through natural language | An admin says *"Invite john@company.com as an instructor and publish the Advanced Python course"* — the AI handles both actions instantly |
+| **Course planning** | Describe a course idea and get a full outline with chapters and lessons, then finalize it into the platform | A training manager describes a "Sales Techniques" course idea and the AI generates a 6-chapter outline ready to be built out |
 
-*(To be completed in next section)*
+### 5.2 Mobile App
+
+| Feature | Description | Real-World Scenario |
+|---|---|---|
+| **Offline learning** | Download courses, videos, and resources to your phone and learn without internet | Mark downloads a "Negotiation Skills" course before his commute. On the train with no signal, he watches lessons and answers quizzes. Progress syncs when he gets online. |
+| **Background audio** | Listen to podcast episodes with the phone locked or while using other apps | On his evening run, Mark listens to a podcast episode in the background with playback speed controls and lock screen controls |
+| **Picture-in-Picture video** | Watch lessons in a small floating window while taking notes or using other apps | A student watches a coding tutorial in a small window while following along in their code editor |
+| **Push notifications** | Get notified of new lessons, discussion replies, mentions, and certificate achievements | A learner gets a push notification: *"New lesson available: Advanced CSS Grid"* — taps it and opens directly to the lesson |
+| **Biometric login** | Unlock the app with Face ID or fingerprint | A student opens the app and logs in with their fingerprint in under a second — no password typing |
+| **Native sharing** | Share course links to any app (WhatsApp, iMessage, LinkedIn, etc.) with the native share sheet | After finishing a course, a learner taps share and sends the course link to their team via WhatsApp with one tap |
+
+## 6. Project Cost Breakdown
+
+Below is a professional agency-style estimate of the cost to build the Koodoox platform from scratch, based on real market data from multiple agencies in 2025-2026.
+
+> **Note:** All prices are estimated ranges. Actual costs vary by team location, seniority, and requirements.
+
+| Item | Estimated Cost |
+|---|---|
+| **Discovery & planning** — Requirements, UX research, technical architecture | $2,000 — $3,000 |
+| **Design (UI/UX)** — Design system, wireframes, high-fidelity mockups, prototype | $6,000 — $9,000 |
+| **Frontend development** — Next.js, auth UI, course/community/podcast UIs, admin dashboard, responsive design | $22,000 — $28,000 |
+| **Backend development** — FastAPI, auth, course/community/podcast APIs, analytics, webhooks, AI, real-time collab | $18,000 — $24,000 |
+| **Content editor & media** — TipTap editor, media upload/streaming, course import/export | $5,000 — $7,000 |
+| **Infrastructure & DevOps** — Cloud setup, CI/CD, database, monitoring, security | $4,000 — $6,000 |
+| **Testing & QA** — Manual QA, automated tests, performance testing | $4,000 — $6,000 |
+| **Project management & docs** — Sprint management, technical docs, user guides | $3,000 — $5,000 |
+| **Total build cost** | **$64,000 — $88,000** |
+
+
