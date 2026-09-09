@@ -1,25 +1,26 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { PodcastEpisode, Podcast } from '@services/podcasts/podcasts'
 import { formatDuration } from '@services/podcasts/episodes'
 import { usePodcastPlayer } from '@components/Contexts/PodcastPlayerContext'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { getEpisodeThumbnailMediaDirectory, getPodcastThumbnailMediaDirectory } from '@services/media/media'
-import { Play, Pause, Clock } from 'lucide-react'
+import { Play, Pause } from 'lucide-react'
 
 interface EpisodeCardProps {
   episode: PodcastEpisode
   podcast: Podcast
-  showThumbnail?: boolean
 }
 
-export default function EpisodeCard({ episode, podcast, showThumbnail = true }: EpisodeCardProps) {
+export default function EpisodeCard({ episode, podcast }: EpisodeCardProps) {
   const { state, playEpisode, togglePlay } = usePodcastPlayer()
-  const org = useOrg() as any
+  const [isHovered, setIsHovered] = useState(false)
 
   const isCurrentEpisode = state.currentEpisode?.episode_uuid === episode.episode_uuid
   const isPlaying = isCurrentEpisode && state.isPlaying
+
+  const progress = isCurrentEpisode && state.duration > 0
+    ? Math.min(Math.round(state.currentTime / state.duration * 100), 100)
+    : 0
 
   const handlePlay = () => {
     if (isCurrentEpisode) {
@@ -29,100 +30,103 @@ export default function EpisodeCard({ episode, podcast, showThumbnail = true }: 
     }
   }
 
-  // Get thumbnail
-  const thumbnailUrl = episode.thumbnail_image && org
-    ? getEpisodeThumbnailMediaDirectory(
-        org.org_uuid,
-        podcast.podcast_uuid,
-        episode.episode_uuid,
-        episode.thumbnail_image
-      )
-    : podcast.thumbnail_image && org
-    ? getPodcastThumbnailMediaDirectory(org.org_uuid, podcast.podcast_uuid, podcast.thumbnail_image)
-    : '/empty_thumbnail.png'
-
   return (
     <div
-      className={`group flex items-center gap-4 p-4 rounded-lg transition-colors cursor-pointer ${
-        isCurrentEpisode ? 'bg-gray-100' : 'hover:bg-gray-50'
+      className={`rounded-xl bg-white border transition-all duration-200 cursor-pointer ${
+        isHovered
+          ? 'border-gray-300 shadow-sm'
+          : 'border-black/10'
       }`}
       onClick={handlePlay}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Episode number */}
-      <div className="flex-shrink-0 w-8 text-center">
-        <span className="text-sm font-bold text-gray-400">
+      {/* Main row — always visible */}
+      <div className="flex items-center gap-2 px-4 py-4">
+        {/* Number */}
+        <span
+          className={`flex-shrink-0 w-6 text-right text-[15px] font-semibold leading-none mr-1.5 ${
+            isCurrentEpisode ? 'text-indigo-600' : 'text-gray-300'
+          }`}
+        >
           {episode.episode_number}
         </span>
-      </div>
 
-      {/* Thumbnail */}
-      {showThumbnail && (
-        <div className="flex-shrink-0 relative">
-          <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-200">
-            <img
-              src={thumbnailUrl}
-              alt={episode.title}
-              className="w-full h-full object-cover"
-            />
-          </div>
-          {/* Play overlay */}
-          <div className={`absolute inset-0 flex items-center justify-center rounded-lg bg-black/40 transition-opacity ${
-            isCurrentEpisode ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-          }`}>
-            <div className="bg-white rounded-full p-2">
-              {isPlaying ? (
-                <Pause size={16} className="text-gray-900" fill="currentColor" />
-              ) : (
-                <Play size={16} className="text-gray-900" fill="currentColor" />
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Episode info */}
-      <div className="flex-1 min-w-0">
-        <h4 className={`font-semibold truncate ${isCurrentEpisode ? 'text-gray-900' : 'text-gray-800'}`}>
+        {/* Title */}
+        <h4
+          className={`flex-1 min-w-0 text-[15px] font-medium truncate ${
+            isCurrentEpisode ? 'text-indigo-700' : 'text-gray-900'
+          }`}
+        >
           {episode.title}
         </h4>
-        {episode.description && (
-          <p className="text-sm text-gray-500 line-clamp-2 mt-0.5">
-            {episode.description}
-          </p>
-        )}
-        <div className="flex items-center gap-3 mt-2 text-xs text-gray-400">
-          <span className="flex items-center gap-1">
-            <Clock size={12} />
-            {formatDuration(episode.duration_seconds || 0)}
-          </span>
-          {!episode.published && (
-            <span className="px-1.5 py-0.5 bg-yellow-100 text-yellow-700 rounded text-[10px] font-medium">
-              Unpublished
-            </span>
-          )}
-        </div>
-      </div>
 
-      {/* Play button (visible on non-thumbnail view or always visible) */}
-      {!showThumbnail && (
+        {/* Play / Pause button */}
         <button
           onClick={(e) => {
             e.stopPropagation()
             handlePlay()
           }}
-          className={`flex-shrink-0 p-3 rounded-full transition-colors ${
+          className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 active:scale-90 ${
             isCurrentEpisode
-              ? 'bg-gray-900 text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              ? 'bg-indigo-600 text-white shadow-sm'
+              : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600'
           }`}
         >
-          {isPlaying ? (
-            <Pause size={18} fill="currentColor" />
-          ) : (
-            <Play size={18} fill="currentColor" />
-          )}
+          <div className="relative w-3.5 h-3.5 flex items-center justify-center">
+            <div
+              className={`absolute inset-0 flex items-center justify-center transition-all duration-200 ${
+                isPlaying
+                  ? 'opacity-0 rotate-90 scale-0'
+                  : 'opacity-100 rotate-0 scale-100'
+              }`}
+            >
+              <Play size={13} fill="currentColor" className="ml-0.5" />
+            </div>
+            <div
+              className={`absolute inset-0 flex items-center justify-center transition-all duration-200 ${
+                isPlaying
+                  ? 'opacity-100 rotate-0 scale-100'
+                  : 'opacity-0 -rotate-90 scale-0'
+              }`}
+            >
+              <Pause size={13} fill="currentColor" />
+            </div>
+          </div>
         </button>
-      )}
+      </div>
+
+      {/* Expandable progress bar — only visible for the current episode */}
+      <div
+        className={`grid transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          isCurrentEpisode ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div
+            className={`px-4 pb-4 transition-all duration-300 delay-75 ${
+              isCurrentEpisode ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1'
+            }`}
+          >
+          {/* Progress bar */}
+          <div className="h-1 bg-gray-200/80 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-indigo-500 rounded-full transition-all duration-300 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          {/* Time labels */}
+          <div className="flex justify-between mt-1.5">
+            <span className="text-[11px] text-gray-400 tabular-nums">
+              {formatDuration(Math.floor(state.currentTime))}
+            </span>
+            <span className="text-[11px] text-gray-400 tabular-nums">
+              {formatDuration(Math.floor(state.duration))}
+            </span>
+          </div>
+        </div>
+      </div>
+      </div>
     </div>
   )
 }

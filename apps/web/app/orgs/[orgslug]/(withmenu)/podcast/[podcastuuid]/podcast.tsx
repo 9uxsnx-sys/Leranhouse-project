@@ -186,30 +186,27 @@ export default function PodcastClient({
               </div>
 
               {/* Episodes List */}
-              <div className="bg-white nice-shadow rounded-lg overflow-hidden">
-                {/* Episode list */}
-                {filteredEpisodes.length > 0 ? (
-                  <div className="divide-y divide-gray-100">
-                    {filteredEpisodes.map((episode) => (
-                      <EpisodeCard
-                        key={episode.episode_uuid}
-                        episode={episode}
-                        podcast={podcast}
-                      />
-                    ))}
-                  </div>
-                ) : episodes.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Headphones size={40} className="mx-auto text-gray-300 mb-3" />
-                    <p className="text-gray-500">{t('podcasts.no_episodes')}</p>
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <Search size={40} className="mx-auto text-gray-300 mb-3" />
-                    <p className="text-gray-500">No episodes match your search</p>
-                  </div>
-                )}
-              </div>
+              {filteredEpisodes.length > 0 ? (
+                <div className="space-y-3">
+                  {filteredEpisodes.map((episode) => (
+                    <EpisodeCard
+                      key={episode.episode_uuid}
+                      episode={episode}
+                      podcast={podcast}
+                    />
+                  ))}
+                </div>
+              ) : episodes.length === 0 ? (
+                <div className="text-center py-12">
+                  <Headphones size={40} className="mx-auto text-gray-300 mb-3" />
+                  <p className="text-gray-500">{t('podcasts.no_episodes')}</p>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Search size={40} className="mx-auto text-gray-300 mb-3" />
+                  <p className="text-gray-500">No episodes match your search</p>
+                </div>
+              )}
             </div>
 
             {/* Right Sidebar - Podcast Info (Desktop only) */}

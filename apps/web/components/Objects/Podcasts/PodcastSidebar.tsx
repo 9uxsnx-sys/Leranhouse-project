@@ -2,7 +2,8 @@
 
 import React from 'react'
 import { Podcast } from '@services/podcasts/podcasts'
-import { Mic } from 'lucide-react'
+import { useOrg } from '@components/Contexts/OrgContext'
+import { getPodcastThumbnailMediaDirectory } from '@services/media/media'
 import { Container } from '@/components/ui/container'
 import { Heading } from '@/components/ui/heading'
 import { Text } from '@/components/ui/text'
@@ -17,20 +18,36 @@ const MOCK_UPDATES = [
 ]
 
 export function PodcastSidebar({ podcast }: PodcastSidebarProps) {
+  const org = useOrg() as any
+
+  const thumbnailUrl = podcast.thumbnail_image && org
+    ? getPodcastThumbnailMediaDirectory(org.org_uuid, podcast.podcast_uuid, podcast.thumbnail_image)
+    : '/empty_thumbnail.png'
+
   return (
     <div className="space-y-4">
-      {/* Container 1: Podcast Info */}
-      <Container className="pt-6 pb-6">
-        <div className="flex items-center gap-2">
-          <Mic size={16} className="text-gray-900 shrink-0" />
-          <p className="text-base font-semibold text-gray-900">{podcast.name}</p>
+      {/* Container 1: Podcast Info — Card */}
+      <div className="rounded-xl bg-white border border-black/10 overflow-hidden">
+        {/* 1:1 square thumbnail */}
+        <div className="aspect-[4/3] overflow-hidden bg-gray-50">
+          <img
+            src={thumbnailUrl}
+            alt={podcast.name}
+            className="w-full h-full object-cover"
+          />
         </div>
-        {podcast.description && (
-          <p className="text-sm text-gray-500 mt-2">
-            {podcast.description}
-          </p>
-        )}
-      </Container>
+        {/* Title + description */}
+        <div className="px-5 pt-4 pb-5">
+          <h3 className="text-base font-semibold text-gray-900">
+            {podcast.name}
+          </h3>
+          {podcast.description && (
+            <p className="text-sm text-gray-500 mt-1.5 leading-relaxed">
+              {podcast.description}
+            </p>
+          )}
+        </div>
+      </div>
 
       {/* Container 3: Updates */}
       <Container className="pt-6 pb-6">
