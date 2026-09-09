@@ -40,6 +40,7 @@ function TrailCourseCard(props: TrailCourseCardProps) {
   const course_progress = course_total_steps > 0
     ? Math.round((course_completed_steps / course_total_steps) * 100)
     : 0
+  const isCompleted = props.run.status === 'STATUS_COMPLETED'
 
   const [courseCertificate, setCourseCertificate] = useState<any>(null)
   const [isLoadingCertificate, setIsLoadingCertificate] = useState(false)
@@ -81,7 +82,10 @@ function TrailCourseCard(props: TrailCourseCardProps) {
   const courseLink = getUriWithOrg(props.orgslug, '/course/' + courseid)
 
   return (
-    <div className="group relative flex flex-col bg-white rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01]">
+    <div
+      className="group relative flex flex-col h-full bg-white border border-[#E7E7E7] rounded-[12px] overflow-hidden transition-all duration-200 hover:-translate-y-[1px] hover:border-[#DADADA] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+      style={{ transformOrigin: 'top center' }}
+    >
       {/* Dropdown Menu */}
       <div className="absolute top-2 right-2 z-20">
         <DropdownMenu>
@@ -109,11 +113,8 @@ function TrailCourseCard(props: TrailCourseCardProps) {
         </DropdownMenu>
       </div>
 
-      {/* Thumbnail */}
-      <Link
-        href={courseLink}
-        className="block relative aspect-video overflow-hidden bg-gray-50"
-      >
+      {/* 16:9 Cover Image */}
+      <Link href={courseLink} className="relative overflow-hidden bg-gray-100 shrink-0" style={{ aspectRatio: '16/9' }}>
         {props.course.thumbnail_image && org?.org_uuid ? (
           <img
             src={getCourseThumbnailMediaDirectory(
@@ -125,69 +126,47 @@ function TrailCourseCard(props: TrailCourseCardProps) {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="flex flex-col items-center justify-center h-full w-full text-gray-300 gap-2">
+          <div className="w-full h-full flex items-center justify-center text-gray-300">
             <BookOpen size={40} strokeWidth={1.5} />
           </div>
         )}
-        {/* Progress overlay */}
-        <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-gray-200/80">
-          <div
-            className={`h-full ${course_progress === 100 ? 'bg-green-500' : 'bg-teal-500'}`}
-            style={{ width: `${course_progress}%` }}
-          />
-        </div>
       </Link>
 
-      {/* Content */}
-      <div className="p-3 flex flex-col space-y-1.5">
-        <Link
-          href={courseLink}
-          className="text-base font-bold text-gray-900 leading-tight hover:text-black transition-colors line-clamp-1"
-        >
-          {course.name}
-        </Link>
+      {/* Progress bar — between image and content */}
+      <div className="h-1 bg-gray-100">
+        <div
+          className={`h-full transition-all ${
+            isCompleted ? 'bg-green-500' : 'bg-indigo-500'
+          }`}
+          style={{ width: `${course_progress}%` }}
+        />
+      </div>
 
-        <div className="flex items-center gap-2 text-sm">
-          <span className={`font-semibold ${course_progress === 100 ? 'text-green-600' : 'text-teal-600'}`}>
-            {course_progress}%
-          </span>
-          <span className="text-gray-400 text-xs">
-            {t('courses.completed_of', { completed: course_completed_steps, total: course_total_steps })}
-          </span>
+      {/* Content */}
+      <div className="px-4 pt-3 pb-4 flex flex-col flex-1">
+        <div className="flex flex-col gap-1">
+          <Link href={courseLink} className="no-underline">
+            <h3 className="text-[15px] font-semibold leading-snug line-clamp-2 text-gray-900 hover:text-gray-700 transition-colors">
+              {course.name}
+            </h3>
+          </Link>
+          <p className="text-[13px] font-normal leading-relaxed line-clamp-1 text-[#6B7280]">
+            {course_completed_steps} of {course_total_steps} lessons completed
+          </p>
         </div>
 
-        <div className="pt-1.5 flex items-center justify-between border-t border-gray-100">
-          {/* Certificate or Progress indicator */}
-          {course_progress === 100 ? (
-            isLoadingCertificate ? (
-              <div className="flex items-center gap-1.5 text-gray-400">
-                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-yellow-500"></div>
-                <span className="text-[10px] font-bold uppercase tracking-wider">{t('common.loading')}</span>
-              </div>
-            ) : courseCertificate ? (
-              <div className="flex items-center gap-1.5 text-yellow-600">
-                <Award size={12} />
-                <span className="text-[10px] font-bold uppercase tracking-wider">{t('certificate.certificate')}</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5 text-green-600">
-                <Award size={12} />
-                <span className="text-[10px] font-bold uppercase tracking-wider">{t('common.completed')}</span>
-              </div>
-            )
-          ) : (
-            <div className="flex items-center gap-1.5 text-gray-500">
-              <BookOpen size={12} />
-              <span className="text-[10px] font-bold uppercase tracking-wider">{t('courses.course_progress')}</span>
-            </div>
-          )}
+        {/* Bottom row: progress percentage + action link */}
+        <div className="mt-auto pt-2 flex items-center justify-between">
+          <span className="text-[12px] text-gray-400">
+            {course_progress}% &middot; {isCompleted ? t('common.completed') : t('courses.course_progress')}
+          </span>
 
-          {course_progress === 100 && courseCertificate ? (
+          {isCompleted && courseCertificate ? (
             <Link
               href={getUriWithOrg(props.orgslug, `/certificates/${courseCertificate.certificate_user.user_certification_uuid}/verify`)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:text-blue-700 uppercase tracking-wider"
+              className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700 transition-colors"
             >
               {t('certificate.verify')}
               <ExternalLink className="w-3 h-3" />
@@ -195,7 +174,7 @@ function TrailCourseCard(props: TrailCourseCardProps) {
           ) : (
             <Link
               href={courseLink}
-              className="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
+              className="text-[11px] font-semibold text-gray-400 hover:text-gray-900 transition-colors"
             >
               {t('courses.continue_learning')}
             </Link>
