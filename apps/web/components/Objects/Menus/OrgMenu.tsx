@@ -365,7 +365,7 @@ export const OrgMenu = ({
       >
         {/* Desktop sidebar — shell.tsx DesktopSidebarContainer (h-screen w-[220px] border-e) */}
         <aside
-          className={`hidden h-full w-[220px] shrink-0 flex-col border-e border-ui-border-base ${sidebarCollapsed ? 'lg:hidden' : 'lg:flex'}`}
+          className={`hidden h-full w-[240px] shrink-0 flex-col border-e border-ui-border-base ${sidebarCollapsed ? 'lg:hidden' : 'lg:flex'}`}
         >
           <MedusaSidebarContent orgslug={orgslug} onSearchClick={() => setSearchModalOpen(true)} />
         </aside>

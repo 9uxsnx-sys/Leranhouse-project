@@ -1,6 +1,6 @@
 'use client'
 
-import React, { ComponentType } from 'react'
+import React, { ComponentType, useMemo } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
@@ -11,16 +11,15 @@ import { getOrgLogoMediaDirectory } from '@services/media/media'
 import { HeaderProfileBox } from '@components/Security/HeaderProfileBox'
 import {
   House,
-  Book,
-  FolderOpen,
+  BookOpen,
   Users,
   ShoppingCart,
-  Directions,
-  GridLayout,
-  EllipsisHorizontal,
-  MagnifyingGlass,
+  Route,
+  LayoutDashboard,
+  MoreHorizontal,
+  Search,
   Mic,
-} from '@components/Objects/Icons/MedusaIcons'
+} from 'lucide-react'
 import { Text } from '@components/ui/text'
 
 /**
@@ -31,8 +30,8 @@ import { Text } from '@components/ui/text'
 
 // nav-item.tsx: BASE_NAV_LINK_CLASSES + ACTIVE_NAV_LINK_CLASSES (exact)
 const NAV_BASE =
-  'text-ui-fg-subtle transition-fg hover:bg-ui-bg-subtle-hover flex items-center gap-x-2 rounded-md py-0.5 pl-0.5 pr-2 outline-none [&>svg]:text-ui-fg-subtle focus-visible:shadow-borders-focus'
-const NAV_ACTIVE = 'bg-ui-bg-base shadow-elevation-card-rest text-ui-fg-base hover:bg-ui-bg-base'
+  'text-ui-fg-subtle transition-fg hover:bg-ui-bg-subtle-hover flex items-center gap-x-2.5 h-10 px-4 rounded-xl outline-none [&>svg]:text-ui-fg-subtle focus-visible:shadow-borders-focus'
+const NAV_ACTIVE = 'text-ui-fg-base'
 
 interface NavEntry {
   to: string
@@ -43,13 +42,13 @@ interface NavEntry {
 }
 
 const NAV_ITEMS: NavEntry[] = [
-  { to: '/search', labelKey: 'common.search', icon: MagnifyingGlass, feature: null },
+  { to: '/search', labelKey: 'common.search', icon: Search, feature: null },
   { to: '/', labelKey: 'common.home', icon: House, feature: null },
-  { to: '/courses', labelKey: 'courses.courses', icon: Book, feature: 'courses' },
+  { to: '/courses', labelKey: 'courses.courses', icon: BookOpen, feature: 'courses' },
   { to: '/podcasts', labelKey: 'podcasts.podcasts', icon: Mic, feature: 'podcasts' },
   { to: '/communities', labelKey: 'communities.title', icon: Users, feature: 'communities' },
   { to: '/store', label: 'Store', icon: ShoppingCart, feature: 'payments' },
-  { to: '/trail', labelKey: 'courses.progress', icon: Directions, feature: null },
+  { to: '/trail', labelKey: 'courses.progress', icon: Route, feature: null },
 ]
 
 // divider.tsx — exact dashed recipe
@@ -90,7 +89,7 @@ function OrgHeader({ org, orgslug }: { org: any; orgslug: string }) {
             {name}
           </Text>
         </div>
-        <EllipsisHorizontal className="text-ui-fg-muted" />
+        <MoreHorizontal className="text-ui-fg-muted" />
       </Link>
     </div>
   )
@@ -118,10 +117,8 @@ function NavLinkItem({
         onClick={onSearchClick}
         className={`${NAV_BASE} w-full text-left`}
       >
-        <div className="flex size-6 items-center justify-center">
-          <Icon className="h-4 w-4" />
-        </div>
-        <Text size="small" weight="plus" leading="compact">
+        <Icon className="w-5 h-5" />
+        <Text size="small" weight="plus" leading="compact" className="text-sm">
           {label}
         </Text>
       </button>
@@ -130,10 +127,8 @@ function NavLinkItem({
 
   return (
     <Link href={href} className={`${NAV_BASE} ${active ? NAV_ACTIVE : ''}`}>
-      <div className="flex size-6 items-center justify-center">
-        <Icon className="h-4 w-4" />
-      </div>
-      <Text size="small" weight="plus" leading="compact">
+      <Icon className="w-5 h-5" />
+      <Text size="small" weight="plus" leading="compact" className="text-sm">
         {label}
       </Text>
     </Link>
@@ -160,6 +155,13 @@ export function MedusaSidebarContent({ orgslug, onSearchClick }: { orgslug: stri
     return pathname === href || pathname?.startsWith(`${href}/`)
   }
 
+  // Animated floating indicator: compute active item index
+  const activeIndex = useMemo(
+    () => visible.findIndex((item) => isActive(item.to)),
+    [visible, pathname, orgslug]
+  )
+  const indicatorTop = activeIndex >= 0 ? activeIndex * 40 : -9999 // 40px (h-10) no gap
+
   return (
     <aside className="flex flex-1 flex-col justify-between overflow-x-hidden overflow-y-auto">
       <div className="flex flex-1 flex-col">
@@ -170,18 +172,25 @@ export function MedusaSidebarContent({ orgslug, onSearchClick }: { orgslug: stri
         </div>
 
         {/* Nav (main-layout.tsx SidebarRoutes) */}
-        <nav className="py-3">
+        <nav className="pt-4 pb-3">
           <div className="px-3">
-            <div className="flex flex-col gap-y-1">
-              {visible.map((item) => (
-                <NavLinkItem
-                  key={item.to}
-                  item={item}
-                  orgslug={orgslug}
-                  active={isActive(item.to)}
-                  onSearchClick={onSearchClick}
-                />
-              ))}
+            <div className="relative">
+              {/* Floating active indicator */}
+              <div
+                className="absolute left-0 right-0 bg-ui-bg-base shadow-elevation-card-rest rounded-xl transition-all duration-200 ease-out pointer-events-none"
+                style={{ top: indicatorTop, height: 40, opacity: activeIndex >= 0 ? 1 : 0 }}
+              />
+              <div className="relative flex flex-col">
+                {visible.map((item) => (
+                  <NavLinkItem
+                    key={item.to}
+                    item={item}
+                    orgslug={orgslug}
+                    active={isActive(item.to)}
+                    onSearchClick={onSearchClick}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </nav>
@@ -195,7 +204,7 @@ export function MedusaSidebarContent({ orgslug, onSearchClick }: { orgslug: stri
               item={{
                 to: '/dash',
                 labelKey: 'common.dashboard',
-                icon: GridLayout,
+                icon: LayoutDashboard,
                 feature: null,
               }}
               orgslug={orgslug}
