@@ -14,10 +14,8 @@ import {
   Book,
   FolderOpen,
   Users,
-  CubeSolid,
   ShoppingCart,
   Directions,
-  GridList,
   GridLayout,
   EllipsisHorizontal,
   MagnifyingGlass,
@@ -50,10 +48,8 @@ const NAV_ITEMS: NavEntry[] = [
   { to: '/courses', labelKey: 'courses.courses', icon: Book, feature: 'courses' },
   { to: '/podcasts', labelKey: 'podcasts.podcasts', icon: Mic, feature: 'podcasts' },
   { to: '/communities', labelKey: 'communities.title', icon: Users, feature: 'communities' },
-  { to: '/playgrounds', label: 'Playgrounds', icon: CubeSolid, feature: 'playgrounds' },
   { to: '/store', label: 'Store', icon: ShoppingCart, feature: 'payments' },
   { to: '/trail', labelKey: 'courses.progress', icon: Directions, feature: null },
-  { to: '/boards', label: 'Boards', icon: GridList, feature: 'boards' },
 ]
 
 // divider.tsx — exact dashed recipe
