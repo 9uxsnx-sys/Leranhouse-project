@@ -22,8 +22,8 @@ import {
 import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
 import CommandPaletteTrigger from '@components/Dashboard/CommandPalette/CommandPaletteTrigger'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import React, { useEffect, useRef, useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import UserAvatar from '../../Objects/UserAvatar'
 import { HeaderProfileBox } from '@components/Security/HeaderProfileBox'
 import AdminAuthorization from '@components/Security/AdminAuthorization'
@@ -60,7 +60,11 @@ function DashLeftMenu() {
   const org = useOrg() as any
   const session = useLHSession() as any
   const { t, i18n } = useTranslation()
-  const pathname = usePathname() || ''
+  const router = useRouter()
+  const rawPathname = usePathname() || ''
+  // Strip /orgs/{slug} prefix added by middleware rewrite so that
+  // isActivePath works the same during SSR and client-side navigation.
+  const pathname = rawPathname.replace(/^\/orgs\/[^/]+/, '')
   const [isCollapsed, setIsCollapsed] = useState(false)
 
   const isActivePath = (path: string) => {
@@ -77,6 +81,19 @@ function DashLeftMenu() {
       const saved = localStorage.getItem('dash-menu-collapsed')
       if (saved !== null) {
         setIsCollapsed(saved === 'true')
+      }
+    }
+  }, [])
+
+  // On page reload, redirect to the home tab to avoid indicator positioning issues
+  useEffect(() => {
+    if (pathname !== '/dash' && pathname !== '') {
+      const navEntries = performance.getEntriesByType('navigation')
+      if (navEntries.length > 0) {
+        const navType = (navEntries[0] as PerformanceNavigationTiming).type
+        if (navType === 'reload') {
+          router.push('/dash')
+        }
       }
     }
   }, [])
@@ -105,23 +122,48 @@ function DashLeftMenu() {
   const [indicatorTop, setIndicatorTop] = useState(-9999)
   const [indicatorOpacity, setIndicatorOpacity] = useState(0)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const container = navContainerRef.current
     if (!container) return
 
-    const activeLink = container.querySelector('[aria-current="page"]')
-    if (activeLink) {
-      const navItem = (activeLink as HTMLElement).closest('[data-nav-item]')
-      if (navItem) {
-        const containerRect = container.getBoundingClientRect()
-        const itemRect = navItem.getBoundingClientRect()
-        setIndicatorTop(itemRect.top - containerRect.top)
-        setIndicatorOpacity(1)
-        return
+    const measure = (): boolean => {
+      const activeLink = container.querySelector('[aria-current="page"]')
+      if (activeLink) {
+        const navItem = (activeLink as HTMLElement).closest('[data-nav-item]')
+        if (navItem) {
+          const containerRect = container.getBoundingClientRect()
+          const itemRect = navItem.getBoundingClientRect()
+          setIndicatorTop(itemRect.top - containerRect.top)
+          setIndicatorOpacity(1)
+          return true
+        }
       }
+      return false
     }
-    setIndicatorTop(-9999)
-    setIndicatorOpacity(0)
+
+    // Try immediately
+    if (measure()) return
+
+    // If nav items aren't rendered yet (e.g. AdminAuthorization still loading),
+    // watch for DOM mutations and measure when children appear
+    const observer = new MutationObserver(() => {
+      if (measure()) {
+        observer.disconnect()
+      }
+    })
+    observer.observe(container, { childList: true, subtree: true })
+
+    // Also try on next frame as a one-shot fallback
+    const rafId = requestAnimationFrame(() => {
+      if (measure()) {
+        observer.disconnect()
+      }
+    })
+
+    return () => {
+      observer.disconnect()
+      cancelAnimationFrame(rafId)
+    }
   }, [pathname, isCollapsed, showCommunities, showPodcasts, showPayments])
 
   // User sub-tab items for the Users tab
@@ -129,7 +171,7 @@ function DashLeftMenu() {
     { label: 'Users', href: '/dash/users/settings/users' },
     { label: 'UserGroups', href: '/dash/users/settings/usergroups' },
     { label: 'Roles', href: '/dash/users/settings/roles' },
-    { label: 'Signups & Invite Codes', href: '/dash/users/settings/signups' },
+    { label: 'Signups', href: '/dash/users/settings/signups' },
     { label: 'Invite Members', href: '/dash/users/settings/add' },
     { label: 'Audit Logs', href: '/dash/users/settings/audit-logs' },
   ]

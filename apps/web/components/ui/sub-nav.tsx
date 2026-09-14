@@ -22,41 +22,54 @@ export function SubNav({ items, currentPath, className }: SubNavProps) {
 
   const isActive = (href: string) => currentPath === href
 
+  const INDICATOR_HEIGHT = 18 // matches text leading-snug line-height
+
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
-    const activeEl = container.querySelector('[data-active="true"]')
-    const railEl = container.querySelector('[data-rail]')
-    if (activeEl && railEl) {
-      const railRect = railEl.getBoundingClientRect()
-      const itemRect = activeEl.getBoundingClientRect()
-      setIndicatorTop(itemRect.top - railRect.top)
-      setIndicatorHeight(itemRect.height)
-    } else {
-      const firstItem = container.querySelector('[data-nav-sub-item]')
+
+    const updatePosition = () => {
+      const activeEl = container.querySelector('[data-active="true"]')
       const railEl = container.querySelector('[data-rail]')
-      if (firstItem && railEl) {
+      if (activeEl && railEl) {
         const railRect = railEl.getBoundingClientRect()
-        const itemRect = firstItem.getBoundingClientRect()
-        setIndicatorTop(itemRect.top - railRect.top)
-        setIndicatorHeight(itemRect.height)
+        const itemRect = activeEl.getBoundingClientRect()
+        // Center the indicator vertically on the item
+        setIndicatorTop(itemRect.top - railRect.top + (itemRect.height - INDICATOR_HEIGHT) / 2)
+        setIndicatorHeight(INDICATOR_HEIGHT)
+      } else {
+        const firstItem = container.querySelector('[data-nav-sub-item]')
+        const railEl = container.querySelector('[data-rail]')
+        if (firstItem && railEl) {
+          const railRect = railEl.getBoundingClientRect()
+          const itemRect = firstItem.getBoundingClientRect()
+          setIndicatorTop(itemRect.top - railRect.top + (itemRect.height - INDICATOR_HEIGHT) / 2)
+          setIndicatorHeight(INDICATOR_HEIGHT)
+        }
       }
     }
+
+    updatePosition()
+
+    // Recalculate on resize
+    const ro = new ResizeObserver(updatePosition)
+    ro.observe(container)
+    return () => ro.disconnect()
   }, [currentPath])
 
   return (
     <div
       ref={containerRef}
-      className={cn("grid grid-cols-[2px_1fr] gap-x-1.5 ml-3 my-1", className)}
+      className={cn("grid grid-cols-[2px_1fr] gap-y-3 gap-x-4 ml-4 py-2", className)}
     >
       {/* Vertical rail — spans exactly the number of items */}
       <div
         data-rail
-        className="relative w-0.5 rounded-full bg-neutral-400/20"
+        className="relative w-0.5 rounded-[1px] bg-neutral-400/12"
         style={{ gridRow: `1 / span ${items.length}`, gridColumn: 1 }}
       >
         <div
-          className="absolute left-0 w-full rounded-full bg-neutral-500 transition-all duration-200 ease-out pointer-events-none"
+          className="absolute left-0 w-full rounded-[100vw] bg-neutral-500 transition-all duration-200 ease-out pointer-events-none"
           style={{ top: indicatorTop, height: indicatorHeight }}
         />
       </div>
@@ -70,7 +83,7 @@ export function SubNav({ items, currentPath, className }: SubNavProps) {
             data-active={active ? 'true' : undefined}
             data-nav-sub-item="true"
             className={cn(
-              "flex items-center py-1.5 px-2 text-[15px] rounded-md transition-colors",
+              "col-[2] text-[15px] leading-snug transition-colors",
               active
                 ? "text-ui-fg-base font-medium"
                 : "text-ui-fg-muted hover:text-ui-fg-base"
