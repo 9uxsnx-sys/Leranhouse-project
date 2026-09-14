@@ -46,6 +46,7 @@ import { FeedbackModal } from '@components/Objects/Modals/FeedbackModal'
 import { AVAILABLE_LANGUAGES } from '@/lib/languages'
 import { getOrgLogoMediaDirectory } from '@services/media/media'
 import { cn } from '@/lib/utils'
+import { AnimatePresence, motion } from 'framer-motion'
 import { SubNav, type SubNavItem } from '@components/ui/sub-nav'
 
 import PlanBadge from '@components/Dashboard/Shared/PlanRestricted/PlanBadge'
@@ -305,9 +306,18 @@ function DashLeftMenu() {
                   isCollapsed={isCollapsed}
                   active={isActivePath('/dash/users')}
                 />
-                {isActivePath('/dash/users') && !isCollapsed && (
-                  <SubNav items={userSubNavItems} currentPath={pathname} />
-                )}
+                <AnimatePresence>
+                  {isActivePath('/dash/users') && !isCollapsed && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: 0.15, ease: 'easeOut' }}
+                    >
+                      <SubNav items={userSubNavItems} currentPath={pathname} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               {/* Payments */}
