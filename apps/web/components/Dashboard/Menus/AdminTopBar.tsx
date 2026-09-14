@@ -139,7 +139,7 @@ export function AdminTopBar({ className }: { className?: string }) {
   const { t } = useTranslation()
 
   return (
-    <header className={cn("grid w-full grid-cols-2 border-b p-3", className)}>
+    <header className={cn("grid w-full grid-cols-2 border-b p-3 bg-ui-bg-subtle", className)}>
       <div className="flex items-center gap-x-1.5">
         <AdminBreadcrumbNav />
       </div>
