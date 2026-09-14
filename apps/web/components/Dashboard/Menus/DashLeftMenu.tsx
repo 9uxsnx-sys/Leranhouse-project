@@ -23,7 +23,7 @@ import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
 import CommandPaletteTrigger from '@components/Dashboard/CommandPalette/CommandPaletteTrigger'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import UserAvatar from '../../Objects/UserAvatar'
 import { HeaderProfileBox } from '@components/Security/HeaderProfileBox'
 import AdminAuthorization from '@components/Security/AdminAuthorization'
@@ -123,49 +123,41 @@ function DashLeftMenu() {
   const [indicatorTop, setIndicatorTop] = useState(-9999)
   const [indicatorOpacity, setIndicatorOpacity] = useState(0)
 
-  useLayoutEffect(() => {
+  // Measure the active nav item and position the floating indicator
+  const measureIndicator = useCallback(() => {
+    const container = navContainerRef.current
+    if (!container) return false
+
+    const activeLink = container.querySelector('[aria-current="page"]')
+    if (activeLink) {
+      const navItem = (activeLink as HTMLElement).closest('[data-nav-item]')
+      if (navItem) {
+        const containerRect = container.getBoundingClientRect()
+        const itemRect = navItem.getBoundingClientRect()
+        setIndicatorTop(itemRect.top - containerRect.top)
+        setIndicatorOpacity(1)
+        return true
+      }
+    }
+    return false
+  }, [])
+
+  // Measure on pathname change and whenever container layout changes
+  useEffect(() => {
     const container = navContainerRef.current
     if (!container) return
 
-    const measure = (): boolean => {
-      const activeLink = container.querySelector('[aria-current="page"]')
-      if (activeLink) {
-        const navItem = (activeLink as HTMLElement).closest('[data-nav-item]')
-        if (navItem) {
-          const containerRect = container.getBoundingClientRect()
-          const itemRect = navItem.getBoundingClientRect()
-          setIndicatorTop(itemRect.top - containerRect.top)
-          setIndicatorOpacity(1)
-          return true
-        }
-      }
-      return false
-    }
+    // Try immediately; if AdminAuthorization hasn't rendered children yet,
+    // the ResizeObserver will catch it once the layout settles.
+    measureIndicator()
 
-    // Try immediately
-    if (measure()) return
-
-    // If nav items aren't rendered yet (e.g. AdminAuthorization still loading),
-    // watch for DOM mutations and measure when children appear
-    const observer = new MutationObserver(() => {
-      if (measure()) {
-        observer.disconnect()
-      }
+    const ro = new ResizeObserver(() => {
+      measureIndicator()
     })
-    observer.observe(container, { childList: true, subtree: true })
+    ro.observe(container)
 
-    // Also try on next frame as a one-shot fallback
-    const rafId = requestAnimationFrame(() => {
-      if (measure()) {
-        observer.disconnect()
-      }
-    })
-
-    return () => {
-      observer.disconnect()
-      cancelAnimationFrame(rafId)
-    }
-  }, [pathname, isCollapsed, showCommunities, showPodcasts, showPayments])
+    return () => ro.disconnect()
+  }, [pathname, isCollapsed, showCommunities, showPodcasts, showPayments, measureIndicator])
 
   // User sub-tab items for the Users tab
   const userSubNavItems: SubNavItem[] = [
