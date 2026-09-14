@@ -18,6 +18,7 @@ type ModalParams = {
   customHeight?: string
   customWidth?: string
   noPadding?: boolean
+  hideCloseButton?: boolean
 }
 
 const Modal = (params: ModalParams) => {
@@ -54,6 +55,7 @@ const Modal = (params: ModalParams) => {
         "max-h-[90vh]",
         "p-0",
         "overflow-hidden",
+        "rounded-xl",
         "sm:w-[90vw] sm:max-w-[90vw]",
         "md:w-auto md:max-w-[90vw]",
         "lg:max-w-[85vw]",
@@ -62,7 +64,9 @@ const Modal = (params: ModalParams) => {
         getMinWidth(),
         params.customHeight,
         params.customWidth
-      )}>
+      )}
+      hideCloseButton={params.hideCloseButton}
+      >
         {/* Header */}
         {params.dialogTitle ? (
           <DialogHeader className="shrink-0 px-4 py-2 border-b border-ui-border-base space-y-0">

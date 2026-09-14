@@ -60,11 +60,12 @@ type PropsType = {
   isDashboard?: boolean
   isSelected?: boolean
   onToggleSelect?: (courseUuid: string) => void
+  isSelectMode?: boolean
 }
 
 export const removeCoursePrefix = (course_uuid: string) => course_uuid.replace('course_', '')
 
-function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isSelected = false, onToggleSelect }: PropsType) {
+function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isSelected = false, onToggleSelect, isSelectMode = false }: PropsType) {
   const org = useOrg() as any
   const session = useLHSession() as any
   const { t } = useTranslation()
@@ -134,9 +135,9 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
 
   return (
     <div className={`group relative bg-ui-bg-base rounded-lg shadow-elevation-card-rest hover:shadow-elevation-card-hover transition-shadow overflow-hidden ${isSelected ? 'ring-2 ring-black ring-offset-2' : ''}`}>
-      {/* Selection checkbox - visible on hover or when selected (dashboard only) */}
-      {isDashboard && onToggleSelect && (
-        <div className={`absolute top-2 left-2 z-20 ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+      {/* Selection checkbox - only visible in select mode (dashboard only) */}
+      {isSelectMode && isDashboard && onToggleSelect && (
+        <div className="absolute top-2 left-2 z-20">
           <IconButton
             variant="transparent"
             size="small"
@@ -179,7 +180,7 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
   )
 }
 
-const AdminEditOptions = ({ course, orgSlug, deleteCourse, cloneCourse, exportCourse, isDashboard = false }: {
+export const AdminEditOptions = ({ course, orgSlug, deleteCourse, cloneCourse, exportCourse, isDashboard = false }: {
   course: Course
   orgSlug: string
   deleteCourse: () => Promise<void>

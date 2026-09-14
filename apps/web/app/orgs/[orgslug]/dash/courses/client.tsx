@@ -1,12 +1,13 @@
 'use client'
-import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse'
 import CourseCreationTypeSelector from '@components/Objects/Modals/Course/Create/CourseCreationTypeSelector'
 import AICourseCreationModal from '@components/Objects/Modals/Course/Create/AICourse/AICourseCreationModal'
-import { BookCopy, Search, X, Trash2, ChevronLeft, ChevronRight, Upload, Users, Info } from 'lucide-react'
+import { BookCopy, Search, X, Trash2, ChevronLeft, ChevronRight, Upload, Users, Info, Download, Copy, CheckSquare } from 'lucide-react'
 import ScormCourseImport from '../../../../../ee/components/Modals/ScormCourseImport'
 import { ImportTypeSelector, LearnHouseCourseImport } from '@components/Objects/Modals/Course/Import'
-import CourseThumbnail, { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail'
+import { removeCoursePrefix, AdminEditOptions } from '@components/Objects/Thumbnails/CourseThumbnail'
+import { CourseCard } from '@components/Objects/Thumbnails/CourseCard'
+import { getCourseThumbnailMediaDirectory } from '@services/media/media'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
@@ -16,13 +17,12 @@ import React, { useState, useMemo } from 'react'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { Download, Copy } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { PlanLevel } from '@services/plans/plans'
 import { OrgUsageResponse, orgUsageFetcher } from '@services/orgs/usage'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { deleteCourseFromBackend, cloneCourse } from '@services/courses/courses'
-import { exportCoursesBatch, downloadBlob, ExportStatus } from '@services/courses/transfer'
+import { exportCourse, exportCoursesBatch, downloadBlob, ExportStatus } from '@services/courses/transfer'
 import { exportToast } from '@components/Objects/StyledElements/Toast/ExportToast'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { getUserGroups, getUserGroupResources } from '@services/usergroups/usergroups'
@@ -32,6 +32,14 @@ import toast from 'react-hot-toast'
 import FeatureDisabledView from '@components/Dashboard/Shared/FeatureDisabled/FeatureDisabledView'
 import { usePlan } from '@components/Hooks/usePlan'
 import { searchMatchesAny } from '@/lib/search/normalize'
+import { IconButton } from '@components/ui/icon-button'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@components/ui/dropdown-menu'
+import { Button } from '@components/ui/button'
 
 type CourseProps = {
   orgslug: string
@@ -168,6 +176,7 @@ function CoursesHome(params: CourseProps) {
 
   // Selection state
   const [selectedCourses, setSelectedCourses] = useState<Set<string>>(new Set())
+  const [isSelectMode, setIsSelectMode] = useState(false)
 
   async function closeNewCourseModal() {
     setNewCourseModal(false)
@@ -211,7 +220,7 @@ function CoursesHome(params: CourseProps) {
   const getNewCourseModalTitle = () => {
     switch (creationType) {
       case 'scratch':
-        return t('dashboard.courses.create_course')
+        return null
       default:
         return t('courses.create.choose_type')
     }
@@ -220,7 +229,7 @@ function CoursesHome(params: CourseProps) {
   const getNewCourseModalDescription = () => {
     switch (creationType) {
       case 'scratch':
-        return t('dashboard.courses.create_new_course')
+        return undefined
       default:
         return t('courses.create.choose_type_description')
     }
@@ -417,298 +426,333 @@ function CoursesHome(params: CourseProps) {
 
   return (
     <FeatureDisabledView featureName="courses" orgslug={orgslug} context="dashboard">
-    <div className="h-full w-full bg-[#f8f8f8] pl-10 pr-10">
-      <div className="mb-6 pt-6">
-        <Breadcrumbs items={[
-          { label: t('courses.courses'), href: '/dash/courses', icon: <BookCopy size={14} /> }
-        ]} />
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-3xl font-bold mb-4 sm:mb-0">{t('dashboard.courses.title')}</h1>
+    <div className="pt-8 px-6 pb-0" style={{ display: 'grid', gridTemplateRows: 'auto auto 1fr auto', minHeight: '100dvh' }}>
+      {/* Page title */}
+      <h1 className="text-[28px] font-semibold text-ui-fg-base mb-6">
+        {t('courses.courses')}
+      </h1>
+
+      {/* Search + Filter toolbar (only if courses exist) */}
+      {allCourses.length > 0 && (
+        <div className="flex items-center gap-3 mb-8">
+          {/* Search + results count group (left side) */}
+          <div className="flex items-center gap-3">
+            {/* Search — custom search bar with icon */}
+            <div className="relative w-80">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t('courses.search_courses')}
+                className="w-full h-7 pl-8 pr-2 text-sm bg-white shadow-borders-base rounded-md placeholder:text-gray-400 focus:outline-none"
+              />
+            </div>
+
+            {/* Search results count — next to search bar */}
+            {searchQuery && (
+              <span className="txt-compact-xsmall text-ui-fg-muted whitespace-nowrap">
+                {t('courses.search_results', { count: filteredCourses.length, query: searchQuery })}
+              </span>
+            )}
           </div>
+
+          {/* Spacer pushes actions to the right */}
+          <div className="flex-1" />
+
+          {/* +New Course Button (opens create modal) */}
           <AuthenticatedClientElement
             checkMethod="roles"
             action="create"
             ressourceType="courses"
             orgId={params.org_id}
           >
-            <div className="flex items-center space-x-2">
-              {courseLimitReached && (
-                <div className="text-xs text-gray-500 bg-gray-100 px-3 py-2 rounded-lg">
-                  {t('dashboard.courses.limit_reached', { limit: courseLimit })}
-                </div>
-              )}
-              <Modal
-                isDialogOpen={importCourseModal}
-                onOpenChange={(open) => {
-                  if (courseLimitReached) return
-                  setImportCourseModal(open)
-                  if (!open) setImportType('select')
-                }}
-                minHeight="no-min"
-                dialogTitle={getImportModalTitle()}
-                dialogDescription={getImportModalDescription()}
-                dialogContent={getImportModalContent()}
-                dialogTrigger={
-                  <button
-                    disabled={courseLimitReached}
-                    className={`rounded-lg bg-primary transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-primary-foreground nice-shadow flex space-x-2 items-center hover:bg-primary/90 ${
-                      courseLimitReached ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
-                    }`}
-                  >
-                    <Download className="w-4 h-4" />
-                    <span>{t('dashboard.courses.import_course')}</span>
-                  </button>
-                }
-              />
-              <Modal
-                isDialogOpen={newCourseModal}
-                onOpenChange={(open) => {
-                  if (courseLimitReached) return
-                  setNewCourseModal(open)
-                  if (!open) setCreationType('select')
-                }}
-                minHeight={creationType === 'select' ? 'no-min' : 'md'}
-                minWidth={creationType === 'select' ? 'md' : 'lg'}
-                dialogContent={getNewCourseModalContent()}
-                dialogTitle={getNewCourseModalTitle()}
-                dialogDescription={getNewCourseModalDescription()}
-                dialogTrigger={
-                  <NewCourseButton disabled={courseLimitReached} />
-                }
-              />
-              <AICourseCreationModal
-                isOpen={aiCourseModalOpen}
-                onClose={closeAICourseModal}
-                orgId={Number(params.org_id)}
-                orgslug={orgslug}
-                accessToken={access_token}
-              />
-            </div>
-          </AuthenticatedClientElement>
-        </div>
-      </div>
-
-      {/* Search, Usergroup Filter, and Selection Controls */}
-      {allCourses.length > 0 && (
-        <div className="mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            {/* Search Input */}
-            <div className="relative w-full sm:w-80">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t('courses.search_courses')}
-                className="w-full pl-10 pr-10 py-2.5 bg-white nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-
-            {/* Usergroup Filter */}
-            {usergroupsAvailable && usergroups.length > 0 && (
-              <div className="relative flex items-center gap-1.5">
-                <div className="relative">
-                  <Users className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
-                  <select
-                    value={selectedUsergroupId}
-                    onChange={(e) => handleUsergroupChange(e.target.value)}
-                    className="pl-8 pr-8 py-2.5 bg-white nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0 appearance-none cursor-pointer min-w-[160px]"
-                  >
-                    <option value="">{t('courses.usergroup_filter.all_courses')}</option>
-                    {usergroups.map((ug: any) => (
-                      <option key={ug.id} value={String(ug.id)}>
-                        {ug.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <button
-                  onClick={() => setShowUsergroupInfo(!showUsergroupInfo)}
-                  className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors rounded-md hover:bg-gray-100"
-                >
-                  <Info className="w-3.5 h-3.5" />
-                </button>
-                {showUsergroupInfo && (
-                  <div className="absolute top-full left-0 mt-2 z-50 w-72 bg-white nice-shadow rounded-lg p-3 border border-gray-100">
-                    <p className="text-xs font-semibold text-gray-700 mb-1">{t('courses.usergroup_filter.info_title')}</p>
-                    <p className="text-xs text-gray-500 leading-relaxed">{t('courses.usergroup_filter.info_description')}</p>
-                  </div>
-                )}
+            {courseLimitReached && (
+              <div className="text-xs text-gray-500 bg-gray-100 px-3 py-2 rounded-lg mr-2">
+                {t('dashboard.courses.limit_reached', { limit: courseLimit })}
               </div>
             )}
-          </div>
-
-          {/* Bulk Actions - shown when items selected */}
-          {selectedCourses.size > 0 && (
-            <AuthenticatedClientElement
-              checkMethod="roles"
-              action="update"
-              ressourceType="courses"
-              orgId={params.org_id}
+            <Button
+              variant="primary"
+              size="small"
+              disabled={courseLimitReached}
+              onClick={() => { setCreationType('scratch'); setNewCourseModal(true); }}
             >
-              <div className="flex items-center gap-2 ml-auto">
-                <span className="text-sm font-medium text-gray-500 px-2">
-                  {t('courses.selected_count', { count: selectedCourses.size })}
-                </span>
-                <button
-                  onClick={selectAllCourses}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 bg-white nice-shadow rounded-lg transition-colors"
+              +&nbsp;{t('courses.new_course')}
+            </Button>
+          </AuthenticatedClientElement>
+
+          {/* Select Toggle (Admin feature) */}
+          <Button
+            variant="secondary"
+            size="small"
+            onClick={() => { setIsSelectMode(prev => !prev); if (isSelectMode) clearSelection(); }}
+            className="gap-x-1.5"
+          >
+            <CheckSquare size={14} />
+            <span>{isSelectMode ? t('cancel') : t('courses.select_courses')}</span>
+          </Button>
+
+          {/* Filter — Medusa IconButton + DropdownMenu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label={t('courses.filter_courses')}>
+                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2.5 4.5h10M4.5 7.5h6M6.5 10.5h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </IconButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-white min-w-0 w-28">
+              <DropdownMenuItem>All Courses</DropdownMenuItem>
+              <DropdownMenuItem>Easy</DropdownMenuItem>
+              <DropdownMenuItem>Medium</DropdownMenuItem>
+              <DropdownMenuItem>Hard</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Usergroup filter — personal/family plans only */}
+          {usergroupsAvailable && usergroups.length > 0 && (
+            <div className="relative flex items-center gap-1.5">
+              <div className="relative">
+                <Users className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ui-fg-muted w-3.5 h-3.5 pointer-events-none" />
+                <select
+                  value={selectedUsergroupId}
+                  onChange={(e) => handleUsergroupChange(e.target.value)}
+                  className="h-7 pl-7 pr-7 txt-compact-small bg-ui-bg-field hover:bg-ui-bg-field-hover shadow-borders-base rounded-md appearance-none cursor-pointer min-w-[140px] outline-none focus-visible:shadow-borders-interactive-with-active"
                 >
-                  <span>{t('courses.select_all')}</span>
-                </button>
-                <button
-                  onClick={clearSelection}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 bg-white nice-shadow rounded-lg transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                  <span>{t('courses.clear_selection')}</span>
-                </button>
-                <ConfirmationModal
-                  confirmationButtonText={t('courses.clone_selected')}
-                  confirmationMessage={t('courses.clone_selected_confirm', { count: selectedCourses.size })}
-                  dialogTitle={t('courses.clone_courses_title')}
-                  dialogTrigger={
-                    <button className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:text-gray-900 bg-white nice-shadow rounded-lg transition-colors">
-                      <Copy className="w-4 h-4" />
-                      <span>{t('courses.clone_selected')}</span>
-                    </button>
-                  }
-                  functionToExecute={bulkCloneCourses}
-                  status="info"
-                />
-                <button
-                  onClick={bulkExportCourses}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:text-gray-900 bg-white nice-shadow rounded-lg transition-colors"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>{t('courses.export_selected')}</span>
-                </button>
-                <ConfirmationModal
-                  confirmationButtonText={t('courses.delete_selected')}
-                  confirmationMessage={t('courses.delete_selected_confirm', { count: selectedCourses.size })}
-                  dialogTitle={t('courses.delete_courses_title')}
-                  dialogTrigger={
-                    <button className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 bg-white nice-shadow rounded-lg transition-colors">
-                      <Trash2 className="w-4 h-4" />
-                      <span>{t('courses.delete_selected')}</span>
-                    </button>
-                  }
-                  functionToExecute={bulkDeleteCourses}
-                  status="warning"
-                />
+                  <option value="">{t('courses.usergroup_filter.all_courses')}</option>
+                  {usergroups.map((ug: any) => (
+                    <option key={ug.id} value={String(ug.id)}>
+                      {ug.name}
+                    </option>
+                  ))}
+                </select>
               </div>
-            </AuthenticatedClientElement>
+              <button
+                onClick={() => setShowUsergroupInfo(!showUsergroupInfo)}
+                className="flex items-center justify-center h-6 w-6 text-ui-fg-muted hover:text-ui-fg-base transition-colors rounded-md hover:bg-ui-bg-base-hover"
+              >
+                <Info className="w-3.5 h-3.5" />
+              </button>
+              {showUsergroupInfo && (
+                <div className="absolute top-full left-0 mt-2 z-50 w-72 bg-ui-bg-component shadow-elevation-flyout rounded-lg p-3">
+                  <p className="txt-compact-xsmall-plus text-ui-fg-subtle mb-1">{t('courses.usergroup_filter.info_title')}</p>
+                  <p className="txt-compact-xsmall text-ui-fg-muted leading-relaxed">{t('courses.usergroup_filter.info_description')}</p>
+                </div>
+              )}
+            </div>
           )}
         </div>
       )}
 
-      {/* Search Results Info */}
-      {searchQuery && (
-        <div className="mb-4 text-sm text-gray-500">
-          {t('courses.search_results', { count: filteredCourses.length, query: searchQuery })}
+      {/* Bulk Action Bar (Admin feature) */}
+      {selectedCourses.size > 0 && (
+        <div className="mb-4 flex items-center gap-2 px-4 py-2 bg-ui-bg-component rounded-lg shadow-borders-base">
+          <span className="txt-compact-small-plus text-ui-fg-base mr-2">
+            {t('courses.selected_count', { count: selectedCourses.size })}
+          </span>
+          <button onClick={selectAllCourses} className="txt-compact-small text-ui-fg-muted hover:text-ui-fg-base px-2 py-1">
+            {t('courses.select_all')}
+          </button>
+          <button onClick={clearSelection} className="txt-compact-small text-ui-fg-muted hover:text-ui-fg-base px-2 py-1">
+            <X className="w-3.5 h-3.5 inline mr-1" />{t('courses.clear_selection')}
+          </button>
+          <div className="w-px h-5 bg-gray-200 mx-1" />
+          <AuthenticatedClientElement
+            checkMethod="roles"
+            action="update"
+            ressourceType="courses"
+            orgId={params.org_id}
+          >
+            <ConfirmationModal
+              confirmationButtonText={t('courses.clone_selected')}
+              confirmationMessage={t('courses.clone_selected_confirm', { count: selectedCourses.size })}
+              dialogTitle={t('courses.clone_courses_title')}
+              dialogTrigger={
+                <button className="txt-compact-small text-ui-fg-muted hover:text-ui-fg-base px-2 py-1">
+                  <Copy className="w-3.5 h-3.5 inline mr-1" />{t('courses.clone_selected')}
+                </button>
+              }
+              functionToExecute={bulkCloneCourses}
+              status="info"
+            />
+            <button onClick={bulkExportCourses} className="txt-compact-small text-ui-fg-muted hover:text-ui-fg-base px-2 py-1">
+              <Download className="w-3.5 h-3.5 inline mr-1" />{t('courses.export_selected')}
+            </button>
+            <ConfirmationModal
+              confirmationButtonText={t('courses.delete_selected')}
+              confirmationMessage={t('courses.delete_selected_confirm', { count: selectedCourses.size })}
+              dialogTitle={t('courses.delete_courses_title')}
+              dialogTrigger={
+                <button className="txt-compact-small text-red-600 hover:text-red-700 px-2 py-1">
+                  <Trash2 className="w-3.5 h-3.5 inline mr-1" />{t('courses.delete_selected')}
+                </button>
+              }
+              functionToExecute={bulkDeleteCourses}
+              status="warning"
+            />
+          </AuthenticatedClientElement>
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {paginatedCourses.map((course: any) => (
-          <CourseThumbnail
-            key={course.course_uuid}
-            customLink={`/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/general`}
-            course={course}
-            orgslug={orgslug}
-            isDashboard={true}
-            isSelected={selectedCourses.has(course.course_uuid)}
-            onToggleSelect={toggleCourseSelection}
-          />
-        ))}
-        {filteredCourses.length === 0 && searchQuery && (
-          <div className="col-span-full flex justify-center items-center py-8">
-            <div className="text-center">
-              <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-gray-600 mb-2">
-                {t('courses.no_search_results')}
-              </h2>
-              <p className="text-gray-400">
-                {t('courses.try_different_search')}
-              </p>
-            </div>
-          </div>
-        )}
-        {allCourses.length === 0 && !searchQuery && (
-          <div className="col-span-full flex justify-center items-center py-8">
-            <div className="text-center">
-              <div className="mb-4">
-                <svg
-                  width="120"
-                  height="120"
-                  viewBox="0 0 295 295"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="mx-auto"
-                >
-                  {/* ... SVG content ... */}
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-gray-600 mb-2">
-                {t('dashboard.courses.no_courses')}
-              </h2>
-              <p className="text-lg text-gray-400">
-                {isUserAdmin ? (
-                  t('dashboard.courses.create_course_placeholder')
-                ) : (
-                  t('dashboard.courses.no_courses_available')
-                )}
-              </p>
-              {isUserAdmin && !courseLimitReached && (
-                <div className="mt-6">
-                  <AuthenticatedClientElement
-                    action="create"
-                    ressourceType="courses"
-                    checkMethod="roles"
-                    orgId={params.org_id}
+      {/* Course Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {paginatedCourses.map((course: any) => {
+          const imageUrl = course.thumbnail_image
+            ? getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)
+            : ''
+          return (
+            <div key={course.course_uuid} className="relative group">
+              {/* Selection checkbox - visible in select mode */}
+              {isSelectMode && (
+                <div className="absolute top-2 left-2 z-20">
+                  <IconButton
+                    variant="transparent"
+                    size="small"
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleCourseSelection(course.course_uuid); }}
+                    aria-label={selectedCourses.has(course.course_uuid) ? 'Deselect course' : 'Select course'}
+                    className="bg-white/90 backdrop-blur-sm"
                   >
-                    <NewCourseButton onClick={() => setNewCourseModal(true)} />
-                  </AuthenticatedClientElement>
+                    {selectedCourses.has(course.course_uuid)
+                      ? <CheckSquare className="h-4 w-4 text-black" />
+                      : <div className="h-4 w-4 border border-gray-400 rounded" />
+                    }
+                  </IconButton>
                 </div>
               )}
+
+              <CourseCard
+                id={removeCoursePrefix(course.course_uuid)}
+                title={course.name}
+                description={course.description || ''}
+                image={imageUrl}
+                lessons={0}
+                duration="N/A"
+                difficulty="All levels"
+                href={`/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/general`}
+              />
+
+              {/* Admin 3-dot menu overlay */}
+              <AdminEditOptions
+                course={course}
+                orgSlug={orgslug}
+                isDashboard={true}
+                deleteCourse={async () => {
+                  const toastId = toast.loading(t('courses.deleting_course'))
+                  try {
+                    await deleteCourseFromBackend(course.course_uuid, access_token)
+                    mutateCourses()
+                    toast.success(t('courses.course_deleted_success'))
+                  } catch (error) {
+                    toast.error(t('courses.course_deleted_error'))
+                  } finally {
+                    toast.dismiss(toastId)
+                  }
+                }}
+                cloneCourse={async () => {
+                  const toastId = toast.loading(t('courses.cloning_course'))
+                  try {
+                    const result = await cloneCourse(course.course_uuid, access_token)
+                    if (result.success) {
+                      mutateCourses()
+                      toast.success(t('courses.course_cloned_success'))
+                    } else {
+                      toast.error(result.HTTPmessage || t('courses.course_cloned_error'))
+                    }
+                  } catch (error) {
+                    toast.error(t('courses.course_cloned_error'))
+                  } finally {
+                    toast.dismiss(toastId)
+                  }
+                }}
+                exportCourse={async () => {
+                  const toastId = exportToast.start('single', course.name)
+                  try {
+                    const blob = await exportCourse(
+                      course.course_uuid,
+                      access_token,
+                      (progress, status) => {
+                        exportToast.update(toastId, status as ExportStatus, progress, course.name, undefined, 'single')
+                      }
+                    )
+                    const timestamp = new Date().toISOString().split('T')[0]
+                    downloadBlob(blob, `${course.name.replace(/[^a-z0-9]/gi, '_')}-${timestamp}.zip`)
+                    exportToast.complete(toastId, course.name, undefined, 'single')
+                  } catch (error: any) {
+                    exportToast.error(toastId, error.message || t('courses.course_exported_error'), course.name, undefined, 'single')
+                  }
+                }}
+              />
             </div>
+          )
+        })}
+
+        {/* Empty state — search with no results */}
+        {filteredCourses.length === 0 && searchQuery && (
+          <div className="col-span-full flex flex-col justify-center items-center py-16 px-4">
+            <div className="p-4 bg-ui-bg-base rounded-full shadow-borders-base mb-4">
+              <BookCopy className="w-8 h-8 text-ui-fg-muted" strokeWidth={1.5} />
+            </div>
+            <h2 className="text-xl font-semibold text-ui-fg-base mb-2">
+              {t('courses.no_search_results')}
+            </h2>
+            <p className="txt-compact-small text-ui-fg-muted">
+              {t('courses.try_different_search')}
+            </p>
+          </div>
+        )}
+
+        {/* Empty state — no courses at all */}
+        {allCourses.length === 0 && !searchQuery && (
+          <div className="col-span-full flex flex-col justify-center items-center py-16 px-4">
+            <div className="p-4 bg-ui-bg-base rounded-full shadow-borders-base mb-4">
+              <BookCopy className="w-8 h-8 text-ui-fg-muted" strokeWidth={1.5} />
+            </div>
+            <h1 className="text-xl font-semibold text-ui-fg-base mb-2">
+              {t('dashboard.courses.no_courses')}
+            </h1>
+            <p className="txt-compact-small text-ui-fg-muted mb-6 text-center max-w-xs">
+              {isUserAdmin ? t('dashboard.courses.create_course_placeholder') : t('dashboard.courses.no_courses_available')}
+            </p>
+            {isUserAdmin && !courseLimitReached && (
+              <AuthenticatedClientElement
+                action="create"
+                ressourceType="courses"
+                checkMethod="roles"
+                orgId={params.org_id}
+              >
+                <NewCourseButton onClick={() => setNewCourseModal(true)} />
+              </AuthenticatedClientElement>
+            )}
           </div>
         )}
       </div>
 
-      {/* Pagination Controls */}
+      {/* Pagination */}
       {totalPages > 1 && (
-        <div className="mt-8 mb-6 flex items-center justify-center gap-2">
-          <button
+        <div className="flex items-center justify-center gap-1 pt-6 pb-0">
+          <Button
+            variant="transparent"
+            size="small"
             onClick={() => goToPage(currentPage - 1)}
             disabled={currentPage === 1}
-            className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 bg-white nice-shadow rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">{t('pagination.previous')}</span>
-          </button>
+            <span className="hidden sm:inline ml-1">{t('pagination.previous')}</span>
+          </Button>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 mx-2">
             {getVisiblePageNumbers().map((page, index) => (
               <React.Fragment key={index}>
                 {page === '...' ? (
-                  <span className="px-2 py-1 text-gray-400">...</span>
+                  <span className="px-2 py-1 txt-compact-small text-ui-fg-muted">...</span>
                 ) : (
                   <button
                     onClick={() => goToPage(page as number)}
-                    className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    className={`w-7 h-7 txt-compact-small-plus rounded-md transition-colors ${
                       currentPage === page
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-white text-gray-600 nice-shadow hover:bg-gray-50'
+                        ? 'bg-ui-bg-base shadow-borders-base text-ui-fg-base'
+                        : 'text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-base-hover'
                     }`}
                   >
                     {page}
@@ -718,24 +762,58 @@ function CoursesHome(params: CourseProps) {
             ))}
           </div>
 
-          <button
+          <Button
+            variant="transparent"
+            size="small"
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 bg-white nice-shadow rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            <span className="hidden sm:inline">{t('pagination.next')}</span>
+            <span className="hidden sm:inline mr-1">{t('pagination.next')}</span>
             <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-
-      {/* Pagination info */}
-      {totalPages > 1 && (
-        <div className="mb-6 text-center text-sm text-gray-500">
-          {t('pagination.showing_page', { current: currentPage, total: totalPages })}
+          </Button>
         </div>
       )}
     </div>
+
+    {/* Create Course Modal */}
+    <Modal
+      isDialogOpen={newCourseModal}
+      onOpenChange={(open) => {
+        if (courseLimitReached) return
+        setNewCourseModal(open)
+      }}
+      minHeight={creationType === 'select' ? 'no-min' : 'sm'}
+      minWidth={creationType === 'select' ? 'md' : 'sm'}
+      customWidth={creationType === 'scratch' ? 'md:!w-[500px] md:!max-w-[500px]' : undefined}
+      noPadding={creationType === 'scratch'}
+      hideCloseButton={creationType === 'scratch'}
+      dialogContent={getNewCourseModalContent()}
+      dialogTitle={getNewCourseModalTitle()}
+      dialogDescription={getNewCourseModalDescription()}
+    />
+
+    {/* Import Course Modal */}
+    <Modal
+      isDialogOpen={importCourseModal}
+      onOpenChange={(open) => {
+        if (courseLimitReached) return
+        setImportCourseModal(open)
+        if (!open) setImportType('select')
+      }}
+      minHeight="no-min"
+      dialogTitle={getImportModalTitle()}
+      dialogDescription={getImportModalDescription()}
+      dialogContent={getImportModalContent()}
+    />
+
+    {/* AI Course Creation Modal */}
+    <AICourseCreationModal
+      isOpen={aiCourseModalOpen}
+      onClose={closeAICourseModal}
+      orgId={Number(params.org_id)}
+      orgslug={orgslug}
+      accessToken={access_token}
+    />
     </FeatureDisabledView>
   )
 }
