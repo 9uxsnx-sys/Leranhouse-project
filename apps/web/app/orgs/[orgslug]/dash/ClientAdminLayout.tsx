@@ -1,6 +1,7 @@
 'use client';
 import DashLeftMenu from '@components/Dashboard/Menus/DashLeftMenu';
 import DashMobileMenu from '@components/Dashboard/Menus/DashMobileMenu';
+import { AdminTopBar } from '@components/Dashboard/Menus/AdminTopBar';
 import OnboardingBar from '@components/Dashboard/Onboarding/OnboardingBar';
 import WelcomeModal from '@components/Dashboard/Onboarding/WelcomeModal';
 import FreePlanUpgradeBanner from '@components/Dashboard/Shared/PlanRestricted/FreePlanUpgradeBanner';
@@ -31,6 +32,7 @@ function ClientAdminLayout({
                             <DashLeftMenu />
                         )}
                         <div className="flex flex-col w-full relative isolate">
+                            <AdminTopBar />
                             <FreePlanUpgradeBanner />
                             {children}
                             <OnboardingBar />
