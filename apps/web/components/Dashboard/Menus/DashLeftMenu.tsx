@@ -46,6 +46,7 @@ import { FeedbackModal } from '@components/Objects/Modals/FeedbackModal'
 import { AVAILABLE_LANGUAGES } from '@/lib/languages'
 import { getOrgLogoMediaDirectory } from '@services/media/media'
 import { cn } from '@/lib/utils'
+import { SubNav, type SubNavItem } from '@components/ui/sub-nav'
 
 import PlanBadge from '@components/Dashboard/Shared/PlanRestricted/PlanBadge'
 import { usePlan } from '@components/Hooks/usePlan'
@@ -122,6 +123,16 @@ function DashLeftMenu() {
     setIndicatorTop(-9999)
     setIndicatorOpacity(0)
   }, [pathname, isCollapsed, showCommunities, showPodcasts, showPayments])
+
+  // User sub-tab items for the Users tab
+  const userSubNavItems: SubNavItem[] = [
+    { label: 'Users', href: '/dash/users/settings/users' },
+    { label: 'UserGroups', href: '/dash/users/settings/usergroups' },
+    { label: 'Roles', href: '/dash/users/settings/roles' },
+    { label: 'Signups & Invite Codes', href: '/dash/users/settings/signups' },
+    { label: 'Invite Members', href: '/dash/users/settings/add' },
+    { label: 'Audit Logs', href: '/dash/users/settings/audit-logs' },
+  ]
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -252,6 +263,9 @@ function DashLeftMenu() {
                   isCollapsed={isCollapsed}
                   active={isActivePath('/dash/users')}
                 />
+                {isActivePath('/dash/users') && !isCollapsed && (
+                  <SubNav items={userSubNavItems} currentPath={pathname} />
+                )}
               </div>
 
               {/* Payments */}
