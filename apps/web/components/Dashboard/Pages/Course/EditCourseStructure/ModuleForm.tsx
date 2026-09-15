@@ -331,7 +331,7 @@ function NewLessonForm({
   })
 
   return (
-    <form onSubmit={formik.handleSubmit} className="px-6 py-5 space-y-5">
+    <FormLayout onSubmit={formik.handleSubmit} className="px-6 py-5 space-y-5">
       {/* Lesson Name */}
       <FormField name="name">
         <FormLabelAndMessage label="Lesson Name" message={formik.errors.name as string} />
@@ -411,7 +411,7 @@ function NewLessonForm({
           )}
         </button>
       </div>
-    </form>
+    </FormLayout>
   )
 }
 
