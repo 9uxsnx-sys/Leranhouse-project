@@ -72,7 +72,7 @@ The `extra_metadata` column is a JSONB field that can store any arbitrary JSON. 
 **Strategy**: Connect existing backend fields first (no new DB work), then add missing fields via `extra_metadata` (JSONB — no migration).
 
 ### Step A1 — Connect `course.about` to the "About This Course" section
-- [ ] Status: `[ ]`
+- [X] Status: `[X]`
 - **File**: `course.tsx`
 - **What**: Replace the 6 hardcoded description paragraphs with real data from `course.about`
 - **How**:
@@ -81,20 +81,20 @@ The `extra_metadata` column is a JSONB field that can store any arbitrary JSON. 
   - If `course.about` has multiple paragraphs (split by `\n\n`), render each as a separate `<Text>` element
   - If `course.about` is empty/null, show nothing (section hides automatically later in polish)
 - **Verify**: The About section shows the real course description from the General tab
-- **Build check**: `npx next build` passes
+- **Build check**: `npx next build` passes — **DONE**
 
 ### Step A2 — Connect `course.description` to the stats/subtitle area
-- [ ] Status: `[ ]`
+- [X] Status: `[X]`
 - **File**: `course.tsx`
 - **What**: Show `course.description` as a subtitle below the course title
 - **How**:
   - After the hero image and course title, add a short description paragraph using `course.description`
   - Place it between the title and the stats row
 - **Verify**: A short description appears below the course title
-- **Build check**: `npx next build` passes
+- **Build check**: `npx next build` passes — **DONE**
 
 ### Step A3 — Connect `course.learnings` properly
-- [ ] Status: `[ ]`
+- [X] Status: `[X]`
 - **File**: `course.tsx`, `CourseLearnings.tsx`
 - **What**: Fix the learning items so they use real backend data instead of falling back to mock
 - **How**:
@@ -102,10 +102,10 @@ The `extra_metadata` column is a JSONB field that can store any arbitrary JSON. 
   - Ensure the parsing handles both JSON array format (new) and comma-separated format (legacy)
   - Remove the mock fallback — if no learnings, the section should simply be empty
 - **Verify**: "What You'll Learn" section shows real learning items from the General tab
-- **Build check**: `npx next build` passes
+- **Build check**: `npx next build` passes — **DONE**
 
 ### Step A4 — Add `extra_metadata` fields to the General Tab
-- [ ] Status: `[ ]`
+- [X] Status: `[X]`
 - **Files**: `EditCourseGeneral.tsx`, `course.tsx`
 - **What**: Add form fields for Difficulty, Duration, Video Hours, Resources Count, Has Certificate, Requirements, Instructor Info — all stored in `course.extra_metadata` JSONB
 - **How**:
@@ -126,10 +126,10 @@ The `extra_metadata` column is a JSONB field that can store any arbitrary JSON. 
   - In `course.tsx`:
     - Read these values from `course.extra_metadata` instead of `MOCK_COURSE_META`
 - **Verify**: Enter values in General tab, save, refresh course page — they display correctly
-- **Build check**: `npx next build` passes
+- **Build check**: `npx next build` passes — **DONE**
 
 ### Step A5 — Remove `MOCK_COURSE_META` entirely
-- [ ] Status: `[ ]`
+- [X] Status: `[X]`
 - **File**: `course.tsx`
 - **What**: Delete the `MOCK_COURSE_META` object and all its references
 - **How**:
@@ -141,7 +141,7 @@ The `extra_metadata` column is a JSONB field that can store any arbitrary JSON. 
     - Instructor card → from `course.extra_metadata`
   - If a field is null/empty, the section should gracefully show nothing (or a placeholder)
 - **Verify**: Page loads without mock data — all sections show real data or are hidden
-- **Build check**: `npx next build` passes
+- **Build check**: `npx next build` passes — **DONE**
 
 ### Step A6 — Connect real course updates (optional stretch)
 - [ ] Status: `[ ]`
