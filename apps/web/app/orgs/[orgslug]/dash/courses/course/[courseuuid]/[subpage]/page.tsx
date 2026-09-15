@@ -154,7 +154,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
   }
 
   return (
-    <div className="h-screen w-full bg-[#f8f8f8] grid grid-rows-[auto_auto_1fr]">
+    <div className="h-screen w-full bg-[#f8f8f8] grid grid-rows-[auto_auto_1fr] overflow-hidden">
       <CourseProvider courseuuid={courseuuid} withUnpublishedActivities={true}>
         {/* Row 1: Page title — matching lesson-preview page style */}
         <div className="max-w-7xl mx-auto w-full pt-8 px-4 sm:px-6 lg:px-8">
@@ -226,7 +226,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
         </div>
 
         {/* Row 3: Content + Sidebar — exact lesson-preview layout */}
-        <div className="w-full mx-auto max-w-7xl mt-8 pb-10 overflow-hidden px-4 sm:px-6 lg:px-8">
+        <div className="w-full mx-auto max-w-7xl mt-8 pb-10 overflow-y-auto min-h-0 px-4 sm:px-6 lg:px-8">
           <div className={`flex flex-col lg:flex-row ${showSidebar ? 'gap-10 justify-between' : ''}`}>
             {/* Main content column */}
             <main className={`flex-1 min-w-0 ${showSidebar ? 'max-w-3xl' : 'w-full'}`}>

@@ -324,19 +324,19 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField name="meta_difficulty">
                     <FormLabelAndMessage label="Difficulty" />
-                    <Form.Control asChild>
-                      <select
-                        className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/5"
-                        onChange={formik.handleChange}
-                        value={formik.values.meta_difficulty}
-                        disabled={isSaving}
-                      >
-                        <option value="">Select difficulty</option>
-                        <option value="Beginner">Beginner</option>
-                        <option value="Intermediate">Intermediate</option>
-                        <option value="Advanced">Advanced</option>
-                      </select>
-                    </Form.Control>
+                    <select
+                      id="meta_difficulty"
+                      name="meta_difficulty"
+                      className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/5"
+                      onChange={formik.handleChange}
+                      value={formik.values.meta_difficulty}
+                      disabled={isSaving}
+                    >
+                      <option value="">Select difficulty</option>
+                      <option value="Beginner">Beginner</option>
+                      <option value="Intermediate">Intermediate</option>
+                      <option value="Advanced">Advanced</option>
+                    </select>
                   </FormField>
 
                   <FormField name="meta_duration">
