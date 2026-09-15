@@ -26,6 +26,8 @@ import {
   BookOpen,
   Loader2,
   X,
+  ArrowLeft,
+  ChevronRight,
 } from 'lucide-react'
 import {
   createActivity,
@@ -40,6 +42,8 @@ type ModuleFormProps = {
   chapterIndex: number
   orgslug: string
   course_uuid: string
+  onBack: () => void
+  onLessonClick: (activity: any) => void
 }
 
 const activityTypeConfig: Record<string, { label: string; color: string; Icon: any }> = {
@@ -50,7 +54,7 @@ const activityTypeConfig: Record<string, { label: string; color: string; Icon: a
   TYPE_SCORM: { label: 'SCORM', color: 'text-gray-600 bg-gray-50', Icon: Layers },
 }
 
-function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid }: ModuleFormProps) {
+function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLessonClick }: ModuleFormProps) {
   const { t } = useTranslation()
   const router = useRouter()
   const session = useLHSession() as any
@@ -80,15 +84,8 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid }: ModuleFormP
     const currentValues = { name: formik.values.name, description: formik.values.description }
     const initialVals = { name: formik.initialValues.name, description: formik.initialValues.description }
 
-    // Skip if nothing changed
-    if (currentValues.name === initialVals.name && currentValues.description === initialVals.description) {
-      return
-    }
-
-    // Skip if same as previous save
-    if (currentValues.name === prevValuesRef.current.name && currentValues.description === prevValuesRef.current.description) {
-      return
-    }
+    if (currentValues.name === initialVals.name && currentValues.description === initialVals.description) return
+    if (currentValues.name === prevValuesRef.current.name && currentValues.description === prevValuesRef.current.description) return
 
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(async () => {
@@ -165,41 +162,48 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid }: ModuleFormP
 
   return (
     <div>
+      {/* Back button */}
+      <button
+        onClick={onBack}
+        className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 mb-4 transition-colors"
+      >
+        <ArrowLeft size={16} />
+        Back to Modules
+      </button>
+
       <FormLayout onSubmit={formik.handleSubmit}>
         <div className="space-y-6">
-          {/* Module Name */}
-          <FormField name="name">
-            <FormLabelAndMessage
-              label="Module Name"
-              message={formik.errors.name as string}
-            />
-            <Form.Control asChild>
-              <Input
-                style={{ backgroundColor: 'white' }}
-                onChange={formik.handleChange}
-                value={formik.values.name}
-                type="text"
-                required
-                disabled={isSaving}
-              />
-            </Form.Control>
-          </FormField>
+          {/* Module Name + Description (compact) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField name="name">
+              <FormLabelAndMessage label="Module Name" message={formik.errors.name as string} />
+              <Form.Control asChild>
+                <Input
+                  style={{ backgroundColor: 'white' }}
+                  onChange={formik.handleChange}
+                  value={formik.values.name}
+                  type="text"
+                  required
+                  disabled={isSaving}
+                />
+              </Form.Control>
+            </FormField>
 
-          {/* Module Description */}
-          <FormField name="description">
-            <FormLabelAndMessage label="Module Description" message={formik.errors.description as string} />
-            <Form.Control asChild>
-              <Textarea
-                style={{ backgroundColor: 'white', height: '120px', minHeight: '120px' }}
-                onChange={formik.handleChange}
-                value={formik.values.description}
-                disabled={isSaving}
-                placeholder="Optional description for this module"
-              />
-            </Form.Control>
-          </FormField>
+            <FormField name="description">
+              <FormLabelAndMessage label="Description" message={formik.errors.description as string} />
+              <Form.Control asChild>
+                <Input
+                  style={{ backgroundColor: 'white' }}
+                  onChange={formik.handleChange}
+                  value={formik.values.description}
+                  type="text"
+                  disabled={isSaving}
+                  placeholder="Optional"
+                />
+              </Form.Control>
+            </FormField>
+          </div>
 
-          {/* Save indicator */}
           {isSaving && (
             <div className="flex items-center gap-2 text-xs text-gray-400">
               <Loader2 size={12} className="animate-spin" />
@@ -208,7 +212,7 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid }: ModuleFormP
           )}
 
           {/* ── Lessons Section ── */}
-          <div className="border-t border-gray-200 pt-6 mt-8">
+          <div className="border-t border-gray-200 pt-6 mt-6">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Lessons</h3>
@@ -232,19 +236,20 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid }: ModuleFormP
                 <p className="text-xs text-gray-300 mt-1">Click "Add Lesson" to add your first lesson</p>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {activities.map((activity: any) => {
                   const typeInfo = getTypeConfig(activity.activity_type)
                   const TypeIcon = typeInfo.Icon
                   return (
-                    <div
+                    <button
                       key={activity.activity_uuid}
-                      className="flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-100 hover:border-gray-200 transition-colors"
+                      onClick={() => onLessonClick(activity)}
+                      className="w-full text-left flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 transition-colors group"
                     >
                       <div className={`p-1.5 rounded-md ${typeInfo.color}`}>
                         <TypeIcon size={16} />
                       </div>
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-0 text-left">
                         <p className="text-sm font-medium text-gray-900 truncate">
                           {activity.name || 'Untitled Lesson'}
                         </p>
@@ -252,10 +257,14 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid }: ModuleFormP
                           {typeInfo.label}
                         </span>
                       </div>
+                      <ChevronRight size={16} className="text-gray-300 group-hover:text-gray-500 transition-colors flex-shrink-0" />
                       <button
-                        onClick={() => handleDeleteActivity(activity)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeleteActivity(activity)
+                        }}
                         disabled={isDeletingActivity === activity.activity_uuid}
-                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                        className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0"
                         title="Delete lesson"
                       >
                         {isDeletingActivity === activity.activity_uuid ? (
@@ -264,7 +273,7 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid }: ModuleFormP
                           <Trash2 size={14} />
                         )}
                       </button>
-                    </div>
+                    </button>
                   )
                 })}
               </div>
@@ -273,11 +282,10 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid }: ModuleFormP
         </div>
       </FormLayout>
 
-      {/* New Lesson Modal — clean form like General tab */}
+      {/* New Lesson Modal */}
       {showNewLessonModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 overflow-hidden">
-            {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h2 className="text-lg font-semibold text-gray-900">New Lesson</h2>
               <button
@@ -287,8 +295,6 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid }: ModuleFormP
                 <X size={20} />
               </button>
             </div>
-
-            {/* Form */}
             <NewLessonForm
               onSubmit={handleCreateLesson}
               onCancel={() => setShowNewLessonModal(false)}
@@ -301,7 +307,7 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid }: ModuleFormP
   )
 }
 
-/* ── New Lesson Form — no type selector, just fields ── */
+/* ── New Lesson Form ── */
 function NewLessonForm({
   onSubmit,
   onCancel,
@@ -323,7 +329,6 @@ function NewLessonForm({
 
   return (
     <FormLayout onSubmit={formik.handleSubmit} className="px-6 py-5 space-y-5">
-      {/* Lesson Name */}
       <FormField name="name">
         <FormLabelAndMessage label="Lesson Name" message={formik.errors.name as string} />
         <Form.Control asChild>
@@ -338,7 +343,6 @@ function NewLessonForm({
         </Form.Control>
       </FormField>
 
-      {/* Description */}
       <FormField name="description">
         <FormLabelAndMessage label="Description (optional)" message={formik.errors.description as string} />
         <Form.Control asChild>
@@ -351,7 +355,6 @@ function NewLessonForm({
         </Form.Control>
       </FormField>
 
-      {/* Buttons */}
       <div className="flex items-center justify-end gap-3 pt-2">
         <button
           type="button"

@@ -120,8 +120,8 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
   const currentTab = tabs.find(tab => tab.key === params.subpage)
   const hasAccessToCurrentPage = currentTab ? hasPermission(currentTab.requiredPermission) : false
 
-  // Determine if sidebar should be shown
-  const showSidebar = params.subpage !== 'content' && params.subpage !== 'analytics'
+  // Sidebar is shown on all tabs
+  const showSidebar = true
 
   // Redirect to first available tab if current page is not accessible
   useEffect(() => {

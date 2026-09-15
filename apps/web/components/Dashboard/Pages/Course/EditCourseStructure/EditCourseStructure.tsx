@@ -10,8 +10,9 @@ import {
   getCourseMetaCacheKey,
 } from '@components/Contexts/CourseContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { Plus, Trash2, BookOpen, Loader2 } from 'lucide-react'
+import { Plus, Trash2, BookOpen, Loader2, ArrowLeft } from 'lucide-react'
 import ModuleForm from './ModuleForm'
+import LessonDetailForm from './LessonDetailForm'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 
@@ -31,7 +32,9 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
   const course_uuid = course ? course.courseStructure.course_uuid : ''
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false
 
+  // 3-state navigation
   const [selectedChapterIndex, setSelectedChapterIndex] = useState<number | null>(null)
+  const [selectedActivity, setSelectedActivity] = useState<any | null>(null)
   const [isCreating, setIsCreating] = useState(false)
 
   const selectedChapter = selectedChapterIndex !== null ? chapters[selectedChapterIndex] : null
@@ -52,7 +55,6 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
       await mutate(getCourseMetaCacheKey(course_uuid, withUnpublishedActivities), undefined, { revalidate: true })
       await revalidateTags(['courses'], props.orgslug)
       router.refresh()
-      // The refresh will re-render with the new chapter; after refresh, select the last one
       setSelectedChapterIndex(chapters.length)
     } catch (e) {
       toast.error('Failed to create module')
@@ -81,18 +83,70 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
 
   const handleModuleClick = (index: number) => {
     setSelectedChapterIndex(index)
+    setSelectedActivity(null)
+  }
+
+  const handleLessonClick = (activity: any) => {
+    setSelectedActivity(activity)
+  }
+
+  const handleBackToModuleList = () => {
+    setSelectedChapterIndex(null)
+    setSelectedActivity(null)
+  }
+
+  const handleBackToLessonList = () => {
+    setSelectedActivity(null)
   }
 
   if (!course) return <PageLoading />
 
+  // ── State 3: Lesson Detail Form ──
+  if (selectedActivity && selectedChapter) {
+    return (
+      <div className="mt-6">
+        <LessonDetailForm
+          activity={selectedActivity}
+          chapter={selectedChapter}
+          orgslug={props.orgslug}
+          course_uuid={course_uuid}
+          onBack={handleBackToLessonList}
+        />
+      </div>
+    )
+  }
+
+  // ── State 2: Lesson List (inside a module) ──
+  if (selectedChapter) {
+    return (
+      <div className="mt-6">
+        <ModuleForm
+          key={selectedChapter.chapter_uuid}
+          chapter={selectedChapter}
+          chapterIndex={selectedChapterIndex!}
+          orgslug={props.orgslug}
+          course_uuid={course_uuid}
+          onBack={handleBackToModuleList}
+          onLessonClick={handleLessonClick}
+        />
+      </div>
+    )
+  }
+
+  // ── State 1: Module List ──
   return (
-    <div className="flex h-full gap-6 mt-6" style={{ minHeight: '400px' }}>
-      {/* Left Panel - Module List */}
-      <div className="w-72 flex-shrink-0 border-r border-gray-200 pr-4">
+    <div className="mt-6">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900">Modules</h2>
+          <p className="text-sm text-gray-500 mt-1">
+            {chapters.length} {chapters.length === 1 ? 'module' : 'modules'} in this course
+          </p>
+        </div>
         <button
           onClick={handleAddModule}
           disabled={isCreating}
-          className="w-full mb-4 px-4 py-2.5 bg-black text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2 hover:bg-gray-800 transition-colors disabled:opacity-50"
+          className="px-4 py-2.5 bg-black text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-800 transition-colors disabled:opacity-50"
         >
           {isCreating ? (
             <Loader2 size={16} className="animate-spin" />
@@ -101,58 +155,41 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
           )}
           Add Module
         </button>
-
-        <div className="space-y-1">
-          {chapters.map((chapter: any, index: number) => (
-            <button
-              key={chapter.chapter_uuid}
-              onClick={() => handleModuleClick(index)}
-              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm flex items-center justify-between group transition-colors ${
-                selectedChapterIndex === index
-                  ? 'bg-blue-50 text-blue-700 font-medium'
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              <div className="flex items-center gap-2 min-w-0">
-                <BookOpen size={16} className="flex-shrink-0" />
-                <span className="truncate">{chapter.name || 'Untitled Module'}</span>
-              </div>
-              <button
-                onClick={(e) => handleDeleteModule(chapter.id, index, e)}
-                className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all p-1 flex-shrink-0"
-                title="Delete module"
-              >
-                <Trash2 size={14} />
-              </button>
-            </button>
-          ))}
-
-          {chapters.length === 0 && (
-            <div className="text-center py-8 text-gray-400 text-sm">
-              <BookOpen size={32} className="mx-auto mb-2 text-gray-300" />
-              <p>No modules yet</p>
-              <p className="text-xs mt-1">Click "Add Module" to get started</p>
-            </div>
-          )}
-        </div>
       </div>
 
-      {/* Right Panel - Module Form */}
-      <div className="flex-1 min-w-0">
-        {selectedChapter ? (
-          <ModuleForm
-            key={selectedChapter.chapter_uuid}
-            chapter={selectedChapter}
-            chapterIndex={selectedChapterIndex!}
-            orgslug={props.orgslug}
-            course_uuid={course_uuid}
-          />
-        ) : (
-          <div className="flex items-center justify-center h-64 text-gray-400">
-            <div className="text-center">
-              <BookOpen size={48} className="mx-auto mb-3 text-gray-300" />
-              <p className="text-sm">Select a module to edit its content</p>
+      <div className="space-y-1.5">
+        {chapters.map((chapter: any, index: number) => (
+          <button
+            key={chapter.chapter_uuid}
+            onClick={() => handleModuleClick(index)}
+            className="w-full text-left px-4 py-3 rounded-lg border border-gray-100 bg-white hover:border-gray-200 transition-colors flex items-center justify-between group"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <BookOpen size={18} className="text-gray-400 flex-shrink-0" />
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {chapter.name || 'Untitled Module'}
+                </p>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {(chapter.activities?.length || 0)} lessons
+                </p>
+              </div>
             </div>
+            <button
+              onClick={(e) => handleDeleteModule(chapter.id, index, e)}
+              className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all p-1.5 rounded hover:bg-red-50 flex-shrink-0"
+              title="Delete module"
+            >
+              <Trash2 size={14} />
+            </button>
+          </button>
+        ))}
+
+        {chapters.length === 0 && (
+          <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-100">
+            <BookOpen size={40} className="mx-auto mb-3 text-gray-300" />
+            <p className="text-sm text-gray-400">No modules yet</p>
+            <p className="text-xs text-gray-300 mt-1">Click "Add Module" to get started</p>
           </div>
         )}
       </div>
