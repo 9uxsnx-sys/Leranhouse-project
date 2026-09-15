@@ -11,10 +11,8 @@ import FormLayout, {
 import { updateChapter } from '@services/courses/chapters'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useCourse, getCourseMetaCacheKey } from '@components/Contexts/CourseContext'
-import { getAPIUrl } from '@services/config/config'
 import { mutate } from 'swr'
 import { revalidateTags } from '@services/utils/ts/requests'
-import { useRouter } from 'next/navigation'
 import {
   Plus,
   Video,
@@ -56,7 +54,6 @@ const activityTypeConfig: Record<string, { label: string; color: string; Icon: a
 
 function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLessonClick }: ModuleFormProps) {
   const { t } = useTranslation()
-  const router = useRouter()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const course = useCourse() as any
@@ -98,9 +95,8 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
         if (Object.keys(changes).length > 0) {
           await updateChapter(chapter.id, changes, access_token)
           prevValuesRef.current = currentValues
-          await mutate(getCourseMetaCacheKey(course_uuid, withUnpublishedActivities), undefined, { revalidate: true })
           await revalidateTags(['courses'], orgslug)
-          router.refresh()
+          await mutate(getCourseMetaCacheKey(course_uuid, withUnpublishedActivities), undefined, { revalidate: true })
         }
       } catch (e) {
         console.error('Failed to save module:', e)
@@ -120,9 +116,8 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
     setIsDeletingActivity(activity.activity_uuid)
     try {
       await deleteActivity(activity.activity_uuid, access_token)
-      await mutate(getCourseMetaCacheKey(course_uuid, withUnpublishedActivities), undefined, { revalidate: true })
       await revalidateTags(['courses'], orgslug)
-      router.refresh()
+      await mutate(getCourseMetaCacheKey(course_uuid, withUnpublishedActivities), undefined, { revalidate: true })
       toast.success('Lesson deleted')
     } catch (e) {
       toast.error('Failed to delete lesson')
@@ -143,12 +138,10 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
         content: {},
       }
       await createActivity(activityData, chapter.id, org.id, access_token)
-      mutate(`${getAPIUrl()}courses/${course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`)
-      mutate((key: string) => typeof key === 'string' && key.includes('/courses/org_slug/'))
+      await revalidateTags(['courses'], orgslug)
+      await mutate(getCourseMetaCacheKey(course_uuid, withUnpublishedActivities), undefined, { revalidate: true })
       toast.success('Lesson created')
       setShowNewLessonModal(false)
-      await revalidateTags(['courses'], orgslug)
-      router.refresh()
     } catch (e) {
       toast.error('Failed to create lesson')
     } finally {

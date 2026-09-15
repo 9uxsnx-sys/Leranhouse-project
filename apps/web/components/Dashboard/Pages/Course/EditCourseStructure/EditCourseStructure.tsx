@@ -4,13 +4,12 @@ import React, { useState } from 'react'
 import { mutate } from 'swr'
 import PageLoading from '@components/Objects/Loaders/PageLoading'
 import { createChapter, deleteChapter } from '@services/courses/chapters'
-import { useRouter } from 'next/navigation'
 import {
   useCourse,
   getCourseMetaCacheKey,
 } from '@components/Contexts/CourseContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { Plus, Trash2, BookOpen, Loader2, ArrowLeft } from 'lucide-react'
+import { Plus, Trash2, BookOpen, Loader2 } from 'lucide-react'
 import ModuleForm from './ModuleForm'
 import LessonDetailForm from './LessonDetailForm'
 import toast from 'react-hot-toast'
@@ -23,7 +22,6 @@ type EditCourseStructureProps = {
 
 const EditCourseStructure = (props: EditCourseStructureProps) => {
   const { t } = useTranslation()
-  const router = useRouter()
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const course = useCourse() as any
@@ -51,10 +49,9 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
         org_id: courseStructure.org_id,
       }
       await createChapter(chapter_object, access_token)
-      toast.success('Module created')
-      await mutate(getCourseMetaCacheKey(course_uuid, withUnpublishedActivities), undefined, { revalidate: true })
       await revalidateTags(['courses'], props.orgslug)
-      router.refresh()
+      await mutate(getCourseMetaCacheKey(course_uuid, withUnpublishedActivities), undefined, { revalidate: true })
+      toast.success('Module created')
       setSelectedChapterIndex(chapters.length)
     } catch (e) {
       toast.error('Failed to create module')
@@ -68,9 +65,8 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
     if (!access_token) return
     try {
       await deleteChapter(chapterId, access_token)
-      await mutate(getCourseMetaCacheKey(course_uuid, withUnpublishedActivities), undefined, { revalidate: true })
       await revalidateTags(['courses'], props.orgslug)
-      router.refresh()
+      await mutate(getCourseMetaCacheKey(course_uuid, withUnpublishedActivities), undefined, { revalidate: true })
       if (selectedChapterIndex === index) {
         setSelectedChapterIndex(null)
       } else if (selectedChapterIndex !== null && selectedChapterIndex > index) {

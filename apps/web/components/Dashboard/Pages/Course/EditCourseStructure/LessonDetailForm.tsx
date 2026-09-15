@@ -13,8 +13,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useCourse, getCourseMetaCacheKey } from '@components/Contexts/CourseContext'
 import { mutate } from 'swr'
 import { revalidateTags } from '@services/utils/ts/requests'
-import { useRouter } from 'next/navigation'
-import { ArrowLeft, Plus, Trash2, GripVertical, Loader2 } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 type LessonDetailFormProps = {
@@ -26,7 +25,6 @@ type LessonDetailFormProps = {
 }
 
 function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: LessonDetailFormProps) {
-  const router = useRouter()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const course = useCourse() as any
@@ -112,9 +110,8 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
             resources: JSON.stringify(currentMeta.resources),
             knowledgeChecks: JSON.stringify(currentMeta.knowledge_checks),
           }
-          await mutate(getCourseMetaCacheKey(course_uuid, withUnpublishedActivities), undefined, { revalidate: true })
           await revalidateTags(['courses'], orgslug)
-          router.refresh()
+          await mutate(getCourseMetaCacheKey(course_uuid, withUnpublishedActivities), undefined, { revalidate: true })
         }
       } catch (e) {
         console.error('Failed to save lesson:', e)
