@@ -29,45 +29,6 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useAnalytics } from '@/hooks/useAnalytics'
 
-// ── Mock data for fields not yet available from the backend ──
-// Swap these for real course data once backend/admin supports them.
-const MOCK_COURSE_META = {
-  requirements: [
-    'No prior experience needed — this course starts from the basics.',
-    'A computer with internet access to watch videos and complete exercises.',
-    'Willingness to learn and experiment — curiosity is all you need!',
-  ],
-  instructor: {
-    name: 'Dr. Sarah Chen',
-    title: 'Professor of Computer Science',
-    bio: '20+ years of experience teaching AI and machine learning at top universities. Passionate about making complex topics accessible to everyone.',
-    avatar: '',
-  },
-  courseIncludes: {
-    videoHours: 6,
-    totalLessons: 24,
-    resources: 3,
-    hasCertificate: true,
-  },
-  difficulty: 'Beginner' as const,
-  totalDuration: '6 hours',
-  updates: [
-    { title: 'New module added', description: 'Advanced prototyping techniques — 8 new lessons', date: 'Mar 2026' },
-    { title: 'Quiz updates', description: 'Added practice questions for modules 3 & 4', date: 'Jan 2026' },
-    { title: 'Course launched', description: 'Initial release with 5 modules', date: 'Nov 2025' },
-  ],
-  learnings: [
-    'Understand core UI/UX design principles and how to apply them',
-    'Master Figma prototyping and design system creation',
-    'Build scalable, reusable component libraries',
-    'Implement "quiet luxury" and minimalist layout structures',
-    'Design conversion-optimized high-end digital experiences',
-    'Apply 8pt grid systems and spatial cadence to layouts',
-    'Create responsive designs that work across all devices',
-    'Develop a professional design portfolio with real projects',
-  ],
-}
-
 const CourseClient = (props: any) => {
   const { t } = useTranslation()
   const [learnings, setLearnings] = useState<any>([])
@@ -116,7 +77,23 @@ const CourseClient = (props: any) => {
     { revalidateOnFocus: false, dedupingInterval: 30000 }
   );
 
-  // Show loading state if fetching course data client-side
+  // Helper to get metadata with fallback
+  const meta = course?.extra_metadata || {}
+
+  const totalLessons = course?.chapters?.reduce((sum: number, ch: any) => sum + (ch.activities?.length || 0), 0)
+  const stats = {
+    lessons: meta.lessons_count || totalLessons || 0,
+    duration: meta.duration || '',
+    difficulty: meta.difficulty || '',
+  }
+  const courseIncludes = {
+    videoHours: meta.video_hours || 0,
+    totalLessons: meta.lessons_count || totalLessons || 0,
+    resources: meta.resources_count || 0,
+    hasCertificate: meta.has_certificate ?? false,
+  }
+  const instructorData = meta.instructor?.name ? meta.instructor : null
+  const requirementsList = meta.requirements ? meta.requirements.split('\n').filter((r: string) => r.trim()) : []
   if (!initialCourse && !serverError && courseLoading) {
     return <PageLoading />
   }
@@ -147,20 +124,14 @@ const CourseClient = (props: any) => {
 
   function getLearningTags(courseData: any) {
     if (!courseData?.learnings) {
-      // Fall back to mock learnings for design/demo purposes
-      setLearnings(MOCK_COURSE_META.learnings.map((text) => ({
-        id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
-        text,
-        emoji: '📝'
-      })))
+      setLearnings([])
       return
     }
 
     try {
-      // Try to parse as JSON (new format)
+      // Try to parse as JSON (new format: array of objects with text/emoji)
       const parsedLearnings = JSON.parse(courseData.learnings)
       if (Array.isArray(parsedLearnings)) {
-        // New format: array of learning items with text and emoji
         setLearnings(parsedLearnings)
         return
       }
@@ -168,11 +139,11 @@ const CourseClient = (props: any) => {
       // Not valid JSON, continue to legacy format handling
     }
 
-    // Legacy format: comma-separated string (changed from pipe-separated)
+    // Legacy format: comma-separated string
     const learningItems = courseData.learnings.split(',').map((text: string) => ({
       id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
-      text: text.trim(), // Trim whitespace that might be present after commas
-      emoji: '📝' // Default emoji for legacy items
+      text: text.trim(),
+      emoji: '📝'
     }))
 
     setLearnings(learningItems)
@@ -336,19 +307,24 @@ const CourseClient = (props: any) => {
                   {/* ── 2. COURSE TITLE + STATS + SHARE ── */}
                   <div>
                     <h1 className="text-2xl md:text-3xl font-semibold text-ui-fg-base leading-tight">{course.name}</h1>
+                    {course?.description && (
+                      <Text size="base" className="text-ui-fg-subtle mt-2 leading-relaxed">
+                        {course.description}
+                      </Text>
+                    )}
                     {/* Stats row + Share */}
                     <div className="flex flex-wrap items-center gap-2 mt-4">
                       <Badge variant="grey" className="flex items-center gap-1">
                         <BookOpen size={12} />
-                        {MOCK_COURSE_META.courseIncludes.totalLessons} lessons
+                        {stats.lessons} lessons
                       </Badge>
                       <Badge variant="grey" className="flex items-center gap-1">
                         <Clock size={12} />
-                        {MOCK_COURSE_META.totalDuration}
+                        {stats.duration}
                       </Badge>
                       <Badge variant="grey" className="flex items-center gap-1">
                         <BarChart3 size={12} />
-                        {MOCK_COURSE_META.difficulty}
+                        {stats.difficulty}
                       </Badge>
                       <div className="ml-auto">
                         <CourseShare
@@ -360,38 +336,31 @@ const CourseClient = (props: any) => {
                   </div>
 
                   {/* ── 3. WHAT YOU'LL LEARN ── */}
-                  <CourseLearnings />
+                  {learnings.length > 0 && (
+                    <CourseLearnings items={learnings.map((l: any) => l.text || l)} />
+                  )}
 
                   {/* ── 4. ABOUT THIS COURSE ── */}
-                  <div>
-                    <Heading level="h1" className="!text-2xl mb-4">About This Course</Heading>
-                    <div className="space-y-4">
-                      <Text size="base" className="text-ui-fg-subtle leading-relaxed block">
-                        This comprehensive UI design course is designed to take you from a complete beginner to a confident, job-ready designer. You will start by learning the foundational principles of visual design — including hierarchy, balance, contrast, and typography — and then gradually move into more advanced topics like design systems, component architecture, and interactive prototyping.
-                      </Text>
-                      <Text size="base" className="text-ui-fg-subtle leading-relaxed block">
-                        Throughout the course, you will work on real-world projects that simulate actual design workflows. Each module builds on the previous one, ensuring a structured and progressive learning experience. By the end, you will have built a complete product interface from scratch, giving you a polished portfolio piece to showcase to employers or clients.
-                      </Text>
-                      <Text size="base" className="text-ui-fg-subtle leading-relaxed block">
-                        Whether you are looking to switch careers, upskill for your current role, or simply explore the world of UI design, this course provides everything you need to succeed. No prior design experience is required — just a willingness to learn and practice.
-                      </Text>
-                      <Text size="base" className="text-ui-fg-subtle leading-relaxed block">
-                        The curriculum is carefully structured across five comprehensive modules, each focusing on a critical aspect of the design process. From understanding user psychology and behavior patterns to mastering advanced prototyping techniques in Figma, every lesson is designed to give you practical, hands-on experience that you can immediately apply to real projects.
-                      </Text>
-                      <Text size="base" className="text-ui-fg-subtle leading-relaxed block">
-                        You will learn how to think like a designer — approaching problems systematically, iterating on solutions, and communicating your design decisions with confidence. The course emphasizes not just the "how" but the "why" behind every design choice, helping you develop a strong design intuition that will serve you throughout your career.
-                      </Text>
-                      <Text size="base" className="text-ui-fg-subtle leading-relaxed block">
-                        In addition to the core curriculum, you will gain access to a growing library of resources including design system templates, UI component kits, and a community of fellow learners and experienced designers who provide feedback and support throughout your learning journey.
-                      </Text>
+                  {course?.about && (
+                    <div>
+                      <Heading level="h1" className="!text-2xl mb-4">About This Course</Heading>
+                      <div className="space-y-4">
+                        {course.about.split('\n\n').filter((p: string) => p.trim()).map((paragraph: string, idx: number) => (
+                          <Text key={idx} size="base" className="text-ui-fg-subtle leading-relaxed block">
+                            {paragraph.trim()}
+                          </Text>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* ── 5. COURSE CURRICULUM ── */}
                   <CourseCurriculum />
 
                   {/* ── 5. COURSE REQUIREMENTS ── */}
-                  <CourseRequirements />
+                  {requirementsList.length > 0 && (
+                    <CourseRequirements items={requirementsList} />
+                  )}
                 </div>
 
                 {/* ═══════════════ RIGHT SIDEBAR ═══════════════ */}
@@ -420,15 +389,15 @@ const CourseClient = (props: any) => {
                     <div className="mt-4 space-y-3">
                       <div className="flex items-center gap-3">
                         <Clock size={16} className="text-ui-fg-muted shrink-0" />
-                        <Text size="small">{MOCK_COURSE_META.courseIncludes.videoHours} hours of video</Text>
+                        <Text size="small">{courseIncludes.videoHours} hours of video</Text>
                       </div>
                       <div className="flex items-center gap-3">
                         <BookOpen size={16} className="text-ui-fg-muted shrink-0" />
-                        <Text size="small">{MOCK_COURSE_META.courseIncludes.totalLessons} lessons</Text>
+                        <Text size="small">{courseIncludes.totalLessons} lessons</Text>
                       </div>
                       <div className="flex items-center gap-3">
                         <Download size={16} className="text-ui-fg-muted shrink-0" />
-                        <Text size="small">{MOCK_COURSE_META.courseIncludes.resources} downloadable resources</Text>
+                        <Text size="small">{courseIncludes.resources} downloadable resources</Text>
                       </div>
                       <div className="flex items-center gap-3">
                         <Award size={16} className="text-ui-fg-muted shrink-0" />
@@ -437,21 +406,6 @@ const CourseClient = (props: any) => {
                     </div>
                   </Container>
 
-                  {/* ── SIDEBAR 3: Course Updates (timeline) ── */}
-                  <Container>
-                    <Heading level="h3">Updates</Heading>
-                    <div className="mt-4">
-                      <div className="relative pl-5 before:absolute before:left-[3px] before:top-2 before:bottom-2 before:w-px before:bg-gray-300 space-y-4">
-                         {MOCK_COURSE_META.updates.map((update: any, idx: number) => (
-                           <div key={idx} className="relative">
-                             <Text weight="plus" size="small">{update.title}</Text>
-                            <Text size="xsmall" className="text-ui-fg-muted mt-0.5 leading-snug">{update.description}</Text>
-                            <Text size="xsmall" className="text-ui-fg-disabled mt-0.5 block">{update.date}</Text>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </Container>
                 </div>
               </div>
             </div>

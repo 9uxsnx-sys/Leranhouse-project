@@ -191,6 +191,9 @@ export const AdminEditOptions = ({ course, orgSlug, deleteCourse, cloneCourse, e
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = React.useState(false)
 
+  const itemClass = "w-full text-left flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+  const itemClassDanger = "w-full text-left flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] font-medium text-red-600 hover:bg-red-50 transition-colors"
+
   return (
     <AuthenticatedClientElement
       action="update"
@@ -212,14 +215,14 @@ export const AdminEditOptions = ({ course, orgSlug, deleteCourse, cloneCourse, e
               <EllipsisHorizontal />
             </IconButton>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-52">
+          <DropdownMenuContent align="end" className="min-w-0 w-36">
             <DropdownMenuItem asChild>
-              <Link prefetch={false} href={getUriWithOrg(orgSlug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/content`)}>
+              <Link prefetch={false} href={getUriWithOrg(orgSlug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/content`)} className={itemClass}>
                 <PencilSquare /> {t('courses.edit_content')}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link prefetch={false} href={getUriWithOrg(orgSlug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/general`)}>
+              <Link prefetch={false} href={getUriWithOrg(orgSlug, `/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/general`)} className={itemClass}>
                 <CogSixTooth /> {t('common.settings')}
               </Link>
             </DropdownMenuItem>
@@ -229,7 +232,7 @@ export const AdminEditOptions = ({ course, orgSlug, deleteCourse, cloneCourse, e
                 confirmationMessage={t('courses.clone_course_confirm')}
                 dialogTitle={t('courses.clone_course_title', { name: course.name })}
                 dialogTrigger={
-                  <button className="w-full text-left flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] font-medium text-gray-700 hover:bg-gray-100 transition-colors">
+                  <button className={itemClass}>
                     <SquareTwoStack /> {t('courses.clone_course')}
                   </button>
                 }
@@ -240,7 +243,7 @@ export const AdminEditOptions = ({ course, orgSlug, deleteCourse, cloneCourse, e
             <DropdownMenuItem asChild>
               <button
                 onClick={exportCourse}
-                className="w-full text-left flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+                className={itemClass}
               >
                 <ArrowDownTray /> {t('courses.export_course')}
               </button>
@@ -251,7 +254,7 @@ export const AdminEditOptions = ({ course, orgSlug, deleteCourse, cloneCourse, e
                 confirmationMessage={t('courses.delete_course_confirm')}
                 dialogTitle={t('courses.delete_course_title', { name: course.name })}
                 dialogTrigger={
-                  <button className="w-full text-left flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] font-medium text-red-600 hover:bg-red-50 transition-colors">
+                  <button className={itemClassDanger}>
                     <Trash /> {t('courses.delete_course')}
                   </button>
                 }

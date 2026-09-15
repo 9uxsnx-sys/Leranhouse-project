@@ -114,6 +114,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
   // Memoize initial values to prevent unnecessary recalculations
   const initialValues = useMemo(() => {
     const thumbnailType = courseStructure?.thumbnail_type || 'image';
+    const meta = courseStructure?.extra_metadata || {};
     return {
       name: courseStructure?.name || '',
       description: courseStructure?.description || '',
@@ -122,10 +123,20 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
       tags: courseStructure?.tags || '',
       public: courseStructure?.public || false,
       thumbnail_type: thumbnailType,
+      // extra_metadata fields
+      meta_difficulty: meta.difficulty || '',
+      meta_duration: meta.duration || '',
+      meta_video_hours: meta.video_hours || '',
+      meta_resources_count: meta.resources_count || '',
+      meta_has_certificate: meta.has_certificate || false,
+      meta_requirements: meta.requirements || '',
+      meta_instructor_name: meta.instructor?.name || '',
+      meta_instructor_title: meta.instructor?.title || '',
+      meta_instructor_bio: meta.instructor?.bio || '',
     };
   }, [courseStructure?.name, courseStructure?.description, courseStructure?.about,
       courseStructure?.learnings, courseStructure?.tags, courseStructure?.public,
-      courseStructure?.thumbnail_type, initializeLearnings]);
+      courseStructure?.thumbnail_type, courseStructure?.extra_metadata, initializeLearnings]);
 
   const formik = useFormik({
     initialValues,
@@ -150,6 +161,27 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
         changes[key] = formik.values[key];
       }
     });
+
+    // Build extra_metadata from prefixed meta_ fields
+    const metadataFields = ['meta_difficulty', 'meta_duration', 'meta_video_hours', 'meta_resources_count', 'meta_has_certificate', 'meta_requirements', 'meta_instructor_name', 'meta_instructor_title', 'meta_instructor_bio'];
+    const anyMetaChanged = metadataFields.some(f => formik.values[f] !== formik.initialValues[f]);
+    if (anyMetaChanged) {
+      changes.extra_metadata = {
+        difficulty: formik.values.meta_difficulty,
+        duration: formik.values.meta_duration,
+        video_hours: formik.values.meta_video_hours,
+        resources_count: formik.values.meta_resources_count,
+        has_certificate: formik.values.meta_has_certificate,
+        requirements: formik.values.meta_requirements,
+        instructor: {
+          name: formik.values.meta_instructor_name,
+          title: formik.values.meta_instructor_title,
+          bio: formik.values.meta_instructor_bio,
+        },
+      };
+      // Remove the individual meta fields from top-level changes
+      metadataFields.forEach(f => delete changes[f]);
+    }
 
     const hasChanges = Object.keys(changes).length > 0;
 
@@ -283,6 +315,142 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                   <ThumbnailUpdate thumbnailType={formik.values.thumbnail_type} />
                 </Form.Control>
               </FormField>
+
+              {/* ── Course Metadata (extra_metadata) ── */}
+              <div className="border-t border-gray-200 pt-6 mt-8">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Course Metadata</h3>
+                <p className="text-sm text-gray-500 mb-6">These fields appear on the public course page (stats, sidebar, instructor card).</p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField name="meta_difficulty">
+                    <FormLabelAndMessage label="Difficulty" />
+                    <Form.Control asChild>
+                      <select
+                        className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/5"
+                        onChange={formik.handleChange}
+                        value={formik.values.meta_difficulty}
+                        disabled={isSaving}
+                      >
+                        <option value="">Select difficulty</option>
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                      </select>
+                    </Form.Control>
+                  </FormField>
+
+                  <FormField name="meta_duration">
+                    <FormLabelAndMessage label="Duration (e.g. '6 hours')" />
+                    <Form.Control asChild>
+                      <Input
+                        style={{ backgroundColor: 'white' }}
+                        onChange={formik.handleChange}
+                        value={formik.values.meta_duration}
+                        type="text"
+                        disabled={isSaving}
+                      />
+                    </Form.Control>
+                  </FormField>
+
+                  <FormField name="meta_video_hours">
+                    <FormLabelAndMessage label="Video Hours" />
+                    <Form.Control asChild>
+                      <Input
+                        style={{ backgroundColor: 'white' }}
+                        onChange={formik.handleChange}
+                        value={formik.values.meta_video_hours}
+                        type="text"
+                        disabled={isSaving}
+                      />
+                    </Form.Control>
+                  </FormField>
+
+                  <FormField name="meta_resources_count">
+                    <FormLabelAndMessage label="Number of Resources" />
+                    <Form.Control asChild>
+                      <Input
+                        style={{ backgroundColor: 'white' }}
+                        onChange={formik.handleChange}
+                        value={formik.values.meta_resources_count}
+                        type="text"
+                        disabled={isSaving}
+                      />
+                    </Form.Control>
+                  </FormField>
+                </div>
+
+                <FormField name="meta_has_certificate" className="mt-4">
+                  <FormLabelAndMessage label="Offers Certificate" />
+                  <Form.Control asChild>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        onChange={formik.handleChange}
+                        checked={formik.values.meta_has_certificate}
+                        disabled={isSaving}
+                        className="rounded border-gray-300"
+                      />
+                      <span className="text-sm text-gray-700">This course offers a certificate of completion</span>
+                    </label>
+                  </Form.Control>
+                </FormField>
+
+                <FormField name="meta_requirements" className="mt-4">
+                  <FormLabelAndMessage label="Requirements (one per line)" />
+                  <Form.Control asChild>
+                    <Textarea
+                      style={{ backgroundColor: 'white', height: '100px', minHeight: '100px' }}
+                      onChange={formik.handleChange}
+                      value={formik.values.meta_requirements}
+                      disabled={isSaving}
+                      placeholder={"No prior experience needed\nA computer with internet access\nBasic computer skills"}
+                    />
+                  </Form.Control>
+                </FormField>
+
+                <div className="border-t border-gray-100 pt-4 mt-6">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-3">Instructor</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField name="meta_instructor_name">
+                      <FormLabelAndMessage label="Instructor Name" />
+                      <Form.Control asChild>
+                        <Input
+                          style={{ backgroundColor: 'white' }}
+                          onChange={formik.handleChange}
+                          value={formik.values.meta_instructor_name}
+                          type="text"
+                          disabled={isSaving}
+                        />
+                      </Form.Control>
+                    </FormField>
+
+                    <FormField name="meta_instructor_title">
+                      <FormLabelAndMessage label="Instructor Title" />
+                      <Form.Control asChild>
+                        <Input
+                          style={{ backgroundColor: 'white' }}
+                          onChange={formik.handleChange}
+                          value={formik.values.meta_instructor_title}
+                          type="text"
+                          disabled={isSaving}
+                        />
+                      </Form.Control>
+                    </FormField>
+                  </div>
+
+                  <FormField name="meta_instructor_bio" className="mt-4">
+                    <FormLabelAndMessage label="Instructor Bio" />
+                    <Form.Control asChild>
+                      <Textarea
+                        style={{ backgroundColor: 'white', height: '100px', minHeight: '100px' }}
+                        onChange={formik.handleChange}
+                        value={formik.values.meta_instructor_bio}
+                        disabled={isSaving}
+                      />
+                    </Form.Control>
+                  </FormField>
+                </div>
+              </div>
             </div>
           </FormLayout>
         </div>
