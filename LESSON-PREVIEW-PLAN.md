@@ -153,6 +153,20 @@ The `extra_metadata` column is a JSONB field that can store any arbitrary JSON. 
 - **Verify**: Updates sidebar shows real course updates
 - **Build check**: `npx next build` passes
 
+### Step A7 — Redesign Content/Structure tab with module list + form panel
+- [X] Status: `[X]`
+- **Files**: `EditCourseStructure.tsx` (rewritten), `ModuleForm.tsx` (created)
+- **What**: Replace the complex drag-and-drop interface with a clean two-panel layout matching the General tab style
+- **How**:
+  - Left sidebar: module list with "Add Module" button, click to select a module
+  - Right panel: `ModuleForm` component with Formik form for module name/description (auto-save with 600ms debounce)
+  - Lesson list within each module showing activities with type icons (Video, Document, Assignment, Dynamic, SCORM)
+  - "Add Lesson" button opens `NewActivityModal` for creating activities
+  - Delete module/lesson buttons with confirmation
+  - All CRUD operations go through existing API endpoints (`createChapter`, `updateChapter`, `deleteChapter`, `createActivity`, `deleteActivity`)
+- **Verify**: Can add modules, select them, edit name/description with auto-save, add/delete lessons
+- **Build check**: `npx next build` passes — **DONE** (only pre-existing podcast error)
+
 ---
 
 ## Phase B — Connect Lesson Preview Page (`lesson-preview/page.tsx`)
