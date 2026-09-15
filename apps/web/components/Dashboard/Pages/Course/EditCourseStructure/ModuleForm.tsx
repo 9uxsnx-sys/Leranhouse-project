@@ -19,9 +19,6 @@ import {
   Plus,
   Video,
   File,
-  Code,
-  Puzzle,
-  Layers,
   Trash2,
   BookOpen,
   Loader2,
@@ -49,14 +46,6 @@ const activityTypeConfig: Record<string, { label: string; color: string; Icon: a
   TYPE_DYNAMIC: { label: 'Dynamic', color: 'text-green-600 bg-green-50', Icon: Code },
   TYPE_SCORM: { label: 'SCORM', color: 'text-gray-600 bg-gray-50', Icon: Layers },
 }
-
-const LESSON_TYPES = [
-  { value: 'TYPE_VIDEO', label: 'Video' },
-  { value: 'TYPE_DOCUMENT', label: 'Document' },
-  { value: 'TYPE_ASSIGNMENT', label: 'Assignment' },
-  { value: 'TYPE_DYNAMIC', label: 'Dynamic' },
-  { value: 'TYPE_SCORM', label: 'SCORM' },
-]
 
 function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid }: ModuleFormProps) {
   const { t } = useTranslation()
@@ -142,7 +131,7 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid }: ModuleFormP
     }
   }
 
-  const handleCreateLesson = async (values: { name: string; description: string; activity_type: string }) => {
+  const handleCreateLesson = async (values: { name: string; description: string }) => {
     if (!access_token) return
     setIsCreatingLesson(true)
     try {
@@ -150,7 +139,7 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid }: ModuleFormP
       const activityData = {
         name: values.name,
         description: values.description || '',
-        activity_type: values.activity_type,
+        activity_type: 'TYPE_DYNAMIC',
         content: {},
       }
       await createActivity(activityData, chapter.id, org.id, access_token)
@@ -309,13 +298,13 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid }: ModuleFormP
   )
 }
 
-/* ── New Lesson Form ── */
+/* ── New Lesson Form — no type selector, just fields ── */
 function NewLessonForm({
   onSubmit,
   onCancel,
   isCreating,
 }: {
-  onSubmit: (values: { name: string; description: string; activity_type: string }) => Promise<void>
+  onSubmit: (values: { name: string; description: string }) => Promise<void>
   onCancel: () => void
   isCreating: boolean
 }) {
@@ -323,7 +312,6 @@ function NewLessonForm({
     initialValues: {
       name: '',
       description: '',
-      activity_type: 'TYPE_VIDEO',
     },
     onSubmit: async (values) => {
       await onSubmit(values)
@@ -359,32 +347,6 @@ function NewLessonForm({
           />
         </Form.Control>
       </FormField>
-
-      {/* Lesson Type */}
-      <FormField name="activity_type">
-        <FormLabelAndMessage label="Lesson Type" />
-        <select
-          name="activity_type"
-          onChange={formik.handleChange}
-          value={formik.values.activity_type}
-          className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        >
-          {LESSON_TYPES.map((type) => (
-            <option key={type.value} value={type.value}>
-              {type.label}
-            </option>
-          ))}
-        </select>
-      </FormField>
-
-      {/* Type description */}
-      <p className="text-xs text-gray-400 -mt-2">
-        {formik.values.activity_type === 'TYPE_VIDEO' && 'Upload a video file or use an external video URL'}
-        {formik.values.activity_type === 'TYPE_DOCUMENT' && 'Upload a PDF document for learners to read'}
-        {formik.values.activity_type === 'TYPE_ASSIGNMENT' && 'Create an assignment with text and file submissions'}
-        {formik.values.activity_type === 'TYPE_DYNAMIC' && 'Add rich content like embed codes, markdown, or interactive elements'}
-        {formik.values.activity_type === 'TYPE_SCORM' && 'Import a SCORM package for advanced interactivity'}
-      </p>
 
       {/* Buttons */}
       <div className="flex items-center justify-end gap-3 pt-2">
