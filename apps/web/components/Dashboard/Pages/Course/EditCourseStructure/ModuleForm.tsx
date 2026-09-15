@@ -25,9 +25,8 @@ import {
   Trash2,
   BookOpen,
   Loader2,
+  X,
 } from 'lucide-react'
-import Modal from '@components/Objects/StyledElements/Modal/Modal'
-import NewActivityModal from '@components/Objects/Modals/Activities/Create/NewActivity'
 import {
   createActivity,
   deleteActivity,
@@ -51,6 +50,14 @@ const activityTypeConfig: Record<string, { label: string; color: string; Icon: a
   TYPE_SCORM: { label: 'SCORM', color: 'text-gray-600 bg-gray-50', Icon: Layers },
 }
 
+const LESSON_TYPES = [
+  { value: 'TYPE_VIDEO', label: 'Video' },
+  { value: 'TYPE_DOCUMENT', label: 'Document' },
+  { value: 'TYPE_ASSIGNMENT', label: 'Assignment' },
+  { value: 'TYPE_DYNAMIC', label: 'Dynamic' },
+  { value: 'TYPE_SCORM', label: 'SCORM' },
+]
+
 function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid }: ModuleFormProps) {
   const { t } = useTranslation()
   const router = useRouter()
@@ -58,9 +65,9 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid }: ModuleFormP
   const access_token = session?.data?.tokens?.access_token
   const course = useCourse() as any
   const [isSaving, setIsSaving] = useState(false)
-  const [newActivityModal, setNewActivityModal] = useState(false)
-  const [selectedView, setSelectedView] = useState('home')
+  const [showNewLessonModal, setShowNewLessonModal] = useState(false)
   const [isDeletingActivity, setIsDeletingActivity] = useState<string | null>(null)
+  const [isCreatingLesson, setIsCreatingLesson] = useState(false)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
   const prevValuesRef = useRef({ name: chapter.name || '', description: chapter.description || '' })
 
@@ -135,61 +142,28 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid }: ModuleFormP
     }
   }
 
-  // Submit new activity
-  const submitActivity = async (activity: any) => {
+  const handleCreateLesson = async (values: { name: string; description: string; activity_type: string }) => {
     if (!access_token) return
-    const toastLoading = toast.loading('Creating lesson...')
+    setIsCreatingLesson(true)
     try {
       const org = await getOrganizationContextInfoWithoutCredentials(orgslug, { revalidate: 1800 })
-      await createActivity(activity, chapter.id, org.id, access_token)
+      const activityData = {
+        name: values.name,
+        description: values.description || '',
+        activity_type: values.activity_type,
+        content: {},
+      }
+      await createActivity(activityData, chapter.id, org.id, access_token)
       mutate(`${getAPIUrl()}courses/${course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`)
       mutate((key: string) => typeof key === 'string' && key.includes('/courses/org_slug/'))
-      toast.dismiss(toastLoading)
       toast.success('Lesson created')
-      setNewActivityModal(false)
+      setShowNewLessonModal(false)
       await revalidateTags(['courses'], orgslug)
       router.refresh()
     } catch (e) {
-      toast.dismiss(toastLoading)
       toast.error('Failed to create lesson')
-    }
-  }
-
-  const submitFileActivity = async (file: any, type: any, activity: any, chapterId: string) => {
-    if (!access_token) return
-    toast.loading('Uploading...')
-    try {
-      const { createFileActivity } = await import('@services/courses/activities')
-      await createFileActivity(file, type, activity, chapterId, access_token)
-      mutate(`${getAPIUrl()}courses/${course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`)
-      mutate((key: string) => typeof key === 'string' && key.includes('/courses/org_slug/'))
-      setNewActivityModal(false)
-      toast.dismiss()
-      toast.success('Lesson created')
-      await revalidateTags(['courses'], orgslug)
-      router.refresh()
-    } catch (e) {
-      toast.dismiss()
-      toast.error('Upload failed')
-    }
-  }
-
-  const submitExternalVideo = async (external_video_data: any, activity: any, chapterId: string) => {
-    if (!access_token) return
-    const toastLoading = toast.loading('Creating...')
-    try {
-      const { createExternalVideoActivity } = await import('@services/courses/activities')
-      await createExternalVideoActivity(external_video_data, activity, chapterId, access_token)
-      mutate(`${getAPIUrl()}courses/${course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`)
-      mutate((key: string) => typeof key === 'string' && key.includes('/courses/org_slug/'))
-      setNewActivityModal(false)
-      toast.dismiss(toastLoading)
-      toast.success('Lesson created')
-      await revalidateTags(['courses'], orgslug)
-      router.refresh()
-    } catch (e) {
-      toast.dismiss(toastLoading)
-      toast.error('Failed to create lesson')
+    } finally {
+      setIsCreatingLesson(false)
     }
   }
 
@@ -251,7 +225,7 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid }: ModuleFormP
                 </p>
               </div>
               <button
-                onClick={() => setNewActivityModal(true)}
+                onClick={() => setShowNewLessonModal(true)}
                 className="px-4 py-2 bg-black text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-800 transition-colors"
               >
                 <Plus size={16} />
@@ -307,44 +281,137 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid }: ModuleFormP
         </div>
       </FormLayout>
 
-      {/* New Activity Modal */}
-      <Modal
-        isDialogOpen={newActivityModal}
-        onOpenChange={setNewActivityModal}
-        minHeight="no-min"
-        minWidth="md"
-        addDefCloseButton={false}
-        noPadding
-        dialogContent={
-          <NewActivityModal
-            closeModal={() => setNewActivityModal(false)}
-            submitFileActivity={submitFileActivity}
-            submitExternalVideo={submitExternalVideo}
-            submitActivity={submitActivity}
-            chapterId={chapter.id}
-            course={course?.courseStructure || {}}
-            selectedView={selectedView}
-            setSelectedView={setSelectedView}
-          />
-        }
-        dialogTitle={selectedView !== 'home' ? (
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setSelectedView('home')}
-              className="flex items-center justify-center h-7 w-7 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width={18} height={18} viewBox="0 0 256 256">
-                <polyline points="160 208 80 128 160 48" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="16" />
-              </svg>
-            </button>
-            <span>New Lesson</span>
+      {/* New Lesson Modal — clean form like General tab */}
+      {showNewLessonModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h2 className="text-lg font-semibold text-gray-900">New Lesson</h2>
+              <button
+                onClick={() => setShowNewLessonModal(false)}
+                className="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Form */}
+            <NewLessonForm
+              onSubmit={handleCreateLesson}
+              onCancel={() => setShowNewLessonModal(false)}
+              isCreating={isCreatingLesson}
+            />
           </div>
-        ) : (
-          'New Lesson'
-        )}
-        dialogDescription={selectedView === 'home' ? 'Choose the type of lesson you want to create' : undefined}
-      />
+        </div>
+      )}
     </div>
+  )
+}
+
+/* ── New Lesson Form ── */
+function NewLessonForm({
+  onSubmit,
+  onCancel,
+  isCreating,
+}: {
+  onSubmit: (values: { name: string; description: string; activity_type: string }) => Promise<void>
+  onCancel: () => void
+  isCreating: boolean
+}) {
+  const formik = useFormik({
+    initialValues: {
+      name: '',
+      description: '',
+      activity_type: 'TYPE_VIDEO',
+    },
+    onSubmit: async (values) => {
+      await onSubmit(values)
+    },
+  })
+
+  return (
+    <form onSubmit={formik.handleSubmit} className="px-6 py-5 space-y-5">
+      {/* Lesson Name */}
+      <FormField name="name">
+        <FormLabelAndMessage label="Lesson Name" message={formik.errors.name as string} />
+        <Form.Control asChild>
+          <Input
+            style={{ backgroundColor: 'white' }}
+            onChange={formik.handleChange}
+            value={formik.values.name}
+            type="text"
+            required
+            placeholder="e.g. Introduction to Variables"
+          />
+        </Form.Control>
+      </FormField>
+
+      {/* Description */}
+      <FormField name="description">
+        <FormLabelAndMessage label="Description (optional)" message={formik.errors.description as string} />
+        <Form.Control asChild>
+          <Textarea
+            style={{ backgroundColor: 'white', height: '100px', minHeight: '100px' }}
+            onChange={formik.handleChange}
+            value={formik.values.description}
+            placeholder="Brief description of this lesson"
+          />
+        </Form.Control>
+      </FormField>
+
+      {/* Lesson Type */}
+      <FormField name="activity_type">
+        <FormLabelAndMessage label="Lesson Type" />
+        <select
+          name="activity_type"
+          onChange={formik.handleChange}
+          value={formik.values.activity_type}
+          className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        >
+          {LESSON_TYPES.map((type) => (
+            <option key={type.value} value={type.value}>
+              {type.label}
+            </option>
+          ))}
+        </select>
+      </FormField>
+
+      {/* Type description */}
+      <p className="text-xs text-gray-400 -mt-2">
+        {formik.values.activity_type === 'TYPE_VIDEO' && 'Upload a video file or use an external video URL'}
+        {formik.values.activity_type === 'TYPE_DOCUMENT' && 'Upload a PDF document for learners to read'}
+        {formik.values.activity_type === 'TYPE_ASSIGNMENT' && 'Create an assignment with text and file submissions'}
+        {formik.values.activity_type === 'TYPE_DYNAMIC' && 'Add rich content like embed codes, markdown, or interactive elements'}
+        {formik.values.activity_type === 'TYPE_SCORM' && 'Import a SCORM package for advanced interactivity'}
+      </p>
+
+      {/* Buttons */}
+      <div className="flex items-center justify-end gap-3 pt-2">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+          disabled={isCreating}
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={isCreating || !formik.values.name.trim()}
+          className="px-5 py-2 bg-black text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-800 transition-colors disabled:opacity-50"
+        >
+          {isCreating ? (
+            <>
+              <Loader2 size={14} className="animate-spin" />
+              Creating...
+            </>
+          ) : (
+            'Create Lesson'
+          )}
+        </button>
+      </div>
+    </form>
   )
 }
 

@@ -48,6 +48,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
         org_id: courseStructure.org_id,
       }
       await createChapter(chapter_object, access_token)
+      toast.success('Module created')
       await mutate(getCourseMetaCacheKey(course_uuid, withUnpublishedActivities), undefined, { revalidate: true })
       await revalidateTags(['courses'], props.orgslug)
       router.refresh()
