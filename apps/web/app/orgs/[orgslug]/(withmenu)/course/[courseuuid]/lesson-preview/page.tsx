@@ -1,9 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, use, lazy, Suspense } from 'react'
 import { getUriWithOrg } from '@services/config/config'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
+import { CourseProvider, useCourse } from '@components/Contexts/CourseContext'
+import { useRouter } from 'next/navigation'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { markActivityAsComplete } from '@services/courses/activity'
+import toast from 'react-hot-toast'
 import {
   ChevronDown,
   ChevronLeft,
@@ -30,6 +35,24 @@ import { Text } from '@/components/ui/text'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+
+// ── Lazy-loaded activity components ──
+
+const VideoActivity = lazy(() => import('@components/Objects/Activities/Video/Video'))
+const DocumentPdfActivity = lazy(() => import('@components/Objects/Activities/DocumentPdf/DocumentPdf'))
+const AssignmentStudentActivity = lazy(() => import('@components/Objects/Activities/Assignment/AssignmentStudentActivity'))
+const ScormActivity = lazy(() => import('../../../../../../../ee/components/Activities/ScormActivity'))
+const MarkdownActivity = lazy(() => import('@components/Objects/Activities/Markdown/MarkdownActivity'))
+const EmbedActivity = lazy(() => import('@components/Objects/Activities/Embed/EmbedActivity'))
+
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center h-64">
+    <div className="relative w-6 h-6">
+      <div className="absolute top-0 left-0 w-full h-full border-2 border-gray-100 rounded-full"></div>
+      <div className="absolute top-0 left-0 w-full h-full border-2 border-gray-400 rounded-full animate-spin border-t-transparent"></div>
+    </div>
+  </div>
+)
 
 // ── Mock data ──
 
@@ -119,8 +142,11 @@ function ActivityIcon({ type, completed }: { type: string; completed?: boolean }
 
 // ── Course Outline Sidebar (accordion) ──
 
-function CourseOutlineSidebar({ currentActivityId }: { currentActivityId: string }) {
+function CourseOutlineSidebar({ currentActivityId, chapters }: { currentActivityId: string; chapters: any[] }) {
   const [isOpen, setIsOpen] = useState(false)
+
+  // Helper to clean activity UUID prefix
+  const cleanId = (id: string) => id?.replace('activity_', '').replace('act_', '')
 
   // Locate the current activity within the chapters
   let currentActivityName = ''
@@ -128,9 +154,11 @@ function CourseOutlineSidebar({ currentActivityId }: { currentActivityId: string
   let currentLessonInModule = 0
   let totalLessonsInModule = 0
 
-  for (let mi = 0; mi < MOCK_CHAPTERS.length; mi++) {
-    const ch = MOCK_CHAPTERS[mi]
-    const actIdx = ch.activities.findIndex((a) => a.id === currentActivityId)
+  for (let mi = 0; mi < chapters.length; mi++) {
+    const ch = chapters[mi]
+    const actIdx = ch.activities.findIndex(
+      (a: any) => cleanId(a.activity_uuid || a.id) === cleanId(currentActivityId)
+    )
     if (actIdx !== -1) {
       currentActivityName = ch.activities[actIdx].name
       currentModuleIndex = mi
@@ -170,24 +198,25 @@ function CourseOutlineSidebar({ currentActivityId }: { currentActivityId: string
       >
         <div className="overflow-hidden">
           <div className="px-5 pb-4 space-y-4">
-            {MOCK_CHAPTERS.map((chapter, mi) => (
+            {chapters.map((chapter: any, mi: number) => (
               <div key={chapter.chapter_uuid}>
                 <Text size="small" className="text-ui-fg-muted font-medium mb-1.5 block">
                   {chapter.name}
                 </Text>
                 <div className="space-y-0.5">
-                  {chapter.activities.map((act) => {
-                    const isCurrent = act.id === currentActivityId
+                  {chapter.activities.map((act: any) => {
+                    const isCurrent = cleanId(act.activity_uuid || act.id) === cleanId(currentActivityId)
+                    const actType = act.activity_type || act.type
                     return (
                       <div
-                        key={act.id}
+                        key={act.activity_uuid || act.id}
                         className="flex items-center gap-2.5 px-2 py-1.5 rounded text-sm cursor-pointer hover:bg-ui-bg-subtle"
                       >
                         {isCurrent ? (
                           <div className="w-3.5 h-3.5 rounded-full bg-black flex items-center justify-center shrink-0">
                             <div className="w-1.5 h-1.5 rounded-full bg-white" />
                           </div>
-                        ) : act.type === 'TYPE_SCORM' ? (
+                        ) : actType === 'TYPE_SCORM' ? (
                           <FileQuestion className="w-3.5 h-3.5 text-ui-fg-muted shrink-0" />
                         ) : (
                           <Circle className="w-3.5 h-3.5 text-ui-fg-muted shrink-0" />
@@ -301,9 +330,100 @@ function KnowledgeCheckCard({ question, answer }: { question: string; answer: st
   )
 }
 
-// ── Main Page ──
+// ── Activity Content Renderer ──
 
-export default function LessonPreviewPage() {
+function renderActivityContent(activity: any, courseuuid: string) {
+  const activityType = activity.activity_type
+  const subType = activity.activity_sub_type
+
+  switch (activityType) {
+    case 'TYPE_DYNAMIC':
+      if (subType === 'SUBTYPE_DYNAMIC_MARKDOWN') {
+        return <MarkdownActivity activity={activity} />
+      }
+      if (subType === 'SUBTYPE_DYNAMIC_EMBED') {
+        return <EmbedActivity activity={activity} />
+      }
+      return <MarkdownActivity activity={activity} />
+    case 'TYPE_VIDEO':
+      return <VideoActivity course={{ course_uuid: courseuuid }} activity={activity} />
+    case 'TYPE_DOCUMENT':
+      return <DocumentPdfActivity course={{ course_uuid: courseuuid }} activity={activity} />
+    case 'TYPE_ASSIGNMENT':
+      return <AssignmentStudentActivity />
+    case 'TYPE_SCORM':
+      return <ScormActivity course={{ course_uuid: courseuuid }} activity={activity} />
+    default:
+      return (
+        <div className="aspect-video bg-white rounded-xl flex items-center justify-center border border-gray-200">
+          <div className="text-center">
+            <Play className="w-12 h-12 text-ui-fg-muted mx-auto mb-2" />
+            <Text size="small" className="text-ui-fg-muted">Unsupported activity type</Text>
+          </div>
+        </div>
+      )
+  }
+}
+
+// ── Inner Content (has access to CourseProvider context) ──
+
+function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid: string; activityid: string; orgslug: string }) {
+  const course = useCourse()
+  const chapters = course.courseStructure?.chapters || []
+  const router = useRouter()
+  const session = useLHSession() as any
+  const access_token = session?.data?.tokens?.access_token
+
+  // Helper to clean activity UUID prefix
+  const cleanId = (id: string) => id?.replace('activity_', '').replace('act_', '')
+
+  // Flatten all activities and find current position
+  const allActivities = chapters.flatMap((ch: any) =>
+    (ch.activities || []).map((act: any) => ({
+      ...act,
+      activity_uuid: act.activity_uuid || act.id,
+      chapterName: ch.name,
+    }))
+  )
+
+  const currentIndex = allActivities.findIndex(
+    (act: any) => cleanId(act.activity_uuid) === cleanId(activityid)
+  )
+
+  const currentActivity = currentIndex >= 0 ? allActivities[currentIndex] : null
+  const prevActivity = currentIndex > 0 ? allActivities[currentIndex - 1] : null
+  const nextActivity = currentIndex < allActivities.length - 1 ? allActivities[currentIndex + 1] : null
+
+  const navigateTo = (act: any) => {
+    if (!act) return
+    const cleanUuid = cleanId(act.activity_uuid)
+    router.push(`?activityid=${cleanUuid}`)
+  }
+
+  // Auto-redirect to first real activity if current activityid doesn't match any
+  useEffect(() => {
+    if (chapters.length > 0 && !currentActivity && allActivities.length > 0) {
+      const firstAct = allActivities[0]
+      if (firstAct) {
+        const cleanUuid = cleanId(firstAct.activity_uuid)
+        router.replace(`?activityid=${cleanUuid}`)
+      }
+    }
+  }, [chapters, currentActivity, allActivities, router])
+
+  const handleMarkComplete = async () => {
+    if (!currentActivity || !access_token) return
+    try {
+      await markActivityAsComplete(orgslug, courseuuid, currentActivity.activity_uuid, access_token)
+      if (nextActivity) {
+        navigateTo(nextActivity)
+      }
+    } catch (e) {
+      console.error('Failed to mark activity as complete:', e)
+      toast.error('Failed to mark as complete')
+    }
+  }
+
   const [activeSection, setActiveSection] = useState('what-youll-learn')
 
   useEffect(() => {
@@ -330,7 +450,7 @@ export default function LessonPreviewPage() {
     <GeneralWrapperStyled>
       {/* ── PAGE TITLE ── */}
       <h1 className="text-3xl md:text-4xl font-semibold text-ui-fg-base leading-tight max-w-7xl mx-auto mt-4">
-        Welcome to the Course
+        {currentActivity?.name || 'Lesson'}
       </h1>
 
       {/* ── CONTENT (two-column layout) ── */}
@@ -362,15 +482,23 @@ export default function LessonPreviewPage() {
               </div>
             </section>
 
-            {/* Lesson Content (video) */}
+            {/* Lesson Content */}
             <section id="lesson-content" className="scroll-mt-24">
-              <Heading level="h1" className="!text-2xl mb-5 ml-1">Main Lesson Video</Heading>
-              <div className="aspect-video bg-white rounded-xl flex items-center justify-center border border-gray-200">
-                <div className="text-center">
-                  <Play className="w-12 h-12 text-ui-fg-muted mx-auto mb-2" />
-                  <Text size="small" className="text-ui-fg-muted">Video placeholder</Text>
+              <Heading level="h1" className="!text-2xl mb-5 ml-1">
+                {currentActivity?.activity_type === 'TYPE_VIDEO' ? 'Lesson Video' : 'Lesson Content'}
+              </Heading>
+              {currentActivity ? (
+                <Suspense fallback={<LoadingFallback />}>
+                  {renderActivityContent(currentActivity, courseuuid)}
+                </Suspense>
+              ) : (
+                <div className="aspect-video bg-white rounded-xl flex items-center justify-center border border-gray-200">
+                  <div className="text-center">
+                    <Play className="w-12 h-12 text-ui-fg-muted mx-auto mb-2" />
+                    <Text size="small" className="text-ui-fg-muted">No activity content available</Text>
+                  </div>
                 </div>
-              </div>
+              )}
             </section>
 
             {/* Lesson Summary */}
@@ -512,32 +640,67 @@ export default function LessonPreviewPage() {
             {/* What's Next */}
             <section id="whats-next" className="scroll-mt-24">
               <Heading level="h1" className="!text-2xl mb-5">Up Next</Heading>
-              <div className="border border-ui-bg-subtle rounded-lg p-5">
-                <div className="flex items-start gap-3">
-                  <BookOpen className="w-5 h-5 text-ui-fg-muted mt-0.5 shrink-0" />
-                  <div>
-                    <Text className="font-medium text-ui-fg-base mb-1">
-                      Design Principles Overview
-                    </Text>
-                    <Text size="small" className="text-ui-fg-subtle">
-                      In the next lesson, we will explore the core principles of visual design,
-                      including hierarchy, balance, contrast, and typography fundamentals.
-                    </Text>
+              {nextActivity ? (
+                <div
+                  className="border border-ui-bg-subtle rounded-lg p-5 cursor-pointer hover:bg-black/[0.02] transition-colors"
+                  onClick={() => navigateTo(nextActivity)}
+                >
+                  <div className="flex items-start gap-3">
+                    <BookOpen className="w-5 h-5 text-ui-fg-muted mt-0.5 shrink-0" />
+                    <div>
+                      <Text className="font-medium text-ui-fg-base mb-1">
+                        {nextActivity.name}
+                      </Text>
+                      <Text size="small" className="text-ui-fg-subtle">
+                        {nextActivity.description || `Continue to the next lesson in ${nextActivity.chapterName || 'this module'}.`}
+                      </Text>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="border border-ui-bg-subtle rounded-lg p-5">
+                  <div className="flex items-start gap-3">
+                    <BookOpen className="w-5 h-5 text-ui-fg-muted mt-0.5 shrink-0" />
+                    <div>
+                      <Text className="font-medium text-ui-fg-base mb-1">
+                        Course Complete
+                      </Text>
+                      <Text size="small" className="text-ui-fg-subtle">
+                        You have completed all lessons in this course.
+                      </Text>
+                    </div>
+                  </div>
+                </div>
+              )}
             </section>
 
             {/* Navigation Buttons */}
             <div className="flex items-center justify-between pt-4 border-t border-gray-200 scroll-mt-24">
-              <Button variant="ghost" size="small" className="gap-1.5">
+              <Button
+                variant="ghost"
+                size="small"
+                className="gap-1.5"
+                onClick={() => navigateTo(prevActivity)}
+                disabled={!prevActivity}
+              >
                 <ArrowLeft className="w-4 h-4" />
                 Previous
               </Button>
-              <Button variant="primary" size="small">
+              <Button
+                variant="primary"
+                size="small"
+                onClick={handleMarkComplete}
+                disabled={!currentActivity || !access_token}
+              >
                 Mark as Complete
               </Button>
-              <Button variant="ghost" size="small" className="gap-1.5">
+              <Button
+                variant="ghost"
+                size="small"
+                className="gap-1.5"
+                onClick={() => navigateTo(nextActivity)}
+                disabled={!nextActivity}
+              >
                 Next
                 <ArrowRight className="w-4 h-4" />
               </Button>
@@ -547,12 +710,33 @@ export default function LessonPreviewPage() {
           {/* ═══ RIGHT SIDEBAR ═══ */}
           <div className="w-full lg:w-72 xl:w-80 shrink-0">
             <div className="lg:sticky lg:top-8 space-y-4">
-              <CourseOutlineSidebar currentActivityId="act_1" />
+              <CourseOutlineSidebar currentActivityId={activityid} chapters={chapters} />
               <OnThisPageSidebar activeSection={activeSection} />
             </div>
           </div>
         </div>
       </div>
     </GeneralWrapperStyled>
+  )
+}
+
+// ── Main Page ──
+
+export default function LessonPreviewPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ orgslug: string; courseuuid: string }>
+  searchParams: Promise<{ activityid?: string }>
+}) {
+  const resolvedParams = use(params)
+  const resolvedSearchParams = use(searchParams)
+  const courseuuid = resolvedParams.courseuuid
+  const activityid = resolvedSearchParams.activityid || 'act_1'
+
+  return (
+    <CourseProvider courseuuid={courseuuid}>
+      <LessonPreviewContent courseuuid={courseuuid} activityid={activityid} orgslug={resolvedParams.orgslug} />
+    </CourseProvider>
   )
 }
