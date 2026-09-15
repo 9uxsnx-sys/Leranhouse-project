@@ -139,9 +139,6 @@ function EditCourseAccess(props: EditCourseAccessProps) {
 
     return (
         <div>
-            <div className="h-6" />
-            <div className="ml-10 mr-10 mx-auto bg-white rounded-xl shadow-xs">
-
                 {/* Header — matches OrgUsers header */}
                 <div className="px-6 py-5 border-b border-gray-100">
                     <h1 className="font-bold text-xl text-gray-800">
@@ -220,7 +217,6 @@ function EditCourseAccess(props: EditCourseAccessProps) {
 
                 {/* User groups (Users-table styled) */}
                 {isClientPublic === false && <UserGroupsSection usergroups={usergroups} />}
-            </div>
         </div>
     );
 }

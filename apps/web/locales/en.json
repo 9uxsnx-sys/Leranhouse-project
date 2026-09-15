@@ -373,10 +373,10 @@
     "deleting_course": "Deleting course...",
     "course_deleted_success": "Course deleted successfully",
     "course_deleted_error": "Failed to delete course",
-    "delete_course": "Delete Course",
+    "delete_course": "Delete",
     "failed_load_courses": "Failed to load courses",
     "start_learning": "Start Learning",
-    "edit_content": "Edit Content",
+    "edit_content": "Edit",
     "delete_course_confirm": "Are you sure you want to delete this course?",
     "delete_course_title": "Delete {{name}}?",
     "course_count": "{{count}} course",
@@ -447,7 +447,7 @@
     "contributor_application_success": "Your application to contribute has been submitted successfully",
     "contributor_application_error": "Failed to submit your application. Please try again later.",
     "contribute": "Contribute",
-    "clone_course": "Clone Course",
+    "clone_course": "Clone",
     "clone_course_title": "Clone \"{{name}}\"",
     "clone_course_confirm": "This will create a complete copy of the course including all chapters, activities, and files. The cloned course will be set to private.",
     "cloning_course": "Cloning course...",
@@ -468,7 +468,7 @@
     "delete_selected": "Delete Selected",
     "delete_selected_confirm": "This will permanently delete {{count}} course(s). This action cannot be undone. Continue?",
     "course_description_required": "Course description is required",
-    "export_course": "Export Course",
+    "export_course": "Export",
     "export_selected": "Export Selected",
     "exporting_course": "Exporting course...",
     "exporting_courses": "Exporting {{count}} course(s)...",
@@ -2064,6 +2064,13 @@
           "remove_success": "Certification removed successfully",
           "remove_error": "Failed to remove certification"
         }
+      },
+      "sidebar": {
+        "status": "Status",
+        "quick_actions": "Quick Actions",
+        "course_info": "Course Info",
+        "chapters": "Chapters",
+        "activities": "Activities"
       },
       "communities": {
         "title": "Communities",

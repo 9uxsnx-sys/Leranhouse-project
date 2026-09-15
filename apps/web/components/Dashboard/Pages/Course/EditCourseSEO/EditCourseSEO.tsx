@@ -196,9 +196,7 @@ function EditCourseSEO(props: EditCourseSEOProps) {
 
   return (
     <div>
-      <div className="h-6"></div>
-      <div className="mx-4 sm:mx-10 bg-white rounded-xl shadow-xs px-4 py-4">
-        <FormLayout onSubmit={formik.handleSubmit}>
+      <FormLayout onSubmit={formik.handleSubmit}>
             {error && (
               <div className="flex justify-center bg-red-200 rounded-md text-red-950 space-x-2 items-center p-4 mb-6 transition-all shadow-xs">
                 <AlertTriangle size={18} />
@@ -533,7 +531,6 @@ function EditCourseSEO(props: EditCourseSEOProps) {
               </div>
             </div>
           </FormLayout>
-      </div>
     </div>
   );
 }

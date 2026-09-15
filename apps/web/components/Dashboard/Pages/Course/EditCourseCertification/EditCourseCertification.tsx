@@ -289,8 +289,7 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
     <div>
       {courseStructure && (
         <div>
-          <div className="mx-4 sm:mx-10 bg-white rounded-xl shadow-xs px-4 py-4">
-            {/* Header Section */}
+          {/* Header Section */}
             <div className="flex items-center justify-between bg-gray-50 px-3 sm:px-5 py-3 rounded-md mb-3">
               <div className="flex flex-col -space-y-1">
                 <h1 className="font-bold text-lg sm:text-xl text-gray-800">{t('dashboard.courses.certification.title')}</h1>
@@ -521,7 +520,6 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
               </div>
             )}
           </div>
-        </div>
       )}
     </div>
   );

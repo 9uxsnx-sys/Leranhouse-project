@@ -174,11 +174,8 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
   }
 
   return (
-    <div className="h-full">
-      <div className="h-6" />
-      <div className="px-10 pb-10">
-        <div className="bg-white rounded-xl shadow-xs">
-          <FormLayout onSubmit={formik.handleSubmit} className="p-6">
+    <div>
+      <FormLayout onSubmit={formik.handleSubmit}>
             {error && (
               <div className="flex justify-center bg-red-200 rounded-md text-red-950 space-x-2 items-center p-4 mb-6 transition-all shadow-xs">
                 <AlertTriangle size={18} />
@@ -289,8 +286,6 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
             </div>
           </FormLayout>
         </div>
-      </div>
-    </div>
   );
 }
 
