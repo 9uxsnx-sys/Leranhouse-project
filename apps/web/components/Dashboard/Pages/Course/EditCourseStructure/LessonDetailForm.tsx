@@ -65,6 +65,9 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
     knowledgeChecks: JSON.stringify(initialMeta.knowledge_checks || []),
   })
 
+  // Ref to track latest values for flush-on-unmount
+  const latestValuesRef = useRef({ name: '', description: '', published: false, meta: {} as any })
+
   // Auto-save with debounce — saves to activity.content.description (no 'description' column on Activity model)
   useEffect(() => {
     const currentMeta = {
@@ -89,6 +92,9 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
       JSON.stringify(currentMeta.knowledge_checks) !== init.knowledgeChecks
 
     if (!nameChanged && !descChanged && !publishedChanged && !metaChanged) return
+
+    // Store latest values for flush-on-unmount
+    latestValuesRef.current = { name: currentName, description: currentDesc, published: currentPublished, meta: currentMeta }
 
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(async () => {
@@ -118,7 +124,25 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
     }, 600)
 
     return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
+      // Flush pending save on unmount instead of canceling
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+        const pending = latestValuesRef.current
+        const initVals = initialValuesRef.current
+        const data: any = {}
+        if (pending.name !== initVals.name) data.name = pending.name
+        if (pending.description !== initVals.description) data.content = { ...(activity.content || {}), description: pending.description }
+        if (pending.published !== initVals.published) data.published = pending.published
+        const metaChanged =
+          JSON.stringify(pending.meta.learning_objectives) !== initVals.learningObjectives ||
+          JSON.stringify(pending.meta.takeaways) !== initVals.takeaways ||
+          JSON.stringify(pending.meta.resources) !== initVals.resources ||
+          JSON.stringify(pending.meta.knowledge_checks) !== initVals.knowledgeChecks
+        if (metaChanged) data.extra_metadata = pending.meta
+        if (Object.keys(data).length > 0) {
+          updateActivity(data, activity.activity_uuid, access_token).catch(console.error)
+        }
+      }
     }
   }, [formik.values, learningObjectives, takeaways, resources, knowledgeChecks, published])
 
