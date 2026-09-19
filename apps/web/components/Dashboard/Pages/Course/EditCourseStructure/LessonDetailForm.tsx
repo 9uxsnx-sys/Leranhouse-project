@@ -10,8 +10,7 @@ import FormLayout, {
 } from '@components/Objects/StyledElements/Form/Form'
 import { updateActivity } from '@services/courses/activities'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useCourse } from '@components/Contexts/CourseContext'
-import { ArrowLeft, Plus, Trash2, Loader2 } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, Globe, EyeOff } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 type LessonDetailFormProps = {
@@ -25,9 +24,7 @@ type LessonDetailFormProps = {
 function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: LessonDetailFormProps) {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
-  const course = useCourse() as any
-  const withUnpublishedActivities = course?.withUnpublishedActivities || false
-  const [isSaving, setIsSaving] = useState(false)
+  const [published, setPublished] = useState(activity.published ?? false)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
 
   const initialMeta = activity.extra_metadata || {}
@@ -61,6 +58,7 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
   const initialValuesRef = useRef({
     name: activity.name || '',
     description: activity.content?.description || '',
+    published: activity.published ?? false,
     learningObjectives: JSON.stringify(initialMeta.learning_objectives || []),
     takeaways: JSON.stringify(initialMeta.takeaways || []),
     resources: JSON.stringify(initialMeta.resources || []),
@@ -78,25 +76,27 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
 
     const currentName = formik.values.name
     const currentDesc = formik.values.description
+    const currentPublished = published
     const init = initialValuesRef.current
 
     const nameChanged = currentName !== init.name
     const descChanged = currentDesc !== init.description
+    const publishedChanged = currentPublished !== init.published
     const metaChanged =
       JSON.stringify(currentMeta.learning_objectives) !== init.learningObjectives ||
       JSON.stringify(currentMeta.takeaways) !== init.takeaways ||
       JSON.stringify(currentMeta.resources) !== init.resources ||
       JSON.stringify(currentMeta.knowledge_checks) !== init.knowledgeChecks
 
-    if (!nameChanged && !descChanged && !metaChanged) return
+    if (!nameChanged && !descChanged && !publishedChanged && !metaChanged) return
 
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(async () => {
-      setIsSaving(true)
       try {
         const data: any = {}
         if (nameChanged) data.name = currentName
         if (descChanged) data.content = { ...(activity.content || {}), description: currentDesc }
+        if (publishedChanged) data.published = currentPublished
         if (metaChanged) data.extra_metadata = currentMeta
 
         if (Object.keys(data).length > 0) {
@@ -104,6 +104,7 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
           initialValuesRef.current = {
             name: currentName,
             description: currentDesc,
+            published: currentPublished,
             learningObjectives: JSON.stringify(currentMeta.learning_objectives),
             takeaways: JSON.stringify(currentMeta.takeaways),
             resources: JSON.stringify(currentMeta.resources),
@@ -113,15 +114,13 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
       } catch (e) {
         console.error('Failed to save lesson:', e)
         toast.error('Failed to save lesson')
-      } finally {
-        setIsSaving(false)
       }
     }, 600)
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
-  }, [formik.values, learningObjectives, takeaways, resources, knowledgeChecks])
+  }, [formik.values, learningObjectives, takeaways, resources, knowledgeChecks, published])
 
   // Helpers for array fields
   const addObjective = () => setLearningObjectives([...learningObjectives, ''])
@@ -195,11 +194,35 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
       <FormLayout onSubmit={formik.handleSubmit}>
         <div className="space-y-8">
           {/* Header */}
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900">Lesson Details</h2>
-            <p className="text-sm text-gray-500 mt-1">
-              Editing: {chapter.name || 'Untitled Module'}
-            </p>
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">Lesson Details</h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Editing: {chapter.name || 'Untitled Module'}
+              </p>
+            </div>
+            {/* Published toggle */}
+            <button
+              type="button"
+              onClick={() => setPublished(!published)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                published
+                  ? 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
+                  : 'bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-100'
+              }`}
+            >
+              {published ? (
+                <>
+                  <Globe size={14} />
+                  Published
+                </>
+              ) : (
+                <>
+                  <EyeOff size={14} />
+                  Unpublished
+                </>
+              )}
+            </button>
           </div>
 
           {/* Lesson Name */}
@@ -212,7 +235,6 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
                 value={formik.values.name}
                 type="text"
                 required
-                disabled={isSaving}
               />
             </Form.Control>
           </FormField>
@@ -225,18 +247,10 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
                 style={{ backgroundColor: 'white', height: '100px', minHeight: '100px' }}
                 onChange={formik.handleChange}
                 value={formik.values.description}
-                disabled={isSaving}
                 placeholder="Brief description of what this lesson covers"
               />
             </Form.Control>
           </FormField>
-
-          {isSaving && (
-            <div className="flex items-center gap-2 text-sm text-gray-400">
-              <Loader2 size={14} className="animate-spin" />
-              Saving...
-            </div>
-          )}
 
           {/* ═══ What You'll Learn ═══ */}
           <div className="border-t border-gray-200 pt-6">
