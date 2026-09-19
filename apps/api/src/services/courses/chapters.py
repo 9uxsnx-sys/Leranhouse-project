@@ -278,6 +278,7 @@ async def get_course_chapters(
                     Activity.current_version,
                     Activity.last_modified_by_id,
                     Activity.lock_type,
+                    Activity.extra_metadata,
                     ChapterActivity.order,
                 )
                 .join(Activity, Activity.id == ChapterActivity.activity_id)  # type: ignore
@@ -307,6 +308,7 @@ async def get_course_chapters(
                     a_version,
                     a_last_modified_by,
                     a_lock_type,
+                    a_extra_metadata,
                     _order,
                 ) = row
                 key = (chapter_id_val, a_id)
@@ -323,6 +325,7 @@ async def get_course_chapters(
                         activity_sub_type=a_sub_type,
                         content={},
                         details=None,
+                        extra_metadata=a_extra_metadata,
                         published=a_published,
                         activity_uuid=a_uuid,
                         creation_date=a_creation,

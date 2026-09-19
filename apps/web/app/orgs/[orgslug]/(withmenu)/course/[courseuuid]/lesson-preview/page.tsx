@@ -1,13 +1,13 @@
 'use client'
 
-import Link from 'next/link'
 import { useEffect, useRef, useState, use, lazy, Suspense } from 'react'
-import { getUriWithOrg } from '@services/config/config'
+import { getAPIUrl } from '@services/config/config'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
-import { CourseProvider, useCourse } from '@components/Contexts/CourseContext'
-import { useRouter } from 'next/navigation'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { markActivityAsComplete } from '@services/courses/activity'
+import { swrFetcher } from '@services/utils/ts/requests'
+import useSWR from 'swr'
+import PageLoading from '@components/Objects/Loaders/PageLoading'
 import toast from 'react-hot-toast'
 import {
   ChevronDown,
@@ -142,7 +142,7 @@ function ActivityIcon({ type, completed }: { type: string; completed?: boolean }
 
 // ── Course Outline Sidebar (accordion) ──
 
-function CourseOutlineSidebar({ currentActivityId, chapters }: { currentActivityId: string; chapters: any[] }) {
+function CourseOutlineSidebar({ currentActivityId, chapters, onNavigate }: { currentActivityId: string; chapters: any[]; onNavigate?: (activityId: string) => void }) {
   const [isOpen, setIsOpen] = useState(false)
 
   // Helper to clean activity UUID prefix
@@ -176,10 +176,12 @@ function CourseOutlineSidebar({ currentActivityId, chapters }: { currentActivity
       >
         <div className="min-w-0 flex-1 pr-2">
           <Text weight="plus" size="large" className="text-ui-fg-base truncate block">
-            {currentActivityName}
+            {currentActivityName || 'Course Outline'}
           </Text>
           <Text size="small" className="text-ui-fg-muted block mt-0.5">
-            Module {currentModuleIndex + 1} &middot; Lesson {currentLessonInModule} of {totalLessonsInModule}
+            {chapters.length > 0
+              ? `Module ${currentModuleIndex + 1} · Lesson ${currentLessonInModule} of ${totalLessonsInModule}`
+              : 'No modules loaded'}
           </Text>
         </div>
         <ChevronDown
@@ -198,6 +200,9 @@ function CourseOutlineSidebar({ currentActivityId, chapters }: { currentActivity
       >
         <div className="overflow-hidden">
           <div className="px-5 pb-4 space-y-4">
+            {chapters.length === 0 && (
+              <Text size="small" className="text-ui-fg-subtle italic">No modules available</Text>
+            )}
             {chapters.map((chapter: any, mi: number) => (
               <div key={chapter.chapter_uuid}>
                 <Text size="small" className="text-ui-fg-muted font-medium mb-1.5 block">
@@ -205,11 +210,13 @@ function CourseOutlineSidebar({ currentActivityId, chapters }: { currentActivity
                 </Text>
                 <div className="space-y-0.5">
                   {chapter.activities.map((act: any) => {
-                    const isCurrent = cleanId(act.activity_uuid || act.id) === cleanId(currentActivityId)
+                    const actId = cleanId(act.activity_uuid || act.id)
+                    const isCurrent = actId === cleanId(currentActivityId)
                     const actType = act.activity_type || act.type
                     return (
                       <div
                         key={act.activity_uuid || act.id}
+                        onClick={() => onNavigate?.(actId)}
                         className="flex items-center gap-2.5 px-2 py-1.5 rounded text-sm cursor-pointer hover:bg-ui-bg-subtle"
                       >
                         {isCurrent ? (
@@ -299,7 +306,7 @@ function KnowledgeCheckCard({ question, answer }: { question: string; answer: st
     <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] overflow-hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-5 py-3 text-left transition-colors hover:bg-black/[0.02]"
+        className="w-full flex items-center justify-between px-5 py-3 text-left transition-colors"
       >
         <Text weight="plus" size="base" className="text-ui-fg-base truncate pr-2">
           {question}
@@ -319,7 +326,7 @@ function KnowledgeCheckCard({ question, answer }: { question: string; answer: st
         )}
       >
         <div className="overflow-hidden">
-          <div className="px-5 pb-5">
+          <div className="px-5 pb-3">
             <Text size="base" className="text-ui-fg-subtle leading-relaxed">
               {answer}
             </Text>
@@ -365,19 +372,48 @@ function renderActivityContent(activity: any, courseuuid: string) {
   }
 }
 
-// ── Inner Content (has access to CourseProvider context) ──
+// ── Lesson Preview Content ──
 
 function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid: string; activityid: string; orgslug: string }) {
-  const course = useCourse()
-  const chapters = course.courseStructure?.chapters || []
-  const router = useRouter()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
+
+  // Fetch course data directly (not through CourseProvider) so we control
+  // loading / error states instead of showing a blank white page.
+  // Use with_unpublished_activities=false (default) since this is a
+  // student-facing page — only published activities should show up.
+  // NOTE: the API expects the course UUID with a "course_" prefix.
+  const courseUuidWithPrefix = `course_${courseuuid}`
+  const apiUrl = `${getAPIUrl()}courses/${courseUuidWithPrefix}/meta?with_unpublished_activities=false&slim=true`
+  // Use a stable key — only depend on session being ready, not on the token
+  // value itself, so SWR doesn't re-fetch every time the token changes.
+  // IMPORTANT: check that `session` is not null (context not yet initialized)
+  // otherwise SWR fires a fetch with no auth token, gets a 401, and caches
+  // that error permanently because the key doesn't change later.
+  const swrKey = session && session?.status !== 'loading' ? apiUrl : null
+  const { data: courseData, error, isLoading } = useSWR(
+    swrKey,
+    url => swrFetcher(url, access_token),
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 10000,
+      keepPreviousData: true,
+    }
+  )
+
+  const chapters = courseData?.chapters || []
+
+  // Log errors to console for debugging (doesn't affect hook order)
+  if (error) {
+    const errStatus = (error as any)?.status
+    const errDetail = (error as any)?.detail || error.message
+    console.error('[LessonPreview] Failed to fetch course meta:', { status: errStatus, detail: errDetail, courseuuid })
+  }
 
   // Helper to clean activity UUID prefix
   const cleanId = (id: string) => id?.replace('activity_', '').replace('act_', '')
 
-  // Flatten all activities and find current position
+  // Flatten all activities
   const allActivities = chapters.flatMap((ch: any) =>
     (ch.activities || []).map((act: any) => ({
       ...act,
@@ -386,8 +422,13 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
     }))
   )
 
+  // Use local state for the active activity ID so we NEVER trigger a full
+  // page navigation when switching between lessons. Initialized from the URL
+  // query param, but updated locally via setActiveActivityId.
+  const [activeActivityId, setActiveActivityId] = useState(() => activityid)
+
   const currentIndex = allActivities.findIndex(
-    (act: any) => cleanId(act.activity_uuid) === cleanId(activityid)
+    (act: any) => cleanId(act.activity_uuid) === cleanId(activeActivityId)
   )
 
   const currentActivity = currentIndex >= 0 ? allActivities[currentIndex] : null
@@ -396,8 +437,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
 
   const navigateTo = (act: any) => {
     if (!act) return
-    const cleanUuid = cleanId(act.activity_uuid)
-    router.push(`?activityid=${cleanUuid}`)
+    setActiveActivityId(cleanId(act.activity_uuid))
   }
 
   // Auto-redirect to first real activity if current activityid doesn't match any
@@ -405,11 +445,10 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
     if (chapters.length > 0 && !currentActivity && allActivities.length > 0) {
       const firstAct = allActivities[0]
       if (firstAct) {
-        const cleanUuid = cleanId(firstAct.activity_uuid)
-        router.replace(`?activityid=${cleanUuid}`)
+        setActiveActivityId(cleanId(firstAct.activity_uuid))
       }
     }
-  }, [chapters, currentActivity, allActivities, router])
+  }, [chapters, currentActivity, allActivities])
 
   const handleMarkComplete = async () => {
     if (!currentActivity || !access_token) return
@@ -446,6 +485,48 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
     return () => observer.disconnect()
   }, [])
 
+  // ── Loading / Error states (placed after all hooks so hook order is stable) ──
+  if (isLoading) {
+    return (
+      <GeneralWrapperStyled>
+        <PageLoading />
+      </GeneralWrapperStyled>
+    )
+  }
+
+  if (error) {
+    const errStatus = (error as any)?.status
+    const errDetail = (error as any)?.detail || error.message
+
+    if (errStatus === 403 || errStatus === 404) {
+      return (
+        <GeneralWrapperStyled>
+          <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+            <Text size="large" className="text-ui-fg-muted">Course not found</Text>
+            <Text size="small" className="text-ui-fg-subtle">This course may not exist or you may not have access to it.</Text>
+            <Button variant="primary" size="small" onClick={() => window.location.reload()}>
+              Refresh Page
+            </Button>
+          </div>
+        </GeneralWrapperStyled>
+      )
+    }
+
+    return (
+      <GeneralWrapperStyled>
+        <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+          <Text size="large" className="text-ui-fg-muted">Failed to load lesson</Text>
+          <Text size="small" className="text-ui-fg-subtle">
+            {errDetail ? `${errDetail}` : 'Please check your connection and try again.'}
+          </Text>
+          <Button variant="primary" size="small" onClick={() => window.location.reload()}>
+            Refresh Page
+          </Button>
+        </div>
+      </GeneralWrapperStyled>
+    )
+  }
+
   return (
     <GeneralWrapperStyled>
       {/* ── PAGE TITLE ── */}
@@ -467,17 +548,18 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
                   <Text size="base" className="text-ui-fg-muted">By the end of this lesson, you&apos;ll be able to</Text>
                 </div>
                 <ul className="mt-3 space-y-2 pl-3">
-                    {[
-                      'Understand the lesson structure and learning path',
-                    'Set up your design tools and workspace for this module',
-                    'Identify key concepts and terminology used in this lesson',
-                    'Apply the techniques demonstrated in the video to your own work',
-                  ].map((item, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <span className="text-ui-fg-muted shrink-0">&bull;</span>
-                      <Text size="base" className="text-[16px]">{item}</Text>
-                    </li>
-                  ))}
+                  {(currentActivity?.extra_metadata?.learning_objectives || []).length > 0
+                    ? currentActivity.extra_metadata.learning_objectives.map((item: string, idx: number) => (
+                        <li key={idx} className="flex items-start gap-2">
+                          <span className="text-ui-fg-muted shrink-0">&bull;</span>
+                          <Text size="base" className="text-[16px]">{item}</Text>
+                        </li>
+                      ))
+                    : (
+                      <li className="flex items-start gap-2">
+                        <Text size="base" className="text-ui-fg-subtle italic">No learning objectives set for this lesson.</Text>
+                      </li>
+                    )}
                 </ul>
               </div>
             </section>
@@ -501,140 +583,84 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
               )}
             </section>
 
-            {/* Lesson Summary */}
+            {/* Key Takeaways */}
             <section id="summary" className="scroll-mt-24">
               <Heading level="h1" className="!text-2xl mb-5 ml-1">Key Takeaways</Heading>
-              <ul className="space-y-4">
-                <li>
-                  <div className="flex items-start gap-2">
-                    <span className="text-ui-fg-muted shrink-0 mt-0.5">&bull;</span>
-                    <Text size="base" className="text-black text-[17px]">Course Structure &amp; Learning Path</Text>
-                  </div>
-                  <ul className="ml-6 mt-2 space-y-1.5">
-                    <li className="flex items-start gap-2">
-                      <span className="text-ui-fg-muted shrink-0">&bull;</span>
-                      <Text size="base" className="text-black text-[17px]">Six progressive modules building from fundamentals to advanced prototyping</Text>
+              {(currentActivity?.extra_metadata?.takeaways || []).length > 0 ? (
+                <ul className="space-y-4">
+                  {currentActivity.extra_metadata.takeaways.map((takeaway: { title: string; items: string[] }, idx: number) => (
+                    <li key={idx}>
+                      <div className="flex items-start gap-2">
+                        <span className="text-ui-fg-muted shrink-0 mt-0.5">&bull;</span>
+                        <Text size="base" className="text-black text-[17px]">{takeaway.title}</Text>
+                      </div>
+                      {takeaway.items && takeaway.items.length > 0 && (
+                        <ul className="ml-6 mt-2 space-y-1.5">
+                          {takeaway.items.map((item: string, iidx: number) => (
+                            <li key={iidx} className="flex items-start gap-2">
+                              <span className="text-ui-fg-muted shrink-0">&bull;</span>
+                              <Text size="base" className="text-black text-[17px]">{item}</Text>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-ui-fg-muted shrink-0">&bull;</span>
-                      <Text size="base" className="text-black text-[17px]">Each module follows a consistent video → exercise → resources → quiz rhythm</Text>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-ui-fg-muted shrink-0">&bull;</span>
-                      <Text size="base" className="text-black text-[17px]">Capstone project runs alongside with a deliverable due at the end of each module</Text>
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  <div className="flex items-start gap-2">
-                    <span className="text-ui-fg-muted shrink-0 mt-0.5">&bull;</span>
-                    <Text size="base" className="text-black text-[17px]">Design Tools &amp; Environment Setup</Text>
-                  </div>
-                  <ul className="ml-6 mt-2 space-y-1.5">
-                    <li className="flex items-start gap-2">
-                      <span className="text-ui-fg-muted shrink-0">&bull;</span>
-                      <Text size="base" className="text-black text-[17px]">Figma is the primary design tool with auto-layout and component-based architecture</Text>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-ui-fg-muted shrink-0">&bull;</span>
-                      <Text size="base" className="text-black text-[17px]">Notion for documenting design decisions and GitHub for version-controlling assets</Text>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-ui-fg-muted shrink-0">&bull;</span>
-                      <Text size="base" className="text-black text-[17px]">Standard 1440px artboard with a 12-column grid and 24px gutters as the baseline template</Text>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-ui-fg-muted shrink-0">&bull;</span>
-                      <Text size="base" className="text-black text-[17px]">Starter files and design system skeletons provided so you never start from scratch</Text>
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  <div className="flex items-start gap-2">
-                    <span className="text-ui-fg-muted shrink-0 mt-0.5">&bull;</span>
-                    <Text size="base" className="text-black text-[17px]">Core Design Principles Introduced</Text>
-                  </div>
-                  <ul className="ml-6 mt-2 space-y-1.5">
-                    <li className="flex items-start gap-2">
-                      <span className="text-ui-fg-muted shrink-0">&bull;</span>
-                      <Text size="base" className="text-black text-[17px]">Visual hierarchy directs user attention through size, color, contrast, and spacing</Text>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-ui-fg-muted shrink-0">&bull;</span>
-                      <Text size="base" className="text-black text-[17px]">Balance and alignment create order — symmetrical for formal, asymmetrical for modern</Text>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-ui-fg-muted shrink-0">&bull;</span>
-                      <Text size="base" className="text-black text-[17px]">Typography pairings and cohesive color palettes establish brand personality and tone</Text>
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  <div className="flex items-start gap-2">
-                    <span className="text-ui-fg-muted shrink-0 mt-0.5">&bull;</span>
-                    <Text size="base" className="text-black text-[17px]">Getting Help &amp; Staying on Track</Text>
-                  </div>
-                  <ul className="ml-6 mt-2 space-y-1.5">
-                    <li className="flex items-start gap-2">
-                      <span className="text-ui-fg-muted shrink-0">&bull;</span>
-                      <Text size="base" className="text-black text-[17px]">Community discussion board for sharing work, asking questions, and giving feedback</Text>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-ui-fg-muted shrink-0">&bull;</span>
-                      <Text size="base" className="text-black text-[17px]">Weekly live Q&amp;A sessions with instructors for personalized guidance and portfolio reviews</Text>
-                    </li>
-                  </ul>
-                </li>
-              </ul>
+                  ))}
+                </ul>
+              ) : (
+                <div className="ml-1">
+                  <Text size="base" className="text-ui-fg-subtle italic">No takeaways set for this lesson.</Text>
+                </div>
+              )}
             </section>
 
             {/* Downloadable Resources */}
             <section id="resources" className="scroll-mt-24">
               <Heading level="h1" className="!text-2xl mb-5">Resources</Heading>
-              <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] px-5 py-5">
-                <div className="flex flex-col gap-0.5">
-                  <Heading level="h2">What&apos;s included</Heading>
-                  <Text size="base" className="text-ui-fg-muted">Downloadable files and resources for this lesson</Text>
+              {(currentActivity?.extra_metadata?.resources || []).length > 0 ? (
+                <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] px-5 py-5">
+                  <div className="flex flex-col gap-0.5">
+                    <Heading level="h2">What&apos;s included</Heading>
+                    <Text size="base" className="text-ui-fg-muted">Downloadable files and resources for this lesson</Text>
+                  </div>
+                  <ul className="mt-3 space-y-3 pl-3">
+                    {currentActivity.extra_metadata.resources.map((resource: { name: string; url: string }, i: number) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <span className="text-ui-fg-muted shrink-0">&bull;</span>
+                        <Text size="base" className="text-[16px] flex-1">{resource.name}</Text>
+                        <a
+                          href={resource.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-ui-fg-muted hover:text-ui-fg-base shrink-0 mt-0.5"
+                        >
+                          <Download className="w-4 h-4" />
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul className="mt-3 space-y-3 pl-3">
-                  {[
-                    'Complete course syllabus with module breakdown and milestones',
-                    'Step-by-step tools setup checklist for the entire course',
-                    'Figma starter file with grid system and design tokens',
-                  ].map((name, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <span className="text-ui-fg-muted shrink-0">&bull;</span>
-                      <Text size="base" className="text-[16px] flex-1">{name}</Text>
-                      <button className="text-ui-fg-muted hover:text-ui-fg-base shrink-0 mt-0.5">
-                        <Download className="w-4 h-4" />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              ) : (
+                <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] px-5 py-5">
+                  <Text size="base" className="text-ui-fg-subtle italic">No resources set for this lesson.</Text>
+                </div>
+              )}
             </section>
 
             {/* Knowledge Check */}
             <section id="knowledge-check" className="scroll-mt-24">
               <Heading level="h1" className="!text-2xl mb-5">Quick Check</Heading>
-              <div className="space-y-2.5">
-                {[
-                  {
-                    q: 'What is the primary purpose of visual hierarchy in UI design?',
-                    a: 'Visual hierarchy guides the user\'s attention to the most important elements on the page first. By using size, color, contrast, and spacing strategically, designers can create a clear path for the eye to follow, making interfaces easier to scan and understand without overwhelming the user.',
-                  },
-                  {
-                    q: 'Why is color theory important in digital design?',
-                    a: 'Color theory helps designers create cohesive and accessible interfaces. Understanding color relationships — complementary, analogous, and triadic schemes — allows designers to evoke specific emotions, establish brand identity, and ensure sufficient contrast for readability and accessibility compliance (WCAG).',
-                  },
-                  {
-                    q: 'How does typography affect user experience?',
-                    a: 'Typography directly impacts readability, hierarchy, and brand perception. Choosing the right typeface, establishing a clear type scale, and maintaining consistent line heights and spacing ensures that content is legible across devices. Good typography also sets the tone of the product — whether professional, playful, or minimalist.',
-                  },
-                ].map((item, i) => (
-                  <KnowledgeCheckCard key={i} question={item.q} answer={item.a} />
-                ))}
-              </div>
+              {(currentActivity?.extra_metadata?.knowledge_checks || []).length > 0 ? (
+                <div className="space-y-2.5">
+                  {currentActivity.extra_metadata.knowledge_checks.map((item: { question: string; answer: string }, i: number) => (
+                    <KnowledgeCheckCard key={i} question={item.question} answer={item.answer} />
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] px-5 py-5">
+                  <Text size="base" className="text-ui-fg-subtle italic">No knowledge checks set for this lesson.</Text>
+                </div>
+              )}
             </section>
 
             {/* What's Next */}
@@ -710,7 +736,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
           {/* ═══ RIGHT SIDEBAR ═══ */}
           <div className="w-full lg:w-72 xl:w-80 shrink-0">
             <div className="lg:sticky lg:top-8 space-y-4">
-              <CourseOutlineSidebar currentActivityId={activityid} chapters={chapters} />
+              <CourseOutlineSidebar currentActivityId={activeActivityId} chapters={chapters} onNavigate={(id) => setActiveActivityId(id)} />
               <OnThisPageSidebar activeSection={activeSection} />
             </div>
           </div>
@@ -735,8 +761,6 @@ export default function LessonPreviewPage({
   const activityid = resolvedSearchParams.activityid || 'act_1'
 
   return (
-    <CourseProvider courseuuid={courseuuid}>
-      <LessonPreviewContent courseuuid={courseuuid} activityid={activityid} orgslug={resolvedParams.orgslug} />
-    </CourseProvider>
+    <LessonPreviewContent courseuuid={courseuuid} activityid={activityid} orgslug={resolvedParams.orgslug} />
   )
 }
