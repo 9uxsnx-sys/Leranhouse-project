@@ -111,13 +111,27 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
     }
   }, [formik.values, formik.initialValues])
 
+  const refreshCourseData = async () => {
+    try {
+      const key = getCourseMetaCacheKey(course_uuid, withUnpublishedActivities)
+      const response = await fetch(key, {
+        headers: access_token ? { Authorization: `Bearer ${access_token}` } : {},
+      })
+      if (response.ok) {
+        const freshData = await response.json()
+        await mutate(key, freshData, { revalidate: false })
+      }
+    } catch (e) {
+      console.error('Failed to refresh course data:', e)
+    }
+  }
+
   const handleDeleteActivity = async (activity: any) => {
     if (!access_token) return
     setIsDeletingActivity(activity.activity_uuid)
     try {
       await deleteActivity(activity.activity_uuid, access_token)
-      await revalidateTags(['courses'], orgslug)
-      await mutate(getCourseMetaCacheKey(course_uuid, withUnpublishedActivities), undefined, { revalidate: true })
+      await refreshCourseData()
       toast.success('Lesson deleted')
     } catch (e) {
       toast.error('Failed to delete lesson')
@@ -138,8 +152,7 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
         content: {},
       }
       await createActivity(activityData, chapter.id, org.id, access_token)
-      await revalidateTags(['courses'], orgslug)
-      await mutate(getCourseMetaCacheKey(course_uuid, withUnpublishedActivities), undefined, { revalidate: true })
+      await refreshCourseData()
       toast.success('Lesson created')
       setShowNewLessonModal(false)
     } catch (e) {
