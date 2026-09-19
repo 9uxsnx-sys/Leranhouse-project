@@ -10,9 +10,7 @@ import FormLayout, {
 } from '@components/Objects/StyledElements/Form/Form'
 import { updateActivity } from '@services/courses/activities'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useCourse, getCourseMetaCacheKey } from '@components/Contexts/CourseContext'
-import { mutate } from 'swr'
-import { revalidateTags } from '@services/utils/ts/requests'
+import { useCourse } from '@components/Contexts/CourseContext'
 import { ArrowLeft, Plus, Trash2, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -35,10 +33,11 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
   const initialMeta = activity.extra_metadata || {}
 
   // Formik for name + description
+  // Note: activity model has no 'description' column — it's stored in activity.content.description
   const formik = useFormik({
     initialValues: {
       name: activity.name || '',
-      description: activity.description || '',
+      description: activity.content?.description || '',
     },
     onSubmit: async () => {},
     enableReinitialize: true,
@@ -61,14 +60,14 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
   // Track initial values for change detection
   const initialValuesRef = useRef({
     name: activity.name || '',
-    description: activity.description || '',
+    description: activity.content?.description || '',
     learningObjectives: JSON.stringify(initialMeta.learning_objectives || []),
     takeaways: JSON.stringify(initialMeta.takeaways || []),
     resources: JSON.stringify(initialMeta.resources || []),
     knowledgeChecks: JSON.stringify(initialMeta.knowledge_checks || []),
   })
 
-  // Auto-save with debounce
+  // Auto-save with debounce — saves to activity.content.description (no 'description' column on Activity model)
   useEffect(() => {
     const currentMeta = {
       learning_objectives: learningObjectives,
@@ -97,7 +96,7 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
       try {
         const data: any = {}
         if (nameChanged) data.name = currentName
-        if (descChanged) data.description = currentDesc
+        if (descChanged) data.content = { ...(activity.content || {}), description: currentDesc }
         if (metaChanged) data.extra_metadata = currentMeta
 
         if (Object.keys(data).length > 0) {
@@ -110,8 +109,6 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
             resources: JSON.stringify(currentMeta.resources),
             knowledgeChecks: JSON.stringify(currentMeta.knowledge_checks),
           }
-          await revalidateTags(['courses'], orgslug)
-          await mutate(getCourseMetaCacheKey(course_uuid, withUnpublishedActivities), undefined, { revalidate: true })
         }
       } catch (e) {
         console.error('Failed to save lesson:', e)
