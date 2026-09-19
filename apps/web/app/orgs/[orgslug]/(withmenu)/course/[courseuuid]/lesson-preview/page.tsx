@@ -466,21 +466,46 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
   const [activeSection, setActiveSection] = useState('what-youll-learn')
 
   useEffect(() => {
+    const sectionIds = MOCK_SECTIONS.map(s => s.id)
+    const SENTINEL_ID = 'page-end-sentinel'
+
     const observer = new IntersectionObserver(
       (entries) => {
+        let bestId = ''
+        let minDist = Infinity
+        let sentinelVisible = false
+
         for (const entry of entries) {
+          if (entry.target.id === SENTINEL_ID) {
+            if (entry.isIntersecting) sentinelVisible = true
+            continue
+          }
+
           if (entry.isIntersecting) {
-            setActiveSection(entry.target.id)
+            const dist = Math.abs(entry.boundingClientRect.top)
+            if (dist < minDist) {
+              minDist = dist
+              bestId = entry.target.id
+            }
           }
         }
+
+        if (sentinelVisible) {
+          setActiveSection(sectionIds[sectionIds.length - 1])
+        } else if (bestId) {
+          setActiveSection(bestId)
+        }
       },
-      { rootMargin: '-80px 0px -60% 0px' }
+      { rootMargin: '-80px 0px -20% 0px' }
     )
 
-    MOCK_SECTIONS.forEach((s) => {
-      const el = document.getElementById(s.id)
+    sectionIds.forEach((id) => {
+      const el = document.getElementById(id)
       if (el) observer.observe(el)
     })
+
+    const sentinel = document.getElementById(SENTINEL_ID)
+    if (sentinel) observer.observe(sentinel)
 
     return () => observer.disconnect()
   }, [])
@@ -731,6 +756,11 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
+
+            {/* bottom sentinel for IntersectionObserver — tells the
+                "On This Page" sidebar to highlight the last section
+                when the user has scrolled to the bottom */}
+            <div id="page-end-sentinel" className="h-1" />
           </div>
 
           {/* ═══ RIGHT SIDEBAR ═══ */}
