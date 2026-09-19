@@ -147,11 +147,14 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
       const org = await getOrganizationContextInfoWithoutCredentials(orgslug, { revalidate: 1800 })
       const activityData = {
         name: values.name,
-        description: values.description || '',
+        chapter_id: chapter.id,
         activity_type: 'TYPE_DYNAMIC',
-        content: {},
+        content: { description: values.description || '' },
       }
-      await createActivity(activityData, chapter.id, org.id, access_token)
+      const result = await createActivity(activityData, chapter.id, org.id, access_token)
+      if (!result || result.detail) {
+        throw new Error(result?.detail?.[0]?.msg || 'API error')
+      }
       await refreshCourseData()
       toast.success('Lesson created')
       setShowNewLessonModal(false)
