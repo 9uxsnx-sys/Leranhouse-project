@@ -155,10 +155,13 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
 
       <div className="space-y-1.5">
         {chapters.map((chapter: any, index: number) => (
-          <button
+          <div
             key={chapter.chapter_uuid}
             onClick={() => handleModuleClick(index)}
-            className="w-full text-left px-4 py-3 rounded-lg border border-gray-100 bg-white hover:border-gray-200 transition-colors flex items-center justify-between group"
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleModuleClick(index); }}
+            role="button"
+            tabIndex={0}
+            className="w-full text-left px-4 py-3 rounded-lg border border-gray-100 bg-white hover:border-gray-200 transition-colors flex items-center justify-between group cursor-pointer"
           >
             <div className="flex items-center gap-3 min-w-0">
               <BookOpen size={18} className="text-gray-400 flex-shrink-0" />
@@ -172,13 +175,13 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
               </div>
             </div>
             <button
-              onClick={(e) => handleDeleteModule(chapter.id, index, e)}
+              onClick={(e) => { e.stopPropagation(); handleDeleteModule(chapter.id, index, e); }}
               className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all p-1.5 rounded hover:bg-red-50 flex-shrink-0"
               title="Delete module"
             >
               <Trash2 size={14} />
             </button>
-          </button>
+          </div>
         ))}
 
         {chapters.length === 0 && (

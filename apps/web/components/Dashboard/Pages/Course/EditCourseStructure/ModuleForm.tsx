@@ -234,10 +234,13 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
                   const typeInfo = getTypeConfig(activity.activity_type)
                   const TypeIcon = typeInfo.Icon
                   return (
-                    <button
+                    <div
                       key={activity.activity_uuid}
                       onClick={() => onLessonClick(activity)}
-                      className="w-full text-left flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 transition-colors group"
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onLessonClick(activity); }}
+                      role="button"
+                      tabIndex={0}
+                      className="w-full text-left flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 transition-colors group cursor-pointer"
                     >
                       <div className={`p-1.5 rounded-md ${typeInfo.color}`}>
                         <TypeIcon size={16} />
@@ -266,7 +269,7 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
                           <Trash2 size={14} />
                         )}
                       </button>
-                    </button>
+                    </div>
                   )
                 })}
               </div>
