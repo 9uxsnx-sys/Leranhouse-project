@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, memo, useCallback, useMemo, lazy, Suspense } from 'react';
-import { Plus, X, Link as LinkIcon, ExternalLink, GripVertical } from 'lucide-react';
+import { Plus, X, GripVertical } from 'lucide-react';
 const Picker = lazy(() => import('@emoji-mart/react'));
 
 interface LearningItem {
@@ -36,12 +36,10 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
   const items = useMemo(() => parseItems(value), [value]);
 
   const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null);
-  const [expandedLink, setExpandedLink] = useState<string | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
 
   const pickerRef = useRef<HTMLDivElement>(null);
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
-  const linkInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const commit = useCallback((next: LearningItem[]) => {
     onChange(JSON.stringify(next));
@@ -65,15 +63,6 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
     commit(items.map(it => it.id === id ? { ...it, emoji } : it));
     setShowEmojiPicker(null);
     setTimeout(() => inputRefs.current[id]?.focus(), 0);
-  }, [items, commit]);
-
-  const updateLink = useCallback((id: string, link: string) => {
-    commit(items.map(it => it.id === id ? { ...it, link } : it));
-  }, [items, commit]);
-
-  const clearLink = useCallback((id: string) => {
-    commit(items.map(it => it.id === id ? { ...it, link: '' } : it));
-    setExpandedLink(null);
   }, [items, commit]);
 
   // Close emoji picker when clicking outside
@@ -114,7 +103,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
 
   return (
     <div className="space-y-1.5">
-      <div className="rounded-xl border border-gray-200 bg-white divide-y divide-gray-100">
+      <div className="rounded-xl border border-gray-200 bg-ui-bg-field">
         {isEmpty && (
           <div className="px-4 py-8 text-center">
             <div className="text-sm text-gray-400 mb-1">No learning objectives yet</div>
@@ -127,7 +116,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
           return (
             <div
               key={item.id}
-              className={`group relative ${isDragging ? 'opacity-40' : ''}`}
+              className={`group relative border-b border-gray-200 ${isDragging ? 'opacity-40' : ''}`}
               onDragOver={onDragOver}
               onDrop={onDrop(item.id)}
             >
@@ -183,80 +172,18 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
                   className="flex-1 min-w-0 text-sm text-gray-700 bg-transparent border-none outline-none placeholder:text-gray-300 py-1"
                 />
 
-                {/* Link chip (when link is set) */}
-                {item.link && expandedLink !== item.id && (
-                  <button
-                    type="button"
-                    onClick={() => setExpandedLink(item.id)}
-                    className="flex items-center gap-1 text-[11px] text-blue-600 bg-blue-50 hover:bg-blue-100 px-2 py-1 rounded-full shrink-0 transition-colors"
-                    title={item.link}
-                  >
-                    <ExternalLink size={10} />
-                    <span className="max-w-[96px] truncate">{item.link.replace(/^https?:\/\//, '')}</span>
-                  </button>
-                )}
-
                 {/* Action buttons — always visible but muted */}
                 <div className="flex items-center gap-0.5 shrink-0">
-                  {!item.link && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setExpandedLink(expandedLink === item.id ? null : item.id);
-                        setTimeout(() => linkInputRefs.current[item.id]?.focus(), 0);
-                      }}
-                      className="p-1.5 text-gray-300 hover:text-blue-500 hover:bg-blue-50 rounded transition-colors"
-                      title="Add link"
-                    >
-                      <LinkIcon size={13} />
-                    </button>
-                  )}
                   <button
                     type="button"
                     onClick={() => removeItem(item.id)}
-                    className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
                     title="Remove"
                   >
                     <X size={13} />
                   </button>
                 </div>
               </div>
-
-              {/* Inline link editor */}
-              {expandedLink === item.id && (
-                <div className="px-12 pb-2.5 -mt-0.5">
-                  <div className="flex items-center gap-2 bg-gray-50 rounded-md px-2.5 py-1.5 border border-gray-100">
-                    <LinkIcon size={12} className="text-gray-400 shrink-0" />
-                    <input
-                      ref={(el) => { linkInputRefs.current[item.id] = el; }}
-                      type="url"
-                      value={item.link || ''}
-                      onChange={(e) => updateLink(item.id, e.target.value)}
-                      onBlur={() => { if (!item.link) setExpandedLink(null); }}
-                      placeholder="https://..."
-                      className="flex-1 text-xs text-gray-700 bg-transparent border-none outline-none placeholder:text-gray-300"
-                      autoFocus
-                    />
-                    {item.link ? (
-                      <button
-                        type="button"
-                        onClick={() => clearLink(item.id)}
-                        className="text-[10px] text-gray-400 hover:text-red-500 transition-colors shrink-0"
-                      >
-                        Remove
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => setExpandedLink(null)}
-                        className="text-[10px] text-gray-400 hover:text-gray-600 transition-colors shrink-0"
-                      >
-                        Close
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
           );
         })}

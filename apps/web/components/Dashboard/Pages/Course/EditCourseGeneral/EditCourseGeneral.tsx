@@ -2,8 +2,6 @@
 import FormLayout, {
   FormField,
   FormLabelAndMessage,
-  Input,
-  Textarea,
 } from '@components/Objects/StyledElements/Form/Form';
 import { useFormik } from 'formik';
 import { AlertTriangle } from 'lucide-react';
@@ -11,16 +9,20 @@ import * as Form from '@radix-ui/react-form';
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import ThumbnailUpdate from './ThumbnailUpdate';
 import { useCourseFieldSync } from '@components/Contexts/CourseContext';
-import FormTagInput from '@components/Objects/StyledElements/Form/TagInput';
 import LearningItemsList from './LearningItemsList';
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { useTranslation } from 'react-i18next';
+import { SafeImage } from '@components/Objects/SafeImage';
 import {
   CustomSelect,
-  CustomSelectContent,
-  CustomSelectItem,
   CustomSelectTrigger,
   CustomSelectValue,
-} from "./CustomSelect";
-import { useTranslation } from 'react-i18next';
+  CustomSelectContent,
+  CustomSelectItem,
+} from './CustomSelect';
 
 type EditCourseStructureProps = {
   orgslug: string
@@ -63,8 +65,26 @@ const validate = (values: any, t: any) => {
     }
   }
 
+  // Validate requirements items (optional field, but if items exist, they must have text)
+  if (values.meta_requirements) {
+    try {
+      const reqItems = JSON.parse(values.meta_requirements);
+      if (Array.isArray(reqItems)) {
+        const hasEmptyText = reqItems.some(item => !item.text || item.text.trim() === '');
+        if (hasEmptyText) {
+          errors.meta_requirements = 'All requirement items must have text';
+        }
+      }
+    } catch (e) {
+      // ignore parse errors
+    }
+  }
+
   return errors;
 };
+
+const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none";
+const selectTriggerClassName = "w-full bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none data-[state=open]:!shadow-none transition-none";
 
 function EditCourseGeneral(props: EditCourseStructureProps) {
   const { t } = useTranslation()
@@ -111,6 +131,35 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
     }
   }, []);
 
+  const initializeRequirements = useCallback((requirements: any) => {
+    if (!requirements) {
+      return JSON.stringify([{ id: 'default-1', text: '', emoji: '📝' }]);
+    }
+    try {
+      const parsed = JSON.parse(requirements);
+      if (Array.isArray(parsed)) {
+        return requirements;
+      }
+      if (typeof requirements === 'string') {
+        return JSON.stringify([{
+          id: 'default-1',
+          text: requirements,
+          emoji: '📝'
+        }]);
+      }
+      return JSON.stringify([{ id: 'default-1', text: '', emoji: '📝' }]);
+    } catch (e) {
+      if (typeof requirements === 'string') {
+        return JSON.stringify([{
+          id: 'default-1',
+          text: requirements,
+          emoji: '📝'
+        }]);
+      }
+      return JSON.stringify([{ id: 'default-1', text: '', emoji: '📝' }]);
+    }
+  }, []);
+
   // Memoize initial values to prevent unnecessary recalculations
   const initialValues = useMemo(() => {
     const thumbnailType = courseStructure?.thumbnail_type || 'image';
@@ -120,7 +169,6 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
       description: courseStructure?.description || '',
       about: courseStructure?.about || '',
       learnings: initializeLearnings(courseStructure?.learnings || ''),
-      tags: courseStructure?.tags || '',
       public: courseStructure?.public || false,
       thumbnail_type: thumbnailType,
       // extra_metadata fields
@@ -129,14 +177,14 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
       meta_video_hours: meta.video_hours || '',
       meta_resources_count: meta.resources_count || '',
       meta_has_certificate: meta.has_certificate || false,
-      meta_requirements: meta.requirements || '',
+      meta_requirements: initializeRequirements(meta.requirements),
       meta_instructor_name: meta.instructor?.name || '',
       meta_instructor_title: meta.instructor?.title || '',
       meta_instructor_bio: meta.instructor?.bio || '',
     };
   }, [courseStructure?.name, courseStructure?.description, courseStructure?.about,
-      courseStructure?.learnings, courseStructure?.tags, courseStructure?.public,
-      courseStructure?.thumbnail_type, courseStructure?.extra_metadata, initializeLearnings]);
+      courseStructure?.learnings, courseStructure?.public,
+      courseStructure?.thumbnail_type, courseStructure?.extra_metadata, initializeLearnings, initializeRequirements]);
 
   const formik = useFormik({
     initialValues,
@@ -215,207 +263,213 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
               </div>
             )}
 
-            <div className="space-y-6">
-              <FormField name="name">
-                <FormLabelAndMessage label={t('dashboard.courses.general.form.name_label')} message={formik.errors.name} />
-                <Form.Control asChild>
-                  <Input
-                    style={{ backgroundColor: 'white' }}
-                    onChange={formik.handleChange}
-                    value={formik.values.name}
-                    type="text"
-                    required
-                    disabled={isSaving}
-                  />
-                </Form.Control>
-              </FormField>
-
-              <FormField name="description">
-                <FormLabelAndMessage label={t('dashboard.courses.general.form.description_label')} message={formik.errors.description} />
-                <Form.Control asChild>
-                  <Input
-                    style={{ backgroundColor: 'white' }}
-                    onChange={formik.handleChange}
-                    value={formik.values.description}
-                    type="text"
-                    required
-                    disabled={isSaving}
-                  />
-                </Form.Control>
-              </FormField>
-
-              <FormField name="about">
-                <FormLabelAndMessage label={t('dashboard.courses.general.form.about_label')} message={formik.errors.about} />
-                <Form.Control asChild>
-                  <Textarea
-                    style={{ backgroundColor: 'white', height: '200px', minHeight: '200px' }}
-                    onChange={formik.handleChange}
-                    value={formik.values.about}
-                    required
-                    disabled={isSaving}
-                  />
-                </Form.Control>
-              </FormField>
-
-              <FormField name="learnings">
-                <FormLabelAndMessage label={t('dashboard.courses.general.form.learnings_label')} message={formik.touched.learnings ? formik.errors.learnings : undefined} />
-                <Form.Control asChild>
-                  <LearningItemsList
-                    value={formik.values.learnings}
-                    onChange={(value) => {
-                      formik.setFieldTouched('learnings', true, false)
-                      formik.setFieldValue('learnings', value)
-                    }}
-                    error={formik.touched.learnings ? formik.errors.learnings : undefined}
-                  />
-                </Form.Control>
-              </FormField>
-
-              <FormField name="tags">
-                <FormLabelAndMessage label={t('dashboard.courses.general.form.tags_label')} message={formik.errors.tags} />
-                <Form.Control asChild>
-                  <FormTagInput
-                    placeholder={t('dashboard.courses.general.form.tags_placeholder')}
-                    onChange={(value) => formik.setFieldValue('tags', value)}
-                    value={formik.values.tags}
-                  />
-                </Form.Control>
-              </FormField>
-
-              <FormField name="thumbnail_type">
-                <FormLabelAndMessage label={t('dashboard.courses.general.form.thumbnail_type_label')} />
-                <Form.Control asChild>
-                  <CustomSelect
-                    value={formik.values.thumbnail_type}
-                    onValueChange={(value) => {
-                      if (!value) return;
-                      formik.setFieldValue('thumbnail_type', value);
-                    }}
-                    disabled={isSaving}
-                  >
-                    <CustomSelectTrigger className="w-full bg-white">
-                      <CustomSelectValue>
-                        {formik.values.thumbnail_type === 'image' ? t('dashboard.courses.general.form.thumbnail_type_image') :
-                         formik.values.thumbnail_type === 'video' ? t('dashboard.courses.general.form.thumbnail_type_video') :
-                         formik.values.thumbnail_type === 'both' ? t('dashboard.courses.general.form.thumbnail_type_both') : t('dashboard.courses.general.form.thumbnail_type_image')}
-                      </CustomSelectValue>
-                    </CustomSelectTrigger>
-                    <CustomSelectContent>
-                      <CustomSelectItem value="image">{t('dashboard.courses.general.form.thumbnail_type_image')}</CustomSelectItem>
-                      <CustomSelectItem value="video">{t('dashboard.courses.general.form.thumbnail_type_video')}</CustomSelectItem>
-                      <CustomSelectItem value="both">{t('dashboard.courses.general.form.thumbnail_type_both')}</CustomSelectItem>
-                    </CustomSelectContent>
-                  </CustomSelect>
-                </Form.Control>
-              </FormField>
-
-              <FormField name="thumbnail">
-                <FormLabelAndMessage label={t('dashboard.courses.general.form.thumbnail_label')} />
-                <Form.Control asChild>
-                  <ThumbnailUpdate thumbnailType={formik.values.thumbnail_type} />
-                </Form.Control>
-              </FormField>
-
-              {/* ── Course Metadata (extra_metadata) ── */}
-              <div className="border-t border-gray-200 pt-6 mt-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Course Metadata</h3>
-                <p className="text-sm text-gray-500 mb-6">These fields appear on the public course page (stats, sidebar, instructor card).</p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField name="meta_difficulty">
-                    <FormLabelAndMessage label="Difficulty" />
-                    <select
-                      id="meta_difficulty"
-                      name="meta_difficulty"
-                      className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/5"
-                      onChange={formik.handleChange}
-                      value={formik.values.meta_difficulty}
-                      disabled={isSaving}
-                    >
-                      <option value="">Select difficulty</option>
-                      <option value="Beginner">Beginner</option>
-                      <option value="Intermediate">Intermediate</option>
-                      <option value="Advanced">Advanced</option>
-                    </select>
-                  </FormField>
-
-                  <FormField name="meta_duration">
-                    <FormLabelAndMessage label="Duration (e.g. '6 hours')" />
+            <div className="space-y-8">
+              {/* ── BASIC INFORMATION ── */}
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Basic Information</h3>
+                <div className="space-y-4">
+                  <FormField name="name">
+                    <FormLabelAndMessage label={t('dashboard.courses.general.form.name_label')} message={formik.errors.name} />
                     <Form.Control asChild>
                       <Input
-                        style={{ backgroundColor: 'white' }}
+                        className={fieldClassName}
                         onChange={formik.handleChange}
-                        value={formik.values.meta_duration}
+                        value={formik.values.name}
                         type="text"
+                        required
                         disabled={isSaving}
                       />
                     </Form.Control>
                   </FormField>
 
-                  <FormField name="meta_video_hours">
-                    <FormLabelAndMessage label="Video Hours" />
+                  <FormField name="description">
+                    <FormLabelAndMessage label={t('dashboard.courses.general.form.description_label')} message={formik.errors.description} />
                     <Form.Control asChild>
                       <Input
-                        style={{ backgroundColor: 'white' }}
+                        className={fieldClassName}
                         onChange={formik.handleChange}
-                        value={formik.values.meta_video_hours}
+                        value={formik.values.description}
                         type="text"
+                        required
                         disabled={isSaving}
                       />
                     </Form.Control>
                   </FormField>
 
-                  <FormField name="meta_resources_count">
-                    <FormLabelAndMessage label="Number of Resources" />
+                  <FormField name="about">
+                    <FormLabelAndMessage label={t('dashboard.courses.general.form.about_label')} message={formik.errors.about} />
                     <Form.Control asChild>
-                      <Input
-                        style={{ backgroundColor: 'white' }}
+                      <Textarea
+                        className={`${fieldClassName} min-h-[200px]`}
                         onChange={formik.handleChange}
-                        value={formik.values.meta_resources_count}
-                        type="text"
+                        value={formik.values.about}
+                        required
                         disabled={isSaving}
                       />
+                    </Form.Control>
+                  </FormField>
+
+                  <FormField name="learnings">
+                    <FormLabelAndMessage label={t('dashboard.courses.general.form.learnings_label')} message={formik.touched.learnings ? formik.errors.learnings : undefined} />
+                    <Form.Control asChild>
+                      <LearningItemsList
+                        value={formik.values.learnings}
+                        onChange={(value) => {
+                          formik.setFieldTouched('learnings', true, false)
+                          formik.setFieldValue('learnings', value)
+                        }}
+                        error={formik.touched.learnings ? formik.errors.learnings : undefined}
+                      />
+                    </Form.Control>
+                  </FormField>
+
+                  <FormField name="meta_requirements">
+                    <FormLabelAndMessage label="Requirements" message={formik.touched.meta_requirements ? formik.errors.meta_requirements : undefined} />
+                    <Form.Control asChild>
+                      <LearningItemsList
+                        value={formik.values.meta_requirements}
+                        onChange={(value) => {
+                          formik.setFieldTouched('meta_requirements', true, false)
+                          formik.setFieldValue('meta_requirements', value)
+                        }}
+                        error={formik.touched.meta_requirements ? formik.errors.meta_requirements : undefined}
+                      />
+                    </Form.Control>
+                  </FormField>
+
+                </div>
+              </div>
+
+              {/* ── MEDIA ── */}
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Media</h3>
+                <div className="space-y-4">
+                  <FormField name="thumbnail_type">
+                    <FormLabelAndMessage label={t('dashboard.courses.general.form.thumbnail_type_label')} />
+                    <Form.Control asChild>
+                      <CustomSelect
+                        value={formik.values.thumbnail_type}
+                        onValueChange={(value) => {
+                          if (!value) return;
+                          formik.setFieldValue('thumbnail_type', value);
+                        }}
+                        disabled={isSaving}
+                      >
+                        <CustomSelectTrigger className="w-full bg-white">
+                          <CustomSelectValue>
+                            {formik.values.thumbnail_type === 'image' ? t('dashboard.courses.general.form.thumbnail_type_image') :
+                             formik.values.thumbnail_type === 'video' ? t('dashboard.courses.general.form.thumbnail_type_video') :
+                             formik.values.thumbnail_type === 'both' ? t('dashboard.courses.general.form.thumbnail_type_both') :
+                             t('dashboard.courses.general.form.thumbnail_type_image')}
+                          </CustomSelectValue>
+                        </CustomSelectTrigger>
+                        <CustomSelectContent>
+                          <CustomSelectItem value="image">{t('dashboard.courses.general.form.thumbnail_type_image')}</CustomSelectItem>
+                          <CustomSelectItem value="video">{t('dashboard.courses.general.form.thumbnail_type_video')}</CustomSelectItem>
+                          <CustomSelectItem value="both">{t('dashboard.courses.general.form.thumbnail_type_both')}</CustomSelectItem>
+                        </CustomSelectContent>
+                      </CustomSelect>
+                    </Form.Control>
+                  </FormField>
+
+                  <FormField name="thumbnail">
+                    <FormLabelAndMessage label={t('dashboard.courses.general.form.thumbnail_label')} />
+                    <Form.Control asChild>
+                      <ThumbnailUpdate thumbnailType={formik.values.thumbnail_type} />
                     </Form.Control>
                   </FormField>
                 </div>
+              </div>
 
-                <FormField name="meta_has_certificate" className="mt-4">
-                  <FormLabelAndMessage label="Offers Certificate" />
-                  <Form.Control asChild>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        onChange={formik.handleChange}
-                        checked={formik.values.meta_has_certificate}
+              {/* ── COURSE DETAILS ── */}
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Course Details</h3>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField name="meta_difficulty">
+                      <FormLabelAndMessage label="Difficulty" />
+                      <Select
+                        value={formik.values.meta_difficulty}
+                        onValueChange={(value) => formik.setFieldValue('meta_difficulty', value)}
                         disabled={isSaving}
-                        className="rounded border-gray-300"
+                      >
+                        <SelectTrigger className={selectTriggerClassName}>
+                          <SelectValue placeholder="Select difficulty" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Beginner">Beginner</SelectItem>
+                          <SelectItem value="Intermediate">Intermediate</SelectItem>
+                          <SelectItem value="Advanced">Advanced</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormField>
+
+                    <FormField name="meta_duration">
+                      <FormLabelAndMessage label="Duration (e.g. '6 hours')" />
+                      <Form.Control asChild>
+                        <Input
+                          className={fieldClassName}
+                          onChange={formik.handleChange}
+                          value={formik.values.meta_duration}
+                          type="text"
+                          disabled={isSaving}
+                        />
+                      </Form.Control>
+                    </FormField>
+
+                    <FormField name="meta_video_hours">
+                      <FormLabelAndMessage label="Video Hours" />
+                      <Form.Control asChild>
+                        <Input
+                          className={fieldClassName}
+                          onChange={formik.handleChange}
+                          value={formik.values.meta_video_hours}
+                          type="text"
+                          disabled={isSaving}
+                        />
+                      </Form.Control>
+                    </FormField>
+
+                    <FormField name="meta_resources_count">
+                      <FormLabelAndMessage label="Number of Resources" />
+                      <Form.Control asChild>
+                        <Input
+                          className={fieldClassName}
+                          onChange={formik.handleChange}
+                          value={formik.values.meta_resources_count}
+                          type="text"
+                          disabled={isSaving}
+                        />
+                      </Form.Control>
+                    </FormField>
+                  </div>
+
+                  <FormField name="meta_has_certificate">
+                    <FormLabelAndMessage label="Offers Certificate" />
+                    <div className="flex items-center gap-2 pt-1">
+                      <Switch
+                        checked={formik.values.meta_has_certificate}
+                        onCheckedChange={(checked) => formik.setFieldValue('meta_has_certificate', checked)}
+                        disabled={isSaving}
+                        className="!shadow-none focus-visible:!shadow-none"
                       />
-                      <span className="text-sm text-gray-700">This course offers a certificate of completion</span>
-                    </label>
-                  </Form.Control>
-                </FormField>
+                      <span className="text-sm text-gray-600">This course offers a certificate of completion</span>
+                    </div>
+                  </FormField>
 
-                <FormField name="meta_requirements" className="mt-4">
-                  <FormLabelAndMessage label="Requirements (one per line)" />
-                  <Form.Control asChild>
-                    <Textarea
-                      style={{ backgroundColor: 'white', height: '100px', minHeight: '100px' }}
-                      onChange={formik.handleChange}
-                      value={formik.values.meta_requirements}
-                      disabled={isSaving}
-                      placeholder={"No prior experience needed\nA computer with internet access\nBasic computer skills"}
-                    />
-                  </Form.Control>
-                </FormField>
+                </div>
+              </div>
 
-                <div className="border-t border-gray-100 pt-4 mt-6">
-                  <h4 className="text-sm font-semibold text-gray-900 mb-3">Instructor</h4>
+              {/* ── INSTRUCTOR ── */}
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Instructor</h3>
+                <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField name="meta_instructor_name">
                       <FormLabelAndMessage label="Instructor Name" />
                       <Form.Control asChild>
                         <Input
-                          style={{ backgroundColor: 'white' }}
+                          className={fieldClassName}
                           onChange={formik.handleChange}
                           value={formik.values.meta_instructor_name}
                           type="text"
@@ -428,7 +482,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                       <FormLabelAndMessage label="Instructor Title" />
                       <Form.Control asChild>
                         <Input
-                          style={{ backgroundColor: 'white' }}
+                          className={fieldClassName}
                           onChange={formik.handleChange}
                           value={formik.values.meta_instructor_title}
                           type="text"
@@ -438,11 +492,11 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                     </FormField>
                   </div>
 
-                  <FormField name="meta_instructor_bio" className="mt-4">
+                  <FormField name="meta_instructor_bio">
                     <FormLabelAndMessage label="Instructor Bio" />
                     <Form.Control asChild>
                       <Textarea
-                        style={{ backgroundColor: 'white', height: '100px', minHeight: '100px' }}
+                        className={`${fieldClassName} min-h-[100px]`}
                         onChange={formik.handleChange}
                         value={formik.values.meta_instructor_bio}
                         disabled={isSaving}
