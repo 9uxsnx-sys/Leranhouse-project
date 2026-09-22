@@ -12,8 +12,6 @@ import { useCourseFieldSync } from '@components/Contexts/CourseContext';
 import LearningItemsList from './LearningItemsList';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { useTranslation } from 'react-i18next';
 import { SafeImage } from '@components/Objects/SafeImage';
 import {
@@ -84,11 +82,11 @@ const validate = (values: any, t: any) => {
 };
 
 const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none";
-const selectTriggerClassName = "w-full bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none data-[state=open]:!shadow-none transition-none";
 
 function EditCourseGeneral(props: EditCourseStructureProps) {
   const { t } = useTranslation()
   const [error, setError] = useState('');
+  const [difficultyOpen, setDifficultyOpen] = useState(false);
 
   // Use the new field sync hook
   const {
@@ -388,20 +386,45 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField name="meta_difficulty">
                       <FormLabelAndMessage label="Difficulty" />
-                      <Select
-                        value={formik.values.meta_difficulty}
-                        onValueChange={(value) => formik.setFieldValue('meta_difficulty', value)}
-                        disabled={isSaving}
-                      >
-                        <SelectTrigger className={selectTriggerClassName}>
-                          <SelectValue placeholder="Select difficulty" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Beginner">Beginner</SelectItem>
-                          <SelectItem value="Intermediate">Intermediate</SelectItem>
-                          <SelectItem value="Advanced">Advanced</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={() => setDifficultyOpen(!difficultyOpen)}
+                          disabled={isSaving}
+                          className={`flex h-9 w-full items-center justify-between rounded-md px-3 py-2 text-sm ${fieldClassName} ${!formik.values.meta_difficulty ? 'text-gray-400' : ''}`}
+                        >
+                          <span>{formik.values.meta_difficulty || 'Select difficulty'}</span>
+                          <svg className={`h-4 w-4 text-gray-400 transition-transform ${difficultyOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+                        {difficultyOpen && (
+                          <>
+                            <div className="fixed inset-0 z-10" onClick={() => setDifficultyOpen(false)} />
+                            <div className="absolute z-20 mt-1 w-full min-w-[8rem] overflow-hidden rounded-md border border-ui-border-base bg-white shadow-md">
+                              {['Beginner', 'Intermediate', 'Advanced'].map((option) => (
+                                <div
+                                  key={option}
+                                  className={`relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-3 pr-8 text-sm hover:bg-gray-100 ${formik.values.meta_difficulty === option ? 'bg-gray-50 font-medium' : ''}`}
+                                  onClick={() => {
+                                    formik.setFieldValue('meta_difficulty', option);
+                                    setDifficultyOpen(false);
+                                  }}
+                                >
+                                  {option}
+                                  {formik.values.meta_difficulty === option && (
+                                    <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">
+                                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                      </svg>
+                                    </span>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </div>
                     </FormField>
 
                     <FormField name="meta_duration">
@@ -446,15 +469,19 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
 
                   <FormField name="meta_has_certificate">
                     <FormLabelAndMessage label="Offers Certificate" />
-                    <div className="flex items-center gap-2 pt-1">
-                      <Switch
-                        checked={formik.values.meta_has_certificate}
-                        onCheckedChange={(checked) => formik.setFieldValue('meta_has_certificate', checked)}
-                        disabled={isSaving}
-                        className="!shadow-none focus-visible:!shadow-none"
-                      />
-                      <span className="text-sm text-gray-600">This course offers a certificate of completion</span>
-                    </div>
+                    <label className="flex items-center gap-3 pt-1 cursor-pointer">
+                      <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${formik.values.meta_has_certificate ? 'bg-black' : 'bg-gray-300'} ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${formik.values.meta_has_certificate ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
+                        <input
+                          type="checkbox"
+                          className="sr-only"
+                          checked={formik.values.meta_has_certificate}
+                          onChange={(e) => formik.setFieldValue('meta_has_certificate', e.target.checked)}
+                          disabled={isSaving}
+                        />
+                      </div>
+                      <span className="text-sm text-gray-600 select-none">This course offers a certificate of completion</span>
+                    </label>
                   </FormField>
 
                 </div>
