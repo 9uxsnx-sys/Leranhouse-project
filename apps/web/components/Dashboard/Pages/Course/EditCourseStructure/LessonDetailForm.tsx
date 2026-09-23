@@ -7,13 +7,13 @@ import FormLayout, {
   FormLabelAndMessage,
 } from '@components/Objects/StyledElements/Form/Form'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import LearningItemsList from '../EditCourseGeneral/LearningItemsList'
 import TakeawayItemsList from '../EditCourseGeneral/TakeawayItemsList'
 import ResourceItemsList from '../EditCourseGeneral/ResourceItemsList'
+import KnowledgeCheckItemsList from '../EditCourseGeneral/KnowledgeCheckItemsList'
 import { updateActivity } from '@services/courses/activities'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 type LessonDetailFormProps = {
@@ -61,8 +61,8 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
   const [resourcesStr, setResourcesStr] = useState(() =>
     JSON.stringify(initialMeta.resources || [])
   )
-  const [knowledgeChecks, setKnowledgeChecks] = useState<{ question: string; answer: string }[]>(
-    initialMeta.knowledge_checks || []
+  const [knowledgeChecksStr, setKnowledgeChecksStr] = useState(() =>
+    JSON.stringify(initialMeta.knowledge_checks || [])
   )
 
   // Track initial values for change detection
@@ -76,7 +76,7 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
     })(),
     takeawaysStr: JSON.stringify(initialMeta.takeaways || []),
     resourcesStr: JSON.stringify(initialMeta.resources || []),
-    knowledgeChecks: JSON.stringify(initialMeta.knowledge_checks || []),
+    knowledgeChecksStr: JSON.stringify(initialMeta.knowledge_checks || []),
   })
 
   // Ref to track latest values for flush-on-unmount
@@ -98,11 +98,13 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
     try { takeawaysArr = JSON.parse(takeawaysStr); if (!Array.isArray(takeawaysArr)) takeawaysArr = [] } catch { takeawaysArr = [] }
     let resourcesArr = []
     try { resourcesArr = JSON.parse(resourcesStr); if (!Array.isArray(resourcesArr)) resourcesArr = [] } catch { resourcesArr = [] }
+    let knowledgeChecksArr = []
+    try { knowledgeChecksArr = JSON.parse(knowledgeChecksStr); if (!Array.isArray(knowledgeChecksArr)) knowledgeChecksArr = [] } catch { knowledgeChecksArr = [] }
     const currentMeta = {
       learning_objectives: learningObjectivesArr,
       takeaways: takeawaysArr,
       resources: resourcesArr,
-      knowledge_checks: knowledgeChecks,
+      knowledge_checks: knowledgeChecksArr,
     }
 
     const currentName = formik.values.name
@@ -117,7 +119,7 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
       learningObjectivesStr !== init.learningObjectivesStr ||
       takeawaysStr !== init.takeawaysStr ||
       resourcesStr !== init.resourcesStr ||
-      JSON.stringify(currentMeta.knowledge_checks) !== init.knowledgeChecks
+      knowledgeChecksStr !== init.knowledgeChecksStr
 
     if (!nameChanged && !descChanged && !publishedChanged && !metaChanged) return
 
@@ -141,7 +143,7 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
             learningObjectivesStr,
             takeawaysStr,
             resourcesStr,
-            knowledgeChecks: JSON.stringify(currentMeta.knowledge_checks),
+            knowledgeChecksStr,
           }
         }
       } catch (e) {
@@ -163,25 +165,14 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
           learningObjectivesStr !== initVals.learningObjectivesStr ||
           takeawaysStr !== initVals.takeawaysStr ||
           resourcesStr !== initVals.resourcesStr ||
-          JSON.stringify(pending.meta.knowledge_checks) !== initVals.knowledgeChecks
+          knowledgeChecksStr !== initVals.knowledgeChecksStr
         if (metaChanged) data.extra_metadata = pending.meta
         if (Object.keys(data).length > 0) {
           updateActivity(data, activity.activity_uuid, access_token).catch(console.error)
         }
       }
     }
-  }, [formik.values, learningObjectivesStr, takeawaysStr, resourcesStr, knowledgeChecks, published])
-
-  // Helpers for array fields
-  const addKnowledgeCheck = () =>
-    setKnowledgeChecks([...knowledgeChecks, { question: '', answer: '' }])
-  const updateKnowledgeCheck = (index: number, field: 'question' | 'answer', value: string) => {
-    const updated = [...knowledgeChecks]
-    updated[index] = { ...updated[index], [field]: value }
-    setKnowledgeChecks(updated)
-  }
-  const removeKnowledgeCheck = (index: number) =>
-    setKnowledgeChecks(knowledgeChecks.filter((_, i) => i !== index))
+  }, [formik.values, learningObjectivesStr, takeawaysStr, resourcesStr, knowledgeChecksStr, published])
 
   return (
     <div>
@@ -268,52 +259,15 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
 
         {/* ── KNOWLEDGE CHECKS ── */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <div className="flex items-center justify-between mb-5">
-            <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500">Knowledge Checks</h3>
-            <button
-              type="button"
-              onClick={addKnowledgeCheck}
-              className="px-3 py-1.5 bg-black text-white rounded-lg text-sm font-medium flex items-center gap-1.5 hover:bg-gray-800 transition-colors"
-            >
-              <Plus size={14} />
-              Add
-            </button>
-          </div>
-          <div className="space-y-3">
-            {knowledgeChecks.map((kc, index) => (
-              <div key={index} className="p-4 bg-ui-bg-field rounded-lg border border-ui-border-base">
-                <div className="flex items-start justify-between mb-3">
-                  <span className="text-xs font-semibold text-gray-500 uppercase">Q{index + 1}</span>
-                  <button
-                    type="button"
-                    onClick={() => removeKnowledgeCheck(index)}
-                    className="p-1 text-gray-400 hover:text-red-500 rounded transition-colors"
-                  >
-                    <Trash2 size={12} />
-                  </button>
-                </div>
-                <div className="space-y-2">
-                  <input
-                    type="text"
-                    value={kc.question}
-                    onChange={(e) => updateKnowledgeCheck(index, 'question', e.target.value)}
-                    placeholder="Question"
-                    className={`w-full px-3 py-2 text-sm rounded-lg ${fieldClassName}`}
-                  />
-                  <textarea
-                    value={kc.answer}
-                    onChange={(e) => updateKnowledgeCheck(index, 'answer', e.target.value)}
-                    placeholder="Answer"
-                    rows={2}
-                    className={`w-full px-3 py-2 text-sm rounded-lg resize-none ${fieldClassName}`}
-                  />
-                </div>
-              </div>
-            ))}
-            {knowledgeChecks.length === 0 && (
-              <p className="text-sm text-gray-400 italic">No knowledge checks added yet</p>
-            )}
-          </div>
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Knowledge Checks</h3>
+          <FormField name="knowledge_checks">
+            <Form.Control asChild>
+              <KnowledgeCheckItemsList
+                value={knowledgeChecksStr}
+                onChange={(value) => setKnowledgeChecksStr(value)}
+              />
+            </Form.Control>
+          </FormField>
         </div>
       </FormLayout>
     </div>
