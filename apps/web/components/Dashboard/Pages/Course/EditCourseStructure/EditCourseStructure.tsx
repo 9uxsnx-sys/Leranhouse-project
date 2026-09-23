@@ -218,8 +218,6 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
       <div className="space-y-3">
         {filteredAndSortedChapters.map((chapter: any, index: number) => {
           const actualIndex = chapters.indexOf(chapter)
-          const lessonCount = chapter.activities?.length || 0
-          const publishedCount = chapter.activities?.filter((a: any) => a.published).length || 0
           return (
             <div
               key={chapter.chapter_uuid}
@@ -229,19 +227,11 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
               tabIndex={0}
               className="w-full text-left px-5 py-4 rounded-xl bg-white shadow-borders-base hover:border-gray-200 transition-colors flex items-center justify-between group cursor-pointer"
             >
-              <div className="flex items-center gap-4 min-w-0">
+              <div className="flex items-center gap-3 min-w-0">
                 <Folder size={18} className="text-gray-400 flex-shrink-0" />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {chapter.name || 'Untitled Module'}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    {lessonCount} {lessonCount === 1 ? 'lesson' : 'lessons'}
-                    {publishedCount > 0 && (
-                      <span> &middot; {publishedCount} published</span>
-                    )}
-                  </p>
-                </div>
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {chapter.name || 'Untitled Module'}
+                </p>
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
