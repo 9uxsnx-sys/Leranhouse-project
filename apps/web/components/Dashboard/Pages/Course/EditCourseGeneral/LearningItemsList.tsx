@@ -1,12 +1,9 @@
-import React, { useState, useEffect, useRef, memo, useCallback, useMemo, lazy, Suspense } from 'react';
+import React, { useState, useRef, memo, useCallback, useMemo } from 'react';
 import { Plus, X, GripVertical } from 'lucide-react';
-const Picker = lazy(() => import('@emoji-mart/react'));
 
 interface LearningItem {
   id: string;
   text: string;
-  emoji: string;
-  link?: string;
 }
 
 interface LearningItemsListProps {
@@ -35,10 +32,8 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
   // Tab switches and remounts stay in sync without a local shadow copy.
   const items = useMemo(() => parseItems(value), [value]);
 
-  const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);
 
-  const pickerRef = useRef<HTMLDivElement>(null);
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const commit = useCallback((next: LearningItem[]) => {
@@ -47,7 +42,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
 
   const addItem = useCallback(() => {
     const id = newId();
-    commit([...items, { id, text: '', emoji: '📝' }]);
+    commit([...items, { id, text: '' }]);
     setTimeout(() => inputRefs.current[id]?.focus(), 0);
   }, [items, commit]);
 
@@ -58,24 +53,6 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
   const updateText = useCallback((id: string, text: string) => {
     commit(items.map(it => it.id === id ? { ...it, text } : it));
   }, [items, commit]);
-
-  const updateEmoji = useCallback((id: string, emoji: string) => {
-    commit(items.map(it => it.id === id ? { ...it, emoji } : it));
-    setShowEmojiPicker(null);
-    setTimeout(() => inputRefs.current[id]?.focus(), 0);
-  }, [items, commit]);
-
-  // Close emoji picker when clicking outside
-  useEffect(() => {
-    if (!showEmojiPicker) return;
-    const handler = (e: MouseEvent) => {
-      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
-        setShowEmojiPicker(null);
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [showEmojiPicker]);
 
   // Drag and drop reordering
   const onDragStart = (id: string) => (e: React.DragEvent) => {
@@ -107,7 +84,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
         {isEmpty && (
           <div className="px-4 py-8 text-center">
             <div className="text-sm text-gray-400 mb-1">No learning objectives yet</div>
-            <div className="text-xs text-gray-300">Click “Add” below to create the first one.</div>
+            <div className="text-xs text-gray-300">Click &ldquo;Add&rdquo; below to create the first one.</div>
           </div>
         )}
 
@@ -130,36 +107,6 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
                   title="Drag to reorder"
                 >
                   <GripVertical size={14} />
-                </div>
-
-                {/* Emoji button */}
-                <div className="relative shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => setShowEmojiPicker(showEmojiPicker === item.id ? null : item.id)}
-                    className="w-8 h-8 flex items-center justify-center text-xl leading-none rounded-md hover:bg-gray-50 transition-colors select-none"
-                    title="Change emoji"
-                  >
-                    {item.emoji}
-                  </button>
-                  {showEmojiPicker === item.id && (
-                    <div ref={pickerRef} className="absolute z-50 top-9 left-0">
-                      <Suspense fallback={
-                        <div className="p-3 text-xs text-gray-400 bg-white border border-gray-200 rounded-lg shadow-lg w-[280px]">
-                          Loading…
-                        </div>
-                      }>
-                        <Picker
-                          onEmojiSelect={(e: any) => updateEmoji(item.id, e.native)}
-                          theme="light"
-                          previewPosition="none"
-                          searchPosition="top"
-                          maxFrequentRows={0}
-                          autoFocus={false}
-                        />
-                      </Suspense>
-                    </div>
-                  )}
                 </div>
 
                 {/* Text input */}

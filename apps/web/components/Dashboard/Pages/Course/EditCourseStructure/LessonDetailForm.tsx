@@ -5,12 +5,15 @@ import * as Form from '@radix-ui/react-form'
 import FormLayout, {
   FormField,
   FormLabelAndMessage,
-  Input,
-  Textarea,
 } from '@components/Objects/StyledElements/Form/Form'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import LearningItemsList from '../EditCourseGeneral/LearningItemsList'
+import TakeawayItemsList from '../EditCourseGeneral/TakeawayItemsList'
+import ResourceItemsList from '../EditCourseGeneral/ResourceItemsList'
 import { updateActivity } from '@services/courses/activities'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { ArrowLeft, Plus, Trash2, Globe, EyeOff } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 type LessonDetailFormProps = {
@@ -21,6 +24,8 @@ type LessonDetailFormProps = {
   onBack: () => void
 }
 
+const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none"
+
 function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: LessonDetailFormProps) {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
@@ -30,7 +35,6 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
   const initialMeta = activity.extra_metadata || {}
 
   // Formik for name + description
-  // Note: activity model has no 'description' column — it's stored in activity.content.description
   const formik = useFormik({
     initialValues: {
       name: activity.name || '',
@@ -41,14 +45,21 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
   })
 
   // Array fields
-  const [learningObjectives, setLearningObjectives] = useState<string[]>(
-    initialMeta.learning_objectives || []
+  const [learningObjectivesStr, setLearningObjectivesStr] = useState(() => {
+    const objs: string[] = initialMeta.learning_objectives || []
+    return JSON.stringify(
+      objs.map((text: string, i: number) => ({
+        id: `obj_${i}`,
+        text,
+        emoji: '📝',
+      }))
+    )
+  })
+  const [takeawaysStr, setTakeawaysStr] = useState(() =>
+    JSON.stringify(initialMeta.takeaways || [])
   )
-  const [takeaways, setTakeaways] = useState<{ title: string; items: string[] }[]>(
-    initialMeta.takeaways || []
-  )
-  const [resources, setResources] = useState<{ name: string; url: string }[]>(
-    initialMeta.resources || []
+  const [resourcesStr, setResourcesStr] = useState(() =>
+    JSON.stringify(initialMeta.resources || [])
   )
   const [knowledgeChecks, setKnowledgeChecks] = useState<{ question: string; answer: string }[]>(
     initialMeta.knowledge_checks || []
@@ -59,21 +70,38 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
     name: activity.name || '',
     description: activity.content?.description || '',
     published: activity.published ?? false,
-    learningObjectives: JSON.stringify(initialMeta.learning_objectives || []),
-    takeaways: JSON.stringify(initialMeta.takeaways || []),
-    resources: JSON.stringify(initialMeta.resources || []),
+    learningObjectivesStr: (() => {
+      const objs: string[] = initialMeta.learning_objectives || []
+      return JSON.stringify(objs.map((text: string, i: number) => ({ id: `obj_${i}`, text, emoji: '📝' })))
+    })(),
+    takeawaysStr: JSON.stringify(initialMeta.takeaways || []),
+    resourcesStr: JSON.stringify(initialMeta.resources || []),
     knowledgeChecks: JSON.stringify(initialMeta.knowledge_checks || []),
   })
 
   // Ref to track latest values for flush-on-unmount
   const latestValuesRef = useRef({ name: '', description: '', published: false, meta: {} as any })
 
-  // Auto-save with debounce — saves to activity.content.description (no 'description' column on Activity model)
+  // Helper to convert LearningItemsList items to string array
+  const parseItemsList = (jsonStr: string): string[] => {
+    try {
+      const items = JSON.parse(jsonStr)
+      if (Array.isArray(items)) return items.map((it: any) => it.text || '')
+    } catch {}
+    return []
+  }
+
+  // Auto-save with debounce
   useEffect(() => {
+    const learningObjectivesArr = parseItemsList(learningObjectivesStr)
+    let takeawaysArr = []
+    try { takeawaysArr = JSON.parse(takeawaysStr); if (!Array.isArray(takeawaysArr)) takeawaysArr = [] } catch { takeawaysArr = [] }
+    let resourcesArr = []
+    try { resourcesArr = JSON.parse(resourcesStr); if (!Array.isArray(resourcesArr)) resourcesArr = [] } catch { resourcesArr = [] }
     const currentMeta = {
-      learning_objectives: learningObjectives,
-      takeaways: takeaways,
-      resources: resources,
+      learning_objectives: learningObjectivesArr,
+      takeaways: takeawaysArr,
+      resources: resourcesArr,
       knowledge_checks: knowledgeChecks,
     }
 
@@ -86,14 +114,13 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
     const descChanged = currentDesc !== init.description
     const publishedChanged = currentPublished !== init.published
     const metaChanged =
-      JSON.stringify(currentMeta.learning_objectives) !== init.learningObjectives ||
-      JSON.stringify(currentMeta.takeaways) !== init.takeaways ||
-      JSON.stringify(currentMeta.resources) !== init.resources ||
+      learningObjectivesStr !== init.learningObjectivesStr ||
+      takeawaysStr !== init.takeawaysStr ||
+      resourcesStr !== init.resourcesStr ||
       JSON.stringify(currentMeta.knowledge_checks) !== init.knowledgeChecks
 
     if (!nameChanged && !descChanged && !publishedChanged && !metaChanged) return
 
-    // Store latest values for flush-on-unmount
     latestValuesRef.current = { name: currentName, description: currentDesc, published: currentPublished, meta: currentMeta }
 
     if (debounceRef.current) clearTimeout(debounceRef.current)
@@ -111,9 +138,9 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
             name: currentName,
             description: currentDesc,
             published: currentPublished,
-            learningObjectives: JSON.stringify(currentMeta.learning_objectives),
-            takeaways: JSON.stringify(currentMeta.takeaways),
-            resources: JSON.stringify(currentMeta.resources),
+            learningObjectivesStr,
+            takeawaysStr,
+            resourcesStr,
             knowledgeChecks: JSON.stringify(currentMeta.knowledge_checks),
           }
         }
@@ -124,7 +151,6 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
     }, 600)
 
     return () => {
-      // Flush pending save on unmount instead of canceling
       if (debounceRef.current) {
         clearTimeout(debounceRef.current)
         const pending = latestValuesRef.current
@@ -134,9 +160,9 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
         if (pending.description !== initVals.description) data.content = { ...(activity.content || {}), description: pending.description }
         if (pending.published !== initVals.published) data.published = pending.published
         const metaChanged =
-          JSON.stringify(pending.meta.learning_objectives) !== initVals.learningObjectives ||
-          JSON.stringify(pending.meta.takeaways) !== initVals.takeaways ||
-          JSON.stringify(pending.meta.resources) !== initVals.resources ||
+          learningObjectivesStr !== initVals.learningObjectivesStr ||
+          takeawaysStr !== initVals.takeawaysStr ||
+          resourcesStr !== initVals.resourcesStr ||
           JSON.stringify(pending.meta.knowledge_checks) !== initVals.knowledgeChecks
         if (metaChanged) data.extra_metadata = pending.meta
         if (Object.keys(data).length > 0) {
@@ -144,56 +170,9 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
         }
       }
     }
-  }, [formik.values, learningObjectives, takeaways, resources, knowledgeChecks, published])
+  }, [formik.values, learningObjectivesStr, takeawaysStr, resourcesStr, knowledgeChecks, published])
 
   // Helpers for array fields
-  const addObjective = () => setLearningObjectives([...learningObjectives, ''])
-  const updateObjective = (index: number, value: string) => {
-    const updated = [...learningObjectives]
-    updated[index] = value
-    setLearningObjectives(updated)
-  }
-  const removeObjective = (index: number) =>
-    setLearningObjectives(learningObjectives.filter((_, i) => i !== index))
-
-  const addTakeaway = () => setTakeaways([...takeaways, { title: '', items: [''] }])
-  const updateTakeawayTitle = (index: number, value: string) => {
-    const updated = [...takeaways]
-    updated[index] = { ...updated[index], title: value }
-    setTakeaways(updated)
-  }
-  const addTakeawayItem = (tIndex: number) => {
-    const updated = [...takeaways]
-    updated[tIndex] = { ...updated[tIndex], items: [...updated[tIndex].items, ''] }
-    setTakeaways(updated)
-  }
-  const updateTakeawayItem = (tIndex: number, iIndex: number, value: string) => {
-    const updated = [...takeaways]
-    const newItems = [...updated[tIndex].items]
-    newItems[iIndex] = value
-    updated[tIndex] = { ...updated[tIndex], items: newItems }
-    setTakeaways(updated)
-  }
-  const removeTakeawayItem = (tIndex: number, iIndex: number) => {
-    const updated = [...takeaways]
-    updated[tIndex] = {
-      ...updated[tIndex],
-      items: updated[tIndex].items.filter((_, i) => i !== iIndex),
-    }
-    setTakeaways(updated)
-  }
-  const removeTakeaway = (index: number) =>
-    setTakeaways(takeaways.filter((_, i) => i !== index))
-
-  const addResource = () => setResources([...resources, { name: '', url: '' }])
-  const updateResource = (index: number, field: 'name' | 'url', value: string) => {
-    const updated = [...resources]
-    updated[index] = { ...updated[index], [field]: value }
-    setResources(updated)
-  }
-  const removeResource = (index: number) =>
-    setResources(resources.filter((_, i) => i !== index))
-
   const addKnowledgeCheck = () =>
     setKnowledgeChecks([...knowledgeChecks, { question: '', answer: '' }])
   const updateKnowledgeCheck = (index: number, field: 'question' | 'answer', value: string) => {
@@ -209,293 +188,131 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
       {/* Back button */}
       <button
         onClick={onBack}
-        className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 mb-4 transition-colors"
+        className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 mb-5 transition-colors"
       >
         <ArrowLeft size={16} />
         Back to Lessons
       </button>
 
-      <FormLayout onSubmit={formik.handleSubmit}>
-        <div className="space-y-8">
-          {/* Header */}
-          <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">Lesson Details</h2>
-              <p className="text-sm text-gray-500 mt-1">
-                Editing: {chapter.name || 'Untitled Module'}
-              </p>
-            </div>
-            {/* Published toggle */}
+      <FormLayout onSubmit={formik.handleSubmit} className="space-y-5">
+        {/* ── BASIC INFORMATION ── */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Basic Information</h3>
+          <div className="space-y-4">
+            <FormField name="name">
+              <FormLabelAndMessage label="Lesson Name" message={formik.errors.name as string} />
+              <Form.Control asChild>
+                <Input
+                  className={fieldClassName}
+                  onChange={formik.handleChange}
+                  value={formik.values.name}
+                  type="text"
+                  required
+                />
+              </Form.Control>
+            </FormField>
+
+            <FormField name="description">
+              <FormLabelAndMessage label="Description" message={formik.errors.description as string} />
+              <Form.Control asChild>
+                <Input
+                  className={fieldClassName}
+                  onChange={formik.handleChange}
+                  value={formik.values.description}
+                  type="text"
+                  placeholder="Brief description of what this lesson covers"
+                />
+              </Form.Control>
+            </FormField>
+          </div>
+        </div>
+
+        {/* ── WHAT YOU'LL LEARN ── */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">What You&apos;ll Learn</h3>
+          <FormField name="learningObjectives">
+            <Form.Control asChild>
+              <LearningItemsList
+                value={learningObjectivesStr}
+                onChange={(value) => setLearningObjectivesStr(value)}
+              />
+            </Form.Control>
+          </FormField>
+        </div>
+
+        {/* ── KEY TAKEAWAYS ── */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Key Takeaways</h3>
+          <FormField name="takeaways">
+            <Form.Control asChild>
+              <TakeawayItemsList
+                value={takeawaysStr}
+                onChange={(value) => setTakeawaysStr(value)}
+              />
+            </Form.Control>
+          </FormField>
+        </div>
+
+        {/* ── RESOURCES ── */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Resources</h3>
+          <FormField name="resources">
+            <Form.Control asChild>
+              <ResourceItemsList
+                value={resourcesStr}
+                onChange={(value) => setResourcesStr(value)}
+              />
+            </Form.Control>
+          </FormField>
+        </div>
+
+        {/* ── KNOWLEDGE CHECKS ── */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500">Knowledge Checks</h3>
             <button
               type="button"
-              onClick={() => setPublished(!published)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                published
-                  ? 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
-                  : 'bg-gray-50 text-gray-500 border border-gray-200 hover:bg-gray-100'
-              }`}
+              onClick={addKnowledgeCheck}
+              className="px-3 py-1.5 bg-black text-white rounded-lg text-sm font-medium flex items-center gap-1.5 hover:bg-gray-800 transition-colors"
             >
-              {published ? (
-                <>
-                  <Globe size={14} />
-                  Published
-                </>
-              ) : (
-                <>
-                  <EyeOff size={14} />
-                  Unpublished
-                </>
-              )}
+              <Plus size={14} />
+              Add
             </button>
           </div>
-
-          {/* Lesson Name */}
-          <FormField name="name">
-            <FormLabelAndMessage label="Lesson Name" message={formik.errors.name as string} />
-            <Form.Control asChild>
-              <Input
-                style={{ backgroundColor: 'white' }}
-                onChange={formik.handleChange}
-                value={formik.values.name}
-                type="text"
-                required
-              />
-            </Form.Control>
-          </FormField>
-
-          {/* Description */}
-          <FormField name="description">
-            <FormLabelAndMessage label="Description" message={formik.errors.description as string} />
-            <Form.Control asChild>
-              <Textarea
-                style={{ backgroundColor: 'white', height: '100px', minHeight: '100px' }}
-                onChange={formik.handleChange}
-                value={formik.values.description}
-                placeholder="Brief description of what this lesson covers"
-              />
-            </Form.Control>
-          </FormField>
-
-          {/* ═══ What You'll Learn ═══ */}
-          <div className="border-t border-gray-200 pt-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">What You'll Learn</h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  Learning objectives shown as bullet points on the lesson page
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={addObjective}
-                className="px-3 py-1.5 bg-black text-white rounded-lg text-sm font-medium flex items-center gap-1.5 hover:bg-gray-800 transition-colors"
-              >
-                <Plus size={14} />
-                Add
-              </button>
-            </div>
-            <div className="space-y-2">
-              {learningObjectives.map((obj, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <span className="text-gray-400 text-lg">&bull;</span>
-                  <input
-                    type="text"
-                    value={obj}
-                    onChange={(e) => updateObjective(index, e.target.value)}
-                    placeholder="e.g. Understand the lesson structure"
-                    className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white"
-                  />
+          <div className="space-y-3">
+            {knowledgeChecks.map((kc, index) => (
+              <div key={index} className="p-4 bg-ui-bg-field rounded-lg border border-ui-border-base">
+                <div className="flex items-start justify-between mb-3">
+                  <span className="text-xs font-semibold text-gray-500 uppercase">Q{index + 1}</span>
                   <button
                     type="button"
-                    onClick={() => removeObjective(index)}
-                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                    onClick={() => removeKnowledgeCheck(index)}
+                    className="p-1 text-gray-400 hover:text-red-500 rounded transition-colors"
                   >
-                    <Trash2 size={14} />
+                    <Trash2 size={12} />
                   </button>
                 </div>
-              ))}
-              {learningObjectives.length === 0 && (
-                <p className="text-sm text-gray-400 italic">No learning objectives added yet</p>
-              )}
-            </div>
-          </div>
-
-          {/* ═══ Key Takeaways ═══ */}
-          <div className="border-t border-gray-200 pt-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Key Takeaways</h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  Sections with bullet points summarizing the lesson
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={addTakeaway}
-                className="px-3 py-1.5 bg-black text-white rounded-lg text-sm font-medium flex items-center gap-1.5 hover:bg-gray-800 transition-colors"
-              >
-                <Plus size={14} />
-                Add Section
-              </button>
-            </div>
-            <div className="space-y-4">
-              {takeaways.map((section, tIndex) => (
-                <div key={tIndex} className="p-4 bg-gray-50 rounded-lg border border-gray-100">
-                  <div className="flex items-center justify-between mb-3">
-                    <input
-                      type="text"
-                      value={section.title}
-                      onChange={(e) => updateTakeawayTitle(tIndex, e.target.value)}
-                      placeholder="Section title (e.g. Course Structure & Learning Path)"
-                      className="flex-1 px-3 py-2 text-sm font-medium border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeTakeaway(tIndex)}
-                      className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors ml-2"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                  <div className="space-y-1.5 pl-2">
-                    {section.items.map((item, iIndex) => (
-                      <div key={iIndex} className="flex items-center gap-2">
-                        <span className="text-gray-400 text-sm">&bull;</span>
-                        <input
-                          type="text"
-                          value={item}
-                          onChange={(e) => updateTakeawayItem(tIndex, iIndex, e.target.value)}
-                          placeholder="Takeaway item"
-                          className="flex-1 px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeTakeawayItem(tIndex, iIndex)}
-                          className="p-1 text-gray-400 hover:text-red-500 rounded transition-colors"
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={() => addTakeawayItem(tIndex)}
-                      className="text-xs text-blue-600 hover:text-blue-700 font-medium mt-1.5"
-                    >
-                      + Add item
-                    </button>
-                  </div>
-                </div>
-              ))}
-              {takeaways.length === 0 && (
-                <p className="text-sm text-gray-400 italic">No takeaways added yet</p>
-              )}
-            </div>
-          </div>
-
-          {/* ═══ Resources ═══ */}
-          <div className="border-t border-gray-200 pt-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Resources</h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  Downloadable files and links for this lesson
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={addResource}
-                className="px-3 py-1.5 bg-black text-white rounded-lg text-sm font-medium flex items-center gap-1.5 hover:bg-gray-800 transition-colors"
-              >
-                <Plus size={14} />
-                Add
-              </button>
-            </div>
-            <div className="space-y-2">
-              {resources.map((resource, index) => (
-                <div key={index} className="flex items-center gap-2">
+                <div className="space-y-2">
                   <input
                     type="text"
-                    value={resource.name}
-                    onChange={(e) => updateResource(index, 'name', e.target.value)}
-                    placeholder="File name (e.g. Course Syllabus PDF)"
-                    className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white"
+                    value={kc.question}
+                    onChange={(e) => updateKnowledgeCheck(index, 'question', e.target.value)}
+                    placeholder="Question"
+                    className={`w-full px-3 py-2 text-sm rounded-lg ${fieldClassName}`}
                   />
-                  <input
-                    type="text"
-                    value={resource.url}
-                    onChange={(e) => updateResource(index, 'url', e.target.value)}
-                    placeholder="URL (e.g. https://...)"
-                    className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white"
+                  <textarea
+                    value={kc.answer}
+                    onChange={(e) => updateKnowledgeCheck(index, 'answer', e.target.value)}
+                    placeholder="Answer"
+                    rows={2}
+                    className={`w-full px-3 py-2 text-sm rounded-lg resize-none ${fieldClassName}`}
                   />
-                  <button
-                    type="button"
-                    onClick={() => removeResource(index)}
-                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                  >
-                    <Trash2 size={14} />
-                  </button>
                 </div>
-              ))}
-              {resources.length === 0 && (
-                <p className="text-sm text-gray-400 italic">No resources added yet</p>
-              )}
-            </div>
-          </div>
-
-          {/* ═══ Knowledge Checks ═══ */}
-          <div className="border-t border-gray-200 pt-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Knowledge Checks</h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  Q&A pairs for the quick check section
-                </p>
               </div>
-              <button
-                type="button"
-                onClick={addKnowledgeCheck}
-                className="px-3 py-1.5 bg-black text-white rounded-lg text-sm font-medium flex items-center gap-1.5 hover:bg-gray-800 transition-colors"
-              >
-                <Plus size={14} />
-                Add
-              </button>
-            </div>
-            <div className="space-y-3">
-              {knowledgeChecks.map((kc, index) => (
-                <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-100">
-                  <div className="flex items-start justify-between mb-3">
-                    <span className="text-xs font-semibold text-gray-500 uppercase">Q{index + 1}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeKnowledgeCheck(index)}
-                      className="p-1 text-gray-400 hover:text-red-500 rounded transition-colors"
-                    >
-                      <Trash2 size={12} />
-                    </button>
-                  </div>
-                  <div className="space-y-2">
-                    <input
-                      type="text"
-                      value={kc.question}
-                      onChange={(e) => updateKnowledgeCheck(index, 'question', e.target.value)}
-                      placeholder="Question"
-                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white"
-                    />
-                    <textarea
-                      value={kc.answer}
-                      onChange={(e) => updateKnowledgeCheck(index, 'answer', e.target.value)}
-                      placeholder="Answer"
-                      rows={2}
-                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 bg-white resize-none"
-                    />
-                  </div>
-                </div>
-              ))}
-              {knowledgeChecks.length === 0 && (
-                <p className="text-sm text-gray-400 italic">No knowledge checks added yet</p>
-              )}
-            </div>
+            ))}
+            {knowledgeChecks.length === 0 && (
+              <p className="text-sm text-gray-400 italic">No knowledge checks added yet</p>
+            )}
           </div>
         </div>
       </FormLayout>

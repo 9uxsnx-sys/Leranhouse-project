@@ -1,32 +1,28 @@
 'use client'
-import React, { useEffect, useState, useRef } from 'react'
-import { useFormik } from 'formik'
-import * as Form from '@radix-ui/react-form'
-import FormLayout, {
-  FormField,
-  FormLabelAndMessage,
-  Input,
-  Textarea,
-} from '@components/Objects/StyledElements/Form/Form'
-import { updateChapter } from '@services/courses/chapters'
+import React, { useState, useMemo } from 'react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useCourse, getCourseMetaCacheKey } from '@components/Contexts/CourseContext'
 import { mutate } from 'swr'
-import { revalidateTags } from '@services/utils/ts/requests'
 import {
-  Plus,
-  Video,
-  File,
-  Code,
-  Puzzle,
-  Layers,
   Trash2,
   BookOpen,
   Loader2,
-  X,
-  ArrowLeft,
-  ChevronRight,
+  Search,
+  ArrowUpDown,
+  CheckSquare,
+  MoreVertical,
+  Copy,
+  FileText,
 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@components/ui/dropdown-menu'
+import { IconButton } from '@/components/ui/icon-button'
+import { Button } from '@/components/ui/button'
 import {
   createActivity,
   deleteActivity,
@@ -44,72 +40,34 @@ type ModuleFormProps = {
   onLessonClick: (activity: any) => void
 }
 
-const activityTypeConfig: Record<string, { label: string; color: string; Icon: any }> = {
-  TYPE_VIDEO: { label: 'Video', color: 'text-blue-600 bg-blue-50', Icon: Video },
-  TYPE_DOCUMENT: { label: 'Document', color: 'text-amber-600 bg-amber-50', Icon: File },
-  TYPE_ASSIGNMENT: { label: 'Assignment', color: 'text-purple-600 bg-purple-50', Icon: Puzzle },
-  TYPE_DYNAMIC: { label: 'Dynamic', color: 'text-green-600 bg-green-50', Icon: Code },
-  TYPE_SCORM: { label: 'SCORM', color: 'text-gray-600 bg-gray-50', Icon: Layers },
-}
-
 function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLessonClick }: ModuleFormProps) {
   const { t } = useTranslation()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const course = useCourse() as any
-  const [isSaving, setIsSaving] = useState(false)
-  const [showNewLessonModal, setShowNewLessonModal] = useState(false)
   const [isDeletingActivity, setIsDeletingActivity] = useState<string | null>(null)
   const [isCreatingLesson, setIsCreatingLesson] = useState(false)
-  const debounceRef = useRef<NodeJS.Timeout | null>(null)
-  const prevValuesRef = useRef({ name: chapter.name || '', description: chapter.description || '' })
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+  const [isSelectMode, setIsSelectMode] = useState(false)
 
   const activities = chapter.activities || []
   const withUnpublishedActivities = course?.withUnpublishedActivities || false
 
-  const formik = useFormik({
-    initialValues: {
-      name: chapter.name || '',
-      description: chapter.description || '',
-    },
-    onSubmit: async () => {},
-    enableReinitialize: true,
-  })
-
-  // Auto-save on change with debounce
-  useEffect(() => {
-    const currentValues = { name: formik.values.name, description: formik.values.description }
-    const initialVals = { name: formik.initialValues.name, description: formik.initialValues.description }
-
-    if (currentValues.name === initialVals.name && currentValues.description === initialVals.description) return
-    if (currentValues.name === prevValuesRef.current.name && currentValues.description === prevValuesRef.current.description) return
-
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(async () => {
-      setIsSaving(true)
-      try {
-        const changes: any = {}
-        if (currentValues.name !== initialVals.name) changes.name = currentValues.name
-        if (currentValues.description !== initialVals.description) changes.description = currentValues.description
-
-        if (Object.keys(changes).length > 0) {
-          await updateChapter(chapter.id, changes, access_token)
-          prevValuesRef.current = currentValues
-          await revalidateTags(['courses'], orgslug)
-          await mutate(getCourseMetaCacheKey(course_uuid, withUnpublishedActivities), undefined, { revalidate: true })
-        }
-      } catch (e) {
-        console.error('Failed to save module:', e)
-        toast.error('Failed to save module')
-      } finally {
-        setIsSaving(false)
-      }
-    }, 600)
-
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
+  const filteredAndSortedActivities = useMemo(() => {
+    let result = activities
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase()
+      result = activities.filter((a: any) =>
+        (a.name || '').toLowerCase().includes(q)
+      )
     }
-  }, [formik.values, formik.initialValues])
+    return [...result].sort((a: any, b: any) => {
+      const nameA = (a.name || '').toLowerCase()
+      const nameB = (b.name || '').toLowerCase()
+      return sortOrder === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA)
+    })
+  }, [activities, searchQuery, sortOrder])
 
   const refreshCourseData = async () => {
     try {
@@ -140,16 +98,16 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
     }
   }
 
-  const handleCreateLesson = async (values: { name: string; description: string }) => {
+  const handleCreateLesson = async () => {
     if (!access_token) return
     setIsCreatingLesson(true)
     try {
       const org = await getOrganizationContextInfoWithoutCredentials(orgslug, { revalidate: 1800 })
       const activityData = {
-        name: values.name,
+        name: 'New Lesson',
         chapter_id: chapter.id,
         activity_type: 'TYPE_DYNAMIC',
-        content: { description: values.description || '' },
+        content: { description: '' },
       }
       const result = await createActivity(activityData, chapter.id, org.id, access_token)
       if (!result || result.detail) {
@@ -157,7 +115,6 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
       }
       await refreshCourseData()
       toast.success('Lesson created')
-      setShowNewLessonModal(false)
     } catch (e) {
       toast.error('Failed to create lesson')
     } finally {
@@ -165,233 +122,135 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
     }
   }
 
-  const getTypeConfig = (type: string) => {
-    return activityTypeConfig[type] || { label: type, color: 'text-gray-600 bg-gray-50', Icon: BookOpen }
-  }
-
   return (
     <div>
-      {/* Back button */}
-      <button
-        onClick={onBack}
-        className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 mb-4 transition-colors"
-      >
-        <ArrowLeft size={16} />
-        Back to Modules
-      </button>
+      {/* Toolbar Row */}
+      <div className="flex items-center gap-3 mb-5">
+        {/* Search Bar */}
+        <div className="relative w-80">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search lessons..."
+            className="w-full h-7 pl-8 pr-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
+          />
+        </div>
 
-      <FormLayout onSubmit={formik.handleSubmit}>
-        <div className="space-y-6">
-          {/* Module Name + Description (compact) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField name="name">
-              <FormLabelAndMessage label="Module Name" message={formik.errors.name as string} />
-              <Form.Control asChild>
-                <Input
-                  style={{ backgroundColor: 'white' }}
-                  onChange={formik.handleChange}
-                  value={formik.values.name}
-                  type="text"
-                  required
-                  disabled={isSaving}
-                />
-              </Form.Control>
-            </FormField>
+        {/* Lesson count */}
+        <span className="text-xs text-gray-400 whitespace-nowrap">
+          {filteredAndSortedActivities.length} {filteredAndSortedActivities.length === 1 ? 'lesson' : 'lessons'}
+        </span>
 
-            <FormField name="description">
-              <FormLabelAndMessage label="Description" message={formik.errors.description as string} />
-              <Form.Control asChild>
-                <Input
-                  style={{ backgroundColor: 'white' }}
-                  onChange={formik.handleChange}
-                  value={formik.values.description}
-                  type="text"
-                  disabled={isSaving}
-                  placeholder="Optional"
-                />
-              </Form.Control>
-            </FormField>
-          </div>
+        {/* Spacer pushes actions to the right */}
+        <div className="flex-1" />
 
-          {isSaving && (
-            <div className="flex items-center gap-2 text-xs text-gray-400">
-              <Loader2 size={12} className="animate-spin" />
-              Saving...
-            </div>
+        {/* New Lesson Button */}
+        <Button
+          variant="primary"
+          size="small"
+          onClick={handleCreateLesson}
+          disabled={isCreatingLesson}
+        >
+          {isCreatingLesson ? (
+            <Loader2 size={14} className="animate-spin" />
+          ) : (
+            '+'
           )}
+          &nbsp;&nbsp;New
+        </Button>
 
-          {/* ── Lessons Section ── */}
-          <div className="border-t border-gray-200 pt-6 mt-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Lessons</h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  {activities.length} {activities.length === 1 ? 'lesson' : 'lessons'} in this module
+        {/* Select Mode Button */}
+        <Button
+          variant="secondary"
+          size="small"
+          onClick={() => setIsSelectMode(!isSelectMode)}
+          className="gap-1.5"
+        >
+          <CheckSquare size={14} strokeWidth={2.5} />
+          <span className="font-semibold">{isSelectMode ? 'Cancel' : 'Select'}</span>
+        </Button>
+
+        {/* Sort toggle button */}
+        <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')} aria-label="Sort lessons">
+          <ArrowUpDown size={15} />
+        </IconButton>
+      </div>
+
+      {/* Lesson List */}
+      <div className="space-y-3">
+        {filteredAndSortedActivities.map((activity: any) => {
+          return (
+            <div
+              key={activity.activity_uuid}
+              onClick={() => onLessonClick(activity)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onLessonClick(activity); }}
+              role="button"
+              tabIndex={0}
+              className="w-full text-left px-5 py-4 rounded-xl bg-white shadow-borders-base hover:border-gray-200 transition-colors flex items-center justify-between group cursor-pointer"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <FileText size={18} className="text-gray-400 flex-shrink-0" />
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {activity.name || 'Untitled Lesson'}
                 </p>
               </div>
-              <button
-                onClick={() => setShowNewLessonModal(true)}
-                className="px-4 py-2 bg-black text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-800 transition-colors"
-              >
-                <Plus size={16} />
-                Add Lesson
-              </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    onClick={(e) => e.stopPropagation()}
+                    className="h-7 w-7 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors flex-shrink-0"
+                  >
+                    <MoreVertical size={16} />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-28">
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      toast.success('Duplicate feature coming soon')
+                    }}
+                    className="gap-2"
+                  >
+                    <Copy size={14} />
+                    Duplicate
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      handleDeleteActivity(activity)
+                    }}
+                    className="text-red-600 gap-2"
+                  >
+                    {isDeletingActivity === activity.activity_uuid ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <Trash2 size={14} />
+                    )}
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
+          )
+        })}
 
-            {activities.length === 0 ? (
-              <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-100">
-                <BookOpen size={32} className="mx-auto mb-2 text-gray-300" />
-                <p className="text-sm text-gray-400">No lessons in this module yet</p>
-                <p className="text-xs text-gray-300 mt-1">Click "Add Lesson" to add your first lesson</p>
-              </div>
-            ) : (
-              <div className="space-y-1.5">
-                {activities.map((activity: any) => {
-                  const typeInfo = getTypeConfig(activity.activity_type)
-                  const TypeIcon = typeInfo.Icon
-                  return (
-                    <div
-                      key={activity.activity_uuid}
-                      onClick={() => onLessonClick(activity)}
-                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onLessonClick(activity); }}
-                      role="button"
-                      tabIndex={0}
-                      className="w-full text-left flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 transition-colors group cursor-pointer"
-                    >
-                      <div className={`p-1.5 rounded-md ${typeInfo.color}`}>
-                        <TypeIcon size={16} />
-                      </div>
-                      <div className="flex-1 min-w-0 text-left">
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {activity.name || 'Untitled Lesson'}
-                        </p>
-                        <span className={`text-xs px-1.5 py-0.5 rounded ${typeInfo.color}`}>
-                          {typeInfo.label}
-                        </span>
-                      </div>
-                      <ChevronRight size={16} className="text-gray-300 group-hover:text-gray-500 transition-colors flex-shrink-0" />
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleDeleteActivity(activity)
-                        }}
-                        disabled={isDeletingActivity === activity.activity_uuid}
-                        className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0"
-                        title="Delete lesson"
-                      >
-                        {isDeletingActivity === activity.activity_uuid ? (
-                          <Loader2 size={14} className="animate-spin" />
-                        ) : (
-                          <Trash2 size={14} />
-                        )}
-                      </button>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
+        {filteredAndSortedActivities.length === 0 && (
+          <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-100">
+            <BookOpen size={40} className="mx-auto mb-3 text-gray-300" />
+            <p className="text-sm text-gray-400">
+              {searchQuery ? 'No lessons match your search' : 'No lessons in this module yet'}
+            </p>
+            <p className="text-xs text-gray-300 mt-1">
+              {searchQuery ? 'Try a different search term' : 'Click "New" to add your first lesson'}
+            </p>
           </div>
-        </div>
-      </FormLayout>
-
-      {/* New Lesson Modal */}
-      {showNewLessonModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-              <h2 className="text-lg font-semibold text-gray-900">New Lesson</h2>
-              <button
-                onClick={() => setShowNewLessonModal(false)}
-                className="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            <NewLessonForm
-              onSubmit={handleCreateLesson}
-              onCancel={() => setShowNewLessonModal(false)}
-              isCreating={isCreatingLesson}
-            />
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-/* ── New Lesson Form ── */
-function NewLessonForm({
-  onSubmit,
-  onCancel,
-  isCreating,
-}: {
-  onSubmit: (values: { name: string; description: string }) => Promise<void>
-  onCancel: () => void
-  isCreating: boolean
-}) {
-  const formik = useFormik({
-    initialValues: {
-      name: '',
-      description: '',
-    },
-    onSubmit: async (values) => {
-      await onSubmit(values)
-    },
-  })
-
-  return (
-    <FormLayout onSubmit={formik.handleSubmit} className="px-6 py-5 space-y-5">
-      <FormField name="name">
-        <FormLabelAndMessage label="Lesson Name" message={formik.errors.name as string} />
-        <Form.Control asChild>
-          <Input
-            style={{ backgroundColor: 'white' }}
-            onChange={formik.handleChange}
-            value={formik.values.name}
-            type="text"
-            required
-            placeholder="e.g. Introduction to Variables"
-          />
-        </Form.Control>
-      </FormField>
-
-      <FormField name="description">
-        <FormLabelAndMessage label="Description (optional)" message={formik.errors.description as string} />
-        <Form.Control asChild>
-          <Textarea
-            style={{ backgroundColor: 'white', height: '100px', minHeight: '100px' }}
-            onChange={formik.handleChange}
-            value={formik.values.description}
-            placeholder="Brief description of this lesson"
-          />
-        </Form.Control>
-      </FormField>
-
-      <div className="flex items-center justify-end gap-3 pt-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
-          disabled={isCreating}
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={isCreating || !formik.values.name.trim()}
-          className="px-5 py-2 bg-black text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-gray-800 transition-colors disabled:opacity-50"
-        >
-          {isCreating ? (
-            <>
-              <Loader2 size={14} className="animate-spin" />
-              Creating...
-            </>
-          ) : (
-            'Create Lesson'
-          )}
-        </button>
+        )}
       </div>
-    </FormLayout>
+      </div>
   )
 }
 
