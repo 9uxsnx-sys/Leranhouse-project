@@ -137,7 +137,7 @@ The Koodook API enforces rate limits to ensure fair usage and platform stability
 
 ## API Documentation
 
-For complete API reference documentation, including endpoints, request/response formats, and examples, see the [Koodook API Reference](../api-reference/README.md).
+For complete API reference documentation, including endpoints, request/response formats, and examples, see the [Koodook API Reference](../../06-api-reference/README.md).
 
 ### Quick Start
 

@@ -183,7 +183,7 @@ Logs can be exported in the following formats:
 ## Best Practices
 
 - **Monitor regularly** — Review audit logs weekly for suspicious activity, such as failed login spikes or unexpected configuration changes.
-- **Set up alerts** — Configure webhook notifications for critical events (e.g., domain removal, API token creation) using the [API webhooks](../api-reference/webhooks.md) system.
+- **Set up alerts** — Configure webhook notifications for critical events (e.g., domain removal, API token creation) using the [API webhooks](../../06-api-reference/webhooks.md) system.
 - **Export periodically** — If your compliance requirements demand longer retention than Koodook provides, schedule regular exports.
 - **Investigate anomalies** — If a user reports an unexpected change, the audit log is the first place to check for who made the change and when.
 - **Train your team** — Ensure all admins understand that their actions are logged and auditable.

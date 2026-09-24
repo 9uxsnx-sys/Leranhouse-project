@@ -191,5 +191,4 @@ import { Button } from "@/components/ui/button"
 
 ## Related components
 
-- **[IconButton](./icon-button.md)** — Use for square icon-only buttons that don't need text labels (e.g., a 3-dot menu trigger, a search toggle).
 - **[DropdownMenu](./dropdown-menu.md)** — DropdownMenu.Trigger often wraps an IconButton or a plain `asChild` Button.

@@ -284,5 +284,4 @@ All standard Radix DropdownMenu props are forwarded.
 
 ## Related components
 
-- **[IconButton](./icon-button.md)** — The standard trigger for 3-dot menus (MoreVertical icon).
 - **[Button](./button.md)** — Alternative trigger for text-labeled menus.

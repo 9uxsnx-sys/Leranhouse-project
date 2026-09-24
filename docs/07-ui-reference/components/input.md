@@ -239,6 +239,5 @@ All native `<textarea>` attributes are forwarded.
 
 ## Related components
 
-- **[Form](./form.md)** — Form.Item, Form.Label, Form.Control, Form.ErrorMessage, Form.Hint wrappers.
 - **[Switch](./switch.md)** — Alternative for boolean toggles instead of checkbox inputs.
 - **[Button](./button.md)** — Submit button that pairs with Input fields in forms.

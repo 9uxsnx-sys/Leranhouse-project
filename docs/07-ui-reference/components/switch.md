@@ -151,4 +151,3 @@ All standard Radix `SwitchPrimitives.Root` props are forwarded, including `defau
 
 - **[Input](./input.md)** — Use for text, number, and search input fields.
 - **[Button](./button.md)** — Use for form submission actions.
-- **[Form](./form.md)** — Form.Item, Form.Label wrappers for consistent layout.
