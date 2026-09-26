@@ -225,11 +225,10 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
           </div>
         </div>
 
-        {/* Row 3: Content — sidebar removed, content stays max-w-3xl and centered */}
+        {/* Row 3: Content — sidebar removed, content centered */}
         <div className="w-full mx-auto max-w-7xl mt-8 pb-10 px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row">
-            {/* Main content column — keep max-w-3xl so cards don't stretch */}
-            <main className="flex-1 min-w-0 max-w-3xl">
+          {/* Main content column — centered */}
+          <main className="max-w-7xl mx-auto">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -285,8 +284,6 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
               </motion.div>
             </main>
 
-            {/* Sidebar removed — actions moved inline into each tab component */}
-          </div>
         </div>
       </CourseProvider>
     </div>
