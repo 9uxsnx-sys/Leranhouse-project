@@ -120,8 +120,8 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
   const currentTab = tabs.find(tab => tab.key === params.subpage)
   const hasAccessToCurrentPage = currentTab ? hasPermission(currentTab.requiredPermission) : false
 
-  // Sidebar is shown on all tabs
-  const showSidebar = true
+  // Sidebar is no longer shown; its actions (Preview, Save, Publish) are now in each tab's inline action row
+  const showSidebar = false
 
   // Redirect to first available tab if current page is not accessible
   useEffect(() => {
@@ -154,7 +154,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
   }
 
   return (
-    <div className="h-screen w-full bg-[#f8f8f8] grid grid-rows-[auto_auto_1fr] overflow-hidden">
+    <div className="min-h-screen w-full bg-[#f8f8f8]">
       <CourseProvider courseuuid={courseuuid} withUnpublishedActivities={true}>
         {/* Row 1: Page title — matching lesson-preview page style */}
         <div className="max-w-7xl mx-auto w-full pt-8 px-4 sm:px-6 lg:px-8">
@@ -225,11 +225,11 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
           </div>
         </div>
 
-        {/* Row 3: Content + Sidebar — exact lesson-preview layout */}
-        <div className="w-full mx-auto max-w-7xl mt-8 pb-10 overflow-y-auto min-h-0 px-4 sm:px-6 lg:px-8">
-          <div className={`flex flex-col lg:flex-row ${showSidebar ? 'gap-10 justify-between' : ''}`}>
-            {/* Main content column */}
-            <main className={`flex-1 min-w-0 ${showSidebar ? 'max-w-3xl' : 'w-full'}`}>
+        {/* Row 3: Content — sidebar removed, content stays max-w-3xl and centered */}
+        <div className="w-full mx-auto max-w-7xl mt-8 pb-10 px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row">
+            {/* Main content column — keep max-w-3xl so cards don't stretch */}
+            <main className="flex-1 min-w-0 max-w-3xl">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -285,12 +285,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
               </motion.div>
             </main>
 
-            {/* Sidebar — hidden for content and analytics tabs */}
-            {showSidebar && (
-              <div className="w-full lg:w-72 xl:w-80 shrink-0">
-                <CourseEditSidebar params={params} />
-              </div>
-            )}
+            {/* Sidebar removed — actions moved inline into each tab component */}
           </div>
         </div>
       </CourseProvider>

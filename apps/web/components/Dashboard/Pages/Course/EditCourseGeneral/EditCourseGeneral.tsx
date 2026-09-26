@@ -4,11 +4,17 @@ import FormLayout, {
   FormLabelAndMessage,
 } from '@components/Objects/StyledElements/Form/Form';
 import { useFormik } from 'formik';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Eye, Globe, GlobeLock, Loader2, Check, SaveAllIcon } from 'lucide-react';
 import * as Form from '@radix-ui/react-form';
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import ThumbnailUpdate from './ThumbnailUpdate';
-import { useCourseFieldSync } from '@components/Contexts/CourseContext';
+import {
+  useCourseFieldSync,
+  useCourseDispatch,
+  getCourseMetaCacheKey,
+  useCourse,
+  useDebounceManager,
+} from '@components/Contexts/CourseContext';
 import LearningItemsList from './LearningItemsList';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,6 +27,14 @@ import {
   CustomSelectContent,
   CustomSelectItem,
 } from './CustomSelect';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { updateCourse } from '@services/courses/courses';
+import { revalidateTags } from '@services/utils/ts/requests';
+import { mutate } from 'swr';
+import toast from 'react-hot-toast';
+import Link from 'next/link';
+import { getUriWithOrg } from '@services/config/config';
+import { useOrg } from '@components/Contexts/OrgContext';
 
 type EditCourseStructureProps = {
   orgslug: string
@@ -87,6 +101,14 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
   const { t } = useTranslation()
   const [error, setError] = useState('');
   const [difficultyOpen, setDifficultyOpen] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isManualSaving, setIsManualSaving] = useState(false);
+  const dispatchCourse = useCourseDispatch() as any;
+  const session = useLHSession() as any;
+  const org = useOrg() as any;
+  const course = useCourse() as any;
+  const withUnpublishedActivities = course?.withUnpublishedActivities ?? false;
+  const debounceManager = useDebounceManager();
 
   // Use the new field sync hook
   const {
@@ -244,6 +266,98 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
     }
   }, [formik.values, formik.initialValues, isLoading, isSaving, syncChanges]);
 
+  const isPublished = courseStructure?.published ?? false;
+  const courseUUID = courseStructure?.course_uuid ?? ''
+  const courseUUIDForUrl = courseUUID.replace('course_', '');
+  const cacheKey = courseUUID
+    ? getCourseMetaCacheKey(courseUUID, withUnpublishedActivities)
+    : null;
+
+  const togglePublishStatus = useCallback(async () => {
+    if (isPublishing || !courseUUID) return;
+    setIsPublishing(true);
+
+    const newPublishedStatus = !isPublished;
+    const toastMessage = newPublishedStatus
+      ? t('dashboard.courses.publishing')
+      : t('dashboard.courses.unpublishing');
+    const toastId = toast.loading(toastMessage);
+
+    const previousState = { ...courseStructure };
+    dispatchCourse({
+      type: 'mergePendingChanges',
+      payload: { published: newPublishedStatus }
+    });
+
+    try {
+      await updateCourse(
+        courseUUID,
+        { published: newPublishedStatus },
+        session.data?.tokens?.access_token
+      );
+
+      if (cacheKey) {
+        await mutate(cacheKey, { ...courseStructure, published: newPublishedStatus }, { revalidate: false });
+      }
+
+      await revalidateTags(['courses'], props.orgslug);
+
+      toast.dismiss(toastId);
+      toast.success(
+        newPublishedStatus
+          ? t('dashboard.courses.published_success')
+          : t('dashboard.courses.unpublished_success')
+      );
+    } catch (error) {
+      dispatchCourse({
+        type: 'mergePendingChanges',
+        payload: { published: previousState.published }
+      });
+      toast.dismiss(toastId);
+      toast.error(t('dashboard.courses.publish_error'));
+    } finally {
+      setIsPublishing(false);
+    }
+  }, [
+    isPublishing, isPublished, courseStructure, courseUUID, cacheKey,
+    session.data?.tokens?.access_token, dispatchCourse, props.orgslug, t
+  ]);
+
+  const isSaved = course?.isSaved ?? true;
+  const isActiveSaving = isSaving || isManualSaving;
+
+  const handleManualSave = useCallback(async () => {
+    if (isActiveSaving || !courseUUID) return;
+    setIsManualSaving(true);
+
+    // Cancel any pending debounced saves
+    debounceManager.cancelAll();
+
+    dispatchCourse({ type: 'setSaving', payload: true });
+
+    try {
+      await updateCourse(
+        courseUUID,
+        courseStructure,
+        session.data?.tokens?.access_token
+      );
+
+      if (cacheKey) {
+        await mutate(cacheKey, { ...courseStructure }, { revalidate: false });
+      }
+      await revalidateTags(['courses'], props.orgslug);
+
+      dispatchCourse({ type: 'setIsSaved' });
+      toast.success('Changes saved');
+    } catch (error) {
+      dispatchCourse({ type: 'setSaveError', payload: 'Failed to save' });
+      toast.error('Failed to save');
+    } finally {
+      dispatchCourse({ type: 'setSaving', payload: false });
+      setIsManualSaving(false);
+    }
+  }, [isActiveSaving, courseUUID, courseStructure, cacheKey, session.data?.tokens?.access_token, dispatchCourse, props.orgslug, debounceManager]);
+
   // useCourseFieldSync handles the unmount cleanup (flushing pending edits
   // instead of discarding them), so no local cleanup is needed here.
 
@@ -261,7 +375,70 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
               </div>
             )}
 
-            <div className="space-y-8">
+            <div className="space-y-3">
+              {/* ── ACTION ROW ── */}
+              <div className="flex items-center justify-between">
+                {/* Left: Preview */}
+                <Link
+                  href={getUriWithOrg(org?.slug, '') + `/course/${courseUUIDForUrl}`}
+                  target="_blank"
+                  className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+                >
+                  <Eye size={14} />
+                  <span>Preview</span>
+                </Link>
+
+                {/* Right: Save + Publish */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={isSaved ? undefined : handleManualSave}
+                    disabled={isActiveSaving}
+                    className={`inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors ${
+                      isActiveSaving
+                        ? 'bg-black text-white border-black opacity-50 cursor-not-allowed'
+                        : isSaved
+                          ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                          : 'bg-black text-white border-black hover:opacity-90 cursor-pointer'
+                    }`}
+                  >
+                    {isActiveSaving ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : isSaved ? (
+                      <Check size={14} />
+                    ) : (
+                      <SaveAllIcon size={14} />
+                    )}
+                    <span>
+                      {isActiveSaving
+                        ? 'Saving...'
+                        : isSaved
+                          ? 'Saved'
+                          : 'Save'}
+                    </span>
+                  </button>
+                  <button
+                    onClick={togglePublishStatus}
+                    disabled={isPublishing}
+                    className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50 ${isPublishing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  >
+                    {isPublishing ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : isPublished ? (
+                      <Globe size={14} />
+                    ) : (
+                      <GlobeLock size={14} />
+                    )}
+                    <span>
+                      {isPublishing
+                        ? 'Processing...'
+                        : isPublished
+                          ? 'Published'
+                          : 'Unpublished'}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
               {/* ── BASIC INFORMATION ── */}
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                 <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Basic Information</h3>

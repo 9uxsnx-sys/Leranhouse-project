@@ -87,7 +87,19 @@ Clicking **New** immediately creates a lesson with default name "New Lesson" and
 
 ## Lesson Detail Form
 
-Clicking a lesson opens the detail form with sectioned white cards:
+Clicking a lesson opens the detail form with sectioned white cards.
+
+### Action Row
+
+Above the sectioned cards, there is an inline **action row**:
+
+```
+[👁 Preview]                    [Save] [Publish/Unpublish]
+```
+
+- **Preview** (left) — opens the lesson preview page in a new tab, showing how the lesson appears to learners (What You'll Learn, activity content, Key Takeaways, Resources, Knowledge Checks). Links to `/course/{uuid}/lesson-preview?activityid={id}`.
+- **Save** (right) — white background when saved, black background when unsaved. Clicking triggers an immediate save. Not clickable when already in saved state.
+- **Publish/Unpublish** (right) — toggles the lesson's published state, saved via auto-save.
 
 ### Basic Information
 

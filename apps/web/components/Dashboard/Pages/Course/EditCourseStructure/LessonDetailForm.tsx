@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useCallback } from 'react'
 import { useFormik } from 'formik'
 import * as Form from '@radix-ui/react-form'
 import FormLayout, {
@@ -13,8 +13,11 @@ import ResourceItemsList from '../EditCourseGeneral/ResourceItemsList'
 import KnowledgeCheckItemsList from '../EditCourseGeneral/KnowledgeCheckItemsList'
 import { updateActivity } from '@services/courses/activities'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Eye, Globe, GlobeLock, Loader2, Check, SaveAllIcon } from 'lucide-react'
 import toast from 'react-hot-toast'
+import Link from 'next/link'
+import { getUriWithOrg } from '@services/config/config'
+import { useOrg } from '@components/Contexts/OrgContext'
 
 type LessonDetailFormProps = {
   activity: any
@@ -28,9 +31,12 @@ const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base
 
 function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: LessonDetailFormProps) {
   const session = useLHSession() as any
+  const org = useOrg() as any
   const access_token = session?.data?.tokens?.access_token
   const [published, setPublished] = useState(activity.published ?? false)
+  const [isSavingLesson, setIsSavingLesson] = useState(false)
   const debounceRef = useRef<NodeJS.Timeout | null>(null)
+  const lastSavedSnapshotRef = useRef('')
 
   const initialMeta = activity.extra_metadata || {}
 
@@ -127,6 +133,7 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
 
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(async () => {
+      setIsSavingLesson(true)
       try {
         const data: any = {}
         if (nameChanged) data.name = currentName
@@ -136,6 +143,16 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
 
         if (Object.keys(data).length > 0) {
           await updateActivity(data, activity.activity_uuid, access_token)
+          const snapshot = JSON.stringify({
+            name: currentName,
+            description: currentDesc,
+            published: currentPublished,
+            learningObjectivesStr,
+            takeawaysStr,
+            resourcesStr,
+            knowledgeChecksStr,
+          })
+          lastSavedSnapshotRef.current = snapshot
           initialValuesRef.current = {
             name: currentName,
             description: currentDesc,
@@ -149,6 +166,8 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
       } catch (e) {
         console.error('Failed to save lesson:', e)
         toast.error('Failed to save lesson')
+      } finally {
+        setIsSavingLesson(false)
       }
     }, 600)
 
@@ -174,18 +193,164 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
     }
   }, [formik.values, learningObjectivesStr, takeawaysStr, resourcesStr, knowledgeChecksStr, published])
 
+  // Compute save status for the indicator
+  const currentSnapshot = JSON.stringify({
+    name: formik.values.name,
+    description: formik.values.description,
+    published,
+    learningObjectivesStr,
+    takeawaysStr,
+    resourcesStr,
+    knowledgeChecksStr,
+  })
+  const hasUnsavedChanges = currentSnapshot !== lastSavedSnapshotRef.current
+
+  // Initialize snapshot on mount
+  useEffect(() => {
+    lastSavedSnapshotRef.current = currentSnapshot
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Manual save: flush debounce and save immediately
+  const handleManualSave = useCallback(() => {
+    if (isSavingLesson) return
+
+    // Clear pending debounce
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+    }
+
+    // Read latest values
+    const learningObjectivesArr = parseItemsList(learningObjectivesStr)
+    let takeawaysArr = []
+    try { takeawaysArr = JSON.parse(takeawaysStr); if (!Array.isArray(takeawaysArr)) takeawaysArr = [] } catch { takeawaysArr = [] }
+    let resourcesArr = []
+    try { resourcesArr = JSON.parse(resourcesStr); if (!Array.isArray(resourcesArr)) resourcesArr = [] } catch { resourcesArr = [] }
+    let knowledgeChecksArr = []
+    try { knowledgeChecksArr = JSON.parse(knowledgeChecksStr); if (!Array.isArray(knowledgeChecksArr)) knowledgeChecksArr = [] } catch { knowledgeChecksArr = [] }
+    const currentMeta = {
+      learning_objectives: learningObjectivesArr,
+      takeaways: takeawaysArr,
+      resources: resourcesArr,
+      knowledge_checks: knowledgeChecksArr,
+    }
+
+    const currentName = formik.values.name
+    const currentDesc = formik.values.description
+    const currentPublished = published
+    const init = initialValuesRef.current
+
+    const nameChanged = currentName !== init.name
+    const descChanged = currentDesc !== init.description
+    const publishedChanged = currentPublished !== init.published
+    const metaChanged =
+      learningObjectivesStr !== init.learningObjectivesStr ||
+      takeawaysStr !== init.takeawaysStr ||
+      resourcesStr !== init.resourcesStr ||
+      knowledgeChecksStr !== init.knowledgeChecksStr
+
+    if (!nameChanged && !descChanged && !publishedChanged && !metaChanged) return
+
+    setIsSavingLesson(true)
+
+    ;(async () => {
+      try {
+        const data: any = {}
+        if (nameChanged) data.name = currentName
+        if (descChanged) data.content = { ...(activity.content || {}), description: currentDesc }
+        if (publishedChanged) data.published = currentPublished
+        if (metaChanged) data.extra_metadata = currentMeta
+
+        if (Object.keys(data).length > 0) {
+          await updateActivity(data, activity.activity_uuid, access_token)
+          const snapshot = JSON.stringify({
+            name: currentName,
+            description: currentDesc,
+            published: currentPublished,
+            learningObjectivesStr,
+            takeawaysStr,
+            resourcesStr,
+            knowledgeChecksStr,
+          })
+          lastSavedSnapshotRef.current = snapshot
+          initialValuesRef.current = {
+            name: currentName,
+            description: currentDesc,
+            published: currentPublished,
+            learningObjectivesStr,
+            takeawaysStr,
+            resourcesStr,
+            knowledgeChecksStr,
+          }
+        }
+      } catch (e) {
+        console.error('Failed to save lesson:', e)
+        toast.error('Failed to save lesson')
+      } finally {
+        setIsSavingLesson(false)
+      }
+    })()
+  }, [formik.values.name, formik.values.description, published, learningObjectivesStr, takeawaysStr, resourcesStr, knowledgeChecksStr, activity, access_token, isSavingLesson])
+
   return (
     <div>
-      {/* Back button */}
-      <button
-        onClick={onBack}
-        className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 mb-5 transition-colors"
-      >
-        <ArrowLeft size={16} />
-        Back to Lessons
-      </button>
+      <FormLayout onSubmit={formik.handleSubmit} className="space-y-3">
+        {/* ── ACTION ROW ── */}
+        <div className="flex items-center justify-between">
+          {/* Left: Preview */}
+          <Link
+            href={getUriWithOrg(org?.slug, '') + `/course/${course_uuid.replace('course_', '')}/lesson-preview?activityid=${activity.activity_uuid}`}
+            target="_blank"
+            className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+          >
+            <Eye size={14} />
+            <span>Preview</span>
+          </Link>
 
-      <FormLayout onSubmit={formik.handleSubmit} className="space-y-5">
+          {/* Right: Save + Publish */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={hasUnsavedChanges ? handleManualSave : undefined}
+              disabled={isSavingLesson}
+              className={`inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors ${
+                isSavingLesson
+                  ? 'bg-black text-white border-black opacity-50 cursor-not-allowed'
+                  : hasUnsavedChanges
+                    ? 'bg-black text-white border-black hover:opacity-90 cursor-pointer'
+                    : 'bg-white text-gray-600 border-gray-200 cursor-default'
+              }`}
+            >
+              {isSavingLesson ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : hasUnsavedChanges ? (
+                <SaveAllIcon size={14} />
+              ) : (
+                <Check size={14} />
+              )}
+              <span>
+                {isSavingLesson
+                  ? 'Saving...'
+                  : hasUnsavedChanges
+                    ? 'Save'
+                    : 'Saved'}
+              </span>
+            </button>
+            <button
+              onClick={() => setPublished(!published)}
+              className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              {published ? (
+                <Globe size={14} />
+              ) : (
+                <GlobeLock size={14} />
+              )}
+              <span>
+                {published ? 'Published' : 'Unpublished'}
+              </span>
+            </button>
+          </div>
+        </div>
+
         {/* ── BASIC INFORMATION ── */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
           <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Basic Information</h3>

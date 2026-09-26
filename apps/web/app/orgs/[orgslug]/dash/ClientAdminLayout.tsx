@@ -31,7 +31,7 @@ function ClientAdminLayout({
                         ) : (
                             <DashLeftMenu />
                         )}
-                        <div className="flex flex-col w-full h-dvh overflow-hidden relative isolate">
+                        <div className="flex flex-col w-full min-h-dvh relative isolate">
                             <AdminTopBar />
                             <FreePlanUpgradeBanner />
                             {children}

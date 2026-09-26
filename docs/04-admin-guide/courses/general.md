@@ -37,6 +37,18 @@ Optional categories for organizing courses on the platform.
 
 ---
 
+## Action Row
+
+Above the sectioned cards, there is an inline **action row**:
+
+```
+[👁 Preview]                    [Save] [Publish/Unpublish]
+```
+
+- **Preview** (left) — opens the course page in a new tab as a user would see it. Links to the public course URL (strips the `course_` prefix from the UUID).
+- **Save** (right) — white background when saved, black background when unsaved changes exist. Clicking saves all pending changes immediately. Not clickable when already saved.
+- **Publish/Unpublish** (right) — toggles the course published state with confirmation toast feedback.
+
 ## UI Pattern
 
 The General tab uses **sectioned white cards** on a light grey background:
