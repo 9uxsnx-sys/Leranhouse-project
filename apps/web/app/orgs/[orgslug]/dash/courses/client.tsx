@@ -138,6 +138,7 @@ function CoursesHome(params: CourseProps) {
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('')
+  const [activeFilter, setActiveFilter] = useState('All')
 
   // Filter courses based on search and usergroup (client-side)
   const filteredCourses = useMemo(() => {
@@ -160,7 +161,7 @@ function CoursesHome(params: CourseProps) {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 12
+  const itemsPerPage = 8
 
   // Reset to page 1 when search or filter changes
   React.useEffect(() => {
@@ -478,35 +479,77 @@ function CoursesHome(params: CourseProps) {
               disabled={courseLimitReached}
               onClick={() => { setCreationType('scratch'); setNewCourseModal(true); }}
             >
-              +&nbsp;{t('courses.new_course')}
+              +&nbsp;New
             </Button>
           </AuthenticatedClientElement>
 
           {/* Select Toggle (Admin feature) */}
-          <Button
-            variant="secondary"
-            size="small"
-            onClick={() => { setIsSelectMode(prev => !prev); if (isSelectMode) clearSelection(); }}
-            className="gap-x-1.5"
-          >
-            <CheckSquare size={14} />
-            <span>{isSelectMode ? t('cancel') : t('courses.select_courses')}</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => { setIsSelectMode(prev => !prev); if (isSelectMode) clearSelection(); }}
+              className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+            >
+              <CheckSquare size={14} />
+              <span>{isSelectMode ? t('cancel') : t('courses.select_courses')}</span>
+            </button>
 
-          {/* Filter — Medusa IconButton + DropdownMenu */}
+            {/* Bulk actions — show when items selected */}
+            {selectedCourses.size > 0 && (
+              <AuthenticatedClientElement
+                checkMethod="roles"
+                action="update"
+                ressourceType="courses"
+                orgId={params.org_id}
+              >
+                <ConfirmationModal
+                  confirmationButtonText={t('courses.clone_selected')}
+                  confirmationMessage={t('courses.clone_selected_confirm', { count: selectedCourses.size })}
+                  dialogTitle={t('courses.clone_courses_title')}
+                  dialogTrigger={
+                    <Button variant="secondary" size="small" className="gap-x-1.5">
+                      <Copy size={14} />
+                      <span>{t('courses.clone_selected')}</span>
+                    </Button>
+                  }
+                  functionToExecute={bulkCloneCourses}
+                  status="info"
+                />
+                <Button variant="secondary" size="small" className="gap-x-1.5" onClick={bulkExportCourses}>
+                  <Download size={14} />
+                  <span>{t('courses.export_selected')}</span>
+                </Button>
+                <ConfirmationModal
+                  confirmationButtonText={t('courses.delete_selected')}
+                  confirmationMessage={t('courses.delete_selected_confirm', { count: selectedCourses.size })}
+                  dialogTitle={t('courses.delete_courses_title')}
+                  dialogTrigger={
+                    <Button variant="secondary" size="small" className="gap-x-1.5 text-red-600 border-red-200 hover:bg-red-50">
+                      <Trash2 size={14} />
+                      <span>{t('courses.delete_selected')}</span>
+                    </Button>
+                  }
+                  functionToExecute={bulkDeleteCourses}
+                  status="warning"
+                />
+              </AuthenticatedClientElement>
+            )}
+          </div>
+
+          {/* Filter — Button + DropdownMenu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label={t('courses.filter_courses')}>
-                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <Button variant="secondary" size="small" className="gap-x-1.5">
+                <svg width="14" height="14" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M2.5 4.5h10M4.5 7.5h6M6.5 10.5h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-              </IconButton>
+                <span>{activeFilter}</span>
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white min-w-0 w-28">
-              <DropdownMenuItem>All Courses</DropdownMenuItem>
-              <DropdownMenuItem>Easy</DropdownMenuItem>
-              <DropdownMenuItem>Medium</DropdownMenuItem>
-              <DropdownMenuItem>Hard</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setActiveFilter('All')}>All Courses</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setActiveFilter('Easy')}>Easy</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setActiveFilter('Medium')}>Medium</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setActiveFilter('Hard')}>Hard</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -545,56 +588,6 @@ function CoursesHome(params: CourseProps) {
         </div>
       )}
 
-      {/* Bulk Action Bar (Admin feature) */}
-      {selectedCourses.size > 0 && (
-        <div className="mb-4 flex items-center gap-2 px-4 py-2 bg-ui-bg-component rounded-lg shadow-borders-base">
-          <span className="txt-compact-small-plus text-ui-fg-base mr-2">
-            {t('courses.selected_count', { count: selectedCourses.size })}
-          </span>
-          <button onClick={selectAllCourses} className="txt-compact-small text-ui-fg-muted hover:text-ui-fg-base px-2 py-1">
-            {t('courses.select_all')}
-          </button>
-          <button onClick={clearSelection} className="txt-compact-small text-ui-fg-muted hover:text-ui-fg-base px-2 py-1">
-            <X className="w-3.5 h-3.5 inline mr-1" />{t('courses.clear_selection')}
-          </button>
-          <div className="w-px h-5 bg-gray-200 mx-1" />
-          <AuthenticatedClientElement
-            checkMethod="roles"
-            action="update"
-            ressourceType="courses"
-            orgId={params.org_id}
-          >
-            <ConfirmationModal
-              confirmationButtonText={t('courses.clone_selected')}
-              confirmationMessage={t('courses.clone_selected_confirm', { count: selectedCourses.size })}
-              dialogTitle={t('courses.clone_courses_title')}
-              dialogTrigger={
-                <button className="txt-compact-small text-ui-fg-muted hover:text-ui-fg-base px-2 py-1">
-                  <Copy className="w-3.5 h-3.5 inline mr-1" />{t('courses.clone_selected')}
-                </button>
-              }
-              functionToExecute={bulkCloneCourses}
-              status="info"
-            />
-            <button onClick={bulkExportCourses} className="txt-compact-small text-ui-fg-muted hover:text-ui-fg-base px-2 py-1">
-              <Download className="w-3.5 h-3.5 inline mr-1" />{t('courses.export_selected')}
-            </button>
-            <ConfirmationModal
-              confirmationButtonText={t('courses.delete_selected')}
-              confirmationMessage={t('courses.delete_selected_confirm', { count: selectedCourses.size })}
-              dialogTitle={t('courses.delete_courses_title')}
-              dialogTrigger={
-                <button className="txt-compact-small text-red-600 hover:text-red-700 px-2 py-1">
-                  <Trash2 className="w-3.5 h-3.5 inline mr-1" />{t('courses.delete_selected')}
-                </button>
-              }
-              functionToExecute={bulkDeleteCourses}
-              status="warning"
-            />
-          </AuthenticatedClientElement>
-        </div>
-      )}
-
       {/* Course Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {paginatedCourses.map((course: any) => {
@@ -605,20 +598,20 @@ function CoursesHome(params: CourseProps) {
             <div key={course.course_uuid} className="relative group">
               {/* Selection checkbox - visible in select mode */}
               {isSelectMode && (
-                <div className="absolute top-2 left-2 z-20">
-                  <IconButton
-                    variant="transparent"
-                    size="small"
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleCourseSelection(course.course_uuid); }}
-                    aria-label={selectedCourses.has(course.course_uuid) ? 'Deselect course' : 'Select course'}
-                    className="bg-white/90 backdrop-blur-sm"
-                  >
-                    {selectedCourses.has(course.course_uuid)
-                      ? <CheckSquare className="h-4 w-4 text-black" />
-                      : <div className="h-4 w-4 border border-gray-400 rounded" />
-                    }
-                  </IconButton>
-                </div>
+                <label className="absolute top-2 left-2 z-20 w-5 h-5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={selectedCourses.has(course.course_uuid)}
+                    onChange={() => toggleCourseSelection(course.course_uuid)}
+                    onClick={(e) => e.stopPropagation()}
+                    className="sr-only peer"
+                  />
+                  <div className="w-full h-full rounded-md border border-gray-300 bg-white peer-checked:bg-gray-500 peer-checked:border-gray-500 flex items-center justify-center transition-all duration-200 shadow-sm peer-hover:border-gray-400 peer-checked:shadow-md">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className="scale-0 peer-checked:scale-100 transition-transform duration-200">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </div>
+                </label>
               )}
 
               <CourseCard
@@ -730,7 +723,7 @@ function CoursesHome(params: CourseProps) {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-1 pt-6 pb-0">
+        <div className="flex items-center justify-center gap-1 pt-6 pb-8">
           <Button
             variant="transparent"
             size="small"

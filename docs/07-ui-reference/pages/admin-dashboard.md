@@ -69,11 +69,11 @@ Defined in `apps/web/components/Dashboard/Menus/AdminTopBar.tsx`.
 - **Create new course** action.
 - **Course migrate** tool at `/orgs/[orgslug]/dash/courses/migrate`.
 
-#### Course Editor (6 Tabs)
+#### Course Editor (7 Tabs)
 
 **Route**: `/orgs/[orgslug]/dash/courses/course/[courseuuid]/[subpage]` — File: `apps/web/app/orgs/[orgslug]/dash/courses/course/[courseuuid]/[subpage]/page.tsx`
 
-The course editor has 6 tabs, each guarded by permissions and plan requirements:
+The course editor has 7 tabs, each guarded by permissions and plan requirements:
 
 1. **General** (`/general`) — `Settings` icon
    - Required permission: `update`
@@ -83,7 +83,7 @@ The course editor has 6 tabs, each guarded by permissions and plan requirements:
 2. **Content** (`/content`) — `BookOpen` icon
    - Required permission: `update_content`
    - Component: `EditCourseStructure`
-   - Chapter and activity management: reorder, add, edit, delete chapters and activities. Drag-and-drop curriculum builder.
+   - Module and lesson management: reorder, add, edit, delete modules and lessons. Drag-and-drop curriculum builder.
 
 3. **Access** (`/access`) — `Globe` icon
    - Required permission: `manage_access`
@@ -93,21 +93,24 @@ The course editor has 6 tabs, each guarded by permissions and plan requirements:
 4. **Contributors** (`/contributors`) — `Users` icon
    - Required permission: `manage_contributors`
    - Component: `EditCourseContributors`
-   - Add/remove contributors, set roles (instructor, assistant, reviewer).
+   - Add/remove contributors via search, set roles (Creator, Maintainer, Contributor, Reporter), toggle active status, bulk remove.
 
 5. **Certification** (`/certification`) — `Award` icon (plan-restricted)
    - Required permission: `update`
    - Requires plan: `standard` or above
    - Component: `EditCourseCertification`
-   - Certificate design, passing criteria, expiration settings.
+   - Enable/disable certification, certificate design (title, description, background color, logo), passing criteria.
 
 6. **SEO** (`/seo`) — `Search` icon (plan-restricted)
    - Required permission: `update`
    - Requires plan: `standard` or above
    - Component: `EditCourseSEO`
-   - Meta title, description, Open Graph image, custom URL slug.
+   - Meta title, meta description, meta keywords, social preview (Twitter/X card type, title, description), URL slug.
 
-- **Analytics tab**: `CourseAnalyticsTab` component — course-specific analytics (enrollments, completion rates, engagement).
+7. **Analytics** (`/analytics`) — `BarChart` icon
+   - Component: `CourseAnalyticsTab`
+   - Course-specific analytics (enrollments, completion rates, engagement).
+
 - **Context**: Wrapped in `CourseProvider` for shared course state.
 - **Rights checking**: `useCourseRights` hook verifies user permissions for each tab.
 - **Navigation**: Tab bar with icons and labels; active tab highlighted with bottom border or underline.
@@ -199,7 +202,13 @@ Subpages:
 
 **Route**: `/orgs/[orgslug]/dash/communities` — File: `apps/web/app/orgs/[orgslug]/dash/communities/client.tsx`
 
-- **Community list** with search and management actions.
+- **Community list** with card-based layout (same design as course list).
+- **Search bar** with live results count.
+- **Filter dropdown**: All Communities, Newest, Course Communities, General.
+- **Select mode**: toggle to enable per-card checkboxes for bulk delete.
+- **Bulk delete** with confirmation modal.
+- **Create new community** button.
+- **Pagination** (8 communities per page).
 - **Community editor**: `/orgs/[orgslug]/dash/communities/[communityuuid]/[subpage]` — Edit community settings, moderate discussions, manage members.
 
 ### Podcast Management

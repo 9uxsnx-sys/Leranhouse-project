@@ -31,8 +31,12 @@ The dashboard course list shows all courses in your organization with:
 - Course thumbnail and name
 - Module and lesson counts
 - Published/unpublished status
-- Search and filter options
-- 3-dot menu per course with **Delete** and **Clone** options
+- Search bar with live results count
+- Difficulty filter (All, Easy, Medium, Hard)
+- **Select mode**: toggle to enable per-card checkboxes for bulk operations
+- **Bulk actions** (visible when courses are selected): Clone, Export, Delete
+- 3-dot menu per course with **Delete**, **Clone**, and **Export** options
+- Pagination (8 courses per page)
 
 ## Editor Layout
 
