@@ -1,9 +1,8 @@
 'use client'
-import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import { getUriWithOrg } from '@services/config/config'
-import { TextIcon, LucideIcon, Image as ImageIcon, Link2, Shield, MessagesSquare, Users } from 'lucide-react'
+import { TextIcon, LucideIcon, Image as ImageIcon, Link2, Shield, Users } from 'lucide-react'
 import Link from 'next/link'
-import React, { useEffect, use } from 'react'
+import React, { use } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'motion/react'
 import { useOrg } from '@components/Contexts/OrgContext'
@@ -34,111 +33,84 @@ const SETTING_TABS: TabItem[] = [
   { id: 'moderation', labelKey: 'dashboard.courses.communities.settings.tabs.moderation', icon: Shield },
 ]
 
-function TabLink({
-  tab,
-  isActive,
-  orgslug,
-  communityuuid,
-  t,
-}: {
-  tab: TabItem
-  isActive: boolean
-  orgslug: string
-  communityuuid: string
-  t: (key: string) => string
-}) {
+function CommunityPageTitle() {
+  const communityState = useCommunity()
+  const community = communityState?.community
   return (
-    <Link href={getUriWithOrg(orgslug, '') + `/dash/communities/${communityuuid}/${tab.id}`}>
-      <div
-        className={`py-2 w-fit text-center border-black transition-all ease-linear ${
-          isActive ? 'border-b-4' : 'opacity-50'
-        } cursor-pointer`}
-      >
-        <div className="flex items-center space-x-2.5 mx-2.5">
-          <tab.icon size={16} />
-          <div className="flex items-center">{t(tab.labelKey)}</div>
-        </div>
-      </div>
-    </Link>
+    <h1 className="text-3xl md:text-4xl font-semibold text-ui-fg-base leading-tight">
+      {community?.name || '...'}
+    </h1>
   )
 }
 
 function CommunitySettingsContent({ params }: { params: CommunityParams }) {
   const { t } = useTranslation()
   const org = useOrg() as any
-  const communityState = useCommunity()
-  const community = communityState?.community
-
-  const [H1Label, setH1Label] = React.useState('')
-  const [H2Label, setH2Label] = React.useState('')
-
-  function handleLabels() {
-    if (params.subpage === 'general') {
-      setH1Label(t('dashboard.courses.communities.settings.general.title'))
-      setH2Label(t('dashboard.courses.communities.settings.general.subtitle'))
-    } else if (params.subpage === 'thumbnail') {
-      setH1Label(t('dashboard.courses.communities.settings.thumbnail.title'))
-      setH2Label(t('dashboard.courses.communities.settings.thumbnail.subtitle'))
-    } else if (params.subpage === 'access') {
-      setH1Label(t('dashboard.courses.communities.settings.access.title'))
-      setH2Label(t('dashboard.courses.communities.settings.access.subtitle'))
-    } else if (params.subpage === 'course') {
-      setH1Label(t('dashboard.courses.communities.settings.course.title'))
-      setH2Label(t('dashboard.courses.communities.settings.course.subtitle'))
-    } else if (params.subpage === 'moderation') {
-      setH1Label(t('dashboard.courses.communities.settings.moderation.title'))
-      setH2Label(t('dashboard.courses.communities.settings.moderation.subtitle'))
-    }
-  }
-
-  useEffect(() => {
-    handleLabels()
-  }, [params.subpage, t])
-
-  if (!community) return null
 
   return (
-    <div className="h-full w-full bg-[#f8f8f8] flex flex-col">
-      <div className="pl-10 pr-10 tracking-tight bg-[#fcfbfc] z-10 nice-shadow flex-shrink-0 relative">
-        <div className="pt-6 pb-4">
-          <Breadcrumbs items={[
-            { label: t('dashboard.courses.communities.title'), href: '/dash/communities', icon: <MessagesSquare size={14} /> },
-            { label: community.name }
-          ]} />
-        </div>
-        <div className="my-2 py-2">
-          <div className="w-100 flex flex-col space-y-1">
-            <div className="pt-3 flex font-bold text-4xl tracking-tighter">{H1Label}</div>
-            <div className="flex font-medium text-gray-400 text-md">{H2Label}</div>
-          </div>
-        </div>
-        <div className="flex space-x-0.5 font-black text-sm">
-          {SETTING_TABS.map((tab) => (
-            <TabLink
-              key={tab.id}
-              tab={tab}
-              isActive={params.subpage === tab.id}
-              orgslug={params.orgslug}
-              communityuuid={params.communityuuid}
-              t={t}
-            />
-          ))}
+    <div className="min-h-screen w-full bg-[#f8f8f8]">
+      {/* Row 1: Page title */}
+      <div className="max-w-7xl mx-auto w-full pt-8 px-4 sm:px-6 lg:px-8">
+        <CommunityPageTitle />
+      </div>
+
+      {/* Row 2: Pill-style tab bar */}
+      <div className="max-w-7xl mx-auto w-full py-4 px-4 sm:px-6 lg:px-8">
+        <div className="bg-gray-50/80 rounded-xl p-1 flex items-center w-full">
+          {SETTING_TABS.map((tab) => {
+            const IconComponent = tab.icon
+            const isActive = params.subpage === tab.id
+
+            return (
+              <Link
+                key={tab.id}
+                prefetch={false}
+                href={getUriWithOrg(params.orgslug, '') + `/dash/communities/${params.communityuuid}/${tab.id}`}
+                className="flex-1 relative"
+              >
+                <div
+                  className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                    isActive
+                      ? 'text-ui-fg-base'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="tab-indicator"
+                      className="absolute inset-0 bg-white rounded-lg shadow-sm border border-neutral-200/80"
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-2">
+                    <IconComponent size={16} />
+                    <span>{t(tab.labelKey)}</span>
+                  </span>
+                </div>
+              </Link>
+            )
+          })}
         </div>
       </div>
-      <div className="h-6 flex-shrink-0"></div>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.1, type: 'spring', stiffness: 80 }}
-        className="flex-1 overflow-y-auto"
-      >
-        {params.subpage === 'general' && <CommunityEditGeneral />}
-        {params.subpage === 'thumbnail' && <CommunityEditThumbnail />}
-        {params.subpage === 'access' && <CommunityEditAccess />}
-        {params.subpage === 'course' && <CommunityEditCourse />}
-        {params.subpage === 'moderation' && <CommunityEditModeration />}
-      </motion.div>
+
+      {/* Row 3: Content */}
+      <div className="w-full mx-auto max-w-7xl mt-8 pb-10 px-4 sm:px-6 lg:px-8">
+        <main className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.1, type: 'spring', stiffness: 80 }}
+            className="space-y-8 rounded-xl"
+          >
+            {params.subpage === 'general' && <CommunityEditGeneral />}
+            {params.subpage === 'thumbnail' && <CommunityEditThumbnail />}
+            {params.subpage === 'access' && <CommunityEditAccess />}
+            {params.subpage === 'course' && <CommunityEditCourse />}
+            {params.subpage === 'moderation' && <CommunityEditModeration />}
+          </motion.div>
+        </main>
+      </div>
     </div>
   )
 }

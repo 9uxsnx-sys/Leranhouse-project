@@ -105,143 +105,138 @@ const CommunityEditCourse: React.FC = () => {
   }
 
   return (
-    <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow">
-      <div className="flex flex-col gap-0">
-        <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 my-3 rounded-md">
-          <h1 className="font-bold text-xl text-gray-800">{t('dashboard.courses.communities.course.title')}</h1>
-          <h2 className="text-gray-500 text-md">
-            {t('dashboard.courses.communities.course.subtitle')}
-          </h2>
-        </div>
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+      <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+        {t('dashboard.courses.communities.course.title')}
+      </h2>
 
-        <div className="mx-5 my-5 space-y-6">
-          {/* Currently linked course */}
-          {community.course_id && linkedCourse && (
-            <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <BookOpen size={20} className="text-gray-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">{linkedCourse.name}</p>
-                    <p className="text-xs text-gray-500">{t('dashboard.courses.communities.course.currently_linked')}</p>
-                  </div>
+      <div className="space-y-6">
+        {/* Currently linked course */}
+        {community.course_id && linkedCourse && (
+          <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <BookOpen size={20} className="text-gray-600" />
                 </div>
-                <Button
-                  onClick={handleUnlink}
-                  disabled={isSubmitting}
-                  variant="ghost"
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  {isSubmitting ? (
-                    <Loader2 size={14} className="animate-spin mr-2" />
-                  ) : (
-                    <Unlink size={14} className="mr-2" />
-                  )}
-                  {t('dashboard.courses.communities.course.unlink')}
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {community.course_id && !linkedCourse && (
-            <div className="p-4 bg-yellow-50 border border-yellow-100 rounded-lg">
-              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-yellow-900">{t('dashboard.courses.communities.course.course_linked_id', { id: community.course_id })}</p>
-                  <p className="text-xs text-yellow-600 mt-1">
-                    {t('dashboard.courses.communities.course.course_not_found')}
-                  </p>
+                  <p className="font-medium text-gray-900">{linkedCourse.name}</p>
+                  <p className="text-xs text-gray-500">{t('dashboard.courses.communities.course.currently_linked')}</p>
                 </div>
-                <Button
-                  onClick={handleUnlink}
-                  disabled={isSubmitting}
-                  variant="ghost"
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  {isSubmitting ? (
-                    <Loader2 size={14} className="animate-spin mr-2" />
-                  ) : (
-                    <Unlink size={14} className="mr-2" />
-                  )}
-                  {t('dashboard.courses.communities.course.unlink')}
-                </Button>
               </div>
-            </div>
-          )}
-
-          {/* Course selection */}
-          {!community.course_id && (
-            <>
-              {/* Search */}
-              <div className="relative max-w-md">
-                <Search
-                  size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                />
-                <Input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={t('dashboard.courses.communities.course.search_placeholder')}
-                  className="pl-10"
-                />
-              </div>
-
-              {/* Course List */}
-              <div className="max-h-80 overflow-y-auto border border-gray-200 rounded-lg">
-                {isLoadingCourses ? (
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 size={24} className="animate-spin text-gray-400" />
-                  </div>
-                ) : filteredCourses.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">
-                    <BookOpen size={32} className="mx-auto mb-2 text-gray-300" />
-                    <p className="text-sm">{t('dashboard.courses.communities.course.no_courses')}</p>
-                  </div>
+              <Button
+                onClick={handleUnlink}
+                disabled={isSubmitting}
+                variant="ghost"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                {isSubmitting ? (
+                  <Loader2 size={14} className="animate-spin mr-2" />
                 ) : (
-                  <div className="divide-y divide-gray-100">
-                    {filteredCourses.map((course) => (
-                      <button
-                        key={course.course_uuid}
-                        onClick={() => setSelectedCourse(course.course_uuid)}
-                        className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors ${
-                          selectedCourse === course.course_uuid
-                            ? 'bg-gray-100 border-l-4 border-black'
-                            : ''
-                        }`}
-                      >
-                        <p className="font-medium text-gray-900 text-sm">{course.name}</p>
-                        {course.description && (
-                          <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">
-                            {course.description}
-                          </p>
-                        )}
-                      </button>
-                    ))}
-                  </div>
+                  <Unlink size={14} className="mr-2" />
                 )}
-              </div>
+                {t('dashboard.courses.communities.course.unlink')}
+              </Button>
+            </div>
+          </div>
+        )}
 
-              {/* Link button */}
-              <div className="flex justify-end">
-                <Button
-                  onClick={handleLink}
-                  disabled={isSubmitting || !selectedCourse}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90"
-                >
-                  {isSubmitting ? (
-                    <Loader2 size={16} className="animate-spin mr-2" />
-                  ) : (
-                    <Link2 size={16} className="mr-2" />
-                  )}
-                  {t('dashboard.courses.communities.course.link_button')}
-                </Button>
+        {community.course_id && !linkedCourse && (
+          <div className="p-4 bg-yellow-50 border border-yellow-100 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-yellow-900">{t('dashboard.courses.communities.course.course_linked_id', { id: community.course_id })}</p>
+                <p className="text-xs text-yellow-600 mt-1">
+                  {t('dashboard.courses.communities.course.course_not_found')}
+                </p>
               </div>
-            </>
-          )}
-        </div>
+              <Button
+                onClick={handleUnlink}
+                disabled={isSubmitting}
+                variant="ghost"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              >
+                {isSubmitting ? (
+                  <Loader2 size={14} className="animate-spin mr-2" />
+                ) : (
+                  <Unlink size={14} className="mr-2" />
+                )}
+                {t('dashboard.courses.communities.course.unlink')}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Course selection */}
+        {!community.course_id && (
+          <>
+            {/* Search */}
+            <div className="relative max-w-md">
+              <Search
+                size={18}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              />
+              <Input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t('dashboard.courses.communities.course.search_placeholder')}
+                className="pl-10 bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong"
+              />
+            </div>
+
+            {/* Course List */}
+            <div className="max-h-80 overflow-y-auto border border-gray-200 rounded-lg">
+              {isLoadingCourses ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 size={24} className="animate-spin text-gray-400" />
+                </div>
+              ) : filteredCourses.length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  <BookOpen size={32} className="mx-auto mb-2 text-gray-300" />
+                  <p className="text-sm">{t('dashboard.courses.communities.course.no_courses')}</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-100">
+                  {filteredCourses.map((course) => (
+                    <button
+                      key={course.course_uuid}
+                      onClick={() => setSelectedCourse(course.course_uuid)}
+                      className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors ${
+                        selectedCourse === course.course_uuid
+                          ? 'bg-gray-100 border-l-4 border-black'
+                          : ''
+                      }`}
+                    >
+                      <p className="font-medium text-gray-900 text-sm">{course.name}</p>
+                      {course.description && (
+                        <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">
+                          {course.description}
+                        </p>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Link button */}
+            <div className="flex justify-end">
+              <Button
+                onClick={handleLink}
+                disabled={isSubmitting || !selectedCourse}
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                {isSubmitting ? (
+                  <Loader2 size={16} className="animate-spin mr-2" />
+                ) : (
+                  <Link2 size={16} className="mr-2" />
+                )}
+                {t('dashboard.courses.communities.course.link_button')}
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )

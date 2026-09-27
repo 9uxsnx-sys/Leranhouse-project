@@ -212,249 +212,239 @@ const CommunityEditModeration: React.FC = () => {
   }
 
   return (
-    <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow">
-      <div className="flex flex-col gap-0">
-        <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 my-3 rounded-md">
-          <h1 className="font-bold text-xl text-gray-800">{t('dashboard.courses.communities.moderation.title')}</h1>
-          <h2 className="text-gray-500 text-md">
-            {t('dashboard.courses.communities.moderation.subtitle')}
-          </h2>
+    <div className="space-y-3">
+      {/* Warning banner */}
+      <div className="flex gap-3 p-4 bg-amber-50 border border-amber-100 rounded-lg">
+        <AlertTriangle size={18} className="text-amber-600 flex-shrink-0 mt-0.5" />
+        <div className="text-sm text-amber-800">
+          <p className="font-medium">{t('dashboard.courses.communities.moderation.info_title')}</p>
+          <p className="text-amber-700 mt-0.5">
+            {t('dashboard.courses.communities.moderation.info_description')}
+          </p>
         </div>
+      </div>
 
-        <div className="mx-5 my-5 space-y-6">
-          <div className="flex gap-3 p-4 bg-amber-50 border border-amber-100 rounded-lg">
-            <AlertTriangle size={18} className="text-amber-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-amber-800">
-              <p className="font-medium">{t('dashboard.courses.communities.moderation.info_title')}</p>
-              <p className="text-amber-700 mt-0.5">
-                {t('dashboard.courses.communities.moderation.info_description')}
-              </p>
+      {/* Card: Content restrictions */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+          {t('dashboard.courses.communities.moderation.restrictions_title')}
+        </h3>
+        <div className="space-y-4">
+          <ToggleRow
+            icon={<Link2 size={18} className="text-gray-500" />}
+            label={t('dashboard.courses.communities.moderation.block_links_label')}
+            description={t('dashboard.courses.communities.moderation.block_links_description')}
+            checked={settings.block_links}
+            onChange={setToggle('block_links')}
+          />
+          <ToggleRow
+            icon={<SmilePlus size={18} className="text-gray-500" />}
+            label={t('dashboard.courses.communities.moderation.disable_reactions_label')}
+            description={t('dashboard.courses.communities.moderation.disable_reactions_description')}
+            checked={settings.disable_reactions}
+            onChange={setToggle('disable_reactions')}
+          />
+        </div>
+      </div>
+
+      {/* Card: Length limits */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+          {t('dashboard.courses.communities.moderation.length_title')}
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <NumberField
+            label={t('dashboard.courses.communities.moderation.min_post_length_label')}
+            value={settings.min_post_length}
+            onChange={setNumber('min_post_length')}
+            hint={t('dashboard.courses.communities.moderation.zero_disables')}
+          />
+          <NumberField
+            label={t('dashboard.courses.communities.moderation.max_post_length_label')}
+            value={settings.max_post_length}
+            onChange={setNumber('max_post_length')}
+            hint={t('dashboard.courses.communities.moderation.zero_disables')}
+          />
+          <NumberField
+            label={t('dashboard.courses.communities.moderation.max_comment_length_label')}
+            value={settings.max_comment_length}
+            onChange={setNumber('max_comment_length')}
+            hint={t('dashboard.courses.communities.moderation.zero_disables')}
+          />
+        </div>
+      </div>
+
+      {/* Card: Rate limits */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+          {t('dashboard.courses.communities.moderation.rate_limits_title')}
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <NumberField
+            icon={<Timer size={14} className="text-gray-400" />}
+            label={t('dashboard.courses.communities.moderation.slow_mode_label')}
+            value={settings.slow_mode_seconds}
+            onChange={setNumber('slow_mode_seconds')}
+            hint={t('dashboard.courses.communities.moderation.slow_mode_hint')}
+          />
+          <NumberField
+            label={t('dashboard.courses.communities.moderation.max_posts_per_day_label')}
+            value={settings.max_posts_per_day}
+            onChange={setNumber('max_posts_per_day')}
+            hint={t('dashboard.courses.communities.moderation.zero_disables')}
+          />
+          <NumberField
+            icon={<CalendarClock size={14} className="text-gray-400" />}
+            label={t('dashboard.courses.communities.moderation.auto_lock_days_label')}
+            value={settings.auto_lock_days}
+            onChange={setNumber('auto_lock_days')}
+            hint={t('dashboard.courses.communities.moderation.auto_lock_days_hint')}
+          />
+        </div>
+      </div>
+
+      {/* Card: Account requirements */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+          {t('dashboard.courses.communities.moderation.account_requirements_title')}
+        </h3>
+        <div className="space-y-4">
+          <NumberField
+            label={t('dashboard.courses.communities.moderation.min_account_age_label')}
+            value={settings.min_account_age_days}
+            onChange={setNumber('min_account_age_days')}
+            hint={t('dashboard.courses.communities.moderation.min_account_age_hint')}
+          />
+          <ToggleRow
+            icon={<MailCheck size={18} className="text-gray-500" />}
+            label={t('dashboard.courses.communities.moderation.require_email_verified_label')}
+            description={t('dashboard.courses.communities.moderation.require_email_verified_description')}
+            checked={settings.require_email_verified}
+            onChange={setToggle('require_email_verified')}
+          />
+        </div>
+      </div>
+
+      {/* Card: Blocked words */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+          {t('dashboard.courses.communities.moderation.blocked_words_section_title')}
+        </h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="space-y-6">
+            <div>
+              <Label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('dashboard.courses.communities.moderation.add_word_label')}
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  ref={inputRef}
+                  type="text"
+                  value={newWord}
+                  onChange={(e) => {
+                    setNewWord(e.target.value)
+                    setError(null)
+                  }}
+                  onKeyDown={handleKeyDown}
+                  placeholder={t('dashboard.courses.communities.moderation.add_word_placeholder')}
+                  className="flex-1 bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong"
+                />
+                <Button
+                  type="button"
+                  onClick={handleAddWord}
+                  disabled={!newWord.trim()}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  <Plus size={16} className="mr-2" />
+                  {t('dashboard.courses.communities.moderation.add_button')}
+                </Button>
+              </div>
             </div>
+
+            <div>
+              <Label className="block text-sm font-medium text-gray-700 mb-2">
+                {t('dashboard.courses.communities.moderation.batch_add_label')}
+              </Label>
+              <p className="text-xs text-gray-500 mb-2">
+                {t('dashboard.courses.communities.moderation.batch_add_description')}
+              </p>
+              <textarea
+                ref={batchInputRef}
+                value={batchWords}
+                onChange={(e) => {
+                  setBatchWords(e.target.value)
+                  setError(null)
+                }}
+                placeholder={t('dashboard.courses.communities.moderation.batch_add_placeholder')}
+                className="w-full min-h-[100px] px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+              />
+              <Button
+                type="button"
+                onClick={handleBatchAdd}
+                disabled={!batchWords.trim()}
+                className="mt-2 bg-primary hover:bg-primary/90"
+              >
+                <Plus size={16} className="mr-2" />
+                {t('dashboard.courses.communities.moderation.add_all_button')}
+              </Button>
+            </div>
+
+            {error && <p className="text-red-500 text-sm">{error}</p>}
           </div>
 
-          {/* Section: Content restrictions */}
-          <Section icon={<Shield size={16} className="text-gray-600" />} title={t('dashboard.courses.communities.moderation.restrictions_title')}>
-            <ToggleRow
-              icon={<Link2 size={18} className="text-gray-500" />}
-              label={t('dashboard.courses.communities.moderation.block_links_label')}
-              description={t('dashboard.courses.communities.moderation.block_links_description')}
-              checked={settings.block_links}
-              onChange={setToggle('block_links')}
-            />
-            <ToggleRow
-              icon={<SmilePlus size={18} className="text-gray-500" />}
-              label={t('dashboard.courses.communities.moderation.disable_reactions_label')}
-              description={t('dashboard.courses.communities.moderation.disable_reactions_description')}
-              checked={settings.disable_reactions}
-              onChange={setToggle('disable_reactions')}
-            />
-          </Section>
-
-          {/* Section: Length limits */}
-          <Section icon={<Ruler size={16} className="text-gray-600" />} title={t('dashboard.courses.communities.moderation.length_title')}>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <NumberField
-                label={t('dashboard.courses.communities.moderation.min_post_length_label')}
-                value={settings.min_post_length}
-                onChange={setNumber('min_post_length')}
-                hint={t('dashboard.courses.communities.moderation.zero_disables')}
-              />
-              <NumberField
-                label={t('dashboard.courses.communities.moderation.max_post_length_label')}
-                value={settings.max_post_length}
-                onChange={setNumber('max_post_length')}
-                hint={t('dashboard.courses.communities.moderation.zero_disables')}
-              />
-              <NumberField
-                label={t('dashboard.courses.communities.moderation.max_comment_length_label')}
-                value={settings.max_comment_length}
-                onChange={setNumber('max_comment_length')}
-                hint={t('dashboard.courses.communities.moderation.zero_disables')}
-              />
-            </div>
-          </Section>
-
-          {/* Section: Rate limits */}
-          <Section icon={<Gauge size={16} className="text-gray-600" />} title={t('dashboard.courses.communities.moderation.rate_limits_title')}>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <NumberField
-                icon={<Timer size={14} className="text-gray-400" />}
-                label={t('dashboard.courses.communities.moderation.slow_mode_label')}
-                value={settings.slow_mode_seconds}
-                onChange={setNumber('slow_mode_seconds')}
-                hint={t('dashboard.courses.communities.moderation.slow_mode_hint')}
-              />
-              <NumberField
-                label={t('dashboard.courses.communities.moderation.max_posts_per_day_label')}
-                value={settings.max_posts_per_day}
-                onChange={setNumber('max_posts_per_day')}
-                hint={t('dashboard.courses.communities.moderation.zero_disables')}
-              />
-              <NumberField
-                icon={<CalendarClock size={14} className="text-gray-400" />}
-                label={t('dashboard.courses.communities.moderation.auto_lock_days_label')}
-                value={settings.auto_lock_days}
-                onChange={setNumber('auto_lock_days')}
-                hint={t('dashboard.courses.communities.moderation.auto_lock_days_hint')}
-              />
-            </div>
-          </Section>
-
-          {/* Section: Account requirements */}
-          <Section icon={<Lock size={16} className="text-gray-600" />} title={t('dashboard.courses.communities.moderation.account_requirements_title')}>
-            <div className="space-y-4">
-              <NumberField
-                label={t('dashboard.courses.communities.moderation.min_account_age_label')}
-                value={settings.min_account_age_days}
-                onChange={setNumber('min_account_age_days')}
-                hint={t('dashboard.courses.communities.moderation.min_account_age_hint')}
-              />
-              <ToggleRow
-                icon={<MailCheck size={18} className="text-gray-500" />}
-                label={t('dashboard.courses.communities.moderation.require_email_verified_label')}
-                description={t('dashboard.courses.communities.moderation.require_email_verified_description')}
-                checked={settings.require_email_verified}
-                onChange={setToggle('require_email_verified')}
-              />
-            </div>
-          </Section>
-
-          {/* Section: Blocked words */}
-          <Section icon={<MessageSquare size={16} className="text-gray-600" />} title={t('dashboard.courses.communities.moderation.blocked_words_section_title')}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="space-y-6">
-                <div>
-                  <Label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('dashboard.courses.communities.moderation.add_word_label')}
-                  </Label>
-                  <div className="flex gap-2">
-                    <Input
-                      ref={inputRef}
-                      type="text"
-                      value={newWord}
-                      onChange={(e) => {
-                        setNewWord(e.target.value)
-                        setError(null)
-                      }}
-                      onKeyDown={handleKeyDown}
-                      placeholder={t('dashboard.courses.communities.moderation.add_word_placeholder')}
-                      className="flex-1"
-                    />
-                    <Button
-                      type="button"
-                      onClick={handleAddWord}
-                      disabled={!newWord.trim()}
-                      className="bg-primary hover:bg-primary/90"
-                    >
-                      <Plus size={16} className="mr-2" />
-                      {t('dashboard.courses.communities.moderation.add_button')}
-                    </Button>
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('dashboard.courses.communities.moderation.batch_add_label')}
-                  </Label>
-                  <p className="text-xs text-gray-500 mb-2">
-                    {t('dashboard.courses.communities.moderation.batch_add_description')}
-                  </p>
-                  <textarea
-                    ref={batchInputRef}
-                    value={batchWords}
-                    onChange={(e) => {
-                      setBatchWords(e.target.value)
-                      setError(null)
-                    }}
-                    placeholder={t('dashboard.courses.communities.moderation.batch_add_placeholder')}
-                    className="w-full min-h-[100px] px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-                  />
-                  <Button
-                    type="button"
-                    onClick={handleBatchAdd}
-                    disabled={!batchWords.trim()}
-                    className="mt-2 bg-primary hover:bg-primary/90"
+          <div>
+            <Label className="block text-sm font-medium text-gray-700 mb-2">
+              {t('dashboard.courses.communities.moderation.blocked_words_label')} ({words.length})
+            </Label>
+            {words.length === 0 ? (
+              <div className="py-12 text-center border border-dashed border-gray-200 rounded-lg">
+                <Shield size={32} className="mx-auto text-gray-300 mb-2" />
+                <p className="text-sm text-gray-500">{t('dashboard.courses.communities.moderation.no_blocked_words')}</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  {t('dashboard.courses.communities.moderation.no_blocked_words_description')}
+                </p>
+              </div>
+            ) : (
+              <div className="max-h-[400px] overflow-y-auto border border-gray-200 rounded-lg divide-y divide-gray-100">
+                {words.map((word, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 group"
                   >
-                    <Plus size={16} className="mr-2" />
-                    {t('dashboard.courses.communities.moderation.add_all_button')}
-                  </Button>
-                </div>
-
-                {error && <p className="text-red-500 text-sm">{error}</p>}
-              </div>
-
-              <div>
-                <Label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('dashboard.courses.communities.moderation.blocked_words_label')} ({words.length})
-                </Label>
-                {words.length === 0 ? (
-                  <div className="py-12 text-center border border-dashed border-gray-200 rounded-lg">
-                    <Shield size={32} className="mx-auto text-gray-300 mb-2" />
-                    <p className="text-sm text-gray-500">{t('dashboard.courses.communities.moderation.no_blocked_words')}</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      {t('dashboard.courses.communities.moderation.no_blocked_words_description')}
-                    </p>
+                    <span className="text-sm text-gray-700 font-mono">{word}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveWord(word)}
+                      className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100"
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </div>
-                ) : (
-                  <div className="max-h-[400px] overflow-y-auto border border-gray-200 rounded-lg divide-y divide-gray-100">
-                    {words.map((word, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 group"
-                      >
-                        <span className="text-sm text-gray-700 font-mono">{word}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveWord(word)}
-                          className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                ))}
               </div>
-            </div>
-          </Section>
-
-          <div className="flex justify-end">
-            <Button
-              onClick={handleSave}
-              disabled={isSubmitting || !hasChanges}
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 size={16} className="animate-spin mr-2" />
-                  {t('common.saving')}
-                </>
-              ) : (
-                t('common.save_changes')
-              )}
-            </Button>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Save button */}
+      <div className="flex justify-end">
+        <Button
+          onClick={handleSave}
+          disabled={isSubmitting || !hasChanges}
+          className="bg-primary text-primary-foreground hover:bg-primary/90"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 size={16} className="animate-spin mr-2" />
+              {t('common.saving')}
+            </>
+          ) : (
+            t('common.save_changes')
+          )}
+        </Button>
+      </div>
     </div>
-  )
-}
-
-interface SectionProps {
-  icon: React.ReactNode
-  title: string
-  children: React.ReactNode
-}
-
-function Section({ icon, title, children }: SectionProps) {
-  return (
-    <section className="border border-gray-200 rounded-lg overflow-hidden">
-      <header className="flex items-center gap-2 px-5 py-3 bg-gray-50 border-b border-gray-200">
-        {icon}
-        <h3 className="font-semibold text-gray-800 text-sm">{title}</h3>
-      </header>
-      <div className="p-5 space-y-4">{children}</div>
-    </section>
   )
 }
 
@@ -496,7 +486,14 @@ function NumberField({ label, value, onChange, hint, icon }: NumberFieldProps) {
         {icon}
         {label}
       </Label>
-      <Input type="number" min={0} value={value || ''} onChange={onChange} placeholder="0" />
+      <Input
+        type="number"
+        min={0}
+        value={value || ''}
+        onChange={onChange}
+        placeholder="0"
+        className="bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong"
+      />
       {hint && <p className="text-xs text-gray-500 mt-1">{hint}</p>}
     </div>
   )

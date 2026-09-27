@@ -81,108 +81,91 @@ const CommunityEditGeneral: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Community Settings */}
-      <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow">
-        <Formik
-          enableReinitialize
-          initialValues={initialValues}
-          validationSchema={validationSchema}
-          onSubmit={handleSubmit}
-        >
-          {({ values, handleChange, errors, touched, setFieldValue, isValid, dirty }) => (
-            <Form>
-              <div className="flex flex-col gap-0">
-                <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 my-3 rounded-md">
-                  <h1 className="font-bold text-xl text-gray-800">{t('dashboard.courses.communities.general.title')}</h1>
-                  <h2 className="text-gray-500 text-md">
-                    {t('dashboard.courses.communities.general.subtitle')}
-                  </h2>
-                </div>
+    <Formik
+      enableReinitialize
+      initialValues={initialValues}
+      validationSchema={validationSchema}
+      onSubmit={handleSubmit}
+    >
+      {({ values, handleChange, errors, touched, setFieldValue, isValid, dirty }) => (
+        <Form>
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+            <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+              {t('dashboard.courses.communities.general.title')}
+            </h2>
 
-                <div className="flex flex-col lg:flex-row lg:space-x-8 mt-0 mx-5 my-5">
-                  <div className="w-full space-y-6">
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="name">
-                          {t('dashboard.courses.communities.general.form.name_label')} *
-                          <span className="text-gray-500 text-sm ml-2">
-                            ({t('dashboard.courses.communities.general.form.characters_left', { count: 100 - (values.name?.length || 0) })})
-                          </span>
-                        </Label>
-                        <Input
-                          id="name"
-                          name="name"
-                          value={values.name}
-                          onChange={handleChange}
-                          placeholder={t('dashboard.courses.communities.general.form.name_placeholder')}
-                          maxLength={100}
-                        />
-                        {touched.name && errors.name && (
-                          <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <Label htmlFor="description">
-                          {t('dashboard.courses.communities.general.form.description_label')}
-                          <span className="text-gray-500 text-sm ml-2">
-                            ({t('dashboard.courses.communities.general.form.characters_left', { count: 500 - (values.description?.length || 0) })})
-                          </span>
-                        </Label>
-                        <Textarea
-                          id="description"
-                          name="description"
-                          value={values.description}
-                          onChange={handleChange}
-                          placeholder={t('dashboard.courses.communities.general.form.description_placeholder')}
-                          className="min-h-[120px]"
-                          maxLength={500}
-                        />
-                        {touched.description && errors.description && (
-                          <p className="text-red-500 text-sm mt-1">{errors.description}</p>
-                        )}
-                      </div>
-
-                      <div className="flex items-center justify-between space-x-2 mt-4 bg-gray-50/50 p-4 rounded-lg nice-shadow">
-                        <div className="space-y-0.5">
-                          <Label className="text-base">{t('dashboard.courses.communities.general.form.public_label')}</Label>
-                          <p className="text-sm text-gray-500">
-                            {t('dashboard.courses.communities.general.form.public_description')}
-                          </p>
-                        </div>
-                        <Switch
-                          name="public"
-                          checked={values.public}
-                          onCheckedChange={(checked) => setFieldValue('public', checked)}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-row-reverse mt-0 mx-5 mb-5">
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting || !isValid || !dirty}
-                    className="bg-primary text-primary-foreground hover:bg-primary/90"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 size={16} className="animate-spin mr-2" />
-                        {t('common.saving')}
-                      </>
-                    ) : (
-                      t('common.save_changes')
-                    )}
-                  </Button>
-                </div>
+            <div className="space-y-6">
+              <div>
+                <Label htmlFor="name">
+                  {t('dashboard.courses.communities.general.form.name_label')} *
+                </Label>
+                <Input
+                  id="name"
+                  name="name"
+                  value={values.name}
+                  onChange={handleChange}
+                  placeholder={t('dashboard.courses.communities.general.form.name_placeholder')}
+                  maxLength={100}
+                  className="bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong mt-1.5"
+                />
+                {touched.name && errors.name && (
+                  <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                )}
               </div>
-            </Form>
-          )}
-        </Formik>
-      </div>
-    </div>
+
+              <div>
+                <Label htmlFor="description">
+                  {t('dashboard.courses.communities.general.form.description_label')}
+                </Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  value={values.description}
+                  onChange={handleChange}
+                  placeholder={t('dashboard.courses.communities.general.form.description_placeholder')}
+                  className="min-h-[120px] bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong mt-1.5"
+                  maxLength={500}
+                />
+                {touched.description && errors.description && (
+                  <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between space-x-2 pt-2">
+                <div className="space-y-0.5">
+                  <Label className="text-base">{t('dashboard.courses.communities.general.form.public_label')}</Label>
+                  <p className="text-sm text-gray-500">
+                    {t('dashboard.courses.communities.general.form.public_description')}
+                  </p>
+                </div>
+                <Switch
+                  name="public"
+                  checked={values.public}
+                  onCheckedChange={(checked) => setFieldValue('public', checked)}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6 pt-4 border-t border-gray-100">
+              <Button
+                type="submit"
+                disabled={isSubmitting || !isValid || !dirty}
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin mr-2" />
+                    {t('common.saving')}
+                  </>
+                ) : (
+                  t('common.save_changes')
+                )}
+              </Button>
+            </div>
+          </div>
+        </Form>
+      )}
+    </Formik>
   )
 }
 

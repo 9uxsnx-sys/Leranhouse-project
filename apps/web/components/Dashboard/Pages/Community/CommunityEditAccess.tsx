@@ -86,26 +86,22 @@ const CommunityEditAccess: React.FC = () => {
   if (!community) return null
 
   return (
-    <div>
-      <div className="h-6"></div>
-      <div className="mx-4 sm:mx-10 bg-white rounded-xl shadow-xs px-4 py-4">
-        <div className="flex flex-col bg-gray-50 -space-y-1 px-3 sm:px-5 py-3 rounded-md mb-3">
-          <h1 className="font-bold text-lg sm:text-xl text-gray-800">
-            {t('dashboard.courses.communities.access.title')}
-          </h1>
-          <h2 className="text-gray-500 text-xs sm:text-sm">
-            {t('dashboard.courses.communities.access.subtitle')}
-          </h2>
-        </div>
+    <div className="space-y-3">
+      {/* Access type card */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+          {t('dashboard.courses.communities.access.title')}
+        </h2>
+
         <div
-          className={`flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0 mx-auto mb-3 ${isSaving ? 'opacity-50 pointer-events-none' : ''}`}
+          className={`flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0 ${isSaving ? 'opacity-50 pointer-events-none' : ''}`}
         >
           <ConfirmationModal
             confirmationButtonText={t('dashboard.courses.communities.access.public.confirmation_button')}
             confirmationMessage={t('dashboard.courses.communities.access.public.confirmation_message')}
             dialogTitle={t('dashboard.courses.communities.access.public.confirmation_title')}
             dialogTrigger={
-              <div className="w-full h-[200px] bg-slate-100 rounded-lg cursor-pointer hover:bg-slate-200 transition-all">
+              <div className="w-full h-[200px] bg-slate-100 rounded-lg cursor-pointer hover:bg-slate-200 transition-all relative">
                 {isClientPublic && (
                   <div className="bg-green-200 text-green-600 font-bold w-fit my-3 mx-3 absolute text-sm px-3 py-1 rounded-lg">
                     {t('dashboard.courses.communities.access.public.active')}
@@ -130,7 +126,7 @@ const CommunityEditAccess: React.FC = () => {
             confirmationMessage={t('dashboard.courses.communities.access.restricted.confirmation_message')}
             dialogTitle={t('dashboard.courses.communities.access.restricted.confirmation_title')}
             dialogTrigger={
-              <div className="w-full h-[200px] bg-slate-100 rounded-lg cursor-pointer hover:bg-slate-200 transition-all">
+              <div className="w-full h-[200px] bg-slate-100 rounded-lg cursor-pointer hover:bg-slate-200 transition-all relative">
                 {!isClientPublic && (
                   <div className="bg-green-200 text-green-600 font-bold w-fit my-3 mx-3 absolute text-sm px-3 py-1 rounded-lg">
                     {t('dashboard.courses.communities.access.restricted.active')}
@@ -151,8 +147,10 @@ const CommunityEditAccess: React.FC = () => {
             status="info"
           />
         </div>
-        {!isClientPublic && <UserGroupsSection usergroups={usergroups} />}
       </div>
+
+      {/* User groups card (only when restricted) */}
+      {!isClientPublic && <UserGroupsSection usergroups={usergroups} />}
     </div>
   )
 }
@@ -192,15 +190,11 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
   }
 
   return (
-    <>
-      <div className="flex flex-col bg-gray-50 -space-y-1 px-3 sm:px-5 py-3 rounded-md mb-3">
-        <h1 className="font-bold text-lg sm:text-xl text-gray-800">
-          {t('dashboard.courses.communities.access.usergroups.title')}
-        </h1>
-        <h2 className="text-gray-500 text-xs sm:text-sm">
-          {t('dashboard.courses.communities.access.usergroups.subtitle')}
-        </h2>
-      </div>
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+      <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+        {t('dashboard.courses.communities.access.usergroups.title')}
+      </h2>
+
       <div className="overflow-x-auto">
         <table className="table-auto w-full text-left whitespace-nowrap rounded-md overflow-hidden">
           <thead className="bg-gray-100 text-gray-500 rounded-xl uppercase">
@@ -233,7 +227,7 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
           </tbody>
         </table>
       </div>
-      <div className="flex flex-row-reverse mt-3 mr-2">
+      <div className="flex flex-row-reverse mt-3">
         <Modal
           isDialogOpen={userGroupModal}
           onOpenChange={() => setUserGroupModal(!userGroupModal)}
@@ -250,7 +244,7 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
           }
         />
       </div>
-    </>
+    </div>
   )
 }
 

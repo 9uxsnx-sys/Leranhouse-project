@@ -150,77 +150,72 @@ const CommunityEditThumbnail: React.FC = () => {
 
   return (
     <>
-      <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow">
-        <div className="flex flex-col gap-0">
-          <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 my-3 rounded-md">
-            <h1 className="font-bold text-xl text-gray-800">{t('dashboard.courses.communities.thumbnail.title')}</h1>
-            <h2 className="text-gray-500 text-md">
-              {t('dashboard.courses.communities.thumbnail.subtitle')}
-            </h2>
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+          {t('dashboard.courses.communities.thumbnail.title')}
+        </h2>
+
+        <div className="space-y-6">
+          {/* Preview */}
+          <div className="aspect-video max-w-2xl bg-gray-100 rounded-xl overflow-hidden border border-gray-200">
+            {thumbnailUrl ? (
+              <SafeImage
+                src={thumbnailUrl}
+                alt="Community thumbnail"
+                className={`w-full h-full object-cover ${isLoading ? 'animate-pulse' : ''}`}
+              />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
+                <ImageIcon size={48} strokeWidth={1} />
+                <p className="text-sm mt-2">{t('dashboard.courses.communities.thumbnail.no_thumbnail')}</p>
+              </div>
+            )}
           </div>
 
-          <div className="mx-5 my-5 space-y-6">
-            {/* Preview */}
-            <div className="aspect-video max-w-2xl bg-gray-100 rounded-xl overflow-hidden border border-gray-200">
-              {thumbnailUrl ? (
-                <SafeImage
-                  src={thumbnailUrl}
-                  alt="Community thumbnail"
-                  className={`w-full h-full object-cover ${isLoading ? 'animate-pulse' : ''}`}
-                />
-              ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
-                  <ImageIcon size={48} strokeWidth={1} />
-                  <p className="text-sm mt-2">{t('dashboard.courses.communities.thumbnail.no_thumbnail')}</p>
-                </div>
-              )}
+          {/* Upload status */}
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="font-medium text-sm text-green-800 bg-green-50 rounded-full px-4 py-2 flex items-center">
+                <ArrowBigUpDash size={16} className="mr-2 animate-bounce" />
+                {t('common.loading')}
+              </div>
             </div>
+          )}
 
-            {/* Upload status */}
-            {isLoading && (
-              <div className="flex justify-start">
-                <div className="font-medium text-sm text-green-800 bg-green-50 rounded-full px-4 py-2 flex items-center">
-                  <ArrowBigUpDash size={16} className="mr-2 animate-bounce" />
-                  {t('common.loading')}
-                </div>
-              </div>
-            )}
+          {/* Action buttons */}
+          {!isLoading && (
+            <div className="flex gap-3">
+              <input
+                ref={imageInputRef}
+                type="file"
+                className="hidden"
+                accept=".jpg,.jpeg,.png"
+                onChange={handleFileChange}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={() => imageInputRef.current?.click()}
+              >
+                <UploadCloud size={16} />
+                {t('dashboard.courses.communities.thumbnail.upload_image')}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={() => setShowUnsplashPicker(true)}
+              >
+                <ImageIcon size={16} />
+                {t('dashboard.courses.communities.thumbnail.browse_unsplash')}
+              </Button>
+            </div>
+          )}
 
-            {/* Action buttons */}
-            {!isLoading && (
-              <div className="flex gap-3">
-                <input
-                  ref={imageInputRef}
-                  type="file"
-                  className="hidden"
-                  accept=".jpg,.jpeg,.png"
-                  onChange={handleFileChange}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="flex items-center gap-2"
-                  onClick={() => imageInputRef.current?.click()}
-                >
-                  <UploadCloud size={16} />
-                  {t('dashboard.courses.communities.thumbnail.upload_image')}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="flex items-center gap-2"
-                  onClick={() => setShowUnsplashPicker(true)}
-                >
-                  <ImageIcon size={16} />
-                  {t('dashboard.courses.communities.thumbnail.browse_unsplash')}
-                </Button>
-              </div>
-            )}
-
-            <p className="text-xs text-gray-500">
-              {t('dashboard.courses.communities.thumbnail.supported_formats')}
-            </p>
-          </div>
+          <p className="text-xs text-gray-500">
+            {t('dashboard.courses.communities.thumbnail.supported_formats')}
+          </p>
         </div>
       </div>
 
