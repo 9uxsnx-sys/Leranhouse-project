@@ -2,21 +2,15 @@
 import FormLayout, {
   FormField,
   FormLabelAndMessage,
-  Input,
-  Textarea,
 } from '@components/Objects/StyledElements/Form/Form';
 import { useFormik } from 'formik';
 import { AlertTriangle } from 'lucide-react';
 import * as Form from '@radix-ui/react-form';
 import React, { useEffect, useRef, useMemo } from 'react';
 import { useCourseFieldSync } from '@components/Contexts/CourseContext';
-import {
-  CustomSelect,
-  CustomSelectContent,
-  CustomSelectItem,
-  CustomSelectTrigger,
-  CustomSelectValue,
-} from "../EditCourseGeneral/CustomSelect";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import SimpleDropdown from "./SimpleDropdown";
 import { useTranslation } from 'react-i18next';
 
 type EditCourseSEOProps = {
@@ -87,11 +81,12 @@ const isValidUrl = (url: string) => {
   }
 };
 
+const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none";
+
 function EditCourseSEO(props: EditCourseSEOProps) {
   const { t } = useTranslation()
   const [error, setError] = React.useState('');
 
-  // Use the new field sync hook
   const {
     syncChanges,
     courseStructure,
@@ -99,11 +94,9 @@ function EditCourseSEO(props: EditCourseSEOProps) {
     isSaving,
   } = useCourseFieldSync('editCourseSEO');
 
-  // Track if we should sync (to avoid syncing on initial load)
   const hasInitializedRef = useRef(false);
   const previousValuesRef = useRef<SEOValues | null>(null);
 
-  // Memoize initial values
   const initialValues = useMemo((): SEOValues => {
     const seo = courseStructure?.seo || {};
     return {
@@ -126,38 +119,30 @@ function EditCourseSEO(props: EditCourseSEOProps) {
   const formik = useFormik({
     initialValues,
     validate: (values) => validate(values, t),
-    onSubmit: async () => {
-      // The actual save is handled by SaveState component
-    },
+    onSubmit: async () => {},
     enableReinitialize: true,
   });
 
-  // Sync form changes to context using the new system
   useEffect(() => {
-    // Skip if loading or saving
     if (isLoading || isSaving) return;
 
-    // Skip initial mount
     if (!hasInitializedRef.current) {
       hasInitializedRef.current = true;
       previousValuesRef.current = formik.values;
       return;
     }
 
-    // Check if values actually changed from previous
     const prevValues = previousValuesRef.current;
     if (!prevValues) {
       previousValuesRef.current = formik.values;
       return;
     }
 
-    // Compare current values with previous
     const hasChanges = Object.keys(formik.values).some(
       key => formik.values[key as keyof SEOValues] !== prevValues[key as keyof SEOValues]
     );
 
     if (hasChanges) {
-      // Build the SEO object with only changed fields tracked
       const seoData = {
         title: formik.values.title || null,
         description: formik.values.description || null,
@@ -174,263 +159,192 @@ function EditCourseSEO(props: EditCourseSEOProps) {
         enable_jsonld: formik.values.enable_jsonld,
       };
 
-      // Sync changes with debounce - only update the seo field
       syncChanges({ seo: seoData });
-
-      // Update previous values ref
       previousValuesRef.current = { ...formik.values };
     }
   }, [formik.values, isLoading, isSaving, syncChanges]);
-
-  // useCourseFieldSync flushes pending edits on unmount, so no local cleanup.
 
   if (isLoading || !courseStructure) {
     return <div>{t('dashboard.courses.settings.loading')}</div>;
   }
 
-  const CharacterCounter = ({ current, max }: { current: number, max: number }) => (
-    <span className={`text-xs ${current > max ? 'text-red-500' : 'text-gray-400'}`}>
-      {current}/{max}
-    </span>
-  );
-
   return (
     <div>
       <FormLayout onSubmit={formik.handleSubmit}>
-            {error && (
-              <div className="flex justify-center bg-red-200 rounded-md text-red-950 space-x-2 items-center p-4 mb-6 transition-all shadow-xs">
-                <AlertTriangle size={18} />
-                <div className="font-bold text-sm">{error}</div>
-              </div>
-            )}
-
-            {/* Basic SEO Section */}
-            <div className="mb-8">
-              <div className="flex flex-col bg-gray-50 -space-y-1 px-3 sm:px-5 py-3 rounded-md mb-3">
-                <h1 className="font-bold text-lg sm:text-xl text-gray-800">
-                  {t('dashboard.courses.seo.sections.basic.title')}
-                </h1>
-                <h2 className="text-gray-500 text-xs sm:text-sm">
-                  {t('dashboard.courses.seo.sections.basic.subtitle')}
-                </h2>
-              </div>
-
-              <div className="space-y-4">
-                <FormField name="title">
-                  <div className="flex justify-between items-center">
-                    <FormLabelAndMessage
-                      label={t('dashboard.courses.seo.form.title_label')}
-                      message={formik.errors.title}
-                    />
-                    <CharacterCounter current={formik.values.title.length} max={70} />
-                  </div>
-                  <Form.Control asChild>
-                    <Input
-                      style={{ backgroundColor: 'white' }}
-                      onChange={formik.handleChange}
-                      value={formik.values.title}
-                      type="text"
-                      placeholder={t('dashboard.courses.seo.form.title_placeholder')}
-                      disabled={isSaving}
-                    />
-                  </Form.Control>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {t('dashboard.courses.seo.form.title_hint')}
-                  </p>
-                </FormField>
-
-                <FormField name="description">
-                  <div className="flex justify-between items-center">
-                    <FormLabelAndMessage
-                      label={t('dashboard.courses.seo.form.description_label')}
-                      message={formik.errors.description}
-                    />
-                    <CharacterCounter current={formik.values.description.length} max={160} />
-                  </div>
-                  <Form.Control asChild>
-                    <Textarea
-                      style={{ backgroundColor: 'white', height: '80px', minHeight: '80px' }}
-                      onChange={formik.handleChange}
-                      value={formik.values.description}
-                      placeholder={t('dashboard.courses.seo.form.description_placeholder')}
-                      disabled={isSaving}
-                    />
-                  </Form.Control>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {t('dashboard.courses.seo.form.description_hint')}
-                  </p>
-                </FormField>
-
-                <FormField name="keywords">
-                  <FormLabelAndMessage
-                    label={t('dashboard.courses.seo.form.keywords_label')}
-                    message={formik.errors.keywords}
-                  />
-                  <Form.Control asChild>
-                    <Input
-                      style={{ backgroundColor: 'white' }}
-                      onChange={formik.handleChange}
-                      value={formik.values.keywords}
-                      type="text"
-                      placeholder={t('dashboard.courses.seo.form.keywords_placeholder')}
-                      disabled={isSaving}
-                    />
-                  </Form.Control>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {t('dashboard.courses.seo.form.keywords_hint')}
-                  </p>
-                </FormField>
-
-                <FormField name="canonical_url">
-                  <FormLabelAndMessage
-                    label={t('dashboard.courses.seo.form.canonical_url_label')}
-                    message={formik.errors.canonical_url}
-                  />
-                  <Form.Control asChild>
-                    <Input
-                      style={{ backgroundColor: 'white' }}
-                      onChange={formik.handleChange}
-                      value={formik.values.canonical_url}
-                      type="text"
-                      placeholder={t('dashboard.courses.seo.form.canonical_url_placeholder')}
-                      disabled={isSaving}
-                    />
-                  </Form.Control>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {t('dashboard.courses.seo.form.canonical_url_hint')}
-                  </p>
-                </FormField>
-              </div>
+        <div className="space-y-3">
+          {error && (
+            <div className="flex justify-center bg-red-200 rounded-md text-red-950 space-x-2 items-center p-4 mb-6 transition-all shadow-xs">
+              <AlertTriangle size={18} />
+              <div className="font-bold text-sm">{error}</div>
             </div>
+          )}
 
-            {/* Open Graph Section */}
-            <div className="mb-8">
-              <div className="flex flex-col bg-gray-50 -space-y-1 px-3 sm:px-5 py-3 rounded-md mb-3">
-                <h1 className="font-bold text-lg sm:text-xl text-gray-800">
-                  {t('dashboard.courses.seo.sections.opengraph.title')}
-                </h1>
-                <h2 className="text-gray-500 text-xs sm:text-sm">
-                  {t('dashboard.courses.seo.sections.opengraph.subtitle')}
-                </h2>
-              </div>
-
-              <div className="space-y-4">
-                <FormField name="og_title">
-                  <div className="flex justify-between items-center">
-                    <FormLabelAndMessage
-                      label={t('dashboard.courses.seo.form.og_title_label')}
-                      message={formik.errors.og_title}
-                    />
-                    <CharacterCounter current={formik.values.og_title.length} max={70} />
-                  </div>
-                  <Form.Control asChild>
-                    <Input
-                      style={{ backgroundColor: 'white' }}
-                      onChange={formik.handleChange}
-                      value={formik.values.og_title}
-                      type="text"
-                      placeholder={t('dashboard.courses.seo.form.og_title_placeholder')}
-                      disabled={isSaving}
-                    />
-                  </Form.Control>
-                </FormField>
-
-                <FormField name="og_description">
-                  <div className="flex justify-between items-center">
-                    <FormLabelAndMessage
-                      label={t('dashboard.courses.seo.form.og_description_label')}
-                      message={formik.errors.og_description}
-                    />
-                    <CharacterCounter current={formik.values.og_description.length} max={200} />
-                  </div>
-                  <Form.Control asChild>
-                    <Textarea
-                      style={{ backgroundColor: 'white', height: '80px', minHeight: '80px' }}
-                      onChange={formik.handleChange}
-                      value={formik.values.og_description}
-                      placeholder={t('dashboard.courses.seo.form.og_description_placeholder')}
-                      disabled={isSaving}
-                    />
-                  </Form.Control>
-                </FormField>
-
-                <FormField name="og_image">
-                  <FormLabelAndMessage
-                    label={t('dashboard.courses.seo.form.og_image_label')}
-                    message={formik.errors.og_image}
+          {/* Basic SEO */}
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+            <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+              {t('dashboard.courses.seo.sections.basic.title')}
+            </h3>
+            <div className="space-y-4">
+              <FormField name="title">
+                <FormLabelAndMessage
+                  label={t('dashboard.courses.seo.form.title_label')}
+                  message={formik.errors.title}
+                />
+                <Form.Control asChild>
+                  <Input
+                    className={fieldClassName}
+                    onChange={formik.handleChange}
+                    value={formik.values.title}
+                    type="text"
+                    placeholder={t('dashboard.courses.seo.form.title_placeholder')}
+                    disabled={isSaving}
                   />
-                  <Form.Control asChild>
-                    <Input
-                      style={{ backgroundColor: 'white' }}
-                      onChange={formik.handleChange}
-                      value={formik.values.og_image}
-                      type="text"
-                      placeholder={t('dashboard.courses.seo.form.og_image_placeholder')}
-                      disabled={isSaving}
-                    />
-                  </Form.Control>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {t('dashboard.courses.seo.form.og_image_hint')}
-                  </p>
-                </FormField>
-              </div>
+                </Form.Control>
+              </FormField>
+
+              <FormField name="description">
+                <FormLabelAndMessage
+                  label={t('dashboard.courses.seo.form.description_label')}
+                  message={formik.errors.description}
+                />
+                <Form.Control asChild>
+                  <Textarea
+                    className={`${fieldClassName} min-h-[80px]`}
+                    onChange={formik.handleChange}
+                    value={formik.values.description}
+                    placeholder={t('dashboard.courses.seo.form.description_placeholder')}
+                    disabled={isSaving}
+                  />
+                </Form.Control>
+              </FormField>
+
+              <FormField name="keywords">
+                <FormLabelAndMessage
+                  label={t('dashboard.courses.seo.form.keywords_label')}
+                  message={formik.errors.keywords}
+                />
+                <Form.Control asChild>
+                  <Input
+                    className={fieldClassName}
+                    onChange={formik.handleChange}
+                    value={formik.values.keywords}
+                    type="text"
+                    placeholder={t('dashboard.courses.seo.form.keywords_placeholder')}
+                    disabled={isSaving}
+                  />
+                </Form.Control>
+              </FormField>
+
+              <FormField name="canonical_url">
+                <FormLabelAndMessage
+                  label={t('dashboard.courses.seo.form.canonical_url_label')}
+                  message={formik.errors.canonical_url}
+                />
+                <Form.Control asChild>
+                  <Input
+                    className={fieldClassName}
+                    onChange={formik.handleChange}
+                    value={formik.values.canonical_url}
+                    type="text"
+                    placeholder={t('dashboard.courses.seo.form.canonical_url_placeholder')}
+                    disabled={isSaving}
+                  />
+                </Form.Control>
+              </FormField>
             </div>
+          </div>
 
-            {/* Twitter Card Section */}
-            <div className="mb-8">
-              <div className="flex flex-col bg-gray-50 -space-y-1 px-3 sm:px-5 py-3 rounded-md mb-3">
-                <h1 className="font-bold text-lg sm:text-xl text-gray-800">
-                  {t('dashboard.courses.seo.sections.twitter.title')}
-                </h1>
-                <h2 className="text-gray-500 text-xs sm:text-sm">
-                  {t('dashboard.courses.seo.sections.twitter.subtitle')}
-                </h2>
-              </div>
+          {/* Open Graph */}
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+            <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+              {t('dashboard.courses.seo.sections.opengraph.title')}
+            </h3>
+            <div className="space-y-4">
+              <FormField name="og_title">
+                <FormLabelAndMessage
+                  label={t('dashboard.courses.seo.form.og_title_label')}
+                  message={formik.errors.og_title}
+                />
+                <Form.Control asChild>
+                  <Input
+                    className={fieldClassName}
+                    onChange={formik.handleChange}
+                    value={formik.values.og_title}
+                    type="text"
+                    placeholder={t('dashboard.courses.seo.form.og_title_placeholder')}
+                    disabled={isSaving}
+                  />
+                </Form.Control>
+              </FormField>
 
-              <div className="space-y-4">
+              <FormField name="og_description">
+                <FormLabelAndMessage
+                  label={t('dashboard.courses.seo.form.og_description_label')}
+                  message={formik.errors.og_description}
+                />
+                <Form.Control asChild>
+                  <Textarea
+                    className={`${fieldClassName} min-h-[80px]`}
+                    onChange={formik.handleChange}
+                    value={formik.values.og_description}
+                    placeholder={t('dashboard.courses.seo.form.og_description_placeholder')}
+                    disabled={isSaving}
+                  />
+                </Form.Control>
+              </FormField>
+
+              <FormField name="og_image">
+                <FormLabelAndMessage
+                  label={t('dashboard.courses.seo.form.og_image_label')}
+                  message={formik.errors.og_image}
+                />
+                <Form.Control asChild>
+                  <Input
+                    className={fieldClassName}
+                    onChange={formik.handleChange}
+                    value={formik.values.og_image}
+                    type="text"
+                    placeholder={t('dashboard.courses.seo.form.og_image_placeholder')}
+                    disabled={isSaving}
+                  />
+                </Form.Control>
+              </FormField>
+            </div>
+          </div>
+
+          {/* Twitter Card */}
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+            <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+              {t('dashboard.courses.seo.sections.twitter.title')}
+            </h3>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
                 <FormField name="twitter_card">
                   <FormLabelAndMessage
                     label={t('dashboard.courses.seo.form.twitter_card_label')}
                   />
-                  <Form.Control asChild>
-                    <CustomSelect
-                      value={formik.values.twitter_card}
-                      onValueChange={(value) => {
-                        if (!value) return;
-                        formik.setFieldValue('twitter_card', value);
-                      }}
-                      disabled={isSaving}
-                    >
-                      <CustomSelectTrigger className="w-full bg-white">
-                        <CustomSelectValue>
-                          {formik.values.twitter_card === 'summary'
-                            ? t('dashboard.courses.seo.form.twitter_card_summary')
-                            : t('dashboard.courses.seo.form.twitter_card_summary_large')}
-                        </CustomSelectValue>
-                      </CustomSelectTrigger>
-                      <CustomSelectContent>
-                        <CustomSelectItem value="summary">
-                          {t('dashboard.courses.seo.form.twitter_card_summary')}
-                        </CustomSelectItem>
-                        <CustomSelectItem value="summary_large_image">
-                          {t('dashboard.courses.seo.form.twitter_card_summary_large')}
-                        </CustomSelectItem>
-                      </CustomSelectContent>
-                    </CustomSelect>
-                  </Form.Control>
+                  <SimpleDropdown
+                    value={formik.values.twitter_card}
+                    onValueChange={(value) => {
+                      if (!value) return;
+                      formik.setFieldValue('twitter_card', value);
+                    }}
+                    options={[
+                      { value: 'summary', label: t('dashboard.courses.seo.form.twitter_card_summary') },
+                      { value: 'summary_large_image', label: t('dashboard.courses.seo.form.twitter_card_summary_large') },
+                    ]}
+                    disabled={isSaving}
+                  />
                 </FormField>
 
                 <FormField name="twitter_title">
-                  <div className="flex justify-between items-center">
-                    <FormLabelAndMessage
-                      label={t('dashboard.courses.seo.form.twitter_title_label')}
-                      message={formik.errors.twitter_title}
-                    />
-                    <CharacterCounter current={formik.values.twitter_title.length} max={70} />
-                  </div>
+                  <FormLabelAndMessage
+                    label={t('dashboard.courses.seo.form.twitter_title_label')}
+                    message={formik.errors.twitter_title}
+                  />
                   <Form.Control asChild>
                     <Input
-                      style={{ backgroundColor: 'white' }}
+                      className={fieldClassName}
                       onChange={formik.handleChange}
                       value={formik.values.twitter_title}
                       type="text"
@@ -439,98 +353,83 @@ function EditCourseSEO(props: EditCourseSEOProps) {
                     />
                   </Form.Control>
                 </FormField>
-
-                <FormField name="twitter_description">
-                  <div className="flex justify-between items-center">
-                    <FormLabelAndMessage
-                      label={t('dashboard.courses.seo.form.twitter_description_label')}
-                      message={formik.errors.twitter_description}
-                    />
-                    <CharacterCounter current={formik.values.twitter_description.length} max={200} />
-                  </div>
-                  <Form.Control asChild>
-                    <Textarea
-                      style={{ backgroundColor: 'white', height: '80px', minHeight: '80px' }}
-                      onChange={formik.handleChange}
-                      value={formik.values.twitter_description}
-                      placeholder={t('dashboard.courses.seo.form.twitter_description_placeholder')}
-                      disabled={isSaving}
-                    />
-                  </Form.Control>
-                </FormField>
               </div>
+
+              <FormField name="twitter_description">
+                <FormLabelAndMessage
+                  label={t('dashboard.courses.seo.form.twitter_description_label')}
+                  message={formik.errors.twitter_description}
+                />
+                <Form.Control asChild>
+                  <Textarea
+                    className={`${fieldClassName} min-h-[80px]`}
+                    onChange={formik.handleChange}
+                    value={formik.values.twitter_description}
+                    placeholder={t('dashboard.courses.seo.form.twitter_description_placeholder')}
+                    disabled={isSaving}
+                  />
+                </Form.Control>
+              </FormField>
             </div>
+          </div>
 
-            {/* Robots & Structured Data Section */}
-            <div className="mb-8">
-              <div className="flex flex-col bg-gray-50 -space-y-1 px-3 sm:px-5 py-3 rounded-md mb-3">
-                <h1 className="font-bold text-lg sm:text-xl text-gray-800">
-                  {t('dashboard.courses.seo.sections.robots.title')}
-                </h1>
-                <h2 className="text-gray-500 text-xs sm:text-sm">
-                  {t('dashboard.courses.seo.sections.robots.subtitle')}
-                </h2>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
+          {/* Robots & Structured Data */}
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+            <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+              {t('dashboard.courses.seo.sections.robots.title')}
+            </h3>
+            <div className="space-y-4">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${formik.values.robots_noindex ? 'bg-black' : 'bg-gray-300'} ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${formik.values.robots_noindex ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
                   <input
                     type="checkbox"
-                    id="robots_noindex"
-                    name="robots_noindex"
+                    className="sr-only"
                     checked={formik.values.robots_noindex}
                     onChange={formik.handleChange}
-                    className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
+                    name="robots_noindex"
+                    id="robots_noindex"
                     disabled={isSaving}
                   />
-                  <label htmlFor="robots_noindex" className="text-sm font-medium text-gray-700">
-                    {t('dashboard.courses.seo.form.robots_noindex_label')}
-                  </label>
                 </div>
-                <p className="text-xs text-gray-400 ml-7">
-                  {t('dashboard.courses.seo.form.robots_noindex_hint')}
-                </p>
+                <span className="text-sm text-gray-600 select-none">{t('dashboard.courses.seo.form.robots_noindex_label')}</span>
+              </label>
 
-                <div className="flex items-center space-x-3">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${formik.values.robots_nofollow ? 'bg-black' : 'bg-gray-300'} ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${formik.values.robots_nofollow ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
                   <input
                     type="checkbox"
-                    id="robots_nofollow"
-                    name="robots_nofollow"
+                    className="sr-only"
                     checked={formik.values.robots_nofollow}
                     onChange={formik.handleChange}
-                    className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
+                    name="robots_nofollow"
+                    id="robots_nofollow"
                     disabled={isSaving}
                   />
-                  <label htmlFor="robots_nofollow" className="text-sm font-medium text-gray-700">
-                    {t('dashboard.courses.seo.form.robots_nofollow_label')}
-                  </label>
                 </div>
-                <p className="text-xs text-gray-400 ml-7">
-                  {t('dashboard.courses.seo.form.robots_nofollow_hint')}
-                </p>
+                <span className="text-sm text-gray-600 select-none">{t('dashboard.courses.seo.form.robots_nofollow_label')}</span>
+              </label>
 
-                <div className="border-t pt-4 mt-4">
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="checkbox"
-                      id="enable_jsonld"
-                      name="enable_jsonld"
-                      checked={formik.values.enable_jsonld}
-                      onChange={formik.handleChange}
-                      className="h-4 w-4 rounded border-gray-300 text-black focus:ring-black"
-                      disabled={isSaving}
-                    />
-                    <label htmlFor="enable_jsonld" className="text-sm font-medium text-gray-700">
-                      {t('dashboard.courses.seo.form.enable_jsonld_label')}
-                    </label>
-                  </div>
-                  <p className="text-xs text-gray-400 ml-7 mt-1">
-                    {t('dashboard.courses.seo.form.enable_jsonld_hint')}
-                  </p>
+              <label className="flex items-center gap-3 cursor-pointer pt-2">
+                <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${formik.values.enable_jsonld ? 'bg-black' : 'bg-gray-300'} ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${formik.values.enable_jsonld ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
+                  <input
+                    type="checkbox"
+                    className="sr-only"
+                    checked={formik.values.enable_jsonld}
+                    onChange={formik.handleChange}
+                    name="enable_jsonld"
+                    id="enable_jsonld"
+                    disabled={isSaving}
+                  />
                 </div>
-              </div>
+                <span className="text-sm text-gray-600 select-none">{t('dashboard.courses.seo.form.enable_jsonld_label')}</span>
+              </label>
             </div>
-          </FormLayout>
+          </div>
+        </div>
+      </FormLayout>
     </div>
   );
 }
