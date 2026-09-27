@@ -55,6 +55,7 @@ class UserRead(UserBase):
     last_login_at: Optional[str] = None
     signup_method: Optional[str] = None
     is_superadmin: bool = False
+    creation_date: str = ""
 
 
 class UserReadPublic(UserBase):
