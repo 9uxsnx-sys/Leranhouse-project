@@ -1,12 +1,11 @@
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import { getAPIUrl } from '@services/config/config'
 import { bulkAddContributors, bulkRemoveContributors, editContributor } from '@services/courses/courses'
 import { searchOrgContent } from '@services/search/search'
 import { swrFetcher } from '@services/utils/ts/requests'
-import { Check, ChevronDown, Search, UserPen, Users } from 'lucide-react'
+import { Check, ChevronDown, Search, ArrowUpDown } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import useSWR, { mutate } from 'swr'
@@ -27,9 +26,9 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import UserAvatar from '@components/Objects/UserAvatar'
-import { Input } from '@/components/ui/input'
 import { useDebounce } from '@/hooks/useDebounce'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
+import { IconButton } from '@/components/ui/icon-button'
 
 type EditCourseContributorsProps = {
     orgslug: string
@@ -37,7 +36,7 @@ type EditCourseContributorsProps = {
 }
 
 type ContributorRole = 'CREATOR' | 'CONTRIBUTOR' | 'MAINTAINER' | 'REPORTER'
-type ContributorStatus = 'ACTIVE' | 'INACTIVE' | 'PENDING'
+type ContributorStatus = 'ACTIVE' | 'INACTIVE'
 
 interface SearchUser {
     username: string;
@@ -246,71 +245,68 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
         }
     };
 
-    const RoleDropdown = ({ contributor }: { contributor: Contributor }) => (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button
-                    variant="outline"
-                    className="w-[200px] justify-between"
-                    disabled={contributor.authorship === 'CREATOR'}
-                >
+    const RoleDropdown = ({ contributor }: { contributor: Contributor }) => {
+        if (contributor.authorship === 'CREATOR') {
+            return (
+                <span className="opacity-50 text-gray-700 text-sm">
                     {t(`dashboard.courses.contributors.roles.${contributor.authorship.toLowerCase()}`)}
-                    <ChevronDown className="ml-2 h-4 w-4 text-muted-foreground" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[200px]">
-                {['CONTRIBUTOR', 'MAINTAINER', 'REPORTER'].map((role) => (
-                    <DropdownMenuItem
-                        key={role}
-                        onClick={() => updateContributor(contributor.user_id, { authorship: role as ContributorRole })}
-                        className="justify-between"
-                    >
-                        {t(`dashboard.courses.contributors.roles.${role.toLowerCase()}`)}
-                        {contributor.authorship === role && <Check className="ml-2 h-4 w-4" />}
-                    </DropdownMenuItem>
-                ))}
-            </DropdownMenuContent>
-        </DropdownMenu>
-    );
-
-    const StatusDropdown = ({ contributor }: { contributor: Contributor }) => (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button
-                    variant="outline"
-                    className={`w-[200px] justify-between ${getStatusStyle(contributor.authorship_status)}`}
-                    disabled={contributor.authorship === 'CREATOR'}
-                >
-                    {t(`dashboard.courses.contributors.statuses.${contributor.authorship_status.toLowerCase()}`)}
-                    <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[200px]">
-                {['ACTIVE', 'INACTIVE', 'PENDING'].map((status) => (
-                    <DropdownMenuItem
-                        key={status}
-                        onClick={() => updateContributor(contributor.user_id, { authorship_status: status as ContributorStatus })}
-                        className="justify-between"
-                    >
-                        {t(`dashboard.courses.contributors.statuses.${status.toLowerCase()}`)}
-                        {contributor.authorship_status === status && <Check className="ml-2 h-4 w-4" />}
-                    </DropdownMenuItem>
-                ))}
-            </DropdownMenuContent>
-        </DropdownMenu>
-    );
-
-    const getStatusStyle = (status: ContributorStatus) => {
-        switch (status) {
-            case 'ACTIVE':
-                return 'bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-800';
-            case 'INACTIVE':
-                return 'bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-gray-800';
-            case 'PENDING':
-                return 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100 hover:text-yellow-800';
-            default:
-                return 'bg-gray-50 text-gray-700 hover:bg-gray-100 hover:text-gray-800';
+                </span>
+            );
         }
+
+        return (
+            <DropdownMenu modal={false}>
+                <DropdownMenuTrigger asChild>
+                    <span className="cursor-pointer px-1.5 py-0.5 rounded hover:bg-gray-100 transition-colors text-gray-700 inline-flex items-center gap-1 text-sm">
+                        {t(`dashboard.courses.contributors.roles.${contributor.authorship.toLowerCase()}`)}
+                        <ChevronDown size={14} className="text-gray-400" />
+                    </span>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                    align="center"
+                    className="min-w-[120px] rounded-lg border border-gray-200 bg-white p-1 shadow-md"
+                    sideOffset={6}
+                >
+                    {['CONTRIBUTOR', 'MAINTAINER', 'REPORTER'].map((role) => (
+                        <DropdownMenuItem
+                            key={role}
+                            onClick={() => updateContributor(contributor.user_id, { authorship: role as ContributorRole })}
+                            className="justify-between text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
+                        >
+                            <span className="text-gray-700">{t(`dashboard.courses.contributors.roles.${role.toLowerCase()}`)}</span>
+                            {contributor.authorship === role && <Check size={14} className="text-gray-500" />}
+                        </DropdownMenuItem>
+                    ))}
+                </DropdownMenuContent>
+            </DropdownMenu>
+        );
+    };
+
+    const StatusToggle = ({ contributor }: { contributor: Contributor }) => {
+        const isActive = contributor.authorship_status === 'ACTIVE';
+        const isCreator = contributor.authorship === 'CREATOR';
+
+        const handleToggle = () => {
+            if (isCreator) return;
+            const newStatus: ContributorStatus = isActive ? 'INACTIVE' : 'ACTIVE';
+            updateContributor(contributor.user_id, { authorship_status: newStatus });
+        };
+
+        return (
+            <span
+                onClick={handleToggle}
+                className={`inline-flex items-center gap-1.5 text-sm ${
+                    isCreator
+                        ? 'opacity-50 cursor-not-allowed'
+                        : 'cursor-pointer hover:bg-gray-100 rounded px-1 py-0.5 -ml-1 -my-0.5 transition-colors'
+                }`}
+            >
+                <span className={`w-2.5 h-2.5 rounded ${isActive ? 'bg-green-500' : 'bg-red-500'}`} />
+                {isActive
+                    ? t('dashboard.courses.contributors.statuses.active')
+                    : t('dashboard.courses.contributors.statuses.inactive')}
+            </span>
+        );
     };
 
     const sortContributors = (contributors: Contributor[] | undefined) => {
@@ -365,206 +361,165 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
         <div>
             {courseStructure && (
                 <div>
-                    <div className="flex flex-col bg-gray-50 -space-y-1 px-3 sm:px-5 py-3 rounded-md mb-3">
-                            <h1 className="font-bold text-lg sm:text-xl text-gray-800">{t('dashboard.courses.contributors.title')}</h1>
-                            <h2 className="text-gray-500 text-xs sm:text-sm">
-                                {t('dashboard.courses.contributors.subtitle')}
-                            </h2>
-                        </div>
-                        <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0 mx-auto mb-3">
-                            <ConfirmationModal
-                                confirmationButtonText={t('dashboard.courses.contributors.open_to_contributors.confirmation_button')}
-                                confirmationMessage={t('dashboard.courses.contributors.open_to_contributors.confirmation_message')}
-                                dialogTitle={t('dashboard.courses.contributors.open_to_contributors.confirmation_title')}
-                                dialogTrigger={
-                                    <div className="w-full h-[200px] bg-slate-100 rounded-lg cursor-pointer hover:bg-slate-200 transition-all">
-                                        {isOpenToContributors && (
-                                            <div className="bg-green-200 text-green-600 font-bold w-fit my-3 mx-3 absolute text-sm px-3 py-1 rounded-lg">
-                                                {t('dashboard.courses.contributors.open_to_contributors.active')}
-                                            </div>
-                                        )}
-                                        <div className="flex flex-col space-y-1 justify-center items-center h-full p-2 sm:p-4">
-                                            <UserPen className="text-slate-400" size={32} />
-                                            <div className="text-xl sm:text-2xl text-slate-700 font-bold">
-                                                {t('dashboard.courses.contributors.open_to_contributors.title')}
-                                            </div>
-                                            <div className="text-gray-400 text-sm sm:text-md tracking-tight w-full sm:w-[500px] leading-5 text-center">
-                                                {t('dashboard.courses.contributors.open_to_contributors.description')}
-                                            </div>
-                                        </div>
-                                    </div>
-                                }
-                                functionToExecute={() => setIsOpenToContributors(true)}
-                                status="info"
-                            />
-                            <ConfirmationModal
-                                confirmationButtonText={t('dashboard.courses.contributors.closed_to_contributors.confirmation_button')}
-                                confirmationMessage={t('dashboard.courses.contributors.closed_to_contributors.confirmation_message')}
-                                dialogTitle={t('dashboard.courses.contributors.closed_to_contributors.confirmation_title')}
-                                dialogTrigger={
-                                    <div className="w-full h-[200px] bg-slate-100 rounded-lg cursor-pointer hover:bg-slate-200 transition-all">
-                                        {!isOpenToContributors && (
-                                            <div className="bg-green-200 text-green-600 font-bold w-fit my-3 mx-3 absolute text-sm px-3 py-1 rounded-lg">
-                                                {t('dashboard.courses.contributors.closed_to_contributors.active')}
-                                            </div>
-                                        )}
-                                        <div className="flex flex-col space-y-1 justify-center items-center h-full p-2 sm:p-4">
-                                            <Users className="text-slate-400" size={32} />
-                                            <div className="text-xl sm:text-2xl text-slate-700 font-bold">
-                                                {t('dashboard.courses.contributors.closed_to_contributors.title')}
-                                            </div>
-                                            <div className="text-gray-400 text-sm sm:text-md tracking-tight w-full sm:w-[500px] leading-5 text-center">
-                                                {t('dashboard.courses.contributors.closed_to_contributors.description')}
-                                            </div>
-                                        </div>
-                                    </div>
-                                }
-                                functionToExecute={() => setIsOpenToContributors(false)}
-                                status="info"
+                    <div className="flex items-center gap-3 mb-5">
+                        <div className="relative w-80">
+                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Search by users..."
+                                className="w-full h-7 pl-8 pr-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
                             />
                         </div>
-                        <div className="space-y-4">
-                            <div className="relative">
-                                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder={t('dashboard.courses.contributors.search.placeholder')}
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-8"
-                                />
-                            </div>
-                            {searchQuery && (
-                                <div className="bg-white rounded-xl nice-shadow divide-y">
-                                    {isSearching ? (
-                                        <div className="p-4 text-center text-sm text-gray-500">
-                                            {t('dashboard.courses.contributors.search.searching')}
-                                        </div>
-                                    ) : searchResults && searchResults.length > 0 ? (
-                                        <>
-                                            {selectedUsers.length > 0 && (
-                                                <div className="p-3 bg-gray-100">
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-sm text-gray-700">
-                                                            {selectedUsers.length === 1 
-                                                                ? t('dashboard.courses.contributors.actions.selected_users', { count: selectedUsers.length })
-                                                                : t('dashboard.courses.contributors.actions.selected_users_plural', { count: selectedUsers.length })}
-                                                        </span>
-                                                        <div className="flex gap-2">
-                                                            <Button
-                                                                onClick={() => setSelectedUsers([])}
-                                                                variant="outline"
-                                                                className="text-sm"
-                                                            >
-                                                                {t('dashboard.courses.contributors.actions.clear')}
-                                                            </Button>
-                                                            <Button
-                                                                onClick={handleAddContributors}
-                                                                className="bg-primary text-primary-foreground hover:bg-primary/90 text-sm"
-                                                            >
-                                                                {t('dashboard.courses.contributors.actions.add_selected')}
-                                                            </Button>
-                                                        </div>
+                        <div className="flex-1" />
+                        <button
+                            onClick={() => setIsOpenToContributors((prev: boolean | undefined) => !prev)}
+                            className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                        >
+                            <span className={`w-2.5 h-2.5 rounded ${isOpenToContributors ? 'bg-green-500' : 'bg-red-500'}`} />
+                            {isOpenToContributors 
+                                ? t('dashboard.courses.contributors.open_to_contributors.title')
+                                : t('dashboard.courses.contributors.closed_to_contributors.title')}
+                        </button>
+                        <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" onClick={() => {}} aria-label="Sort contributors">
+                            <ArrowUpDown size={15} />
+                        </IconButton>
+                    </div>
+                    <div className="space-y-4">
+                        {searchQuery && (
+                            <div className="bg-white rounded-xl nice-shadow divide-y">
+                                {isSearching ? (
+                                    <div className="p-4 text-center text-sm text-gray-500">
+                                        {t('dashboard.courses.contributors.search.searching')}
+                                    </div>
+                                ) : searchResults && searchResults.length > 0 ? (
+                                    <>
+                                        {selectedUsers.length > 0 && (
+                                            <div className="p-3 bg-gray-100">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-sm text-gray-700">
+                                                        {selectedUsers.length === 1 
+                                                            ? t('dashboard.courses.contributors.actions.selected_users', { count: selectedUsers.length })
+                                                            : t('dashboard.courses.contributors.actions.selected_users_plural', { count: selectedUsers.length })}
+                                                    </span>
+                                                    <div className="flex gap-2">
+                                                        <Button
+                                                            onClick={() => setSelectedUsers([])}
+                                                            variant="outline"
+                                                            className="text-sm"
+                                                        >
+                                                            {t('dashboard.courses.contributors.actions.clear')}
+                                                        </Button>
+                                                        <Button
+                                                            onClick={handleAddContributors}
+                                                            className="bg-primary text-primary-foreground hover:bg-primary/90 text-sm"
+                                                        >
+                                                            {t('dashboard.courses.contributors.actions.add_selected')}
+                                                        </Button>
                                                     </div>
                                                 </div>
-                                            )}
-                                            {searchResults.map((user) => {
-                                                const isSelected = selectedUsers.includes(user.username);
-                                                const isExistingContributor = contributors?.some(
-                                                    c => c.user.username === user.username
-                                                );
+                                            </div>
+                                        )}
+                                        {searchResults.map((user) => {
+                                            const isSelected = selectedUsers.includes(user.username);
+                                            const isExistingContributor = contributors?.some(
+                                                c => c.user.username === user.username
+                                            );
 
-                                                return (
-                                                    <div
-                                                        key={user.username}
-                                                        className={`flex items-center justify-between p-4 ${
-                                                            isSelected ? 'bg-gray-100' : ''
-                                                        } ${!isExistingContributor ? 'cursor-pointer hover:bg-gray-50' : ''} transition-colors`}
-                                                        onClick={(e) => {
-                                                            // Don't handle click if it's on a checkbox
-                                                            if (e.target instanceof HTMLElement && e.target.closest('input[type="checkbox"]')) {
-                                                                return;
-                                                            }
-                                                            if (!isExistingContributor) {
-                                                                handleUserSelect(user.username);
-                                                            }
-                                                        }}
-                                                    >
-                                                        <div className="flex items-center space-x-3">
-                                                            <div onClick={(e) => e.stopPropagation()}>
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={isSelected || false}
-                                                                    onChange={() => !isExistingContributor && handleUserSelect(user.username)}
-                                                                    disabled={isExistingContributor}
-                                                                    className="h-4 w-4 rounded border-gray-300 text-gray-600 focus:ring-gray-500 disabled:opacity-50"
-                                                                />
-                                                            </div>
-                                                            <UserAvatar
-                                                                width={40}
-                                                                avatar_url={user.avatar_url}
-                                                                predefined_avatar={user.avatar_image ? undefined : 'empty'}
-                                                                userId={user.id.toString()}
-                                                                showProfilePopup
-                                                                rounded="rounded-full"
-                                                                backgroundColor="bg-gray-100"
+                                            return (
+                                                <div
+                                                    key={user.username}
+                                                    className={`flex items-center justify-between p-4 ${
+                                                        isSelected ? 'bg-gray-100' : ''
+                                                    } ${!isExistingContributor ? 'cursor-pointer hover:bg-gray-50' : ''} transition-colors`}
+                                                    onClick={(e) => {
+                                                        // Don't handle click if it's on a checkbox
+                                                        if (e.target instanceof HTMLElement && e.target.closest('input[type="checkbox"]')) {
+                                                            return;
+                                                        }
+                                                        if (!isExistingContributor) {
+                                                            handleUserSelect(user.username);
+                                                        }
+                                                    }}
+                                                >
+                                                    <div className="flex items-center space-x-3">
+                                                        <div onClick={(e) => e.stopPropagation()}>
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={isSelected || false}
+                                                                onChange={() => !isExistingContributor && handleUserSelect(user.username)}
+                                                                disabled={isExistingContributor}
+                                                                className="h-4 w-4 rounded border-gray-300 text-gray-600 focus:ring-gray-500 disabled:opacity-50"
                                                             />
-                                                            <div>
-                                                                <div className="font-medium text-gray-900">
-                                                                    {user.first_name} {user.last_name}
-                                                                </div>
-                                                                <div className="text-sm text-gray-500">
-                                                                    @{user.username}
-                                                                </div>
+                                                        </div>
+                                                        <UserAvatar
+                                                            width={40}
+                                                            avatar_url={user.avatar_url}
+                                                            predefined_avatar={user.avatar_image ? undefined : 'empty'}
+                                                            userId={user.id.toString()}
+                                                            showProfilePopup
+                                                            rounded="rounded-full"
+                                                            backgroundColor="bg-gray-100"
+                                                        />
+                                                        <div>
+                                                            <div className="font-medium text-gray-900">
+                                                                {user.first_name} {user.last_name}
+                                                            </div>
+                                                            <div className="text-sm text-gray-500">
+                                                                @{user.username}
                                                             </div>
                                                         </div>
-                                                        {isExistingContributor && (
-                                                            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                                                                {t('dashboard.courses.contributors.actions.already_contributor')}
-                                                            </span>
-                                                        )}
                                                     </div>
-                                                );
-                                            })}
-                                        </>
-                                    ) : (
-                                        <div className="p-4 text-center text-sm text-gray-500">
-                                            {t('dashboard.courses.contributors.search.no_results')}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                            <div className="bg-white rounded-xl nice-shadow">
-                                {selectedContributors.length > 0 && (
-                                    <div className="p-3 bg-gray-100 rounded-t-xl border-b">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-sm text-gray-700">
-                                                {selectedContributors.length === 1
-                                                    ? t('dashboard.courses.contributors.actions.selected_contributors', { count: selectedContributors.length })
-                                                    : t('dashboard.courses.contributors.actions.selected_contributors_plural', { count: selectedContributors.length })}
-                                            </span>
-                                            <div className="flex gap-2">
-                                                <Button
-                                                    onClick={() => setSelectedContributors([])}
-                                                    variant="outline"
-                                                    className="text-sm"
-                                                >
-                                                    {t('dashboard.courses.contributors.actions.clear')}
-                                                </Button>
-                                                <Button
-                                                    onClick={handleBulkRemove}
-                                                    className="bg-red-600 text-white hover:bg-red-700 text-sm"
-                                                >
-                                                    {t('dashboard.courses.contributors.actions.remove_selected')}
-                                                </Button>
-                                            </div>
-                                        </div>
+                                                    {isExistingContributor && (
+                                                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                                                            {t('dashboard.courses.contributors.actions.already_contributor')}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </>
+                                ) : (
+                                    <div className="p-4 text-center text-sm text-gray-500">
+                                        {t('dashboard.courses.contributors.search.no_results')}
                                     </div>
                                 )}
-                                <div className="max-h-[600px] overflow-y-auto">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead className="w-[30px]">
+                            </div>
+                        )}
+                        <div className="rounded-xl border border-gray-200 overflow-hidden">
+                            {selectedContributors.length > 0 && (
+                                <div className="p-3 bg-gray-100 border-b border-gray-200">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-gray-700">
+                                            {selectedContributors.length === 1
+                                                ? t('dashboard.courses.contributors.actions.selected_contributors', { count: selectedContributors.length })
+                                                : t('dashboard.courses.contributors.actions.selected_contributors_plural', { count: selectedContributors.length })}
+                                        </span>
+                                        <div className="flex gap-2">
+                                            <Button
+                                                onClick={() => setSelectedContributors([])}
+                                                variant="outline"
+                                                className="text-sm"
+                                            >
+                                                {t('dashboard.courses.contributors.actions.clear')}
+                                            </Button>
+                                            <Button
+                                                onClick={handleBulkRemove}
+                                                className="bg-red-600 text-white hover:bg-red-700 text-sm"
+                                            >
+                                                {t('dashboard.courses.contributors.actions.remove_selected')}
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            <div>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow className="bg-gray-50">
+                                            <TableHead className="w-[30px]">
+                                                <label className="flex items-center justify-center cursor-pointer w-4 h-4">
                                                     <input
                                                         type="checkbox"
                                                         checked={masterCheckboxChecked}
@@ -572,7 +527,6 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                                                             setMasterCheckboxChecked(e.target.checked);
                                                             if (contributors) {
                                                                 if (e.target.checked) {
-                                                                    // Select all non-creator contributors
                                                                     const nonCreatorContributors = contributors
                                                                         .filter(c => c.authorship !== 'CREATOR')
                                                                         .map(c => c.user_id);
@@ -582,83 +536,93 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                                                                 }
                                                             }
                                                         }}
-                                                        className="h-4 w-4 rounded border-gray-300 text-gray-600 focus:ring-gray-500"
+                                                        className="sr-only peer"
                                                     />
-                                                </TableHead>
-                                                <TableHead className="w-[50px]"></TableHead>
-                                                <TableHead>{t('dashboard.courses.contributors.table.name')}</TableHead>
-                                                <TableHead>{t('dashboard.courses.contributors.table.username')}</TableHead>
-                                                <TableHead>{t('dashboard.courses.contributors.table.email')}</TableHead>
-                                                <TableHead>{t('dashboard.courses.contributors.table.role')}</TableHead>
-                                                <TableHead>{t('dashboard.courses.contributors.table.status')}</TableHead>
-                                                <TableHead>{t('dashboard.courses.contributors.table.added_on')}</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {sortContributors(contributors)?.map((contributor) => (
-                                                <TableRow 
-                                                    key={`${contributor.user_id}-${contributor.id}`}
-                                                    className={`${selectedContributors.includes(contributor.user_id) ? 'bg-gray-50' : ''} ${contributor.authorship !== 'CREATOR' ? 'cursor-pointer hover:bg-gray-50' : ''}`}
-                                                    onClick={(e) => {
-                                                        // Don't handle click if it's on a dropdown or checkbox
-                                                        if (
-                                                            e.target instanceof HTMLElement && 
-                                                            (e.target.closest('button') || 
-                                                             e.target.closest('input[type="checkbox"]'))
-                                                        ) {
-                                                            return;
-                                                        }
-                                                        if (contributor.authorship !== 'CREATOR') {
-                                                            handleContributorSelect(contributor.user_id);
-                                                        }
-                                                    }}
-                                                >
-                                                    <TableCell onClick={(e) => e.stopPropagation()}>
+                                                    <div className="w-full h-full rounded border border-gray-300 bg-white peer-checked:bg-gray-600 peer-checked:border-gray-600 flex items-center justify-center transition-colors">
+                                                        <Check size={12} className="text-white hidden peer-checked:block" strokeWidth={3} />
+                                                    </div>
+                                                </label>
+                                            </TableHead>
+                                            <TableHead><span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.courses.contributors.table.name')}</span></TableHead>
+                                            <TableHead><span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.courses.contributors.table.username')}</span></TableHead>
+                                            <TableHead><span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.courses.contributors.table.email')}</span></TableHead>
+                                            <TableHead><span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.courses.contributors.table.role')}</span></TableHead>
+                                            <TableHead><span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.courses.contributors.table.status')}</span></TableHead>
+                                            <TableHead><span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.courses.contributors.table.added_on')}</span></TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {sortContributors(contributors)?.map((contributor) => (
+                                            <TableRow 
+                                                key={`${contributor.user_id}-${contributor.id}`}
+                                                className={`${selectedContributors.includes(contributor.user_id) ? 'bg-gray-50' : ''} ${contributor.authorship !== 'CREATOR' ? 'cursor-pointer hover:bg-gray-50' : ''}`}
+                                                onClick={(e) => {
+                                                    // Don't handle click if it's on a dropdown or checkbox
+                                                    if (
+                                                        e.target instanceof HTMLElement && 
+                                                        (e.target.closest('button') || 
+                                                         e.target.closest('input[type="checkbox"]') ||
+                                                         e.target.closest('[role="menuitem"]') ||
+                                                         e.target.closest('[role="menu"]'))
+                                                    ) {
+                                                        return;
+                                                    }
+                                                    if (contributor.authorship !== 'CREATOR') {
+                                                        handleContributorSelect(contributor.user_id);
+                                                    }
+                                                }}
+                                            >
+                                                <TableCell onClick={(e) => e.stopPropagation()}>
+                                                    <label className="flex items-center justify-center cursor-pointer w-4 h-4">
                                                         <input
                                                             type="checkbox"
                                                             checked={selectedContributors.includes(contributor.user_id)}
                                                             onChange={() => handleContributorSelect(contributor.user_id)}
                                                             disabled={contributor.authorship === 'CREATOR'}
-                                                            className="h-4 w-4 rounded border-gray-300 text-gray-600 focus:ring-gray-500 disabled:opacity-50"
+                                                            className="sr-only peer disabled:opacity-50"
                                                         />
-                                                    </TableCell>
-                                                    <TableCell>
+                                                        <div className="w-full h-full rounded border border-gray-300 bg-white peer-checked:bg-gray-600 peer-checked:border-gray-600 flex items-center justify-center transition-colors peer-disabled:opacity-50">
+                                                            <Check size={12} className="text-white hidden peer-checked:block" strokeWidth={3} />
+                                                        </div>
+                                                    </label>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-2">
                                                         <UserAvatar
                                                             width={30}
                                                             border='border-2'
                                                             avatar_url={contributor.user.avatar_image ? getUserAvatarMediaDirectory(contributor.user.user_uuid, contributor.user.avatar_image) : ''}
-                                                            rounded="rounded"
+                                                            rounded="rounded-full"
                                                             predefined_avatar={contributor.user.avatar_image === '' ? 'empty' : undefined}
                                                         />
-                                                    </TableCell>
-                                                    <TableCell className="font-medium">
-                                                        {contributor.user.first_name} {contributor.user.last_name}
-                                                    </TableCell>
-                                                    <TableCell className="text-gray-500">
-                                                        @{contributor.user.username}
-                                                    </TableCell>
-                                                    <TableCell className="text-gray-500">
-                                                        {contributor.user.email}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <RoleDropdown contributor={contributor} />
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <StatusDropdown contributor={contributor} />
-                                                    </TableCell>
-                                                    <TableCell className="text-gray-500 text-sm">
-                                                        {formatDate(contributor.creation_date)}
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </div>
+                                                        <span className="font-medium">{contributor.user.first_name} {contributor.user.last_name}</span>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="text-gray-500">
+                                                    @{contributor.user.username}
+                                                </TableCell>
+                                                <TableCell className="text-gray-500">
+                                                    {contributor.user.email}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <RoleDropdown contributor={contributor} />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <StatusToggle contributor={contributor} />
+                                                </TableCell>
+                                                <TableCell className="text-gray-500 text-sm">
+                                                    {formatDate(contributor.creation_date)}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
                             </div>
                         </div>
+                    </div>
                 </div>
-        )}
-    </div>
+            )}
+        </div>
     );
 }
 
