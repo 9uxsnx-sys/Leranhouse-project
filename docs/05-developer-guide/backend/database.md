@@ -54,12 +54,28 @@ SQLAlchemy events are registered for pool monitoring:
 - `checkout` — Tracks connection checkout
 - `checkin` — Tracks connection return
 
+### Key Models
+
+| Model | Table | Purpose |
+|-------|-------|---------|
+| `Organization` | `organization` | Tenant orgs with custom domains and config |
+| `Course` | `course` | Courses with published, public, pricing fields |
+| `Community` | `community` | Course-linked social spaces with 3D access control (public/restricted, published/unpublished, UserGroup) |
+| `Chapter` | `coursechapter` | Course module/chapter structure |
+| `Activity` | `activity` | Individual lessons within chapters |
+| `Collection` | `collection` | Content collections (courses grouped by org) |
+| `User` | `user` | Platform users with roles and memberships |
+| `UserGroup` | `usergroup` | Access groups for resource gating |
+| `PaymentOrder` | `payment_order` | Payment transactions via Chargily |
+| `CoursePurchase` | `course_purchase` | Course purchase records |
+
 ### Cache Invalidation on Commit
 
 The database layer hooks into commit events to automatically bust Redis caches:
 - Org slug changes → clear org caches
 - Course UUID operations → clear course caches
 - Activity/chapter changes → clear content caches
+- Community UUID operations → clear community caches
 
 ---
 

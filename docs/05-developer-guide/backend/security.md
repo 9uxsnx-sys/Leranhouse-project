@@ -286,6 +286,23 @@ async def update_course(
 ): ...
 ```
 
+### Resource-Level Checks
+
+The RBAC system evaluates access at the resource level through `check_resource_access()` in `resource_access.py`. This function is called by service functions to verify whether the acting user has the required permission on a specific resource (e.g., a specific course or community).
+
+### Published Field Enforcement
+
+Resources with `has_published_field=True` in their RBAC config (courses, communities) have an additional access layer:
+
+- **Anonymous users** -- blocked from reading unpublished resources
+- **Authenticated users** -- blocked from reading unpublished resources (even if public or linked via UserGroup)
+- **UserGroup members** -- blocked from accessing unpublished resources (the published check gates all access, not just public view)
+- **Admins and superadmins** -- bypass the published check, can see all resources regardless of published status
+
+This is enforced in `_is_public_and_published()`, `_check_anonymous_read_access()`, and `_check_public_view_read_access()` in `resource_access.py`. The `published` field acts as a master on/off switch that gates all non-admin access.
+
+For communities specifically, the listing endpoint (`get_communities_by_org()`) also filters by `published` at the query level to ensure unpublished communities don't appear in search results for non-admin users.
+
 ---
 
 ## UserGroup-Based Resource Locking

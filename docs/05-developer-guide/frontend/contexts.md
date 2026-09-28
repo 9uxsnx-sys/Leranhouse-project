@@ -180,7 +180,55 @@ const {
 The `CourseProvider` also manages a global `DebounceManager` that coordinates debounced saves across components, with flush-on-unmount behavior.
 
 ---
+## CommunityContext (`@components/Contexts/CommunityContext`)
 
+The `CommunityContext` provides community state and membership information to community editor pages.
+
+### Provider
+
+```tsx
+<CommunityProvider communityuuid={uuid} accessToken={token}>
+  {children}
+</CommunityProvider>
+```
+
+### Context Value
+
+Uses the same dual-context pattern as `CourseContext`:
+
+```tsx
+export const CommunityContext = createContext<CommunityState | null>(null)
+export const CommunityDispatchContext = createContext<React.Dispatch<CommunityAction> | null>(null)
+```
+
+```tsx
+interface CommunityState {
+  community: Community | null
+  isMember: boolean
+  isLoading: boolean
+  error: string | null
+}
+```
+
+### Available Hooks
+
+**`useCommunity()`** -- Returns community state:
+
+```tsx
+const { community, isMember, isLoading } = useCommunity()
+// community.published, community.public, community.name, etc.
+```
+
+**`useCommunityDispatch()`** -- Returns the dispatch function for optimistic updates:
+
+```tsx
+const dispatch = useCommunityDispatch()
+dispatch({ type: 'updateField', payload: { field: 'published', value: true } })
+```
+
+Dispatch is used in the General tab to optimistically update the publish/unpublish state before the API call completes, with rollback on error.
+
+---
 ## OrgContext (`@components/Contexts/OrgContext`)
 
 The `OrgContext` provides organization configuration and membership status. It is provided at the `[orgslug]` layout level.
@@ -284,7 +332,7 @@ function MyComponent() {
 
 | Context | File | Purpose |
 |---------|------|---------|
-| `CommunityContext` | `Contexts/CommunityContext.tsx` | Community state and membership |
+| `CommunityContext` | `Contexts/CommunityContext.tsx` | Community state, membership, and dispatch (see details below) |
 | `PodcastContext` | `Contexts/PodcastContext.tsx` | Podcast data |
 | `PodcastPlayerContext` | `Contexts/PodcastPlayerContext.tsx` | Podcast player state (provides `PodcastPlayerProvider`) |
 | `AIChatBotContext` | `Contexts/AI/AIChatBotContext.tsx` | AI chatbot conversation state |

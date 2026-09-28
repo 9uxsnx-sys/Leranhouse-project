@@ -23,6 +23,12 @@ The documents in this section describe cross-cutting feature areas that touch mu
 |----------|-------------|
 | [Overview](./ai/overview.md) | AI Copilot features, Magic Blocks, course planning assistance, RAG system, embedding pipeline |
 
+### Communities
+
+| Document | Description |
+|----------|-------------|
+| [Overview](./communities/overview.md) | Community access control model (3 dimensions), publish/unpublish, public/restricted, course linking, moderation, discussions |
+
 ### Planned (Future)
 
 | Document | Description |

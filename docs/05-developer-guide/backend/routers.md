@@ -82,7 +82,7 @@ require_authenticated_user = get_authenticated_non_api_token_user
 | Prefix | Tags | Dependencies |
 |--------|------|-------------|
 | `/api/v1/communities` | communities | `require_plan_for_community("standard")` |
-| (none, uses path params) | discussions | `require_plan_for_community("standard")` |
+| `/api/v1/communities/discussions` | discussions | `require_plan_for_community("standard")` |
 
 ### Podcasts
 
