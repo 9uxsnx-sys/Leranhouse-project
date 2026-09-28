@@ -10,13 +10,13 @@ import { useCommunity, useCommunityDispatch } from '@components/Contexts/Communi
 import { updateCommunity } from '@services/communities/communities'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { mutate } from 'swr'
-import { getAPIUrl } from '@services/config/config'
-import { Loader2, Info } from 'lucide-react'
+import { getAPIUrl, getUriWithOrg } from '@services/config/config'
+import { Loader2, Info, Eye, Check, SaveAllIcon } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { Input } from '@components/ui/input'
 import { Textarea } from '@components/ui/textarea'
 import { Switch } from '@components/ui/switch'
-import { Button } from '@components/ui/button'
+import Link from 'next/link'
 
 const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none"
 
@@ -93,6 +93,8 @@ const CommunityEditGeneral: React.FC = () => {
     }
   }
 
+  const communityUuid = community.community_uuid.replace('community_', '')
+
   return (
     <Formik
       enableReinitialize
@@ -100,78 +102,106 @@ const CommunityEditGeneral: React.FC = () => {
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ values, handleChange, errors, touched, setFieldValue, isValid, dirty }) => (
+      {({ values, handleChange, errors, touched, setFieldValue, isValid, dirty, submitForm }) => (
         <Form>
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-            <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
-              {t('dashboard.courses.communities.general.title')}
-            </h2>
+          <div className="space-y-3">
+            {/* ── ACTION ROW ── */}
+            <div className="flex items-center justify-between">
+              <Link
+                href={getUriWithOrg(org?.slug, '') + `/community/${communityUuid}`}
+                target="_blank"
+                className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                <Eye size={14} />
+                <span>{t('dashboard.courses.general.preview')}</span>
+              </Link>
 
-            <div className="space-y-4">
-              <div className="grid mb-2.5">
-                <CommunityFormLabelAndMessage
-                  label={`${t('dashboard.courses.communities.general.form.name_label')} *`}
-                  message={touched.name ? errors.name : undefined}
-                />
-                <Input
-                  id="name"
-                  name="name"
-                  value={values.name}
-                  onChange={handleChange}
-                  placeholder={t('dashboard.courses.communities.general.form.name_placeholder')}
-                  maxLength={100}
-                  className={fieldClassName}
-                />
-              </div>
-
-              <div className="grid mb-2.5">
-                <CommunityFormLabelAndMessage
-                  label={t('dashboard.courses.communities.general.form.description_label')}
-                  message={touched.description ? errors.description : undefined}
-                />
-                <Textarea
-                  id="description"
-                  name="description"
-                  value={values.description}
-                  onChange={handleChange}
-                  placeholder={t('dashboard.courses.communities.general.form.description_placeholder')}
-                  className={`${fieldClassName} min-h-[120px]`}
-                  maxLength={500}
-                />
-              </div>
-
-              <div className="flex items-center justify-between space-x-2 pt-2">
-                <div className="space-y-0.5">
-                  <span className="font-medium leading-[35px] text-black text-sm">
-                    {t('dashboard.courses.communities.general.form.public_label')}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={submitForm}
+                  disabled={isSubmitting || !isValid || !dirty}
+                  className={`inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors ${
+                    isSubmitting
+                      ? 'bg-black text-white border-black opacity-50 cursor-not-allowed'
+                      : !dirty
+                        ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                        : 'bg-black text-white border-black hover:opacity-90 cursor-pointer'
+                  }`}
+                >
+                  {isSubmitting ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : !dirty ? (
+                    <Check size={14} />
+                  ) : (
+                    <SaveAllIcon size={14} />
+                  )}
+                  <span>
+                    {isSubmitting
+                      ? t('common.saving')
+                      : !dirty
+                        ? t('common.saved')
+                        : t('common.save')}
                   </span>
-                  <p className="text-sm text-gray-500">
-                    {t('dashboard.courses.communities.general.form.public_description')}
-                  </p>
-                </div>
-                <Switch
-                  name="public"
-                  checked={values.public}
-                  onCheckedChange={(checked) => setFieldValue('public', checked)}
-                />
+                </button>
               </div>
             </div>
 
-            <div className="flex justify-end mt-6 pt-4 border-t border-gray-100">
-              <Button
-                type="submit"
-                disabled={isSubmitting || !isValid || !dirty}
-                className="bg-primary text-primary-foreground hover:bg-primary/90"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin mr-2" />
-                    {t('common.saving')}
-                  </>
-                ) : (
-                  t('common.save_changes')
-                )}
-              </Button>
+            {/* ── GENERAL INFO CARD ── */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+              <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+                {t('dashboard.courses.communities.general.title')}
+              </h2>
+
+              <div className="space-y-4">
+                <div className="grid mb-2.5">
+                  <CommunityFormLabelAndMessage
+                    label={`${t('dashboard.courses.communities.general.form.name_label')} *`}
+                    message={touched.name ? errors.name : undefined}
+                  />
+                  <Input
+                    id="name"
+                    name="name"
+                    value={values.name}
+                    onChange={handleChange}
+                    placeholder={t('dashboard.courses.communities.general.form.name_placeholder')}
+                    maxLength={100}
+                    className={fieldClassName}
+                  />
+                </div>
+
+                <div className="grid mb-2.5">
+                  <CommunityFormLabelAndMessage
+                    label={t('dashboard.courses.communities.general.form.description_label')}
+                    message={touched.description ? errors.description : undefined}
+                  />
+                  <Textarea
+                    id="description"
+                    name="description"
+                    value={values.description}
+                    onChange={handleChange}
+                    placeholder={t('dashboard.courses.communities.general.form.description_placeholder')}
+                    className={`${fieldClassName} min-h-[120px]`}
+                    maxLength={500}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between space-x-2 pt-2">
+                  <div className="space-y-0.5">
+                    <span className="font-medium leading-[35px] text-black text-sm">
+                      {t('dashboard.courses.communities.general.form.public_label')}
+                    </span>
+                    <p className="text-sm text-gray-500">
+                      {t('dashboard.courses.communities.general.form.public_description')}
+                    </p>
+                  </div>
+                  <Switch
+                    name="public"
+                    checked={values.public}
+                    onCheckedChange={(checked) => setFieldValue('public', checked)}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </Form>
