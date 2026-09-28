@@ -11,15 +11,26 @@ import { updateCommunity } from '@services/communities/communities'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { mutate } from 'swr'
 import { getAPIUrl } from '@services/config/config'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Info } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { FormLabelAndMessage } from '@components/Objects/StyledElements/Form/Form'
 import { Input } from '@components/ui/input'
 import { Textarea } from '@components/ui/textarea'
 import { Switch } from '@components/ui/switch'
 import { Button } from '@components/ui/button'
 
 const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none"
+
+const CommunityFormLabelAndMessage = (props: { label: string; message?: string }) => (
+  <div className="flex items-center space-x-3">
+    <span className="font-medium leading-[35px] text-black grow text-sm">{props.label}</span>
+    {props.message && (
+      <div className="text-red-700 text-sm items-center rounded-md flex space-x-1">
+        <Info size={10} />
+        <div>{props.message}</div>
+      </div>
+    )}
+  </div>
+)
 
 const CommunityEditGeneral: React.FC = () => {
   const { t } = useTranslation()
@@ -98,7 +109,7 @@ const CommunityEditGeneral: React.FC = () => {
 
             <div className="space-y-4">
               <div className="grid mb-2.5">
-                <FormLabelAndMessage
+                <CommunityFormLabelAndMessage
                   label={`${t('dashboard.courses.communities.general.form.name_label')} *`}
                   message={touched.name ? errors.name : undefined}
                 />
@@ -114,7 +125,7 @@ const CommunityEditGeneral: React.FC = () => {
               </div>
 
               <div className="grid mb-2.5">
-                <FormLabelAndMessage
+                <CommunityFormLabelAndMessage
                   label={t('dashboard.courses.communities.general.form.description_label')}
                   message={touched.description ? errors.description : undefined}
                 />
