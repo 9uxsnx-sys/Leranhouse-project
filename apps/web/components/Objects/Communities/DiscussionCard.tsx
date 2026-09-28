@@ -154,7 +154,7 @@ export function DiscussionCard({
           </div>
         </div>
 
-        {/* Label badge - Medusa UI style */}
+        {/* Label badge */}
         <span
           className={`inline-flex items-center gap-x-0.5 border box-border rounded-md h-5 px-1 text-[11px] font-medium flex-shrink-0 ml-2 ${
             labelInfo.id === 'general' ? 'bg-gray-100 text-gray-700 border-gray-200' :
