@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search, Users, MessagesSquare, Trash2, X, ChevronLeft, ChevronRight, CheckSquare } from 'lucide-react'
+import { Search, Users, MessagesSquare, Trash2, X, ChevronLeft, ChevronRight, CheckSquare, ListChecks } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -235,13 +235,15 @@ const CommunitiesDashClient = ({
           </AuthenticatedClientElement>
 
           <div className="flex items-center gap-2">
-            <button
+            <Button
+              variant="secondary"
+              size="small"
+              className="gap-x-1.5"
               onClick={() => { setIsSelectMode(prev => !prev); if (isSelectMode) clearSelection(); }}
-              className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
             >
-              <CheckSquare size={14} />
+              <ListChecks size={14} />
               <span>{isSelectMode ? 'Cancel' : 'Select'}</span>
-            </button>
+            </Button>
 
             {selectedCommunities.size > 0 && (
               <ConfirmationModal

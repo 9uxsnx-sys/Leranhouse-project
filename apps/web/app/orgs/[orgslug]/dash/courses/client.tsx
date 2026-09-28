@@ -2,7 +2,7 @@
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse'
 import CourseCreationTypeSelector from '@components/Objects/Modals/Course/Create/CourseCreationTypeSelector'
 import AICourseCreationModal from '@components/Objects/Modals/Course/Create/AICourse/AICourseCreationModal'
-import { BookCopy, Search, X, Trash2, ChevronLeft, ChevronRight, Upload, Users, Info, Download, Copy, CheckSquare } from 'lucide-react'
+import { BookCopy, Search, X, Trash2, ChevronLeft, ChevronRight, Upload, Users, Info, Download, Copy, ListChecks } from 'lucide-react'
 import ScormCourseImport from '../../../../../ee/components/Modals/ScormCourseImport'
 import { ImportTypeSelector, LearnHouseCourseImport } from '@components/Objects/Modals/Course/Import'
 import { removeCoursePrefix, AdminEditOptions } from '@components/Objects/Thumbnails/CourseThumbnail'
@@ -485,13 +485,15 @@ function CoursesHome(params: CourseProps) {
 
           {/* Select Toggle (Admin feature) */}
           <div className="flex items-center gap-2">
-            <button
+            <Button
+              variant="secondary"
+              size="small"
+              className="gap-x-1.5"
               onClick={() => { setIsSelectMode(prev => !prev); if (isSelectMode) clearSelection(); }}
-              className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
             >
-              <CheckSquare size={14} />
+              <ListChecks size={14} />
               <span>{isSelectMode ? t('cancel') : t('courses.select_courses')}</span>
-            </button>
+            </Button>
 
             {/* Bulk actions — show when items selected */}
             {selectedCourses.size > 0 && (
