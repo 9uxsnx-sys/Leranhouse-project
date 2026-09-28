@@ -15,7 +15,6 @@ import { Loader2, Info, Eye, Check, SaveAllIcon } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { Input } from '@components/ui/input'
 import { Textarea } from '@components/ui/textarea'
-import { Switch } from '@components/ui/switch'
 import Link from 'next/link'
 
 const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none"
@@ -50,7 +49,6 @@ const CommunityEditGeneral: React.FC = () => {
       .min(3, t('dashboard.courses.communities.general.form.name_min_length'))
       .max(100, t('dashboard.courses.communities.general.form.name_max_length')),
     description: Yup.string().max(500, t('dashboard.courses.communities.general.form.description_max_length')),
-    public: Yup.boolean(),
   })
 
   if (!community) return null
@@ -58,7 +56,6 @@ const CommunityEditGeneral: React.FC = () => {
   const initialValues = {
     name: community.name,
     description: community.description || '',
-    public: community.public,
   }
 
   const handleSubmit = async (values: typeof initialValues) => {
@@ -71,7 +68,6 @@ const CommunityEditGeneral: React.FC = () => {
         {
           name: values.name,
           description: values.description || null,
-          public: values.public,
         },
         accessToken
       )
@@ -102,7 +98,7 @@ const CommunityEditGeneral: React.FC = () => {
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ values, handleChange, errors, touched, setFieldValue, isValid, dirty, submitForm }) => (
+      {({ values, handleChange, errors, touched, isValid, dirty, submitForm }) => (
         <Form>
           <div className="space-y-3">
             {/* ── ACTION ROW ── */}
@@ -183,22 +179,6 @@ const CommunityEditGeneral: React.FC = () => {
                     placeholder={t('dashboard.courses.communities.general.form.description_placeholder')}
                     className={`${fieldClassName} min-h-[120px]`}
                     maxLength={500}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between space-x-2 pt-2">
-                  <div className="space-y-0.5">
-                    <span className="font-medium leading-[35px] text-black text-sm">
-                      {t('dashboard.courses.communities.general.form.public_label')}
-                    </span>
-                    <p className="text-sm text-gray-500">
-                      {t('dashboard.courses.communities.general.form.public_description')}
-                    </p>
-                  </div>
-                  <Switch
-                    name="public"
-                    checked={values.public}
-                    onCheckedChange={(checked) => setFieldValue('public', checked)}
                   />
                 </div>
               </div>
