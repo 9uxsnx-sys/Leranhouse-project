@@ -13,11 +13,13 @@ import { mutate } from 'swr'
 import { getAPIUrl } from '@services/config/config'
 import { Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { Label } from '@components/ui/label'
+import { FormLabelAndMessage } from '@components/Objects/StyledElements/Form/Form'
 import { Input } from '@components/ui/input'
 import { Textarea } from '@components/ui/textarea'
 import { Switch } from '@components/ui/switch'
 import { Button } from '@components/ui/button'
+
+const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none"
 
 const CommunityEditGeneral: React.FC = () => {
   const { t } = useTranslation()
@@ -94,11 +96,13 @@ const CommunityEditGeneral: React.FC = () => {
               {t('dashboard.courses.communities.general.title')}
             </h2>
 
-            <div className="space-y-6">
-              <div>
-                <Label htmlFor="name">
-                  {t('dashboard.courses.communities.general.form.name_label')} *
-                </Label>
+            <div className="space-y-4">
+              {/* Name field */}
+              <div className="grid mb-2.5">
+                <FormLabelAndMessage
+                  label={`${t('dashboard.courses.communities.general.form.name_label')} *`}
+                  message={touched.name ? errors.name : undefined}
+                />
                 <Input
                   id="name"
                   name="name"
@@ -106,34 +110,33 @@ const CommunityEditGeneral: React.FC = () => {
                   onChange={handleChange}
                   placeholder={t('dashboard.courses.communities.general.form.name_placeholder')}
                   maxLength={100}
-                  className="bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong mt-1.5"
+                  className={fieldClassName}
                 />
-                {touched.name && errors.name && (
-                  <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-                )}
               </div>
 
-              <div>
-                <Label htmlFor="description">
-                  {t('dashboard.courses.communities.general.form.description_label')}
-                </Label>
+              {/* Description field */}
+              <div className="grid mb-2.5">
+                <FormLabelAndMessage
+                  label={t('dashboard.courses.communities.general.form.description_label')}
+                  message={touched.description ? errors.description : undefined}
+                />
                 <Textarea
                   id="description"
                   name="description"
                   value={values.description}
                   onChange={handleChange}
                   placeholder={t('dashboard.courses.communities.general.form.description_placeholder')}
-                  className="min-h-[120px] bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong mt-1.5"
+                  className={`${fieldClassName} min-h-[120px]`}
                   maxLength={500}
                 />
-                {touched.description && errors.description && (
-                  <p className="text-red-500 text-sm mt-1">{errors.description}</p>
-                )}
               </div>
 
+              {/* Public toggle */}
               <div className="flex items-center justify-between space-x-2 pt-2">
                 <div className="space-y-0.5">
-                  <Label className="text-base">{t('dashboard.courses.communities.general.form.public_label')}</Label>
+                  <span className="font-medium leading-[35px] text-black text-sm">
+                    {t('dashboard.courses.communities.general.form.public_label')}
+                  </span>
                   <p className="text-sm text-gray-500">
                     {t('dashboard.courses.communities.general.form.public_description')}
                   </p>
