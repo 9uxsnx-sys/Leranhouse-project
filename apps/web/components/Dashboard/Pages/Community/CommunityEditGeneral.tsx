@@ -113,7 +113,7 @@ const CommunityEditGeneral: React.FC = () => {
                 className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
               >
                 <Eye size={14} />
-                <span>{t('dashboard.courses.general.preview')}</span>
+                <span>{t('dashboard.courses.preview')}</span>
               </Link>
 
               <div className="flex items-center gap-2">
@@ -138,10 +138,10 @@ const CommunityEditGeneral: React.FC = () => {
                   )}
                   <span>
                     {isSubmitting
-                      ? t('common.saving')
+                      ? t('dashboard.courses.save.saving')
                       : !dirty
-                        ? t('common.saved')
-                        : t('common.save')}
+                        ? t('dashboard.courses.save.saved')
+                        : t('dashboard.courses.save.save')}
                   </span>
                 </button>
               </div>
