@@ -201,3 +201,15 @@ export async function updateCommunityThumbnail(
   const res = await getResponseMetadata(result)
   return res
 }
+
+export async function deleteCommunityThumbnail(
+  community_uuid: string,
+  access_token: string
+) {
+  const result: any = await fetch(
+    `${getAPIUrl()}communities/${community_uuid}/thumbnail`,
+    RequestBodyWithAuthHeader('DELETE', null, null, access_token)
+  )
+  const res = await getResponseMetadata(result)
+  return res
+}

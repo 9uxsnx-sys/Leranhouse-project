@@ -16,6 +16,7 @@ import toast from 'react-hot-toast'
 import { Input } from '@components/ui/input'
 import { Textarea } from '@components/ui/textarea'
 import Link from 'next/link'
+import CommunityMediaSection from './CommunityMediaSection'
 
 const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none"
 
@@ -249,6 +250,9 @@ const CommunityEditGeneral: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {/* ── MEDIA SECTION ── */}
+            <CommunityMediaSection />
           </div>
         </Form>
       )}

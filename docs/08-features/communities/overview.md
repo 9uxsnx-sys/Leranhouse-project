@@ -92,10 +92,9 @@ Each community is edited via a tabbed interface in the dashboard. The tabs map t
 
 | Tab | Component | Purpose |
 |-----|-----------|---------|
-| **General** | `CommunityEditGeneral` | Community name, description, thumbnail, **Publish/Unpublish button** |
+| **General** | `CommunityEditGeneral` | Community name, description, **Media section** (thumbnail upload), **Publish/Unpublish button** |
 | **Access** | `CommunityEditAccess` | Public/restricted toggle with confirmation, course linking |
 | **Moderation** | `CommunityEditModeration` | Word filtering, moderation settings, banned words list |
-| **Thumbnail** | `CommunityEditThumbnail` | Community thumbnail image upload |
 | **Course** | `CommunityEditCourse` | Link/unlink community to a course |
 
 ### Publish/Unpublish Flow (General tab)
@@ -106,6 +105,33 @@ Each community is edited via a tabbed interface in the dashboard. The tabs map t
 4. Community context dispatches optimistic update (rolls back on error)
 5. SWR cache revalidates
 6. Toast notification shows success/error
+
+### Media Section (General tab)
+
+The thumbnail upload is a compact row inside the General tab (not a separate tab):
+
+```
+┌───────────────────────────────────────────────────────────────┐
+│ [ImageIcon]  Community Cover Image              [UploadCloud] │
+│                                                     or        │
+│                                              [Trash2] (delete) │
+└───────────────────────────────────────────────────────────────┘
+```
+
+**States:**
+
+- **No image:** Shows an UploadCloud icon button. Clicking it opens a file picker (JPG/PNG only, max 8MB).
+- **Has image:** Shows a Trash2 icon button. Clicking it deletes the thumbnail image.
+- **Loading:** The action icon is replaced by a small spinning circle (same 18px size).
+
+**Flow:**
+
+1. Click the upload icon to pick a file from device
+2. File is validated client-side (type + size)
+3. Uploaded via `FormData` to `PUT /communities/{uuid}/thumbnail`
+4. On success, CommunityContext dispatches the updated community, SWR cache revalidates (both single community and list), and `router.refresh()` triggers server re-render
+5. Click the trash icon to delete — sends `DELETE /communities/{uuid}/thumbnail`, same revalidation flow
+6. On error, toast shows the failure reason
 
 ### Public/Restricted Flow (Access tab)
 
@@ -155,7 +181,8 @@ See [CommunityContext documentation](../../05-developer-guide/frontend/contexts.
 | GET | `/api/v1/communities/{uuid}/rights` | Get user's rights for a community |
 | POST | `/api/v1/communities/{uuid}/link-course` | Link community to a course |
 | POST | `/api/v1/communities/{uuid}/unlink-course` | Unlink community from a course |
-| POST | `/api/v1/communities/{uuid}/thumbnail` | Upload community thumbnail |
+| PUT | `/api/v1/communities/{uuid}/thumbnail` | Upload community thumbnail |
+| DELETE | `/api/v1/communities/{uuid}/thumbnail` | Remove community thumbnail |
 
 ---
 

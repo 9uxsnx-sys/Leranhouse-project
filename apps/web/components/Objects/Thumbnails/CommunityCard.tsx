@@ -37,6 +37,8 @@ export function CommunityCard({ id, title, description, org_uuid, community_uuid
     ? getCommunityThumbnailMediaDirectory(org_uuid, community_uuid, props.thumbnail_image)
     : ''
 
+  console.log(`[CommunityCard] ${title}: thumbnail_image=${props.thumbnail_image}, org_uuid=${org_uuid}, imageUrl=${imageUrl}`)
+
   const communityType = course_id ? 'Course' : 'General'
 
   return (
@@ -48,7 +50,13 @@ export function CommunityCard({ id, title, description, org_uuid, community_uuid
       {/* 16:9 Cover Image */}
       <div className="relative overflow-hidden bg-gray-100 shrink-0" style={{ aspectRatio: '16/9' }}>
         {imageUrl ? (
-          <img className="w-full h-full object-cover" src={imageUrl} alt={title} />
+          <img
+            className="w-full h-full object-cover"
+            src={imageUrl}
+            alt={title}
+            onError={(e) => console.error(`[CommunityCard] Image failed to load: ${imageUrl}`, e)}
+            onLoad={() => console.log(`[CommunityCard] Image loaded successfully: ${imageUrl}`)}
+          />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-300">
             <Users size={40} strokeWidth={1.5} />

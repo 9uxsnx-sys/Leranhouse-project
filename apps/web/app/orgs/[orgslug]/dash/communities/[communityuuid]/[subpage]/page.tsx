@@ -1,6 +1,6 @@
 'use client'
 import { getUriWithOrg } from '@services/config/config'
-import { TextIcon, LucideIcon, Image as ImageIcon, Link2, Shield, Users } from 'lucide-react'
+import { TextIcon, LucideIcon, Link2, Shield, Users } from 'lucide-react'
 import Link from 'next/link'
 import React, { use } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -8,7 +8,6 @@ import { motion } from 'motion/react'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { CommunityProvider, useCommunity } from '@components/Contexts/CommunityContext'
 import CommunityEditGeneral from '@components/Dashboard/Pages/Community/CommunityEditGeneral'
-import CommunityEditThumbnail from '@components/Dashboard/Pages/Community/CommunityEditThumbnail'
 import CommunityEditCourse from '@components/Dashboard/Pages/Community/CommunityEditCourse'
 import CommunityEditModeration from '@components/Dashboard/Pages/Community/CommunityEditModeration'
 import CommunityEditAccess from '@components/Dashboard/Pages/Community/CommunityEditAccess'
@@ -27,7 +26,6 @@ interface TabItem {
 
 const SETTING_TABS: TabItem[] = [
   { id: 'general', labelKey: 'dashboard.courses.communities.settings.tabs.general', icon: TextIcon },
-  { id: 'thumbnail', labelKey: 'dashboard.courses.communities.settings.tabs.thumbnail', icon: ImageIcon },
   { id: 'access', labelKey: 'dashboard.courses.communities.settings.tabs.access', icon: Users },
   { id: 'course', labelKey: 'dashboard.courses.communities.settings.tabs.course', icon: Link2 },
   { id: 'moderation', labelKey: 'dashboard.courses.communities.settings.tabs.moderation', icon: Shield },
@@ -104,7 +102,6 @@ function CommunitySettingsContent({ params }: { params: CommunityParams }) {
             className="space-y-8 rounded-xl"
           >
             {params.subpage === 'general' && <CommunityEditGeneral />}
-            {params.subpage === 'thumbnail' && <CommunityEditThumbnail />}
             {params.subpage === 'access' && <CommunityEditAccess />}
             {params.subpage === 'course' && <CommunityEditCourse />}
             {params.subpage === 'moderation' && <CommunityEditModeration />}

@@ -17,6 +17,9 @@ import { usePlan } from '@components/Hooks/usePlan'
 import { searchMatchesAny } from '@/lib/search/normalize'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import toast from 'react-hot-toast'
+import useSWR from 'swr'
+import { swrFetcher } from '@services/utils/ts/requests'
+import { getAPIUrl } from '@services/config/config'
 
 import { IconButton } from '@/components/ui/icon-button'
 import {
@@ -50,6 +53,20 @@ const CommunitiesDashClient = ({
   const currentPlan = usePlan()
   const org_uuid = org?.org_uuid
 
+  // Client-side re-fetch to keep communities list in sync (e.g. after thumbnail upload)
+  const communitiesListUrl = `${getAPIUrl()}communities/org/${org_id}/page/1/limit/100`
+  console.log('[CommunitiesDashClient] SWR key:', communitiesListUrl)
+  const { data: swrCommunities } = useSWR(
+    communitiesListUrl,
+    (url) => swrFetcher(url, access_token),
+    { fallbackData: communities, revalidateOnMount: false }
+  )
+  const effectiveCommunities = swrCommunities || communities
+  console.log('[CommunitiesDashClient] communities count:', effectiveCommunities.length)
+  effectiveCommunities.forEach((c: any) => {
+    if (c.thumbnail_image) console.log(`[CommunitiesDashClient] ${c.name}: thumbnail_image=${c.thumbnail_image}`)
+  })
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [editingCommunity, setEditingCommunity] = useState<Community | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -67,7 +84,7 @@ const CommunitiesDashClient = ({
   }, [activeFilter])
 
   const filteredCommunities = useMemo(() => {
-    let items = communities
+    let items = effectiveCommunities
 
     switch (activeFilter) {
       case 'course':
@@ -90,7 +107,7 @@ const CommunitiesDashClient = ({
     }
 
     return items
-  }, [communities, searchQuery, activeFilter])
+  }, [effectiveCommunities, searchQuery, activeFilter])
 
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 8
@@ -196,7 +213,7 @@ const CommunitiesDashClient = ({
         {t('dashboard.courses.communities.title')}
       </h1>
 
-      {communities.length > 0 && (
+      {effectiveCommunities.length > 0 && (
         <div className="flex items-center gap-3 mb-8">
           <div className="flex items-center gap-3">
             <div className="relative w-80">
@@ -365,7 +382,7 @@ const CommunitiesDashClient = ({
             </div>
           )}
 
-          {communities.length === 0 && !searchQuery && (
+          {effectiveCommunities.length === 0 && !searchQuery && (
             <div className="col-span-full flex flex-col justify-center items-center py-16 px-4">
               <div className="p-4 bg-ui-bg-base rounded-full shadow-borders-base mb-4">
                 <Users className="w-8 h-8 text-ui-fg-muted" strokeWidth={1.5} />

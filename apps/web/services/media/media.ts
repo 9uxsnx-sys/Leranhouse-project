@@ -3,9 +3,10 @@ import { getBackendUrl, getConfig } from '@services/config/config'
 function getMediaUrl() {
   const mediaUrl = getConfig('NEXT_PUBLIC_LEARNHOUSE_MEDIA_URL');
   if (mediaUrl) {
-    return mediaUrl;
+    return mediaUrl.endsWith('/') ? mediaUrl : mediaUrl + '/';
   } else {
-    return getBackendUrl();
+    const url = getBackendUrl();
+    return url.endsWith('/') ? url : url + '/';
   }
 }
 

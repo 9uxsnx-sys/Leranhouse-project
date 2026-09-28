@@ -18,7 +18,7 @@ from src.services.communities.communities import (
     unlink_community_from_course,
     get_community_user_rights,
 )
-from src.services.communities.thumbnails import upload_community_thumbnail
+from src.services.communities.thumbnails import upload_community_thumbnail, delete_community_thumbnail_file
 from src.db.communities.communities import Community
 from src.security.rbac import check_resource_access, AccessAction
 
@@ -335,6 +335,62 @@ async def api_update_community_thumbnail(
 
         # Update community with new thumbnail
         community.thumbnail_image = filename
+
+    db_session.add(community)
+    db_session.commit()
+    db_session.refresh(community)
+
+    return CommunityRead.model_validate(community.model_dump())
+
+
+@router.delete(
+    "/{community_uuid}/thumbnail",
+    response_model=CommunityRead,
+    summary="Delete a community thumbnail",
+    description="Remove the thumbnail image from a community. Requires admin/maintainer role.",
+    responses={
+        200: {"description": "Thumbnail deleted and community updated.", "model": CommunityRead},
+        401: {"description": "Authentication required"},
+        403: {"description": "User lacks admin/maintainer role for this community"},
+        404: {"description": "Community or organization not found"},
+    },
+)
+async def api_delete_community_thumbnail(
+    request: Request,
+    community_uuid: str,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session: Session = Depends(get_db_session),
+) -> CommunityRead:
+    """
+    Delete a community thumbnail.
+
+    Requires admin/maintainer role.
+    """
+    # Get community
+    community_statement = select(Community).where(Community.community_uuid == community_uuid)
+    community = db_session.exec(community_statement).first()
+
+    if not community:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Community not found")
+
+    # Check permissions
+    await check_resource_access(request, db_session, current_user, community_uuid, AccessAction.UPDATE)
+
+    # Get org UUID for storage path
+    org_statement = select(Organization).where(Organization.id == community.org_id)
+    org = db_session.exec(org_statement).first()
+
+    if not org:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Organization not found")
+
+    # Delete the thumbnail file from storage
+    if community.thumbnail_image:
+        await delete_community_thumbnail_file(org.org_uuid, community_uuid, community.thumbnail_image)
+
+    # Clear thumbnail field
+    community.thumbnail_image = ""
 
     db_session.add(community)
     db_session.commit()

@@ -68,10 +68,9 @@ Each dashboard subpage has its own component in `components/Dashboard/Pages/`:
 | `EditCourseContributors` | `/dash/courses/course/[uuid]/contributors` | Contributor management |
 | `EditCourseSEO` | `/dash/courses/course/[uuid]/seo` | SEO metadata editor |
 | `EditCourseCertification` | `/dash/courses/course/[uuid]/certification` | Certificate configuration |
-| `CommunityEditGeneral` | `/dash/org/[orgslug]/community/[uuid]/general` | Community name, description, **publish/unpublish** |
+| `CommunityEditGeneral` | `/dash/org/[orgslug]/community/[uuid]/general` | Community name, description, **Media section** (thumbnail upload), **publish/unpublish** |
 | `CommunityEditAccess` | `/dash/org/[orgslug]/community/[uuid]/access` | Public/restricted toggle, course linking |
 | `CommunityEditModeration` | `/dash/org/[orgslug]/community/[uuid]/moderation` | Word filtering, moderation settings |
-| `CommunityEditThumbnail` | `/dash/org/[orgslug]/community/[uuid]/thumbnail` | Community thumbnail image |
 | `CommunityEditCourse` | `/dash/org/[orgslug]/community/[uuid]/course` | Link/unlink community to a course |
 | `OrgEditBranding` | `/dash/org/settings/branding` | Organization branding |
 | `OrgEditLanding` | `/dash/org/settings/landing` | Landing page customization |
