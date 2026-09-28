@@ -21,6 +21,7 @@ class CommunityBase(SQLModel):
     name: str
     description: Optional[str] = Field(default=None, sa_column=Column(Text))
     public: bool = True
+    published: bool = Field(default=False)
     thumbnail_image: Optional[str] = Field(default="")
 
 
@@ -28,6 +29,7 @@ class Community(CommunityBase, table=True):
     __table_args__ = (
         Index("ix_community_org_id", "org_id"),
         Index("ix_community_course_id", "course_id"),
+        Index("ix_community_org_public_published_created", "org_id", "public", "published", "creation_date"),
     )
     id: Optional[int] = Field(default=None, primary_key=True)
     org_id: int = Field(
@@ -55,6 +57,7 @@ class CommunityUpdate(SQLModel):
     name: Optional[str] = None
     description: Optional[str] = None
     public: Optional[bool] = None
+    published: Optional[bool] = None
     moderation_words: Optional[List[str]] = None
     moderation_settings: Optional[Dict[str, Any]] = None
 

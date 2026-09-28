@@ -7,8 +7,8 @@
 | [Getting Started](./getting-started.md) | Prerequisites and first run |
 | [Project Structure](./project-structure.md) | Monorepo layout |
 | [Environment Variables](./environment-variables.md) | Complete env var reference |
-| [Frontend Overview](./frontend/overview.md) | Next.js architecture |
-| [Backend Overview](./backend/overview.md) | FastAPI architecture |
+| [Frontend](./frontend/README.md) | Next.js architecture, components, state management, UI |
+| [Backend](./backend/README.md) | FastAPI architecture, routers, services, database, security |
 | [CLI Reference](./cli.md) | Development CLI |
-| [Testing](./testing.md) | Testing strategy |
+| [Testing](./testing/README.md) | Testing strategy (API + Agent) |
 | [Troubleshooting](./troubleshooting.md) | Common issues |

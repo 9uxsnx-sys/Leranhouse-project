@@ -33,7 +33,7 @@ RESOURCE_CONFIGS: dict[str, ResourceConfig] = {
     "communities": ResourceConfig(
         resource_type="communities",
         uuid_prefix="community_",
-        has_published_field=False,  # Communities only use public flag
+        has_published_field=True,
         supports_usergroups=True,
         supports_authorship=False,  # Communities don't have authors
         model_name="Community",

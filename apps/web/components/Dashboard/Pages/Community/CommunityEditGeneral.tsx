@@ -11,7 +11,7 @@ import { updateCommunity } from '@services/communities/communities'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { mutate } from 'swr'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
-import { Loader2, Info, Eye, Check, SaveAllIcon } from 'lucide-react'
+import { Loader2, Info, Eye, Check, SaveAllIcon, Globe, GlobeLock } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { Input } from '@components/ui/input'
 import { Textarea } from '@components/ui/textarea'
@@ -42,6 +42,9 @@ const CommunityEditGeneral: React.FC = () => {
   const accessToken = session?.data?.tokens?.access_token
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isPublishing, setIsPublishing] = useState(false)
+
+  const isPublished = community?.published ?? false
 
   const validationSchema = Yup.object({
     name: Yup.string()
@@ -91,6 +94,48 @@ const CommunityEditGeneral: React.FC = () => {
 
   const communityUuid = community.community_uuid.replace('community_', '')
 
+  const togglePublishStatus = async () => {
+    if (isPublishing || !community) return
+    setIsPublishing(true)
+
+    const newPublishedStatus = !isPublished
+    const toastMessage = newPublishedStatus ? 'Publishing...' : 'Unpublishing...'
+    const toastId = toast.loading(toastMessage)
+
+    const previousPublished = community.published
+
+    // Optimistic update
+    if (dispatch) {
+      dispatch({ type: 'setCommunity', payload: { ...community, published: newPublishedStatus } })
+    }
+
+    try {
+      await updateCommunity(
+        community.community_uuid,
+        { published: newPublishedStatus },
+        accessToken
+      )
+
+      await revalidateTags(['communities'], org.slug)
+      mutate(`${getAPIUrl()}communities/${community.community_uuid}`)
+
+      toast.dismiss(toastId)
+      toast.success(
+        newPublishedStatus ? 'Community published successfully' : 'Community unpublished successfully'
+      )
+    } catch (error) {
+      console.error('Failed to toggle publish status:', error)
+      // Rollback optimistic update
+      if (dispatch) {
+        dispatch({ type: 'setCommunity', payload: { ...community, published: previousPublished } })
+      }
+      toast.dismiss(toastId)
+      toast.error('Failed to update publish status')
+    } finally {
+      setIsPublishing(false)
+    }
+  }
+
   return (
     <Formik
       enableReinitialize
@@ -138,6 +183,27 @@ const CommunityEditGeneral: React.FC = () => {
                       : !dirty
                         ? t('dashboard.courses.save.saved')
                         : t('dashboard.courses.save.save')}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={togglePublishStatus}
+                  disabled={isPublishing}
+                  className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50 ${isPublishing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                >
+                  {isPublishing ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : isPublished ? (
+                    <Globe size={14} />
+                  ) : (
+                    <GlobeLock size={14} />
+                  )}
+                  <span>
+                    {isPublishing
+                      ? 'Processing...'
+                      : isPublished
+                        ? 'Published'
+                        : 'Unpublished'}
                   </span>
                 </button>
               </div>

@@ -122,11 +122,12 @@ async def get_communities_by_org(
     # admin / membership checks run against a real user_id.
     acting_user_id = resolve_acting_user_id(current_user)
 
-    # For anonymous users, only show public communities
+    # For anonymous users, only show public and published communities
     if isinstance(current_user, AnonymousUser) or acting_user_id == 0:
         query = select(Community).where(
             Community.org_id == org_id,
-            Community.public == True
+            Community.public == True,
+            Community.published == True
         )
         query = query.order_by(Community.creation_date.desc()).offset(offset).limit(limit)  # type: ignore
         communities = db_session.exec(query).all()
@@ -159,7 +160,7 @@ async def get_communities_by_org(
     # Get IDs of communities the user has access to
     accessible_community_ids_query = (
         select(Community.id)
-        .where(Community.org_id == org_id)
+        .where(Community.org_id == org_id, Community.published == True)
         .outerjoin(UserGroupResource, UserGroupResource.resource_uuid == Community.community_uuid)
         .outerjoin(UserGroupUser, and_(
             UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
@@ -246,6 +247,8 @@ async def update_community(
         community.description = community_object.description
     if community_object.public is not None:
         community.public = community_object.public
+    if community_object.published is not None:
+        community.published = community_object.published
     if community_object.moderation_words is not None:
         community.moderation_words = community_object.moderation_words
     if community_object.moderation_settings is not None:
@@ -457,12 +460,16 @@ async def get_community_user_rights(
     )
 
     # Check if user has access via public, UserGroups, or admin status
-    has_access = (
-        community.public or
-        not rights["access"]["has_usergroup_restriction"] or
-        len(rights["access"]["via_usergroups"]) > 0 or
-        is_admin_or_maintainer
-    )
+    # If community is unpublished, only admins have access
+    if not community.published:
+        has_access = is_admin_or_maintainer
+    else:
+        has_access = (
+            community.public or
+            not rights["access"]["has_usergroup_restriction"] or
+            len(rights["access"]["via_usergroups"]) > 0 or
+            is_admin_or_maintainer
+        )
 
     if has_access:
         rights["permissions"]["read"] = True
