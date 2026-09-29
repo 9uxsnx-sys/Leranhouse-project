@@ -1,20 +1,10 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react'
 import {
-  Plus,
-  Trash2,
-  Shield,
-  AlertTriangle,
+  X,
+  Check,
+  SaveAllIcon,
   Loader2,
-  Link2,
-  Ruler,
-  MessageSquare,
-  Timer,
-  Gauge,
-  CalendarClock,
-  MailCheck,
-  Lock,
-  SmilePlus,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
@@ -32,7 +22,6 @@ import toast from 'react-hot-toast'
 import { Input } from '@components/ui/input'
 import { Button } from '@components/ui/button'
 import { Label } from '@components/ui/label'
-import { Switch } from '@components/ui/switch'
 
 type Settings = Required<CommunityModerationSettings>
 
@@ -101,12 +90,10 @@ const CommunityEditModeration: React.FC = () => {
   const community = communityState?.community
   const accessToken = session?.data?.tokens?.access_token
   const inputRef = useRef<HTMLInputElement>(null)
-  const batchInputRef = useRef<HTMLTextAreaElement>(null)
 
   const [words, setWords] = useState<string[]>([])
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS)
   const [newWord, setNewWord] = useState('')
-  const [batchWords, setBatchWords] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [hasChanges, setHasChanges] = useState(false)
@@ -140,24 +127,6 @@ const CommunityEditModeration: React.FC = () => {
     setNewWord('')
     setError(null)
     inputRef.current?.focus()
-  }
-
-  const handleBatchAdd = () => {
-    if (!batchWords.trim()) return
-    const newWordsToAdd = batchWords
-      .split(',')
-      .map((w) => w.trim().toLowerCase())
-      .filter((w) => w.length > 0)
-      .filter((w) => !words.includes(w))
-
-    if (newWordsToAdd.length === 0) {
-      setError(t('dashboard.courses.communities.moderation.all_words_exist_error'))
-      return
-    }
-
-    setWords([...words, ...Array.from(new Set(newWordsToAdd))])
-    setBatchWords('')
-    setError(null)
   }
 
   const handleRemoveWord = (wordToRemove: string) => {
@@ -213,38 +182,34 @@ const CommunityEditModeration: React.FC = () => {
 
   return (
     <div className="space-y-3">
-      {/* Warning banner */}
-      <div className="flex gap-3 p-4 bg-amber-50 border border-amber-100 rounded-lg">
-        <AlertTriangle size={18} className="text-amber-600 flex-shrink-0 mt-0.5" />
-        <div className="text-sm text-amber-800">
-          <p className="font-medium">{t('dashboard.courses.communities.moderation.info_title')}</p>
-          <p className="text-amber-700 mt-0.5">
-            {t('dashboard.courses.communities.moderation.info_description')}
-          </p>
-        </div>
-      </div>
-
-      {/* Card: Content restrictions */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
-          {t('dashboard.courses.communities.moderation.restrictions_title')}
-        </h3>
-        <div className="space-y-4">
-          <ToggleRow
-            icon={<Link2 size={18} className="text-gray-500" />}
-            label={t('dashboard.courses.communities.moderation.block_links_label')}
-            description={t('dashboard.courses.communities.moderation.block_links_description')}
-            checked={settings.block_links}
-            onChange={setToggle('block_links')}
-          />
-          <ToggleRow
-            icon={<SmilePlus size={18} className="text-gray-500" />}
-            label={t('dashboard.courses.communities.moderation.disable_reactions_label')}
-            description={t('dashboard.courses.communities.moderation.disable_reactions_description')}
-            checked={settings.disable_reactions}
-            onChange={setToggle('disable_reactions')}
-          />
-        </div>
+      {/* Action bar */}
+      <div className="flex items-center justify-end">
+        <button
+          onClick={handleSave}
+          disabled={isSubmitting || !hasChanges}
+          className={`inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors ${
+            isSubmitting
+              ? 'bg-black text-white border-black opacity-50 cursor-not-allowed'
+              : !hasChanges
+                ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                : 'bg-black text-white border-black hover:opacity-90 cursor-pointer'
+          }`}
+        >
+          {isSubmitting ? (
+            <Loader2 size={14} className="animate-spin" />
+          ) : !hasChanges ? (
+            <Check size={14} />
+          ) : (
+            <SaveAllIcon size={14} />
+          )}
+          <span>
+            {isSubmitting
+              ? t('common.saving')
+              : !hasChanges
+                ? t('dashboard.courses.save.saved')
+                : t('common.save')}
+          </span>
+        </button>
       </div>
 
       {/* Card: Length limits */}
@@ -281,7 +246,6 @@ const CommunityEditModeration: React.FC = () => {
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <NumberField
-            icon={<Timer size={14} className="text-gray-400" />}
             label={t('dashboard.courses.communities.moderation.slow_mode_label')}
             value={settings.slow_mode_seconds}
             onChange={setNumber('slow_mode_seconds')}
@@ -294,7 +258,6 @@ const CommunityEditModeration: React.FC = () => {
             hint={t('dashboard.courses.communities.moderation.zero_disables')}
           />
           <NumberField
-            icon={<CalendarClock size={14} className="text-gray-400" />}
             label={t('dashboard.courses.communities.moderation.auto_lock_days_label')}
             value={settings.auto_lock_days}
             onChange={setNumber('auto_lock_days')}
@@ -315,13 +278,30 @@ const CommunityEditModeration: React.FC = () => {
             onChange={setNumber('min_account_age_days')}
             hint={t('dashboard.courses.communities.moderation.min_account_age_hint')}
           />
-          <ToggleRow
-            icon={<MailCheck size={18} className="text-gray-500" />}
-            label={t('dashboard.courses.communities.moderation.require_email_verified_label')}
-            description={t('dashboard.courses.communities.moderation.require_email_verified_description')}
-            checked={settings.require_email_verified}
-            onChange={setToggle('require_email_verified')}
-          />
+          <label className="flex items-center gap-3 cursor-pointer">
+            <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${settings.block_links ? 'bg-black' : 'bg-gray-300'}`}>
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${settings.block_links ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={settings.block_links}
+                onChange={(e) => setToggle('block_links')(e.target.checked)}
+              />
+            </div>
+            <span className="text-sm text-gray-600 select-none">{t('dashboard.courses.communities.moderation.block_links_label')}</span>
+          </label>
+          <label className="flex items-center gap-3 cursor-pointer">
+            <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${settings.require_email_verified ? 'bg-black' : 'bg-gray-300'}`}>
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${settings.require_email_verified ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
+              <input
+                type="checkbox"
+                className="sr-only"
+                checked={settings.require_email_verified}
+                onChange={(e) => setToggle('require_email_verified')(e.target.checked)}
+              />
+            </div>
+            <span className="text-sm text-gray-600 select-none">{t('dashboard.courses.communities.moderation.require_email_verified_label')}</span>
+          </label>
         </div>
       </div>
 
@@ -330,143 +310,59 @@ const CommunityEditModeration: React.FC = () => {
         <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
           {t('dashboard.courses.communities.moderation.blocked_words_section_title')}
         </h3>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="space-y-6">
-            <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('dashboard.courses.communities.moderation.add_word_label')}
-              </Label>
-              <div className="flex gap-2">
-                <Input
-                  ref={inputRef}
-                  type="text"
-                  value={newWord}
-                  onChange={(e) => {
-                    setNewWord(e.target.value)
-                    setError(null)
-                  }}
-                  onKeyDown={handleKeyDown}
-                  placeholder={t('dashboard.courses.communities.moderation.add_word_placeholder')}
-                  className="flex-1 bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong"
-                />
-                <Button
-                  type="button"
-                  onClick={handleAddWord}
-                  disabled={!newWord.trim()}
-                  className="bg-primary hover:bg-primary/90"
-                >
-                  <Plus size={16} className="mr-2" />
-                  {t('dashboard.courses.communities.moderation.add_button')}
-                </Button>
-              </div>
+
+        <div className="rounded-xl border border-gray-200 bg-ui-bg-field">
+          {words.length === 0 ? (
+            <div className="px-4 py-8 text-center">
+              <p className="text-sm text-gray-400">{t('dashboard.courses.communities.moderation.no_blocked_words')}</p>
             </div>
-
-            <div>
-              <Label className="block text-sm font-medium text-gray-700 mb-2">
-                {t('dashboard.courses.communities.moderation.batch_add_label')}
-              </Label>
-              <p className="text-xs text-gray-500 mb-2">
-                {t('dashboard.courses.communities.moderation.batch_add_description')}
-              </p>
-              <textarea
-                ref={batchInputRef}
-                value={batchWords}
-                onChange={(e) => {
-                  setBatchWords(e.target.value)
-                  setError(null)
-                }}
-                placeholder={t('dashboard.courses.communities.moderation.batch_add_placeholder')}
-                className="w-full min-h-[100px] px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-              />
-              <Button
-                type="button"
-                onClick={handleBatchAdd}
-                disabled={!batchWords.trim()}
-                className="mt-2 bg-primary hover:bg-primary/90"
-              >
-                <Plus size={16} className="mr-2" />
-                {t('dashboard.courses.communities.moderation.add_all_button')}
-              </Button>
-            </div>
-
-            {error && <p className="text-red-500 text-sm">{error}</p>}
-          </div>
-
-          <div>
-            <Label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('dashboard.courses.communities.moderation.blocked_words_label')} ({words.length})
-            </Label>
-            {words.length === 0 ? (
-              <div className="py-12 text-center border border-dashed border-gray-200 rounded-lg">
-                <Shield size={32} className="mx-auto text-gray-300 mb-2" />
-                <p className="text-sm text-gray-500">{t('dashboard.courses.communities.moderation.no_blocked_words')}</p>
-                <p className="text-xs text-gray-400 mt-1">
-                  {t('dashboard.courses.communities.moderation.no_blocked_words_description')}
-                </p>
-              </div>
-            ) : (
-              <div className="max-h-[400px] overflow-y-auto border border-gray-200 rounded-lg divide-y divide-gray-100">
-                {words.map((word, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between px-4 py-3 hover:bg-gray-50 group"
-                  >
-                    <span className="text-sm text-gray-700 font-mono">{word}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveWord(word)}
-                      className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Save button */}
-      <div className="flex justify-end">
-        <Button
-          onClick={handleSave}
-          disabled={isSubmitting || !hasChanges}
-          className="bg-primary text-primary-foreground hover:bg-primary/90"
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 size={16} className="animate-spin mr-2" />
-              {t('common.saving')}
-            </>
           ) : (
-            t('common.save_changes')
+            <div className="max-h-[400px] overflow-y-auto">
+              {words.map((word, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between px-4 py-2.5 border-b border-gray-200 last:border-b-0 hover:bg-gray-50"
+                >
+                  <span className="text-sm text-gray-700">{word}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveWord(word)}
+                    className="p-1 text-gray-400 hover:text-red-500 rounded transition-colors"
+                  >
+                    <X size={13} />
+                  </button>
+                </div>
+              ))}
+            </div>
           )}
-        </Button>
-      </div>
-    </div>
-  )
-}
 
-interface ToggleRowProps {
-  icon: React.ReactNode
-  label: string
-  description: string
-  checked: boolean
-  onChange: (checked: boolean) => void
-}
+          {error && <p className="text-xs text-red-500 px-4 pt-3">{error}</p>}
 
-function ToggleRow({ icon, label, description, checked, onChange }: ToggleRowProps) {
-  return (
-    <div className="flex items-start justify-between gap-4">
-      <div className="flex items-start gap-3">
-        <div className="mt-0.5">{icon}</div>
-        <div>
-          <Label className="text-sm font-medium text-gray-800">{label}</Label>
-          <p className="text-xs text-gray-500 mt-0.5">{description}</p>
+          <div className="flex items-center gap-2 px-4 py-2.5 border-t border-gray-200">
+            <input
+              ref={inputRef}
+              type="text"
+              value={newWord}
+              onChange={(e) => {
+                setNewWord(e.target.value)
+                setError(null)
+              }}
+              onKeyDown={handleKeyDown}
+              placeholder={t('dashboard.courses.communities.moderation.add_word_placeholder')}
+              className="flex-1 text-sm text-gray-700 bg-transparent border-none outline-none placeholder:text-gray-300"
+            />
+            <button
+              type="button"
+              onClick={handleAddWord}
+              disabled={!newWord.trim()}
+              className="text-sm text-blue-600 hover:text-blue-700 font-medium disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
+            >
+              {t('dashboard.courses.communities.moderation.add_button')}
+            </button>
+          </div>
         </div>
       </div>
-      <Switch checked={checked} onCheckedChange={onChange} />
+
     </div>
   )
 }
@@ -476,25 +372,20 @@ interface NumberFieldProps {
   value: number
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   hint?: string
-  icon?: React.ReactNode
 }
 
-function NumberField({ label, value, onChange, hint, icon }: NumberFieldProps) {
+function NumberField({ label, value, onChange, hint }: NumberFieldProps) {
   return (
     <div>
-      <Label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1">
-        {icon}
-        {label}
-      </Label>
+      <Label className="text-sm font-medium text-gray-700 mb-1">{label}</Label>
       <Input
         type="number"
         min={0}
         value={value || ''}
         onChange={onChange}
-        placeholder="0"
-        className="bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong"
+        placeholder={hint || '0'}
+        className="bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
       />
-      {hint && <p className="text-xs text-gray-500 mt-1">{hint}</p>}
     </div>
   )
 }
