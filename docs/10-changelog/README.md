@@ -60,6 +60,21 @@ Each release provides a summary of changes organized by category:
 
 ---
 
+## v1.2.0-koodook.N (Unreleased)
+
+### New Features
+
+- **Drag-and-drop reordering for podcast episodes** — Episodes can now be reordered by dragging the grip handle. The custom order persists via API and is reflected in the public podcast page.
+- **Drag-and-drop reordering for course modules and lessons** — Modules and lessons in the course content editor can now be reordered with the same drag-and-drop pattern as episodes.
+- **Select mode with checkboxes** — Clicking "Select" in the toolbar replaces drag handles with checkboxes on episodes, modules, and lessons. Drag-and-drop is disabled in select mode. Selected items show a blue ring and filled checkbox.
+- **Episode detail preview button** — The "Back to Episodes" button was replaced with a "Preview" button that opens the public podcast page in a new tab, matching the lesson preview pattern.
+
+### Improvements
+
+- **Field size consistency** — Podcast episode title and description fields now use the same shadcn Input/Textarea components and fieldClassName as all other dashboard edit pages (Course, Community, Podcast General, etc.), ensuring consistent sizing and styling across the admin dashboard.
+
+---
+
 ## Staying Updated
 
 - **Watch the repository** on GitHub to receive notifications for new releases.

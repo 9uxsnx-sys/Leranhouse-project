@@ -41,11 +41,12 @@ Each module is displayed as a card:
 
 ```
 ┌──────────────────────────────────────────────┐
-│  📁  Module Name                       [⋮]   │
+│  ⠿  📁  Module Name                   [⋮]   │
 └──────────────────────────────────────────────┘
 ```
 
-- **Folder icon** on the left
+- **Drag handle** (⠿) on the left — drag to reorder modules
+- **Folder icon** next to the drag handle
 - **Module name** centered
 - **3-dot menu** on the right with Duplicate and Delete options
 
@@ -54,6 +55,23 @@ Each module is displayed as a card:
 - **Click** a module to view its lessons
 - **Duplicate** --- creates a copy of the module
 - **Delete** --- removes the module (with confirmation)
+- **Drag** the drag handle to reorder modules — order persists via API
+
+### Select Mode
+
+Clicking **Select** in the toolbar toggles select mode:
+
+```
+┌──────────────────────────────────────────────┐
+│  ☑  📁  Module Name                   [⋮]   │
+└──────────────────────────────────────────────┘
+```
+
+- Drag handles are replaced with **checkboxes**
+- Drag-and-drop is disabled
+- Clicking a card toggles its checkbox
+- Selected cards show a **blue ring** and filled checkbox
+- Click **Cancel** to exit select mode and restore drag handles
 
 ---
 
@@ -71,13 +89,29 @@ Clicking a module shows its lessons, using the **exact same layout** as the modu
 
 ```
 ┌──────────────────────────────────────────────┐
-│  📄  Lesson Name                       [⋮]   │
+│  ⠿  📄  Lesson Name                   [⋮]   │
 └──────────────────────────────────────────────┘
 ```
 
-- **FileText icon** on the left
+- **Drag handle** (⠿) on the left — drag to reorder lessons within the module
+- **FileText icon** next to the drag handle
 - **Lesson name** only (no type badges/icons)
 - **3-dot menu** with Duplicate and Delete
+
+### Select Mode
+
+Same as modules — clicking **Select** replaces drag handles with checkboxes:
+
+```
+┌──────────────────────────────────────────────┐
+│  ☑  📄  Lesson Name                   [⋮]   │
+└──────────────────────────────────────────────┘
+```
+
+- Drag handles are replaced with **checkboxes**
+- Drag-and-drop is disabled
+- Clicking a card toggles its checkbox
+- Selected cards show a **blue ring** and filled checkbox
 
 ### Lesson Creation
 

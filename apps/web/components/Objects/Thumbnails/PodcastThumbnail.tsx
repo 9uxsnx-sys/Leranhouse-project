@@ -191,7 +191,7 @@ function PodcastThumbnail({ podcast, orgslug, customLink, isDashboard = false }:
   )
 }
 
-const AdminEditOptions = ({ podcast, orgSlug, deletePodcast, isDashboard = false }: {
+export const AdminEditOptions = ({ podcast, orgSlug, deletePodcast, isDashboard = false }: {
   podcast: Podcast
   orgSlug: string
   deletePodcast: () => Promise<void>

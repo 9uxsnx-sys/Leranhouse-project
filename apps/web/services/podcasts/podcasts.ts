@@ -193,6 +193,18 @@ export async function updatePodcastThumbnail(
   return res
 }
 
+export async function deletePodcastThumbnail(
+  podcast_uuid: string,
+  access_token: string
+) {
+  const result: any = await fetch(
+    `${getAPIUrl()}podcasts/${podcast_uuid}/thumbnail`,
+    RequestBodyWithAuthHeader('DELETE', null, null, access_token)
+  )
+  const res = await getResponseMetadata(result)
+  return res
+}
+
 export async function deletePodcast(
   podcast_uuid: string,
   access_token: string

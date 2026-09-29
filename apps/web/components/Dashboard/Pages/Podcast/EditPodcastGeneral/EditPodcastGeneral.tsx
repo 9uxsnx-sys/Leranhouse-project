@@ -1,23 +1,21 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useRef } from 'react'
 import { usePodcast } from '@components/Contexts/PodcastContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { updatePodcast, updatePodcastThumbnail } from '@services/podcasts/podcasts'
-import { getPodcastThumbnailMediaDirectory } from '@services/media/media'
+import { updatePodcast, updatePodcastThumbnail, deletePodcastThumbnail } from '@services/podcasts/podcasts'
 import { revalidateTags } from '@services/utils/ts/requests'
-import { useFormik } from 'formik'
+import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
 import { useTranslation } from 'react-i18next'
-import { Loader2, Upload, Trash2, Save } from 'lucide-react'
+import { Loader2, Eye, Check, SaveAllIcon, Globe, GlobeLock, UploadCloud, ImageIcon, Trash2 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import FormLayout, {
-  FormField,
-  FormLabelAndMessage,
-  Input,
-  Textarea,
-} from '@components/Objects/StyledElements/Form/Form'
-import * as Form from '@radix-ui/react-form'
+import { Input } from '@components/ui/input'
+import { Textarea } from '@components/ui/textarea'
+import Link from 'next/link'
+import { getUriWithOrg } from '@services/config/config'
+
+const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none"
 
 interface EditPodcastGeneralProps {
   orgslug: string
@@ -28,79 +26,24 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
   const { podcast, refreshPodcast, isLoading } = usePodcast()
   const session = useLHSession() as any
   const org = useOrg() as any
+  const imageInputRef = useRef<HTMLInputElement>(null)
   const [isSaving, setIsSaving] = useState(false)
-  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
-  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null)
+  const [isPublishing, setIsPublishing] = useState(false)
+  const [isThumbnailLoading, setIsThumbnailLoading] = useState(false)
 
   const accessToken = session?.data?.tokens?.access_token
+  const isPublished = podcast?.published ?? false
+  const shortUuid = podcast?.podcast_uuid?.replace('podcast_', '')
+  const hasThumbnail = !!podcast?.thumbnail_image
 
   const validationSchema = Yup.object({
     name: Yup.string()
       .required(t('podcasts.form.name_required'))
       .min(3, t('podcasts.form.name_min_length'))
       .max(100, t('podcasts.form.name_max_length')),
-    description: Yup.string()
-      .max(500, t('podcasts.form.description_max_length')),
-    about: Yup.string()
-      .max(2000, t('podcasts.dashboard.form.about_max_length')),
-    tags: Yup.string(),
-    public: Yup.boolean(),
-    published: Yup.boolean(),
+    description: Yup.string().max(500, t('podcasts.form.description_max_length')),
+    about: Yup.string().max(2000, t('podcasts.dashboard.form.about_max_length')),
   })
-
-  const formik = useFormik({
-    initialValues: {
-      name: podcast?.name || '',
-      description: podcast?.description || '',
-      about: podcast?.about || '',
-      tags: podcast?.tags || '',
-      public: podcast?.public || false,
-      published: podcast?.published || false,
-    },
-    validationSchema,
-    enableReinitialize: true,
-    onSubmit: async (values) => {
-      setIsSaving(true)
-      const toastId = toast.loading(t('podcasts.dashboard.saving'))
-      try {
-        await updatePodcast(podcast!.podcast_uuid, values, accessToken)
-
-        if (thumbnailFile) {
-          const formData = new FormData()
-          formData.append('thumbnail', thumbnailFile)
-          await updatePodcastThumbnail(podcast!.podcast_uuid, formData, accessToken)
-        }
-
-        await revalidateTags(['podcasts'], orgslug)
-        await refreshPodcast()
-        toast.success(t('podcasts.dashboard.saved'), { id: toastId })
-        setThumbnailFile(null)
-        setThumbnailPreview(null)
-      } catch (error) {
-        console.error('Failed to save podcast:', error)
-        toast.error(t('podcasts.dashboard.save_error'), { id: toastId })
-      } finally {
-        setIsSaving(false)
-      }
-    },
-  })
-
-  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setThumbnailFile(file)
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setThumbnailPreview(reader.result as string)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const removeThumbnail = () => {
-    setThumbnailFile(null)
-    setThumbnailPreview(null)
-  }
 
   if (isLoading || !podcast) {
     return (
@@ -110,196 +53,286 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
     )
   }
 
-  const currentThumbnail = thumbnailPreview || (podcast.thumbnail_image
-    ? getPodcastThumbnailMediaDirectory(org?.org_uuid, podcast.podcast_uuid, podcast.thumbnail_image)
-    : null)
+  const initialValues = {
+    name: podcast.name || '',
+    description: podcast.description || '',
+    about: podcast.about || '',
+  }
+
+  const handleSubmit = async (values: typeof initialValues) => {
+    setIsSaving(true)
+    const toastId = toast.loading(t('podcasts.dashboard.saving'))
+    try {
+      await updatePodcast(podcast.podcast_uuid, values, accessToken)
+      await revalidateTags(['podcasts'], orgslug)
+      await refreshPodcast()
+      toast.success(t('podcasts.dashboard.saved'), { id: toastId })
+    } catch (error) {
+      console.error('Failed to save podcast:', error)
+      toast.error(t('podcasts.dashboard.save_error'), { id: toastId })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const togglePublishStatus = async () => {
+    if (isPublishing || !podcast) return
+    setIsPublishing(true)
+
+    const newPublishedStatus = !isPublished
+    const toastMessage = newPublishedStatus ? 'Publishing...' : 'Unpublishing...'
+    const toastId = toast.loading(toastMessage)
+
+    try {
+      await updatePodcast(
+        podcast.podcast_uuid,
+        { published: newPublishedStatus },
+        accessToken
+      )
+
+      await revalidateTags(['podcasts'], orgslug)
+      await refreshPodcast()
+
+      toast.dismiss(toastId)
+      toast.success(
+        newPublishedStatus ? 'Podcast published successfully' : 'Podcast unpublished successfully'
+      )
+    } catch (error) {
+      console.error('Failed to toggle publish status:', error)
+      toast.dismiss(toastId)
+      toast.error('Failed to update publish status')
+    } finally {
+      setIsPublishing(false)
+    }
+  }
+
+  const handleThumbnailChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsThumbnailLoading(true)
+    const toastId = toast.loading('Uploading thumbnail...')
+    try {
+      const formData = new FormData()
+      formData.append('thumbnail', file)
+      await updatePodcastThumbnail(podcast.podcast_uuid, formData, accessToken)
+      await revalidateTags(['podcasts'], orgslug)
+      await refreshPodcast()
+      toast.success('Thumbnail uploaded', { id: toastId })
+    } catch (error) {
+      console.error('Failed to upload thumbnail:', error)
+      toast.error('Failed to upload thumbnail', { id: toastId })
+    } finally {
+      setIsThumbnailLoading(false)
+      e.target.value = ''
+    }
+  }
+
+  const handleDeleteThumbnail = async () => {
+    setIsThumbnailLoading(true)
+    const toastId = toast.loading('Removing thumbnail...')
+    try {
+      await deletePodcastThumbnail(podcast.podcast_uuid, accessToken)
+      await revalidateTags(['podcasts'], orgslug)
+      await refreshPodcast()
+      toast.success('Thumbnail removed', { id: toastId })
+    } catch (error) {
+      console.error('Failed to delete thumbnail:', error)
+      toast.error('Failed to remove thumbnail', { id: toastId })
+    } finally {
+      setIsThumbnailLoading(false)
+    }
+  }
 
   return (
-    <div className="h-full">
-      <div className="h-6" />
-      <div className="px-10 pb-10">
-        <div className="bg-white rounded-xl shadow-sm">
-          <FormLayout onSubmit={formik.handleSubmit} className="p-6">
-            <div className="space-y-6">
-              {/* Thumbnail */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('podcasts.dashboard.form.thumbnail')}
-                </label>
-                <div className="flex items-start space-x-4">
-                  <div className="relative w-40 h-40 bg-gray-100 rounded-lg overflow-hidden">
-                    {currentThumbnail ? (
-                      <>
-                        <img
-                          src={currentThumbnail}
-                          alt="Podcast thumbnail"
-                          className="w-full h-full object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={removeThumbnail}
-                          className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </>
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400">
-                        <Upload size={32} />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleThumbnailChange}
-                      className="hidden"
-                      id="thumbnail-upload"
-                    />
-                    <label
-                      htmlFor="thumbnail-upload"
-                      className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                    >
-                      <Upload size={16} className="mr-2" />
-                      {t('podcasts.dashboard.form.upload_thumbnail')}
-                    </label>
-                    <p className="mt-2 text-xs text-gray-500">
-                      {t('podcasts.dashboard.form.thumbnail_hint')}
-                    </p>
-                  </div>
-                </div>
-              </div>
+    <Formik
+      enableReinitialize
+      initialValues={initialValues}
+      validationSchema={validationSchema}
+      onSubmit={handleSubmit}
+    >
+      {({ values, handleChange, errors, touched, isValid, dirty, submitForm }) => (
+        <Form>
+          <div className="space-y-3">
+            {/* ── ACTION ROW ── */}
+            <div className="flex items-center justify-between">
+              <Link
+                href={getUriWithOrg(org?.slug, '') + `/podcast/${shortUuid}`}
+                target="_blank"
+                className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                <Eye size={14} />
+                <span>Preview</span>
+              </Link>
 
-              {/* Name */}
-              <FormField name="name">
-                <FormLabelAndMessage
-                  label={t('podcasts.modals.create.form.name_label')}
-                  message={formik.errors.name as string}
-                />
-                <Form.Control asChild>
-                  <Input
-                    onChange={formik.handleChange}
-                    value={formik.values.name}
-                    placeholder={t('podcasts.modals.create.form.name_placeholder')}
-                  />
-                </Form.Control>
-              </FormField>
-
-              {/* Description */}
-              <FormField name="description">
-                <FormLabelAndMessage
-                  label={t('podcasts.modals.create.form.description_label')}
-                  message={formik.errors.description as string}
-                />
-                <Form.Control asChild>
-                  <Textarea
-                    onChange={formik.handleChange}
-                    value={formik.values.description}
-                    placeholder={t('podcasts.modals.create.form.description_placeholder')}
-                    rows={3}
-                  />
-                </Form.Control>
-              </FormField>
-
-              {/* About */}
-              <FormField name="about">
-                <FormLabelAndMessage
-                  label={t('podcasts.dashboard.form.about')}
-                  message={formik.errors.about as string}
-                />
-                <Form.Control asChild>
-                  <Textarea
-                    onChange={formik.handleChange}
-                    value={formik.values.about}
-                    placeholder={t('podcasts.dashboard.form.about_placeholder')}
-                    rows={5}
-                  />
-                </Form.Control>
-              </FormField>
-
-              {/* Tags */}
-              <FormField name="tags">
-                <FormLabelAndMessage
-                  label={t('podcasts.tags')}
-                  message={formik.errors.tags as string}
-                />
-                <Form.Control asChild>
-                  <Input
-                    onChange={formik.handleChange}
-                    value={formik.values.tags}
-                    placeholder={t('podcasts.dashboard.form.tags_placeholder')}
-                  />
-                </Form.Control>
-                <p className="mt-1 text-xs text-gray-500">
-                  {t('podcasts.dashboard.form.tags_hint')}
-                </p>
-              </FormField>
-
-              {/* Visibility Options */}
-              <div className="border-t border-gray-100 pt-6">
-                <h3 className="text-sm font-medium text-gray-900 mb-4">
-                  {t('podcasts.dashboard.form.visibility')}
-                </h3>
-                <div className="space-y-4">
-                  <label className="flex items-center space-x-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      name="public"
-                      checked={formik.values.public}
-                      onChange={formik.handleChange}
-                      className="w-4 h-4 text-black rounded border-gray-300 focus:ring-black/20"
-                    />
-                    <div>
-                      <span className="text-sm font-medium text-gray-700">
-                        {t('podcasts.public')}
-                      </span>
-                      <p className="text-xs text-gray-500">
-                        {t('podcasts.dashboard.form.public_hint')}
-                      </p>
-                    </div>
-                  </label>
-
-                  <label className="flex items-center space-x-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      name="published"
-                      checked={formik.values.published}
-                      onChange={formik.handleChange}
-                      className="w-4 h-4 text-black rounded border-gray-300 focus:ring-black/20"
-                    />
-                    <div>
-                      <span className="text-sm font-medium text-gray-700">
-                        {t('podcasts.published')}
-                      </span>
-                      <p className="text-xs text-gray-500">
-                        {t('podcasts.dashboard.form.published_hint')}
-                      </p>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <div className="flex justify-end pt-4 border-t border-gray-100">
+              <div className="flex items-center gap-2">
                 <button
-                  type="submit"
-                  disabled={isSaving || !formik.isValid}
-                  className="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  type="button"
+                  onClick={submitForm}
+                  disabled={isSaving || !isValid || !dirty}
+                  className={`inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors ${
+                    isSaving
+                      ? 'bg-black text-white border-black opacity-50 cursor-not-allowed'
+                      : !dirty
+                        ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                        : 'bg-black text-white border-black hover:opacity-90 cursor-pointer'
+                  }`}
                 >
                   {isSaving ? (
-                    <Loader2 size={16} className="mr-2 animate-spin" />
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : !dirty ? (
+                    <Check size={14} />
                   ) : (
-                    <Save size={16} className="mr-2" />
+                    <SaveAllIcon size={14} />
                   )}
-                  {t('podcasts.dashboard.save_changes')}
+                  <span>
+                    {isSaving
+                      ? 'Saving...'
+                      : !dirty
+                        ? 'Saved'
+                        : 'Save'}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={togglePublishStatus}
+                  disabled={isPublishing}
+                  className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50 ${isPublishing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                >
+                  {isPublishing ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : isPublished ? (
+                    <Globe size={14} />
+                  ) : (
+                    <GlobeLock size={14} />
+                  )}
+                  <span>
+                    {isPublishing
+                      ? 'Processing...'
+                      : isPublished
+                        ? 'Published'
+                        : 'Unpublished'}
+                  </span>
                 </button>
               </div>
             </div>
-          </FormLayout>
-        </div>
-      </div>
-    </div>
+
+            {/* ── BASIC INFORMATION ── */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+              <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+                Basic Information
+              </h3>
+              <div className="space-y-4">
+                <div className="grid mb-2.5">
+                  <label className="font-medium leading-[35px] text-black grow text-sm">
+                    {t('podcasts.modals.create.form.name_label')} *
+                  </label>
+                  {touched.name && errors.name && (
+                    <div className="text-red-700 text-sm items-center rounded-md flex space-x-1 mb-1">
+                      <span>{errors.name}</span>
+                    </div>
+                  )}
+                  <Input
+                    id="name"
+                    name="name"
+                    value={values.name}
+                    onChange={handleChange}
+                    placeholder={t('podcasts.modals.create.form.name_placeholder')}
+                    className={fieldClassName}
+                  />
+                </div>
+
+                <div className="grid mb-2.5">
+                  <label className="font-medium leading-[35px] text-black grow text-sm">
+                    {t('podcasts.modals.create.form.description_label')}
+                  </label>
+                  {touched.description && errors.description && (
+                    <div className="text-red-700 text-sm items-center rounded-md flex space-x-1 mb-1">
+                      <span>{errors.description}</span>
+                    </div>
+                  )}
+                  <Input
+                    id="description"
+                    name="description"
+                    value={values.description}
+                    onChange={handleChange}
+                    placeholder={t('podcasts.modals.create.form.description_placeholder')}
+                    className={fieldClassName}
+                  />
+                </div>
+
+                <div className="grid mb-2.5">
+                  <label className="font-medium leading-[35px] text-black grow text-sm">
+                    {t('podcasts.dashboard.form.about')}
+                  </label>
+                  {touched.about && errors.about && (
+                    <div className="text-red-700 text-sm items-center rounded-md flex space-x-1 mb-1">
+                      <span>{errors.about}</span>
+                    </div>
+                  )}
+                  <Textarea
+                    id="about"
+                    name="about"
+                    value={values.about}
+                    onChange={handleChange}
+                    placeholder={t('podcasts.dashboard.form.about_placeholder')}
+                    className={`${fieldClassName} min-h-[200px]`}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* ── MEDIA ── */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+              <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+                Media
+              </h3>
+              <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50">
+                <div className="flex-shrink-0">
+                  <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-700">Podcast Cover Image</p>
+                </div>
+                {isThumbnailLoading ? (
+                  <div className="w-[18px] h-[18px] border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <input
+                      ref={imageInputRef}
+                      type="file"
+                      className="hidden"
+                      accept=".jpg,.jpeg,.png"
+                      onChange={handleThumbnailChange}
+                    />
+                    {hasThumbnail ? (
+                      <button
+                        type="button"
+                        onClick={handleDeleteThumbnail}
+                        className="flex items-center justify-center text-red-400 hover:text-red-600 transition-colors cursor-pointer"
+                        title="Remove cover image"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => imageInputRef.current?.click()}
+                        className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                        title="Upload cover image"
+                      >
+                        <UploadCloud size={18} />
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+
+          </div>
+        </Form>
+      )}
+    </Formik>
   )
 }
 
