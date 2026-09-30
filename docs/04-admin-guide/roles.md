@@ -6,9 +6,97 @@
 
 Koodook uses a **role-based access control (RBAC)** system. Every user is assigned one or more roles, and each role carries a set of permissions. A user's effective permissions are the union of all permissions from all their assigned roles.
 
+## Roles Management UI
+
+Roles are managed in **Admin Dashboard → Users → Roles** tab. The interface follows the same card-based listing pattern used for user groups and modules.
+
+### List View
+
+The Roles list displays all roles in the organization as individual cards. Each card shows:
+
+- **Shield icon** — Visual identifier for the role.
+- **Role name** — The display name of the role.
+
+**System roles** (e.g., Super Admin, Org Admin) are rendered with reduced opacity and are read-only — clicking them does nothing. They are distinguished by their `role_type` in the backend.
+
+#### Action Row
+
+At the top of the list, a toolbar provides:
+
+| Element | Description |
+|---|---|
+| **Search** | Filters roles by name in real time. |
+| **Role count** | Shows the total number of matching roles. |
+| **Create button** | Creates a new custom role and immediately opens the edit view. |
+| **Filter dropdown** | Filters by All roles, System roles only, or Custom roles only. |
+
+#### Dropdown Menu
+
+Each role card has a `...` (More Vertical) menu with:
+
+- **View Rights** — Opens a modal showing all permissions for that role with green checkmarks for granted permissions and red crosses for denied ones.
+- **Delete** (custom roles only) — Opens a confirmation modal. Deletion is permanent and cannot be undone.
+
+### Creating a Role
+
+1. Click the **Create** button in the action row.
+2. A new role named "New Role" is created via the API with all permissions set to disabled.
+3. The edit view opens immediately so you can configure it.
+
+### Edit View
+
+Clicking a **custom role** card opens the inline edit view. The edit view follows the same layout as the Course General tab, with an action row at the top and form sections in separate cards.
+
+#### Action Row
+
+- **Back to roles** (left) — Returns to the list view.
+- **Cancel** (right) — Returns to the list view without saving.
+- **Save Role** (right) — Submits the form and saves all changes.
+
+#### Card: Basic Information
+
+| Field | Type | Description |
+|---|---|---|
+| **Role Name** | Text input | A unique, descriptive name (e.g., "Content Reviewer"). Minimum 2 characters. |
+| **Description** | Textarea | Explanation of the role's purpose. Minimum 10 characters. |
+
+#### Card: Predefined Rights
+
+Clickable preset buttons that populate the permissions automatically:
+
+| Preset | Description |
+|---|---|
+| **Admin** | Full access to all resources. |
+| **Course Manager** | Full course management (create, read, update, delete). |
+| **Instructor** | Manage courses and users. |
+| **Viewer** | Read-only access to courses and users. |
+| **Content Creator** | Create and manage courses and chapters. |
+| **User Manager** | Manage users and user groups. |
+| **Moderator** | Manage courses, activities, and discussions. |
+| **Analyst** | Read access to courses, users, and dashboard analytics. |
+| **Guest** | Read-only access to courses only. |
+
+Clicking a preset updates all permission checkboxes immediately. You can then fine-tune individual permissions.
+
+#### Card: Permissions
+
+Permissions are organized into categories. Each category has a **Select All / Deselect All** toggle and individual checkboxes for each action.
+
+| Category | Available Actions |
+|---|---|
+| **Courses** | Create, Read, Read Own, Update, Update Own, Delete, Delete Own |
+| **Users** | Create, Read, Update, Delete |
+| **User Groups** | Create, Read, Update, Delete |
+| **Collections** | Create, Read, Update, Delete |
+| **Organizations** | Create, Read, Update, Delete |
+| **Course Chapters** | Create, Read, Update, Delete |
+| **Activities** | Create, Read, Update, Delete |
+| **Roles** | Create, Read, Update, Delete |
+| **Dashboard** | Access |
+
 ## Built-in Roles
 
-The platform ships with five default roles. These roles cannot be deleted, though their permissions can be customized (except Super Admin).
+The platform ships with default roles. These roles cannot be deleted, though their permissions can be customized (except Super Admin).
 
 ### Super Admin
 
@@ -64,52 +152,6 @@ Super Admin
 This means a **Course Creator** automatically has all the permissions of an **Instructor** and a **Learner**. An **Org Admin** has everything a Course Creator has, plus organization-wide permissions.
 
 > **Important:** Permission inheritance is additive. Assigning a higher-level role does not remove any permissions. It only adds more.
-
-## Creating Custom Roles
-
-When the built-in roles don't match your needs, create custom roles with a tailored set of permissions.
-
-1. Go to **Admin Dashboard → Settings → Roles**.
-2. Click **Create Custom Role**.
-3. Enter:
-   - **Role Name** — A unique, descriptive name (e.g., "Content Reviewer", "Sales Manager").
-   - **Description** — Optional explanation of the role's purpose.
-   - **Base Permissions** — Optionally start from an existing role's permission set (use the "Clone from" dropdown).
-4. Click **Create**.
-
-You are then taken to the permission editor to fine-tune what this role can do.
-
-## Configuring Granular Permissions
-
-Permissions are organized into categories. Each category contains individual permissions that can be toggled on or off.
-
-### Permission categories
-
-| Category | Example permissions |
-|---|---|
-| **Users** | View users, create users, edit users, suspend users, delete users, invite users |
-| **Roles** | View roles, create roles, edit roles, assign roles, delete roles |
-| **Courses** | Create courses, publish courses, delete courses, view any course, manage enrollment |
-| **Content** | Create lessons, edit lessons, delete lessons, upload media, manage quizzes, manage assignments |
-| **Groups** | View groups, create groups, edit groups, delete groups, manage members |
-| **Analytics** | View dashboard, view user analytics, view revenue analytics, export reports |
-| **Payments** | View transactions, process refunds, configure pricing, manage payment gateways |
-| **Settings** | View organization settings, edit organization settings, manage branding, manage domains |
-| **Certificates** | Issue certificates, revoke certificates, design templates |
-
-Each permission is a simple on/off toggle. Changes take effect immediately for all users with that role.
-
-### Setting permission scopes
-
-Some permissions have a **scope** that controls how broadly they apply:
-
-- **Own** — The user can only act on resources they created or own (e.g., edit only their own courses).
-- **Assigned** — The user can act on resources they are explicitly assigned to (e.g., grade students in courses they teach).
-- **All** — The user can act on all resources within their organization (e.g., edit any course).
-
-Example: The "Edit courses" permission can be set to:
-- **Own** — Course Creator edits only their own courses.
-- **All** — Org Admin edits any course in the organization.
 
 ## Assigning Roles to Users
 
