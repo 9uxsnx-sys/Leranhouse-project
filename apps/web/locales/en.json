@@ -1857,10 +1857,10 @@
           "added_on": "Added On"
         },
         "roles": {
-          "creator": "CREATOR",
-          "contributor": "CONTRIBUTOR",
-          "maintainer": "MAINTAINER",
-          "reporter": "REPORTER"
+          "creator": "Creator",
+          "contributor": "Contributor",
+          "maintainer": "Maintainer",
+          "reporter": "Reporter"
         },
         "statuses": {
           "active": "ACTIVE",
@@ -2961,10 +2961,10 @@
       "settings": {
         "tabs": {
           "users": "Users",
-          "usergroups": "UserGroups",
+          "usergroups": "Groups",
           "roles": "Roles",
-          "signups": "Signups & Invite Codes",
-          "add": "Invite Members",
+          "signups": "Access",
+          "add": "Invite",
           "audit_logs": "Audit Logs"
         },
         "pages": {

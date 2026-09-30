@@ -164,13 +164,14 @@ function OrgRoles() {
 
     return (
         <>
-            <div className="mx-4 sm:mx-6 lg:mx-10 bg-white rounded-xl nice-shadow px-3 sm:px-4 py-4">
-                <div className="flex flex-col bg-gray-50 -space-y-1 px-3 sm:px-5 py-3 rounded-md mb-3">
-                    <h1 className="font-bold text-lg sm:text-xl text-gray-800">{t('dashboard.users.roles.title')}</h1>
-                    <h2 className="text-gray-500 text-xs sm:text-sm">
-                        {' '}
-                        {t('dashboard.users.roles.subtitle')}{' '}
-                    </h2>
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm mx-auto">
+                <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+                    <div className="flex-1">
+                        <h1 className="font-bold text-xl text-gray-800">{t('dashboard.users.roles.title')}</h1>
+                        <p className="text-sm text-gray-500 mt-0.5">
+                            {t('dashboard.users.roles.subtitle')}
+                        </p>
+                    </div>
                 </div>
                 
                 {/* Mobile view - Cards */}
@@ -212,8 +213,8 @@ function OrgRoles() {
                                         dialogTitle={t('dashboard.users.roles.modals.view_rights.title', { roleName: role.name })}
                                         dialogDescription={t('dashboard.users.roles.modals.view_rights.description')}
                                         dialogTrigger={
-                                            <button className="flex-1 flex justify-center space-x-2 hover:cursor-pointer p-2 bg-blue-600 rounded-md font-bold items-center text-sm text-white hover:bg-blue-700 transition-colors shadow-sm">
-                                                <Eye className="w-4 h-4" />
+                                            <button className="flex-1 inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors">
+                                                <Eye size={14} />
                                                 <span>{t('dashboard.users.roles.actions.view_rights')}</span>
                                             </button>
                                         }
@@ -240,8 +241,8 @@ function OrgRoles() {
                                                 dialogTitle={t('dashboard.users.roles.modals.edit.title')}
                                                 dialogDescription={t('dashboard.users.roles.modals.edit.description')}
                                                 dialogTrigger={
-                                                    <button className="flex-1 flex justify-center space-x-2 hover:cursor-pointer p-2 bg-primary rounded-md font-bold items-center text-sm text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm">
-                                                        <Pencil className="w-4 h-4" />
+                                                    <button className="flex-1 inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors">
+                                                        <Pencil size={14} />
                                                         <span>{t('dashboard.users.roles.actions.edit')}</span>
                                                     </button>
                                                 }
@@ -251,8 +252,8 @@ function OrgRoles() {
                                                 confirmationMessage={t('dashboard.users.roles.modals.delete.message')}
                                                 dialogTitle={t('dashboard.users.roles.modals.delete.title')}
                                                 dialogTrigger={
-                                                    <button className="flex-1 flex justify-center space-x-2 hover:cursor-pointer p-2 bg-red-600 rounded-md font-bold items-center text-sm text-white hover:bg-red-700 transition-colors shadow-sm">
-                                                        <X className="w-4 h-4" />
+                                                    <button className="flex-1 inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-rose-200 bg-white text-rose-600 hover:bg-rose-50 transition-colors">
+                                                        <X size={14} />
                                                         <span>{t('dashboard.users.roles.actions.delete')}</span>
                                                     </button>
                                                 }
@@ -272,12 +273,12 @@ function OrgRoles() {
                 {/* Desktop view - Table */}
                 <div className="hidden sm:block overflow-x-auto">
                     <table className="table-auto w-full text-left whitespace-nowrap rounded-md overflow-hidden">
-                        <thead className="bg-gray-100 text-gray-500 rounded-xl uppercase">
-                            <tr className="font-bolder text-sm">
-                                <th className="py-3 px-4">{t('dashboard.users.roles.table.role_name')}</th>
-                                <th className="py-3 px-4">{t('dashboard.users.roles.table.description')}</th>
-                                <th className="py-3 px-4">{t('dashboard.users.roles.table.permissions')}</th>
-                                <th className="py-3 px-4">{t('dashboard.users.roles.table.actions')}</th>
+                        <thead>
+                            <tr className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                <th className="px-6 py-3">{t('dashboard.users.roles.table.role_name')}</th>
+                                <th className="px-6 py-3">{t('dashboard.users.roles.table.description')}</th>
+                                <th className="px-6 py-3">{t('dashboard.users.roles.table.permissions')}</th>
+                                <th className="px-6 py-3">{t('dashboard.users.roles.table.actions')}</th>
                             </tr>
                         </thead>
                         <>
@@ -322,8 +323,8 @@ function OrgRoles() {
                                                         dialogTitle={t('dashboard.users.roles.modals.view_rights.title', { roleName: role.name })}
                                                         dialogDescription={t('dashboard.users.roles.modals.view_rights.description')}
                                                         dialogTrigger={
-                                                            <button className="flex space-x-2 hover:cursor-pointer p-1 px-3 bg-blue-600 rounded-md font-bold items-center text-sm text-white hover:bg-blue-700 transition-colors shadow-sm">
-                                                                <Eye className="w-4 h-4" />
+                                                            <button className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors">
+                                                                <Eye size={14} />
                                                                 <span>{t('dashboard.users.roles.actions.view_rights')}</span>
                                                             </button>
                                                         }
@@ -350,8 +351,8 @@ function OrgRoles() {
                                                                 dialogTitle={t('dashboard.users.roles.modals.edit.title')}
                                                                 dialogDescription={t('dashboard.users.roles.modals.edit.description')}
                                                                 dialogTrigger={
-                                                                    <button className="flex space-x-2 hover:cursor-pointer p-1 px-3 bg-primary rounded-md font-bold items-center text-sm text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm">
-                                                                        <Pencil className="w-4 h-4" />
+                                                                    <button className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors">
+                                                                        <Pencil size={14} />
                                                                         <span>{t('dashboard.users.roles.actions.edit')}</span>
                                                                     </button>
                                                                 }
@@ -361,8 +362,8 @@ function OrgRoles() {
                                                                 confirmationMessage={t('dashboard.users.roles.modals.delete.message')}
                                                                 dialogTitle={t('dashboard.users.roles.modals.delete.title')}
                                                                 dialogTrigger={
-                                                                    <button className="flex space-x-2 hover:cursor-pointer p-1 px-3 bg-red-600 rounded-md font-bold items-center text-sm text-white hover:bg-red-700 transition-colors shadow-sm">
-                                                                        <X className="w-4 h-4" />
+                                                                    <button className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-rose-200 bg-white text-rose-600 hover:bg-rose-50 transition-colors">
+                                                                        <X size={14} />
                                                                         <span>{t('dashboard.users.roles.actions.delete')}</span>
                                                                     </button>
                                                                 }
@@ -399,8 +400,8 @@ function OrgRoles() {
                             dialogTitle={t('dashboard.users.roles.modals.create.title')}
                             dialogDescription={t('dashboard.users.roles.modals.create.description')}
                             dialogTrigger={
-                                <button className="flex space-x-2 hover:cursor-pointer p-2 sm:p-1 sm:px-3 bg-primary rounded-md font-bold items-center text-sm text-primary-foreground w-full sm:w-auto justify-center hover:bg-primary/90 transition-colors shadow-sm">
-                                    <Shield className="w-4 h-4" />
+                                <button className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-semibold rounded-lg bg-black text-white hover:opacity-90 transition-colors">
+                                    <Shield size={14} />
                                     <span>{t('dashboard.users.roles.actions.create')}</span>
                                 </button>
                             }
@@ -409,9 +410,9 @@ function OrgRoles() {
                         <div className="flex items-center space-x-2">
                             <button
                                 disabled
-                                className="flex space-x-2 p-2 sm:p-1 sm:px-3 bg-gray-300 rounded-md font-bold items-center text-sm text-gray-500 w-full sm:w-auto justify-center cursor-not-allowed"
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-semibold rounded-lg bg-gray-200 text-gray-400 cursor-not-allowed transition-colors"
                             >
-                                <Lock className="w-4 h-4" />
+                                <Lock size={14} />
                                 <span>{t('dashboard.users.roles.actions.create')}</span>
                             </button>
                             <PlanBadge currentPlan={currentPlan} requiredPlan={(rf?.roles?.required_plan || 'pro') as PlanLevel} />

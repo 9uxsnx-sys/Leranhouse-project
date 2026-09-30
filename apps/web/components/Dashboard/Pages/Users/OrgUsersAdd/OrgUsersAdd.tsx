@@ -26,6 +26,17 @@ import React, { useEffect, useMemo, useState, useCallback } from 'react'
 import toast from 'react-hot-toast'
 import useSWR, { mutate } from 'swr'
 import { useTranslation } from 'react-i18next'
+import { Input } from '@components/ui/input'
+import { Textarea } from '@components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@components/ui/select'
+
+const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none"
 
 const ITEMS_PER_PAGE = 10
 
@@ -165,7 +176,7 @@ function OrgUsersAdd() {
       <div className="h-6"></div>
 
       {/* Send Invites Section */}
-      <div className="ml-10 mr-10 mx-auto bg-white rounded-xl shadow-xs">
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm mx-auto">
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
           <div className="flex-1">
             <h1 className="font-bold text-xl text-gray-800">
@@ -178,11 +189,10 @@ function OrgUsersAdd() {
         </div>
 
         <div className="px-6 py-5">
-          <textarea
+          <Textarea
             value={invitedUsers}
             onChange={(e) => setInvitedUsers(e.target.value)}
-            aria-label={t('dashboard.users.invite_members.email_placeholder')}
-            className="w-full h-[140px] rounded-lg border border-gray-200 px-4 py-3 bg-gray-50/50 placeholder:italic placeholder:text-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all resize-none"
+            className={`${fieldClassName} min-h-[140px] resize-none`}
             placeholder={t('dashboard.users.invite_members.email_placeholder')}
           />
           <div className="flex items-center justify-between mt-4">
@@ -190,19 +200,22 @@ function OrgUsersAdd() {
               <span className="text-sm text-gray-600 font-medium">
                 {t('dashboard.users.invite_members.invite_code_label')}
               </span>
-              <select
-                onChange={(e) => setSelectedInviteCode(e.target.value || undefined)}
+              <Select
                 value={selectedInviteCode || ''}
-                aria-label={t('dashboard.users.invite_members.invite_code_label')}
-                className="text-sm text-gray-600 border border-gray-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
+                onValueChange={(val) => setSelectedInviteCode(val || undefined)}
               >
-                <option value="">{t('dashboard.users.invite_members.no_invite_code') || 'None'}</option>
-                {invites?.map((invite: any) => (
-                  <option key={invite.invite_code_uuid} value={invite.invite_code_uuid}>
-                    {invite.invite_code}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="h-8 w-fit min-w-[100px] text-xs border-gray-200 bg-white">
+                  <SelectValue placeholder={t('dashboard.users.invite_members.no_invite_code') || 'None'} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">{t('dashboard.users.invite_members.no_invite_code') || 'None'}</SelectItem>
+                  {invites?.map((invite: any) => (
+                    <SelectItem key={invite.invite_code_uuid} value={invite.invite_code_uuid}>
+                      {invite.invite_code}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <ToolTip
                 content={t('dashboard.users.invite_members.invite_code_tooltip')}
                 sideOffset={8}
@@ -214,7 +227,7 @@ function OrgUsersAdd() {
             <button
               onClick={sendInvites}
               disabled={isLoading || !invitedUsers.trim()}
-              className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed rounded-lg font-semibold text-sm text-primary-foreground transition-all"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-semibold rounded-lg bg-black text-white hover:opacity-90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <UserPlus className="w-4 h-4" />
               <span>{t('dashboard.users.invite_members.send_button')}</span>
@@ -287,7 +300,7 @@ function OrgUsersAdd() {
 
       {/* Invited Users Table */}
       <div className="h-6"></div>
-      <div className="ml-10 mr-10 mx-auto bg-white rounded-xl shadow-xs">
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
           <div className="flex-1">
@@ -306,12 +319,12 @@ function OrgUsersAdd() {
             )}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
+              <Input
                 placeholder={
                   t('dashboard.users.invite_members.invited_users.search_placeholder') ||
                   'Search by email...'
                 }
-                className="pl-10 pr-4 py-2 w-[240px] border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
+                className={`${fieldClassName} pl-9 w-[240px]`}
                 value={searchValue}
                 onChange={(e) => handleSearchChange(e.target.value)}
               />
@@ -406,8 +419,8 @@ function OrgUsersAdd() {
                           'Remove invitation'
                         }
                         dialogTrigger={
-                          <button className="inline-flex items-center gap-1.5 h-8 px-3 bg-white text-gray-600 hover:bg-rose-50 hover:text-rose-600 rounded-md text-xs font-medium nice-shadow transition-all">
-                            <Trash2 className="w-3.5 h-3.5" />
+                          <button className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors">
+                            <Trash2 size={14} />
                             <span>
                               {t('dashboard.users.invite_members.invited_users.remove_button') ||
                                 'Remove'}

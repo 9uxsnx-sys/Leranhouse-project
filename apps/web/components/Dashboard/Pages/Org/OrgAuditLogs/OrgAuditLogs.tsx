@@ -177,19 +177,16 @@ const OrgAuditLogs = () => {
       descriptionKey="common.plans.feature_restricted.audit_logs.description"
     >
       <>
-        <div className="ml-10 mr-10 mx-auto bg-white rounded-xl shadow-xs px-4 py-4">
-        <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 rounded-md mb-3">
-          <div className="flex justify-between items-center">
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm mx-auto">
+        <div className="px-6 py-5 border-b border-gray-100">
+          <div className="flex justify-between items-start">
             <div>
-              <h1 className="font-bold text-xl text-gray-800 flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-indigo-600" />
-                {t('dashboard.organization.audit_logs.title')}
-              </h1>
-              <h2 className="text-gray-500 text-md">
+              <h1 className="font-bold text-xl text-gray-800">{t('dashboard.organization.audit_logs.title')}</h1>
+              <p className="text-sm text-gray-500 mt-0.5">
                 {t('dashboard.organization.audit_logs.subtitle')}
-              </h2>
+              </p>
             </div>
-            <div className="flex gap-2 items-center">
+            <div className="flex gap-2 items-center flex-wrap justify-end">
                <button 
                 onClick={handleRefresh}
                 className={`p-2 rounded-md hover:bg-gray-200 transition-colors ${isValidating ? 'animate-spin' : ''}`}
@@ -200,11 +197,11 @@ const OrgAuditLogs = () => {
 
                <button 
                 onClick={handleExport}
-                className="p-2 rounded-md hover:bg-gray-200 transition-colors flex items-center gap-2 text-sm text-gray-600"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
                 title={t('dashboard.organization.audit_logs.export')}
                >
-                <Download className="w-4 h-4" />
-                <span className="hidden md:inline font-medium">{t('dashboard.organization.audit_logs.export')}</span>
+                <Download size={14} />
+                <span>{t('dashboard.organization.audit_logs.export')}</span>
                </button>
 
                <div className="flex items-center gap-0 border border-gray-200 rounded-md overflow-hidden bg-white">
@@ -327,15 +324,15 @@ const OrgAuditLogs = () => {
         </div>
 
         <table className="table-auto w-full text-left whitespace-nowrap rounded-md overflow-hidden">
-          <thead className="bg-gray-100 text-gray-500 rounded-xl uppercase">
-            <tr className="font-bolder text-[10px] tracking-wider">
-              <th className="py-3 px-4">{t('dashboard.organization.audit_logs.table.timestamp')}</th>
-              <th className="py-3 px-4">{t('dashboard.organization.audit_logs.table.user')}</th>
-              <th className="py-3 px-4">{t('dashboard.organization.audit_logs.table.resource')}</th>
-              <th className="py-3 px-4">{t('dashboard.organization.audit_logs.table.path_method')}</th>
-              <th className="py-3 px-4">{t('dashboard.organization.audit_logs.table.ip_address')}</th>
-              <th className="py-3 px-4 text-right">{t('dashboard.organization.audit_logs.table.status')}</th>
-              <th className="py-3 px-4 text-right">{t('dashboard.organization.audit_logs.table.payload')}</th>
+          <thead>
+            <tr className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3">{t('dashboard.organization.audit_logs.table.timestamp')}</th>
+              <th className="px-6 py-3">{t('dashboard.organization.audit_logs.table.user')}</th>
+              <th className="px-6 py-3">{t('dashboard.organization.audit_logs.table.resource')}</th>
+              <th className="px-6 py-3">{t('dashboard.organization.audit_logs.table.path_method')}</th>
+              <th className="px-6 py-3">{t('dashboard.organization.audit_logs.table.ip_address')}</th>
+              <th className="px-6 py-3 text-right">{t('dashboard.organization.audit_logs.table.status')}</th>
+              <th className="px-6 py-3 text-right">{t('dashboard.organization.audit_logs.table.payload')}</th>
             </tr>
           </thead>
           <tbody className="bg-white relative">

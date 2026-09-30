@@ -19,7 +19,10 @@ import toast from 'react-hot-toast'
 import useSWR, { mutate } from 'swr'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@components/ui/badge'
+import { Input } from '@components/ui/input'
 import { usePlan } from '@components/Hooks/usePlan'
+
+const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none"
 
 function OrgUserGroups() {
     const { t } = useTranslation()
@@ -75,7 +78,7 @@ function OrgUserGroups() {
             titleKey="common.plans.feature_restricted.usergroups.title"
             descriptionKey="common.plans.feature_restricted.usergroups.description"
         >
-            <div className="ml-10 mr-10 mx-auto bg-white rounded-xl shadow-xs">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm mx-auto">
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
                     <div className="flex-1">
@@ -94,9 +97,9 @@ function OrgUserGroups() {
                         )}
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                            <input
+                            <Input
                                 placeholder={t('dashboard.users.usergroups.search_placeholder')}
-                                className="pl-10 pr-4 py-2 w-[260px] border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
+                                className={`${fieldClassName} pl-9 w-[260px]`}
                                 value={searchValue}
                                 onChange={(e) => setSearchValue(e.target.value)}
                             />
@@ -113,8 +116,8 @@ function OrgUserGroups() {
                             dialogTitle={t('dashboard.users.usergroups.modals.create.title')}
                             dialogDescription={t('dashboard.users.usergroups.modals.create.description')}
                             dialogTrigger={
-                                <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
-                                    <SquareUserRound className="w-4 h-4" />
+                                <button className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-semibold rounded-lg bg-black text-white hover:opacity-90 transition-colors">
+                                    <SquareUserRound size={14} />
                                     <span>{t('dashboard.users.usergroups.actions.create')}</span>
                                 </button>
                             }
@@ -204,8 +207,8 @@ function OrgUserGroups() {
                                             dialogTitle={t('dashboard.users.usergroups.modals.manage_users.title')}
                                             dialogDescription={t('dashboard.users.usergroups.modals.manage_users.description')}
                                             dialogTrigger={
-                                                <button className="flex items-center gap-1.5 h-8 px-3 bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-md text-xs font-semibold transition-all">
-                                                    <Users className="w-3.5 h-3.5" />
+                                                <button className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors">
+                                                    <Users size={14} />
                                                     <span>{t('dashboard.users.usergroups.actions.manage_users')}</span>
                                                 </button>
                                             }
@@ -215,9 +218,9 @@ function OrgUserGroups() {
                                             dialogTrigger={
                                                 <button
                                                     onClick={() => setSelectedUserGroup(usergroup.id)}
-                                                    className="flex items-center gap-1.5 h-8 px-3 bg-sky-50 text-sky-700 hover:bg-sky-100 rounded-md text-xs font-semibold transition-all"
+                                                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
                                                 >
-                                                    <Pencil className="w-3.5 h-3.5" />
+                                                    <Pencil size={14} />
                                                     <span>{t('dashboard.users.usergroups.actions.edit')}</span>
                                                 </button>
                                             }
@@ -235,8 +238,8 @@ function OrgUserGroups() {
                                             confirmationMessage={t('dashboard.users.usergroups.modals.delete.message')}
                                             dialogTitle={t('dashboard.users.usergroups.modals.delete.title')}
                                             dialogTrigger={
-                                                <button className="flex items-center gap-1.5 h-8 px-3 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-md text-xs font-semibold transition-all">
-                                                    <X className="w-3.5 h-3.5" />
+                                                <button className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-rose-200 bg-white text-rose-600 hover:bg-rose-50 transition-colors">
+                                                    <X size={14} />
                                                     <span>{t('dashboard.users.usergroups.actions.delete')}</span>
                                                 </button>
                                             }

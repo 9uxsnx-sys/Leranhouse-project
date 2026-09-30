@@ -5,7 +5,7 @@ import { getAPIUrl } from '@services/config/config'
 import { bulkAddContributors, bulkRemoveContributors, editContributor } from '@services/courses/courses'
 import { searchOrgContent } from '@services/search/search'
 import { swrFetcher } from '@services/utils/ts/requests'
-import { Check, ChevronDown, Search, ArrowUpDown } from 'lucide-react'
+import { Check, Search, ArrowUpDown } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import useSWR, { mutate } from 'swr'
@@ -223,9 +223,8 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
         return (
             <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
-                    <span className="cursor-pointer px-1.5 py-0.5 rounded hover:bg-gray-100 transition-colors text-gray-700 inline-flex items-center gap-1 text-sm">
+                    <span className="cursor-pointer px-1.5 py-0.5 rounded hover:bg-gray-100 transition-colors text-gray-700 text-sm">
                         {t(`dashboard.courses.contributors.roles.${contributor.authorship.toLowerCase()}`)}
-                        <ChevronDown size={14} className="text-gray-400" />
                     </span>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -279,9 +278,8 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
         return (
             <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
-                    <span className="cursor-pointer px-1.5 py-0.5 rounded hover:bg-gray-100 transition-colors text-gray-700 inline-flex items-center gap-1 text-sm">
+                    <span className="cursor-pointer px-1.5 py-0.5 rounded hover:bg-gray-100 transition-colors text-gray-700 text-sm">
                         User
-                        <ChevronDown size={14} className="text-gray-400" />
                     </span>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -592,7 +590,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                                                     <TableCell className="text-gray-500">
                                                         {contributor.user.email}
                                                     </TableCell>
-                                                    <TableCell>
+                                                    <TableCell onClick={(e) => e.stopPropagation()}>
                                                         <RoleDropdown contributor={contributor} />
                                                     </TableCell>
                                                     <TableCell>
