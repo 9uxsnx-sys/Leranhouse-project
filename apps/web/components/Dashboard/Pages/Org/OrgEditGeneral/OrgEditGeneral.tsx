@@ -1,58 +1,27 @@
 'use client'
 import React from 'react'
-import { Form, Formik } from 'formik'
+import { Formik } from 'formik'
 import * as Yup from 'yup'
 import {
   updateOrganization,
-  updateOrgFooterTextConfig,
   updateOrgDefaultLanguageConfig,
 } from '@services/settings/org'
 import { AVAILABLE_LANGUAGES } from '@/lib/languages'
 import { revalidateTags } from '@services/utils/ts/requests'
-import { useRouter } from 'next/navigation'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { toast } from 'react-hot-toast'
 import { Input } from "@components/ui/input"
 import { Textarea } from "@components/ui/textarea"
-import { Button } from "@components/ui/button"
-import { Label } from "@components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select"
+import FormLayout, {
+  FormField,
+  FormLabelAndMessage,
+} from '@components/Objects/StyledElements/Form/Form'
+import * as Form from '@radix-ui/react-form'
 import { mutate } from 'swr'
 import { getAPIUrl } from '@services/config/config'
 import { useTranslation } from 'react-i18next'
-
-const ORG_LABELS = [
-  { value: 'languages', label: '🌐 Languages' },
-  { value: 'business', label: '💰 Business' },
-  { value: 'ecommerce', label: '🛍 E-commerce' },
-  { value: 'gaming', label: '🎮 Gaming' },
-  { value: 'music', label: '🎸 Music' },
-  { value: 'sports', label: '⚽ Sports' },
-  { value: 'cars', label: '🚗 Cars' },
-  { value: 'sales_marketing', label: '🚀 Sales & Marketing' },
-  { value: 'tech', label: '💻 Tech' },
-  { value: 'photo_video', label: '📸 Photo & Video' },
-  { value: 'pets', label: '🐕 Pets' },
-  { value: 'personal_development', label: '📚 Personal Development' },
-  { value: 'real_estate', label: '🏠 Real Estate' },
-  { value: 'beauty_fashion', label: '👠 Beauty & Fashion' },
-  { value: 'travel', label: '✈️ Travel' },
-  { value: 'productivity', label: '⏳ Productivity' },
-  { value: 'health_fitness', label: '🍎 Health & Fitness' },
-  { value: 'finance', label: '📈 Finance' },
-  { value: 'arts_crafts', label: '🎨 Arts & Crafts' },
-  { value: 'education', label: '📚 Education' },
-  { value: 'stem', label: '🔬 STEM' },
-  { value: 'humanities', label: '📖 Humanities' },
-  { value: 'professional_skills', label: '💼 Professional Skills' },
-  { value: 'digital_skills', label: '💻 Digital Skills' },
-  { value: 'creative_arts', label: '🎨 Creative Arts' },
-  { value: 'social_sciences', label: '🌍 Social Sciences' },
-  { value: 'test_prep', label: '✍️ Test Preparation' },
-  { value: 'vocational', label: '🔧 Vocational Training' },
-  { value: 'early_education', label: '🎯 Early Education' },
-] as const
+import { ChevronRight, Globe, Check, Loader2, SaveAllIcon } from 'lucide-react'
 
 const validationSchema = Yup.object().shape({
   name: Yup.string()
@@ -64,26 +33,21 @@ const validationSchema = Yup.object().shape({
   about: Yup.string()
     .optional()
     .max(400, 'About text must be 400 characters or less'),
-  label: Yup.string().required('Organization label is required'),
 })
 
 interface OrganizationValues {
   name: string
   description: string
   about: string
-  label: string
 }
+
+const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none";
 
 const OrgEditGeneral: React.FC = () => {
   const { t } = useTranslation()
-  const router = useRouter()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
-
-  // Footer text state
-  const [footerText, setFooterText] = React.useState<string>(org?.config?.config?.customization?.general?.footer_text || org?.config?.config?.general?.footer_text || '')
-  const [isFooterSaving, setIsFooterSaving] = React.useState(false)
 
   // Default language state
   const [defaultLanguage, setDefaultLanguage] = React.useState<string>(
@@ -92,31 +56,40 @@ const OrgEditGeneral: React.FC = () => {
     'en'
   )
 
+  const [isSaved, setIsSaved] = React.useState(true)
+  const [isManualSaving, setIsManualSaving] = React.useState(false)
+  const isActiveSaving = isManualSaving
+
   const initialValues: OrganizationValues = {
     name: org?.name,
     description: org?.description || '',
     about: org?.about || '',
-    label: org?.label || '',
   }
 
   const updateOrg = async (values: OrganizationValues) => {
-    const loadingToast = toast.loading(t('dashboard.organization.settings.updating'))
+    setIsManualSaving(true)
     try {
       await updateOrganization(org.id, values, access_token)
-      // Also save footer text
-      await updateOrgFooterTextConfig(org.id, footerText, access_token)
       // Save default language
       await updateOrgDefaultLanguageConfig(org.id, defaultLanguage, access_token)
       await revalidateTags(['organizations'], org.slug)
       mutate(`${getAPIUrl()}orgs/slug/${org.slug}`)
-      toast.success(t('dashboard.organization.settings.update_success'), { id: loadingToast })
+      setIsSaved(true)
+      toast.success(t('dashboard.organization.settings.update_success'))
     } catch (err) {
-      toast.error(t('dashboard.organization.settings.update_error'), { id: loadingToast })
+      toast.error(t('dashboard.organization.settings.update_error'))
+    } finally {
+      setIsManualSaving(false)
     }
   }
 
+  const handleManualSave = async (values: OrganizationValues) => {
+    if (isActiveSaving) return
+    await updateOrg(values)
+  }
+
   return (
-    <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow ">
+    <div>
       <Formik
         enableReinitialize
         initialValues={initialValues}
@@ -128,163 +101,195 @@ const OrgEditGeneral: React.FC = () => {
           }, 400)
         }}
       >
-        {({ isSubmitting, values, handleChange, errors, touched, setFieldValue }) => (
-          <Form>
-            <div className="flex flex-col gap-0">
-              <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 my-3 rounded-md">
-                <h1 className="font-bold text-xl text-gray-800">
-                  {t('dashboard.organization.settings.title')}
-                </h1>
-                <h2 className="text-gray-500 text-md">
-                  {t('dashboard.organization.settings.subtitle')}
-                </h2>
+        {({ isSubmitting, values, handleChange, handleSubmit, errors, touched, setFieldValue }) => {
+          const handleFieldChange = (e: any) => {
+            setIsSaved(false)
+            handleChange(e)
+          }
+
+          return (
+          <FormLayout onSubmit={handleSubmit}>
+            <div className="space-y-3">
+              {/* ===== Action Row ===== */}
+              <div className="flex items-center justify-between">
+                <div></div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={isSaved ? undefined : () => handleManualSave(values)}
+                    disabled={isActiveSaving}
+                    className={`inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors ${
+                      isActiveSaving
+                        ? 'bg-black text-white border-black opacity-50 cursor-not-allowed'
+                        : isSaved
+                          ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                          : 'bg-black text-white border-black hover:opacity-90 cursor-pointer'
+                    }`}
+                  >
+                    {isActiveSaving ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : isSaved ? (
+                      <Check size={14} />
+                    ) : (
+                      <SaveAllIcon size={14} />
+                    )}
+                    <span>
+                      {isActiveSaving
+                        ? 'Saving...'
+                        : isSaved
+                          ? 'Saved'
+                          : 'Save'}
+                    </span>
+                  </button>
+                </div>
               </div>
 
-              <div className="flex flex-col lg:flex-row lg:space-x-8 mt-0 mx-5 my-5">
-                <div className="w-full space-y-6">
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="name">
-                        {t('dashboard.organization.settings.name')}
-                        <span className="text-gray-500 text-sm ml-2">
-                          ({60 - (values.name?.length || 0)} characters left)
-                        </span>
-                      </Label>
+              {/* ===== Card 1: Basic Information ===== */}
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 overflow-visible">
+                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+                  {t('dashboard.organization.settings.title')}
+                </h3>
+                <div className="space-y-4">
+                  <FormField name="name">
+                    <FormLabelAndMessage
+                      label={t('dashboard.organization.settings.name')}
+                      message={touched.name ? errors.name : undefined}
+                    />
+                    <Form.Control asChild>
                       <Input
-                        id="name"
-                        name="name"
+                        className={fieldClassName}
+                        onChange={handleFieldChange}
                         value={values.name}
-                        onChange={handleChange}
                         placeholder={t('dashboard.organization.settings.name_placeholder')}
                         maxLength={60}
                       />
-                      {touched.name && errors.name && (
-                        <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-                      )}
-                    </div>
+                    </Form.Control>
+                  </FormField>
 
-                    <div>
-                      <Label htmlFor="description">
-                        {t('dashboard.organization.settings.short_description')}
-                        <span className="text-gray-500 text-sm ml-2">
-                          ({100 - (values.description?.length || 0)} characters left)
-                        </span>
-                      </Label>
+                  <FormField name="description">
+                    <FormLabelAndMessage
+                      label={t('dashboard.organization.settings.short_description')}
+                      message={touched.description ? errors.description : undefined}
+                    />
+                    <Form.Control asChild>
                       <Input
-                        id="description"
-                        name="description"
+                        className={fieldClassName}
+                        onChange={handleFieldChange}
                         value={values.description}
-                        onChange={handleChange}
                         placeholder={t('dashboard.organization.settings.short_description_placeholder')}
                         maxLength={100}
                       />
-                      {touched.description && errors.description && (
-                        <p className="text-red-500 text-sm mt-1">{errors.description}</p>
-                      )}
-                    </div>
+                    </Form.Control>
+                  </FormField>
 
-                    <div>
-                      <Label htmlFor="label">{t('dashboard.organization.settings.label')}</Label>
-                      <Select
-                        value={values.label}
-                        onValueChange={(value) => setFieldValue('label', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder={t('dashboard.organization.settings.label_placeholder')} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {ORG_LABELS.map((type) => (
-                            <SelectItem key={type.value} value={type.value}>
-                              {type.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {touched.label && errors.label && (
-                        <p className="text-red-500 text-sm mt-1">{errors.label}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <Label htmlFor="about">
-                        {t('dashboard.organization.settings.about')}
-                        <span className="text-gray-500 text-sm ml-2">
-                          ({400 - (values.about?.length || 0)} characters left)
-                        </span>
-                      </Label>
+                  <FormField name="about">
+                    <FormLabelAndMessage
+                      label={t('dashboard.organization.settings.about')}
+                      message={touched.about ? errors.about : undefined}
+                    />
+                    <Form.Control asChild>
                       <Textarea
-                        id="about"
-                        name="about"
+                        className={`${fieldClassName} min-h-[80px]`}
+                        onChange={handleFieldChange}
                         value={values.about}
-                        onChange={handleChange}
                         placeholder={t('dashboard.organization.settings.about_placeholder')}
-                        className="min-h-[250px]"
                         maxLength={400}
                       />
-                      {touched.about && errors.about && (
-                        <p className="text-red-500 text-sm mt-1">{errors.about}</p>
-                      )}
-                    </div>
+                    </Form.Control>
+                  </FormField>
 
-                    <div>
-                      <Label htmlFor="footerText">
-                        {t('dashboard.organization.settings.footer_text')}
-                        <span className="text-gray-500 text-sm ml-2">
-                          ({100 - (footerText?.length || 0)} characters left)
-                        </span>
-                      </Label>
-                      <Input
-                        id="footerText"
-                        name="footerText"
-                        value={footerText}
-                        onChange={(e) => setFooterText(e.target.value)}
-                        placeholder={t('dashboard.organization.settings.footer_text_placeholder')}
-                        maxLength={100}
-                      />
-                      <p className="text-gray-500 text-sm mt-1">{t('dashboard.organization.settings.footer_text_desc')}</p>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="defaultLanguage">
-                        {t('dashboard.organization.settings.default_language')}
-                      </Label>
-                      <Select
-                        value={defaultLanguage}
-                        onValueChange={setDefaultLanguage}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {AVAILABLE_LANGUAGES.map((lang) => (
-                            <SelectItem key={lang.code} value={lang.code}>
-                              <span className="flex items-center space-x-2">
-                                <span className="text-xs font-mono text-gray-400 w-6">{lang.code.toUpperCase()}</span>
-                                <span>{lang.nativeName}</span>
-                              </span>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <p className="text-gray-500 text-sm mt-1">{t('dashboard.organization.settings.default_language_desc')}</p>
-                    </div>
-
-                  </div>
+                  <FormField name="defaultLanguage">
+                    <FormLabelAndMessage
+                      label={t('dashboard.organization.settings.default_language')}
+                    />
+                    <LanguageSection
+                      value={defaultLanguage}
+                      onChange={(value) => { setDefaultLanguage(value); setIsSaved(false) }}
+                      t={t}
+                    />
+                  </FormField>
                 </div>
               </div>
-              <div className="flex flex-row-reverse mt-0 mx-5 mb-5">
-                <Button 
-                  type="submit" 
-                  disabled={isSubmitting}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90"
-                >
-                  {isSubmitting ? t('dashboard.organization.settings.saving') : t('dashboard.organization.settings.save_changes')}
-                </Button>
-              </div>
             </div>
-          </Form>
-        )}
+          </FormLayout>
+          )
+        }}
       </Formik>
+    </div>
+  )
+}
+
+// ===== Language Section (Expanding Container - Single Select) =====
+const LanguageSection: React.FC<{
+  value: string
+  onChange: (value: string) => void
+  t: any
+}> = ({ value, onChange, t }) => {
+  const [isExpanded, setIsExpanded] = React.useState(false)
+
+  const currentLang = AVAILABLE_LANGUAGES.find((l) => l.code === value)
+
+  return (
+    <div className="bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
+      {/* Header - clickable to expand/collapse */}
+      <button
+        type="button"
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-100/50 transition-colors"
+      >
+        <div className="flex items-center gap-2.5">
+          <Globe className="w-4 h-4 text-gray-500 flex-shrink-0" />
+          <span className="text-sm font-semibold text-gray-800">
+            {currentLang ? (
+              <><span className="font-mono text-gray-400 mr-1.5">{currentLang.code.toUpperCase()}</span>{currentLang.nativeName}</>
+            ) : (
+              t('dashboard.organization.settings.default_language')
+            )}
+          </span>
+        </div>
+        <ChevronRight
+          size={16}
+          className={`text-gray-400 transition-transform duration-200 ${
+            isExpanded ? 'rotate-90' : ''
+          }`}
+        />
+      </button>
+
+      {/* Expanded content with grid animation */}
+      <div
+        className={`grid transition-all duration-300 ease-in-out ${
+          isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div className="px-4 pb-3 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+              {AVAILABLE_LANGUAGES.map((lang) => {
+                const isSelected = value === lang.code
+                return (
+                  <div
+                    key={lang.code}
+                    onClick={() => { onChange(lang.code); setIsExpanded(false) }}
+                    className={`relative flex cursor-pointer items-center rounded-md py-2 pl-3 pr-8 text-sm hover:bg-gray-100 transition-colors ${
+                      isSelected ? 'bg-gray-100 font-medium' : ''
+                    }`}
+                  >
+                    <span className="text-xs text-gray-700">
+                      <span className="font-mono text-gray-400 mr-1.5">{lang.code.toUpperCase()}</span>
+                      {lang.nativeName}
+                    </span>
+                    {isSelected && (
+                      <span className="absolute right-2 text-gray-600">
+                        <Check size={14} strokeWidth={2.5} />
+                      </span>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

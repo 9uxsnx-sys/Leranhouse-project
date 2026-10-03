@@ -1,6 +1,6 @@
 'use client'
 import React, { useRef, useState } from 'react'
-import { Form, Formik } from 'formik'
+import { Formik } from 'formik'
 import {
   updateOrgSeoConfig,
   uploadOrganizationOgImage,
@@ -12,14 +12,19 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { toast } from 'react-hot-toast'
 import { Input } from '@components/ui/input'
 import { Textarea } from '@components/ui/textarea'
-import { Button } from '@components/ui/button'
-import { Label } from '@components/ui/label'
 import { Switch } from '@components/ui/switch'
 import { mutate } from 'swr'
-import { getAPIUrl, getUriWithOrg } from '@services/config/config'
+import { getAPIUrl } from '@services/config/config'
 import { getOrgOgImageMediaDirectory } from '@services/media/media'
-import { Copy, ExternalLink, Upload, X } from 'lucide-react'
+import { Copy, ExternalLink, Upload, X, Check, Loader2, SaveAllIcon } from 'lucide-react'
 import { getCanonicalUrl } from '@/lib/seo/utils'
+import FormLayout, {
+  FormField,
+  FormLabelAndMessage,
+} from '@components/Objects/StyledElements/Form/Form'
+import * as Form from '@radix-ui/react-form'
+
+const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none"
 
 const OrgEditSEO: React.FC = () => {
   const session = useLHSession() as any
@@ -28,6 +33,9 @@ const OrgEditSEO: React.FC = () => {
   const ogImageInputRef = useRef<HTMLInputElement>(null)
   const [ogImageFile, setOgImageFile] = useState<File | null>(null)
   const [ogImagePreview, setOgImagePreview] = useState<string | null>(null)
+  const [isSaved, setIsSaved] = useState(true)
+  const [isManualSaving, setIsManualSaving] = useState(false)
+  const isActiveSaving = isManualSaving
 
   const seoConfig = org?.config?.config?.customization?.seo || org?.config?.config?.seo || {}
 
@@ -57,6 +65,7 @@ const OrgEditSEO: React.FC = () => {
         setOgImagePreview(reader.result as string)
       }
       reader.readAsDataURL(file)
+      setIsSaved(false)
     }
   }
 
@@ -66,10 +75,11 @@ const OrgEditSEO: React.FC = () => {
     if (ogImageInputRef.current) {
       ogImageInputRef.current.value = ''
     }
+    setIsSaved(false)
   }
 
   const saveSeoConfig = async (values: SeoOrgConfig) => {
-    const loadingToast = toast.loading('Saving SEO settings...')
+    setIsManualSaving(true)
     try {
       // Upload OG image if a new one was selected
       if (ogImageFile) {
@@ -85,9 +95,12 @@ const OrgEditSEO: React.FC = () => {
       await revalidateTags(['organizations'], org.slug)
       mutate(`${getAPIUrl()}orgs/slug/${org.slug}`)
       setOgImageFile(null)
-      toast.success('SEO settings saved successfully', { id: loadingToast })
+      setIsSaved(true)
+      toast.success('SEO settings saved successfully')
     } catch (err) {
-      toast.error('Failed to save SEO settings', { id: loadingToast })
+      toast.error('Failed to save SEO settings')
+    } finally {
+      setIsManualSaving(false)
     }
   }
 
@@ -96,8 +109,13 @@ const OrgEditSEO: React.FC = () => {
       ? getOrgOgImageMediaDirectory(org?.org_uuid, seoConfig.default_og_image)
       : null
 
+  const handleManualSave = async (values: SeoOrgConfig) => {
+    if (isActiveSaving) return
+    await saveSeoConfig(values)
+  }
+
   return (
-    <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow">
+    <div>
       <Formik
         enableReinitialize
         initialValues={initialValues}
@@ -108,250 +126,259 @@ const OrgEditSEO: React.FC = () => {
           }, 400)
         }}
       >
-        {({ isSubmitting, values, handleChange, setFieldValue }) => (
-          <Form>
-            <div className="flex flex-col gap-0">
-              {/* Quick Links */}
-              <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 my-3 rounded-md">
-                <h1 className="font-bold text-xl text-gray-800">Quick Links</h1>
-                <h2 className="text-gray-500 text-md">
-                  Important SEO URLs for your organization
-                </h2>
-              </div>
-              <div className="mx-5 my-3 space-y-3">
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-2 min-w-0 flex-1">
-                    <span className="text-sm font-medium text-gray-700 shrink-0">Sitemap:</span>
-                    <a
-                      href={sitemapUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-blue-600 hover:underline truncate"
-                    >
-                      {sitemapUrl}
-                    </a>
-                  </div>
-                  <div className="flex items-center space-x-1 shrink-0 ml-2">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyToClipboard(sitemapUrl)}
-                    >
-                      <Copy size={14} />
-                    </Button>
-                    <a href={sitemapUrl} target="_blank" rel="noopener noreferrer">
-                      <Button type="button" variant="ghost" size="sm">
-                        <ExternalLink size={14} />
-                      </Button>
-                    </a>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-2 min-w-0 flex-1">
-                    <span className="text-sm font-medium text-gray-700 shrink-0">Robots.txt:</span>
-                    <a
-                      href={robotsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-blue-600 hover:underline truncate"
-                    >
-                      {robotsUrl}
-                    </a>
-                  </div>
-                  <div className="flex items-center space-x-1 shrink-0 ml-2">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => copyToClipboard(robotsUrl)}
-                    >
-                      <Copy size={14} />
-                    </Button>
-                    <a href={robotsUrl} target="_blank" rel="noopener noreferrer">
-                      <Button type="button" variant="ghost" size="sm">
-                        <ExternalLink size={14} />
-                      </Button>
-                    </a>
-                  </div>
-                </div>
-              </div>
+        {({ isSubmitting, values, handleChange, setFieldValue, handleSubmit }) => {
+          const handleFieldChange = (e: any) => {
+            setIsSaved(false)
+            handleChange(e)
+          }
 
-              {/* Default Meta Tags */}
-              <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 mt-4 rounded-md">
-                <h1 className="font-bold text-xl text-gray-800">Default Meta Tags</h1>
-                <h2 className="text-gray-500 text-md">
-                  Set default metadata for all pages
-                </h2>
-              </div>
-              <div className="mx-5 my-5 space-y-4">
-                <div>
-                  <Label htmlFor="default_meta_title_suffix">
-                    Title Suffix
-                    <span className="text-gray-500 text-sm ml-2">
-                      ({30 - (values.default_meta_title_suffix?.length || 0)} characters left)
-                    </span>
-                  </Label>
-                  <Input
-                    id="default_meta_title_suffix"
-                    name="default_meta_title_suffix"
-                    value={values.default_meta_title_suffix}
-                    onChange={handleChange}
-                    placeholder=" | My Academy"
-                    maxLength={30}
-                  />
-                  <p className="text-gray-500 text-sm mt-1">
-                    Appended to all page titles, e.g. &quot; | My Academy&quot;
-                  </p>
+          return (
+            <FormLayout onSubmit={handleSubmit}>
+              <div className="space-y-3">
+                {/* ===== Action Row ===== */}
+                <div className="flex items-center justify-between">
+                  <div></div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={isSaved ? undefined : () => handleManualSave(values)}
+                      disabled={isActiveSaving}
+                      className={`inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors ${
+                        isActiveSaving
+                          ? 'bg-black text-white border-black opacity-50 cursor-not-allowed'
+                          : isSaved
+                            ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                            : 'bg-black text-white border-black hover:opacity-90 cursor-pointer'
+                      }`}
+                    >
+                      {isActiveSaving ? (
+                        <Loader2 size={14} className="animate-spin" />
+                      ) : isSaved ? (
+                        <Check size={14} />
+                      ) : (
+                        <SaveAllIcon size={14} />
+                      )}
+                      <span>
+                        {isActiveSaving
+                          ? 'Saving...'
+                          : isSaved
+                            ? 'Saved'
+                            : 'Save'}
+                      </span>
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="default_meta_description">
-                    Default Description
-                    <span className="text-gray-500 text-sm ml-2">
-                      ({160 - (values.default_meta_description?.length || 0)} characters left)
-                    </span>
-                  </Label>
-                  <Textarea
-                    id="default_meta_description"
-                    name="default_meta_description"
-                    value={values.default_meta_description}
-                    onChange={handleChange}
-                    placeholder="A brief description of your organization for search engines"
-                    maxLength={160}
-                    className="min-h-[80px]"
-                  />
-                  <p className="text-gray-500 text-sm mt-1">
-                    Fallback description when a page has no specific one
-                  </p>
-                </div>
-              </div>
 
-              {/* Social & Open Graph */}
-              <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 mt-4 rounded-md">
-                <h1 className="font-bold text-xl text-gray-800">Social & Open Graph</h1>
-                <h2 className="text-gray-500 text-md">
-                  Control how your pages appear when shared on social media
-                </h2>
-              </div>
-              <div className="mx-5 my-5 space-y-4">
-                <div>
-                  <Label>Default OG Image</Label>
-                  <p className="text-gray-500 text-sm mb-2">
-                    Default sharing image for social media (1200x630 recommended)
-                  </p>
-                  <div className="flex items-start space-x-4">
-                    {(ogImagePreview || existingOgImageUrl) && (
-                      <div className="relative">
-                        <img
-                          src={ogImagePreview || existingOgImageUrl || ''}
-                          alt="OG Image Preview"
-                          className="w-48 h-24 object-cover rounded-lg border"
-                        />
-                        {ogImagePreview && (
+                {/* ===== Card 1: Quick Links ===== */}
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+                    Quick Links
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-2 min-w-0 flex-1">
+                        <span className="text-sm font-medium text-gray-700 shrink-0">Sitemap:</span>
+                        <a
+                          href={sitemapUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 hover:underline truncate"
+                        >
+                          {sitemapUrl}
+                        </a>
+                      </div>
+                      <div className="flex items-center space-x-1 shrink-0 ml-2">
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(sitemapUrl)}
+                          className="inline-flex items-center justify-center p-1.5 rounded-md text-gray-500 hover:bg-gray-200 transition-colors"
+                        >
+                          <Copy size={14} />
+                        </button>
+                        <a href={sitemapUrl} target="_blank" rel="noopener noreferrer">
                           <button
                             type="button"
-                            onClick={clearOgImage}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"
+                            className="inline-flex items-center justify-center p-1.5 rounded-md text-gray-500 hover:bg-gray-200 transition-colors"
                           >
-                            <X size={14} />
+                            <ExternalLink size={14} />
                           </button>
-                        )}
+                        </a>
                       </div>
-                    )}
-                    <div>
-                      <input
-                        ref={ogImageInputRef}
-                        type="file"
-                        accept="image/*"
-                        onChange={handleOgImageChange}
-                        className="hidden"
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => ogImageInputRef.current?.click()}
-                      >
-                        <Upload size={14} className="mr-2" />
-                        {existingOgImageUrl || ogImagePreview ? 'Change Image' : 'Upload Image'}
-                      </Button>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-2 min-w-0 flex-1">
+                        <span className="text-sm font-medium text-gray-700 shrink-0">Robots.txt:</span>
+                        <a
+                          href={robotsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 hover:underline truncate"
+                        >
+                          {robotsUrl}
+                        </a>
+                      </div>
+                      <div className="flex items-center space-x-1 shrink-0 ml-2">
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard(robotsUrl)}
+                          className="inline-flex items-center justify-center p-1.5 rounded-md text-gray-500 hover:bg-gray-200 transition-colors"
+                        >
+                          <Copy size={14} />
+                        </button>
+                        <a href={robotsUrl} target="_blank" rel="noopener noreferrer">
+                          <button
+                            type="button"
+                            className="inline-flex items-center justify-center p-1.5 rounded-md text-gray-500 hover:bg-gray-200 transition-colors"
+                          >
+                            <ExternalLink size={14} />
+                          </button>
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div>
-                  <Label htmlFor="twitter_handle">Twitter Handle</Label>
-                  <Input
-                    id="twitter_handle"
-                    name="twitter_handle"
-                    value={values.twitter_handle}
-                    onChange={handleChange}
-                    placeholder="@yourhandle"
-                  />
-                  <p className="text-gray-500 text-sm mt-1">
-                    Shown on Twitter cards as the site account
-                  </p>
-                </div>
-              </div>
 
-              {/* Search Engine Verification */}
-              <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 mt-4 rounded-md">
-                <h1 className="font-bold text-xl text-gray-800">Search Engine Verification</h1>
-                <h2 className="text-gray-500 text-md">
-                  Verify ownership with search engines
-                </h2>
-              </div>
-              <div className="mx-5 my-5 space-y-4">
-                <div>
-                  <Label htmlFor="google_site_verification">Google Search Console</Label>
-                  <Input
-                    id="google_site_verification"
-                    name="google_site_verification"
-                    value={values.google_site_verification}
-                    onChange={handleChange}
-                    placeholder="Google verification code"
-                  />
-                  <p className="text-gray-500 text-sm mt-1">
-                    Verification code from Google Search Console
-                  </p>
-                </div>
-              </div>
-
-              {/* Indexing Controls */}
-              <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 mt-4 rounded-md">
-                <h1 className="font-bold text-xl text-gray-800">Indexing Controls</h1>
-                <h2 className="text-gray-500 text-md">
-                  Control which pages search engines can index
-                </h2>
-              </div>
-              <div className="mx-5 my-5 space-y-4">
-                <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-lg">
-                  <div className="space-y-0.5">
-                    <Label className="text-base">Hide Communities</Label>
-                    <p className="text-sm text-gray-500">
-                      Hide community pages from search engines
-                    </p>
+                {/* ===== Card 2: Default Meta Tags ===== */}
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+                    Default Meta Tags
+                  </h3>
+                  <div className="space-y-4">
+                    <FormField name="default_meta_title_suffix">
+                      <FormLabelAndMessage label="Title Suffix" />
+                      <Form.Control asChild>
+                        <Input
+                          className={fieldClassName}
+                          onChange={handleFieldChange}
+                          value={values.default_meta_title_suffix}
+                          placeholder=" | My Academy"
+                        />
+                      </Form.Control>
+                    </FormField>
+                    <FormField name="default_meta_description">
+                      <FormLabelAndMessage label="Default Description" />
+                      <Form.Control asChild>
+                        <Textarea
+                          className={`${fieldClassName} min-h-[80px]`}
+                          onChange={handleFieldChange}
+                          value={values.default_meta_description}
+                          placeholder="A brief description of your organization for search engines"
+                        />
+                      </Form.Control>
+                    </FormField>
                   </div>
-                  <Switch
-                    checked={values.noindex_communities}
-                    onCheckedChange={(checked) =>
-                      setFieldValue('noindex_communities', checked)
-                    }
-                  />
+                </div>
+
+                {/* ===== Card 3: Social & Open Graph ===== */}
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+                    Social & Open Graph
+                  </h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-semibold text-gray-700">Default OG Image</label>
+                      <p className="text-xs text-gray-500 mb-2 mt-0">
+                        Default sharing image for social media (1200x630 recommended)
+                      </p>
+                      <div className="flex items-start space-x-4">
+                        {(ogImagePreview || existingOgImageUrl) && (
+                          <div className="relative">
+                            <img
+                              src={ogImagePreview || existingOgImageUrl || ''}
+                              alt="OG Image Preview"
+                              className="w-48 h-24 object-cover rounded-lg border"
+                            />
+                            {ogImagePreview && (
+                              <button
+                                type="button"
+                                onClick={clearOgImage}
+                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"
+                              >
+                                <X size={14} />
+                              </button>
+                            )}
+                          </div>
+                        )}
+                        <div>
+                          <input
+                            ref={ogImageInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleOgImageChange}
+                            className="hidden"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => ogImageInputRef.current?.click()}
+                            className={`inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors ${fieldClassName}`}
+                          >
+                            <Upload size={14} />
+                            {existingOgImageUrl || ogImagePreview ? 'Change Image' : 'Upload Image'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <FormField name="twitter_handle">
+                      <FormLabelAndMessage label="Twitter Handle" />
+                      <Form.Control asChild>
+                        <Input
+                          className={fieldClassName}
+                          onChange={handleFieldChange}
+                          value={values.twitter_handle}
+                          placeholder="@yourhandle"
+                        />
+                      </Form.Control>
+                    </FormField>
+                  </div>
+                </div>
+
+                {/* ===== Card 4: Search Engine Verification ===== */}
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+                    Search Engine Verification
+                  </h3>
+                  <div className="space-y-4">
+                    <FormField name="google_site_verification">
+                      <FormLabelAndMessage label="Google Search Console" />
+                      <Form.Control asChild>
+                        <Input
+                          className={fieldClassName}
+                          onChange={handleFieldChange}
+                          value={values.google_site_verification}
+                          placeholder="Google verification code"
+                        />
+                      </Form.Control>
+                    </FormField>
+                  </div>
+                </div>
+
+                {/* ===== Card 5: Indexing Controls ===== */}
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+                    Indexing Controls
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-lg">
+                      <div className="space-y-0.5">
+                        <label className="text-sm font-semibold text-gray-700">Hide Communities</label>
+                        <p className="text-sm text-gray-500">
+                          Hide community pages from search engines
+                        </p>
+                      </div>
+                      <Switch
+                        checked={values.noindex_communities}
+                        onCheckedChange={(checked) => {
+                          setFieldValue('noindex_communities', checked)
+                          setIsSaved(false)
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              {/* Save Button */}
-              <div className="flex flex-row-reverse mt-0 mx-5 mb-5">
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90"
-                >
-                  {isSubmitting ? 'Saving...' : 'Save Changes'}
-                </Button>
-              </div>
-            </div>
-          </Form>
-        )}
+            </FormLayout>
+          )
+        }}
       </Formik>
     </div>
   )
