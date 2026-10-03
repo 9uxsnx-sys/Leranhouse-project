@@ -4,12 +4,11 @@ import { motion } from 'motion/react'
 import Link from 'next/link'
 import { useMediaQuery } from 'usehooks-ts'
 import { getUriWithOrg } from '@services/config/config'
-import { Monitor, ScanEye, SquareUserRound, UserPlus, Users, Shield, ShieldAlert } from 'lucide-react'
+import { Monitor, Ticket, SquareUserRound, Users, Shield, ShieldAlert } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import OrgUsers from '@components/Dashboard/Pages/Users/OrgUsers/OrgUsers'
 import OrgAccess from '@components/Dashboard/Pages/Users/OrgAccess/OrgAccess'
-import OrgUsersAdd from '@components/Dashboard/Pages/Users/OrgUsersAdd/OrgUsersAdd'
 import OrgUserGroups from '@components/Dashboard/Pages/Users/OrgUserGroups/OrgUserGroups'
 import OrgRoles from '@components/Dashboard/Pages/Users/OrgRoles/OrgRoles'
 import OrgAuditLogs from '@components/Dashboard/Pages/Org/OrgAuditLogs/OrgAuditLogs'
@@ -78,14 +77,8 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
     {
       key: 'signups',
       label: t('dashboard.users.settings.tabs.signups'),
-      icon: ScanEye,
+      icon: Ticket,
       href: `/dash/users/settings/signups`,
-    },
-    {
-      key: 'add',
-      label: t('dashboard.users.settings.tabs.add'),
-      icon: UserPlus,
-      href: `/dash/users/settings/add`,
     },
     {
       key: 'audit-logs',
@@ -159,7 +152,6 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
           >
             {params.subpage == 'users' ? <OrgUsers /> : ''}
             {params.subpage == 'signups' ? <OrgAccess /> : ''}
-            {params.subpage == 'add' ? <OrgUsersAdd /> : ''}
             {params.subpage == 'usergroups' ? <OrgUserGroups /> : ''}
             {params.subpage == 'roles' ? <OrgRoles /> : ''}
             {params.subpage == 'audit-logs' ? <OrgAuditLogs /> : ''}

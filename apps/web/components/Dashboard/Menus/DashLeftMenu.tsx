@@ -164,8 +164,7 @@ function DashLeftMenu() {
     { label: 'Users', href: '/dash/users/settings/users' },
     { label: 'UserGroups', href: '/dash/users/settings/usergroups' },
     { label: 'Roles', href: '/dash/users/settings/roles' },
-    { label: 'Signups', href: '/dash/users/settings/signups' },
-    { label: 'Invite Members', href: '/dash/users/settings/add' },
+    { label: 'Invite Codes', href: '/dash/users/settings/signups' },
     { label: 'Audit Logs', href: '/dash/users/settings/audit-logs' },
   ]
 

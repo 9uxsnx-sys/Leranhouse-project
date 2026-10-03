@@ -8,8 +8,8 @@ import { getAPIUrl } from '@services/config/config'
 import { createRole, deleteRole, updateRole } from '@services/roles/roles'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { PlanLevel } from '@services/plans/plans'
-import { Shield, Globe, Lock, Eye, Check, XCircle, Search, Users, Loader2, ArrowLeft, BookOpen, UserCheck, FolderOpen, Building, FileText, Activity, Monitor, CheckSquare, Square, MoreVertical, Trash2, Plus } from 'lucide-react'
-import React, { useMemo, useState } from 'react'
+import { Shield, Globe, Lock, Eye, Check, XCircle, Search, Users, Loader2, BookOpen, UserCheck, FolderOpen, Building, FileText, Activity, Monitor, MoreVertical, Trash2, Plus, SaveAllIcon, MessageCircle, Radio, ChevronRight } from 'lucide-react'
+import React, { useMemo, useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import useSWR, { mutate } from 'swr'
 import { useTranslation } from 'react-i18next'
@@ -17,9 +17,13 @@ import { usePlan } from '@components/Hooks/usePlan'
 import { Button } from '@/components/ui/button'
 import { IconButton } from '@/components/ui/icon-button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import FormLayout, { FormField, FormLabelAndMessage, Input, Textarea } from '@components/Objects/StyledElements/Form/Form'
+import FormLayout, { FormField, FormLabelAndMessage } from '@components/Objects/StyledElements/Form/Form'
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import * as Form from '@radix-ui/react-form'
 import { useFormik } from 'formik'
+
+const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none";
 
 // ── Types ──
 
@@ -78,6 +82,30 @@ interface Rights {
     dashboard: {
         action_access: boolean;
     };
+    communities: {
+        action_create: boolean;
+        action_read: boolean;
+        action_update: boolean;
+        action_delete: boolean;
+    };
+    discussions: {
+        action_create: boolean;
+        action_read: boolean;
+        action_read_own: boolean;
+        action_update: boolean;
+        action_update_own: boolean;
+        action_delete: boolean;
+        action_delete_own: boolean;
+    };
+    podcasts: {
+        action_create: boolean;
+        action_read: boolean;
+        action_read_own: boolean;
+        action_update: boolean;
+        action_update_own: boolean;
+        action_delete: boolean;
+        action_delete_own: boolean;
+    };
 }
 
 const defaultRights: Rights = {
@@ -90,144 +118,9 @@ const defaultRights: Rights = {
     activities: { action_create: false, action_read: false, action_update: false, action_delete: false },
     roles: { action_create: false, action_read: false, action_update: false, action_delete: false },
     dashboard: { action_access: false },
-}
-
-const predefinedRoles: Record<string, { name: string; description: string; rights: Rights }> = {
-    'Admin': {
-        name: 'Admin',
-        description: 'Full platform control with all permissions',
-        rights: {
-            courses: { action_create: true, action_read: true, action_read_own: true, action_update: true, action_update_own: true, action_delete: true, action_delete_own: true },
-            users: { action_create: true, action_read: true, action_update: true, action_delete: true },
-            usergroups: { action_create: true, action_read: true, action_update: true, action_delete: true },
-            collections: { action_create: true, action_read: true, action_update: true, action_delete: true },
-            organizations: { action_create: true, action_read: true, action_update: true, action_delete: true },
-            coursechapters: { action_create: true, action_read: true, action_update: true, action_delete: true },
-            activities: { action_create: true, action_read: true, action_update: true, action_delete: true },
-            roles: { action_create: true, action_read: true, action_update: true, action_delete: true },
-            dashboard: { action_access: true },
-        },
-    },
-    'Course Manager': {
-        name: 'Course Manager',
-        description: 'Can manage courses, chapters, and activities',
-        rights: {
-            courses: { action_create: true, action_read: true, action_read_own: true, action_update: true, action_update_own: true, action_delete: false, action_delete_own: true },
-            users: { action_create: false, action_read: true, action_update: false, action_delete: false },
-            usergroups: { action_create: false, action_read: true, action_update: false, action_delete: false },
-            collections: { action_create: true, action_read: true, action_update: true, action_delete: false },
-            organizations: { action_create: false, action_read: false, action_update: false, action_delete: false },
-            coursechapters: { action_create: true, action_read: true, action_update: true, action_delete: false },
-            activities: { action_create: true, action_read: true, action_update: true, action_delete: false },
-            roles: { action_create: false, action_read: false, action_update: false, action_delete: false },
-            dashboard: { action_access: true },
-        },
-    },
-    'Instructor': {
-        name: 'Instructor',
-        description: 'Can create and manage their own courses',
-        rights: {
-            courses: { action_create: true, action_read: true, action_read_own: true, action_update: false, action_update_own: true, action_delete: false, action_delete_own: true },
-            users: { action_create: false, action_read: false, action_update: false, action_delete: false },
-            usergroups: { action_create: false, action_read: false, action_update: false, action_delete: false },
-            collections: { action_create: false, action_read: true, action_update: false, action_delete: false },
-            organizations: { action_create: false, action_read: false, action_update: false, action_delete: false },
-            coursechapters: { action_create: true, action_read: true, action_update: false, action_delete: false },
-            activities: { action_create: true, action_read: true, action_update: false, action_delete: false },
-            roles: { action_create: false, action_read: false, action_update: false, action_delete: false },
-            dashboard: { action_access: true },
-        },
-    },
-    'Viewer': {
-        name: 'Viewer',
-        description: 'Read-only access to courses and content',
-        rights: {
-            courses: { action_create: false, action_read: true, action_read_own: true, action_update: false, action_update_own: false, action_delete: false, action_delete_own: false },
-            users: { action_create: false, action_read: false, action_update: false, action_delete: false },
-            usergroups: { action_create: false, action_read: false, action_update: false, action_delete: false },
-            collections: { action_create: false, action_read: true, action_update: false, action_delete: false },
-            organizations: { action_create: false, action_read: false, action_update: false, action_delete: false },
-            coursechapters: { action_create: false, action_read: true, action_update: false, action_delete: false },
-            activities: { action_create: false, action_read: true, action_update: false, action_delete: false },
-            roles: { action_create: false, action_read: false, action_update: false, action_delete: false },
-            dashboard: { action_access: true },
-        },
-    },
-    'Content Creator': {
-        name: 'Content Creator',
-        description: 'Can create and edit content but not manage users',
-        rights: {
-            courses: { action_create: true, action_read: true, action_read_own: true, action_update: true, action_update_own: true, action_delete: false, action_delete_own: false },
-            users: { action_create: false, action_read: false, action_update: false, action_delete: false },
-            usergroups: { action_create: false, action_read: false, action_update: false, action_delete: false },
-            collections: { action_create: true, action_read: true, action_update: true, action_delete: false },
-            organizations: { action_create: false, action_read: false, action_update: false, action_delete: false },
-            coursechapters: { action_create: true, action_read: true, action_update: true, action_delete: false },
-            activities: { action_create: true, action_read: true, action_update: true, action_delete: false },
-            roles: { action_create: false, action_read: false, action_update: false, action_delete: false },
-            dashboard: { action_access: true },
-        },
-    },
-    'User Manager': {
-        name: 'User Manager',
-        description: 'Can manage users and user groups',
-        rights: {
-            courses: { action_create: false, action_read: true, action_read_own: true, action_update: false, action_update_own: false, action_delete: false, action_delete_own: false },
-            users: { action_create: true, action_read: true, action_update: true, action_delete: true },
-            usergroups: { action_create: true, action_read: true, action_update: true, action_delete: true },
-            collections: { action_create: false, action_read: true, action_update: false, action_delete: false },
-            organizations: { action_create: false, action_read: false, action_update: false, action_delete: false },
-            coursechapters: { action_create: false, action_read: true, action_update: false, action_delete: false },
-            activities: { action_create: false, action_read: true, action_update: false, action_delete: false },
-            roles: { action_create: false, action_read: true, action_update: false, action_delete: false },
-            dashboard: { action_access: true },
-        },
-    },
-    'Moderator': {
-        name: 'Moderator',
-        description: 'Can moderate content and manage activities',
-        rights: {
-            courses: { action_create: false, action_read: true, action_read_own: true, action_update: false, action_update_own: false, action_delete: false, action_delete_own: false },
-            users: { action_create: false, action_read: true, action_update: false, action_delete: false },
-            usergroups: { action_create: false, action_read: true, action_update: false, action_delete: false },
-            collections: { action_create: false, action_read: true, action_update: true, action_delete: false },
-            organizations: { action_create: false, action_read: false, action_update: false, action_delete: false },
-            coursechapters: { action_create: false, action_read: true, action_update: true, action_delete: false },
-            activities: { action_create: false, action_read: true, action_update: true, action_delete: false },
-            roles: { action_create: false, action_read: false, action_update: false, action_delete: false },
-            dashboard: { action_access: true },
-        },
-    },
-    'Analyst': {
-        name: 'Analyst',
-        description: 'Read-only access with analytics capabilities',
-        rights: {
-            courses: { action_create: false, action_read: true, action_read_own: true, action_update: false, action_update_own: false, action_delete: false, action_delete_own: false },
-            users: { action_create: false, action_read: true, action_update: false, action_delete: false },
-            usergroups: { action_create: false, action_read: true, action_update: false, action_delete: false },
-            collections: { action_create: false, action_read: true, action_update: false, action_delete: false },
-            organizations: { action_create: false, action_read: true, action_update: false, action_delete: false },
-            coursechapters: { action_create: false, action_read: true, action_update: false, action_delete: false },
-            activities: { action_create: false, action_read: true, action_update: false, action_delete: false },
-            roles: { action_create: false, action_read: true, action_update: false, action_delete: false },
-            dashboard: { action_access: true },
-        },
-    },
-    'Guest': {
-        name: 'Guest',
-        description: 'Limited access for external users',
-        rights: {
-            courses: { action_create: false, action_read: true, action_read_own: false, action_update: false, action_update_own: false, action_delete: false, action_delete_own: false },
-            users: { action_create: false, action_read: false, action_update: false, action_delete: false },
-            usergroups: { action_create: false, action_read: false, action_update: false, action_delete: false },
-            collections: { action_create: false, action_read: true, action_update: false, action_delete: false },
-            organizations: { action_create: false, action_read: false, action_update: false, action_delete: false },
-            coursechapters: { action_create: false, action_read: true, action_update: false, action_delete: false },
-            activities: { action_create: false, action_read: true, action_update: false, action_delete: false },
-            roles: { action_create: false, action_read: false, action_update: false, action_delete: false },
-            dashboard: { action_access: false },
-        },
-    },
+    communities: { action_create: false, action_read: false, action_update: false, action_delete: false },
+    discussions: { action_create: false, action_read: false, action_read_own: false, action_update: false, action_update_own: false, action_delete: false, action_delete_own: false },
+    podcasts: { action_create: false, action_read: false, action_read_own: false, action_update: false, action_update_own: false, action_delete: false, action_delete_own: false },
 }
 
 // ── Helpers ──
@@ -264,12 +157,14 @@ const formatResourceName = (resource: string) => {
         courses: 'Courses',
         users: 'Users',
         usergroups: 'User Groups',
-        collections: 'Collections',
         organizations: 'Organizations',
-        coursechapters: 'Course Chapters',
-        activities: 'Activities',
+        coursechapters: 'Modules',
+        activities: 'Lessons',
         roles: 'Roles',
         dashboard: 'Dashboard',
+        communities: 'Communities',
+        discussions: 'Discussions',
+        podcasts: 'Podcasts',
     }
     return resourceNames[resource] || resource.charAt(0).toUpperCase() + resource.slice(1)
 }
@@ -336,41 +231,81 @@ const PermissionSection = ({
     onRightChange: (section: keyof Rights, action: string, value: boolean) => void
     onSelectAll: (section: keyof Rights, value: boolean) => void
 }) => {
-    const sectionRights = rights[section] as any
+    const sectionRights = (rights[section] || {}) as any
     const allSelected = permissions.every((perm) => sectionRights[perm])
-    const someSelected = permissions.some((perm) => sectionRights[perm]) && !allSelected
+    const selectedCount = permissions.filter((perm) => sectionRights[perm]).length
+    const [isExpanded, setIsExpanded] = useState(false)
 
     return (
-        <div className="border border-gray-200 rounded-lg p-4 mb-4 bg-white shadow-sm">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
-                <div className="flex items-center space-x-2">
-                    <Icon className="w-4 h-4 text-gray-500" />
-                    <h3 className="font-semibold text-gray-800 text-sm sm:text-base">{title}</h3>
+        <div className="bg-gray-50 rounded-xl overflow-hidden mb-3 border border-gray-100">
+            {/* Header - clickable to expand/collapse */}
+            <button
+                type="button"
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-100/50 transition-colors"
+            >
+                <div className="flex items-center gap-2.5">
+                    <Icon className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                    <span className="text-sm font-semibold text-gray-800">{title}</span>
                 </div>
-                <button
-                    type="button"
-                    onClick={() => onSelectAll(section, !allSelected)}
-                    className="flex items-center space-x-2 text-sm text-blue-600 hover:text-blue-700 font-medium self-start sm:self-auto transition-colors"
-                >
-                    {allSelected ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
-                    <span className="hidden sm:inline">{allSelected ? 'Deselect all' : 'Select all'}</span>
-                    <span className="sm:hidden">{allSelected ? 'Deselect' : 'Select'}</span>
-                </button>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {permissions.map((permission) => (
-                    <label key={permission} className="flex items-center space-x-2 cursor-pointer p-2 rounded-md hover:bg-gray-50 transition-colors">
-                        <input
-                            type="checkbox"
-                            checked={rights[section]?.[permission as keyof typeof rights[typeof section]] || false}
-                            onChange={(e) => onRightChange(section, permission, e.target.checked)}
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2"
-                        />
-                        <span className="text-sm text-gray-700 capitalize">
-                            {formatActionName(permission)}
-                        </span>
-                    </label>
-                ))}
+                <div className="flex items-center gap-2">
+                    {!isExpanded && selectedCount > 0 && (
+                        <span className="text-xs text-gray-400 tabular-nums">{selectedCount}/{permissions.length}</span>
+                    )}
+                    <ChevronRight
+                        size={16}
+                        className={`text-gray-400 transition-transform duration-200 ${
+                            isExpanded ? 'rotate-90' : ''
+                        }`}
+                    />
+                </div>
+            </button>
+
+            {/* Expanded content - using grid-rows pattern for smooth animation */}
+            <div
+                className={`grid transition-all duration-300 ease-in-out ${
+                    isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                }`}
+            >
+                <div className="overflow-hidden">
+                {/* Info row: counter + select all */}
+                <div className="flex items-center justify-between px-4 py-2">
+                    <span className="text-xs text-gray-400 tabular-nums">
+                        {selectedCount} of {permissions.length}
+                    </span>
+                    <button
+                        type="button"
+                        onClick={() => onSelectAll(section, !allSelected)}
+                        className="text-xs text-gray-800 hover:text-gray-600 font-medium transition-colors"
+                    >
+                        {allSelected ? 'Deselect all' : 'Select all'}
+                    </button>
+                </div>
+
+                {/* Checkboxes */}
+                <div className="px-4 pb-3 pt-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                        {permissions.map((permission) => (
+                            <label key={permission} className="flex items-center gap-2 cursor-pointer p-1.5 rounded-md hover:bg-gray-100 transition-colors">
+                                <div className="relative w-4 h-4 flex-shrink-0">
+                                    <input
+                                        type="checkbox"
+                                        checked={rights[section]?.[permission as keyof typeof rights[typeof section]] || false}
+                                        onChange={(e) => onRightChange(section, permission, e.target.checked)}
+                                        className="sr-only peer"
+                                    />
+                                    <div className="w-full h-full rounded border border-gray-300 bg-white peer-checked:bg-gray-600 peer-checked:border-gray-600 flex items-center justify-center transition-colors">
+                                        <Check size={12} className="text-white hidden peer-checked:block" strokeWidth={3} />
+                                    </div>
+                                </div>
+                                <span className="text-xs text-gray-700 capitalize">
+                                    {formatActionName(permission)}
+                                </span>
+                            </label>
+                        ))}
+                    </div>
+                </div>
+                </div>
             </div>
         </div>
     )
@@ -391,6 +326,10 @@ function OrgRoles() {
     const [view, setView] = useState<'list' | 'edit'>('list')
     const [selectedRole, setSelectedRole] = useState<any>(null)
     const [isCreating, setIsCreating] = useState(false)
+
+    // Save state
+    const [isSaving, setIsSaving] = useState(false)
+    const [isSaved, setIsSaved] = useState(true)
 
     // List state
     const [searchQuery, setSearchQuery] = useState('')
@@ -470,11 +409,6 @@ function OrgRoles() {
         setView('edit')
     }
 
-    const handleBackToList = () => {
-        setView('list')
-        setSelectedRole(null)
-    }
-
     const handleViewRights = (role: any) => {
         setModalRole(role)
         setViewRightsModal(true)
@@ -509,7 +443,8 @@ function OrgRoles() {
         },
         onSubmit: async (values) => {
             if (!selectedRole) return
-            const toastID = toast.loading('Saving role...')
+            setIsSaving(true)
+            setIsSaved(false)
 
             const formattedRights = {
                 courses: {
@@ -566,6 +501,30 @@ function OrgRoles() {
                 dashboard: {
                     action_access: rights.dashboard?.action_access || false,
                 },
+                communities: {
+                    action_create: rights.communities?.action_create || false,
+                    action_read: rights.communities?.action_read || false,
+                    action_update: rights.communities?.action_update || false,
+                    action_delete: rights.communities?.action_delete || false,
+                },
+                discussions: {
+                    action_create: rights.discussions?.action_create || false,
+                    action_read: rights.discussions?.action_read || false,
+                    action_read_own: rights.discussions?.action_read_own || false,
+                    action_update: rights.discussions?.action_update || false,
+                    action_update_own: rights.discussions?.action_update_own || false,
+                    action_delete: rights.discussions?.action_delete || false,
+                    action_delete_own: rights.discussions?.action_delete_own || false,
+                },
+                podcasts: {
+                    action_create: rights.podcasts?.action_create || false,
+                    action_read: rights.podcasts?.action_read || false,
+                    action_read_own: rights.podcasts?.action_read_own || false,
+                    action_update: rights.podcasts?.action_update || false,
+                    action_update_own: rights.podcasts?.action_update_own || false,
+                    action_delete: rights.podcasts?.action_delete || false,
+                    action_delete_own: rights.podcasts?.action_delete_own || false,
+                },
             }
 
             const res = await updateRole(selectedRole.id, {
@@ -576,12 +535,22 @@ function OrgRoles() {
             }, access_token)
             if (res.status === 200) {
                 mutate(`${getAPIUrl()}roles/org/${org.id}`)
-                toast.success('Role saved', { id: toastID })
+                setSelectedRole({ ...selectedRole, name: values.name, description: values.description })
+                formik.resetForm({ values: { name: values.name, description: values.description } })
+                setIsSaved(true)
             } else {
-                toast.error('Failed to save role', { id: toastID })
+                toast.error('Failed to save role')
             }
+            setIsSaving(false)
         },
     })
+
+    // Reset "Saved" state when user makes changes
+    useEffect(() => {
+        if (formik.dirty) {
+            setIsSaved(false)
+        }
+    }, [formik.dirty])
 
     const handleRightChange = (section: keyof Rights, action: string, value: boolean) => {
         setRights((prev) => ({
@@ -603,15 +572,6 @@ function OrgRoles() {
         }))
     }
 
-    const handlePredefinedRole = (roleKey: string) => {
-        const role = predefinedRoles[roleKey]
-        if (role) {
-            formik.setFieldValue('name', role.name)
-            formik.setFieldValue('description', role.description)
-            setRights(role.rights as Rights)
-        }
-    }
-
     // ── Render: Edit View ──
 
     if (view === 'edit' && selectedRole) {
@@ -620,42 +580,32 @@ function OrgRoles() {
                 <FormLayout onSubmit={formik.handleSubmit}>
                     <div className="space-y-3">
                         {/* ── ACTION ROW ── */}
-                        <div className="flex items-center justify-between">
-                            {/* Left: Back */}
-                            <button
-                                onClick={handleBackToList}
-                                className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
-                            >
-                                <ArrowLeft size={14} />
-                                <span>Back to roles</span>
-                            </button>
-
-                            {/* Right: Cancel + Save */}
-                            <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-end">
+                            {/* Save button (Pattern 1 - three-state) */}
+                            <Form.Submit asChild>
                                 <button
-                                    type="button"
-                                    onClick={handleBackToList}
-                                    className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+                                    type="submit"
+                                    disabled={isSaving}
+                                    className={`inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors ${
+                                        isSaving
+                                            ? 'bg-black text-white border-black opacity-50 cursor-not-allowed'
+                                            : !formik.dirty && isSaved
+                                                ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                                                : 'bg-black text-white border-black hover:opacity-90 cursor-pointer'
+                                    }`}
                                 >
-                                    Cancel
+                                    {isSaving ? (
+                                        <Loader2 size={14} className="animate-spin" />
+                                    ) : !formik.dirty && isSaved ? (
+                                        <Check size={14} />
+                                    ) : (
+                                        <SaveAllIcon size={14} />
+                                    )}
+                                    <span>
+                                        {isSaving ? 'Saving...' : !formik.dirty && isSaved ? 'Saved' : 'Save Role'}
+                                    </span>
                                 </button>
-                                <Form.Submit asChild>
-                                    <button
-                                        type="submit"
-                                        disabled={formik.isSubmitting}
-                                        className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-transparent bg-black text-white hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        {formik.isSubmitting ? (
-                                            <>
-                                                <Loader2 size={14} className="animate-spin" />
-                                                Saving...
-                                            </>
-                                        ) : (
-                                            'Save Role'
-                                        )}
-                                    </button>
-                                </Form.Submit>
-                            </div>
+                            </Form.Submit>
                         </div>
 
                         {/* ── BASIC INFORMATION ── */}
@@ -666,6 +616,7 @@ function OrgRoles() {
                                     <FormLabelAndMessage label="Role Name" message={formik.errors.name} />
                                     <Form.Control asChild>
                                         <Input
+                                            className={fieldClassName}
                                             onChange={formik.handleChange}
                                             value={formik.values.name}
                                             type="text"
@@ -679,6 +630,7 @@ function OrgRoles() {
                                     <FormLabelAndMessage label="Description" message={formik.errors.description} />
                                     <Form.Control asChild>
                                         <Textarea
+                                            className={fieldClassName}
                                             onChange={formik.handleChange}
                                             value={formik.values.description}
                                             required
@@ -686,28 +638,6 @@ function OrgRoles() {
                                         />
                                     </Form.Control>
                                 </FormField>
-                            </div>
-                        </div>
-
-                        {/* ── PREDEFINED RIGHTS ── */}
-                        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                            <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Predefined Rights</h3>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                {Object.keys(predefinedRoles).map((roleKey) => (
-                                    <button
-                                        key={roleKey}
-                                        type="button"
-                                        onClick={() => handlePredefinedRole(roleKey)}
-                                        className="p-3 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 text-left bg-white shadow-sm hover:shadow-md"
-                                    >
-                                        <div className="font-medium text-gray-900 text-sm">
-                                            {predefinedRoles[roleKey].name}
-                                        </div>
-                                        <div className="text-xs text-gray-500 mt-1">
-                                            {predefinedRoles[roleKey].description}
-                                        </div>
-                                    </button>
-                                ))}
                             </div>
                         </div>
 
@@ -720,6 +650,24 @@ function OrgRoles() {
                                     icon={BookOpen}
                                     section="courses"
                                     permissions={['action_create', 'action_read', 'action_read_own', 'action_update', 'action_update_own', 'action_delete', 'action_delete_own']}
+                                    rights={rights}
+                                    onRightChange={handleRightChange}
+                                    onSelectAll={handleSelectAll}
+                                />
+                                <PermissionSection
+                                    title="Modules"
+                                    icon={FileText}
+                                    section="coursechapters"
+                                    permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
+                                    rights={rights}
+                                    onRightChange={handleRightChange}
+                                    onSelectAll={handleSelectAll}
+                                />
+                                <PermissionSection
+                                    title="Lessons"
+                                    icon={Activity}
+                                    section="activities"
+                                    permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
                                     rights={rights}
                                     onRightChange={handleRightChange}
                                     onSelectAll={handleSelectAll}
@@ -743,42 +691,6 @@ function OrgRoles() {
                                     onSelectAll={handleSelectAll}
                                 />
                                 <PermissionSection
-                                    title="Collections"
-                                    icon={FolderOpen}
-                                    section="collections"
-                                    permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
-                                    rights={rights}
-                                    onRightChange={handleRightChange}
-                                    onSelectAll={handleSelectAll}
-                                />
-                                <PermissionSection
-                                    title="Organizations"
-                                    icon={Building}
-                                    section="organizations"
-                                    permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
-                                    rights={rights}
-                                    onRightChange={handleRightChange}
-                                    onSelectAll={handleSelectAll}
-                                />
-                                <PermissionSection
-                                    title="Course Chapters"
-                                    icon={FileText}
-                                    section="coursechapters"
-                                    permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
-                                    rights={rights}
-                                    onRightChange={handleRightChange}
-                                    onSelectAll={handleSelectAll}
-                                />
-                                <PermissionSection
-                                    title="Activities"
-                                    icon={Activity}
-                                    section="activities"
-                                    permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
-                                    rights={rights}
-                                    onRightChange={handleRightChange}
-                                    onSelectAll={handleSelectAll}
-                                />
-                                <PermissionSection
                                     title="Roles"
                                     icon={Shield}
                                     section="roles"
@@ -788,10 +700,46 @@ function OrgRoles() {
                                     onSelectAll={handleSelectAll}
                                 />
                                 <PermissionSection
+                                    title="Communities"
+                                    icon={Globe}
+                                    section="communities"
+                                    permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
+                                    rights={rights}
+                                    onRightChange={handleRightChange}
+                                    onSelectAll={handleSelectAll}
+                                />
+                                <PermissionSection
+                                    title="Discussions"
+                                    icon={MessageCircle}
+                                    section="discussions"
+                                    permissions={['action_create', 'action_read', 'action_read_own', 'action_update', 'action_update_own', 'action_delete', 'action_delete_own']}
+                                    rights={rights}
+                                    onRightChange={handleRightChange}
+                                    onSelectAll={handleSelectAll}
+                                />
+                                <PermissionSection
+                                    title="Podcasts"
+                                    icon={Radio}
+                                    section="podcasts"
+                                    permissions={['action_create', 'action_read', 'action_read_own', 'action_update', 'action_update_own', 'action_delete', 'action_delete_own']}
+                                    rights={rights}
+                                    onRightChange={handleRightChange}
+                                    onSelectAll={handleSelectAll}
+                                />
+                                <PermissionSection
                                     title="Dashboard"
                                     icon={Monitor}
                                     section="dashboard"
                                     permissions={['action_access']}
+                                    rights={rights}
+                                    onRightChange={handleRightChange}
+                                    onSelectAll={handleSelectAll}
+                                />
+                                <PermissionSection
+                                    title="Organizations"
+                                    icon={Building}
+                                    section="organizations"
+                                    permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
                                     rights={rights}
                                     onRightChange={handleRightChange}
                                     onSelectAll={handleSelectAll}

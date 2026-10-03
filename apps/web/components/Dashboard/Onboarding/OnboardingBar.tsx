@@ -25,7 +25,6 @@ import {
   SkipForward,
   Lock,
   DotsThree,
-  UserPlus,
   Palette,
   Command,
   TextT,
@@ -93,13 +92,6 @@ const STEP_CONFIG: Record<
     pattern: `radial-gradient(circle, rgba(253,230,138,0.12) 1px, transparent 1px), radial-gradient(circle, rgba(253,186,116,0.08) 1px, transparent 1px)`,
     patternSize: '14px 14px',
     iconColor: 'text-amber-400',
-  },
-  invite_users: {
-    icon: UserPlus,
-    actionLabel: 'Invite Users',
-    actionHref: '/dash/users/settings/add',
-    pattern: `repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(191,219,254,0.08) 8px, rgba(191,219,254,0.08) 9px), repeating-linear-gradient(-45deg, transparent, transparent 8px, rgba(191,219,254,0.08) 8px, rgba(191,219,254,0.08) 9px)`,
-    iconColor: 'text-sky-400',
   },
   customize_org: {
     icon: Palette,

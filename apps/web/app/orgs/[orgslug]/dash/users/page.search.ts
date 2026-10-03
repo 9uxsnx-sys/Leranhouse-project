@@ -18,15 +18,6 @@ export const searchMetas: SearchMeta[] = [
     group: 'users',
   },
   {
-    id: 'dash.users.add',
-    titleKey: 'dashboard.users.settings.tabs.add',
-    descriptionKey: 'dashboard.search.entries.users_add.description',
-    keywordsKey: 'dashboard.search.entries.users_add.keywords',
-    icon: UserPlus,
-    href: '/dash/users/settings/add',
-    group: 'users',
-  },
-  {
     id: 'dash.users.usergroups',
     titleKey: 'dashboard.users.settings.tabs.usergroups',
     descriptionKey: 'dashboard.search.entries.usergroups.description',

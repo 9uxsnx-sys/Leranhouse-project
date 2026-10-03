@@ -2963,8 +2963,7 @@
           "users": "Users",
           "usergroups": "Groups",
           "roles": "Roles",
-          "signups": "Access",
-          "add": "Invite",
+          "signups": "Invite Codes",
           "audit_logs": "Audit Logs"
         },
         "pages": {
@@ -2973,12 +2972,8 @@
             "subtitle": "Manage your organization users, assign roles and permissions"
           },
           "signups": {
-            "title": "Signups & Invite Codes",
-            "subtitle": "Choose from where users can join your organization"
-          },
-          "add": {
-            "title": "Invite Members",
-            "subtitle": "Invite members to join your organization"
+            "title": "Invite Codes",
+            "subtitle": "Manage invite codes for private access to your organization"
           },
           "usergroups": {
             "title": "UserGroups",
@@ -3098,59 +3093,6 @@
           "toasts": {
             "error": "Error {{status}}: {{detail}}"
           }
-        }
-      },
-      "invite_members": {
-        "title": "Invite users to your Organization",
-        "subtitle": "Send invite via email, separated by comma",
-        "email_placeholder": "Example : spike.spiegel@bepop.space, michael.scott@dundermifflin.com",
-        "invite_code_label": "Invite Code",
-        "invite_code_tooltip": "Optionally attach an invite code that you generated from the signup access page",
-        "no_invite_code": "None",
-        "send_button": "Send invites via email",
-        "results": {
-          "summary_title": "Results",
-          "sent_count": "{{count}} sent",
-          "failed_count": "{{count}} failed",
-          "skipped_count": "{{count}} already invited",
-          "status": {
-            "sent": "Sent",
-            "email_failed": "Failed",
-            "already_invited": "Already invited"
-          }
-        },
-        "invited_users": {
-          "title": "Invited Users",
-          "subtitle": "Users who have been invited to join your organization",
-          "search_placeholder": "Search by email...",
-          "no_results": "No invitations found matching your search",
-          "no_invites": "No pending invitations",
-          "table": {
-            "email": "Email",
-            "signup_status": "Signup Status",
-            "email_sent": "Email sent",
-            "actions": "Actions"
-          },
-          "status": {
-            "pending": "Pending",
-            "signed": "Signed up"
-          },
-          "email_status": {
-            "sent": "Sent",
-            "no": "Not sent"
-          },
-          "removing": "Removing invitation...",
-          "remove_success": "Invitation removed",
-          "remove_error": "Error removing invitation",
-          "remove_button": "Remove",
-          "remove_title": "Remove invitation",
-          "remove_message": "Are you sure you want to remove the invitation for {{email}}?"
-        },
-        "toasts": {
-          "sending": "Sending invites...",
-          "success": "Invites sent successfully",
-          "partial": "{{sent}} sent, {{failed}} failed",
-          "error": "Error sending invites"
         }
       },
       "usergroups": {
@@ -3923,8 +3865,8 @@
           "keywords": "permissions, access, rbac, security"
         },
         "signups": {
-          "description": "Review user signups",
-          "keywords": "registrations, applications, requests"
+          "description": "Manage invite codes for private access",
+          "keywords": "invite, codes, invitations, private, access"
         },
         "org_general": {
           "description": "Organization general settings",
@@ -3947,10 +3889,6 @@
           "description": "Payment products and pricing",
           "keywords": "products, prices, stripe, tiers, plans",
           "title": "Products"
-        },
-        "users_add": {
-          "description": "Invite new members",
-          "keywords": "invite, add, members, send"
         },
         "users_audit_logs": {
           "description": "Organization activity log",

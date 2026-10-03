@@ -1,31 +1,38 @@
-﻿import { useOrg } from '@components/Contexts/OrgContext'
+'use client'
+import { useOrg } from '@components/Contexts/OrgContext'
 import PageLoading from '@components/Objects/Loaders/PageLoading'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
-import { Check, Copy, Globe, Ticket, UserSquare, Users, X } from 'lucide-react'
-import Link from 'next/link'
+import { Check, Copy, Ticket, Trash2, Users, Loader2 } from 'lucide-react'
 import React, { useEffect } from 'react'
 import useSWR, { mutate } from 'swr'
 import dayjs from 'dayjs'
 import {
   changeSignupMechanism,
+  createInviteCode,
   deleteInviteCode,
 } from '@services/organizations/invites'
 import toast from 'react-hot-toast'
-import { useRouter } from 'next/navigation'
-import Modal from '@components/Objects/StyledElements/Modal/Modal'
-import OrgInviteCodeGenerate from '@components/Objects/Modals/Dash/OrgAccess/OrgInviteCodeGenerate'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useTranslation } from 'react-i18next'
 
-function CopyButton({ text }: { text: string }) {
+function CopyButton({ text, children }: { text: string; children?: React.ReactNode }) {
   const [copied, setCopied] = React.useState(false)
 
-  const handleCopy = async () => {
+  const handleCopy = async (e: React.MouseEvent) => {
+    e.preventDefault()
     await navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (children) {
+    return (
+      <div onClick={handleCopy} className="inline-flex" title="Click to copy">
+        {children}
+      </div>
+    )
   }
 
   return (
@@ -49,10 +56,10 @@ function OrgAccess() {
     (url) => swrFetcher(url, access_token),
     { revalidateOnFocus: false }
   )
-  const [isLoading, setIsLoading] = React.useState(false)
-  const [joinMethod, setJoinMethod] = React.useState('closed')
-  const [invitesModal, setInvitesModal] = React.useState(false)
-  const router = useRouter()
+  const [isLoading, setIsLoading] = React.useState(true)
+  const [joinMethod, setJoinMethod] = React.useState('open')
+  const [isToggling, setIsToggling] = React.useState(false)
+  const [isGenerating, setIsGenerating] = React.useState(false)
 
   async function getOrgJoinMethod() {
     if (org) {
@@ -81,17 +88,20 @@ function OrgAccess() {
     }
   }
 
-  async function changeJoinMethod(method: 'open' | 'inviteOnly') {
+  async function handleToggle() {
+    if (isToggling) return
+    setIsToggling(true)
+    const newMethod = joinMethod === 'open' ? 'inviteOnly' : 'open'
     const toastId = toast.loading(t('dashboard.users.signups.invite_codes.toasts.changing_method'))
-    let res = await changeSignupMechanism(org.id, method, access_token)
+    let res = await changeSignupMechanism(org.id, newMethod, access_token)
     if (res.status == 200) {
-      setJoinMethod(method)
+      setJoinMethod(newMethod)
       mutate(`${getAPIUrl()}orgs/slug/${org?.slug}`)
-      router.refresh()
-      toast.success(t('dashboard.users.signups.invite_codes.toasts.change_success', { method }), {id:toastId})
+      toast.success(t('dashboard.users.signups.invite_codes.toasts.change_success', { method: newMethod }), {id:toastId})
     } else {
       toast.error(t('dashboard.users.signups.invite_codes.toasts.change_error'), {id:toastId})
     }
+    setIsToggling(false)
   }
 
   useEffect(() => {
@@ -101,204 +111,124 @@ function OrgAccess() {
     }
   }, [org, invites])
 
+  async function handleGenerate() {
+    if (isGenerating) return
+    setIsGenerating(true)
+    const toastId = toast.loading('Generating invite code...')
+    try {
+      const res = await createInviteCode(org.id, access_token)
+      if (res.status === 200) {
+        mutate(`${getAPIUrl()}orgs/${org.id}/invites`)
+        toast.success('Invite code generated', { id: toastId })
+      } else {
+        toast.error(res.data?.detail || 'Failed to generate code', { id: toastId })
+      }
+    } catch {
+      toast.error('Failed to generate code', { id: toastId })
+    }
+    setIsGenerating(false)
+  }
+
   const inviteCount = invites?.length ?? 0
+  const isInviteOnly = joinMethod === 'inviteOnly'
 
   return (
     <>
       {!isLoading ? (
-        <>
-          <div className="h-6"></div>
-          <div className="ml-10 mr-10 mx-auto bg-white rounded-xl shadow-xs px-4 py-4 anit ">
-            <div className="flex flex-col bg-gray-50 -space-y-1  px-5 py-3 rounded-md mb-3 ">
-              <h1 className="font-bold text-xl text-gray-800">{t('dashboard.users.signups.title')}</h1>
-              <h2 className="text-gray-500  text-md">
-                {' '}
-                {t('dashboard.users.signups.subtitle')}{' '}
-              </h2>
-            </div>
-            <div className="flex space-x-2 mx-auto">
-              <ConfirmationModal
-                confirmationButtonText={t('dashboard.users.signups.open.change_to')}
-                confirmationMessage={t('dashboard.users.signups.open.confirmation_message')}
-                dialogTitle={t('dashboard.users.signups.open.confirmation_title')}
-                dialogTrigger={
-                  <div className="w-full h-[160px] bg-slate-100 rounded-lg cursor-pointer hover:bg-slate-200 ease-linear transition-all">
-                    {joinMethod == 'open' ? (
-                      <div className="bg-green-200 text-green-600 font-bold w-fit my-3 mx-3 absolute text-sm px-3 py-1 rounded-lg">
-                        {t('dashboard.users.signups.open.active')}
-                      </div>
-                    ) : null}
-                    <div className="flex flex-col space-y-1 justify-center items-center h-full">
-                      <Globe className="text-slate-400" size={40}></Globe>
-                      <div className="text-2xl text-slate-700 font-bold">
-                        {t('dashboard.users.signups.open.title')}
-                      </div>
-                      <div className="text-gray-400 text-center">
-                        {t('dashboard.users.signups.open.description')}
-                      </div>
-                    </div>
-                  </div>
-                }
-                functionToExecute={() => {
-                  changeJoinMethod('open')
-                }}
-                status="info"
-              ></ConfirmationModal>
-              <ConfirmationModal
-                confirmationButtonText={t('dashboard.users.signups.closed.change_to')}
-                confirmationMessage={t('dashboard.users.signups.closed.confirmation_message')}
-                dialogTitle={t('dashboard.users.signups.closed.confirmation_title')}
-                dialogTrigger={
-                  <div className="w-full h-[160px] bg-slate-100 rounded-lg cursor-pointer hover:bg-slate-200 ease-linear transition-all">
-                    {joinMethod == 'inviteOnly' ? (
-                      <div className="bg-green-200 text-green-600 font-bold w-fit my-3 mx-3 absolute text-sm px-3 py-1 rounded-lg">
-                        {t('dashboard.users.signups.closed.active')}
-                      </div>
-                    ) : null}
-                    <div className="flex flex-col space-y-1 justify-center items-center h-full">
-                      <Ticket className="text-slate-400" size={40}></Ticket>
-                      <div className="text-2xl text-slate-700 font-bold">
-                        {t('dashboard.users.signups.closed.title')}
-                      </div>
-                      <div className="text-gray-400 text-center">
-                        {t('dashboard.users.signups.closed.description')}
-                      </div>
-                    </div>
-                  </div>
-                }
-                functionToExecute={() => {
-                  changeJoinMethod('inviteOnly')
-                }}
-                status="info"
-              ></ConfirmationModal>
-            </div>
-            <div
-              className={
-                joinMethod == 'open'
-                  ? 'opacity-20 pointer-events-none'
-                  : 'pointer-events-auto'
-              }
+        <div className="space-y-3">
+          {/* Action Row */}
+          <div className="flex items-center justify-between">
+            <button
+              onClick={handleGenerate}
+              disabled={isGenerating}
+              className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <div className="flex flex-col bg-gray-50 -space-y-1  px-5 py-3 rounded-md mt-3 mb-3 ">
-                <h1 className="font-bold text-xl text-gray-800">
-                  {t('dashboard.users.signups.invite_codes.title')}
-                </h1>
-                <h2 className="text-gray-500  text-md">
-                  {t('dashboard.users.signups.invite_codes.subtitle')}{' '}
-                </h2>
-              </div>
-              <table className="table-auto w-full text-left whitespace-nowrap rounded-md overflow-hidden">
-                <thead className="bg-gray-100 text-gray-500 rounded-xl uppercase">
-                  <tr className="font-bolder text-sm">
-                    <th className="py-3 px-4">{t('dashboard.users.signups.invite_codes.table.code')}</th>
-                    <th className="py-3 px-4">{t('dashboard.users.signups.invite_codes.table.signup_link')}</th>
-                    <th className="py-3 px-4">{t('dashboard.users.signups.invite_codes.table.type')}</th>
-                    <th className="py-3 px-4">{t('dashboard.users.signups.invite_codes.table.expiration_date')}</th>
-                    <th className="py-3 px-4">{t('dashboard.users.signups.invite_codes.table.actions')}</th>
-                  </tr>
-                </thead>
-                <>
-                  <tbody className="mt-5 bg-white rounded-md">
-                    {invites?.map((invite: any) => (
-                      <tr
-                        key={invite.invite_code_uuid}
-                        className="border-b border-gray-100 text-sm"
-                      >
-                        <td className="py-3 px-4">
-                          <div className="flex items-center space-x-2">
-                            <code className="bg-gray-50 px-2 py-0.5 rounded text-sm font-mono">{invite.invite_code}</code>
-                            <CopyButton text={invite.invite_code} />
-                          </div>
-                        </td>
-                        <td className="py-3 px-4 ">
-                          <div className="flex items-center space-x-2">
-                            <Link
-                              className="outline bg-gray-50 text-gray-600 px-2 py-1 rounded-md outline-gray-300 outline-dashed outline-1 text-xs truncate max-w-[300px]"
-                              target="_blank"
-                              href={getUriWithOrg(org.slug, `/signup?inviteCode=${invite.invite_code}`)}
-                            >
-                              {getUriWithOrg(org.slug, `/signup?inviteCode=${invite.invite_code}`)}
-                            </Link>
-                            <CopyButton text={getUriWithOrg(org.slug, `/signup?inviteCode=${invite.invite_code}`)} />
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          {invite.usergroup_id ? (
-                            <div className="flex items-center space-x-1.5">
-                              <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-                                <UserSquare className="w-3 h-3" />
-                                <span>{invite.usergroup_name || t('dashboard.users.signups.invite_codes.types.linked_to_usergroup')}</span>
-                              </span>
-                            </div>
-                          ) : (
-                            <div className="flex space-x-2 items-center">
-                              <Users className="w-4 h-4 text-gray-400" />
-                              <span className="text-gray-500">{t('dashboard.users.signups.invite_codes.types.normal')}</span>
-                            </div>
-                          )}
-                        </td>
-                        <td className="py-3 px-4">
-                          {dayjs(invite.created_at)
-                            .add(1, 'year')
-                            .format('DD/MM/YYYY')}{' '}
-                        </td>
-                        <td className="py-3 px-4">
-                          <ConfirmationModal
-                            confirmationButtonText={t('dashboard.users.signups.invite_codes.actions.delete_code')}
-                            confirmationMessage={t('dashboard.users.signups.invite_codes.actions.delete_confirmation_message')}
-                            dialogTitle={t('dashboard.users.signups.invite_codes.actions.delete_confirmation_title')}
-                            dialogTrigger={
-                              <button className="mr-2 flex space-x-2 hover:cursor-pointer p-1 px-3 bg-rose-700 rounded-md font-bold items-center text-sm text-rose-100">
-                                <X className="w-4 h-4" />
-                                <span> {t('dashboard.users.signups.invite_codes.actions.delete_code')}</span>
-                              </button>
-                            }
-                            functionToExecute={() => {
-                              deleteInvite(invite)
-                            }}
-                            status="warning"
-                          ></ConfirmationModal>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </>
-              </table>
-              <div className='flex items-center justify-between mt-3 mr-2'>
-                <span className='text-xs text-gray-400 ml-2'>
-                  {inviteCount} / 6 invite codes used
-                </span>
-                <Modal
-                  isDialogOpen={
-                    invitesModal
-                  }
-                  onOpenChange={() =>
-                    setInvitesModal(!invitesModal)
-                  }
-                  minHeight="no-min"
-                  minWidth='lg'
-                  dialogContent={
-                    <OrgInviteCodeGenerate
-                      setInvitesModal={setInvitesModal}
-                    />
-                  }
-                  dialogTitle={t('dashboard.users.signups.invite_codes.actions.generate_title')}
-                  dialogDescription={t('dashboard.users.signups.invite_codes.actions.generate_description')}
-                  dialogTrigger={
-                    <button
-                      className=" flex space-x-2 hover:cursor-pointer p-1 px-3 bg-primary rounded-md font-bold items-center text-sm text-primary-foreground"
-                    >
-                      <Ticket className="w-4 h-4" />
-                      <span> {t('dashboard.users.signups.invite_codes.actions.generate')}</span>
-                    </button>
-                  }
-                />
+              {isGenerating ? <Loader2 size={14} className="animate-spin" /> : <Ticket size={14} />}
+              <span>{isGenerating ? 'Generating...' : t('dashboard.users.signups.invite_codes.actions.generate')}</span>
+            </button>
 
-              </div>
-
+            <div className="flex items-center gap-2">
+              {/* ON/OFF Toggle (immediate) */}
+              <button
+                onClick={handleToggle}
+                disabled={isToggling}
+                className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isToggling ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <span className={`w-2.5 h-2.5 rounded ${isInviteOnly ? 'bg-green-500' : 'bg-red-500'}`} />
+                )}
+                {isToggling ? '...' : isInviteOnly ? 'On' : 'Off'}
+              </button>
             </div>
           </div>
-        </>
+
+          {/* Invite Codes Card */}
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+            <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+              {t('dashboard.users.signups.invite_codes.title')}
+            </h3>
+
+            {invites && invites.length > 0 ? (
+              <div className="space-y-2">
+                {invites?.map((invite: any) => (
+                  <div
+                    key={invite.invite_code_uuid}
+                    className="flex items-center justify-between px-5 py-4 rounded-xl bg-gray-50 shadow-borders-base"
+                  >
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                      <CopyButton text={invite.invite_code}>
+                        <code className="bg-white px-2.5 py-1 rounded text-sm font-mono text-gray-700 shrink-0 cursor-pointer hover:bg-gray-100 transition-colors">
+                          {invite.invite_code}
+                        </code>
+                      </CopyButton>
+                      <CopyButton text={getUriWithOrg(org.slug, `/signup?inviteCode=${invite.invite_code}`)}>
+                        <span className="text-gray-400 text-xs truncate font-mono hover:text-gray-600 transition-colors cursor-pointer">
+                          {getUriWithOrg(org.slug, `/signup?inviteCode=${invite.invite_code}`)}
+                        </span>
+                      </CopyButton>
+                      <span className="inline-flex items-center gap-1 text-gray-400 text-xs shrink-0">
+                        <Users className="w-3.5 h-3.5" />
+                        <span>{t('dashboard.users.signups.invite_codes.types.normal')}</span>
+                      </span>
+                      <span className="text-xs text-gray-300 shrink-0">
+                        {dayjs(invite.created_at).add(1, 'year').format('DD/MM/YYYY')}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <CopyButton text={invite.invite_code} />
+                      <ConfirmationModal
+                        confirmationButtonText={t('dashboard.users.signups.invite_codes.actions.delete_code')}
+                        confirmationMessage={t('dashboard.users.signups.invite_codes.actions.delete_confirmation_message')}
+                        dialogTitle={t('dashboard.users.signups.invite_codes.actions.delete_confirmation_title')}
+                        dialogTrigger={
+                          <button className="text-gray-300 hover:text-red-500 transition-colors">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        }
+                        functionToExecute={() => deleteInvite(invite)}
+                        status="warning"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Ticket className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                <p className="text-sm text-gray-400">No invite codes yet</p>
+                <p className="text-xs text-gray-300 mt-1">Generate codes to invite users to your organization</p>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between mt-4">
+              <span className="text-xs text-gray-400">{inviteCount} / 6 invite codes used</span>
+            </div>
+          </div>
+
+
+        </div>
       ) : (
         <PageLoading />
       )}
