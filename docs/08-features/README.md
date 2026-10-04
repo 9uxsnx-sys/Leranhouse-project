@@ -33,6 +33,7 @@ The documents in this section describe cross-cutting feature areas that touch mu
 
 | Document | Description |
 |----------|-------------|
+| [PostHog Integration](./analytics/posthog-integration-plan.md) | PostHog analytics platform: product analytics, session replay, feature flags, A/B testing, surveys, error tracking |
 | `realtime.md` | Yjs-based realtime collaboration with Hocuspocus server |
 | `seo.md` | SEO system: metadata, sitemaps, Open Graph, JSON-LD |
 

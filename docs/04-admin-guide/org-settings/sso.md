@@ -1,6 +1,8 @@
 # SSO Configuration
 
-> Configure Single Sign-On (SSO) for your Koodook organization, allowing users to sign in with their existing Google, GitHub, Microsoft, or any custom OAuth 2.0 provider accounts.
+> **Note:** SSO configuration has been removed from the organization settings page. This documentation is kept for reference purposes only.
+
+> Configure Single Sign-On (SSO) for your organization, allowing users to sign in with their existing Google, GitHub, Microsoft, or any custom OAuth 2.0 provider accounts.
 
 ## Overview
 

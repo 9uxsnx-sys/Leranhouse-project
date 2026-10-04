@@ -7,7 +7,6 @@ import {
   Globe,
   Lightning,
   Key,
-  Lock,
   Sliders,
   ChartBar,
   DotsThree,
@@ -94,15 +93,6 @@ export const searchMetas: SearchMeta[] = [
     keywordsKey: 'dashboard.search.entries.org_api.keywords',
     icon: Key,
     href: '/dash/org/settings/api',
-    group: 'settings',
-  },
-  {
-    id: 'dash.org.sso',
-    titleKey: 'dashboard.organization.settings.tabs.sso',
-    descriptionKey: 'dashboard.search.entries.org_sso.description',
-    keywordsKey: 'dashboard.search.entries.org_sso.keywords',
-    icon: Lock,
-    href: '/dash/org/settings/sso',
     group: 'settings',
   },
   {

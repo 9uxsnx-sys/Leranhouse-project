@@ -8,14 +8,6 @@ import { getAPIUrl } from '@services/config/config'
 import useSWR, { mutate } from 'swr'
 import { swrFetcher } from '@services/utils/ts/requests'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@components/ui/table'
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -279,28 +271,28 @@ const OrgEditDomains: React.FC = () => {
     switch (status) {
       case 'verified':
         return (
-          <Badge variant="outline" className="border-transparent bg-green-100 text-green-800">
+          <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500">
             <CheckCircle2 size={12} className="mr-1" />
             Verified
           </Badge>
         )
       case 'pending':
         return (
-          <Badge variant="outline" className="border-transparent bg-yellow-100 text-yellow-800">
+          <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500">
             <Clock size={12} className="mr-1" />
             Pending
           </Badge>
         )
       case 'failed':
         return (
-          <Badge variant="outline" className="border-transparent bg-red-100 text-red-800">
+          <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500">
             <XCircle size={12} className="mr-1" />
             Failed
           </Badge>
         )
       default:
         return (
-          <Badge variant="secondary">
+          <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500">
             {status}
           </Badge>
         )
@@ -330,116 +322,92 @@ const OrgEditDomains: React.FC = () => {
       titleKey="common.plans.feature_restricted.custom_domains.title"
       descriptionKey="common.plans.feature_restricted.custom_domains.description"
     >
-      <>
-        <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow pt-3">
-          <div className="flex flex-col gap-0">
-            <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 mb-3 rounded-md">
-              <h1 className="font-bold text-xl text-gray-800">Custom Domains</h1>
-              <h2 className="text-gray-500 text-md">
-                Configure custom domains to access your organization
-              </h2>
-            </div>
-
-            <div className="px-5 pb-4">
-              <div className="flex justify-between items-center mb-4">
-                <p className="text-sm text-gray-600">
-                  Add your own domain to provide a branded experience for your learners.
-                </p>
-                <Button
-                  onClick={() => setIsAddDialogOpen(true)}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90"
-                >
-                  <Plus size={16} className="mr-2" />
-                  Add Domain
-                </Button>
-              </div>
-
-              {isLoading ? (
-                <div className="flex justify-center py-8">
-                  <RefreshCw className="animate-spin text-gray-400" size={24} />
-                </div>
-              ) : domains && domains.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Domain</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>SSL</TableHead>
-                      <TableHead>Added</TableHead>
-                      <TableHead>Verified</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {domains.map((domain) => (
-                      <TableRow key={domain.domain_uuid}>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Globe size={16} className="text-gray-400" />
-                            <span className="font-medium">{domain.domain}</span>
-                            {domain.status === 'verified' && (
-                              <a
-                                href={`https://${domain.domain}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-gray-400 hover:text-gray-600"
-                              >
-                                <ExternalLink size={14} />
-                              </a>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>{getStatusBadge(domain.status)}</TableCell>
-                        <TableCell>{getSSLBadge(domain)}</TableCell>
-                        <TableCell className="text-sm text-gray-600">
-                          {formatDate(domain.creation_date)}
-                        </TableCell>
-                        <TableCell className="text-sm text-gray-600">
-                          {domain.verified_at ? formatDate(domain.verified_at) : '-'}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            {domain.status === 'pending' && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={async () => {
-                                  setSelectedDomain(domain)
-                                  await loadVerificationInfo(domain.domain_uuid)
-                                  setIsVerifyDialogOpen(true)
-                                }}
-                              >
-                                <RefreshCw size={14} className="mr-1" />
-                                Verify
-                              </Button>
-                            )}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-red-600 hover:text-red-700"
-                              onClick={() => {
-                                setSelectedDomain(domain)
-                                setIsDeleteDialogOpen(true)
-                              }}
-                            >
-                              <Trash2 size={16} />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="text-center py-12 text-gray-500">
-                  <Globe size={48} className="mx-auto mb-4 opacity-50" />
-                  <p>No custom domains yet</p>
-                  <p className="text-sm">Add your first domain to get started</p>
-                </div>
-              )}
-            </div>
-          </div>
+      <div className="space-y-3">
+        {/* ===== Action Row ===== */}
+        <div className="flex items-center justify-end">
+          <button
+            type="button"
+            onClick={() => setIsAddDialogOpen(true)}
+            className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border bg-black text-white border-black hover:opacity-90 cursor-pointer transition-colors"
+          >
+            <Plus size={14} />
+            <span>Add Domain</span>
+          </button>
         </div>
+
+        {/* ===== Main Card ===== */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+          <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+            Custom Domains
+          </h2>
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <RefreshCw className="animate-spin text-gray-400" size={24} />
+            </div>
+          ) : domains && domains.length > 0 ? (
+              <div className="space-y-2">
+                {domains.map((domain) => (
+                  <div
+                    key={domain.domain_uuid}
+                    className="flex items-center justify-between px-5 py-5 rounded-xl bg-gray-50 shadow-borders-base"
+                  >
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                      <Globe size={16} className="text-gray-400 shrink-0" />
+                      <span className="font-medium truncate">{domain.domain}</span>
+                      {domain.status === 'verified' && (
+                        <a
+                          href={`https://${domain.domain}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-400 hover:text-gray-600 shrink-0"
+                        >
+                          <ExternalLink size={14} />
+                        </a>
+                      )}
+                      {getStatusBadge(domain.status)}
+                      {getSSLBadge(domain)}
+                      <span className="text-xs text-gray-400 shrink-0">
+                        {formatDate(domain.creation_date)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      {domain.status === 'pending' && (
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+                          onClick={async () => {
+                            setSelectedDomain(domain)
+                            await loadVerificationInfo(domain.domain_uuid)
+                            setIsVerifyDialogOpen(true)
+                          }}
+                        >
+                          <RefreshCw size={12} />
+                          Verify
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className="p-1.5 text-gray-300 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50 cursor-pointer"
+                        onClick={() => {
+                          setSelectedDomain(domain)
+                          setIsDeleteDialogOpen(true)
+                        }}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+          ) : (
+            <div className="text-center py-12 text-gray-500">
+              <Globe size={48} className="mx-auto mb-4 opacity-50" />
+              <p>No custom domains yet</p>
+              <p className="text-sm">Add your first domain to get started</p>
+            </div>
+          )}
+        </div>
+      </div>
 
         {/* Add Domain Dialog */}
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -476,104 +444,96 @@ const OrgEditDomains: React.FC = () => {
 
         {/* Verify Domain Dialog */}
         <Dialog open={isVerifyDialogOpen} onOpenChange={setIsVerifyDialogOpen}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader className="px-6 pt-6">
-              <DialogTitle>Verify Domain</DialogTitle>
-              <DialogDescription>
-                Add the following DNS records at your domain provider to verify ownership.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="px-6 pb-6 space-y-4">
+          <DialogContent className="rounded-xl p-6" hideCloseButton>
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto">
               {verificationInfo && (
                 <>
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <div className="flex items-start gap-3">
-                      <AlertTriangle className="text-blue-600 flex-shrink-0 mt-0.5" size={20} />
-                      <div>
-                        <p className="font-medium text-blue-800">DNS Configuration Required</p>
-                        <p className="text-sm text-blue-700">
-                          Add these records at your domain registrar (e.g., Cloudflare, GoDaddy, Namecheap).
-                          DNS changes may take up to 48 hours to propagate.
-                        </p>
-                      </div>
+                  <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <AlertTriangle className="text-gray-400 shrink-0 mt-0.5" size={20} />
+                    <div>
+                      <p className="text-sm font-semibold text-gray-700">DNS Configuration Required</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Add these records at your domain registrar (e.g., Cloudflare, GoDaddy, Namecheap).
+                        DNS changes may take up to 48 hours to propagate.
+                      </p>
                     </div>
                   </div>
 
                   {/* TXT Record */}
-                  <div className="border rounded-lg p-4 space-y-3">
+                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline">TXT Record</Badge>
-                      <span className="text-sm text-gray-500">For verification</span>
+                      <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500 text-xs">TXT Record</Badge>
+                      <span className="text-xs text-gray-400">For verification</span>
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <div>
-                        <Label className="text-xs text-gray-500">Host / Name</Label>
-                        <div className="flex gap-2 mt-1">
-                          <code className="flex-1 bg-gray-100 px-3 py-2 rounded text-sm break-all">
+                        <label className="text-xs font-semibold text-gray-500">Host / Name</label>
+                        <div className="flex gap-2 mt-1.5">
+                          <code className="flex-1 bg-gray-50 px-3 py-2 rounded-lg text-sm font-mono text-gray-700 border border-gray-100 break-all">
                             {verificationInfo.txt_record_host}
                           </code>
-                          <Button
-                            variant="outline"
-                            size="icon"
+                          <button
+                            type="button"
+                            className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-white text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer shrink-0"
                             onClick={() => copyToClipboard(verificationInfo.txt_record_host, 'txt_host')}
                           >
-                            {copiedField === 'txt_host' ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
-                          </Button>
+                            {copiedField === 'txt_host' ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
+                          </button>
                         </div>
                       </div>
                       <div>
-                        <Label className="text-xs text-gray-500">Value</Label>
-                        <div className="flex gap-2 mt-1">
-                          <code className="flex-1 bg-gray-100 px-3 py-2 rounded text-sm break-all">
+                        <label className="text-xs font-semibold text-gray-500">Value</label>
+                        <div className="flex gap-2 mt-1.5">
+                          <code className="flex-1 bg-gray-50 px-3 py-2 rounded-lg text-sm font-mono text-gray-700 border border-gray-100 break-all">
                             {verificationInfo.txt_record_value}
                           </code>
-                          <Button
-                            variant="outline"
-                            size="icon"
+                          <button
+                            type="button"
+                            className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-white text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer shrink-0"
                             onClick={() => copyToClipboard(verificationInfo.txt_record_value, 'txt_value')}
                           >
-                            {copiedField === 'txt_value' ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
-                          </Button>
+                            {copiedField === 'txt_value' ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
+                          </button>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   {/* CNAME Record */}
-                  <div className="border rounded-lg p-4 space-y-3">
+                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline">CNAME Record</Badge>
-                      <span className="text-sm text-gray-500">For routing</span>
+                      <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500 text-xs">CNAME Record</Badge>
+                      <span className="text-xs text-gray-400">For routing</span>
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <div>
-                        <Label className="text-xs text-gray-500">Host / Name</Label>
-                        <div className="flex gap-2 mt-1">
-                          <code className="flex-1 bg-gray-100 px-3 py-2 rounded text-sm break-all">
+                        <label className="text-xs font-semibold text-gray-500">Host / Name</label>
+                        <div className="flex gap-2 mt-1.5">
+                          <code className="flex-1 bg-gray-50 px-3 py-2 rounded-lg text-sm font-mono text-gray-700 border border-gray-100 break-all">
                             {verificationInfo.cname_record_host}
                           </code>
-                          <Button
-                            variant="outline"
-                            size="icon"
+                          <button
+                            type="button"
+                            className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-white text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer shrink-0"
                             onClick={() => copyToClipboard(verificationInfo.cname_record_host, 'cname_host')}
                           >
-                            {copiedField === 'cname_host' ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
-                          </Button>
+                            {copiedField === 'cname_host' ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
+                          </button>
                         </div>
                       </div>
                       <div>
-                        <Label className="text-xs text-gray-500">Value / Target</Label>
-                        <div className="flex gap-2 mt-1">
-                          <code className="flex-1 bg-gray-100 px-3 py-2 rounded text-sm break-all">
+                        <label className="text-xs font-semibold text-gray-500">Value / Target</label>
+                        <div className="flex gap-2 mt-1.5">
+                          <code className="flex-1 bg-gray-50 px-3 py-2 rounded-lg text-sm font-mono text-gray-700 border border-gray-100 break-all">
                             {verificationInfo.cname_record_value}
                           </code>
-                          <Button
-                            variant="outline"
-                            size="icon"
+                          <button
+                            type="button"
+                            className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-white text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer shrink-0"
                             onClick={() => copyToClipboard(verificationInfo.cname_record_value, 'cname_value')}
                           >
-                            {copiedField === 'cname_value' ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
-                          </Button>
+                            {copiedField === 'cname_value' ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -581,35 +541,35 @@ const OrgEditDomains: React.FC = () => {
 
                   {/* SSL Certificate Status */}
                   {selectedDomain && selectedDomain.status === 'verified' && (
-                    <div className="border rounded-lg p-4 space-y-3">
+                    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Badge variant="outline">SSL Certificate</Badge>
-                          <span className="text-sm text-gray-500">HTTPS status</span>
+                          <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500 text-xs">SSL Certificate</Badge>
+                          <span className="text-xs text-gray-400">HTTPS status</span>
                         </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
                           onClick={() => handleCheckSSL(selectedDomain)}
                           disabled={sslLoading[selectedDomain.domain_uuid]}
                         >
                           {sslLoading[selectedDomain.domain_uuid] ? (
-                            <Loader2 size={14} className="mr-1 animate-spin" />
+                            <Loader2 size={12} className="animate-spin" />
                           ) : (
-                            <RefreshCw size={14} className="mr-1" />
+                            <RefreshCw size={12} />
                           )}
                           Check
-                        </Button>
+                        </button>
                       </div>
                       {sslStatuses[selectedDomain.domain_uuid] ? (
-                        <div className={`rounded-lg p-3 ${
+                        <div className={`rounded-lg p-4 ${
                           sslStatuses[selectedDomain.domain_uuid].has_ssl
                             ? 'bg-green-50 border border-green-200'
                             : sslStatuses[selectedDomain.domain_uuid].status === 'provisioning'
                             ? 'bg-yellow-50 border border-yellow-200'
                             : 'bg-red-50 border border-red-200'
                         }`}>
-                          <div className="flex items-start gap-2">
+                          <div className="flex items-start gap-3">
                             {sslStatuses[selectedDomain.domain_uuid].has_ssl ? (
                               <ShieldCheck size={18} className="text-green-600 flex-shrink-0 mt-0.5" />
                             ) : sslStatuses[selectedDomain.domain_uuid].status === 'provisioning' ? (
@@ -650,32 +610,38 @@ const OrgEditDomains: React.FC = () => {
                   )}
                 </>
               )}
+            </div>
 
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setIsVerifyDialogOpen(false)
-                    setSelectedDomain(null)
-                    setVerificationInfo(null)
-                  }}
-                >
-                  Close
-                </Button>
-                <Button onClick={handleVerifyDomain} disabled={isVerifying}>
-                  {isVerifying ? (
-                    <>
-                      <RefreshCw size={16} className="mr-2 animate-spin" />
-                      Verifying...
-                    </>
-                  ) : (
-                    <>
-                      <Check size={16} className="mr-2" />
-                      Verify DNS
-                    </>
-                  )}
-                </Button>
-              </DialogFooter>
+            <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t border-gray-100">
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+                onClick={() => {
+                  setIsVerifyDialogOpen(false)
+                  setSelectedDomain(null)
+                  setVerificationInfo(null)
+                }}
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={handleVerifyDomain}
+                disabled={isVerifying}
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg bg-black text-white hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isVerifying ? (
+                  <>
+                    <RefreshCw size={14} className="animate-spin" />
+                    <span>Verifying...</span>
+                  </>
+                ) : (
+                  <>
+                    <Check size={14} />
+                    <span>Verify DNS</span>
+                  </>
+                )}
+              </button>
             </div>
           </DialogContent>
         </Dialog>
@@ -712,7 +678,6 @@ const OrgEditDomains: React.FC = () => {
             </div>
           </DialogContent>
         </Dialog>
-      </>
     </PlanRestrictedFeature>
   )
 }

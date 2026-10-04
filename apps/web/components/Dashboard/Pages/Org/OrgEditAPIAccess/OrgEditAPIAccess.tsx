@@ -3,32 +3,9 @@ import React, { useState } from 'react'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { toast } from 'react-hot-toast'
-import { Button } from '@components/ui/button'
-import { getAPIUrl, getPlatformUrl } from '@services/config/config'
+import { getAPIUrl } from '@services/config/config'
 import useSWR, { mutate } from 'swr'
 import { swrFetcher } from '@services/utils/ts/requests'
-import { useTranslation } from 'react-i18next'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@components/ui/table'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@components/ui/dialog'
-import { Input } from '@components/ui/input'
-import { Textarea } from '@components/ui/textarea'
-import { Label } from '@components/ui/label'
-import { Switch } from '@components/ui/switch'
-import { Badge } from '@components/ui/badge'
 import {
   Key,
   Plus,
@@ -39,51 +16,61 @@ import {
   EyeOff,
   AlertTriangle,
   Check,
-  BookOpen,
-  Clock,
-  Shield,
-  LifeBuoy,
+  ChevronRight,
+  Loader2,
+  SaveAllIcon,
+  SlidersHorizontal,
+  Search,
 } from 'lucide-react'
 import {
   APIToken,
   APITokenCreateRequest,
   APITokenRights,
   createAPIToken,
+  updateAPIToken,
   getDefaultRights,
   getFullRights,
   getReadOnlyRights,
   regenerateAPIToken,
   revokeAPIToken,
 } from '@services/api_tokens/api_tokens'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs'
+import { Input } from '@components/ui/input'
+import { Textarea } from '@components/ui/textarea'
 import APIDocumentation from './APIDocumentation'
 import PlanRestrictedFeature from '@components/Dashboard/Shared/PlanRestricted/PlanRestrictedFeature'
-import { PlanLevel } from '@services/plans/plans'
 import { usePlan } from '@components/Hooks/usePlan'
 
+type PageView = 'list' | 'detail'
+
+const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none"
+
 const OrgEditAPIAccess: React.FC = () => {
-  const { t } = useTranslation()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
   const currentPlan = usePlan()
 
-  const [activeTab, setActiveTab] = useState('tokens')
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
-  const [isRevokeDialogOpen, setIsRevokeDialogOpen] = useState(false)
-  const [isRegenerateDialogOpen, setIsRegenerateDialogOpen] = useState(false)
-  const [selectedToken, setSelectedToken] = useState<APIToken | null>(null)
-  const [newTokenValue, setNewTokenValue] = useState<string | null>(null)
-  const [showTokenValue, setShowTokenValue] = useState(false)
-  const [copiedToken, setCopiedToken] = useState(false)
+  const [showDoc, setShowDoc] = useState(false)
+  const [currentView, setCurrentView] = useState<PageView>('list')
+  const [selectedTokenId, setSelectedTokenId] = useState<string | null>(null)
+  const [docSearchQuery, setDocSearchQuery] = useState('')
 
-  // Create token form state
+  // Form state
   const [tokenName, setTokenName] = useState('')
   const [tokenDescription, setTokenDescription] = useState('')
   const [tokenExpiry, setTokenExpiry] = useState('')
   const [tokenRights, setTokenRights] = useState<APITokenRights>(getDefaultRights())
   const [rightsPreset, setRightsPreset] = useState<'custom' | 'readonly' | 'full'>('readonly')
+
+  // Save state
+  const [isSaved, setIsSaved] = useState(true)
+  const [isManualSaving, setIsManualSaving] = useState(false)
+  const isActiveSaving = isManualSaving
+
+  // Token reveal state
+  const [newTokenValue, setNewTokenValue] = useState<string | null>(null)
+  const [showTokenValue, setShowTokenValue] = useState(false)
+  const [copiedToken, setCopiedToken] = useState(false)
 
   // Fetch tokens
   const tokensUrl = org?.id ? `${getAPIUrl()}orgs/${org.id}/api-tokens` : null
@@ -92,99 +79,6 @@ const OrgEditAPIAccess: React.FC = () => {
     (url: string) => swrFetcher(url, access_token),
     { revalidateOnFocus: false }
   )
-
-  const handleCreateToken = async () => {
-    if (!tokenName.trim()) {
-      toast.error('Token name is required')
-      return
-    }
-
-    const loadingToast = toast.loading('Creating API token...')
-    try {
-      const data: APITokenCreateRequest = {
-        name: tokenName.trim(),
-        description: tokenDescription.trim() || null,
-        rights: tokenRights,
-        expires_at: tokenExpiry || null,
-      }
-
-      const response = await createAPIToken(org.id, data, access_token)
-
-      if (response.success) {
-        setNewTokenValue(response.data.token)
-        setShowTokenValue(true)
-        mutate(tokensUrl)
-        toast.success('API token created successfully', { id: loadingToast })
-        // Reset form
-        setTokenName('')
-        setTokenDescription('')
-        setTokenExpiry('')
-        setTokenRights(getDefaultRights())
-        setRightsPreset('readonly')
-      } else {
-        toast.error(response.data?.detail || 'Failed to create token', { id: loadingToast })
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to create token', { id: loadingToast })
-    }
-  }
-
-  const handleRevokeToken = async () => {
-    if (!selectedToken) return
-
-    const loadingToast = toast.loading('Revoking API token...')
-    try {
-      const response = await revokeAPIToken(org.id, selectedToken.token_uuid, access_token)
-
-      if (response.success) {
-        mutate(tokensUrl)
-        toast.success('API token revoked successfully', { id: loadingToast })
-        setIsRevokeDialogOpen(false)
-        setSelectedToken(null)
-      } else {
-        toast.error(response.data?.detail || 'Failed to revoke token', { id: loadingToast })
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to revoke token', { id: loadingToast })
-    }
-  }
-
-  const handleRegenerateToken = async () => {
-    if (!selectedToken) return
-
-    const loadingToast = toast.loading('Regenerating API token...')
-    try {
-      const response = await regenerateAPIToken(org.id, selectedToken.token_uuid, access_token)
-
-      if (response.success) {
-        setNewTokenValue(response.data.token)
-        setShowTokenValue(true)
-        mutate(tokensUrl)
-        toast.success('API token regenerated successfully', { id: loadingToast })
-        // Don't close the dialog here - keep it open to show the new token
-      } else {
-        toast.error(response.data?.detail || 'Failed to regenerate token', { id: loadingToast })
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to regenerate token', { id: loadingToast })
-    }
-  }
-
-  const copyToClipboard = async (text: string) => {
-    await navigator.clipboard.writeText(text)
-    setCopiedToken(true)
-    toast.success('Token copied to clipboard')
-    setTimeout(() => setCopiedToken(false), 2000)
-  }
-
-  const handlePresetChange = (preset: 'custom' | 'readonly' | 'full') => {
-    setRightsPreset(preset)
-    if (preset === 'readonly') {
-      setTokenRights(getReadOnlyRights())
-    } else if (preset === 'full') {
-      setTokenRights(getFullRights())
-    }
-  }
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return 'Never'
@@ -201,6 +95,457 @@ const OrgEditAPIAccess: React.FC = () => {
     }
   }
 
+  const copyToClipboard = async (text: string) => {
+    await navigator.clipboard.writeText(text)
+    setCopiedToken(true)
+    toast.success('Token copied to clipboard')
+    setTimeout(() => setCopiedToken(false), 2000)
+  }
+
+  // Create new token immediately with defaults
+  const handleAddToken = async () => {
+    if (!org?.id || !access_token) return
+    setIsManualSaving(true)
+    try {
+      const data: APITokenCreateRequest = {
+        name: 'New Token',
+        rights: getReadOnlyRights(),
+      }
+      const res = await createAPIToken(org.id, data, access_token)
+      if (res.success) {
+        setNewTokenValue(res.data.token)
+        setShowTokenValue(true)
+        setSelectedTokenId(res.data.token_uuid || 'new')
+        setCurrentView('detail')
+        mutate(tokensUrl)
+        toast.success('API token created')
+      } else {
+        toast.error(res.data?.detail || 'Failed to create token')
+      }
+    } catch {
+      toast.error('An error occurred while creating token')
+    } finally {
+      setIsManualSaving(false)
+    }
+  }
+
+  // Open existing token
+  const openDetail = (uuid: string) => {
+    const token = tokens?.find((t) => t.token_uuid === uuid)
+    if (token) {
+      setTokenName(token.name)
+      setTokenDescription(token.description || '')
+      setTokenExpiry(token.expires_at || '')
+      setTokenRights(token.rights || getDefaultRights())
+      setRightsPreset('custom')
+    }
+    setSelectedTokenId(uuid)
+    setIsSaved(true)
+    setNewTokenValue(null)
+    setShowTokenValue(false)
+    setCurrentView('detail')
+  }
+
+  const goBackToList = () => {
+    setCurrentView('list')
+    setSelectedTokenId(null)
+    setNewTokenValue(null)
+    setShowTokenValue(false)
+  }
+
+  // Save (update existing token)
+  const handleSave = async () => {
+    if (isActiveSaving || !org?.id || !access_token || !selectedTokenId) return
+    setIsManualSaving(true)
+    try {
+      const data = {
+        name: tokenName.trim(),
+        description: tokenDescription.trim() || null,
+        rights: tokenRights,
+        expires_at: tokenExpiry || null,
+      }
+      const res = await updateAPIToken(org.id, selectedTokenId, data, access_token)
+      if (res.status === 200) {
+        toast.success('Token saved')
+        setIsSaved(true)
+        mutate(tokensUrl)
+      } else {
+        toast.error(res.data?.detail || 'Failed to update token')
+      }
+    } catch {
+      toast.error('An error occurred while saving')
+    } finally {
+      setIsManualSaving(false)
+    }
+  }
+
+  // Revoke
+  const handleRevoke = async () => {
+    if (!selectedTokenId || !org?.id || !access_token) return
+    try {
+      const res = await revokeAPIToken(org.id, selectedTokenId, access_token)
+      if (res.success) {
+        toast.success('Token revoked')
+        mutate(tokensUrl)
+        goBackToList()
+      } else {
+        toast.error(res.data?.detail || 'Failed to revoke token')
+      }
+    } catch {
+      toast.error('An error occurred while revoking')
+    }
+  }
+
+  // Regenerate
+  const handleRegenerate = async () => {
+    if (!selectedTokenId || !org?.id || !access_token) return
+    setIsManualSaving(true)
+    try {
+      const res = await regenerateAPIToken(org.id, selectedTokenId, access_token)
+      if (res.success) {
+        setNewTokenValue(res.data.token)
+        setShowTokenValue(true)
+        mutate(tokensUrl)
+        toast.success('Token regenerated')
+      } else {
+        toast.error(res.data?.detail || 'Failed to regenerate token')
+      }
+    } catch {
+      toast.error('An error occurred while regenerating')
+    } finally {
+      setIsManualSaving(false)
+    }
+  }
+
+  const handlePresetChange = (preset: 'custom' | 'readonly' | 'full') => {
+    setRightsPreset(preset)
+    setIsSaved(false)
+    if (preset === 'readonly') {
+      setTokenRights(getReadOnlyRights())
+    } else if (preset === 'full') {
+      setTokenRights(getFullRights())
+    }
+  }
+
+  // ──────────────────────────────────────────────
+  //  LIST VIEW
+  // ──────────────────────────────────────────────
+  const renderListView = () => (
+    <div className="space-y-3">
+      {/* ===== Action Row ===== */}
+      <div className="flex items-center justify-between">
+        {showDoc ? (
+          <div className="relative flex-1 max-w-xs">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+            <Input
+              placeholder="Search endpoints..."
+              value={docSearchQuery}
+              onChange={(e) => setDocSearchQuery(e.target.value)}
+              className="pl-10 h-9 text-sm"
+            />
+          </div>
+        ) : (
+          <div />
+        )}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowDoc(!showDoc)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-700 cursor-pointer hover:bg-gray-50 transition-colors"
+          >
+            {!showDoc ? (
+              <>
+                <Key size={14} />
+                API
+              </>
+            ) : (
+              <>
+                <ChevronRight size={14} className="rotate-90" />
+                Doc
+              </>
+            )}
+          </button>
+          {!showDoc && (
+            <button
+              type="button"
+              onClick={handleAddToken}
+              disabled={isActiveSaving}
+              className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border bg-black text-white border-black hover:opacity-90 cursor-pointer transition-colors"
+            >
+              <Plus size={14} />
+              <span>Create Token</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* ===== Content ===== */}
+      {!showDoc ? (
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+          <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+            API Tokens
+          </h2>
+
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12 text-gray-400">
+              <Loader2 size={24} className="animate-spin" />
+            </div>
+          ) : tokens && tokens.length > 0 ? (
+            <div className="space-y-2">
+              {tokens.map((token) => (
+                <div
+                  key={token.token_uuid}
+                  className="flex items-center justify-between px-5 py-5 rounded-xl bg-gray-50 shadow-borders-base cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => openDetail(token.token_uuid)}
+                >
+                  <div className="flex items-center gap-4 flex-1 min-w-0">
+                    <Key size={16} className="text-gray-400 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium truncate">{token.name}</span>
+                        <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full border ${
+                          token.is_active
+                            ? 'bg-gray-200 text-gray-600 border-transparent'
+                            : 'bg-red-100 text-red-700 border-transparent'
+                        }`}>
+                          {token.is_active ? 'Active' : 'Revoked'}
+                        </span>
+                        <code className="text-xs bg-gray-200/60 px-1.5 py-0.5 rounded font-mono text-gray-500">
+                          {token.token_prefix}...
+                        </code>
+                      </div>
+                      <div className="flex items-center gap-3 mt-0.5">
+                        {token.description && (
+                          <p className="text-xs text-gray-500 truncate max-w-[200px]">
+                            {token.description}
+                          </p>
+                        )}
+                        <span className="text-[11px] text-gray-400">
+                          Last used: {formatDate(token.last_used_at)}
+                        </span>
+                        <span className="text-[11px] text-gray-400">
+                          Expires: {token.expires_at ? formatDate(token.expires_at) : 'Never'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 text-gray-500">
+              <Key size={48} className="mx-auto mb-4 opacity-50" />
+              <p>No API tokens yet</p>
+              <p className="text-sm">Create your first token to get started</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <APIDocumentation searchQuery={docSearchQuery} />
+      )}
+    </div>
+  )
+
+  // ──────────────────────────────────────────────
+  //  DETAIL VIEW
+  // ──────────────────────────────────────────────
+  const renderDetailView = () => {
+    if (!selectedTokenId) return null
+    const hasRevealedToken = newTokenValue !== null
+
+    // Token reveal view
+    if (hasRevealedToken) {
+      return (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              onClick={goBackToList}
+              className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+            >
+              <ChevronRight size={16} className="rotate-180" />
+              <span>Back to tokens</span>
+            </button>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+            <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+              Token Created
+            </h2>
+
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-5">
+              <div className="flex items-start gap-3">
+                <AlertTriangle size={20} className="text-yellow-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-yellow-800">Save your token now!</p>
+                  <p className="text-sm text-yellow-700">
+                    This is the only time you&apos;ll see this token. Copy it and store it securely.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
+                Your API Token
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type={showTokenValue ? 'text' : 'password'}
+                  value={newTokenValue}
+                  readOnly
+                  className="flex-1 px-3 py-2 text-sm font-mono bg-ui-bg-field !shadow-none border border-ui-border-base rounded-lg focus:border-ui-border-strong focus-visible:!shadow-none transition-none outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowTokenValue(!showTokenValue)}
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 transition-colors cursor-pointer shrink-0"
+                >
+                  {showTokenValue ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(newTokenValue!)}
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 transition-colors cursor-pointer shrink-0"
+                >
+                  {copiedToken ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // Edit view
+    return (
+      <div className="space-y-3">
+        {/* ===== Action Row ===== */}
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={goBackToList}
+            className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+          >
+            <ChevronRight size={16} className="rotate-180" />
+            <span>Back to tokens</span>
+          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleRegenerate}
+              disabled={isActiveSaving}
+              className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50 cursor-pointer"
+            >
+              <RefreshCw size={14} />
+              Regenerate
+            </button>
+            <button
+              type="button"
+              onClick={isSaved ? undefined : handleSave}
+              disabled={isActiveSaving}
+              className={`inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors ${
+                isActiveSaving
+                  ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                  : isSaved
+                    ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                    : 'bg-black text-white border-black hover:opacity-90 cursor-pointer'
+              }`}
+            >
+              {isActiveSaving ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : isSaved ? (
+                <Check size={14} />
+              ) : (
+                <SaveAllIcon size={14} />
+              )}
+              <span>
+                {isActiveSaving ? 'Saving...' : isSaved ? 'Saved' : 'Save'}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* ===== Token Details Card ===== */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+            Token Details
+          </h3>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
+                Token Name <span className="text-red-400">*</span>
+              </label>
+              <Input
+                className={fieldClassName}
+                value={tokenName}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setTokenName(e.target.value); setIsSaved(false) }}
+                placeholder="e.g., CI/CD Pipeline, Mobile App"
+                maxLength={100}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
+                Description
+              </label>
+              <Textarea
+                className={`${fieldClassName} min-h-[60px]`}
+                value={tokenDescription}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => { setTokenDescription(e.target.value); setIsSaved(false) }}
+                placeholder="What will this token be used for?"
+                rows={2}
+                maxLength={500}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ===== Permissions Card ===== */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+            Permissions
+          </h3>
+          <div className="space-y-2">
+            {/* Read Only - clickable container */}
+            <div
+              onClick={() => handlePresetChange('readonly')}
+              className={`flex items-center gap-3 px-5 py-5 rounded-xl cursor-pointer transition-colors ${
+                rightsPreset === 'readonly'
+                  ? 'bg-gray-100 shadow-borders-base'
+                  : 'bg-gray-50 shadow-borders-base hover:bg-gray-100'
+              }`}
+            >
+              <Eye size={16} className="text-gray-400 shrink-0" />
+              <span className="text-sm font-semibold text-gray-800">Read Only</span>
+            </div>
+
+            {/* Full Access - clickable container */}
+            <div
+              onClick={() => handlePresetChange('full')}
+              className={`flex items-center gap-3 px-5 py-5 rounded-xl cursor-pointer transition-colors ${
+                rightsPreset === 'full'
+                  ? 'bg-gray-100 shadow-borders-base'
+                  : 'bg-gray-50 shadow-borders-base hover:bg-gray-100'
+              }`}
+            >
+              <Key size={16} className="text-gray-400 shrink-0" />
+              <span className="text-sm font-semibold text-gray-800">Full Access</span>
+            </div>
+
+            {/* Custom - expandable container */}
+            <CustomPermissionContainer
+              isCustom={rightsPreset === 'custom'}
+              onActivate={() => handlePresetChange('custom')}
+              rights={tokenRights}
+              onRightsChange={(r) => { setTokenRights(r); setIsSaved(false) }}
+            />
+          </div>
+        </div>
+
+      </div>
+    )
+  }
+
   return (
     <PlanRestrictedFeature
       currentPlan={currentPlan}
@@ -209,598 +554,150 @@ const OrgEditAPIAccess: React.FC = () => {
       titleKey="common.plans.feature_restricted.api_access.title"
       descriptionKey="common.plans.feature_restricted.api_access.description"
     >
-    <>
-    <div className="sm:mx-10 mx-0 bg-white rounded-xl nice-shadow pt-3">
-      <div className="flex flex-col gap-0">
-        <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 mx-3 mb-3 rounded-md">
-          <h1 className="font-bold text-xl text-gray-800">
-            {activeTab === 'tokens' ? 'API Access' : 'API Documentation & Playground'}
-          </h1>
-          <h2 className="text-gray-500 text-md">
-            {activeTab === 'tokens'
-              ? 'Manage API tokens and programmatic access to your organization'
-              : 'Explore and test API endpoints using your API tokens'}
-          </h2>
-        </div>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full px-5">
-        <div className="flex items-center justify-between mb-6">
-          <TabsList>
-            <TabsTrigger value="tokens" className="flex items-center gap-2">
-              <Key size={16} />
-              API Tokens
-            </TabsTrigger>
-            <TabsTrigger value="documentation" className="flex items-center gap-2">
-              <BookOpen size={16} />
-              Documentation & Playground
-            </TabsTrigger>
-          </TabsList>
-          <a
-            href={getPlatformUrl('/dashboard/support') ?? 'https://www.learnhouse.app/dashboard/support'}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors border border-gray-200"
-            title="Contact LearnHouse support"
-          >
-            <LifeBuoy size={14} />
-            Something not working as expected?
-          </a>
-        </div>
-
-        <TabsContent value="tokens">
-          <div className="pb-4">
-            <div className="flex justify-between items-center mb-4">
-              <p className="text-sm text-gray-600">
-                API tokens allow external applications to access your organization&apos;s data securely.
-              </p>
-              <Button
-                onClick={() => setIsCreateDialogOpen(true)}
-                className="bg-primary text-primary-foreground hover:bg-primary/90"
-              >
-                <Plus size={16} className="mr-2" />
-                Create Token
-              </Button>
-            </div>
-
-            {isLoading ? (
-              <div className="flex justify-center py-8">
-                <RefreshCw className="animate-spin text-gray-400" size={24} />
-              </div>
-            ) : tokens && tokens.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Token Prefix</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Last Used</TableHead>
-                    <TableHead>Expires</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {tokens.map((token) => (
-                    <TableRow key={token.token_uuid}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{token.name}</div>
-                          {token.description && (
-                            <div className="text-sm text-gray-500 truncate max-w-[200px]">
-                              {token.description}
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <code className="bg-gray-100 px-2 py-1 rounded text-sm">
-                          {token.token_prefix}...
-                        </code>
-                      </TableCell>
-                      <TableCell>
-                        {token.is_active ? (
-                          <Badge variant="default" className="bg-green-100 text-green-800">
-                            Active
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary" className="bg-red-100 text-red-800">
-                            Revoked
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-sm text-gray-600">
-                        {token.last_used_at ? formatDate(token.last_used_at) : 'Never'}
-                      </TableCell>
-                      <TableCell className="text-sm text-gray-600">
-                        {token.expires_at ? formatDate(token.expires_at) : 'Never'}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedToken(token)
-                              setIsViewDialogOpen(true)
-                            }}
-                          >
-                            <Eye size={16} />
-                          </Button>
-                          {token.is_active && (
-                            <>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedToken(token)
-                                  setIsRegenerateDialogOpen(true)
-                                }}
-                              >
-                                <RefreshCw size={16} />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-red-600 hover:text-red-700"
-                                onClick={() => {
-                                  setSelectedToken(token)
-                                  setIsRevokeDialogOpen(true)
-                                }}
-                              >
-                                <Trash2 size={16} />
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <div className="text-center py-12 text-gray-500">
-                <Key size={48} className="mx-auto mb-4 opacity-50" />
-                <p>No API tokens yet</p>
-                <p className="text-sm">Create your first token to get started</p>
-              </div>
-            )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="documentation" className="pb-4">
-          <APIDocumentation />
-        </TabsContent>
-        </Tabs>
-      </div>
-    </div>
-
-      {/* Create Token Dialog */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="px-6 pt-6">
-            <DialogTitle>Create API Token</DialogTitle>
-            <DialogDescription>
-              Create a new API token for programmatic access. The token will only be shown once.
-            </DialogDescription>
-          </DialogHeader>
-
-          {newTokenValue ? (
-            <div className="px-6 pb-6 space-y-4">
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="text-yellow-600 flex-shrink-0 mt-0.5" size={20} />
-                  <div>
-                    <p className="font-medium text-yellow-800">Save your token now!</p>
-                    <p className="text-sm text-yellow-700">
-                      This is the only time you&apos;ll see this token. Copy it and store it securely.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Your API Token</Label>
-                <div className="flex gap-2">
-                  <Input
-                    type={showTokenValue ? 'text' : 'password'}
-                    value={newTokenValue}
-                    readOnly
-                    className="font-mono text-sm"
-                  />
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setShowTokenValue(!showTokenValue)}
-                  >
-                    {showTokenValue ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => copyToClipboard(newTokenValue)}
-                  >
-                    {copiedToken ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
-                  </Button>
-                </div>
-              </div>
-
-              <DialogFooter>
-                <Button
-                  onClick={() => {
-                    setIsCreateDialogOpen(false)
-                    setNewTokenValue(null)
-                    setShowTokenValue(false)
-                  }}
-                >
-                  Done
-                </Button>
-              </DialogFooter>
-            </div>
-          ) : (
-            <div className="px-6 pb-6 space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="tokenName">Token Name *</Label>
-                <Input
-                  id="tokenName"
-                  value={tokenName}
-                  onChange={(e) => setTokenName(e.target.value)}
-                  placeholder="e.g., CI/CD Pipeline, Mobile App"
-                  maxLength={100}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="tokenDescription">Description</Label>
-                <Textarea
-                  id="tokenDescription"
-                  value={tokenDescription}
-                  onChange={(e) => setTokenDescription(e.target.value)}
-                  placeholder="What will this token be used for?"
-                  maxLength={500}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="tokenExpiry">Expiration Date (optional)</Label>
-                <Input
-                  id="tokenExpiry"
-                  type="datetime-local"
-                  value={tokenExpiry}
-                  onChange={(e) => setTokenExpiry(e.target.value)}
-                />
-                <p className="text-xs text-gray-500">Leave empty for a token that never expires</p>
-              </div>
-
-              <div className="space-y-3">
-                <Label>Permissions</Label>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant={rightsPreset === 'readonly' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handlePresetChange('readonly')}
-                  >
-                    Read Only
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={rightsPreset === 'full' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handlePresetChange('full')}
-                  >
-                    Full Access
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={rightsPreset === 'custom' ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handlePresetChange('custom')}
-                  >
-                    Custom
-                  </Button>
-                </div>
-
-                {rightsPreset === 'custom' && (
-                  <PermissionsEditor rights={tokenRights} onChange={setTokenRights} />
-                )}
-              </div>
-
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleCreateToken}>Create Token</Button>
-              </DialogFooter>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* View Token Dialog */}
-      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader className="px-6 pt-6">
-            <DialogTitle>Token Details</DialogTitle>
-          </DialogHeader>
-          {selectedToken && (
-            <div className="px-6 pb-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-gray-500">Name</Label>
-                  <p className="font-medium">{selectedToken.name}</p>
-                </div>
-                <div>
-                  <Label className="text-gray-500">Status</Label>
-                  <p>
-                    {selectedToken.is_active ? (
-                      <Badge className="bg-green-100 text-green-800">Active</Badge>
-                    ) : (
-                      <Badge className="bg-red-100 text-red-800">Revoked</Badge>
-                    )}
-                  </p>
-                </div>
-                <div>
-                  <Label className="text-gray-500">Token Prefix</Label>
-                  <code className="bg-gray-100 px-2 py-1 rounded text-sm">
-                    {selectedToken.token_prefix}...
-                  </code>
-                </div>
-                <div>
-                  <Label className="text-gray-500">Created</Label>
-                  <p className="text-sm">{formatDate(selectedToken.creation_date)}</p>
-                </div>
-                <div>
-                  <Label className="text-gray-500">Last Used</Label>
-                  <p className="text-sm">
-                    {selectedToken.last_used_at ? formatDate(selectedToken.last_used_at) : 'Never'}
-                  </p>
-                </div>
-                <div>
-                  <Label className="text-gray-500">Expires</Label>
-                  <p className="text-sm">
-                    {selectedToken.expires_at ? formatDate(selectedToken.expires_at) : 'Never'}
-                  </p>
-                </div>
-              </div>
-              {selectedToken.description && (
-                <div>
-                  <Label className="text-gray-500">Description</Label>
-                  <p className="text-sm">{selectedToken.description}</p>
-                </div>
-              )}
-              {selectedToken.rights && (
-                <div>
-                  <Label className="text-gray-500">Permissions</Label>
-                  <div className="mt-2 bg-gray-50 rounded-lg p-3 text-xs">
-                    <PermissionsViewer rights={selectedToken.rights} />
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Revoke Token Dialog */}
-      <Dialog open={isRevokeDialogOpen} onOpenChange={setIsRevokeDialogOpen}>
-        <DialogContent>
-          <DialogHeader className="px-6 pt-6">
-            <DialogTitle className="flex items-center gap-2 text-red-600">
-              <AlertTriangle size={20} />
-              Revoke API Token
-            </DialogTitle>
-            <DialogDescription>
-              Are you sure you want to revoke this token? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="px-6 pb-6">
-            {selectedToken && (
-              <div className="bg-gray-50 rounded-lg p-3 mb-4">
-                <p className="font-medium">{selectedToken.name}</p>
-                <code className="text-sm text-gray-600">{selectedToken.token_prefix}...</code>
-              </div>
-            )}
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsRevokeDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button variant="destructive" onClick={handleRevokeToken}>
-                Revoke Token
-              </Button>
-            </DialogFooter>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Regenerate Token Dialog */}
-      <Dialog open={isRegenerateDialogOpen} onOpenChange={setIsRegenerateDialogOpen}>
-        <DialogContent>
-          <DialogHeader className="px-6 pt-6">
-            <DialogTitle className="flex items-center gap-2">
-              <RefreshCw size={20} />
-              Regenerate API Token
-            </DialogTitle>
-            <DialogDescription>
-              This will generate a new secret for this token. The old token will immediately stop working.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="px-6 pb-6">
-            {newTokenValue ? (
-              <div className="space-y-4">
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <div className="flex items-start gap-3">
-                    <AlertTriangle className="text-yellow-600 flex-shrink-0 mt-0.5" size={20} />
-                    <div>
-                      <p className="font-medium text-yellow-800">Save your new token!</p>
-                      <p className="text-sm text-yellow-700">
-                        This is the only time you&apos;ll see this token.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Input
-                    type={showTokenValue ? 'text' : 'password'}
-                    value={newTokenValue}
-                    readOnly
-                    className="font-mono text-sm"
-                  />
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setShowTokenValue(!showTokenValue)}
-                  >
-                    {showTokenValue ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => copyToClipboard(newTokenValue)}
-                  >
-                    {copiedToken ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
-                  </Button>
-                </div>
-                <DialogFooter>
-                  <Button
-                    onClick={() => {
-                      setIsRegenerateDialogOpen(false)
-                      setNewTokenValue(null)
-                      setShowTokenValue(false)
-                      setSelectedToken(null)
-                    }}
-                  >
-                    Done
-                  </Button>
-                </DialogFooter>
-              </div>
-            ) : (
-              <>
-                {selectedToken && (
-                  <div className="bg-gray-50 rounded-lg p-3 mb-4">
-                    <p className="font-medium">{selectedToken.name}</p>
-                    <code className="text-sm text-gray-600">{selectedToken.token_prefix}...</code>
-                  </div>
-                )}
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsRegenerateDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleRegenerateToken}>Regenerate</Button>
-                </DialogFooter>
-              </>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
+      {currentView === 'list' ? renderListView() : renderDetailView()}
     </PlanRestrictedFeature>
   )
 }
 
-// Permissions Editor Component
-const PermissionsEditor: React.FC<{
+// Custom Permission Container - expandable with checkboxes inside
+const CustomPermissionContainer: React.FC<{
+  isCustom: boolean
+  onActivate: () => void
   rights: APITokenRights
-  onChange: (rights: APITokenRights) => void
-}> = ({ rights, onChange }) => {
-  // API Token access is restricted to specific resources
-  const resources = [
-    { key: 'courses', label: 'Courses', hasCrud: true },
-    { key: 'activities', label: 'Activities', hasCrud: true },
-    { key: 'coursechapters', label: 'Chapters', hasCrud: true },
-    { key: 'collections', label: 'Collections', hasCrud: true },
-    { key: 'certifications', label: 'Certifications', hasCrud: true },
-    { key: 'usergroups', label: 'User Groups', hasCrud: true },
-    { key: 'payments', label: 'Payments', hasCrud: true },
-  ]
+  onRightsChange: (rights: APITokenRights) => void
+}> = ({ isCustom, onActivate, rights, onRightsChange }) => {
+  const [isExpanded, setIsExpanded] = React.useState(false)
 
-  const togglePermission = (resource: string, permission: string) => {
+  const handleToggle = (resource: string, permission: string) => {
     const newRights = { ...rights }
     const resourceRights = { ...(newRights as any)[resource] }
     resourceRights[permission] = !resourceRights[permission]
     ;(newRights as any)[resource] = resourceRights
-    onChange(newRights)
+
+    // Check if any permission is now checked — activate custom if so
+    const anyChecked = Object.keys(newRights).some((res) => {
+      const r = (newRights as any)[res]
+      return r && Object.values(r).some((v) => v === true)
+    })
+    if (anyChecked && !isCustom) onActivate()
+
+    onRightsChange(newRights)
   }
 
-  return (
-    <div className="border rounded-lg overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Resource</TableHead>
-            <TableHead className="text-center">Create</TableHead>
-            <TableHead className="text-center">Read</TableHead>
-            <TableHead className="text-center">Update</TableHead>
-            <TableHead className="text-center">Delete</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {resources.map((resource) => (
-            <TableRow key={resource.key}>
-              <TableCell className="font-medium">{resource.label}</TableCell>
-              <TableCell className="text-center">
-                <Switch
-                  checked={(rights as any)[resource.key]?.action_create || false}
-                  onCheckedChange={() => togglePermission(resource.key, 'action_create')}
-                />
-              </TableCell>
-              <TableCell className="text-center">
-                <Switch
-                  checked={(rights as any)[resource.key]?.action_read || false}
-                  onCheckedChange={() => togglePermission(resource.key, 'action_read')}
-                />
-              </TableCell>
-              <TableCell className="text-center">
-                <Switch
-                  checked={(rights as any)[resource.key]?.action_update || false}
-                  onCheckedChange={() => togglePermission(resource.key, 'action_update')}
-                />
-              </TableCell>
-              <TableCell className="text-center">
-                <Switch
-                  checked={(rights as any)[resource.key]?.action_delete || false}
-                  onCheckedChange={() => togglePermission(resource.key, 'action_delete')}
-                />
-              </TableCell>
-            </TableRow>
-          ))}
-          <TableRow>
-            <TableCell className="font-medium">Search</TableCell>
-            <TableCell className="text-center">-</TableCell>
-            <TableCell className="text-center">
-              <Switch
-                checked={rights.search?.action_read || false}
-                onCheckedChange={() => togglePermission('search', 'action_read')}
-              />
-            </TableCell>
-            <TableCell className="text-center">-</TableCell>
-            <TableCell className="text-center">-</TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-    </div>
+  const resources = [
+    { key: 'courses', label: 'Courses' },
+    { key: 'activities', label: 'Activities' },
+    { key: 'coursechapters', label: 'Chapters' },
+    { key: 'collections', label: 'Collections' },
+    { key: 'certifications', label: 'Certifications' },
+    { key: 'usergroups', label: 'User Groups' },
+    { key: 'payments', label: 'Payments' },
+    { key: 'search', label: 'Search' },
+  ]
+
+  const crudItems = [
+    { key: 'action_create', label: 'Create' },
+    { key: 'action_read', label: 'Read' },
+    { key: 'action_update', label: 'Update' },
+    { key: 'action_delete', label: 'Delete' },
+  ]
+
+  const isSearchResource = (key: string) => key === 'search'
+  const isCrudDisabled = (resKey: string, permKey: string) =>
+    isSearchResource(resKey) && permKey !== 'action_read'
+
+  const anyChecked = resources.some((res) =>
+    crudItems.some((item) => {
+      if (isCrudDisabled(res.key, item.key)) return false
+      return (rights as any)[res.key]?.[item.key] || false
+    })
   )
-}
-
-// Permissions Viewer Component
-const PermissionsViewer: React.FC<{ rights: APITokenRights }> = ({ rights }) => {
-  const getPermissionSummary = (resourceRights: any) => {
-    const perms = []
-    if (resourceRights?.action_create) perms.push('C')
-    if (resourceRights?.action_read) perms.push('R')
-    if (resourceRights?.action_update) perms.push('U')
-    if (resourceRights?.action_delete) perms.push('D')
-    return perms.length > 0 ? perms.join('') : '-'
-  }
 
   return (
-    <div className="grid grid-cols-3 gap-2">
-      <div>Courses: {getPermissionSummary(rights.courses)}</div>
-      <div>Activities: {getPermissionSummary(rights.activities)}</div>
-      <div>Chapters: {getPermissionSummary(rights.coursechapters)}</div>
-      <div>Collections: {getPermissionSummary(rights.collections)}</div>
-      <div>Certs: {getPermissionSummary(rights.certifications)}</div>
-      <div>Groups: {getPermissionSummary(rights.usergroups)}</div>
-      <div>Payments: {getPermissionSummary(rights.payments)}</div>
-      <div>Search: {rights.search?.action_read ? 'R' : '-'}</div>
+    <div className="rounded-xl overflow-hidden border border-gray-100">
+      {/* Header - clickable to expand/collapse */}
+      <div
+        onClick={() => setIsExpanded(!isExpanded)}
+        className={`flex items-center justify-between px-5 py-5 rounded-xl cursor-pointer transition-colors ${
+          isCustom
+            ? 'bg-gray-100 shadow-borders-base'
+            : 'bg-gray-50 shadow-borders-base hover:bg-gray-100'
+        }`}
+      >
+        <div className="flex items-center gap-3">
+          <SlidersHorizontal size={16} className="text-gray-400 shrink-0" />
+          <span className="text-sm font-semibold text-gray-800">Custom</span>
+          {anyChecked && (
+            <span className="text-xs text-gray-400 tabular-nums">
+              {resources.filter((res) =>
+                crudItems.some((item) => {
+                  if (isCrudDisabled(res.key, item.key)) return false
+                  return (rights as any)[res.key]?.[item.key]
+                })
+              ).length} resources
+            </span>
+          )}
+        </div>
+        <ChevronRight
+          size={16}
+          className={`text-gray-400 transition-transform duration-200 ${
+            isExpanded ? 'rotate-90' : ''
+          }`}
+        />
+      </div>
+
+      {/* Expanded content */}
+      <div className={`${isExpanded ? '' : 'hidden'}`}>
+        <div className="overflow-hidden">
+          <div className="px-5 pb-5 pt-0" onClick={(e) => e.stopPropagation()}>
+            <div className="space-y-1">
+              {/* Header row */}
+              <div className="flex items-center px-4 py-2 border-b border-gray-100">
+                <div className="flex-1 text-xs font-semibold text-gray-400">Resource</div>
+                <div className="flex items-center gap-4">
+                  {crudItems.map((item) => (
+                    <span key={item.key} className="w-8 text-center text-xs font-semibold text-gray-400">
+                      {item.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              {/* Resource rows */}
+              {resources.map((resource) => (
+                <div key={resource.key} className="flex items-center px-4 py-2.5 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex-1 text-sm font-medium text-gray-700">{resource.label}</div>
+                  <div className="flex items-center gap-4">
+                    {crudItems.map((item) => {
+                      const disabled = isCrudDisabled(resource.key, item.key)
+                      return (
+                        <div key={item.key} className="w-8 flex justify-center">
+                          {disabled ? (
+                             <span className="text-xs text-gray-300">-</span>
+                           ) : (
+                             <label className="cursor-pointer">
+                               <div className="relative w-4 h-4 flex-shrink-0">
+                                 <input
+                                   type="checkbox"
+                                   checked={(rights as any)[resource.key]?.[item.key] || false}
+                                   onChange={() => handleToggle(resource.key, item.key)}
+                                   className="sr-only peer"
+                                 />
+                                 <div className="w-full h-full rounded border border-gray-300 bg-white peer-checked:bg-gray-600 peer-checked:border-gray-600 flex items-center justify-center transition-colors">
+                                   <Check size={12} className="text-white hidden peer-checked:block" strokeWidth={3} />
+                                 </div>
+                               </div>
+                             </label>
+                           )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

@@ -12,11 +12,10 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { toast } from 'react-hot-toast'
 import { Input } from '@components/ui/input'
 import { Textarea } from '@components/ui/textarea'
-import { Switch } from '@components/ui/switch'
 import { mutate } from 'swr'
 import { getAPIUrl } from '@services/config/config'
 import { getOrgOgImageMediaDirectory } from '@services/media/media'
-import { Copy, ExternalLink, Upload, X, Check, Loader2, SaveAllIcon } from 'lucide-react'
+import { Copy, ExternalLink, Check, Loader2, SaveAllIcon, Trash2, UploadCloud, ImageIcon } from 'lucide-react'
 import { getCanonicalUrl } from '@/lib/seo/utils'
 import FormLayout, {
   FormField,
@@ -280,43 +279,51 @@ const OrgEditSEO: React.FC = () => {
                       <p className="text-xs text-gray-500 mb-2 mt-0">
                         Default sharing image for social media (1200x630 recommended)
                       </p>
-                      <div className="flex items-start space-x-4">
-                        {(ogImagePreview || existingOgImageUrl) && (
-                          <div className="relative">
-                            <img
-                              src={ogImagePreview || existingOgImageUrl || ''}
-                              alt="OG Image Preview"
-                              className="w-48 h-24 object-cover rounded-lg border"
-                            />
-                            {ogImagePreview && (
-                              <button
-                                type="button"
-                                onClick={clearOgImage}
-                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"
-                              >
-                                <X size={14} />
-                              </button>
-                            )}
-                          </div>
-                        )}
-                        <div>
-                          <input
-                            ref={ogImageInputRef}
-                            type="file"
-                            accept="image/*"
-                            onChange={handleOgImageChange}
-                            className="hidden"
-                          />
+                      <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-ui-bg-field">
+                        <div className="flex-shrink-0">
+                          <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-700">
+                            {existingOgImageUrl || ogImagePreview ? 'OG Image set' : 'No OG Image set'}
+                          </p>
+                        </div>
+                        <input
+                          ref={ogImageInputRef}
+                          type="file"
+                          accept=".jpg,.jpeg,.png"
+                          onChange={handleOgImageChange}
+                          className="hidden"
+                        />
+                        {existingOgImageUrl || ogImagePreview ? (
+                          <button
+                            type="button"
+                            onClick={clearOgImage}
+                            className="flex items-center justify-center text-red-400 hover:text-red-600 transition-colors cursor-pointer"
+                            title="Remove OG image"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        ) : (
                           <button
                             type="button"
                             onClick={() => ogImageInputRef.current?.click()}
-                            className={`inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors ${fieldClassName}`}
+                            className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                            title="Upload OG image"
                           >
-                            <Upload size={14} />
-                            {existingOgImageUrl || ogImagePreview ? 'Change Image' : 'Upload Image'}
+                            <UploadCloud size={18} />
                           </button>
-                        </div>
+                        )}
                       </div>
+                      {(ogImagePreview || existingOgImageUrl) && (
+                        <div className="mt-3 max-w-[480px]">
+                          <img
+                            src={ogImagePreview || existingOgImageUrl || ''}
+                            alt="OG Image Preview"
+                            className="w-full aspect-video object-cover rounded-lg border border-gray-200"
+                          />
+                        </div>
+                      )}
                     </div>
                     <FormField name="twitter_handle">
                       <FormLabelAndMessage label="Twitter Handle" />
@@ -358,21 +365,33 @@ const OrgEditSEO: React.FC = () => {
                     Indexing Controls
                   </h3>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-lg">
-                      <div className="space-y-0.5">
-                        <label className="text-sm font-semibold text-gray-700">Hide Communities</label>
-                        <p className="text-sm text-gray-500">
-                          Hide community pages from search engines
-                        </p>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <div
+                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                          values.noindex_communities ? 'bg-black' : 'bg-gray-300'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
+                            values.noindex_communities
+                              ? 'translate-x-[18px]'
+                              : 'translate-x-[2px]'
+                          }`}
+                        />
+                        <input
+                          type="checkbox"
+                          className="sr-only"
+                          checked={values.noindex_communities}
+                          onChange={(e) => {
+                            setFieldValue('noindex_communities', e.target.checked)
+                            setIsSaved(false)
+                          }}
+                          name="noindex_communities"
+                          id="noindex_communities"
+                        />
                       </div>
-                      <Switch
-                        checked={values.noindex_communities}
-                        onCheckedChange={(checked) => {
-                          setFieldValue('noindex_communities', checked)
-                          setIsSaved(false)
-                        }}
-                      />
-                    </div>
+                      <span className="text-sm text-gray-600 select-none">Hide Communities</span>
+                    </label>
                   </div>
                 </div>
               </div>

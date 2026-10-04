@@ -3,11 +3,11 @@ import React, { useEffect, use } from 'react';
 import { motion } from 'motion/react'
 import Link from 'next/link'
 import { getUriWithOrg } from '@services/config/config'
-import { TextIcon, LucideIcon, KeyIcon, Palette, Shield, Globe, Search, Zap } from 'lucide-react'
+import { TextIcon, LucideIcon, KeyIcon, Palette, Globe, Search, Zap } from 'lucide-react'
 import OrgEditGeneral from '@components/Dashboard/Pages/Org/OrgEditGeneral/OrgEditGeneral'
 import OrgEditBranding from '@components/Dashboard/Pages/Org/OrgEditBranding/OrgEditBranding'
 import OrgEditAPIAccess from '@components/Dashboard/Pages/Org/OrgEditAPIAccess/OrgEditAPIAccess'
-import OrgEditSSO from '@components/Dashboard/Pages/Org/OrgEditSSO/OrgEditSSO'
+
 import OrgEditDomains from '@components/Dashboard/Pages/Org/OrgEditDomains/OrgEditDomains'
 import OrgEditSEO from '@components/Dashboard/Pages/Org/OrgEditSEO/OrgEditSEO'
 import OrgEditAutomations from '@components/Dashboard/Pages/Org/OrgEditAutomations/OrgEditAutomations'
@@ -37,7 +37,6 @@ const getSettingTabs = (t: any): TabItem[] => [
   { id: 'domains', label: t('dashboard.organization.settings.tabs.domains') || 'Domains', icon: Globe, requiredPlan: 'standard' },
   { id: 'automations', label: 'Automations', icon: Zap, requiredPlan: 'pro' },
   { id: 'api', label: t('dashboard.organization.settings.tabs.api') || 'API Access', icon: KeyIcon, requiredPlan: 'pro' },
-  { id: 'sso', label: t('dashboard.organization.settings.tabs.sso') || 'SSO', icon: Shield, requiredPlan: 'enterprise' },
 ]
 
 function OrgPage(props: { params: Promise<OrgParams> }) {
@@ -55,7 +54,6 @@ function OrgPage(props: { params: Promise<OrgParams> }) {
     else if (params.subpage == 'domains') setH1Label(t('dashboard.organization.settings.pages.domains.title') || 'Custom Domains')
     else if (params.subpage == 'automations') setH1Label('Automations')
     else if (params.subpage == 'api') setH1Label(t('dashboard.organization.settings.pages.api.title') || 'API Access')
-    else if (params.subpage == 'sso') setH1Label(t('dashboard.organization.settings.pages.sso.title') || 'Single Sign-On')
   }, [params.subpage, params, t])
 
   return (
@@ -128,7 +126,6 @@ function OrgPage(props: { params: Promise<OrgParams> }) {
             {params.subpage == 'domains' ? <OrgEditDomains /> : ''}
             {params.subpage == 'automations' ? <OrgEditAutomations /> : ''}
             {params.subpage == 'api' ? <OrgEditAPIAccess /> : ''}
-            {params.subpage == 'sso' ? <OrgEditSSO /> : ''}
           </motion.div>
         </main>
       </div>
