@@ -410,6 +410,162 @@ useEffect(() => {
 
 The `SaveState` component provides inline feedback for auto-save operations (see [Auto-save section](#savestate-indicator)).
 
+## Breadcrumb navigation
+
+The admin dashboard uses a centralized breadcrumb component (`AdminBreadcrumbNav`) rendered in the top bar (`AdminTopBar`). It provides hierarchical navigation context for all dashboard pages.
+
+### Architecture
+
+The breadcrumb is a **single client component** (`AdminBreadcrumbNav` in `AdminTopBar.tsx`) that:
+- Parses the current URL to detect entity types and UUIDs
+- Fetches entity names via SWR with auth tokens
+- Renders clickable intermediate links and plain-text current page labels
+- Handles mobile truncation with a `...` ellipsis
+
+### URL parsing
+
+The component normalizes the pathname relative to the org base, then detects patterns:
+
+| Pattern | Example URL | Breadcrumb Trail |
+|---------|------------|------------------|
+| Root dashboard | `/dash` | Home > Dashboard |
+| Section listing | `/dash/courses` | Home > Dashboard > Courses |
+| Entity detail | `/dash/courses/course/{uuid}/general` | Home > Dashboard > Courses > {name} > General |
+| Entity subpage | `/dash/boards/{uuid}/members` | Home > Dashboard > Boards > {name} > Members |
+| Settings subpage | `/dash/org/settings/branding` | Home > Dashboard > Organization > Branding |
+| Payments subpage | `/dash/payments/overview` | Home > Dashboard > Payments > Overview |
+
+### UUID detection
+
+UUIDs may have a prefix (e.g., `course_`, `board_`) or be bare UUIDs:
+
+```tsx
+const UUID_PATTERN = /^([a-zA-Z]+_)?[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+```
+
+### Entity name resolution
+
+Entity names are fetched via SWR using the auth token from `useLHSession`:
+
+```tsx
+// Build the API URL based on entity type
+function buildEntityApiUrl(type: string, uuid: string): string {
+  const base = getAPIUrl()
+  switch (type) {
+    case 'course':
+      return `${base}courses/course_${uuid}/meta?with_unpublished_activities=false&slim=true`
+    case 'board':
+      return `${base}boards/board_${uuid}`
+    case 'community':
+      return `${base}communities/community_${uuid}`
+    case 'podcast':
+      return `${base}podcasts/podcast_${uuid}/meta`
+    case 'assignment':
+      return `${base}assignments/assignment_${uuid}`
+    default:
+      return ''
+  }
+}
+
+// Extract name from API response
+function extractEntityName(type: string, data: any): string {
+  switch (type) {
+    case 'course':    return data?.name ?? data?.courseStructure?.name ?? '...'
+    case 'board':     return data?.name ?? '...'
+    case 'community': return data?.name ?? '...'
+    case 'podcast':   return data?.podcast?.name ?? data?.name ?? '...'
+    case 'assignment': return data?.title ?? '...'
+    default:          return '...'
+  }
+}
+```
+
+### Crumb construction
+
+```tsx
+const crumbs: Crumb[] = [
+  { label: t('common.home'), href: getUriWithOrg(orgslug, '/') },
+  { label: 'Dashboard', href: getUriWithOrg(orgslug, '/dash') },
+]
+
+if (section) {
+  const sectionLabel = SECTION_LABELS[section] ?? section.charAt(0).toUpperCase() + section.slice(1)
+
+  if (entityType) {
+    // Entity detail: section links back to listing
+    crumbs.push({ label: sectionLabel, href: getUriWithOrg(orgslug, `/dash/${section}`) })
+    crumbs.push({ label: entityName || '...' })
+    if (subpage) crumbs.push({ label: getSubpageLabel(section, subpage) })
+  } else if (subpage) {
+    crumbs.push({ label: sectionLabel, href: getUriWithOrg(orgslug, `/dash/${section}`) })
+    crumbs.push({ label: getSubpageLabel(section, subpage) })
+  } else {
+    crumbs.push({ label: sectionLabel })
+  }
+}
+```
+
+### Subpage label map
+
+Subpage URL segments are mapped to display labels via `SUBPAGE_LABELS`:
+
+```tsx
+const SUBPAGE_LABELS: Record<string, Record<string, string>> = {
+  courses:    { general: 'General', content: 'Content', access: 'Access', ... },
+  boards:     { general: 'General', thumbnail: 'Thumbnail', access: 'Access', members: 'Members' },
+  communities:{ general: 'General', access: 'Access', course: 'Course', moderation: 'Moderation' },
+  podcasts:   { general: 'General', content: 'Episodes', distribution: 'Distribution' },
+  org:        { general: 'General', branding: 'Branding', seo: 'SEO', domains: 'Domains', ... },
+  users:      { users: 'Users', signups: 'Sign Ups', usergroups: 'User Groups', roles: 'Roles', ... },
+  payments:   { overview: 'Overview', customers: 'Customers', transactions: 'Transactions', ... },
+}
+```
+
+### Rendering
+
+```tsx
+<nav aria-label="Breadcrumb">
+  <ol className="text-ui-fg-muted txt-compact-small-plus flex select-none items-center">
+    {crumbs.map((crumb, index) => {
+      const isLast = index === crumbs.length - 1
+      return (
+        <li key={index} className="flex items-center">
+          {!isLast && crumb.href ? (
+            <Link href={crumb.href} className="transition-fg hover:text-ui-fg-subtle">
+              {crumb.label}
+            </Link>
+          ) : (
+            <div>
+              {!isSingle && <span className="block lg:hidden">...</span>}
+              <span className={isSingle ? '' : 'hidden lg:block'}>
+                {crumb.label}
+              </span>
+            </div>
+          )}
+          {!isLast && (
+            <span className="mx-2">
+              <TriangleRightMini className="rtl:rotate-180" />
+            </span>
+          )}
+        </li>
+      )
+    })}
+  </ol>
+</nav>
+```
+
+### Key behaviors
+
+- **Mobile responsive**: On screens smaller than `lg`, intermediate crumbs collapse to `...` while the last crumb (current page) remains visible.
+- **SWR caching**: Entity names are fetched with `revalidateOnFocus: false` to avoid unnecessary network requests.
+- **No inline duplicates**: All dash pages rely solely on the top bar breadcrumb — inline `<Breadcrumbs>` components have been removed to prevent duplication.
+- **Fallback loading**: While the entity name is being fetched, `'...'` is displayed as a placeholder.
+
+### Source location
+
+- `AdminBreadcrumbNav` is defined in [`AdminTopBar.tsx`](file:///c:/Projects/learnhouse-dev/learnhouse-dev/apps/web/components/Dashboard/Menus/AdminTopBar.tsx)
+- Rendered by [`AdminTopBar`](file:///c:/Projects/learnhouse-dev/learnhouse-dev/apps/web/components/Dashboard/Menus/AdminTopBar.tsx) which is used in [`ClientAdminLayout.tsx`](file:///c:/Projects/learnhouse-dev/learnhouse-dev/apps/web/app/orgs/%5Borgslug%5D/dash/ClientAdminLayout.tsx)
+
 ## Related files
 
 - **[Design tokens](./design-tokens.md)** — All token values referenced by these patterns

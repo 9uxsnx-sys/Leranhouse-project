@@ -30,7 +30,6 @@ import {
 import toast from 'react-hot-toast'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import PlanRestrictedFeature from '@components/Dashboard/Shared/PlanRestricted/PlanRestrictedFeature'
 import FeatureDisabledView from '@components/Dashboard/Shared/FeatureDisabled/FeatureDisabledView'
@@ -199,9 +198,6 @@ export default function PlaygroundsListClient({ org_id, orgslug }: PlaygroundsLi
 
           {/* Header */}
           <div className="mb-6 pt-6">
-            <Breadcrumbs
-              items={[{ label: 'Playgrounds', href: '/dash/playgrounds', icon: <Cube size={14} /> }]}
-            />
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4">
               <h1 className="text-3xl font-bold mb-4 sm:mb-0">Playgrounds</h1>
               <AuthenticatedClientElement

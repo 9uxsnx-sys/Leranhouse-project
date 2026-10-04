@@ -13,7 +13,6 @@ import { useTranslation } from 'react-i18next'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getUriWithOrg } from '@services/config/config'
-import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import MigrationDropZone from '@components/Objects/Modals/Course/Create/MigrationWizard/MigrationDropZone'
 import MigrationPromptForm from '@components/Objects/Modals/Course/Create/MigrationWizard/MigrationPromptForm'
 import MigrationTreeEditor from '@components/Objects/Modals/Course/Create/MigrationWizard/MigrationTreeEditor'
@@ -205,19 +204,6 @@ export default function MigrationClient({ orgslug }: MigrationClientProps) {
   return (
     <div className="h-full w-full bg-[#f8f8f8] pl-10 pr-10">
       <div className="mb-6 pt-6">
-        <Breadcrumbs
-          items={[
-            {
-              label: t('courses.courses'),
-              href: '/dash/courses',
-              icon: <BookCopy size={14} />,
-            },
-            {
-              label: t('migration.title'),
-              icon: <Upload size={14} />,
-            },
-          ]}
-        />
         <h1 className="text-3xl font-bold mt-4">
           {t('migration.title')}
         </h1>

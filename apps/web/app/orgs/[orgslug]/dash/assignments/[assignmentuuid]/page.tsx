@@ -1,5 +1,4 @@
 'use client';
-import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import {
     ALargeSmall,
     BookOpen,
@@ -15,7 +14,6 @@ import {
     Shield,
     ThumbsUp,
     UserRoundPen,
-    Backpack,
     Zap,
     BarChart3,
 } from 'lucide-react'
@@ -66,7 +64,6 @@ function AssignmentEdit() {
                 <div className='flex flex-col bg-white z-10 nice-shadow relative'>
                     <div className='flex justify-between mr-10 h-full'>
                         <div className="pl-10 mr-10 tracking-tighter">
-                            <BrdCmpx />
                             <div className="w-100 flex justify-between">
                                 <div className="flex flex-col space-y-2">
                                     <AssignmentTitle />
@@ -128,23 +125,6 @@ function AssignmentEdit() {
 }
 
 export default AssignmentEdit
-
-function BrdCmpx() {
-    const { t } = useTranslation()
-    const assignment = useAssignments() as any
-
-    useEffect(() => {
-    }, [assignment])
-
-    return (
-        <div className="pt-6 pb-4">
-            <Breadcrumbs items={[
-                { label: t('common.assignments'), href: '/dash/assignments', icon: <Backpack size={14} /> },
-                ...(assignment?.assignment_object?.title ? [{ label: assignment.assignment_object.title }] : [])
-            ]} />
-        </div>
-    )
-}
 
 function PublishingState() {
     const { t } = useTranslation()

@@ -13,7 +13,6 @@ import { getBoardThumbnailMediaDirectory } from '@services/media/media'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 import Link from 'next/link'
-import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import PlanRestrictedFeature from '@components/Dashboard/Shared/PlanRestricted/PlanRestrictedFeature'
 import FeatureDisabledView from '@components/Dashboard/Shared/FeatureDisabled/FeatureDisabledView'
@@ -251,9 +250,6 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
     <FeatureDisabledView featureName="boards" orgslug={orgslug} context="dashboard">
       <div className="h-full w-full bg-[#f8f8f8] pl-10 pr-10">
         <div className="mb-6 pt-6">
-          <Breadcrumbs items={[
-            { label: t('boards.boards'), href: '/dash/boards', icon: <ChalkboardSimple size={14} /> }
-          ]} />
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4">
             <div className="flex items-center space-x-4">
               <h1 className="text-3xl font-bold mb-4 sm:mb-0">{t('boards.boards')}</h1>

@@ -10,7 +10,6 @@ import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { getBoardThumbnailMediaDirectory } from '@services/media/media'
 import useSWR from 'swr'
 import { swrFetcher } from '@services/utils/ts/requests'
-import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import BoardGeneralTab from '@components/Dashboard/Boards/Tabs/BoardGeneralTab'
 import BoardThumbnailTab from '@components/Dashboard/Boards/Tabs/BoardThumbnailTab'
 import BoardAccessTab from '@components/Dashboard/Boards/Tabs/BoardAccessTab'
@@ -80,16 +79,8 @@ function BoardSettingsPage(props: { params: Promise<BoardSettingsParams> }) {
 
   return (
     <div className="h-screen w-full bg-[#f8f8f8] grid grid-rows-[auto_1fr]">
-      {/* Top bar with breadcrumbs, board info, and tabs */}
+      {/* Top bar with board info and tabs */}
       <div className="pl-10 pr-10 text-sm tracking-tight bg-[#fcfbfc] z-10 nice-shadow relative">
-        {/* Breadcrumbs */}
-        <div className="pt-6 pb-4">
-          <Breadcrumbs items={[
-            { label: 'Boards', href: '/dash/boards', icon: <ChalkboardSimple size={14} /> },
-            { label: board.name },
-          ]} />
-        </div>
-
         {/* Board info row */}
         <div className="flex">
           <div className="flex py-3 grow items-center">

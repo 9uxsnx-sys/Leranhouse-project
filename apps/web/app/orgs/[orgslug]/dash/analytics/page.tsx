@@ -1,7 +1,6 @@
 'use client'
 import React, { useState } from 'react'
 import dynamic from 'next/dynamic'
-import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import { ChartBar, ChartLine, SquaresFour } from '@phosphor-icons/react'
 import { motion } from 'motion/react'
 import { useTranslation } from 'react-i18next'
@@ -86,11 +85,6 @@ export default function AnalyticsDashboard() {
     <div className="h-full w-full bg-[#f8f8f8] flex flex-col">
       {/* Sticky header box */}
       <div className="pl-10 pr-10 tracking-tight bg-[#fcfbfc] z-10 nice-shadow flex-shrink-0 relative">
-        <div className="pt-6 pb-4">
-          <Breadcrumbs items={[
-            { label: t('analytics.title'), href: '/dash/analytics', icon: <ChartBar size={14} /> }
-          ]} />
-        </div>
         <div className="my-2 py-2">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex flex-col space-y-1">

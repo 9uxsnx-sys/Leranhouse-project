@@ -1,7 +1,6 @@
 'use client'
 import React, { use } from 'react';
 import { motion } from 'motion/react'
-import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
 import Link from 'next/link'
 import { getUriWithOrg } from '@services/config/config'
 import { Settings, Users, Gem, CreditCard, Layers, ShoppingBag, ExternalLink } from 'lucide-react'
@@ -93,11 +92,6 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
     <FeatureDisabledView featureName="payments" orgslug={params.orgslug} context="dashboard">
     <div className="h-screen w-full bg-[#f8f8f8] flex flex-col">
       <div className="pl-10 pr-10 tracking-tight bg-[#fcfbfc] z-10 nice-shadow flex-shrink-0 relative">
-        <div className="pt-6 pb-4">
-          <Breadcrumbs items={[
-            { label: 'Payments', href: '/dash/payments', icon: <CreditCard size={14} /> }
-          ]} />
-        </div>
         <div className="my-2 py-2 flex items-end justify-between">
           <div className="w-100 flex flex-col space-y-1">
             <div className="pt-3 flex font-bold text-4xl tracking-tighter">
