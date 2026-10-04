@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import { getCertificateByUuid } from '@services/courses/certifications';
 import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
 import { Shield, CheckCircle, XCircle, AlertTriangle, ArrowLeft } from 'lucide-react';
@@ -41,6 +42,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
         console.error('Error fetching certificate:', error);
         setError('Failed to verify certificate. Please try again later.');
         setVerificationStatus('invalid');
+        toast.error('Failed to verify certificate. Please try again later.');
       } finally {
         setIsLoading(false);
       }

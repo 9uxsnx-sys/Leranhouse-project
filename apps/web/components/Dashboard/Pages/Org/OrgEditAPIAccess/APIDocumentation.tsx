@@ -6,6 +6,7 @@ import {
   ChevronRight,
   RefreshCw,
 } from 'lucide-react'
+import toast from 'react-hot-toast'
 import { fetchOpenAPISpec } from '@services/api_tokens/api_tokens'
 
 interface OpenAPIPath {
@@ -115,6 +116,7 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
       setSpec(data)
     } catch (err: any) {
       setError(err.message || 'Failed to load API documentation')
+      toast.error(err.message || 'Failed to load API documentation')
     } finally {
       setLoading(false)
     }

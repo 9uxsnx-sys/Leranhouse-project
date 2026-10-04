@@ -11,6 +11,7 @@ import useSWR from 'swr'
 import { removeCourse } from '@services/courses/activity'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { useRouter } from 'next/navigation'
+import toast from 'react-hot-toast'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import { BookOpen, Signpost, Search, ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -60,8 +61,10 @@ function Trail(params: any) {
       await revalidateTags(['courses'], orgslug);
       router.refresh();
       await mutate();
+      toast.success('All courses quit successfully')
     } catch (error) {
       console.error('Error quitting courses:', error);
+      toast.error('Error quitting courses')
     } finally {
       setIsQuittingAll(false)
       setQuittingProgress(0)

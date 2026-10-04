@@ -9,6 +9,7 @@ import { getUserCertificates } from '@services/courses/certifications'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 import { mutate } from 'swr'
 import { Award, ExternalLink, BookOpen, MoreVertical, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -46,10 +47,16 @@ function TrailCourseCard(props: TrailCourseCardProps) {
   const [isLoadingCertificate, setIsLoadingCertificate] = useState(false)
 
   async function quitCourse(course_uuid: string) {
-    let activity = await removeCourse(course_uuid, props.orgslug, access_token)
-    await revalidateTags(['courses'], props.orgslug)
-    router.refresh()
-    mutate(`${getAPIUrl()}trail/org/${orgID}/trail`)
+    try {
+      await removeCourse(course_uuid, props.orgslug, access_token)
+      await revalidateTags(['courses'], props.orgslug)
+      router.refresh()
+      mutate(`${getAPIUrl()}trail/org/${orgID}/trail`)
+      toast.success('Course quit successfully')
+    } catch (error) {
+      console.error('Error quitting course:', error)
+      toast.error('Error quitting course')
+    }
   }
 
   useEffect(() => {

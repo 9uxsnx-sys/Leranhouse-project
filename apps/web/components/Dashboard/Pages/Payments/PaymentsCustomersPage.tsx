@@ -1,5 +1,6 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import toast from 'react-hot-toast'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import useSWR from 'swr'
@@ -193,6 +194,12 @@ function CustomersTab({ orgId, accessToken }: { orgId: number; accessToken: stri
     () => getOrgCustomers(orgId, accessToken),
     { revalidateOnFocus: false }
   )
+
+  useEffect(() => {
+    if (error) {
+      toast.error('Error loading customers')
+    }
+  }, [error])
 
   if (isLoading) return <PageLoading />
   if (error) return <div className="p-6 text-sm text-red-500">Error loading customers</div>
@@ -479,6 +486,10 @@ function Empty({ message }: { message: string }) {
 }
 
 function StripeUnavailable() {
+  useEffect(() => {
+    toast.error('Could not reach Stripe. Check your connection or configuration.')
+  }, [])
+
   return (
     <div className="bg-white border border-gray-200 rounded-xl py-10 text-center space-y-1">
       <AlertCircle size={20} className="mx-auto text-gray-400" />

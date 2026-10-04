@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
+import toast from 'react-hot-toast'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
@@ -215,6 +216,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
       isNewChatRef.current = false
     } catch {
       setError('Failed to load session')
+      toast.error('Failed to load session')
     } finally {
       setIsLoadingSession(false)
     }
@@ -233,30 +235,45 @@ export function CopilotChat({ orgslug }: CopilotProps) {
 
   const handleDeleteSession = useCallback(async (uuid: string) => {
     if (!accessToken) return
-    await deleteRAGChatSession(uuid, accessToken)
-    mutateSessions()
-    // If deleting the active session, reset to new chat
-    if (uuid === aichatUuid) {
-      handleNewChat()
+    try {
+      await deleteRAGChatSession(uuid, accessToken)
+      mutateSessions()
+      toast.success('Session deleted')
+      // If deleting the active session, reset to new chat
+      if (uuid === aichatUuid) {
+        handleNewChat()
+      }
+    } catch {
+      toast.error('Failed to delete session')
     }
   }, [accessToken, aichatUuid, mutateSessions, handleNewChat])
 
   const handleRenameSession = useCallback(async (newTitle: string) => {
     if (!accessToken || !aichatUuid || !newTitle.trim()) return
-    const updated = await updateRAGChatSession(aichatUuid, accessToken, { title: newTitle.trim() })
-    if (updated) {
-      setCurrentSessionTitle(updated.title)
-      mutateSessions()
+    try {
+      const updated = await updateRAGChatSession(aichatUuid, accessToken, { title: newTitle.trim() })
+      if (updated) {
+        setCurrentSessionTitle(updated.title)
+        mutateSessions()
+        toast.success('Session renamed')
+      }
+    } catch {
+      toast.error('Failed to rename session')
     }
   }, [accessToken, aichatUuid, mutateSessions])
 
   const handleToggleFavorite = useCallback(async () => {
     if (!accessToken || !aichatUuid) return
-    const newFav = !currentSessionFavorite
-    const updated = await updateRAGChatSession(aichatUuid, accessToken, { favorite: newFav })
-    if (updated) {
-      setCurrentSessionFavorite(updated.favorite || false)
-      mutateSessions()
+    try {
+      const newFav = !currentSessionFavorite
+      const updated = await updateRAGChatSession(aichatUuid, accessToken, { favorite: newFav })
+      if (updated) {
+        setCurrentSessionFavorite(updated.favorite || false)
+        mutateSessions()
+        toast.success(updated.favorite ? 'Added to favorites' : 'Removed from favorites')
+      }
+    } catch {
+      toast.error('Failed to update favorite')
     }
   }, [accessToken, aichatUuid, currentSessionFavorite, mutateSessions])
 

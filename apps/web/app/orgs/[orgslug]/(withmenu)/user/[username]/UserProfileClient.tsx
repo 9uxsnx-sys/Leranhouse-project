@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react'
+import toast from 'react-hot-toast'
 import UserAvatar from '@components/Objects/UserAvatar'
 import { 
   Briefcase, 
@@ -94,6 +95,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
           if (mounted) {
             console.error('Error fetching user courses:', error);
             setCoursesError(true);
+            toast.error('Failed to load courses')
           }
         } finally {
           if (mounted) setIsLoadingCourses(false);

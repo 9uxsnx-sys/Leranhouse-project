@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import toast from 'react-hot-toast';
 import { Search, ArrowRight, Sparkles, BookCopy, SquareLibrary, ArrowUpRight, TextSearch, ScanSearch, Users } from 'lucide-react';
 import { searchOrgContent } from '@services/search/search';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
@@ -168,6 +169,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
         });
       } catch (error) {
         console.error('Error searching content:', error);
+        toast.error('Search failed. Please try again.')
         setSearchResults({ courses: [], collections: [], users: [] });
       }
       setIsLoading(false);

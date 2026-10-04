@@ -4,6 +4,7 @@ import { Search, Cpu, Briefcase, GraduationCap, Heart, Palette, Plane, Utensils,
   Flower} from 'lucide-react';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import { useTranslation } from 'react-i18next';
+import toast from 'react-hot-toast';
 
 let unsplashApi: any = null;
 async function getUnsplashApi() {
@@ -77,6 +78,7 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
       }
     } catch (error) {
       console.error('Error fetching images:', error);
+      toast.error('Failed to load images from Unsplash');
     } finally {
       setLoading(false);
     }
@@ -95,6 +97,7 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
       }
     } catch (error) {
       console.error('Error fetching default images:', error);
+      toast.error('Failed to load images from Unsplash');
     } finally {
       setLoading(false);
     }
@@ -145,6 +148,7 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
       }
     } catch (error) {
       console.error('Error tracking Unsplash download:', error);
+      toast.error('Failed to track image download');
     }
     const meta: UnsplashPhotoMeta = {
       photo_url: image?.links?.html || '',

@@ -387,6 +387,25 @@ toast.success("Course saved successfully")
 toast.error("Failed to save course")
 ```
 
+**Toast patterns across the platform:**
+
+| Pattern | Type | Example Locations |
+|---------|------|------------------|
+| Course save/update | `toast.success` / `toast.error` | `SaveState` component, course editors |
+| API errors (fetch failures) | `toast.error` | `APIDocumentation`, `SearchBar`, `CertificateVerificationPage`, `UserProfileClient` |
+| Stripe/payment errors | `toast.error` via `useEffect` | `PaymentsCustomersPage` (all 4 tabs) |
+| Unsplash image operations | `toast.error` | `UnsplashImagePicker` (search, default images, download) |
+| Trail/course quit actions | `toast.success` / `toast.error` | `trail.tsx`, `TrailCourseCard`, `TrailCourseElement` |
+| Copilot session management | `toast.success` / `toast.error` | `copilot.tsx` (delete, rename, favorite, load session) |
+
+For SWR-based components, use `useEffect` to show the toast when the error becomes truthy, preventing duplicate toasts on re-renders:
+
+```tsx
+useEffect(() => {
+  if (error) toast.error("Failed to load data")
+}, [error])
+```
+
 ### Save state indicator
 
 The `SaveState` component provides inline feedback for auto-save operations (see [Auto-save section](#savestate-indicator)).
