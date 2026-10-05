@@ -171,6 +171,10 @@ alembic history
 | `description` | Text | Course description |
 | `public` | Boolean | Visible to non-members |
 | `published` | Boolean | Published status |
+| `thumbnail_type` | Enum | `IMAGE`, `VIDEO`, or `BOTH` |
+| `thumbnail_image` | String | Card cover image URL (course card thumbnail) |
+| `thumbnail_video` | String | Video thumbnail URL |
+| `banner_image` | String | Hero banner image URL (course detail page) |
 | `seo` | JSONB | SEO metadata (OG, Twitter, JSON-LD) |
 | `extra_metadata` | JSONB | Extensible metadata |
 | `creation_date` | String | ISO date |

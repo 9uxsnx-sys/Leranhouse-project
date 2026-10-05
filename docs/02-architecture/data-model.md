@@ -52,7 +52,7 @@ Organization
 ### Course
 
 - **Represents**: A learning course
-- **Key fields**: name, description, difficulty, thumbnail, price, access_type
+- **Key fields**: name, description, difficulty, thumbnail_image, banner_image, thumbnail_video, price, access_type
 - **Access types**: `public`, `users_only`, `paid` (future)
 - **Relationships**: belongs to Organization, has many Chapters, Contributors
 - **Metadata**: extra_metadata JSONB for flexible attributes

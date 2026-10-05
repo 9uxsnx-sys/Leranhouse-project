@@ -68,10 +68,15 @@ Each release provides a summary of changes organized by category:
 - **Drag-and-drop reordering for course modules and lessons** — Modules and lessons in the course content editor can now be reordered with the same drag-and-drop pattern as episodes.
 - **Select mode with checkboxes** — Clicking "Select" in the toolbar replaces drag handles with checkboxes on episodes, modules, and lessons. Drag-and-drop is disabled in select mode. Selected items show a blue ring and filled checkbox.
 - **Episode detail preview button** — The "Back to Episodes" button was replaced with a "Preview" button that opens the public podcast page in a new tab, matching the lesson preview pattern.
+- **Banner image for courses** — A new `banner_image` field was added to courses for the hero banner on the course detail page. Includes full CRUD support via API (PUT/DELETE `/courses/{uuid}/banner`) and a `CourseMediaSection` UI component in the General tab with two image fields: Card Cover (`thumbnail_image`) and Banner Image (`banner_image`).
 
 ### Improvements
 
 - **Field size consistency** — Podcast episode title and description fields now use the same shadcn Input/Textarea components and fieldClassName as all other dashboard edit pages (Course, Community, Podcast General, etc.), ensuring consistent sizing and styling across the admin dashboard.
+- **Course detail page hero** — The course detail page hero banner now uses `banner_image` as the primary image source, with `thumbnail_image` as fallback. The old image/video toggle UI was removed.
+- **Course thumbnail delete endpoint** — Added `DELETE /courses/{uuid}/thumbnail` endpoint (previously missing), enabling removal of card cover images from the course media section.
+- **Scrollbar visibility** — Global scrollbar styling applied across the platform for consistent scrollbar visibility (Windows WebKit scrollbar styling in `globals.css`, removed `scrollbar-hide` class from `OrgMenu.tsx`).
+- **Searchbar consistency** — The API Documentation searchbar (Org Edit API Access tab) was updated to use the same raw `<input>` styling as the modules/lessons listing searchbar, replacing the previous `<Input>` component for visual consistency.
 
 ---
 

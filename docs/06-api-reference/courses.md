@@ -54,7 +54,8 @@ GET /api/v1/courses/org_slug/my-org/page/1/limit/10?visibility=public
       "public": true,
       "access": "public",
       "price": null,
-      "thumbnail": "https://cdn.koodook.com/thumbnails/abc123.jpg",
+      "thumbnail_image": "https://cdn.koodook.com/thumbnails/abc123.jpg",
+      "banner_image": "",
       "tags": ["math", "algebra", "beginner"],
       "created_at": "2026-09-20T10:00:00Z",
       "updated_at": "2026-09-22T15:30:00Z"
@@ -97,8 +98,10 @@ GET /api/v1/courses/{course_uuid}
   "learnings": "By the end of this course, students will understand basic algebraic concepts.",
   "about": "This course covers variables, equations, and functions.",
   "tags": ["math", "algebra", "beginner"],
-  "thumbnail": "https://cdn.koodook.com/thumbnails/abc123.jpg",
-  "thumbnail_type": "upload",
+  "thumbnail_image": "https://cdn.koodook.com/thumbnails/abc123.jpg",
+  "thumbnail_video": "",
+  "thumbnail_type": "IMAGE",
+  "banner_image": "",
   "extra_metadata": {},
   "org_id": 1,
   "created_at": "2026-09-20T10:00:00Z",
@@ -206,9 +209,10 @@ POST /api/v1/courses/{org_id}
 | `learnings` | string | No | Learning objectives |
 | `tags` | string | No | Comma-separated tags |
 | `about` | string | No | Detailed course description |
-| `thumbnail_type` | string | No | `"upload"` or `"url"` |
+| `thumbnail_type` | string | No | `"IMAGE"`, `"VIDEO"`, or `"BOTH"` |
+| `thumbnail_image` | string | No | Card cover image URL |
+| `banner_image` | string | No | Banner image URL |
 | `extra_metadata` | string (JSON) | No | Arbitrary JSON metadata string |
-| `thumbnail` | file | No | Course thumbnail image file |
 
 ### Example Request
 
@@ -450,6 +454,82 @@ GET /api/v1/courses/org_slug/{org_slug}/count
 
 ---
 
+## Update Course Thumbnail
+
+Upload a card cover image for the course.
+
+```
+PUT /api/v1/courses/{course_uuid}/thumbnail
+```
+
+### Request Body (Multipart Form Data)
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `file` | file | Yes | Image file (JPG/PNG, max 8MB) |
+
+### Response Body (200 OK)
+
+```json
+{
+  "thumbnail_image": "https://cdn.koodook.com/media/course_abc123/thumbnail.jpg"
+}
+```
+
+---
+
+## Delete Course Thumbnail
+
+Remove the card cover image from a course.
+
+```
+DELETE /api/v1/courses/{course_uuid}/thumbnail
+```
+
+### Response
+
+`204 No Content` on success.
+
+---
+
+## Update Course Banner
+
+Upload a hero banner image for the course detail page.
+
+```
+PUT /api/v1/courses/{course_uuid}/banner
+```
+
+### Request Body (Multipart Form Data)
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `file` | file | Yes | Image file (JPG/PNG, max 8MB) |
+
+### Response Body (200 OK)
+
+```json
+{
+  "banner_image": "https://cdn.koodook.com/media/course_abc123/banner.jpg"
+}
+```
+
+---
+
+## Delete Course Banner
+
+Remove the banner image from a course.
+
+```
+DELETE /api/v1/courses/{course_uuid}/banner
+```
+
+### Response
+
+`204 No Content` on success.
+
+---
+
 ## Get Course Rights
 
 Retrieve granular access rights for a course, including ownership, roles, and permissions.
@@ -538,8 +618,10 @@ GET /api/v1/courses/{course_uuid}/updates
 | `learnings` | text | Learning objectives |
 | `about` | text | Detailed description |
 | `tags` | array | Categorization tags |
-| `thumbnail` | string | Thumbnail URL |
-| `thumbnail_type` | string | `upload` or `url` |
+| `thumbnail_image` | string | Card cover image URL (course card thumbnail) |
+| `thumbnail_video` | string | Video thumbnail URL |
+| `thumbnail_type` | string | `IMAGE`, `VIDEO`, or `BOTH` |
+| `banner_image` | string | Hero banner image URL (course detail page) |
 | `extra_metadata` | JSON | Arbitrary metadata |
 | `created_at` | datetime | Creation timestamp |
 | `updated_at` | datetime | Last update timestamp |

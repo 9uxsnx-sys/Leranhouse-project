@@ -566,6 +566,107 @@ const SUBPAGE_LABELS: Record<string, Record<string, string>> = {
 - `AdminBreadcrumbNav` is defined in [`AdminTopBar.tsx`](file:///c:/Projects/learnhouse-dev/learnhouse-dev/apps/web/components/Dashboard/Menus/AdminTopBar.tsx)
 - Rendered by [`AdminTopBar`](file:///c:/Projects/learnhouse-dev/learnhouse-dev/apps/web/components/Dashboard/Menus/AdminTopBar.tsx) which is used in [`ClientAdminLayout.tsx`](file:///c:/Projects/learnhouse-dev/learnhouse-dev/apps/web/app/orgs/%5Borgslug%5D/dash/ClientAdminLayout.tsx)
 
+## Scrollbar styling
+
+The platform applies consistent scrollbar visibility across all browsers for a uniform look.
+
+### Global styling (`globals.css`)
+
+```css
+/* WebKit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db transparent;
+}
+```
+
+### Usage notes
+
+- Scrollbars are **always visible** (not auto-hiding) to improve discoverability of scrollable content.
+- The `scrollbar-hide` Tailwind class was removed from main content containers to ensure scrollbars remain visible.
+- The 8px width provides a balance between usability and visual footprint.
+
+---
+
+## Search bar + toolbar
+
+### Layout
+
+```tsx
+<div className="flex items-center gap-x-2">
+  {/* Search — left side, grows */}
+  <div className="relative flex-1">
+    <Input
+      type="search"
+      placeholder="Search…"
+      value={searchQuery}
+      onChange={(e) => setSearchQuery(e.target.value)}
+    />
+  </div>
+
+  {/* Count — subtle text */}
+  <span className="txt-small text-ui-fg-muted whitespace-nowrap">
+    {filteredCount} items
+  </span>
+
+  {/* Spacer pushes actions right */}
+  <div className="flex-1" />
+
+  {/* Sort toggle */}
+  <IconButton variant="transparent" size="small" onClick={toggleSort}>
+    <ArrowUpDown className="h-4 w-4" />
+  </IconButton>
+
+  {/* Primary action */}
+  <Button variant="primary" size="small" onClick={handleAdd}>
+    <Plus />
+    Add
+  </Button>
+</div>
+```
+
+### Key elements
+
+| Element          | Purpose                                     |
+| ---------------- | ------------------------------------------- |
+| Search input     | Filters list items by text                  |
+| Count            | Shows filtered/total count                  |
+| `flex-1` spacer  | Separates search from toolbar actions       |
+| Sort toggle      | Switches between ascending / descending     |
+| Action button    | Primary action (e.g., "Add", "Create")      |
+
+### Searchbar variants
+
+Two searchbar styles are used across the platform:
+
+| Variant | Component | Where Used |
+|---------|-----------|------------|
+| **Full Input** | shadcn `<Input type="search">` | Module/lesson listing in course editor, content library, and most list views |
+| **Raw input** | `<input className="... bg-ui-bg-field">` | API Documentation searchbar (Org Edit → API Access tab) — matches the raw input styling of the full variant without shadcn wrapper overhead |
+
+Both variants use the same field styling classes for visual consistency:
+```css
+bg-ui-bg-field border border-ui-border-base rounded-md px-3 py-2 text-sm
+```
+
+Used in `EditCourseStructure.tsx` (module list), `ModuleForm.tsx` (lesson list), `OrgEditAPIAccess.tsx` (API docs search), and similar list views.
+
 ## Related files
 
 - **[Design tokens](./design-tokens.md)** — All token values referenced by these patterns
