@@ -772,6 +772,194 @@ async def update_course_thumbnail(
     return course
 
 
+async def update_course_banner(
+    request: Request,
+    course_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+    banner_file: UploadFile | None = None,
+):
+    from src.services.courses.banners import upload_course_banner, delete_course_banner_file
+
+    statement = select(Course).where(Course.course_uuid == course_uuid)
+    course = db_session.exec(statement).first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    # RBAC check
+    await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.UPDATE)
+
+    # Get org uuid
+    org_statement = select(Organization).where(Organization.id == course.org_id)
+    org = db_session.exec(org_statement).first()
+
+    # Delete old banner file if exists
+    if course.banner_image:
+        await delete_course_banner_file(org.org_uuid, course.course_uuid, course.banner_image)  # type: ignore
+
+    # Upload new banner
+    name_in_disk = None
+    if banner_file and banner_file.filename:
+        name_in_disk = await upload_course_banner(
+            banner_file, org.org_uuid, course.course_uuid  # type: ignore
+        )
+
+    if not name_in_disk:
+        raise HTTPException(
+            status_code=500,
+            detail="Issue with banner upload",
+        )
+
+    course.banner_image = name_in_disk
+    course.update_date = str(datetime.now())
+
+    db_session.add(course)
+    db_session.commit()
+    db_session.refresh(course)
+
+    # Get course authors
+    authors_statement = (
+        select(ResourceAuthor, User)
+        .join(User, ResourceAuthor.user_id == User.id)
+        .where(ResourceAuthor.resource_uuid == course.course_uuid)
+        .order_by(ResourceAuthor.id.asc())
+    )
+    author_results = db_session.exec(authors_statement).all()
+
+    authors = [
+        AuthorWithRole(
+            user=UserRead.model_validate(user),
+            authorship=resource_author.authorship,
+            authorship_status=resource_author.authorship_status,
+            creation_date=resource_author.creation_date,
+            update_date=resource_author.update_date
+        )
+        for resource_author, user in author_results
+    ]
+
+    course = CourseRead(**course.model_dump(), authors=authors)
+
+    return course
+
+
+async def delete_course_banner(
+    request: Request,
+    course_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+):
+    from src.services.courses.banners import delete_course_banner_file
+
+    statement = select(Course).where(Course.course_uuid == course_uuid)
+    course = db_session.exec(statement).first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.UPDATE)
+
+    org_statement = select(Organization).where(Organization.id == course.org_id)
+    org = db_session.exec(org_statement).first()
+
+    if course.banner_image:
+        await delete_course_banner_file(org.org_uuid, course.course_uuid, course.banner_image)  # type: ignore
+
+    course.banner_image = ""
+    course.update_date = str(datetime.now())
+
+    db_session.add(course)
+    db_session.commit()
+    db_session.refresh(course)
+
+    authors_statement = (
+        select(ResourceAuthor, User)
+        .join(User, ResourceAuthor.user_id == User.id)
+        .where(ResourceAuthor.resource_uuid == course.course_uuid)
+        .order_by(ResourceAuthor.id.asc())
+    )
+    author_results = db_session.exec(authors_statement).all()
+
+    authors = [
+        AuthorWithRole(
+            user=UserRead.model_validate(user),
+            authorship=resource_author.authorship,
+            authorship_status=resource_author.authorship_status,
+            creation_date=resource_author.creation_date,
+            update_date=resource_author.update_date
+        )
+        for resource_author, user in author_results
+    ]
+
+    course = CourseRead(**course.model_dump(), authors=authors)
+
+    return course
+
+
+async def delete_course_thumbnail(
+    request: Request,
+    course_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+):
+    from src.services.courses.thumbnails import delete_course_thumbnail_file
+
+    statement = select(Course).where(Course.course_uuid == course_uuid)
+    course = db_session.exec(statement).first()
+
+    if not course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
+    await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.UPDATE)
+
+    org_statement = select(Organization).where(Organization.id == course.org_id)
+    org = db_session.exec(org_statement).first()
+
+    if course.thumbnail_image:
+        await delete_course_thumbnail_file(org.org_uuid, course.course_uuid, course.thumbnail_image)  # type: ignore
+
+    course.thumbnail_image = ""
+    course.thumbnail_video = ""
+    course.thumbnail_type = ThumbnailType.IMAGE
+    course.update_date = str(datetime.now())
+
+    db_session.add(course)
+    db_session.commit()
+    db_session.refresh(course)
+
+    authors_statement = (
+        select(ResourceAuthor, User)
+        .join(User, ResourceAuthor.user_id == User.id)
+        .where(ResourceAuthor.resource_uuid == course.course_uuid)
+        .order_by(ResourceAuthor.id.asc())
+    )
+    author_results = db_session.exec(authors_statement).all()
+
+    authors = [
+        AuthorWithRole(
+            user=UserRead.model_validate(user),
+            authorship=resource_author.authorship,
+            authorship_status=resource_author.authorship_status,
+            creation_date=resource_author.creation_date,
+            update_date=resource_author.update_date
+        )
+        for resource_author, user in author_results
+    ]
+
+    course = CourseRead(**course.model_dump(), authors=authors)
+
+    return course
+
+
 async def update_course(
     request: Request,
     course_object: CourseUpdate,

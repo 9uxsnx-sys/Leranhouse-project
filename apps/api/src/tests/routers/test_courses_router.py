@@ -436,6 +436,44 @@ class TestUpdateCourse:
         assert response.json()["thumbnail_image"] == "updated.png"
 
 
+class TestCourseBannerEndpoints:
+    async def test_upload_course_banner(self, client):
+        with patch(
+            "src.routers.courses.courses.update_course_banner",
+            new_callable=AsyncMock,
+            return_value=_mock_course_read(banner_image="banner.png"),
+        ):
+            response = await client.put(
+                "/api/v1/courses/course_test/banner",
+                files={"banner": ("banner.png", b"img", "image/png")},
+            )
+
+        assert response.status_code == 200
+        assert response.json()["banner_image"] == "banner.png"
+
+    async def test_delete_course_banner(self, client):
+        with patch(
+            "src.routers.courses.courses.delete_course_banner",
+            new_callable=AsyncMock,
+            return_value=_mock_course_read(banner_image=""),
+        ):
+            response = await client.delete("/api/v1/courses/course_test/banner")
+
+        assert response.status_code == 200
+        assert response.json()["banner_image"] == ""
+
+    async def test_delete_course_thumbnail(self, client):
+        with patch(
+            "src.routers.courses.courses.delete_course_thumbnail",
+            new_callable=AsyncMock,
+            return_value=_mock_course_read(thumbnail_image=""),
+        ):
+            response = await client.delete("/api/v1/courses/course_test/thumbnail")
+
+        assert response.status_code == 200
+        assert response.json()["thumbnail_image"] == ""
+
+
 class TestDeleteCourse:
     async def test_delete_course(self, client):
         with patch(

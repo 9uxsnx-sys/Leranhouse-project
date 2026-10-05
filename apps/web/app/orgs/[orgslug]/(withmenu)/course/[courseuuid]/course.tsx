@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
 import {
   getCourseThumbnailMediaDirectory,
+  getCourseBannerMediaDirectory,
 } from '@services/media/media'
 import { ArrowRight, Backpack, Check, File, StickyNote, Video, Square, Image as ImageIcon, BookCopy, Lock, Clock, BookOpen, Award, Download, ChevronDown, BarChart3 } from 'lucide-react'
 import { useOrg } from '@components/Contexts/OrgContext'
@@ -33,7 +34,6 @@ const CourseClient = (props: any) => {
   const { t } = useTranslation()
   const [learnings, setLearnings] = useState<any>([])
   const [expandedChapters, setExpandedChapters] = useState<{[key: string]: boolean}>({})
-  const [activeThumbnailType, setActiveThumbnailType] = useState<'image' | 'video'>('image')
   const courseuuid = props.courseuuid
   const orgslug = props.orgslug
   const initialCourse = props.course
@@ -262,9 +262,15 @@ const CourseClient = (props: any) => {
       ) : (
         <>
           <GeneralWrapperStyled>
-            {/* ── HERO IMAGE (centered, constrained) ── */}
+            {/* ── HERO BANNER IMAGE (centered, constrained) ── */}
             <div className="relative w-full mx-auto max-w-7xl aspect-[3/1] rounded-xl overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-gray-100 ring-1 ring-inset ring-black/5">
-              {course.thumbnail_image ? (
+              {course.banner_image ? (
+                <img
+                  src={getCourseBannerMediaDirectory(org?.org_uuid, course?.course_uuid, course?.banner_image)}
+                  alt={course.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : course.thumbnail_image ? (
                 <img
                   src={getCourseThumbnailMediaDirectory(org?.org_uuid, course?.course_uuid, course?.thumbnail_image)}
                   alt={course.name}
@@ -276,23 +282,7 @@ const CourseClient = (props: any) => {
                     <div className="w-20 h-20 rounded-2xl bg-white shadow-sm ring-1 ring-black/5 flex items-center justify-center mx-auto">
                       <BookOpen className="w-10 h-10 text-indigo-400" />
                     </div>
-                    <Text size="small" className="text-gray-400 mt-3">Course thumbnail</Text>
-                  </div>
-                </div>
-              )}
-              {course.thumbnail_type === 'both' && (
-                <div className="absolute top-3 right-3 z-10">
-                  <div className="bg-white/80 backdrop-blur-sm rounded-lg p-1 flex space-x-1 shadow-sm ring-1 ring-black/5">
-                    <button onClick={() => setActiveThumbnailType('image')}
-                      className={`flex items-center px-2 py-1 rounded-md text-xs font-medium transition-colors ${activeThumbnailType === 'image' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}>
-                      <ImageIcon size={12} className="mr-1" />
-                      {t('courses.image')}
-                    </button>
-                    <button onClick={() => setActiveThumbnailType('video')}
-                      className={`flex items-center px-2 py-1 rounded-md text-xs font-medium transition-colors ${activeThumbnailType === 'video' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}>
-                      <Video size={12} className="mr-1" />
-                      {t('activities.video')}
-                    </button>
+                    <Text size="small" className="text-gray-400 mt-3">Course banner</Text>
                   </div>
                 </div>
               )}

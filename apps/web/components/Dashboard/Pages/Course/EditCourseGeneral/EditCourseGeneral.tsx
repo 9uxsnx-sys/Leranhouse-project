@@ -7,7 +7,7 @@ import { useFormik } from 'formik';
 import { AlertTriangle, Eye, Globe, GlobeLock, Loader2, Check, SaveAllIcon } from 'lucide-react';
 import * as Form from '@radix-ui/react-form';
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
-import ThumbnailUpdate from './ThumbnailUpdate';
+import CourseMediaSection from './CourseMediaSection';
 import {
   useCourseFieldSync,
   useCourseDispatch,
@@ -20,13 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useTranslation } from 'react-i18next';
 import { SafeImage } from '@components/Objects/SafeImage';
-import {
-  CustomSelect,
-  CustomSelectTrigger,
-  CustomSelectValue,
-  CustomSelectContent,
-  CustomSelectItem,
-} from './CustomSelect';
+
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { updateCourse } from '@services/courses/courses';
 import { revalidateTags } from '@services/utils/ts/requests';
@@ -516,45 +510,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
               </div>
 
               {/* ── MEDIA ── */}
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Media</h3>
-                <div className="space-y-4">
-                  <FormField name="thumbnail_type">
-                    <FormLabelAndMessage label={t('dashboard.courses.general.form.thumbnail_type_label')} />
-                    <Form.Control asChild>
-                      <CustomSelect
-                        value={formik.values.thumbnail_type}
-                        onValueChange={(value) => {
-                          if (!value) return;
-                          formik.setFieldValue('thumbnail_type', value);
-                        }}
-                        disabled={isSaving}
-                      >
-                        <CustomSelectTrigger className="w-full bg-white">
-                          <CustomSelectValue>
-                            {formik.values.thumbnail_type === 'image' ? t('dashboard.courses.general.form.thumbnail_type_image') :
-                             formik.values.thumbnail_type === 'video' ? t('dashboard.courses.general.form.thumbnail_type_video') :
-                             formik.values.thumbnail_type === 'both' ? t('dashboard.courses.general.form.thumbnail_type_both') :
-                             t('dashboard.courses.general.form.thumbnail_type_image')}
-                          </CustomSelectValue>
-                        </CustomSelectTrigger>
-                        <CustomSelectContent>
-                          <CustomSelectItem value="image">{t('dashboard.courses.general.form.thumbnail_type_image')}</CustomSelectItem>
-                          <CustomSelectItem value="video">{t('dashboard.courses.general.form.thumbnail_type_video')}</CustomSelectItem>
-                          <CustomSelectItem value="both">{t('dashboard.courses.general.form.thumbnail_type_both')}</CustomSelectItem>
-                        </CustomSelectContent>
-                      </CustomSelect>
-                    </Form.Control>
-                  </FormField>
-
-                  <FormField name="thumbnail">
-                    <FormLabelAndMessage label={t('dashboard.courses.general.form.thumbnail_label')} />
-                    <Form.Control asChild>
-                      <ThumbnailUpdate thumbnailType={formik.values.thumbnail_type} />
-                    </Form.Control>
-                  </FormField>
-                </div>
-              </div>
+              <CourseMediaSection />
 
               {/* ── COURSE DETAILS ── */}
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">

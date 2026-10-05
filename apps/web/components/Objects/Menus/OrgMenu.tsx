@@ -371,7 +371,7 @@ export const OrgMenu = ({
         </aside>
 
         {/* Right column — shell.tsx (flex h-screen w-full flex-col overflow-auto) */}
-        <div className="flex h-full w-full flex-col overflow-auto scrollbar-hide min-h-0">
+        <div className="flex h-full w-full flex-col overflow-auto min-h-0">
           {/* Topbar — shell.tsx Topbar (grid w-full grid-cols-2 border-b p-3, canvas shows through) */}
           <header className="grid w-full grid-cols-2 border-b p-3">
             <div className="flex items-center gap-x-1.5">

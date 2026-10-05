@@ -31,6 +31,9 @@ from src.services.courses.courses import (
     update_course,
     delete_course,
     update_course_thumbnail,
+    update_course_banner,
+    delete_course_banner,
+    delete_course_thumbnail,
     search_courses,
     get_course_user_rights,
     clone_course,
@@ -348,6 +351,83 @@ async def api_create_course_thumbnail(
     """
     return await update_course_thumbnail(
         request, course_uuid, current_user, db_session, thumbnail, thumbnail_type
+    )
+
+
+@router.delete(
+    "/{course_uuid}/thumbnail",
+    response_model=CourseRead,
+    summary="Delete course thumbnail",
+    description="Remove the thumbnail image/video from a course.",
+    responses={
+        200: {"description": "Thumbnail deleted successfully", "model": CourseRead},
+        403: {"description": "User lacks permission to update the course"},
+        404: {"description": "Course not found"},
+    },
+)
+async def api_delete_course_thumbnail(
+    request: Request,
+    course_uuid: str,
+    db_session: Session = Depends(get_db_session),
+    current_user: PublicUser = Depends(get_current_user),
+) -> CourseRead:
+    """
+    Delete a course thumbnail.
+    """
+    return await delete_course_thumbnail(
+        request, course_uuid, current_user, db_session
+    )
+
+
+@router.put(
+    "/{course_uuid}/banner",
+    response_model=CourseRead,
+    summary="Update course banner image",
+    description="Upload or replace the banner image for a course.",
+    responses={
+        200: {"description": "Banner updated successfully", "model": CourseRead},
+        403: {"description": "User lacks permission to update the course"},
+        404: {"description": "Course not found"},
+        422: {"description": "Invalid banner file"},
+    },
+)
+async def api_upload_course_banner(
+    request: Request,
+    course_uuid: str,
+    banner: UploadFile | None = None,
+    db_session: Session = Depends(get_db_session),
+    current_user: PublicUser = Depends(get_current_user),
+) -> CourseRead:
+    """
+    Upload or replace a course banner image.
+    """
+    return await update_course_banner(
+        request, course_uuid, current_user, db_session, banner
+    )
+
+
+@router.delete(
+    "/{course_uuid}/banner",
+    response_model=CourseRead,
+    summary="Delete course banner image",
+    description="Remove the banner image from a course.",
+    responses={
+        200: {"description": "Banner deleted successfully", "model": CourseRead},
+        403: {"description": "User lacks permission to update the course"},
+        404: {"description": "Course not found"},
+    },
+)
+async def api_delete_course_banner(
+    request: Request,
+    course_uuid: str,
+    db_session: Session = Depends(get_db_session),
+    current_user: PublicUser = Depends(get_current_user),
+) -> CourseRead:
+    """
+    Delete a course banner image.
+    """
+    return await delete_course_banner(
+        request, course_uuid, current_user, db_session
     )
 
 

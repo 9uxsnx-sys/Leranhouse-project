@@ -93,6 +93,33 @@ export async function updateCourseThumbnail(course_uuid: any, formData: FormData
   return res
 }
 
+export async function deleteCourseThumbnail(course_uuid: any, access_token: any) {
+  const result: any = await fetch(
+    `${getAPIUrl()}courses/${course_uuid}/thumbnail`,
+    RequestBodyWithAuthHeader('DELETE', null, null, access_token)
+  )
+  const res = await getResponseMetadata(result)
+  return res
+}
+
+export async function updateCourseBanner(course_uuid: any, formData: FormData, access_token: any) {
+  const result: any = await fetch(
+    `${getAPIUrl()}courses/${course_uuid}/banner`,
+    RequestBodyFormWithAuthHeader('PUT', formData, null, access_token)
+  )
+  const res = await getResponseMetadata(result)
+  return res
+}
+
+export async function deleteCourseBanner(course_uuid: any, access_token: any) {
+  const result: any = await fetch(
+    `${getAPIUrl()}courses/${course_uuid}/banner`,
+    RequestBodyWithAuthHeader('DELETE', null, null, access_token)
+  )
+  const res = await getResponseMetadata(result)
+  return res
+}
+
 export async function createNewCourse(
   org_id: string,
   course_body: any,

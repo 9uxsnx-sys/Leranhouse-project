@@ -54,6 +54,7 @@ class CourseBase(SQLModel):
     thumbnail_type: Optional[ThumbnailType] = Field(default=ThumbnailType.IMAGE)
     thumbnail_image: Optional[str] = Field(default="")
     thumbnail_video: Optional[str] = Field(default="")
+    banner_image: Optional[str] = Field(default="")
     public: bool
     published: bool = Field(default=False)
     open_to_contributors: bool
@@ -80,6 +81,7 @@ class CourseCreate(CourseBase):
     thumbnail_type: Optional[ThumbnailType] = Field(default=ThumbnailType.IMAGE)
     thumbnail_image: Optional[str] = Field(default="")
     thumbnail_video: Optional[str] = Field(default="")
+    banner_image: Optional[str] = Field(default="")
     extra_metadata: Optional[dict] = None
     pass
 
@@ -93,6 +95,7 @@ class CourseUpdate(SQLModel):
     thumbnail_type: Optional[ThumbnailType] = None
     thumbnail_image: Optional[str] = None
     thumbnail_video: Optional[str] = None
+    banner_image: Optional[str] = None
     public: Optional[bool] = None
     published: Optional[bool] = None
     open_to_contributors: Optional[bool] = None
@@ -110,6 +113,7 @@ class CourseRead(CourseBase):
     thumbnail_type: Optional[ThumbnailType] = Field(default=ThumbnailType.IMAGE)
     thumbnail_image: Optional[str] = Field(default="")
     thumbnail_video: Optional[str] = Field(default="")
+    banner_image: Optional[str] = Field(default="")
     seo: Optional[dict] = None
     extra_metadata: Optional[dict] = None
 
@@ -124,6 +128,7 @@ class FullCourseRead(CourseBase):
     thumbnail_type: Optional[ThumbnailType] = Field(default=ThumbnailType.IMAGE)
     thumbnail_image: Optional[str] = Field(default="")
     thumbnail_video: Optional[str] = Field(default="")
+    banner_image: Optional[str] = Field(default="")
     seo: Optional[dict] = None
     extra_metadata: Optional[dict] = None
     # Chapters, Activities
