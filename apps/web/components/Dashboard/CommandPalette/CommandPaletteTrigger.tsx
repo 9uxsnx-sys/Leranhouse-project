@@ -25,9 +25,9 @@ export default function CommandPaletteTrigger({ isCollapsed = false }: Props) {
         type="button"
         onClick={() => setOpen(true)}
         aria-label={t('dashboard.search.trigger')}
-        className="flex h-9 w-full items-center justify-center rounded-lg text-ui-fg-muted transition-colors hover:bg-ui-bg-subtle-hover hover:text-ui-fg-base"
+        className="flex h-10 w-full items-center justify-center rounded-xl text-ui-fg-subtle transition-colors hover:bg-ui-bg-subtle-hover hover:text-ui-fg-base"
       >
-        <MagnifyingGlass size={16} />
+        <MagnifyingGlass size={18} />
       </button>
     )
   }
@@ -37,13 +37,13 @@ export default function CommandPaletteTrigger({ isCollapsed = false }: Props) {
       type="button"
       onClick={() => setOpen(true)}
       aria-label={t('dashboard.search.trigger')}
-      className="group flex h-9 w-full items-center gap-2.5 rounded-lg bg-ui-bg-subtle-hover px-2.5 text-left transition-colors hover:bg-ui-bg-subtle-hover"
+      className="group flex h-10 w-full items-center gap-x-2.5 rounded-xl px-4 text-left text-ui-fg-subtle transition-colors hover:bg-ui-bg-subtle-hover hover:text-ui-fg-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-fg-muted/20"
     >
-      <MagnifyingGlass size={14} className="shrink-0 text-ui-fg-muted group-hover:text-ui-fg-base" />
-      <span className="flex-1 text-[12.5px] font-normal text-ui-fg-muted group-hover:text-ui-fg-base">
+      <MagnifyingGlass size={18} className="shrink-0" />
+      <span className="flex-1 text-sm font-medium">
         {t('dashboard.search.trigger')}
       </span>
-      <kbd className="hidden sm:inline-flex shrink-0 h-[18px] items-center rounded bg-ui-bg-base px-1.5 font-sans text-[10.5px] font-medium leading-none tracking-wide text-ui-fg-muted group-hover:bg-ui-bg-subtle-hover group-hover:text-ui-fg-base">
+      <kbd className="hidden sm:inline-flex h-[18px] items-center rounded-md bg-ui-bg-base px-1.5 font-sans text-[10.5px] font-medium leading-none text-ui-fg-muted">
         {isMac ? '⌘K' : 'Ctrl K'}
       </kbd>
     </button>

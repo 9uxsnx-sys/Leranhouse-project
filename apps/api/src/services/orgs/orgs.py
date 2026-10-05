@@ -451,6 +451,10 @@ async def update_org_logo(
     db_session.commit()
     db_session.refresh(org)
 
+    # Invalidate cache so sidebar picks up the new logo immediately
+    from src.services.orgs.cache import invalidate_org_cache
+    invalidate_org_cache(org.slug)
+
     return {"detail": "Logo updated"}
 
 
@@ -487,6 +491,10 @@ async def update_org_logo_icon(
     db_session.add(org)
     db_session.commit()
     db_session.refresh(org)
+
+    # Invalidate Redis cache so the frontend sees the new logo_icon immediately
+    from src.services.orgs.cache import invalidate_org_cache
+    invalidate_org_cache(org.slug)
 
     return {"detail": "Logo icon updated"}
 

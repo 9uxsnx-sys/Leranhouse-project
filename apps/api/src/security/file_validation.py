@@ -1,6 +1,6 @@
 """
 Secure file validation utilities.
-Blocks SVG files entirely to prevent XSS attacks (CWE-79).
+SVG files are allowed but validated to prevent XSS attacks (CWE-79).
 Validates file types and content to prevent unrestricted uploads (CWE-434).
 """
 
@@ -33,7 +33,36 @@ def validate_image_content(content: bytes) -> bool:
     if magic_bytes.startswith(b'RIFF') and b'WEBP' in content[:16]:
         return True
     
-    return False
+    # SVG: XML-based, check via text validator
+    return validate_svg_content(content)
+
+
+def validate_svg_content(content: bytes) -> bool:
+    """Validate SVG content. Checks for real SVG XML and blocks XSS vectors."""
+    decoded = content.decode('utf-8', errors='replace')
+    stripped = decoded.strip()
+    
+    # Must look like an SVG (XML declaration or <svg tag)
+    if not (stripped.startswith('<?xml') or stripped.startswith('<svg')):
+        return False
+    
+    # Must contain an <svg> tag
+    if '<svg' not in stripped:
+        return False
+    
+    # Block script tags
+    if re.search(r'<script[\s>]', stripped, re.IGNORECASE):
+        return False
+    
+    # Block event handlers (onload, onerror, onclick, etc.)
+    if re.search(r'\bon\w+\s*=', stripped, re.IGNORECASE):
+        return False
+    
+    # Block javascript: URLs
+    if re.search(r'javascript\s*:', stripped, re.IGNORECASE):
+        return False
+    
+    return True
 
 
 def validate_video_content(content: bytes) -> bool:
@@ -114,8 +143,8 @@ _GB = 1024 * 1024 * 1024
 _MB = 1024 * 1024
 FILE_TYPES = {
     'image': {
-        'extensions': ['.jpg', '.jpeg', '.png', '.gif', '.webp'],
-        'mime_types': ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+        'extensions': ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'],
+        'mime_types': ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'],
         'max_size': 15 * _MB,
         'validator': validate_image_content
     },
@@ -187,10 +216,8 @@ def validate_upload(
     content = file.file.read()
     file.file.seek(0)
     
-    # Get file extension and block SVG explicitly
+    # Get file extension and validate
     ext = '.' + file.filename.split('.')[-1].lower()
-    if ext == '.svg':
-        raise HTTPException(status_code=415, detail="SVG files are not allowed for security reasons")
     
     # Find matching file type configuration
     config = None

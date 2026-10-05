@@ -23,8 +23,7 @@ The dashboard is wrapped by `apps/web/app/orgs/[orgslug]/dash/layout.tsx` (serve
 Defined in `apps/web/components/Dashboard/Menus/DashLeftMenu.tsx`. Features:
 
 - **Collapsible**: Toggles between `w-64` (256px) expanded and `w-[72px]` collapsed. State saved to `localStorage` (`dash-menu-collapsed`).
-- **Org Header**: Logo or fallback initial with org name and collapse button.
-- **Command palette trigger**: Search button that opens the command palette.
+- **Org Header**: Logo or fallback initial with org name. The collapse button is in the bottom section.
 - **Navigation groups** with section labels:
   - **General**: Home (`/dash`)
   - **Content**: Courses (`/dash/courses`), Communities (`/dash/communities`, feature-gated), Podcasts (`/dash/podcasts`, feature-gated)
@@ -38,7 +37,7 @@ Defined in `apps/web/components/Dashboard/Menus/DashLeftMenu.tsx`. Features:
 
 Defined in `apps/web/components/Dashboard/Menus/AdminTopBar.tsx`.
 
-- **Grid layout**: Breadcrumbs on the left, notifications bell and help dropdown on the right.
+- **Grid layout**: Breadcrumbs on the left, search icon, notifications bell and help dropdown on the right.
 - **Breadcrumbs** (`AdminBreadcrumbNav`): Strips the `/orgs/{slug}/dash` prefix and maps URL segments to human-readable labels for: users, settings, payments, org, analytics, courses, communities, podcasts.
 
 ## Dashboard Pages
@@ -253,7 +252,7 @@ Subpages:
 - **Medusa design tokens**: Dashboard uses the same design system as the user-facing section: CSS variables, `shadow-borders-base`, `shadow-elevation-card-rest`, `bg-ui-bg-subtle`, `text-ui-fg-muted`, etc.
 - **Role-based access**: `AdminAuthorization` component wraps the entire dashboard at the "page" level. Individual pages and actions use `useCourseRights` and permission checks.
 - **Plan-based restrictions**: `PlanBadge`, `PlanRestrictedFeature`, and plan-gated tabs (Certification, SEO) restrict features based on the organization's subscription plan.
-- **Command palette**: Global `CommandPalette` component triggered by `CommandPaletteTrigger` in the sidebar or via Ctrl+K / Cmd+K keyboard shortcut.
+- **Command palette**: Global `CommandPalette` component triggered by a search icon in the top bar or via Ctrl+K / Cmd+K keyboard shortcut.
 - **SWR data fetching**: Dashboard components use SWR for data fetching with caching and deduplication.
 - **Animated sub-navigation**: User management sub-nav uses `framer-motion`'s `AnimatePresence` for smooth expand/collapse animations.
 - **LocalStorage persistence**: Sidebar collapse state is saved to and restored from localStorage.

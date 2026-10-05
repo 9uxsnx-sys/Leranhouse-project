@@ -17,10 +17,8 @@ import {
   Headphones,
   BarChart3,
   Search,
-  MoreHorizontal,
 } from 'lucide-react'
 import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
-import CommandPaletteTrigger from '@components/Dashboard/CommandPalette/CommandPaletteTrigger'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
@@ -49,8 +47,6 @@ import { cn } from '@/lib/utils'
 import { AnimatePresence, motion } from 'framer-motion'
 import { SubNav, type SubNavItem } from '@components/ui/sub-nav'
 
-import PlanBadge from '@components/Dashboard/Shared/PlanRestricted/PlanBadge'
-import { usePlan } from '@components/Hooks/usePlan'
 
 // Nav item base and active classes (light theme variant)
 const NAV_BASE =
@@ -107,8 +103,6 @@ function DashLeftMenu() {
 
 
   if (!org || !session) return null
-
-  const plan = usePlan()
 
   // Feature visibility from API resolved_features
   const rf = org?.config?.config?.resolved_features
@@ -177,72 +171,56 @@ function DashLeftMenu() {
         isCollapsed ? "w-[72px]" : "w-64"
       )}
     >
-      {/* Header with OrgHeader style (matching user sidebar) */}
-      <div className="w-full p-3">
+      {/* Header */}
+      <div className={cn("w-full", isCollapsed ? "px-3 pt-4 pb-3" : "pt-5 pb-3")}>
         <div className={cn(
           "flex items-center",
-          isCollapsed ? "justify-center" : "justify-between"
+          isCollapsed && "justify-center"
         )}>
-          <Link
-            href={'/'}
-            className={cn(
-              "bg-ui-bg-subtle transition-fg items-center rounded-md p-0.5 outline-none hover:bg-ui-bg-subtle-hover focus-visible:shadow-borders-focus",
-              isCollapsed
-                ? "flex justify-center w-full pe-0"
-                : "grid w-full grid-cols-[24px_1fr_15px] gap-x-3 pe-2"
-            )}
-          >
-            {isCollapsed ? (
-              <>
-                {org?.logo_icon ? (
-                  <img
-                    src={getOrgLogoIconMediaDirectory(org.org_uuid, org.logo_icon)}
-                    alt={org?.name || 'Organization'}
-                    className="h-6 w-6 rounded-md object-cover"
-                  />
-                ) : (
-                  <div className="shadow-borders-base flex h-6 w-6 items-center justify-center rounded-md bg-ui-bg-base text-xs font-medium text-ui-fg-muted">
-                    {(org?.name || 'L').slice(0, 1).toUpperCase()}
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                {plan === 'enterprise' && org?.logo_image ? (
+          {isCollapsed ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link href={'/'} className="flex items-center justify-center py-1">
+                  {org?.logo_icon ? (
+                    <img
+                      src={getOrgLogoIconMediaDirectory(org.org_uuid, org.logo_icon)}
+                      alt={org?.name || 'Organization'}
+                      className="h-7 w-7 object-contain"
+                    />
+                  ) : (
+                    <span className="text-base font-semibold text-ui-fg-muted">
+                      {(org?.name || 'L').slice(0, 1).toUpperCase()}
+                    </span>
+                  )}
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="z-tooltip bg-ui-bg-base shadow-elevation-card-rest text-ui-fg-base text-xs px-2 py-1">
+                {org?.name || 'Organization'}
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            <Link href={'/'} className="block w-full px-3 outline-none">
+              {org?.logo_image ? (
+                <div className="flex items-center justify-center w-full">
                   <img
                     src={getOrgLogoMediaDirectory(org.org_uuid, org.logo_image)}
                     alt={org?.name || 'Organization'}
-                    className="h-6 w-6 rounded-md object-cover"
+                    className="max-w-[180px] max-h-14 w-auto h-auto object-contain"
                   />
-                ) : (
-                  <div className="shadow-borders-base flex h-6 w-6 items-center justify-center rounded-md bg-ui-bg-base text-xs font-medium text-ui-fg-muted">
+                </div>
+              ) : (
+                <div className="flex items-center gap-x-3">
+                  <div className="shadow-borders-base flex h-8 w-8 items-center justify-center rounded-md bg-ui-bg-base text-sm font-semibold text-ui-fg-muted">
                     {(org?.name || 'L').slice(0, 1).toUpperCase()}
                   </div>
-                )}
-                <div className="block overflow-hidden text-start">
-                  <span className="text-sm font-medium truncate text-ui-fg-base block">
+                  <span className="text-sm font-medium text-ui-fg-base truncate">
                     {org?.name || 'LearnHouse'}
                   </span>
                 </div>
-                <MoreHorizontal className="w-3.5 h-3.5 text-ui-fg-muted" />
-              </>
-            )}
-          </Link>
-          {!isCollapsed && (
-            <button
-              aria-label="Collapse sidebar"
-              onClick={toggleCollapse}
-              className="p-2 rounded-lg text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover transition-all shrink-0"
-            >
-              <PanelLeftClose className="w-[18px] h-[18px]" />
-            </button>
+              )}
+            </Link>
           )}
         </div>
-      </div>
-
-      {/* Search trigger */}
-      <div className="px-3 pt-3">
-        <CommandPaletteTrigger isCollapsed={isCollapsed} />
       </div>
 
       {/* Main Navigation - Vertically Centered */}
@@ -373,6 +351,25 @@ function DashLeftMenu() {
       {/* Bottom Section */}
       <div className="border-t border-gray-200 py-3 px-3 shrink-0">
         <div className="space-y-1">
+          {/* Collapse sidebar button (expanded state) */}
+          {!isCollapsed && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  aria-label="Collapse sidebar"
+                  onClick={toggleCollapse}
+                  className="flex items-center w-full h-10 px-4 gap-x-2.5 rounded-xl text-ui-fg-subtle hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover transition-all"
+                >
+                  <PanelLeftClose className="w-[18px] h-[18px]" />
+                  <span className="text-sm font-medium">{t('common.collapse')}</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="z-tooltip bg-ui-bg-base shadow-elevation-card-rest text-ui-fg-base text-xs px-2 py-1">
+                {t('common.collapse')}
+              </TooltipContent>
+            </Tooltip>
+          )}
+
           {/* Expand button when collapsed */}
           {isCollapsed && (
             <Tooltip>

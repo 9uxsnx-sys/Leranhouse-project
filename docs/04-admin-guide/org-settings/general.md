@@ -19,6 +19,12 @@ The **General Settings** page is the first stop when setting up your Koodook org
 - The logo is displayed in the top navigation bar of both the public site and the admin dashboard.
 - Supported formats: `.png`, `.svg`, `.jpg`, `.webp`. Maximum file size: **2 MB**.
 
+### Logo Icon (Mark)
+
+- Upload an optional **icon mark** (logomark) that appears in the collapsed sidebar.
+- Best results with **SVG** format.
+- Falls back to the first letter of the organization name if not set.
+
 ### Favicon
 
 - Upload a favicon that appears in browser tabs and bookmarks.

@@ -43,6 +43,7 @@
                    "all_assignments":  "All Assignments",
                    "recent":  "Recent",
                    "expand":  "Expand",
+                   "collapse":  "Collapse",
                    "help":  "Help",
                    "help_menu":  {
                                      "documentation":  "Documentation",

@@ -20,7 +20,7 @@ import { mutate } from 'swr'
 import { getAPIUrl } from '@services/config/config'
 import AuthBrandingTab from './AuthBrandingTab'
 
-const SUPPORTED_FILES = constructAcceptValue(['png', 'jpg'])
+const SUPPORTED_FILES = constructAcceptValue(['png', 'jpg', 'svg'])
 
 export default function OrgEditBranding() {
   const { t } = useTranslation()
@@ -54,6 +54,8 @@ export default function OrgEditBranding() {
         await uploadOrganizationLogo(org.id, file, access_token)
         await new Promise((r) => setTimeout(r, 1500))
         toast.success(t('dashboard.organization.images.toasts.logo_success'), { id: loadingToast })
+        await revalidateTags(['organizations'], org.slug)
+        mutate(`${getAPIUrl()}orgs/slug/${org.slug}`)
         router.refresh()
       } catch (err) {
         toast.error(t('dashboard.organization.images.toasts.logo_error'), { id: loadingToast })
@@ -113,6 +115,8 @@ export default function OrgEditBranding() {
         await uploadOrganizationLogoIcon(org.id, file, access_token)
         await new Promise((r) => setTimeout(r, 1500))
         toast.success('Logomark updated', { id: loadingToast })
+        await revalidateTags(['organizations'], org.slug)
+        mutate(`${getAPIUrl()}orgs/slug/${org.slug}`)
         router.refresh()
       } catch (err) {
         toast.error('Failed to upload logomark', { id: loadingToast })

@@ -70,6 +70,14 @@ Koodook exposes a full color palette system with the following categories:
 - Maximum file size: **2 MB** per logo.
 - Use **SVG** format for crisp rendering at any screen size.
 
+### Logo Icon (Mark)
+
+- Upload an **icon mark** (logomark) that appears in the collapsed sidebar state.
+- Supported formats: `.svg`, `.png`, `.jpg`, `.webp`.
+- Best results with **SVG** format for crisp rendering at small sizes.
+- Ideal size: a square icon between **100 × 100 px** and **512 × 512 px**.
+- If no logo icon is uploaded, the collapsed sidebar shows the first letter of the organization name.
+
 ### Favicon
 
 - Upload a favicon that appears in browser tabs.

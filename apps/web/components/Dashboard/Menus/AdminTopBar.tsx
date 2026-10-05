@@ -9,6 +9,7 @@ import {
   BellAlert,
   BellAlertDone,
   GlobeEurope,
+  MagnifyingGlass,
   QuestionMark,
   TriangleRightMini,
 } from '@components/Objects/Icons/MedusaIcons'
@@ -32,6 +33,7 @@ import { cn } from '@/lib/utils'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
+import { useCommandPalette } from '@components/Dashboard/CommandPalette/CommandPaletteContext'
 
 const LAST_READ_NOTIFICATION_KEY = 'notificationsLastReadAt'
 
@@ -350,6 +352,7 @@ function AdminBreadcrumbNav() {
 // ─── Top Bar ──────────────────────────────────────────────────────────────────
 export function AdminTopBar({ className }: { className?: string }) {
   const { t } = useTranslation()
+  const { setOpen } = useCommandPalette()
 
   return (
     <header className={cn('grid w-full grid-cols-2 border-b p-3 bg-ui-bg-subtle', className)}>
@@ -358,6 +361,26 @@ export function AdminTopBar({ className }: { className?: string }) {
       </div>
 
       <div className="flex items-center justify-end gap-x-3">
+        {/* Search */}
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <IconButton
+                variant="transparent"
+                size="small"
+                className="text-ui-fg-muted hover:text-ui-fg-subtle"
+                aria-label={t('dashboard.search.trigger')}
+                onClick={() => setOpen(true)}
+              >
+                <MagnifyingGlass />
+              </IconButton>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="text-xs">
+              {t('dashboard.search.trigger')}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
         {/* Notifications bell */}
         <NotificationsBell />
 

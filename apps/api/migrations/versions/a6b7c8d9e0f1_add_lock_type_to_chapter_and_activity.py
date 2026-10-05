@@ -66,12 +66,21 @@ def _install_lock_column(bind, table: str, enum_name: str) -> None:
 
     # Column exists. If it's already the enum type, we're done.
     current = _column_type(inspector, table, 'lock_type')
-    if current and enum_name in current:
-        return
+    if current:
+        # The enum name could appear as the raw type name (e.g. 'locktype')
+        # or inside the full repr (e.g. 'LOCKTYPE' or 'enum('public',...)')
+        if enum_name in current or enum_name.upper() in current.upper():
+            return
+        # Also check the type object's .name attribute (PG enum types store the name there)
+        for col in inspector.get_columns(table):
+            if col['name'] == 'lock_type' and hasattr(col['type'], 'name'):
+                if col['type'].name == enum_name:
+                    return
 
     # Existing column is VARCHAR (from an earlier partial run) — coerce any
     # lowercase values to the enum's uppercase labels, then swap the type.
-    bind.exec_driver_sql(f"UPDATE {table} SET lock_type = UPPER(lock_type)")
+    # Cast to text first since lock_type may already be an enum type which UPPER() cannot handle directly.
+    bind.exec_driver_sql(f"UPDATE {table} SET lock_type = UPPER(lock_type::text)")
     bind.exec_driver_sql(f"ALTER TABLE {table} ALTER COLUMN lock_type DROP DEFAULT")
     bind.exec_driver_sql(
         f"ALTER TABLE {table} ALTER COLUMN lock_type TYPE {enum_name} USING lock_type::{enum_name}"

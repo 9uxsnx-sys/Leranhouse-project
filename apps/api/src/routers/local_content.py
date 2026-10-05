@@ -166,6 +166,7 @@ _MIME_TYPES = {
     '.png': 'image/png',
     '.gif': 'image/gif',
     '.webp': 'image/webp',
+    '.svg': 'image/svg+xml',
     '.ico': 'image/x-icon',
     '.pdf': 'application/pdf',
     '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',

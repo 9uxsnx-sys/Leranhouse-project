@@ -7,6 +7,7 @@ export const ACCEPTED_FILE_FORMATS = {
     png: 'image/png',
     webp: 'image/webp',
     gif: 'image/gif',
+    svg: 'image/svg+xml',
     mp3: 'audio/mpeg',
     wav: 'audio/wav',
     ogg: 'audio/ogg',
