@@ -207,6 +207,21 @@ export async function uploadOrgAuthBackground(
   return res
 }
 
+export async function uploadOrganizationLogoIcon(
+  org_id: string,
+  logo_icon_file: File,
+  access_token: string
+) {
+  const formData = new FormData()
+  formData.append('logo_icon_file', logo_icon_file)
+  const result: any = await fetch(
+    `${getAPIUrl()}orgs/${org_id}/logo_icon`,
+    RequestBodyFormWithAuthHeader('PUT', formData, null, access_token)
+  )
+  const res = await errorHandling(result)
+  return res
+}
+
 export async function uploadOrganizationFavicon(
   org_id: string,
   favicon_file: File,

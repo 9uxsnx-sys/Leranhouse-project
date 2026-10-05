@@ -19,6 +19,7 @@ class OrganizationBase(SQLModel):
     links: Optional[dict] = Field(default_factory=dict, sa_column=Column(JSON))
     scripts: Optional[dict] = Field(default_factory=dict, sa_column=Column(JSON))
     logo_image: Optional[str] = None
+    logo_icon: Optional[str] = None
     thumbnail_image: Optional[str] = None
     previews: Optional[dict] = Field(default_factory=dict, sa_column=Column(JSON))
     explore: Optional[bool] = Field(default=False)
@@ -49,6 +50,7 @@ class OrganizationUpdate(SQLModel):
     links: Optional[dict] = None
     scripts: Optional[dict] = None
     logo_image: Optional[str] = None
+    logo_icon: Optional[str] = None
     thumbnail_image: Optional[str] = None
     previews: Optional[dict] = None
     label: Optional[str] = None

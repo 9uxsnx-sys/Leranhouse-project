@@ -38,6 +38,7 @@ from src.services.orgs.orgs import (
     get_orgs_by_user_admin,
     update_org,
     update_org_logo,
+    update_org_logo_icon,
     update_org_preview,
     update_org_signup_mechanism,
     update_org_ai_config,
@@ -1028,6 +1029,36 @@ async def api_update_org_logo(
     return await update_org_logo(
         request=request,
         logo_file=logo_file,
+        org_id=org_id,
+        current_user=current_user,
+        db_session=db_session,
+    )
+
+
+@router.put(
+    "/{org_id}/logo_icon",
+    summary="Update organization logo icon",
+    description="Upload a new logo icon (logomark) for the organization.",
+    responses={
+        200: {"description": "Logo icon updated."},
+        401: {"description": "Not authenticated"},
+        403: {"description": "Caller is not an organization administrator"},
+        404: {"description": "Organization not found"},
+    },
+)
+async def api_update_org_logo_icon(
+    request: Request,
+    org_id: int,
+    logo_icon_file: UploadFile,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session: Session = Depends(get_db_session),
+):
+    """
+    Update org logo icon (logomark)
+    """
+    return await update_org_logo_icon(
+        request=request,
+        logo_icon_file=logo_icon_file,
         org_id=org_id,
         current_user=current_user,
         db_session=db_session,

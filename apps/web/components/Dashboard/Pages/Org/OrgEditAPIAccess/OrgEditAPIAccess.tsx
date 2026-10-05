@@ -235,13 +235,14 @@ const OrgEditAPIAccess: React.FC = () => {
       {/* ===== Action Row ===== */}
       <div className="flex items-center justify-between">
         {showDoc ? (
-          <div className="relative flex-1 max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
-            <Input
-              placeholder="Search endpoints..."
+          <div className="relative w-80">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+            <input
+              type="text"
               value={docSearchQuery}
               onChange={(e) => setDocSearchQuery(e.target.value)}
-              className="pl-10 h-9 text-sm"
+              placeholder="Search endpoints..."
+              className="w-full h-7 pl-8 pr-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
             />
           </div>
         ) : (

@@ -84,3 +84,15 @@ async def upload_org_favicon(file: UploadFile, org_uuid: str) -> str:
         allowed_types=["image"],
         filename_prefix="favicon"
     )
+
+
+async def upload_org_logo_icon(file: UploadFile, org_uuid: str) -> str:
+    """Upload organization logo icon (logomark)."""
+    return await upload_file(
+        file=file,
+        directory="logo_icons",
+        type_of_dir="orgs",
+        uuid=org_uuid,
+        allowed_types=["image"],
+        filename_prefix="logo_icon"
+    )

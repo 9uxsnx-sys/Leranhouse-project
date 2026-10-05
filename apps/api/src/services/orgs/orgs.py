@@ -23,7 +23,7 @@ from src.db.organizations import (
 )
 from fastapi import HTTPException, UploadFile, status, Request
 
-from src.services.orgs.uploads import upload_org_logo, upload_org_preview, upload_org_thumbnail, upload_org_landing_content, upload_org_auth_background, upload_org_og_image, upload_org_favicon
+from src.services.orgs.uploads import upload_org_logo, upload_org_preview, upload_org_thumbnail, upload_org_landing_content, upload_org_auth_background, upload_org_og_image, upload_org_favicon, upload_org_logo_icon
 from src.db.organization_config import AuthBrandingConfig, SeoOrgConfig
 from src.core.ee_hooks import is_multi_org_allowed
 from src.services.webhooks.dispatch import dispatch_webhooks
@@ -452,6 +452,43 @@ async def update_org_logo(
     db_session.refresh(org)
 
     return {"detail": "Logo updated"}
+
+
+async def update_org_logo_icon(
+    request: Request,
+    logo_icon_file: UploadFile,
+    org_id: int,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+):
+    statement = select(Organization).where(Organization.id == org_id)
+    result = db_session.exec(statement)
+
+    org = result.first()
+
+    if not org:
+        raise HTTPException(
+            status_code=404,
+            detail="Organization not found",
+        )
+
+    # RBAC check
+    await rbac_check(request, org.org_uuid, current_user, "update", db_session)
+
+    # Upload logo icon
+    name_in_disk = await upload_org_logo_icon(logo_icon_file, org.org_uuid)
+
+    # Update org
+    org.logo_icon = name_in_disk
+
+    # Complete the org object
+    org.update_date = str(datetime.now())
+
+    db_session.add(org)
+    db_session.commit()
+    db_session.refresh(org)
+
+    return {"detail": "Logo icon updated"}
 
 
 async def update_org_favicon(
