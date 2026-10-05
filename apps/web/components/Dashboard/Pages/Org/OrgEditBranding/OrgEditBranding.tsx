@@ -4,11 +4,11 @@ import { UploadCloud, Info, X, StarIcon, ImageIcon, Palette, LogIn } from 'lucid
 import { useRouter } from 'next/navigation'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { getOrgLogoMediaDirectory, getOrgThumbnailMediaDirectory, getOrgFaviconMediaDirectory } from '@services/media/media'
+import { getOrgLogoMediaDirectory, getOrgThumbnailMediaDirectory, getOrgFaviconMediaDirectory, getOrgLogoIconMediaDirectory } from '@services/media/media'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@components/ui/tabs"
 import { toast } from 'react-hot-toast'
 import { constructAcceptValue } from '@/lib/constants'
-import { uploadOrganizationLogo, uploadOrganizationThumbnail, updateOrgColorConfig, updateOrgFontConfig, uploadOrganizationFavicon } from '@services/settings/org'
+import { uploadOrganizationLogo, uploadOrganizationThumbnail, updateOrgColorConfig, updateOrgFontConfig, uploadOrganizationFavicon, uploadOrganizationLogoIcon } from '@services/settings/org'
 import FontSelector from './FontSelector'
 import { cn } from '@/lib/utils'
 import { Input } from "@components/ui/input"
@@ -32,9 +32,11 @@ export default function OrgEditBranding() {
   const [localLogo, setLocalLogo] = useState<string | null>(null)
   const [localThumbnail, setLocalThumbnail] = useState<string | null>(null)
   const [localFavicon, setLocalFavicon] = useState<string | null>(null)
+  const [localLogoIcon, setLocalLogoIcon] = useState<string | null>(null)
   const [isLogoUploading, setIsLogoUploading] = useState(false)
   const [isThumbnailUploading, setIsThumbnailUploading] = useState(false)
   const [isFaviconUploading, setIsFaviconUploading] = useState(false)
+  const [isLogoIconUploading, setIsLogoIconUploading] = useState(false)
 
   // Theme state
   const [primaryColor, setPrimaryColor] = useState<string>(org?.config?.config?.customization?.general?.color || org?.config?.config?.general?.color || '')
@@ -97,6 +99,25 @@ export default function OrgEditBranding() {
         toast.error(t('dashboard.organization.images.toasts.logo_error'), { id: loadingToast })
       } finally {
         setIsFaviconUploading(false)
+      }
+    }
+  }
+
+  const handleLogoIconChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      const file = event.target.files[0]
+      setLocalLogoIcon(URL.createObjectURL(file))
+      setIsLogoIconUploading(true)
+      const loadingToast = toast.loading('Uploading logomark...')
+      try {
+        await uploadOrganizationLogoIcon(org.id, file, access_token)
+        await new Promise((r) => setTimeout(r, 1500))
+        toast.success('Logomark updated', { id: loadingToast })
+        router.refresh()
+      } catch (err) {
+        toast.error('Failed to upload logomark', { id: loadingToast })
+      } finally {
+        setIsLogoIconUploading(false)
       }
     }
   }
@@ -280,6 +301,57 @@ export default function OrgEditBranding() {
                           <p className="font-medium">{t('dashboard.organization.images.accepted_files')}</p>
                         </div>
                         <p className="text-gray-400">Recommended: 32×32px or 64×64px PNG</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Logomark Upload */}
+                <div className="w-full border-t border-gray-100 pt-6">
+                  <div className="flex flex-col justify-center items-center space-y-6">
+                    <div className="flex flex-col items-center space-y-2">
+                      <div
+                        className={cn(
+                          "w-[48px] h-[48px] bg-contain bg-no-repeat bg-center rounded-lg bg-white",
+                          "border-2 border-gray-100 hover:border-blue-200 transition-all duration-300",
+                          isLogoIconUploading && "opacity-50"
+                        )}
+                        style={{ backgroundImage: `url(${localLogoIcon || (org?.logo_icon ? getOrgLogoIconMediaDirectory(org?.org_uuid, org?.logo_icon) : '')})` }}
+                      />
+                      <p className="text-xs text-gray-400">Logomark preview (square icon)</p>
+                    </div>
+
+                    <div className="flex flex-col items-center space-y-4">
+                      <input
+                        type="file"
+                        id="logoIconInput"
+                        accept={SUPPORTED_FILES}
+                        className="hidden"
+                        onChange={handleLogoIconChange}
+                      />
+                      <button
+                        type="button"
+                        disabled={isLogoIconUploading}
+                        className={cn(
+                          "font-medium text-sm px-6 py-2.5 rounded-full",
+                          "bg-linear-to-r from-emerald-500 to-emerald-600 text-white",
+                          "hover:from-emerald-600 hover:to-emerald-700",
+                          "shadow-xs hover:shadow-sm transition-all duration-300",
+                          "flex items-center space-x-2",
+                          isLogoIconUploading && "opacity-75 cursor-not-allowed"
+                        )}
+                        onClick={handleImageButtonClick('logoIconInput')}
+                      >
+                        <UploadCloud size={18} className={cn("", isLogoIconUploading && "animate-bounce")} />
+                        <span>{isLogoIconUploading ? 'Uploading...' : 'Upload Logomark'}</span>
+                      </button>
+
+                      <div className="flex flex-col text-xs space-y-2 items-center text-gray-500">
+                        <div className="flex items-center space-x-2 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full">
+                          <Info size={14} />
+                          <p className="font-medium">PNG, JPG</p>
+                        </div>
+                        <p className="text-gray-400">Recommended: 512×512px square</p>
                       </div>
                     </div>
                   </div>

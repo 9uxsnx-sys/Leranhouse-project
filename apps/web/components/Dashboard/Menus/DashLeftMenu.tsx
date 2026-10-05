@@ -44,7 +44,7 @@ import {
 } from "@components/ui/hover-menu"
 import { FeedbackModal } from '@components/Objects/Modals/FeedbackModal'
 import { AVAILABLE_LANGUAGES } from '@/lib/languages'
-import { getOrgLogoMediaDirectory } from '@services/media/media'
+import { getOrgLogoMediaDirectory, getOrgLogoIconMediaDirectory } from '@services/media/media'
 import { cn } from '@/lib/utils'
 import { AnimatePresence, motion } from 'framer-motion'
 import { SubNav, type SubNavItem } from '@components/ui/sub-nav'
@@ -185,25 +185,48 @@ function DashLeftMenu() {
         )}>
           <Link
             href={'/'}
-            className="bg-ui-bg-subtle transition-fg grid w-full grid-cols-[24px_1fr_15px] items-center gap-x-3 rounded-md p-0.5 pe-2 outline-none hover:bg-ui-bg-subtle-hover focus-visible:shadow-borders-focus"
-          >
-            {plan === 'enterprise' && org?.logo_image ? (
-              <img
-                src={getOrgLogoMediaDirectory(org.org_uuid, org.logo_image)}
-                alt={org?.name || 'Organization'}
-                className="h-6 w-6 rounded-md object-cover"
-              />
-            ) : (
-              <div className="shadow-borders-base flex h-6 w-6 items-center justify-center rounded-md bg-ui-bg-base text-xs font-medium text-ui-fg-muted">
-                {(org?.name || 'L').slice(0, 1).toUpperCase()}
-              </div>
+            className={cn(
+              "bg-ui-bg-subtle transition-fg items-center rounded-md p-0.5 outline-none hover:bg-ui-bg-subtle-hover focus-visible:shadow-borders-focus",
+              isCollapsed
+                ? "flex justify-center w-full pe-0"
+                : "grid w-full grid-cols-[24px_1fr_15px] gap-x-3 pe-2"
             )}
-            <div className="block overflow-hidden text-start">
-              <span className="text-sm font-medium truncate text-ui-fg-base block">
-                {org?.name || 'LearnHouse'}
-              </span>
-            </div>
-            <MoreHorizontal className="w-3.5 h-3.5 text-ui-fg-muted" />
+          >
+            {isCollapsed ? (
+              <>
+                {org?.logo_icon ? (
+                  <img
+                    src={getOrgLogoIconMediaDirectory(org.org_uuid, org.logo_icon)}
+                    alt={org?.name || 'Organization'}
+                    className="h-6 w-6 rounded-md object-cover"
+                  />
+                ) : (
+                  <div className="shadow-borders-base flex h-6 w-6 items-center justify-center rounded-md bg-ui-bg-base text-xs font-medium text-ui-fg-muted">
+                    {(org?.name || 'L').slice(0, 1).toUpperCase()}
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                {plan === 'enterprise' && org?.logo_image ? (
+                  <img
+                    src={getOrgLogoMediaDirectory(org.org_uuid, org.logo_image)}
+                    alt={org?.name || 'Organization'}
+                    className="h-6 w-6 rounded-md object-cover"
+                  />
+                ) : (
+                  <div className="shadow-borders-base flex h-6 w-6 items-center justify-center rounded-md bg-ui-bg-base text-xs font-medium text-ui-fg-muted">
+                    {(org?.name || 'L').slice(0, 1).toUpperCase()}
+                  </div>
+                )}
+                <div className="block overflow-hidden text-start">
+                  <span className="text-sm font-medium truncate text-ui-fg-base block">
+                    {org?.name || 'LearnHouse'}
+                  </span>
+                </div>
+                <MoreHorizontal className="w-3.5 h-3.5 text-ui-fg-muted" />
+              </>
+            )}
           </Link>
           {!isCollapsed && (
             <button
