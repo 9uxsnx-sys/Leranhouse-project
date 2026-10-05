@@ -75,7 +75,7 @@ Each release provides a summary of changes organized by category:
 - **Field size consistency** — Podcast episode title and description fields now use the same shadcn Input/Textarea components and fieldClassName as all other dashboard edit pages (Course, Community, Podcast General, etc.), ensuring consistent sizing and styling across the admin dashboard.
 - **Course detail page hero** — The course detail page hero banner now uses `banner_image` as the primary image source, with `thumbnail_image` as fallback. The old image/video toggle UI was removed.
 - **Course thumbnail delete endpoint** — Added `DELETE /courses/{uuid}/thumbnail` endpoint (previously missing), enabling removal of card cover images from the course media section.
-- **Scrollbar visibility** — Global scrollbar styling applied across the platform for consistent scrollbar visibility (Windows WebKit scrollbar styling in `globals.css`, removed `scrollbar-hide` class from `OrgMenu.tsx`).
+- **Scrollbar hidden globally** — Scrollbars are now hidden entirely across the platform to prevent layout shifts when dropdowns or menus open (the disappearing scrollbar was causing content to jump right). Scrolling still works via mouse wheel, keyboard, and touch. Previous custom scrollbar styling (`scrollbar-gutter: stable`, WebKit styling, Firefox `scrollbar-width: thin`) replaced with `scrollbar-width: none` and `::-webkit-scrollbar { display: none }`.
 - **Searchbar consistency** — The API Documentation searchbar (Org Edit API Access tab) was updated to use the same raw `<input>` styling as the modules/lessons listing searchbar, replacing the previous `<Input>` component for visual consistency.
 
 ---

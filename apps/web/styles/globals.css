@@ -595,9 +595,17 @@
   body {
     padding: 0;
     margin: 0;
-    scrollbar-gutter: stable;
     font-family: var(--font-default, 'Inter'), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
     letter-spacing: -0.01em;
+  }
+
+  /* Hide all scrollbars globally — no layout shift when menus open */
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
   }
 
   a {

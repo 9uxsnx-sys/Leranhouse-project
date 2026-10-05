@@ -568,39 +568,26 @@ const SUBPAGE_LABELS: Record<string, Record<string, string>> = {
 
 ## Scrollbar styling
 
-The platform applies consistent scrollbar visibility across all browsers for a uniform look.
+Scrollbars are **hidden globally** to prevent layout shifts when dropdowns or menus open (the disappearing scrollbar would otherwise cause content to jump right by the scrollbar width). Users can still scroll via mouse wheel, keyboard, or touch.
 
 ### Global styling (`globals.css`)
 
 ```css
-/* WebKit (Chrome, Safari, Edge) */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
-}
-
-/* Firefox */
+/* Hide all scrollbars globally — no layout shift when menus open */
 * {
-  scrollbar-width: thin;
-  scrollbar-color: #d1d5db transparent;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  display: none;
 }
 ```
 
 ### Usage notes
 
-- Scrollbars are **always visible** (not auto-hiding) to improve discoverability of scrollable content.
-- The `scrollbar-hide` Tailwind class was removed from main content containers to ensure scrollbars remain visible.
-- The 8px width provides a balance between usability and visual footprint.
+- Scrollbars are **hidden everywhere** — the layout never shifts when menus/modals open because no scrollbar space exists to appear or disappear.
+- Scrolling still works via mouse wheel, keyboard (arrow keys, Page Up/Down), and touch.
+- The `scrollbar-hide` utility class is no longer needed since scrollbars are hidden globally.
 
 ---
 
