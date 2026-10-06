@@ -14,7 +14,6 @@ import {
   Route,
   MagnifyingGlass,
   Stack,
-  BookOpen as BookOpenIcon,
 } from '@phosphor-icons/react'
 
 import { getUriWithOrg } from '@services/config/config'
@@ -191,7 +190,7 @@ export function SearchModal({ open, onClose, orgslug }: SearchModalProps) {
   }
 
   const renderContentItem = (r: ContentResult) => {
-    const Icon = r.type === 'course' ? BookOpenIcon : Stack
+    const Icon = r.type === 'course' ? BookOpen : Stack
     return (
       <Command.Item
         key={`${r.type}-${r.id}`}
