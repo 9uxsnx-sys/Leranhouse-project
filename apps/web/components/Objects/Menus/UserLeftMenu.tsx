@@ -129,7 +129,7 @@ function UserLeftMenu() {
     <nav
       aria-label="User sidebar navigation"
       className={cn(
-        "flex flex-col h-screen sticky top-0 z-overlay border-r border-gray-200 bg-ui-bg-subtle transition-all duration-300",
+        "hidden lg:flex flex-col h-screen sticky top-0 z-overlay border-r border-gray-200 bg-ui-bg-subtle transition-all duration-300",
         isCollapsed ? "w-[72px]" : "w-64"
       )}
     >

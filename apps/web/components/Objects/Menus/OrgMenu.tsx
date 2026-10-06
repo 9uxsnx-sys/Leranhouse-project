@@ -324,10 +324,8 @@ export const OrgMenu = ({
           ['--brand' as string]: primaryColor || '#6366f1',
         }}
       >
-        {/* Desktop sidebar */}
-        <aside className="hidden lg:flex h-full shrink-0">
-          <UserLeftMenu />
-        </aside>
+        {/* Desktop sidebar — rendered directly, matching dashboard layout */}
+        <UserLeftMenu />
 
         {/* Right column — shell.tsx (flex h-screen w-full flex-col overflow-auto) */}
         <div className="flex h-full w-full flex-col overflow-auto min-h-0">
