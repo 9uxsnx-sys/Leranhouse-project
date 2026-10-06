@@ -1,19 +1,30 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
-import Link from 'next/link'
+import React, { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
+import { Command } from 'cmdk'
+import * as DialogPrimitive from '@radix-ui/react-dialog'
 import {
+  House,
+  BookOpen,
+  Users,
+  Headphones,
+  ShoppingCart,
+  Route,
   MagnifyingGlass,
-  XMark,
-  Book,
-  FolderOpen,
-} from '@components/Objects/Icons/MedusaIcons'
-import { Text } from '@components/ui/text'
+  Stack,
+  BookOpen as BookOpenIcon,
+} from '@phosphor-icons/react'
+
+import { getUriWithOrg } from '@services/config/config'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useDebounce } from '@/hooks/useDebounce'
 import { searchOrgContent } from '@services/search/search'
-import { getUriWithOrg } from '@services/config/config'
+import { normalizeForSearch } from '@/lib/search/normalize'
 import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail'
+import type { SearchMeta } from '@/lib/dashboard-search/types'
+import useSWR from 'swr'
 
 interface SearchModalProps {
   open: boolean
@@ -21,231 +32,289 @@ interface SearchModalProps {
   orgslug: string
 }
 
-interface CourseResult {
-  course_uuid: string
-  name: string
-  description: string
-  thumbnail_image: string
+interface ContentResult {
+  id: string
+  type: 'course' | 'collection'
+  title: string
+  subtitle?: string
+  href: string
 }
 
-interface CollectionResult {
-  collection_uuid: string
-  name: string
-  description: string
-}
-
-interface SearchApiResponse {
-  courses: CourseResult[]
-  collections: CollectionResult[]
-  total_courses: number
-  total_collections: number
-}
-
-const ResultsSkeleton = () => (
-  <div className="px-3 py-4 space-y-3">
-    {[1, 2, 3].map((i) => (
-      <div key={i} className="space-y-1.5">
-        <div className="h-3 w-20 bg-ui-bg-subtle-hover rounded animate-pulse" />
-        <div className="h-4 w-full bg-ui-bg-subtle-hover rounded animate-pulse" />
-        <div className="h-3 w-3/4 bg-ui-bg-subtle-hover rounded animate-pulse" />
-      </div>
-    ))}
-  </div>
-)
+const userPages: SearchMeta[] = [
+  {
+    id: 'user.home',
+    titleKey: 'Home',
+    descriptionKey: 'Organization home page',
+    icon: House,
+    href: '',
+    group: 'navigation',
+  },
+  {
+    id: 'user.courses',
+    titleKey: 'Courses',
+    descriptionKey: 'Browse courses',
+    icon: BookOpen,
+    href: '/courses',
+    group: 'navigation',
+  },
+  {
+    id: 'user.communities',
+    titleKey: 'Communities',
+    descriptionKey: 'Browse communities',
+    icon: Users,
+    href: '/communities',
+    group: 'navigation',
+  },
+  {
+    id: 'user.podcasts',
+    titleKey: 'Podcasts',
+    descriptionKey: 'Browse podcasts',
+    icon: Headphones,
+    href: '/podcasts',
+    group: 'navigation',
+  },
+  {
+    id: 'user.store',
+    titleKey: 'Store',
+    descriptionKey: 'Browse store',
+    icon: ShoppingCart,
+    href: '/store',
+    group: 'navigation',
+  },
+  {
+    id: 'user.trail',
+    titleKey: 'Trail',
+    descriptionKey: 'Your learning progress',
+    icon: Route,
+    href: '/trail',
+    group: 'navigation',
+  },
+]
 
 export function SearchModal({ open, onClose, orgslug }: SearchModalProps) {
-  const inputRef = useRef<HTMLInputElement>(null)
+  const { t } = useTranslation()
+  const router = useRouter()
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState<{ courses: CourseResult[]; collections: CollectionResult[] }>({ courses: [], collections: [] })
-  const [isLoading, setIsLoading] = useState(false)
+  const debouncedQuery = useDebounce(query, 250)
   const session = useLHSession() as any
-  const debouncedQuery = useDebounce(query, 300)
+  const accessToken = session?.data?.tokens?.access_token
 
+  // Reset state when modal closes
   useEffect(() => {
-    if (open) {
-      inputRef.current?.focus()
-      setQuery('')
-      setResults({ courses: [], collections: [] })
-    }
+    if (!open) setQuery('')
   }, [open])
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && open) {
-        onClose()
-      }
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [open, onClose])
+  const onSelect = (href: string) => {
+    onClose()
+    router.push(href)
+  }
 
-  useEffect(() => {
-    const fetchResults = async () => {
-      if (debouncedQuery.trim().length === 0) {
-        setResults({ courses: [], collections: [] })
-        setIsLoading(false)
-        return
-      }
+  const openSelectedInNewTab = (rootEl: HTMLElement | null) => {
+    const selected = rootEl?.querySelector(
+      '[cmdk-item][aria-selected="true"]',
+    ) as HTMLElement | null
+    const href = selected?.getAttribute('data-href')
+    if (!href) return
+    window.open(href, '_blank', 'noopener,noreferrer')
+  }
 
-      setIsLoading(true)
-      try {
-        const response = await searchOrgContent(
-          orgslug,
-          debouncedQuery,
-          1,
-          5,
-          null,
-          session?.data?.tokens?.access_token
-        )
+  // Content search via SWR
+  const trimmed = debouncedQuery.trim()
+  const searchEnabled = trimmed.length >= 2 && !!orgslug
 
-        const data = response.data as SearchApiResponse
+  const { data: contentResults, isLoading } = useSWR(
+    searchEnabled ? ['user-search', orgslug, trimmed, accessToken ?? null] : null,
+    async () => {
+      const res = await searchOrgContent(orgslug, trimmed, 1, 5, null, accessToken)
+      if (!res?.success || !res?.data) return []
+      const data = res.data as any
+      const results: ContentResult[] = []
 
-        setResults({
-          courses: Array.isArray(data?.courses) ? data.courses : [],
-          collections: Array.isArray(data?.collections) ? data.collections : [],
+      for (const c of data.courses ?? []) {
+        results.push({
+          id: c.course_uuid,
+          type: 'course',
+          title: c.name,
+          subtitle: c.description ?? undefined,
+          href: getUriWithOrg(orgslug, `/course/${removeCoursePrefix(c.course_uuid)}`),
         })
-      } catch (error) {
-        console.error('Error searching content:', error)
-        setResults({ courses: [], collections: [] })
       }
-      setIsLoading(false)
-    }
+      for (const col of data.collections ?? []) {
+        results.push({
+          id: col.collection_uuid,
+          type: 'collection',
+          title: col.name,
+          subtitle: col.description ?? undefined,
+          href: getUriWithOrg(orgslug, `/collection/${col.collection_uuid}`),
+        })
+      }
 
-    fetchResults()
-  }, [debouncedQuery, orgslug, session?.data?.tokens?.access_token])
+      return results
+    },
+    {
+      keepPreviousData: true,
+      revalidateOnFocus: false,
+      dedupingInterval: 1500,
+    },
+  )
 
-  if (!open) return null
+  const isWaiting = query.trim().length >= 2 && trimmed !== query.trim()
 
-  const hasResults = results.courses.length > 0 || results.collections.length > 0
+  const renderPageItem = (p: SearchMeta) => {
+    const title = t(p.titleKey)
+    const description = p.descriptionKey ? t(p.descriptionKey) : undefined
+    const Icon = p.icon
+    const href = p.href ? getUriWithOrg(orgslug, p.href) : getUriWithOrg(orgslug, '/')
+
+    return (
+      <Command.Item
+        key={p.id}
+        value={`${title} ${description ?? ''}`}
+        onSelect={() => onSelect(href)}
+        className="group/item flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-ui-fg-muted transition-colors aria-selected:bg-ui-bg-subtle-hover aria-selected:text-ui-fg-base"
+        data-href={href}
+      >
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-ui-bg-subtle text-ui-fg-muted group-aria-selected/item:bg-ui-bg-base">
+          <Icon size={14} />
+        </span>
+        <span className="flex min-w-0 flex-1 flex-col leading-snug">
+          <span className="truncate text-[13px] font-medium text-ui-fg-base">
+            {title}
+          </span>
+          {description ? (
+            <span className="truncate text-[12px] text-ui-fg-muted">{description}</span>
+          ) : null}
+        </span>
+        <span className="hidden text-ui-fg-muted/40 group-aria-selected/item:inline text-[11px] font-medium">Open</span>
+      </Command.Item>
+    )
+  }
+
+  const renderContentItem = (r: ContentResult) => {
+    const Icon = r.type === 'course' ? BookOpenIcon : Stack
+    return (
+      <Command.Item
+        key={`${r.type}-${r.id}`}
+        value={`${r.title} ${r.subtitle ?? ''}`}
+        onSelect={() => onSelect(r.href)}
+        className="group/item flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-ui-fg-muted transition-colors aria-selected:bg-ui-bg-subtle-hover aria-selected:text-ui-fg-base"
+        data-href={r.href}
+      >
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-ui-bg-subtle text-ui-fg-muted group-aria-selected/item:bg-ui-bg-base">
+          <Icon size={14} />
+        </span>
+        <span className="flex min-w-0 flex-1 flex-col leading-snug">
+          <span className="truncate text-[13px] font-medium text-ui-fg-base">
+            {r.title}
+          </span>
+          {r.subtitle ? (
+            <span className="truncate text-[12px] text-ui-fg-muted">{r.subtitle}</span>
+          ) : null}
+        </span>
+        <span className="hidden text-ui-fg-muted/40 group-aria-selected/item:inline text-[11px] font-medium">Open</span>
+      </Command.Item>
+    )
+  }
 
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-start justify-center bg-black/40 pt-[15vh]"
-      onClick={onClose}
-    >
-      <div
-        className="bg-ui-bg-base shadow-elevation-modal dark:shadow-elevation-modal-dark w-full max-w-2xl rounded-xl mx-4 flex flex-col max-h-[60vh]"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Search input */}
-        <div className="flex items-center gap-x-3 border-b border-ui-border-base px-4 py-3 shrink-0">
-          <MagnifyingGlass className="h-4 w-4 shrink-0 text-ui-fg-muted" />
-          <input
-            ref={inputRef}
-            type="text"
-            placeholder="Search courses, collections..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-full bg-transparent text-[16px] text-ui-fg-base outline-none placeholder:text-ui-fg-muted"
-          />
-          {query && (
-            <button
-              onClick={() => setQuery('')}
-              className="flex size-6 items-center justify-center rounded-md text-ui-fg-muted hover:bg-ui-bg-subtle-hover hover:text-ui-fg-base"
+    <DialogPrimitive.Root open={open} onOpenChange={(val) => { if (!val) onClose() }}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:duration-150 data-[state=closed]:duration-100 ease-out"
+          style={{ zIndex: 'var(--z-modal-backdrop)' as any }}
+        />
+        <DialogPrimitive.Content
+          aria-label="Search"
+          className="fixed left-1/2 top-[12%] flex w-[94vw] max-w-[640px] -translate-x-1/2 flex-col overflow-hidden rounded-2xl border border-ui-border-base bg-ui-bg-base shadow-elevation-card-rest data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:slide-in-from-top-2 data-[state=closed]:slide-out-to-top-2 data-[state=open]:duration-150 data-[state=closed]:duration-100 ease-out"
+          style={{ zIndex: 'var(--z-modal)' as any }}
+          onOpenAutoFocus={(e) => {
+            e.preventDefault()
+            const input = (e.currentTarget as HTMLElement).querySelector('input')
+            if (input) (input as HTMLInputElement).focus()
+          }}
+        >
+          <DialogPrimitive.Title className="sr-only">Search</DialogPrimitive.Title>
+
+          <Command
+            label="Search"
+            shouldFilter={true}
+            filter={(value: string, search: string) => {
+              const haystack = normalizeForSearch(value)
+              const needle = normalizeForSearch(search)
+              if (!needle) return 1
+              if (haystack.includes(needle)) return 1
+              const tokens = needle.split(/\s+/u).filter(Boolean)
+              return tokens.every((tok: string) => haystack.includes(tok)) ? 0.8 : 0
+            }}
+            className="flex flex-col [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:pt-4 [&_[cmdk-group-heading]]:pb-1 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-ui-fg-muted/50"
+          >
+            {/* Header with search input */}
+            <div className="flex items-center gap-3 px-4 py-3">
+              <MagnifyingGlass size={16} className="shrink-0 text-ui-fg-muted/50" />
+              <Command.Input
+                value={query}
+                onValueChange={setQuery}
+                placeholder="Search pages, courses..."
+                onKeyDown={(e) => {
+                  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    const root = (e.currentTarget as HTMLElement).closest(
+                      '[cmdk-root]',
+                    ) as HTMLElement | null
+                    openSelectedInNewTab(root)
+                  }
+                }}
+                className="w-full bg-transparent text-[15px] font-normal leading-tight tracking-tight text-ui-fg-base outline-none placeholder:text-ui-fg-muted/50"
+              />
+              {(isLoading || isWaiting) && (
+                <span className="shrink-0 text-[11px] text-ui-fg-muted/50">Loading</span>
+              )}
+              <kbd className="hidden sm:inline-flex h-[20px] items-center rounded-md border border-ui-border-base bg-ui-bg-field px-1.5 font-sans text-[11px] font-medium leading-none text-ui-fg-muted shadow-sm">
+                Esc
+              </kbd>
+            </div>
+
+            {/* List — no dividers */}
+            <Command.List
+              className="min-h-[200px] max-h-[55vh] overflow-y-auto px-2 pb-3 scroll-py-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-ui-border-base hover:[&::-webkit-scrollbar-thumb]:bg-ui-border-hover"
+              style={{ scrollbarColor: 'rgba(0,0,0,0.12) transparent', scrollbarWidth: 'thin' }}
             >
-              <XMark className="h-4 w-4" />
-            </button>
-          )}
-        </div>
+              <Command.Empty className="px-4 py-12 text-center text-sm text-ui-fg-muted/60">
+                {isLoading || isWaiting ? 'Loading...' : 'No results found'}
+              </Command.Empty>
 
-        {/* Results area */}
-        <div className="flex-1 overflow-y-auto px-1 py-1">
-          {!query && (
-            <div className="flex flex-col items-center justify-center py-12">
-              <Text size="small" weight="plus" className="text-ui-fg-muted">
-                Type to search...
-              </Text>
-            </div>
-          )}
+              <Command.Group heading="Pages">
+                {userPages.map(renderPageItem)}
+              </Command.Group>
 
-          {query && isLoading && <ResultsSkeleton />}
-
-          {query && !isLoading && !hasResults && (
-            <div className="flex flex-col items-center justify-center py-12">
-              <Text size="small" weight="plus" className="text-ui-fg-muted">
-                No results found
-              </Text>
-            </div>
-          )}
-
-          {query && !isLoading && hasResults && (
-            <div className="flex flex-col">
-              {/* Courses */}
-              {results.courses.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-x-2 px-3 pt-3 pb-1">
-                    <Book className="h-3.5 w-3.5 text-ui-fg-muted" />
-                    <Text size="xsmall" weight="plus" className="text-ui-fg-muted uppercase tracking-wider">
-                      Courses
-                    </Text>
-                  </div>
-                  {results.courses.map((course) => (
-                    <Link
-                      key={course.course_uuid}
-                      href={getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}
-                      onClick={onClose}
-                      className="w-full text-left px-3 py-2 rounded-md hover:bg-ui-bg-subtle-hover transition-fg block"
-                    >
-                      <Text size="small" weight="plus" className="text-ui-fg-base">
-                        {course.name}
-                      </Text>
-                      <Text size="xsmall" className="text-ui-fg-muted mt-0.5 line-clamp-1">
-                        {course.description}
-                      </Text>
-                    </Link>
-                  ))}
-                </div>
+              {contentResults && contentResults.length > 0 && (
+                <Command.Group heading="Content">
+                  {contentResults.map(renderContentItem)}
+                </Command.Group>
               )}
+            </Command.List>
 
-              {/* Collections */}
-              {results.collections.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-x-2 px-3 pt-3 pb-1">
-                    <FolderOpen className="h-3.5 w-3.5 text-ui-fg-muted" />
-                    <Text size="xsmall" weight="plus" className="text-ui-fg-muted uppercase tracking-wider">
-                      Collections
-                    </Text>
-                  </div>
-                  {results.collections.map((collection) => (
-                    <Link
-                      key={collection.collection_uuid}
-                      href={getUriWithOrg(orgslug, `/collection/${collection.collection_uuid}`)}
-                      onClick={onClose}
-                      className="w-full text-left px-3 py-2 rounded-md hover:bg-ui-bg-subtle-hover transition-fg block"
-                    >
-                      <Text size="small" weight="plus" className="text-ui-fg-base">
-                        {collection.name}
-                      </Text>
-                      <Text size="xsmall" className="text-ui-fg-muted mt-0.5 line-clamp-1">
-                        {collection.description}
-                      </Text>
-                    </Link>
-                  ))}
-                </div>
-              )}
+            {/* Footer — minimal, no border */}
+            <div className="flex items-center gap-4 px-4 py-2.5 text-[11px] text-ui-fg-muted/40">
+              <span className="inline-flex items-center gap-1">
+                <span>Navigate</span>
+                <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">↑</kbd>
+                <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">↓</kbd>
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span>Open</span>
+                <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">↵</kbd>
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span>New tab</span>
+                <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">⌘</kbd>
+                <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">↵</kbd>
+              </span>
             </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        {query && !isLoading && hasResults && (
-          <div className="flex items-center gap-x-4 border-t border-ui-border-base px-4 py-2 shrink-0">
-            <div className="flex items-center gap-x-1.5">
-              <kbd className="inline-flex h-5 items-center rounded-sm border border-ui-border-base bg-ui-bg-subtle px-1.5 text-[11px] text-ui-fg-muted">↑</kbd>
-              <kbd className="inline-flex h-5 items-center rounded-sm border border-ui-border-base bg-ui-bg-subtle px-1.5 text-[11px] text-ui-fg-muted">↓</kbd>
-              <Text size="xsmall" className="text-ui-fg-muted">Navigate</Text>
-            </div>
-            <div className="flex items-center gap-x-1.5">
-              <kbd className="inline-flex h-5 items-center rounded-sm border border-ui-border-base bg-ui-bg-subtle px-1.5 text-[11px] text-ui-fg-muted">↵</kbd>
-              <Text size="xsmall" className="text-ui-fg-muted">Open</Text>
-            </div>
-            <div className="flex items-center gap-x-1.5">
-              <kbd className="inline-flex h-5 items-center rounded-sm border border-ui-border-base bg-ui-bg-subtle px-1.5 text-[11px] text-ui-fg-muted">Esc</kbd>
-              <Text size="xsmall" className="text-ui-fg-muted">Close</Text>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+          </Command>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   )
 }
