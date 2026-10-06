@@ -194,10 +194,6 @@ function UserLeftMenu() {
             style={{ top: indicatorTop, height: 40, opacity: indicatorOpacity }}
           />
           <div className="flex flex-col">
-            {/* General group */}
-            <div className={cn("px-3 pt-4 pb-1 text-[11px] font-medium uppercase tracking-wider text-ui-fg-muted", isCollapsed && "hidden")}>
-              General
-            </div>
             <div data-nav-item>
               <MenuLink
                 href={getUriWithOrg(orgslug, '/')}
@@ -208,10 +204,6 @@ function UserLeftMenu() {
               />
             </div>
 
-            {/* Content group label */}
-            <div className={cn("px-3 pt-5 pb-1 text-[11px] font-medium uppercase tracking-wider text-ui-fg-muted", isCollapsed && "hidden")}>
-              Content
-            </div>
             {/* Courses */}
             <div data-nav-item>
               <MenuLink
