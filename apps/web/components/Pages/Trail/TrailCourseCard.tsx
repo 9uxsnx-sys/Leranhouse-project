@@ -1,25 +1,13 @@
 'use client'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { getAPIUrl, getUriWithOrg } from '@services/config/config'
-import { removeCourse } from '@services/courses/activity'
+import { getUriWithOrg } from '@services/config/config'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
-import { revalidateTags } from '@services/utils/ts/requests'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getUserCertificates } from '@services/courses/certifications'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import toast from 'react-hot-toast'
-import { mutate } from 'swr'
-import { Award, ExternalLink, BookOpen, MoreVertical, Trash2 } from 'lucide-react'
+import { ExternalLink, BookOpen } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@components/ui/dropdown-menu"
 
 interface TrailCourseCardProps {
   course: any
@@ -34,7 +22,6 @@ function TrailCourseCard(props: TrailCourseCardProps) {
   const access_token = session?.data?.tokens?.access_token;
   const courseid = props.course.course_uuid.replace('course_', '')
   const course = props.course
-  const router = useRouter()
   const course_total_steps = props.run.course_total_steps
   const course_completed_steps = props.run.steps.length
   const orgID = org?.id
@@ -45,19 +32,6 @@ function TrailCourseCard(props: TrailCourseCardProps) {
 
   const [courseCertificate, setCourseCertificate] = useState<any>(null)
   const [isLoadingCertificate, setIsLoadingCertificate] = useState(false)
-
-  async function quitCourse(course_uuid: string) {
-    try {
-      await removeCourse(course_uuid, props.orgslug, access_token)
-      await revalidateTags(['courses'], props.orgslug)
-      router.refresh()
-      mutate(`${getAPIUrl()}trail/org/${orgID}/trail`)
-      toast.success('Course quit successfully')
-    } catch (error) {
-      console.error('Error quitting course:', error)
-      toast.error('Error quitting course')
-    }
-  }
 
   useEffect(() => {
     const fetchCourseCertificate = async () => {
@@ -93,33 +67,6 @@ function TrailCourseCard(props: TrailCourseCardProps) {
       className="group relative flex flex-col h-full bg-white border border-[#E7E7E7] rounded-[12px] overflow-hidden transition-all duration-200 hover:-translate-y-[1px] hover:border-[#DADADA] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
       style={{ transformOrigin: 'top center' }}
     >
-      {/* Dropdown Menu */}
-      <div className="absolute top-2 right-2 z-20">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="p-1.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md">
-              <MoreVertical size={18} className="text-gray-700" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem asChild>
-              <ConfirmationModal
-                confirmationMessage={t('courses.quit_course_confirm')}
-                confirmationButtonText={t('courses.quit_course')}
-                dialogTitle={t('courses.quit_course_title')}
-                dialogTrigger={
-                  <button className="w-full text-left flex items-center px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors">
-                    <Trash2 className="mr-2 h-4 w-4" /> {t('courses.quit_course')}
-                  </button>
-                }
-                functionToExecute={() => quitCourse(course.course_uuid)}
-                status="warning"
-              />
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
       {/* 16:9 Cover Image */}
       <Link href={courseLink} className="relative overflow-hidden bg-gray-100 shrink-0" style={{ aspectRatio: '16/9' }}>
         {props.course.thumbnail_image && org?.org_uuid ? (

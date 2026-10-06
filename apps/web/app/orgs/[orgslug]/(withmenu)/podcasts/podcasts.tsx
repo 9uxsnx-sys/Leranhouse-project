@@ -120,11 +120,9 @@ export default function PodcastsClient({
     >
       <div className="pt-8 px-6 pb-0" style={{ display: 'grid', gridTemplateRows: 'auto auto 1fr auto', minHeight: '100dvh' }}>
         {/* Page title */}
-        <div className="mb-6">
-          <h1 className="text-[28px] font-semibold text-ui-fg-base">
-            {t('podcasts.podcasts')}
-          </h1>
-        </div>
+      <h1 className="text-[28px] font-semibold text-ui-fg-base mb-6">
+        {t('podcasts.podcasts')}
+      </h1>
 
         {/* Search + Filter toolbar (only if podcasts exist) */}
         {allPodcasts.length > 0 && (
@@ -180,7 +178,7 @@ export default function PodcastsClient({
         )}
 
         {/* Podcast grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-start">
           {paginatedPodcasts.map((podcast: PodcastWithEpisodeCount) => (
             <div key={podcast.podcast_uuid} className="relative group">
               <PodcastCard
@@ -228,8 +226,8 @@ export default function PodcastsClient({
             )}
           </div>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
+        {/* Pagination — always at same position */}
+        {totalPages >= 1 && (
           <div className="flex items-center justify-center gap-1 pt-6 pb-8">
             <Button
               variant="transparent"

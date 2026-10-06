@@ -23,7 +23,7 @@ interface EditPodcastGeneralProps {
 
 function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
   const { t } = useTranslation()
-  const { podcast, refreshPodcast, isLoading } = usePodcast()
+  const { podcast, refreshPodcast, setPodcast, isLoading } = usePodcast()
   const session = useLHSession() as any
   const org = useOrg() as any
   const imageInputRef = useRef<HTMLInputElement>(null)
@@ -133,6 +133,8 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
     const toastId = toast.loading('Removing thumbnail...')
     try {
       await deletePodcastThumbnail(podcast.podcast_uuid, accessToken)
+      // Immediately clear the thumbnail in local state so UI switches instantly
+      setPodcast({ ...podcast, thumbnail_image: null as any })
       await revalidateTags(['podcasts'], orgslug)
       await refreshPodcast()
       toast.success('Thumbnail removed', { id: toastId })

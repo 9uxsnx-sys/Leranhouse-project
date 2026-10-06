@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, ChevronLeft, ChevronRight, MessagesSquare, Users } from 'lucide-react'
+import { Search, ChevronLeft, ChevronRight, MessagesSquare, Users, CheckSquare } from 'lucide-react'
 import { CommunityCard } from '@components/Objects/Thumbnails/CommunityCard'
 import { searchMatchesAny } from '@/lib/search/normalize'
 import { Community } from '@services/communities/communities'
@@ -135,11 +135,9 @@ function CommunitiesClient(props: CommunitiesClientProps) {
     <FeatureDisabledView featureName="communities" orgslug={orgslug} context="public">
     <div className="pt-8 px-6 pb-0" style={{ display: 'grid', gridTemplateRows: 'auto auto 1fr auto', minHeight: '100dvh' }}>
       {/* Page title */}
-      <div className="mb-6">
-        <h1 className="text-[28px] font-semibold text-ui-fg-base">
-          {t('communities.title') || 'Communities'}
-        </h1>
-      </div>
+      <h1 className="text-[28px] font-semibold text-ui-fg-base mb-6">
+        {t('communities.title') || 'Communities'}
+      </h1>
 
       {/* Search + Filter toolbar (only if communities exist) */}
       {allCommunities.length > 0 && (
@@ -177,18 +175,22 @@ function CommunitiesClient(props: CommunitiesClientProps) {
                 <span>{filterLabel}</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white min-w-0 w-44">
-              <DropdownMenuItem onSelect={() => setActiveFilter('all')}>
+            <DropdownMenuContent align="end" className="bg-white min-w-0 w-40">
+              <DropdownMenuItem onSelect={() => setActiveFilter('all')} className="flex items-center justify-between">
                 <span>All Communities</span>
+                {activeFilter === 'all' && <CheckSquare size={12} className="text-gray-500" />}
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setActiveFilter('newest')}>
+              <DropdownMenuItem onSelect={() => setActiveFilter('newest')} className="flex items-center justify-between">
                 <span>Newest</span>
+                {activeFilter === 'newest' && <CheckSquare size={12} className="text-gray-500" />}
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setActiveFilter('course')}>
+              <DropdownMenuItem onSelect={() => setActiveFilter('course')} className="flex items-center justify-between">
                 <span>Course Communities</span>
+                {activeFilter === 'course' && <CheckSquare size={12} className="text-gray-500" />}
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setActiveFilter('general')}>
+              <DropdownMenuItem onSelect={() => setActiveFilter('general')} className="flex items-center justify-between">
                 <span>General</span>
+                {activeFilter === 'general' && <CheckSquare size={12} className="text-gray-500" />}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -196,23 +198,23 @@ function CommunitiesClient(props: CommunitiesClientProps) {
       )}
 
       {/* Community grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {paginatedCommunities.map((community: any) => (
-          <div key={community.community_uuid} className="relative group">
-            <CommunityCard
-              id={removeCommunityPrefix(community.community_uuid)}
-              title={community.name}
-              description={community.description || ''}
-              org_uuid={org_uuid}
-              community_uuid={community.community_uuid}
-              course_id={community.course_id}
-              public={community.public || false}
-              creation_date={community.creation_date || ''}
-              thumbnail_image={community.thumbnail_image}
-              href={`/orgs/${orgslug}/community/${removeCommunityPrefix(community.community_uuid)}`}
-            />
-          </div>
-        ))}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-start">
+          {paginatedCommunities.map((community: any) => (
+            <div key={community.community_uuid} className="relative group">
+              <CommunityCard
+                id={removeCommunityPrefix(community.community_uuid)}
+                title={community.name}
+                description={community.description || ''}
+                org_uuid={org_uuid}
+                community_uuid={community.community_uuid}
+                course_id={community.course_id}
+                public={community.public || false}
+                creation_date={community.creation_date || ''}
+                thumbnail_image={community.thumbnail_image}
+                href={`/orgs/${orgslug}/community/${removeCommunityPrefix(community.community_uuid)}`}
+              />
+            </div>
+          ))}
 
           {/* Empty state — search with no results */}
           {filteredCommunities.length === 0 && searchQuery && (
@@ -260,8 +262,8 @@ function CommunitiesClient(props: CommunitiesClientProps) {
           )}
         </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
+      {/* Pagination — always at same position */}
+      {totalPages >= 1 && (
         <div className="flex items-center justify-center gap-1 pt-6 pb-8">
           <Button
             variant="transparent"
@@ -270,7 +272,7 @@ function CommunitiesClient(props: CommunitiesClientProps) {
             disabled={currentPage === 1}
           >
             <ChevronLeft className="w-4 h-4" />
-            <span className="hidden sm:inline ml-1">Previous</span>
+            <span className="hidden sm:inline ml-1">{t('pagination.previous')}</span>
           </Button>
 
           <div className="flex items-center gap-1 mx-2">
@@ -300,7 +302,7 @@ function CommunitiesClient(props: CommunitiesClientProps) {
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage === totalPages}
           >
-            <span className="hidden sm:inline mr-1">Next</span>
+            <span className="hidden sm:inline mr-1">{t('pagination.next')}</span>
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>

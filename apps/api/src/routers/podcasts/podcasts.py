@@ -14,6 +14,7 @@ from src.services.podcasts.podcasts import (
     create_podcast,
     update_podcast,
     update_podcast_thumbnail,
+    delete_podcast_thumbnail,
     delete_podcast,
     get_podcast_user_rights,
 )
@@ -217,6 +218,31 @@ async def api_update_podcast_thumbnail(
         request, podcast_uuid, current_user, db_session, thumbnail
     )
     return podcast
+
+
+@router.delete(
+    "/{podcast_uuid}/thumbnail",
+    response_model=PodcastRead,
+    summary="Delete podcast thumbnail",
+    description="Remove the thumbnail image from a podcast.",
+    responses={
+        200: {"description": "Thumbnail deleted successfully", "model": PodcastRead},
+        403: {"description": "User lacks permission to update the podcast"},
+        404: {"description": "Podcast not found"},
+    },
+)
+async def api_delete_podcast_thumbnail(
+    request: Request,
+    podcast_uuid: str,
+    db_session: Session = Depends(get_db_session),
+    current_user=Depends(get_current_user),
+) -> PodcastRead:
+    """
+    Delete a podcast thumbnail.
+    """
+    return await delete_podcast_thumbnail(
+        request, podcast_uuid, current_user, db_session
+    )
 
 
 @router.delete(

@@ -8,11 +8,6 @@ import { getAPIUrl } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
 import React, { useEffect, useState, useMemo } from 'react'
 import useSWR from 'swr'
-import { removeCourse } from '@services/courses/activity'
-import { revalidateTags } from '@services/utils/ts/requests'
-import { useRouter } from 'next/navigation'
-import toast from 'react-hot-toast'
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import { BookOpen, Signpost, Search, ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import FeatureDisabledView from '@components/Dashboard/Shared/FeatureDisabled/FeatureDisabledView'
@@ -32,10 +27,6 @@ function Trail(params: any) {
   const access_token = session?.data?.tokens?.access_token;
   const org = useOrg() as any
   const orgID = org?.id
-  const router = useRouter()
-  const [isQuittingAll, setIsQuittingAll] = useState(false)
-  const [quittingProgress, setQuittingProgress] = useState(0)
-
   // Check if courses feature is enabled
   const isCoursesEnabled = org?.config?.config?.resolved_features?.courses?.enabled ?? org?.config?.config?.features?.courses?.enabled !== false
 
@@ -44,32 +35,6 @@ function Trail(params: any) {
     isCoursesEnabled && orgID ? `${getAPIUrl()}trail/org/${orgID}/trail` : null,
     (url) => swrFetcher(url, access_token)
   )
-
-  const handleQuitAllCourses = async () => {
-    if (!trail?.runs?.length || isQuittingAll) return;
-
-    setIsQuittingAll(true)
-    const totalCourses = trail.runs.length;
-
-    try {
-      for (let i = 0; i < trail.runs.length; i++) {
-        const run = trail.runs[i];
-        await removeCourse(run.course.course_uuid, orgslug, access_token);
-        setQuittingProgress(Math.round(((i + 1) / totalCourses) * 100));
-      }
-
-      await revalidateTags(['courses'], orgslug);
-      router.refresh();
-      await mutate();
-      toast.success('All courses quit successfully')
-    } catch (error) {
-      console.error('Error quitting courses:', error);
-      toast.error('Error quitting courses')
-    } finally {
-      setIsQuittingAll(false)
-      setQuittingProgress(0)
-    }
-  }
 
   // Search, filter, sort state
   const [searchQuery, setSearchQuery] = useState('')
@@ -161,36 +126,10 @@ function Trail(params: any) {
       context="public"
     >
       <div className="pt-8 px-6 pb-0" style={{ display: 'grid', gridTemplateRows: 'auto auto 1fr auto', minHeight: '100dvh' }}>
-        {/* Page title + Quit All button */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-[28px] font-semibold text-ui-fg-base">
-            {t('courses.progress')}
-          </h1>
-          {trail?.runs?.length > 0 && (
-            <ConfirmationModal
-              confirmationButtonText={isQuittingAll ? t('courses.quitting_courses', { progress: quittingProgress }) : t('courses.quit_all_courses')}
-              confirmationMessage={t('courses.quit_all_courses_confirm')}
-              dialogTitle={t('courses.quit_all_courses_title')}
-              dialogTrigger={
-                <button
-                  disabled={isQuittingAll}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-colors
-                    ${isQuittingAll
-                      ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                      : 'bg-red-50 text-red-700 hover:bg-red-100'
-                    }`}
-                >
-                  {isQuittingAll
-                    ? t('courses.quitting_courses', { progress: quittingProgress })
-                    : t('courses.quit_all_courses')
-                  }
-                </button>
-              }
-              functionToExecute={handleQuitAllCourses}
-              status="warning"
-            />
-          )}
-        </div>
+        {/* Page title */}
+        <h1 className="text-[28px] font-semibold text-ui-fg-base mb-6">
+          {t('courses.progress')}
+        </h1>
 
         {/* Search + Filter toolbar */}
         {trail?.runs?.length > 0 && (
@@ -283,7 +222,7 @@ function Trail(params: any) {
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
+        {totalPages >= 1 && (
           <div className="flex items-center justify-center gap-1 pt-6 pb-0">
             <Button variant="transparent" size="small" onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>
               <ChevronLeft className="w-4 h-4" />

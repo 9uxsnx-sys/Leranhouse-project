@@ -6,6 +6,7 @@ from src.services.podcasts.podcasts import (
     create_podcast,
     update_podcast,
     update_podcast_thumbnail,
+    delete_podcast_thumbnail,
     delete_podcast,
     get_podcast_user_rights,
 )
@@ -23,6 +24,7 @@ from src.services.podcasts.thumbnails import (
     upload_podcast_thumbnail,
     upload_episode_thumbnail,
     upload_episode_audio,
+    delete_podcast_thumbnail_file,
 )
 
 __all__ = [
@@ -34,6 +36,7 @@ __all__ = [
     "create_podcast",
     "update_podcast",
     "update_podcast_thumbnail",
+    "delete_podcast_thumbnail",
     "delete_podcast",
     "get_podcast_user_rights",
     # Episode functions
@@ -49,4 +52,5 @@ __all__ = [
     "upload_podcast_thumbnail",
     "upload_episode_thumbnail",
     "upload_episode_audio",
+    "delete_podcast_thumbnail_file",
 ]
