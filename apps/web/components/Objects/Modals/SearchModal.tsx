@@ -11,7 +11,7 @@ import {
   Users,
   Headphones,
   ShoppingCart,
-  Route,
+  Path,
   MagnifyingGlass,
   Stack,
 } from '@phosphor-icons/react'
@@ -84,7 +84,7 @@ const userPages: SearchMeta[] = [
     id: 'user.trail',
     titleKey: 'Trail',
     descriptionKey: 'Your learning progress',
-    icon: Route,
+    icon: Path,
     href: '/trail',
     group: 'navigation',
   },

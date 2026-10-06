@@ -8,9 +8,9 @@ The entire user-facing section is wrapped by `apps/web/app/orgs/[orgslug]/(withm
 
 - **NavigationBar**: A fixed top progress bar (`z-50`, height `0.25rem`) that animates on route changes.
 - **Flex row container**: `h-screen overflow-hidden` with two columns:
-  - **Desktop sidebar** (`240px` wide, `border-e`): Renders `MedusaSidebarContent` with org logo, nav items, and user profile.
+  - **Desktop sidebar** (collapsible, `border-e`): Renders `UserLeftMenu` (an exact copy of the dashboard `DashLeftMenu`) with org logo mark/logo, navigation tabs, and user profile. The sidebar matches the dashboard sidebar in width, styling, and behavior.
   - **Right column**: A full-height scrollable column containing:
-    - **Topbar**: A grid (`grid-cols-2`) with `ToggleSidebar` + `BreadcrumbNav` on the left, and `NotificationsBell`, Copilot menu, and Help dropdown on the right.
+    - **Topbar**: A grid (`grid-cols-2`) with `ToggleSidebar` + `BreadcrumbNav` on the left, and search icon button, `NotificationsBell`, Copilot menu, and Help dropdown on the right.
     - **Main content**: A vertically and horizontally centered container (`max-w-[1600px]`, `px-1 py-3`) with `flex-1` content area at `z-index: var(--z-content)`.
     - **Footer**: Custom footer text from org config, plus a LearnHouse watermark.
 - **Mobile drawer**: Fixed overlay with slide-in sidebar (`max-w-[304px]`) when the hamburger menu is toggled.
@@ -18,24 +18,21 @@ The entire user-facing section is wrapped by `apps/web/app/orgs/[orgslug]/(withm
 - **Providers**: `SessionGate`, `OrgJoinBannerProvider`, `PodcastPlayerProvider`.
 - **Custom font support**: Dynamically injects Google Font stylesheets from org configuration.
 
-### Sidebar Navigation (MedusaSidebar)
+### Sidebar Navigation (UserLeftMenu)
 
-Defined in `apps/web/components/Objects/Menus/MedusaSidebar.tsx`. The sidebar has:
+Defined in `apps/web/components/Objects/Menus/UserLeftMenu.tsx`. The sidebar is an exact copy of the dashboard `DashLeftMenu` and shares the same collapsible design, width, and behavior.
 
-- **Org Header**: Logo image or fallback initial, org name, and a `MoreHorizontal` icon. Links to the org home.
-- **Dashed divider** between header and nav.
+- **Collapsed state**: Shows only icon buttons for each nav item, with a logo mark icon at the top.
+- **Expanded state**: Shows logo (mark + wordmark), navigation labels, and user profile section.
 - **Navigation items** (filtered by `resolved_features`):
-  - `/search` — Opens the `SearchModal` (a button, not a link)
   - `/` — Home
   - `/courses` — Course listing (requires `courses` feature)
-  - `/podcasts` — Podcast listing (requires `podcasts` feature)
   - `/communities` — Community listing (requires `communities` feature)
+  - `/podcasts` — Podcast listing (requires `podcasts` feature)
   - `/store` — Store (requires `payments` feature)
   - `/trail` — Learning progress
-- **Floating active indicator**: A white pill (`shadow-elevation-card-rest`) that transitions between nav items based on the active index.
 - **Bottom section**:
   - Dashboard link (for admin/maintainer/instructor roles): Links to `/dash`.
-  - Divider
   - `HeaderProfileBox`: User avatar, name, and logout.
 
 ## Pages
@@ -219,7 +216,18 @@ This is the most complex page in the user-facing section.
 **Route**: `/orgs/[orgslug]/search` — File: `apps/web/app/orgs/[orgslug]/(withmenu)/search/page.tsx`
 
 - **Global search page** with results across courses, communities, and other content types.
-- Also accessible via the sidebar search button which opens a `SearchModal`.
+- Also accessible via the search icon in the topbar which opens a `SearchModal`.
+
+#### SearchModal
+
+Defined in `apps/web/components/Objects/Modals/SearchModal.tsx`. A command-palette-style search dialog that uses `cmdk` + `@radix-ui/react-dialog`, matching the dashboard `CommandPalette` design exactly.
+
+- **Trigger**: Search icon button in the top navigation bar (next to the notifications bell).
+- **Layout**: Full-screen overlay with backdrop blur, centered dialog (`max-w-[640px]`, `rounded-2xl`).
+- **Page quick links**: Shows 6 user-facing pages (Home, Courses, Communities, Podcasts, Store, Trail) when no query is typed.
+- **Content search**: Uses SWR to search courses and collections via `searchOrgContent` when typing (debounced at 250ms).
+- **Keyboard navigation**: Arrow keys to navigate, Enter to open, Cmd+Enter for new tab, Esc to close.
+- **Styling**: No dividers, same hover/selected states as the dashboard CommandPalette (`aria-selected:bg-ui-bg-subtle-hover`).
 
 ### Playgrounds
 
