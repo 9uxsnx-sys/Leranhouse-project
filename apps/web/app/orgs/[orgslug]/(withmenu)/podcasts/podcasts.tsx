@@ -9,7 +9,6 @@ import { PodcastWithEpisodeCount } from '@services/podcasts/podcasts'
 import FeatureDisabledView from '@components/Dashboard/Shared/FeatureDisabled/FeatureDisabledView'
 
 // Medusa components
-import { IconButton } from '@/components/ui/icon-button'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -155,14 +154,15 @@ export default function PodcastsClient({
             {/* Spacer pushes filter to the right */}
             <div className="flex-1" />
 
-            {/* Filter — Medusa IconButton + DropdownMenu */}
+            {/* Filter — Button + DropdownMenu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label={t('podcasts.filter_podcasts')}>
-                  <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <Button variant="secondary" size="small" className="gap-x-1.5">
+                  <svg width="14" height="14" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M2.5 4.5h10M4.5 7.5h6M6.5 10.5h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                </IconButton>
+                  <span>{filterVisibility === 'all' ? (t('podcasts.all_podcasts') || 'All Podcasts') : filterVisibility === 'public' ? (t('podcasts.public') || 'Public') : (t('podcasts.private') || 'Private')}</span>
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-white min-w-0 w-28">
                 <DropdownMenuItem onClick={() => setFilterVisibility('all')}>
@@ -179,12 +179,11 @@ export default function PodcastsClient({
           </div>
         )}
 
-        {/* Grid area */}
-        <div className="flex-1 flex flex-col">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {paginatedPodcasts.map((podcast: PodcastWithEpisodeCount) => (
+        {/* Podcast grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {paginatedPodcasts.map((podcast: PodcastWithEpisodeCount) => (
+            <div key={podcast.podcast_uuid} className="relative group">
               <PodcastCard
-                key={podcast.podcast_uuid}
                 id={removePodcastPrefix(podcast.podcast_uuid)}
                 title={podcast.name}
                 description={podcast.description || ''}
@@ -195,7 +194,8 @@ export default function PodcastsClient({
                 org_uuid={org?.org_uuid}
                 href={`/orgs/${orgslug}/podcast/${removePodcastPrefix(podcast.podcast_uuid)}`}
               />
-            ))}
+            </div>
+          ))}
 
             {/* Empty state — search with no results */}
             {filteredPodcasts.length === 0 && searchQuery && (
@@ -227,11 +227,10 @@ export default function PodcastsClient({
               </div>
             )}
           </div>
-        </div>
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-1 pt-6 pb-0">
+          <div className="flex items-center justify-center gap-1 pt-6 pb-8">
             <Button
               variant="transparent"
               size="small"

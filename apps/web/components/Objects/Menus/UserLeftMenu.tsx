@@ -5,17 +5,16 @@ import {
   House,
   BookOpen,
   Users,
-  DollarSign,
-  Building2,
+  ShoppingCart,
+  Route,
+  LayoutDashboard,
   Globe,
   HelpCircle,
   PanelLeftClose,
   Check,
-  MessageCircle,
   Book,
   MessageCircleMore,
   Headphones,
-  BarChart3,
   Search,
 } from 'lucide-react'
 import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
@@ -24,9 +23,10 @@ import { usePathname, useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import UserAvatar from '../../Objects/UserAvatar'
 import { HeaderProfileBox } from '@components/Security/HeaderProfileBox'
-import AdminAuthorization from '@components/Security/AdminAuthorization'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import useAdminStatus from '@components/Hooks/useAdminStatus'
 import { changeLanguage } from '@/lib/i18n'
+import { getUriWithOrg } from '@services/config/config'
 import {
   Tooltip,
   TooltipContent,
@@ -43,52 +43,47 @@ import { AVAILABLE_LANGUAGES } from '@/lib/languages'
 import { getOrgLogoMediaDirectory, getOrgLogoIconMediaDirectory } from '@services/media/media'
 import { cn } from '@/lib/utils'
 import { AnimatePresence, motion } from 'framer-motion'
-import { SubNav, type SubNavItem } from '@components/ui/sub-nav'
-
 
 // Nav item base and active classes (light theme variant)
 const NAV_BASE =
   'text-ui-fg-subtle hover:bg-ui-bg-subtle-hover flex items-center gap-x-2.5 h-10 px-4 rounded-xl transition-all'
 const NAV_ACTIVE = 'text-ui-fg-base'
 
-function DashLeftMenu() {
+interface NavEntry {
+  to: string
+  labelKey?: string
+  label?: string
+  icon: React.ReactNode
+  feature?: string | null
+}
+
+function UserLeftMenu() {
   const org = useOrg() as any
   const session = useLHSession() as any
   const { t, i18n } = useTranslation()
   const router = useRouter()
   const rawPathname = usePathname() || ''
-  // Strip /orgs/{slug} prefix added by middleware rewrite so that
-  // isActivePath works the same during SSR and client-side navigation.
+  const { rights } = useAdminStatus()
+  // Strip /orgs/{slug} prefix
   const pathname = rawPathname.replace(/^\/orgs\/[^/]+/, '')
   const [isCollapsed, setIsCollapsed] = useState(false)
 
   const isActivePath = (path: string) => {
-    if (path === '/dash') {
-      return pathname === '/dash' || pathname === '/dash/'
+    if (path === '/') {
+      return pathname === '/' || pathname === ''
     }
     return pathname === path || pathname.startsWith(path + '/')
   }
+
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false)
   const access_token = session?.data?.tokens?.access_token
+  const orgslug = org?.slug || ''
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('dash-menu-collapsed')
+      const saved = localStorage.getItem('user-menu-collapsed')
       if (saved !== null) {
         setIsCollapsed(saved === 'true')
-      }
-    }
-  }, [])
-
-  // On page reload, redirect to the home tab to avoid indicator positioning issues
-  useEffect(() => {
-    if (pathname !== '/dash' && pathname !== '') {
-      const navEntries = performance.getEntriesByType('navigation')
-      if (navEntries.length > 0) {
-        const navType = (navEntries[0] as PerformanceNavigationTiming).type
-        if (navType === 'reload') {
-          router.push('/dash')
-        }
       }
     }
   }, [])
@@ -96,9 +91,8 @@ function DashLeftMenu() {
   const toggleCollapse = () => {
     const newState = !isCollapsed
     setIsCollapsed(newState)
-    localStorage.setItem('dash-menu-collapsed', String(newState))
+    localStorage.setItem('user-menu-collapsed', String(newState))
   }
-
 
   if (!org || !session) return null
 
@@ -106,16 +100,31 @@ function DashLeftMenu() {
   const rf = org?.config?.config?.resolved_features
   const isEnabled = (feature: string) => rf?.[feature]?.enabled === true
 
-  const showCommunities = isEnabled('communities')
   const showPodcasts = isEnabled('podcasts')
+  const showCommunities = isEnabled('communities')
   const showPayments = isEnabled('payments')
+
+  // User-facing nav items
+  const NAV_ITEMS: NavEntry[] = [
+    { to: '/', labelKey: 'common.home', icon: <House className="w-[18px] h-[18px]" />, feature: null },
+    { to: '/courses', labelKey: 'courses.courses', icon: <BookOpen className="w-[18px] h-[18px]" />, feature: 'courses' },
+    { to: '/podcasts', labelKey: 'podcasts.podcasts', icon: <Headphones className="w-[18px] h-[18px]" />, feature: 'podcasts' },
+    { to: '/communities', labelKey: 'communities.title', icon: <Users className="w-[18px] h-[18px]" />, feature: 'communities' },
+    { to: '/store', label: 'Store', icon: <ShoppingCart className="w-[18px] h-[18px]" />, feature: 'payments' },
+    { to: '/trail', labelKey: 'courses.progress', icon: <Route className="w-[18px] h-[18px]" />, feature: null },
+  ]
+
+  const visibleNavItems = NAV_ITEMS.filter((item) => {
+    if (!item.feature) return true
+    if (rf?.[item.feature]) return rf[item.feature].enabled
+    return true
+  })
 
   // Floating indicator: measure active nav item position
   const navContainerRef = useRef<HTMLDivElement>(null)
   const [indicatorTop, setIndicatorTop] = useState(-9999)
   const [indicatorOpacity, setIndicatorOpacity] = useState(0)
 
-  // Measure the active nav item and position the floating indicator
   const measureIndicator = useCallback(() => {
     const container = navContainerRef.current
     if (!container) return false
@@ -134,13 +143,10 @@ function DashLeftMenu() {
     return false
   }, [])
 
-  // Measure on pathname change and whenever container layout changes
   useEffect(() => {
     const container = navContainerRef.current
     if (!container) return
 
-    // Try immediately; if AdminAuthorization hasn't rendered children yet,
-    // the ResizeObserver will catch it once the layout settles.
     measureIndicator()
 
     const ro = new ResizeObserver(() => {
@@ -149,21 +155,12 @@ function DashLeftMenu() {
     ro.observe(container)
 
     return () => ro.disconnect()
-  }, [pathname, isCollapsed, showCommunities, showPodcasts, showPayments, measureIndicator])
-
-  // User sub-tab items for the Users tab
-  const userSubNavItems: SubNavItem[] = [
-    { label: 'Users', href: '/dash/users/settings/users' },
-    { label: 'UserGroups', href: '/dash/users/settings/usergroups' },
-    { label: 'Roles', href: '/dash/users/settings/roles' },
-    { label: 'Invite Codes', href: '/dash/users/settings/signups' },
-    { label: 'Audit Logs', href: '/dash/users/settings/audit-logs' },
-  ]
+  }, [pathname, isCollapsed, showPodcasts, showCommunities, showPayments, measureIndicator])
 
   return (
     <TooltipProvider delayDuration={0}>
     <nav
-      aria-label="Dashboard sidebar navigation"
+      aria-label="User sidebar navigation"
       className={cn(
         "flex flex-col h-screen sticky top-0 z-overlay border-r border-gray-200 bg-ui-bg-subtle transition-all duration-300",
         isCollapsed ? "w-[72px]" : "w-64"
@@ -221,129 +218,46 @@ function DashLeftMenu() {
         </div>
       </div>
 
-      {/* Main Navigation - Vertically Centered */}
+      {/* Main Navigation */}
       <div className="flex-1 flex flex-col justify-center py-4 px-3">
-        <AdminAuthorization authorizationMode="component">
-          <div className="relative" ref={navContainerRef}>
-            {/* Floating active indicator */}
-            <div
-              className="absolute left-0 right-0 bg-ui-bg-base shadow-elevation-card-rest rounded-xl transition-all duration-200 ease-out pointer-events-none"
-              style={{ top: indicatorTop, height: 40, opacity: indicatorOpacity }}
-            />
-            <div className="flex flex-col">
-              <div className={cn("px-3 pt-4 pb-1 text-[11px] font-medium uppercase tracking-wider text-ui-fg-muted", isCollapsed && "hidden")}>
-                General
-              </div>
-              <div data-nav-item>
-                <MenuLink
-                  href="/dash"
-                  icon={<House className="w-[18px] h-[18px]" />}
-                  label={t('common.home')}
-                  isCollapsed={isCollapsed}
-                  active={isActivePath('/dash')}
-                />
-              </div>
-
-              {/* Content group label */}
-              <div className={cn("px-3 pt-5 pb-1 text-[11px] font-medium uppercase tracking-wider text-ui-fg-muted", isCollapsed && "hidden")}>
-                Content
-              </div>
-              {/* Courses */}
-              <div data-nav-item>
-                <MenuLink
-                  href="/dash/courses"
-                  icon={<BookOpen className="w-[18px] h-[18px]" />}
-                  label={t('courses.courses')}
-                  isCollapsed={isCollapsed}
-                  active={isActivePath('/dash/courses')}
-                />
-              </div>
-
-
-              {showCommunities && (
-                <div data-nav-item>
-                  <MenuLink
-                    href="/dash/communities"
-                    icon={<MessageCircle className="w-[18px] h-[18px]" />}
-                    label={t('communities.title')}
-                    isCollapsed={isCollapsed}
-                    active={isActivePath('/dash/communities')}
-                  />
-                </div>
-              )}
-              {showPodcasts && (
-                <div data-nav-item>
-                  <MenuLink
-                    href="/dash/podcasts"
-                    icon={<Headphones className="w-[18px] h-[18px]" />}
-                    label={t('podcasts.podcasts')}
-                    isCollapsed={isCollapsed}
-                    active={isActivePath('/dash/podcasts')}
-                  />
-                </div>
-              )}
-
-              {/* Administration group label */}
-              <div className={cn("px-3 pt-5 pb-1 text-[11px] font-medium uppercase tracking-wider text-ui-fg-muted", isCollapsed && "hidden")}>
-                Administration
-              </div>
-              {/* Users */}
-              <div data-nav-item>
-                <MenuLink
-                  href="/dash/users/settings/users"
-                  icon={<Users className="w-[18px] h-[18px]" />}
-                  label={t('common.users')}
-                  isCollapsed={isCollapsed}
-                  active={isActivePath('/dash/users')}
-                />
-              </div>
-              <AnimatePresence>
-                {isActivePath('/dash/users') && !isCollapsed && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.15, ease: 'easeOut' }}
-                  >
-                    <SubNav items={userSubNavItems} currentPath={pathname} />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Payments */}
-              <div data-nav-item>
-                <MenuLink
-                  href="/dash/payments/overview"
-                  icon={<DollarSign className="w-[18px] h-[18px]" />}
-                  label={t('common.payments')}
-                  isCollapsed={isCollapsed}
-                  active={isActivePath('/dash/payments')}
-                />
-              </div>
-
-              {/* Organization */}
-              <div data-nav-item>
-                <MenuLink
-                  href="/dash/org/settings/general"
-                  icon={<Building2 className="w-[18px] h-[18px]" />}
-                  label={t('common.organization')}
-                  isCollapsed={isCollapsed}
-                  active={isActivePath('/dash/org')}
-                />
-              </div>
-
-              {/* Analytics */}
-              <div data-nav-item>
-                <MenuLink
-                  href="/dash/analytics"
-                  icon={<BarChart3 className="w-[18px] h-[18px]" />}
-                  label="Analytics"
-                  isCollapsed={isCollapsed}
-                  active={isActivePath('/dash/analytics')}
-                />
-              </div>
+        <div className="relative" ref={navContainerRef}>
+          {/* Floating active indicator */}
+          <div
+            className="absolute left-0 right-0 bg-ui-bg-base shadow-elevation-card-rest rounded-xl transition-all duration-200 ease-out pointer-events-none"
+            style={{ top: indicatorTop, height: 40, opacity: indicatorOpacity }}
+          />
+          <div className="flex flex-col">
+            {/* General group */}
+            <div className={cn("px-3 pt-4 pb-1 text-[11px] font-medium uppercase tracking-wider text-ui-fg-muted", isCollapsed && "hidden")}>
+              General
             </div>
+            <div data-nav-item>
+              <MenuLink
+                href={getUriWithOrg(orgslug, '/')}
+                icon={<House className="w-[18px] h-[18px]" />}
+                label={t('common.home')}
+                isCollapsed={isCollapsed}
+                active={isActivePath('/')}
+              />
+            </div>
+
+            {/* Content group */}
+            <div className={cn("px-3 pt-5 pb-1 text-[11px] font-medium uppercase tracking-wider text-ui-fg-muted", isCollapsed && "hidden")}>
+              Content
+            </div>
+            {visibleNavItems.filter(item => item.to !== '/').map((item) => (
+              <div data-nav-item key={item.to}>
+                <MenuLink
+                  href={getUriWithOrg(orgslug, item.to)}
+                  icon={item.icon}
+                  label={item.labelKey ? t(item.labelKey) : (item.label || '')}
+                  isCollapsed={isCollapsed}
+                  active={isActivePath(item.to)}
+                />
+              </div>
+            ))}
           </div>
-        </AdminAuthorization>
+        </div>
       </div>
 
       {/* Bottom Section */}
@@ -478,10 +392,25 @@ function DashLeftMenu() {
             </button>
           </HoverMenu>
 
+          {/* Dashboard shortcut */}
+          {rights?.dashboard?.action_access && (
+            <>
+              {!isCollapsed && <div className="border-t border-gray-200 mt-1 mb-3" />}
+              <div data-nav-item>
+                <MenuLink
+                  href={getUriWithOrg(orgslug, '/dash')}
+                  icon={<LayoutDashboard className="w-[18px] h-[18px]" />}
+                  label={t('common.dashboard')}
+                  isCollapsed={isCollapsed}
+                />
+              </div>
+            </>
+          )}
+
           {/* Divider */}
           {!isCollapsed && <div className="border-t border-gray-200 mt-1 mb-3" />}
 
-          {/* User Menu - same style as user sidebar */}
+          {/* User Menu */}
           {!isCollapsed && <HeaderProfileBox />}
           {isCollapsed && (
             <Tooltip>
@@ -563,4 +492,4 @@ const MenuLink = ({ href, icon, label, isCollapsed, isExternal, active }: {
   return linkElement
 }
 
-export default DashLeftMenu
+export default UserLeftMenu

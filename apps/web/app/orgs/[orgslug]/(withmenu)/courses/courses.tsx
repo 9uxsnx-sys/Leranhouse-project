@@ -11,7 +11,6 @@ import { usePlan } from '@components/Hooks/usePlan'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
 
 // Medusa components
-import { IconButton } from '@/components/ui/icon-button'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -89,6 +88,7 @@ function Courses(props: CourseProps) {
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('')
+  const [activeFilter, setActiveFilter] = useState('All')
 
   // Filter courses based on search and usergroup
   const filteredCourses = useMemo(() => {
@@ -194,20 +194,21 @@ function Courses(props: CourseProps) {
           {/* Spacer pushes filter to the right */}
           <div className="flex-1" />
 
-          {/* Filter — Medusa IconButton + DropdownMenu */}
+          {/* Filter — Button + DropdownMenu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label={t('courses.filter_courses')}>
-                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <Button variant="secondary" size="small" className="gap-x-1.5">
+                <svg width="14" height="14" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M2.5 4.5h10M4.5 7.5h6M6.5 10.5h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-              </IconButton>
+                <span>{activeFilter}</span>
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white min-w-0 w-28">
-              <DropdownMenuItem>All Courses</DropdownMenuItem>
-              <DropdownMenuItem>Easy</DropdownMenuItem>
-              <DropdownMenuItem>Medium</DropdownMenuItem>
-              <DropdownMenuItem>Hard</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setActiveFilter('All')}>All Courses</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setActiveFilter('Easy')}>Easy</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setActiveFilter('Medium')}>Medium</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setActiveFilter('Hard')}>Hard</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -246,17 +247,15 @@ function Courses(props: CourseProps) {
         </div>
       )}
 
-      {/* Grid area — fills remaining space */}
-      <div className="flex-1 flex flex-col">
-        {/* Course grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {paginatedCourses.map((course: any) => {
-            const imageUrl = course.thumbnail_image
-              ? getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)
-              : ''
-            return (
+      {/* Course grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {paginatedCourses.map((course: any) => {
+          const imageUrl = course.thumbnail_image
+            ? getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)
+            : ''
+          return (
+            <div key={course.course_uuid} className="relative group">
               <CourseCard
-                key={course.course_uuid}
                 id={removeCoursePrefix(course.course_uuid)}
                 title={course.name}
                 description={course.description || ''}
@@ -265,8 +264,9 @@ function Courses(props: CourseProps) {
                 duration="N/A"
                 difficulty="All levels"
               />
-            )
-          })}
+            </div>
+          )
+        })}
 
           {/* Empty state — search with no results */}
           {filteredCourses.length === 0 && searchQuery && (
@@ -298,11 +298,10 @@ function Courses(props: CourseProps) {
             </div>
           )}
         </div>
-      </div>
 
       {/* Pagination — always at same position */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-1 pt-6 pb-0">
+        <div className="flex items-center justify-center gap-1 pt-6 pb-8">
           <Button
             variant="transparent"
             size="small"

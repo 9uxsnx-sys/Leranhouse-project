@@ -119,7 +119,7 @@ const HoverMenuContent = React.forwardRef<HTMLDivElement, HoverMenuContentProps>
       <div
         ref={ref}
         className={cn(
-          "min-w-[200px] rounded-lg border bg-[#0f0f10] border-white/10 shadow-xl shadow-black/30 py-1",
+          "min-w-[200px] rounded-lg border border-ui-border-base bg-ui-bg-base shadow-elevation-card-rest py-1",
           className
         )}
       >
@@ -141,7 +141,7 @@ const HoverMenuItem = React.forwardRef<HTMLDivElement, HoverMenuItemProps>(
   ({ children, className, onClick, asChild }, ref) => {
     if (asChild) {
       return (
-        <div ref={ref} className={cn("hover-menu-item", className)}>
+        <div ref={ref} className={cn("flex items-center gap-2 px-3 py-2 text-sm text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover cursor-pointer transition-colors", className)}>
           {children}
         </div>
       )
@@ -152,7 +152,7 @@ const HoverMenuItem = React.forwardRef<HTMLDivElement, HoverMenuItemProps>(
         ref={ref}
         onClick={onClick}
         className={cn(
-          "px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.08] cursor-pointer transition-colors",
+          "flex items-center gap-2 px-3 py-2 text-sm text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover cursor-pointer transition-colors",
           className
         )}
       >
@@ -163,44 +163,8 @@ const HoverMenuItem = React.forwardRef<HTMLDivElement, HoverMenuItemProps>(
 )
 HoverMenuItem.displayName = "HoverMenuItem"
 
-interface HoverMenuLabelProps {
-  children: React.ReactNode
-  className?: string
-}
-
-const HoverMenuLabel = React.forwardRef<HTMLDivElement, HoverMenuLabelProps>(
-  ({ children, className }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          "px-3 py-2 text-xs font-medium text-white/50",
-          className
-        )}
-      >
-        {children}
-      </div>
-    )
-  }
-)
-HoverMenuLabel.displayName = "HoverMenuLabel"
-
-const HoverMenuSeparator = React.forwardRef<HTMLDivElement, { className?: string }>(
-  ({ className }, ref) => {
-    return (
-      <div
-        ref={ref}
-        className={cn("my-1 h-px bg-white/10", className)}
-      />
-    )
-  }
-)
-HoverMenuSeparator.displayName = "HoverMenuSeparator"
-
 export {
   HoverMenu,
   HoverMenuContent,
   HoverMenuItem,
-  HoverMenuLabel,
-  HoverMenuSeparator,
 }

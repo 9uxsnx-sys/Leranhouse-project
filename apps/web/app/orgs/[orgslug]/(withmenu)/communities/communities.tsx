@@ -9,7 +9,6 @@ import { useOrg } from '@components/Contexts/OrgContext'
 import FeatureDisabledView from '@components/Dashboard/Shared/FeatureDisabled/FeatureDisabledView'
 
 // Medusa components
-import { IconButton } from '@/components/ui/icon-button'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -168,43 +167,39 @@ function CommunitiesClient(props: CommunitiesClientProps) {
           {/* Spacer pushes filter to the right */}
           <div className="flex-1" />
 
-          {/* Filter — Medusa IconButton + DropdownMenu */}
+          {/* Filter — Button + DropdownMenu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label="Filter communities">
-                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <Button variant="secondary" size="small" className="gap-x-1.5">
+                <svg width="14" height="14" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M2.5 4.5h10M4.5 7.5h6M6.5 10.5h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-              </IconButton>
+                <span>{filterLabel}</span>
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white min-w-0 w-44">
               <DropdownMenuItem onSelect={() => setActiveFilter('all')}>
-                {activeFilter === 'all' && <span className="absolute left-2">✓</span>}
-                <span className={activeFilter === 'all' ? 'ml-5' : 'ml-5'}>All Communities</span>
+                <span>All Communities</span>
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setActiveFilter('newest')}>
-                {activeFilter === 'newest' && <span className="absolute left-2">✓</span>}
-                <span className={activeFilter === 'newest' ? 'ml-5' : 'ml-5'}>Newest</span>
+                <span>Newest</span>
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setActiveFilter('course')}>
-                {activeFilter === 'course' && <span className="absolute left-2">✓</span>}
-                <span className={activeFilter === 'course' ? 'ml-5' : 'ml-5'}>Course Communities</span>
+                <span>Course Communities</span>
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setActiveFilter('general')}>
-                {activeFilter === 'general' && <span className="absolute left-2">✓</span>}
-                <span className={activeFilter === 'general' ? 'ml-5' : 'ml-5'}>General</span>
+                <span>General</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       )}
 
-      {/* Grid area */}
-      <div className="flex-1 flex flex-col">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {paginatedCommunities.map((community: any) => (
+      {/* Community grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {paginatedCommunities.map((community: any) => (
+          <div key={community.community_uuid} className="relative group">
             <CommunityCard
-              key={community.community_uuid}
               id={removeCommunityPrefix(community.community_uuid)}
               title={community.name}
               description={community.description || ''}
@@ -216,7 +211,8 @@ function CommunitiesClient(props: CommunitiesClientProps) {
               thumbnail_image={community.thumbnail_image}
               href={`/orgs/${orgslug}/community/${removeCommunityPrefix(community.community_uuid)}`}
             />
-          ))}
+          </div>
+        ))}
 
           {/* Empty state — search with no results */}
           {filteredCommunities.length === 0 && searchQuery && (
@@ -263,11 +259,10 @@ function CommunitiesClient(props: CommunitiesClientProps) {
             </div>
           )}
         </div>
-      </div>
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-1 pt-6 pb-0">
+        <div className="flex items-center justify-center gap-1 pt-6 pb-8">
           <Button
             variant="transparent"
             size="small"

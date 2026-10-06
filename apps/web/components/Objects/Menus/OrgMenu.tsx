@@ -6,10 +6,9 @@ import Link from 'next/link'
 import useSWR from 'swr'
 import { getUriWithOrg } from '@services/config/config'
 import { fetchRAGChatSessions, RAGChatSession } from '@services/ai/ai'
-import { MedusaSidebarContent } from './MedusaSidebar'
+import UserLeftMenu from './UserLeftMenu'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { SearchBar } from '@components/Objects/Search/SearchBar'
 import { usePathname } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
@@ -21,7 +20,6 @@ import {
   BellAlertDone,
   GlobeEurope,
   QuestionMark,
-  SidebarLeft,
   TriangleRightMini,
   XMark,
 } from '@components/Objects/Icons/MedusaIcons'
@@ -50,11 +48,9 @@ import {
 
 /**
  * LearnHouse port of the Medusa v2.18.0 shell (shell.tsx + main-layout.tsx):
- * h-screen overflow-hidden, grey #fafafa canvas, 220px sidebar, slim grid topbar
+ * h-screen overflow-hidden, grey #fafafa canvas, slim grid topbar
  * with breadcrumb + notifications, centered max-w-[1600px] gutter with 12px padding.
  */
-
-// shell.tsx NavigationBar + progress-bar.tsx — top route-change bar
 const ProgressBar = () => (
   <div
     className="bg-ui-fg-subtle size-full"
@@ -152,40 +148,6 @@ const BreadcrumbNav = ({ orgslug }: { orgslug: string }) => {
   )
 }
 
-// shell.tsx ToggleSidebar — desktop collapses the sidebar, mobile opens the drawer
-const ToggleSidebar = ({
-  isMenuOpen,
-  onMobileToggle,
-  onDesktopToggle,
-}: {
-  isMenuOpen: boolean
-  onMobileToggle: () => void
-  onDesktopToggle: () => void
-}) => {
-  return (
-    <div>
-      <IconButton
-        className="hidden lg:flex"
-        variant="transparent"
-        size="small"
-        aria-label="Toggle sidebar"
-        onClick={onDesktopToggle}
-      >
-        <SidebarLeft className="text-ui-fg-muted rtl:rotate-180" />
-      </IconButton>
-      <IconButton
-        className="hidden max-lg:flex"
-        variant="transparent"
-        size="small"
-        aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-        onClick={onMobileToggle}
-      >
-        <BarsThree className="text-ui-fg-muted" />
-      </IconButton>
-    </div>
-  )
-}
-
 // notifications.tsx — bell trigger (no feed yet; unread state kept for when one lands)
 const LAST_READ_NOTIFICATION_KEY = 'notificationsLastReadAt'
 
@@ -269,7 +231,6 @@ export const OrgMenu = ({
   const session = useLHSession() as any;
   const org = useOrg() as any;
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [isFocusMode, setIsFocusMode] = useState(false)
   const pathname = usePathname()
   const { t } = useTranslation()
@@ -363,11 +324,9 @@ export const OrgMenu = ({
           ['--brand' as string]: primaryColor || '#6366f1',
         }}
       >
-        {/* Desktop sidebar — shell.tsx DesktopSidebarContainer (h-screen w-[220px] border-e) */}
-        <aside
-          className={`hidden h-full w-[240px] shrink-0 flex-col border-e border-ui-border-base ${sidebarCollapsed ? 'lg:hidden' : 'lg:flex'}`}
-        >
-          <MedusaSidebarContent orgslug={orgslug} onSearchClick={() => setSearchModalOpen(true)} />
+        {/* Desktop sidebar */}
+        <aside className="hidden lg:flex h-full shrink-0">
+          <UserLeftMenu />
         </aside>
 
         {/* Right column — shell.tsx (flex h-screen w-full flex-col overflow-auto) */}
@@ -375,15 +334,31 @@ export const OrgMenu = ({
           {/* Topbar — shell.tsx Topbar (grid w-full grid-cols-2 border-b p-3, canvas shows through) */}
           <header className="grid w-full grid-cols-2 border-b p-3">
             <div className="flex items-center gap-x-1.5">
-              <ToggleSidebar
-                isMenuOpen={isMenuOpen}
-                onMobileToggle={toggleMenu}
-                onDesktopToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
-              />
+              {/* Mobile hamburger */}
+              <IconButton
+                className="hidden max-lg:flex"
+                variant="transparent"
+                size="small"
+                aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+                onClick={toggleMenu}
+              >
+                <BarsThree className="text-ui-fg-muted" />
+              </IconButton>
               <BreadcrumbNav orgslug={orgslug} />
             </div>
 
             <div className="flex items-center justify-end gap-x-3">
+              {/* Search */}
+              <IconButton
+                variant="transparent"
+                size="small"
+                className="text-ui-fg-muted hover:text-ui-fg-subtle"
+                aria-label="Search"
+                onClick={() => setSearchModalOpen(true)}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              </IconButton>
+
               {/* Notifications bell */}
               <NotificationsBell />
 
@@ -522,7 +497,7 @@ export const OrgMenu = ({
               <h2 className="sr-only">{t('app.nav.accessibility.title', 'Navigation')}</h2>
             </div>
           </div>
-          <MedusaSidebarContent orgslug={orgslug} onSearchClick={() => setSearchModalOpen(true)} />
+          <UserLeftMenu />
         </div>
       </div>
 

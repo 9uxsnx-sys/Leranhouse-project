@@ -13,10 +13,6 @@ import {
   Cube,
   Microphone,
   MagnifyingGlass,
-  ArrowUp,
-  ArrowDown,
-  CornersOut,
-  X,
 } from '@phosphor-icons/react'
 
 import { useCommandPalette } from './CommandPaletteContext'
@@ -183,7 +179,7 @@ export default function CommandPalette() {
         />
         <DialogPrimitive.Content
           aria-label={t('dashboard.search.placeholder')}
-          className="fixed left-1/2 top-[12%] flex w-[94vw] max-w-[680px] -translate-x-1/2 flex-col overflow-hidden rounded-2xl border border-ui-border-base bg-ui-bg-base shadow-elevation-card-rest data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:slide-in-from-top-2 data-[state=closed]:slide-out-to-top-2 data-[state=open]:duration-150 data-[state=closed]:duration-100 ease-out"
+          className="fixed left-1/2 top-[12%] flex w-[94vw] max-w-[640px] -translate-x-1/2 flex-col overflow-hidden rounded-2xl border border-ui-border-base bg-ui-bg-base shadow-elevation-card-rest data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:slide-in-from-top-2 data-[state=closed]:slide-out-to-top-2 data-[state=open]:duration-150 data-[state=closed]:duration-100 ease-out"
           style={{ zIndex: 'var(--z-modal)' as any }}
           onOpenAutoFocus={(e) => {
             e.preventDefault()
@@ -206,11 +202,11 @@ export default function CommandPalette() {
               const tokens = needle.split(/\s+/u).filter(Boolean)
               return tokens.every((tok: string) => haystack.includes(tok)) ? 0.8 : 0
             }}
-            className="flex flex-col [&_[cmdk-group-heading]]:px-4 [&_[cmdk-group-heading]]:pt-4 [&_[cmdk-group-heading]]:pb-1.5 [&_[cmdk-group-heading]]:text-[10.5px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.08em] [&_[cmdk-group-heading]]:text-ui-fg-muted/50"
+            className="flex flex-col [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:pt-4 [&_[cmdk-group-heading]]:pb-1 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-ui-fg-muted/50"
           >
             {/* Header with search input */}
-            <div className="flex items-center gap-3 px-5 py-4">
-              <MagnifyingGlass size={18} className="shrink-0 text-ui-fg-muted/60" />
+            <div className="flex items-center gap-3 px-4 py-3">
+              <MagnifyingGlass size={16} className="shrink-0 text-ui-fg-muted/50" />
               <Command.Input
                 value={query}
                 onValueChange={setQuery}
@@ -225,7 +221,7 @@ export default function CommandPalette() {
                     openSelectedInNewTab(root)
                   }
                 }}
-                className="w-full bg-transparent text-[16px] font-normal leading-tight tracking-tight text-ui-fg-base outline-none placeholder:text-ui-fg-muted/50"
+                className="w-full bg-transparent text-[15px] font-normal leading-tight tracking-tight text-ui-fg-base outline-none placeholder:text-ui-fg-muted/50"
               />
               {(isLoading || isWaiting) && (
                 <span className="shrink-0 text-[11px] text-ui-fg-muted/50">
@@ -237,12 +233,9 @@ export default function CommandPalette() {
               </kbd>
             </div>
 
-            {/* Divider */}
-            <div className="border-t border-ui-border-base" />
-
-            {/* List */}
+            {/* List — no dividers */}
             <Command.List
-              className="min-h-[200px] max-h-[55vh] overflow-y-auto px-2 pt-1 pb-2 scroll-py-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-ui-border-base hover:[&::-webkit-scrollbar-thumb]:bg-ui-border-hover"
+              className="min-h-[200px] max-h-[55vh] overflow-y-auto px-2 pb-3 scroll-py-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-ui-border-base hover:[&::-webkit-scrollbar-thumb]:bg-ui-border-hover"
               style={{ scrollbarColor: 'rgba(0,0,0,0.12) transparent', scrollbarWidth: 'thin' }}
             >
               <Command.Empty className="px-4 py-12 text-center text-sm text-ui-fg-muted/60">
@@ -266,32 +259,26 @@ export default function CommandPalette() {
               })}
             </Command.List>
 
-            {/* Footer */}
-            <div className="flex items-center gap-5 border-t border-ui-border-base bg-ui-bg-subtle px-5 py-2.5 text-[11.5px] text-ui-fg-muted/60">
-              <FooterHint label="Navigate" keys={['↑', '↓']} />
-              <FooterHint label="Open" keys={['↵']} />
-              <FooterHint label="New tab" keys={['⌘', '↵']} />
-              <FooterHint label="Close" keys={['Esc']} />
+            {/* Footer — minimal, no border */}
+            <div className="flex items-center gap-4 px-4 py-2.5 text-[11px] text-ui-fg-muted/40">
+              <span className="inline-flex items-center gap-1">
+                <span>Navigate</span>
+                <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">↑</kbd>
+                <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">↓</kbd>
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span>Open</span>
+                <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">↵</kbd>
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span>New tab</span>
+                <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">⌘</kbd>
+                <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">↵</kbd>
+              </span>
             </div>
           </Command>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
-  )
-}
-
-function FooterHint({ label, keys }: { label: string; keys: string[] }) {
-  return (
-    <span className="inline-flex items-center gap-1.5">
-      <span>{label}</span>
-      {keys.map((k) => (
-        <kbd
-          key={k}
-          className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-base px-1 font-sans text-[10.5px] font-medium leading-none text-ui-fg-muted"
-        >
-          {k}
-        </kbd>
-      ))}
-    </span>
   )
 }
