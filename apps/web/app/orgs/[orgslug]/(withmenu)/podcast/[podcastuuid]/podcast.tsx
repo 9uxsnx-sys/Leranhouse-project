@@ -1,13 +1,13 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
+import Link from 'next/link'
 import useSWR from 'swr'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
-import { PodcastSidebar } from '@components/Objects/Podcasts/PodcastSidebar'
 import EpisodeCard from '@components/Objects/Podcasts/EpisodeCard'
 import { Podcast, PodcastEpisode, PodcastMeta } from '@services/podcasts/podcasts'
-import { Headphones, Loader2, Search, Clock, ArrowUpDown, SortAsc } from 'lucide-react'
-import { getAPIUrl } from '@services/config/config'
+import { Headphones, Loader2, Search, Clock, ArrowUpDown, SortAsc, RefreshCw, BookOpen, Award, User } from 'lucide-react'
+import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { useTranslation } from 'react-i18next'
 import { useMediaQuery } from 'usehooks-ts'
 import { usePodcastPlayer } from '@components/Contexts/PodcastPlayerContext'
@@ -20,6 +20,7 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
 import { IconButton } from '@/components/ui/icon-button'
+import { Button } from '@/components/ui/button'
 
 interface PodcastClientProps {
   orgslug: string
@@ -62,6 +63,7 @@ export default function PodcastClient({
   const podcast = data?.podcast || initialPodcast
   const episodes = data?.episodes || initialEpisodes
   const totalDurationSeconds = episodes.reduce((sum, ep) => sum + (ep.duration_seconds || 0), 0)
+  const meta = (podcast as any).extra_metadata || {}
 
   // Filter and sort episodes
   const filteredEpisodes = useMemo(() => {
@@ -92,6 +94,17 @@ export default function PodcastClient({
 
     return result
   }, [episodes, searchQuery, sortBy])
+
+  // Format duration from seconds to human-readable string
+  const formatDuration = (seconds: number) => {
+    if (!seconds || seconds <= 0) return '0 min'
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor((seconds % 3600) / 60)
+    if (hours > 0) {
+      return `${hours}h ${minutes}min`
+    }
+    return `${minutes}min`
+  }
 
   // Add padding at bottom when player is visible
   const bottomPadding = state.isVisible ? (state.isMinimized ? 'pb-20' : 'pb-28') : ''
@@ -212,7 +225,112 @@ export default function PodcastClient({
             {/* Right Sidebar - Podcast Info (Desktop only) */}
             <div className="w-full lg:w-72 xl:w-80 shrink-0">
               <div className="lg:sticky lg:top-8 space-y-4">
-                <PodcastSidebar podcast={podcast} />
+
+                {/* ── SIDEBAR 1: Get Access ── */}
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-4">Get Access</h3>
+                  <p className="text-sm text-gray-500 mb-2 leading-snug">
+                    Get access to all episodes and updates
+                  </p>
+                  <Button variant="primary" size="large" className="w-full">
+                    Get Access
+                  </Button>
+                </div>
+
+                {/* ── SIDEBAR 2: Podcast Stats ── */}
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">This Podcast Includes</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <Headphones size={16} className="text-gray-400 shrink-0" />
+                      <span className="text-sm text-gray-600">{episodes.length} {episodes.length === 1 ? 'episode' : 'episodes'}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Clock size={16} className="text-gray-400 shrink-0" />
+                      <span className="text-sm text-gray-600">
+                        {meta.total_duration
+                          ? `${meta.total_duration} min total`
+                          : formatDuration(totalDurationSeconds) + ' total'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <BookOpen size={16} className="text-gray-400 shrink-0" />
+                      <span className="text-sm text-gray-600">{podcast.authors?.length || 0} {podcast.authors?.length === 1 ? 'host' : 'hosts'}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Award size={16} className="text-gray-400 shrink-0" />
+                      <span className="text-sm text-gray-600">Premium content</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── SIDEBAR 3: Host ── */}
+                {(podcast.authors && podcast.authors.length > 0) || meta.host_name ? (
+                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Hosted by</h3>
+                    <div className="flex items-center gap-3">
+                      {meta.host_name ? (
+                        <>
+                          <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden shrink-0">
+                            {meta.host_avatar ? (
+                              <img
+                                src={meta.host_avatar}
+                                alt={meta.host_name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                <User size={14} />
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900">{meta.host_name}</p>
+                            {meta.host_title && (
+                              <p className="text-xs text-gray-500">{meta.host_title}</p>
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden shrink-0">
+                            {podcast.authors![0].user.avatar_image ? (
+                              <img
+                                src={podcast.authors![0].user.avatar_image}
+                                alt={`${podcast.authors![0].user.first_name} ${podcast.authors![0].user.last_name}`}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                <User size={14} />
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {podcast.authors![0].user.first_name} {podcast.authors![0].user.last_name}
+                            </p>
+                            <p className="text-xs text-gray-500 capitalize">
+                              {podcast.authors![0].authorship === 'CREATOR' ? 'Host' : podcast.authors![0].authorship.toLowerCase()}
+                            </p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── SIDEBAR 4: Updates ── */}
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Updates</h3>
+                  <div className="flex items-center gap-3">
+                    <RefreshCw size={16} className="text-gray-400 shrink-0" />
+                    <span className="text-sm text-gray-600">
+                      Last updated {podcast.update_date ? new Date(podcast.update_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'}
+                    </span>
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>

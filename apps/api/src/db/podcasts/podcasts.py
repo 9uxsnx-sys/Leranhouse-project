@@ -44,6 +44,7 @@ class PodcastBase(SQLModel):
     thumbnail_image: Optional[str] = Field(default="")
     public: bool
     published: bool = Field(default=False)
+    extra_metadata: Optional[dict] = None
 
 
 class Podcast(PodcastBase, table=True):
@@ -55,6 +56,7 @@ class Podcast(PodcastBase, table=True):
     creation_date: str = ""
     update_date: str = ""
     seo: Optional[dict] = Field(default=None, sa_column=Column(JSONB))
+    extra_metadata: Optional[dict] = Field(default=None, sa_column=Column(JSONB))
 
 
 class PodcastCreate(PodcastBase):
@@ -71,6 +73,7 @@ class PodcastUpdate(SQLModel):
     public: Optional[bool] = None
     published: Optional[bool] = None
     seo: Optional[dict] = None
+    extra_metadata: Optional[dict] = None
 
 
 class PodcastRead(PodcastBase):

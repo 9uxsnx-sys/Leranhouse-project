@@ -10,7 +10,7 @@ import {
   getCourseThumbnailMediaDirectory,
   getCourseBannerMediaDirectory,
 } from '@services/media/media'
-import { ArrowRight, Backpack, Check, File, StickyNote, Video, Square, Image as ImageIcon, BookCopy, Lock, Clock, BookOpen, Award, Download, ChevronDown, BarChart3 } from 'lucide-react'
+import { Backpack, Check, File, StickyNote, Video, Square, Image as ImageIcon, BookCopy, Lock, Clock, BookOpen, Award, Download, ChevronDown, BarChart3, RefreshCw } from 'lucide-react'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useMediaQuery } from 'usehooks-ts'
 import CourseActionsMobile from '@components/Objects/Courses/CourseActions/CourseActionsMobile'
@@ -23,7 +23,6 @@ import CourseShare from '@components/Objects/Courses/CourseShare/CourseShare'
 import CourseLearnings from '@components/Objects/Courses/CourseLearnings/CourseLearnings'
 import CourseCurriculum from '@components/Objects/Courses/CourseCurriculum/CourseCurriculum'
 import CourseRequirements from '@components/Objects/Courses/CourseRequirements/CourseRequirements'
-import { Container } from '@/components/ui/container'
 import { Heading } from '@/components/ui/heading'
 import { Text } from '@/components/ui/text'
 import { Badge } from '@/components/ui/badge'
@@ -92,6 +91,21 @@ const CourseClient = (props: any) => {
     resources: meta.resources_count || 0,
     hasCertificate: meta.has_certificate ?? false,
   }
+
+  // Find trail run for this course
+  const courseRun = React.useMemo(() => {
+    if (!course?.course_uuid || !trailData?.runs || !Array.isArray(trailData.runs)) return null
+    const cleanCourseUuid = course.course_uuid.replace('course_', '')
+    return trailData.runs.find((run: any) => {
+      const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '')
+      return cleanRunCourseUuid === cleanCourseUuid
+    }) || null
+  }, [course, trailData])
+
+  const isEnrolled = !!courseRun
+  const completedSteps = courseRun?.steps?.length || 0
+  const totalSteps = totalLessons || 0
+  const progressPercent = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0
   const instructorData = meta.instructor?.name ? meta.instructor : null
   const requirementsList = meta.requirements ? meta.requirements.split('\n').filter((r: string) => r.trim()) : []
   if (!initialCourse && !serverError && courseLoading) {
@@ -357,44 +371,76 @@ const CourseClient = (props: any) => {
                 <div className="w-full lg:w-72 xl:w-80 shrink-0">
                   <div className="lg:sticky lg:top-8 space-y-4">
 
-                  {/* ── SIDEBAR 1: Progress + Continue ── */}
-                  <Container>
-                    <div className="flex items-center justify-between">
-                      <Text weight="plus" size="large">75% Complete</Text>
-                      <Text size="small" className="text-ui-fg-muted">18/24</Text>
+                  {/* ── SIDEBAR 1: Access / Progress ── */}
+                  {isEnrolled ? (
+                    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                      <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">In Progress</h3>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-semibold text-gray-900">{progressPercent}% Complete</span>
+                        <span className="text-sm text-gray-500">{completedSteps}/{totalSteps}</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
+                        <div className="h-full bg-black rounded-full transition-all" style={{ width: `${progressPercent}%` }} />
+                      </div>
+                      <Link href={getUriWithOrg(orgslug, `/course/${courseuuid}/lesson-preview`)} className="block w-full mt-4">
+                        <Button variant="primary" size="large" className="w-full">
+                          Continue Learning
+                        </Button>
+                      </Link>
                     </div>
-                    <div className="w-full h-1.5 bg-ui-bg-subtle rounded-full mt-2 overflow-hidden">
-                      <div className="h-full bg-black rounded-full transition-all" style={{ width: '75%' }} />
-                    </div>
-                    <Link href={getUriWithOrg(orgslug, `/course/${courseuuid}/lesson-preview`)} className="block w-full mt-4">
+                  ) : (
+                    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                      <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-4">Get Access</h3>
+                      <p className="text-sm text-gray-500 mb-2 leading-snug">
+                        Purchase this course to start learning
+                      </p>
                       <Button variant="primary" size="large" className="w-full">
-                        Continue Learning
+                        Get Access
                       </Button>
-                    </Link>
-                  </Container>
+                    </div>
+                  )}
 
                   {/* ── SIDEBAR 2: Course Includes ── */}
-                  <Container>
-                    <Heading level="h3">This Course Includes</Heading>
-                    <div className="mt-4 space-y-3">
+                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">This Course Includes</h3>
+                    <div className="space-y-3">
                       <div className="flex items-center gap-3">
-                        <Clock size={16} className="text-ui-fg-muted shrink-0" />
-                        <Text size="small">{courseIncludes.videoHours} hours of video</Text>
+                        <Clock size={16} className="text-gray-400 shrink-0" />
+                        <span className="text-sm text-gray-600">{courseIncludes.videoHours} hours of video</span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <BookOpen size={16} className="text-ui-fg-muted shrink-0" />
-                        <Text size="small">{courseIncludes.totalLessons} lessons</Text>
+                        <BookOpen size={16} className="text-gray-400 shrink-0" />
+                        <span className="text-sm text-gray-600">{courseIncludes.totalLessons} lessons</span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <Download size={16} className="text-ui-fg-muted shrink-0" />
-                        <Text size="small">{courseIncludes.resources} downloadable resources</Text>
+                        <Download size={16} className="text-gray-400 shrink-0" />
+                        <span className="text-sm text-gray-600">{courseIncludes.resources} downloadable resources</span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <Award size={16} className="text-ui-fg-muted shrink-0" />
-                        <Text size="small">Certificate of completion</Text>
+                        <Award size={16} className="text-gray-400 shrink-0" />
+                        <span className="text-sm text-gray-600">Certificate of completion</span>
                       </div>
                     </div>
-                  </Container>
+                  </div>
+
+                  {/* ── SIDEBAR 3: Updates ── */}
+                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Updates</h3>
+                    <div className="flex items-center gap-3">
+                      <RefreshCw size={16} className="text-gray-400 shrink-0" />
+                      <span className="text-sm text-gray-600">
+                        Last updated {course.update_date ? new Date(course.update_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* ── SIDEBAR 4: Community ── */}
+                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Community</h3>
+                    <p className="text-sm text-gray-600">
+                      This course includes access to a dedicated community where you can discuss, ask questions, and learn together with fellow students.
+                    </p>
+                  </div>
 
                 </div>
               </div>

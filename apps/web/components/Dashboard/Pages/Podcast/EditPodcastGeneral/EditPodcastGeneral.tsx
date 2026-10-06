@@ -53,17 +53,33 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
     )
   }
 
+  const meta = podcast.extra_metadata || {}
   const initialValues = {
     name: podcast.name || '',
     description: podcast.description || '',
     about: podcast.about || '',
+    meta_total_duration: meta.total_duration?.toString() || '',
+    meta_host_name: meta.host_name || '',
+    meta_host_title: meta.host_title || '',
+    meta_host_avatar: meta.host_avatar || '',
   }
 
   const handleSubmit = async (values: typeof initialValues) => {
     setIsSaving(true)
     const toastId = toast.loading(t('podcasts.dashboard.saving'))
     try {
-      await updatePodcast(podcast.podcast_uuid, values, accessToken)
+      const { meta_total_duration, meta_host_name, meta_host_title, meta_host_avatar, ...rest } = values
+      const extra_metadata: Record<string, any> = {}
+      if (meta_total_duration) extra_metadata.total_duration = parseInt(meta_total_duration, 10)
+      if (meta_host_name) extra_metadata.host_name = meta_host_name
+      if (meta_host_title) extra_metadata.host_title = meta_host_title
+      if (meta_host_avatar) extra_metadata.host_avatar = meta_host_avatar
+
+      await updatePodcast(
+        podcast.podcast_uuid,
+        { ...rest, extra_metadata: Object.keys(extra_metadata).length > 0 ? extra_metadata : null },
+        accessToken
+      )
       await revalidateTags(['podcasts'], orgslug)
       await refreshPodcast()
       toast.success(t('podcasts.dashboard.saved'), { id: toastId })
@@ -279,6 +295,72 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                     onChange={handleChange}
                     placeholder={t('podcasts.dashboard.form.about_placeholder')}
                     className={`${fieldClassName} min-h-[200px]`}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* ── PODCAST DETAILS ── */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+              <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+                Podcast Details
+              </h3>
+              <div className="space-y-4">
+                <div className="grid mb-2.5">
+                  <label className="font-medium leading-[35px] text-black grow text-sm">
+                    Total Duration (minutes)
+                  </label>
+                  <Input
+                    id="meta_total_duration"
+                    name="meta_total_duration"
+                    type="number"
+                    min="0"
+                    value={values.meta_total_duration}
+                    onChange={handleChange}
+                    placeholder="e.g. 45"
+                    className={fieldClassName}
+                  />
+                </div>
+
+                <div className="grid mb-2.5">
+                  <label className="font-medium leading-[35px] text-black grow text-sm">
+                    Host Name
+                  </label>
+                  <Input
+                    id="meta_host_name"
+                    name="meta_host_name"
+                    value={values.meta_host_name}
+                    onChange={handleChange}
+                    placeholder="e.g. John Doe"
+                    className={fieldClassName}
+                  />
+                </div>
+
+                <div className="grid mb-2.5">
+                  <label className="font-medium leading-[35px] text-black grow text-sm">
+                    Host Title
+                  </label>
+                  <Input
+                    id="meta_host_title"
+                    name="meta_host_title"
+                    value={values.meta_host_title}
+                    onChange={handleChange}
+                    placeholder="e.g. Host &amp; Producer"
+                    className={fieldClassName}
+                  />
+                </div>
+
+                <div className="grid mb-2.5">
+                  <label className="font-medium leading-[35px] text-black grow text-sm">
+                    Host Avatar URL
+                  </label>
+                  <Input
+                    id="meta_host_avatar"
+                    name="meta_host_avatar"
+                    value={values.meta_host_avatar}
+                    onChange={handleChange}
+                    placeholder="https://example.com/avatar.jpg"
+                    className={fieldClassName}
                   />
                 </div>
               </div>
