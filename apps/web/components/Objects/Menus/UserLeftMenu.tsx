@@ -15,11 +15,10 @@ import {
   Book,
   MessageCircleMore,
   Headphones,
-  Search,
 } from 'lucide-react'
 import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import UserAvatar from '../../Objects/UserAvatar'
 import { HeaderProfileBox } from '@components/Security/HeaderProfileBox'
@@ -42,31 +41,16 @@ import { FeedbackModal } from '@components/Objects/Modals/FeedbackModal'
 import { AVAILABLE_LANGUAGES } from '@/lib/languages'
 import { getOrgLogoMediaDirectory, getOrgLogoIconMediaDirectory } from '@services/media/media'
 import { cn } from '@/lib/utils'
-import { AnimatePresence, motion } from 'framer-motion'
-
-// Nav item base and active classes (light theme variant)
-const NAV_BASE =
-  'text-ui-fg-subtle hover:bg-ui-bg-subtle-hover flex items-center gap-x-2.5 h-10 px-4 rounded-xl transition-all'
-const NAV_ACTIVE = 'text-ui-fg-base'
-
-interface NavEntry {
-  to: string
-  labelKey?: string
-  label?: string
-  icon: React.ReactNode
-  feature?: string | null
-}
 
 function UserLeftMenu() {
   const org = useOrg() as any
   const session = useLHSession() as any
   const { t, i18n } = useTranslation()
-  const router = useRouter()
   const rawPathname = usePathname() || ''
-  const { rights } = useAdminStatus()
   // Strip /orgs/{slug} prefix
   const pathname = rawPathname.replace(/^\/orgs\/[^/]+/, '')
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const { rights } = useAdminStatus()
 
   const isActivePath = (path: string) => {
     if (path === '/') {
@@ -74,7 +58,6 @@ function UserLeftMenu() {
     }
     return pathname === path || pathname.startsWith(path + '/')
   }
-
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false)
   const access_token = session?.data?.tokens?.access_token
   const orgslug = org?.slug || ''
@@ -100,25 +83,9 @@ function UserLeftMenu() {
   const rf = org?.config?.config?.resolved_features
   const isEnabled = (feature: string) => rf?.[feature]?.enabled === true
 
-  const showPodcasts = isEnabled('podcasts')
   const showCommunities = isEnabled('communities')
+  const showPodcasts = isEnabled('podcasts')
   const showPayments = isEnabled('payments')
-
-  // User-facing nav items
-  const NAV_ITEMS: NavEntry[] = [
-    { to: '/', labelKey: 'common.home', icon: <House className="w-[18px] h-[18px]" />, feature: null },
-    { to: '/courses', labelKey: 'courses.courses', icon: <BookOpen className="w-[18px] h-[18px]" />, feature: 'courses' },
-    { to: '/podcasts', labelKey: 'podcasts.podcasts', icon: <Headphones className="w-[18px] h-[18px]" />, feature: 'podcasts' },
-    { to: '/communities', labelKey: 'communities.title', icon: <Users className="w-[18px] h-[18px]" />, feature: 'communities' },
-    { to: '/store', label: 'Store', icon: <ShoppingCart className="w-[18px] h-[18px]" />, feature: 'payments' },
-    { to: '/trail', labelKey: 'courses.progress', icon: <Route className="w-[18px] h-[18px]" />, feature: null },
-  ]
-
-  const visibleNavItems = NAV_ITEMS.filter((item) => {
-    if (!item.feature) return true
-    if (rf?.[item.feature]) return rf[item.feature].enabled
-    return true
-  })
 
   // Floating indicator: measure active nav item position
   const navContainerRef = useRef<HTMLDivElement>(null)
@@ -155,7 +122,7 @@ function UserLeftMenu() {
     ro.observe(container)
 
     return () => ro.disconnect()
-  }, [pathname, isCollapsed, showPodcasts, showCommunities, showPayments, measureIndicator])
+  }, [pathname, isCollapsed, showCommunities, showPodcasts, showPayments, measureIndicator])
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -218,7 +185,7 @@ function UserLeftMenu() {
         </div>
       </div>
 
-      {/* Main Navigation */}
+      {/* Main Navigation - Vertically Centered */}
       <div className="flex-1 flex flex-col justify-center py-4 px-3">
         <div className="relative" ref={navContainerRef}>
           {/* Floating active indicator */}
@@ -241,21 +208,67 @@ function UserLeftMenu() {
               />
             </div>
 
-            {/* Content group */}
+            {/* Content group label */}
             <div className={cn("px-3 pt-5 pb-1 text-[11px] font-medium uppercase tracking-wider text-ui-fg-muted", isCollapsed && "hidden")}>
               Content
             </div>
-            {visibleNavItems.filter(item => item.to !== '/').map((item) => (
-              <div data-nav-item key={item.to}>
+            {/* Courses */}
+            <div data-nav-item>
+              <MenuLink
+                href={getUriWithOrg(orgslug, '/courses')}
+                icon={<BookOpen className="w-[18px] h-[18px]" />}
+                label={t('courses.courses')}
+                isCollapsed={isCollapsed}
+                active={isActivePath('/courses')}
+              />
+            </div>
+
+            {showCommunities && (
+              <div data-nav-item>
                 <MenuLink
-                  href={getUriWithOrg(orgslug, item.to)}
-                  icon={item.icon}
-                  label={item.labelKey ? t(item.labelKey) : (item.label || '')}
+                  href={getUriWithOrg(orgslug, '/communities')}
+                  icon={<Users className="w-[18px] h-[18px]" />}
+                  label={t('communities.title')}
                   isCollapsed={isCollapsed}
-                  active={isActivePath(item.to)}
+                  active={isActivePath('/communities')}
                 />
               </div>
-            ))}
+            )}
+            {showPodcasts && (
+              <div data-nav-item>
+                <MenuLink
+                  href={getUriWithOrg(orgslug, '/podcasts')}
+                  icon={<Headphones className="w-[18px] h-[18px]" />}
+                  label={t('podcasts.podcasts')}
+                  isCollapsed={isCollapsed}
+                  active={isActivePath('/podcasts')}
+                />
+              </div>
+            )}
+
+            {/* Store */}
+            {showPayments && (
+              <div data-nav-item>
+                <MenuLink
+                  href={getUriWithOrg(orgslug, '/store')}
+                  icon={<ShoppingCart className="w-[18px] h-[18px]" />}
+                  label="Store"
+                  isCollapsed={isCollapsed}
+                  active={isActivePath('/store')}
+                />
+              </div>
+            )}
+
+            {/* Trail / Progress */}
+            <div data-nav-item>
+              <MenuLink
+                href={getUriWithOrg(orgslug, '/trail')}
+                icon={<Route className="w-[18px] h-[18px]" />}
+                label={t('courses.progress')}
+                isCollapsed={isCollapsed}
+                active={isActivePath('/trail')}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -392,7 +405,7 @@ function UserLeftMenu() {
             </button>
           </HoverMenu>
 
-          {/* Dashboard shortcut */}
+          {/* Dashboard shortcut for admins */}
           {rights?.dashboard?.action_access && (
             <>
               {!isCollapsed && <div className="border-t border-gray-200 mt-1 mb-3" />}
