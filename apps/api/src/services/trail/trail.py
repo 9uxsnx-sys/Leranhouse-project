@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import uuid4
 from sqlmodel import Session, select, func
+from pydantic import BaseModel
 from src.db.courses.chapter_activities import ChapterActivity
 from fastapi import HTTPException, Request, status
 from src.db.courses.activities import Activity
@@ -19,6 +20,11 @@ from src.services.courses.certifications import (
 from src.services.analytics.analytics import track
 from src.services.analytics import events as analytics_events
 from src.services.webhooks.dispatch import dispatch_webhooks
+
+
+class EpisodeProgressUpdate(BaseModel):
+    playback_position: float
+    duration: float
 
 
 def _build_trail_read(
@@ -599,6 +605,138 @@ async def remove_episode_from_trail(
     trail_runs_raw = db_session.exec(statement).all()
 
     return _build_trail_read(trail, list(trail_runs_raw), db_session, user_id=user.id)
+
+async def update_episode_progress(
+    request: Request,
+    user: PublicUser,
+    episode_uuid: str,
+    progress: EpisodeProgressUpdate,
+    db_session: Session,
+) -> TrailRead:
+    """Update playback position for an episode and auto-mark complete when near the end."""
+    statement = select(PodcastEpisode).where(PodcastEpisode.episode_uuid == episode_uuid)
+    episode = db_session.exec(statement).first()
+
+    if not episode:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Episode not found"
+        )
+
+    statement = select(Podcast).where(Podcast.id == episode.podcast_id)
+    podcast = db_session.exec(statement).first()
+
+    if not podcast:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Podcast not found"
+        )
+
+    trail = await check_trail_presence(
+        org_id=podcast.org_id,
+        user_id=user.id,
+        request=request,
+        user=user,
+        db_session=db_session,
+    )
+
+    statement = select(TrailRun).where(
+        TrailRun.trail_id == trail.id, TrailRun.podcast_id == podcast.id, TrailRun.user_id == user.id
+    )
+    trailrun = db_session.exec(statement).first()
+
+    if not trailrun:
+        trailrun = TrailRun(
+            trail_id=trail.id if trail.id is not None else 0,
+            podcast_id=podcast.id if podcast.id is not None else 0,
+            run_type=TrailRunEnum.RUN_TYPE_PODCAST,
+            org_id=podcast.org_id,
+            user_id=user.id,
+            creation_date=str(datetime.now()),
+            update_date=str(datetime.now()),
+        )
+        db_session.add(trailrun)
+        db_session.commit()
+        db_session.refresh(trailrun)
+
+    statement = select(TrailStep).where(
+        TrailStep.trailrun_id == trailrun.id,
+        TrailStep.episode_id == episode.id,
+        TrailStep.user_id == user.id,
+    )
+    trailstep = db_session.exec(statement).first()
+
+    # Determine if episode is near completion (>=95%)
+    is_near_complete = progress.duration > 0 and (progress.playback_position / progress.duration) >= 0.95
+
+    if trailstep:
+        # Update existing step
+        data = dict(trailstep.data or {})
+        data["playback_position"] = progress.playback_position
+        data["duration"] = progress.duration
+        trailstep.data = data
+        if is_near_complete and not trailstep.complete:
+            trailstep.complete = True
+        trailstep.update_date = str(datetime.now())
+        db_session.add(trailstep)
+        db_session.commit()
+        db_session.refresh(trailstep)
+    else:
+        # Create new step with progress
+        trailstep = TrailStep(
+            trailrun_id=trailrun.id if trailrun.id is not None else 0,
+            episode_id=episode.id if episode.id is not None else 0,
+            podcast_id=podcast.id if podcast.id is not None else 0,
+            trail_id=trail.id if trail.id is not None else 0,
+            org_id=podcast.org_id,
+            complete=is_near_complete,
+            teacher_verified=False,
+            grade="",
+            data={"playback_position": progress.playback_position, "duration": progress.duration},
+            user_id=user.id,
+            creation_date=str(datetime.now()),
+            update_date=str(datetime.now()),
+        )
+        db_session.add(trailstep)
+        db_session.commit()
+        db_session.refresh(trailstep)
+
+    statement = select(TrailRun).where(TrailRun.trail_id == trail.id, TrailRun.user_id == user.id)
+    trail_runs_raw = db_session.exec(statement).all()
+
+    return _build_trail_read(trail, list(trail_runs_raw), db_session, user_id=user.id)
+
+
+async def get_episode_progress(
+    request: Request,
+    user: PublicUser,
+    episode_uuid: str,
+    db_session: Session,
+) -> dict:
+    """Get saved playback progress for an episode."""
+    statement = select(PodcastEpisode).where(PodcastEpisode.episode_uuid == episode_uuid)
+    episode = db_session.exec(statement).first()
+
+    if not episode:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Episode not found"
+        )
+
+    # Find the trail step for this episode
+    statement = select(TrailStep).where(
+        TrailStep.episode_id == episode.id,
+        TrailStep.user_id == user.id,
+    )
+    trailstep = db_session.exec(statement).first()
+
+    if not trailstep:
+        return {"playback_position": 0, "duration": 0, "complete": False}
+
+    data = trailstep.data or {}
+    return {
+        "playback_position": data.get("playback_position", 0),
+        "duration": data.get("duration", 0),
+        "complete": trailstep.complete,
+    }
+
 
 async def remove_activity_from_trail(
     request: Request,

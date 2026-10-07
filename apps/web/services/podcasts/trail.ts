@@ -41,3 +41,27 @@ export async function unmarkEpisodeAsComplete(episode_uuid: string, access_token
   const res = await errorHandling(result)
   return res
 }
+
+export async function saveEpisodeProgress(episode_uuid: string, playback_position: number, duration: number, access_token: any) {
+  const result: any = await fetch(
+    `${getAPIUrl()}trail/progress/${episode_uuid}`,
+    RequestBodyWithAuthHeader('PUT', { playback_position, duration }, null, access_token)
+  )
+  const res = await errorHandling(result)
+  return res
+}
+
+export async function getEpisodeProgress(episode_uuid: string, access_token: any) {
+  const result: any = await fetch(
+    `${getAPIUrl()}trail/progress/${episode_uuid}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+      cache: 'no-store',
+    }
+  )
+  const res = await errorHandling(result)
+  return res
+}

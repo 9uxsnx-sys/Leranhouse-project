@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useReducer, useCallback, useRef, useEffect, useMemo } from 'react'
 import { Podcast, PodcastEpisode } from '@services/podcasts/podcasts'
+import { saveEpisodeProgress, getEpisodeProgress } from '@services/podcasts/trail'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
 
 interface PodcastPlayerState {
   currentEpisode: PodcastEpisode | null
@@ -110,6 +112,23 @@ const PodcastPlayerContext = createContext<PodcastPlayerContextValue | null>(nul
 export function PodcastPlayerProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(podcastPlayerReducer, initialState)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const saveIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const session = useLHSession() as any
+  const access_token = session?.access_token || null
+
+  // ── Save current playback progress ──
+  const saveProgress = useCallback(() => {
+    const audio = audioRef.current
+    if (!audio || !state.currentEpisode?.episode_uuid || !access_token) return
+    saveEpisodeProgress(
+      state.currentEpisode.episode_uuid,
+      audio.currentTime,
+      audio.duration || state.duration,
+      access_token,
+    ).catch(() => {
+      // Silently fail — progress saving is non-critical
+    })
+  }, [state.currentEpisode, state.duration, access_token])
 
   const playEpisode = useCallback((episode: PodcastEpisode, podcast: Podcast) => {
     dispatch({ type: 'SET_EPISODE', payload: { episode, podcast } })
@@ -123,16 +142,19 @@ export function PodcastPlayerProvider({ children }: { children: React.ReactNode 
   const pause = useCallback(() => {
     dispatch({ type: 'PAUSE' })
     audioRef.current?.pause()
-  }, [])
+    // Save progress on pause
+    saveProgress()
+  }, [saveProgress])
 
   const togglePlay = useCallback(() => {
     if (state.isPlaying) {
       audioRef.current?.pause()
+      saveProgress()
     } else {
       audioRef.current?.play()
     }
     dispatch({ type: 'TOGGLE_PLAY' })
-  }, [state.isPlaying])
+  }, [state.isPlaying, saveProgress])
 
   const setTime = useCallback((time: number) => {
     dispatch({ type: 'SET_TIME', payload: time })
@@ -154,9 +176,11 @@ export function PodcastPlayerProvider({ children }: { children: React.ReactNode 
   }, [])
 
   const closePlayer = useCallback(() => {
+    // Save progress before closing
+    saveProgress()
     audioRef.current?.pause()
     dispatch({ type: 'CLOSE_PLAYER' })
-  }, [])
+  }, [saveProgress])
 
   const seekTo = useCallback((time: number) => {
     if (audioRef.current) {
@@ -165,7 +189,23 @@ export function PodcastPlayerProvider({ children }: { children: React.ReactNode 
     }
   }, [])
 
-  // Sync audio element with state
+  // ── Auto-save progress every 30 seconds while playing ──
+  useEffect(() => {
+    if (state.isPlaying && state.currentEpisode && access_token) {
+      saveIntervalRef.current = setInterval(() => {
+        saveProgress()
+      }, 30000)
+    }
+
+    return () => {
+      if (saveIntervalRef.current) {
+        clearInterval(saveIntervalRef.current)
+        saveIntervalRef.current = null
+      }
+    }
+  }, [state.isPlaying, state.currentEpisode, access_token, saveProgress])
+
+  // ── Sync audio element with state ──
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
@@ -180,6 +220,8 @@ export function PodcastPlayerProvider({ children }: { children: React.ReactNode 
 
     const handleEnded = () => {
       dispatch({ type: 'PAUSE' })
+      // Save final progress (auto-marks complete on backend >=95%)
+      saveProgress()
     }
 
     audio.addEventListener('timeupdate', handleTimeUpdate)
@@ -191,7 +233,32 @@ export function PodcastPlayerProvider({ children }: { children: React.ReactNode 
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata)
       audio.removeEventListener('ended', handleEnded)
     }
-  }, [])
+  }, [saveProgress])
+
+  // ── Resume playback from saved position when episode loads ──
+  useEffect(() => {
+    if (!state.currentEpisode?.episode_uuid || !access_token || !audioRef.current) return
+
+    let cancelled = false
+
+    getEpisodeProgress(state.currentEpisode.episode_uuid, access_token)
+      .then((progress: any) => {
+        if (cancelled) return
+        const pos = progress?.playback_position || 0
+        const isComplete = progress?.complete || false
+        if (pos > 0 && !isComplete && audioRef.current) {
+          audioRef.current.currentTime = pos
+          dispatch({ type: 'SET_TIME', payload: pos })
+        }
+      })
+      .catch(() => {
+        // Silently fail
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [state.currentEpisode?.episode_uuid, access_token])
 
   const value: PodcastPlayerContextValue = useMemo(() => ({
     state,

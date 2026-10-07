@@ -87,6 +87,23 @@ export default function PodcastClient({
   const totalEpisodes = episodes.length || 0
   const progressPercent = totalEpisodes > 0 ? Math.round((completedEpisodes / totalEpisodes) * 100) : 0
 
+  // Build episode progress map from trail steps (for partial progress indicators)
+  const episodeProgressMap = React.useMemo(() => {
+    const map: Record<string, { playback_position: number; duration: number } | null> = {}
+    if (podcastRun?.steps) {
+      for (const step of podcastRun.steps) {
+        if (step.episode_id && step.data) {
+          const pos = step.data.playback_position
+          const dur = step.data.duration
+          if (pos > 0 && dur > 0) {
+            map[step.episode_id] = { playback_position: pos, duration: dur }
+          }
+        }
+      }
+    }
+    return map
+  }, [podcastRun])
+
   const handleGetAccess = async () => {
     try {
       await startPodcast(podcast.podcast_uuid, orgslug, access_token)
@@ -237,6 +254,7 @@ export default function PodcastClient({
                       key={episode.episode_uuid}
                       episode={episode}
                       podcast={podcast}
+                      savedProgress={episodeProgressMap[episode.id]}
                     />
                   ))}
                 </div>

@@ -9,9 +9,10 @@ import { Play, Pause } from 'lucide-react'
 interface EpisodeCardProps {
   episode: PodcastEpisode
   podcast: Podcast
+  savedProgress?: { playback_position: number; duration: number } | null
 }
 
-export default function EpisodeCard({ episode, podcast }: EpisodeCardProps) {
+export default function EpisodeCard({ episode, podcast, savedProgress }: EpisodeCardProps) {
   const { state, playEpisode, togglePlay } = usePodcastPlayer()
   const [isHovered, setIsHovered] = useState(false)
 
@@ -20,6 +21,10 @@ export default function EpisodeCard({ episode, podcast }: EpisodeCardProps) {
 
   const progress = isCurrentEpisode && state.duration > 0
     ? Math.min(Math.round(state.currentTime / state.duration * 100), 100)
+    : 0
+
+  const savedPercent = !isCurrentEpisode && savedProgress && savedProgress.duration > 0
+    ? Math.min(Math.round((savedProgress.playback_position / savedProgress.duration) * 100), 100)
     : 0
 
   const handlePlay = () => {
@@ -95,6 +100,23 @@ export default function EpisodeCard({ episode, podcast }: EpisodeCardProps) {
           </div>
         </button>
       </div>
+
+      {/* Saved progress bar — shown for non-current episodes with saved progress */}
+      {savedPercent > 0 && !isCurrentEpisode && (
+        <div className="px-4 pb-4">
+          <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gray-400 rounded-full"
+              style={{ width: `${savedPercent}%` }}
+            />
+          </div>
+          <div className="flex justify-end mt-1">
+            <span className="text-[11px] text-gray-400 tabular-nums">
+              {formatDuration(Math.floor(savedProgress!.playback_position))}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Expandable progress bar — only visible for the current episode */}
       <div

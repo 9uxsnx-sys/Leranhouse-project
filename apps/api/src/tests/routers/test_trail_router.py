@@ -73,3 +73,19 @@ class TestTrailRouter:
         with patch("src.routers.trail.remove_activity_from_trail", new_callable=AsyncMock, return_value=_mock_trail()):
             response = await client.delete("/api/v1/trail/remove_activity/activity_test")
         assert response.status_code == 200
+
+        # ── Podcast progress endpoints ──
+        with patch("src.routers.trail.update_episode_progress", new_callable=AsyncMock, return_value=_mock_trail()):
+            response = await client.put(
+                "/api/v1/trail/progress/episode_test",
+                json={"playback_position": 120.5, "duration": 600.0},
+            )
+        assert response.status_code == 200
+
+        with patch("src.routers.trail.get_episode_progress", new_callable=AsyncMock, return_value={"playback_position": 120.5, "duration": 600.0, "complete": False}):
+            response = await client.get("/api/v1/trail/progress/episode_test")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["playback_position"] == 120.5
+        assert data["duration"] == 600.0
+        assert data["complete"] is False

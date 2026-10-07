@@ -4,18 +4,21 @@ from src.db.trails import TrailCreate, TrailRead
 from src.security.auth import get_current_user
 from src.security.features_utils.dependencies import require_courses_feature
 from src.services.trail.trail import (
+    EpisodeProgressUpdate,
     Trail,
     add_activity_to_trail,
     add_course_to_trail,
     add_episode_to_trail,
     add_podcast_to_trail,
     create_user_trail,
+    get_episode_progress,
     get_user_trails,
     get_user_trail_with_orgid,
     remove_activity_from_trail,
     remove_course_from_trail,
     remove_episode_from_trail,
     remove_podcast_from_trail,
+    update_episode_progress,
 )
 
 
@@ -286,3 +289,49 @@ async def api_remove_episode_from_trail(
     Remove Episode from trail
     """
     return await remove_episode_from_trail(request, user, episode_uuid, db_session)
+
+
+@router.put(
+    "/progress/{episode_uuid}",
+    response_model=TrailRead,
+    summary="Update episode playback progress",
+    description="Save the current playback position for an episode. Auto-marks as complete when >=95% listened.",
+    responses={
+        200: {"description": "Episode progress updated.", "model": TrailRead},
+        401: {"description": "Authentication required"},
+        404: {"description": "Episode or podcast not found"},
+    },
+)
+async def api_update_episode_progress(
+    request: Request,
+    episode_uuid: str,
+    progress: EpisodeProgressUpdate,
+    user=Depends(get_current_user),
+    db_session=Depends(get_db_session),
+) -> TrailRead:
+    """
+    Update episode playback progress
+    """
+    return await update_episode_progress(request, user, episode_uuid, progress, db_session)
+
+
+@router.get(
+    "/progress/{episode_uuid}",
+    summary="Get episode playback progress",
+    description="Retrieve the saved playback position for an episode.",
+    responses={
+        200: {"description": "Episode progress retrieved."},
+        401: {"description": "Authentication required"},
+        404: {"description": "Episode not found"},
+    },
+)
+async def api_get_episode_progress(
+    request: Request,
+    episode_uuid: str,
+    user=Depends(get_current_user),
+    db_session=Depends(get_db_session),
+):
+    """
+    Get episode playback progress
+    """
+    return await get_episode_progress(request, user, episode_uuid, db_session)
