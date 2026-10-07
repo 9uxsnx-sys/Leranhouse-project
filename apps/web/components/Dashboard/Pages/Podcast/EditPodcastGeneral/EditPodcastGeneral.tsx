@@ -1,9 +1,9 @@
 'use client'
-import React, { useState, useRef } from 'react'
+import React, { useState } from 'react'
 import { usePodcast } from '@components/Contexts/PodcastContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { updatePodcast, updatePodcastThumbnail, deletePodcastThumbnail } from '@services/podcasts/podcasts'
+import { updatePodcast } from '@services/podcasts/podcasts'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
@@ -14,6 +14,7 @@ import { Input } from '@components/ui/input'
 import { Textarea } from '@components/ui/textarea'
 import Link from 'next/link'
 import { getUriWithOrg } from '@services/config/config'
+import PodcastMediaSection from './PodcastMediaSection'
 
 const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none"
 
@@ -26,16 +27,13 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
   const { podcast, refreshPodcast, setPodcast, isLoading } = usePodcast()
   const session = useLHSession() as any
   const org = useOrg() as any
-  const imageInputRef = useRef<HTMLInputElement>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
-  const [isThumbnailLoading, setIsThumbnailLoading] = useState(false)
   const [expandedHosts, setExpandedHosts] = useState<Record<number, boolean>>({})
 
   const accessToken = session?.data?.tokens?.access_token
   const isPublished = podcast?.published ?? false
   const shortUuid = podcast?.podcast_uuid?.replace('podcast_', '')
-  const hasThumbnail = !!podcast?.thumbnail_image
 
   const validationSchema = Yup.object({
     name: Yup.string()
@@ -120,46 +118,6 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
       toast.error('Failed to update publish status')
     } finally {
       setIsPublishing(false)
-    }
-  }
-
-  const handleThumbnailChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    setIsThumbnailLoading(true)
-    const toastId = toast.loading('Uploading thumbnail...')
-    try {
-      const formData = new FormData()
-      formData.append('thumbnail', file)
-      await updatePodcastThumbnail(podcast.podcast_uuid, formData, accessToken)
-      await revalidateTags(['podcasts'], orgslug)
-      await refreshPodcast()
-      toast.success('Thumbnail uploaded', { id: toastId })
-    } catch (error) {
-      console.error('Failed to upload thumbnail:', error)
-      toast.error('Failed to upload thumbnail', { id: toastId })
-    } finally {
-      setIsThumbnailLoading(false)
-      e.target.value = ''
-    }
-  }
-
-  const handleDeleteThumbnail = async () => {
-    setIsThumbnailLoading(true)
-    const toastId = toast.loading('Removing thumbnail...')
-    try {
-      await deletePodcastThumbnail(podcast.podcast_uuid, accessToken)
-      // Immediately clear the thumbnail in local state so UI switches instantly
-      setPodcast({ ...podcast, thumbnail_image: null as any })
-      await revalidateTags(['podcasts'], orgslug)
-      await refreshPodcast()
-      toast.success('Thumbnail removed', { id: toastId })
-    } catch (error) {
-      console.error('Failed to delete thumbnail:', error)
-      toast.error('Failed to remove thumbnail', { id: toastId })
-    } finally {
-      setIsThumbnailLoading(false)
     }
   }
 
@@ -486,52 +444,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
               </div>
             </div>
 
-            {/* ── MEDIA ── */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-              <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
-                Media
-              </h3>
-              <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50">
-                <div className="flex-shrink-0">
-                  <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-700">Podcast Cover Image</p>
-                </div>
-                {isThumbnailLoading ? (
-                  <div className="w-[18px] h-[18px] border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <input
-                      ref={imageInputRef}
-                      type="file"
-                      className="hidden"
-                      accept=".jpg,.jpeg,.png"
-                      onChange={handleThumbnailChange}
-                    />
-                    {hasThumbnail ? (
-                      <button
-                        type="button"
-                        onClick={handleDeleteThumbnail}
-                        className="flex items-center justify-center text-red-400 hover:text-red-600 transition-colors cursor-pointer"
-                        title="Remove cover image"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => imageInputRef.current?.click()}
-                        className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
-                        title="Upload cover image"
-                      >
-                        <UploadCloud size={18} />
-                      </button>
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
+            <PodcastMediaSection />
 
           </div>
         </Form>

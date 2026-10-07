@@ -42,6 +42,7 @@ class PodcastBase(SQLModel):
     about: Optional[str] = None
     tags: Optional[str] = None
     thumbnail_image: Optional[str] = Field(default="")
+    banner_image: Optional[str] = Field(default="")
     public: bool
     published: bool = Field(default=False)
     extra_metadata: Optional[dict] = None
@@ -62,6 +63,7 @@ class Podcast(PodcastBase, table=True):
 class PodcastCreate(PodcastBase):
     org_id: int = Field(default=None, foreign_key="organization.id")
     thumbnail_image: Optional[str] = Field(default="")
+    banner_image: Optional[str] = Field(default="")
 
 
 class PodcastUpdate(SQLModel):
@@ -70,6 +72,7 @@ class PodcastUpdate(SQLModel):
     about: Optional[str] = None
     tags: Optional[str] = None
     thumbnail_image: Optional[str] = Field(default="")
+    banner_image: Optional[str] = Field(default="")
     public: Optional[bool] = None
     published: Optional[bool] = None
     seo: Optional[dict] = None
@@ -84,6 +87,7 @@ class PodcastRead(PodcastBase):
     creation_date: str
     update_date: str
     thumbnail_image: Optional[str] = Field(default="")
+    banner_image: Optional[str] = Field(default="")
     seo: Optional[dict] = None
 
 

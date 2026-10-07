@@ -15,6 +15,8 @@ from src.services.podcasts.podcasts import (
     update_podcast,
     update_podcast_thumbnail,
     delete_podcast_thumbnail,
+    update_podcast_banner,
+    delete_podcast_banner,
     delete_podcast,
     get_podcast_user_rights,
 )
@@ -25,6 +27,10 @@ from src.services.podcasts.episodes import (
 )
 from src.db.podcasts.episodes import PodcastEpisodeRead
 from src.core.events.database import get_db_session
+from src.services.podcasts.thumbnails import (
+    upload_podcast_banner,
+    delete_podcast_banner_file,
+)
 from src.security.auth import get_current_user
 
 router = APIRouter()
@@ -241,6 +247,58 @@ async def api_delete_podcast_thumbnail(
     Delete a podcast thumbnail.
     """
     return await delete_podcast_thumbnail(
+        request, podcast_uuid, current_user, db_session
+    )
+
+
+@router.put(
+    "/{podcast_uuid}/banner",
+    response_model=PodcastRead,
+    summary="Update podcast banner image",
+    description="Upload or replace the banner image for a podcast.",
+    responses={
+        200: {"description": "Banner updated successfully", "model": PodcastRead},
+        403: {"description": "User lacks permission to update the podcast"},
+        404: {"description": "Podcast not found"},
+        422: {"description": "Invalid banner file"},
+    },
+)
+async def api_update_podcast_banner(
+    request: Request,
+    podcast_uuid: str,
+    banner: UploadFile = File(...),
+    db_session: Session = Depends(get_db_session),
+    current_user=Depends(get_current_user),
+) -> PodcastRead:
+    """
+    Upload or replace a podcast banner image.
+    """
+    return await update_podcast_banner(
+        request, podcast_uuid, current_user, db_session, banner
+    )
+
+
+@router.delete(
+    "/{podcast_uuid}/banner",
+    response_model=PodcastRead,
+    summary="Delete podcast banner image",
+    description="Remove the banner image from a podcast.",
+    responses={
+        200: {"description": "Banner deleted successfully", "model": PodcastRead},
+        403: {"description": "User lacks permission to update the podcast"},
+        404: {"description": "Podcast not found"},
+    },
+)
+async def api_delete_podcast_banner(
+    request: Request,
+    podcast_uuid: str,
+    db_session: Session = Depends(get_db_session),
+    current_user=Depends(get_current_user),
+) -> PodcastRead:
+    """
+    Delete a podcast banner image.
+    """
+    return await delete_podcast_banner(
         request, podcast_uuid, current_user, db_session
     )
 

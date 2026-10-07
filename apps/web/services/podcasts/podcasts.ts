@@ -30,6 +30,7 @@ export interface Podcast {
   about: string
   tags: string
   thumbnail_image: string
+  banner_image: string
   public: boolean
   published: boolean
   creation_date: string
@@ -199,6 +200,31 @@ export async function deletePodcastThumbnail(
 ) {
   const result: any = await fetch(
     `${getAPIUrl()}podcasts/${podcast_uuid}/thumbnail`,
+    RequestBodyWithAuthHeader('DELETE', null, null, access_token)
+  )
+  const res = await getResponseMetadata(result)
+  return res
+}
+
+export async function updatePodcastBanner(
+  podcast_uuid: string,
+  formData: FormData,
+  access_token: string
+) {
+  const result: any = await fetch(
+    `${getAPIUrl()}podcasts/${podcast_uuid}/banner`,
+    RequestBodyFormWithAuthHeader('PUT', formData, null, access_token)
+  )
+  const res = await getResponseMetadata(result)
+  return res
+}
+
+export async function deletePodcastBanner(
+  podcast_uuid: string,
+  access_token: string
+) {
+  const result: any = await fetch(
+    `${getAPIUrl()}podcasts/${podcast_uuid}/banner`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token)
   )
   const res = await getResponseMetadata(result)

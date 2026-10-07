@@ -9,6 +9,7 @@ import { Podcast, PodcastEpisode, PodcastMeta } from '@services/podcasts/podcast
 import { startPodcast } from '@services/podcasts/trail'
 import { Headphones, Loader2, Search, Clock, ArrowUpDown, SortAsc, RefreshCw, BookOpen, Award, User, Play } from 'lucide-react'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
+import { getPodcastThumbnailMediaDirectory, getPodcastBannerMediaDirectory } from '@services/media/media'
 import { useTranslation } from 'react-i18next'
 import { useMediaQuery } from 'usehooks-ts'
 import { usePodcastPlayer } from '@components/Contexts/PodcastPlayerContext'
@@ -22,6 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { IconButton } from '@/components/ui/icon-button'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 
 interface PodcastClientProps {
   orgslug: string
@@ -170,25 +172,60 @@ export default function PodcastClient({
   return (
     <GeneralWrapperStyled>
       <div className={bottomPadding}>
+        {/* ── HERO BANNER IMAGE (centered, constrained) ── */}
+        <div className="relative w-full mx-auto max-w-7xl aspect-[3/1] rounded-xl overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-gray-100 ring-1 ring-inset ring-black/5">
+          {podcast.banner_image ? (
+            <img
+              src={getPodcastBannerMediaDirectory(org?.org_uuid, podcast?.podcast_uuid, podcast?.banner_image)}
+              alt={podcast.name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500/5 via-white to-indigo-500/10">
+              <div className="text-center">
+                <div className="w-20 h-20 rounded-2xl bg-white shadow-sm ring-1 ring-black/5 flex items-center justify-center mx-auto">
+                  <Headphones className="w-10 h-10 text-indigo-400" />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Layout - Content Left, Sidebar Right */}
         <div className="w-full mx-auto max-w-7xl mt-8 space-y-8">
           <div className="flex flex-col lg:flex-row gap-10 justify-between">
             {/* Main Content - Episodes Feed */}
             <div className="flex-1 min-w-0 max-w-3xl space-y-8">
-              {/* Mobile header */}
-              <div className="md:hidden">
-                <h1 className="text-xl font-bold text-gray-900">{podcast.name}</h1>
+              {/* ── PODCAST TITLE + STATS ── */}
+              <div>
+                <h1 className="text-2xl md:text-3xl font-semibold text-ui-fg-base leading-tight">{podcast.name}</h1>
                 {podcast.description && (
-                  <p className="mt-1 text-sm text-gray-500 line-clamp-2">
+                  <p className="text-base text-ui-fg-subtle mt-2 leading-relaxed">
                     {podcast.description}
                   </p>
                 )}
-                <div className="flex items-center gap-2 mt-2 text-sm text-gray-500">
-                  <Headphones size={16} />
-                  <span>
-                    {episodes.length}{' '}
-                    {episodes.length === 1 ? 'episode' : 'episodes'}
-                  </span>
+                {/* Stats row */}
+                <div className="flex flex-wrap items-center gap-2 mt-4">
+                  <Badge variant="grey" className="flex items-center gap-1">
+                    <Headphones size={12} />
+                    {episodes.length} {episodes.length === 1 ? 'episode' : 'episodes'}
+                  </Badge>
+                  <Badge variant="grey" className="flex items-center gap-1">
+                    <Clock size={12} />
+                    {meta.total_duration
+                      ? `${meta.total_duration} min`
+                      : formatDuration(totalDurationSeconds)}
+                  </Badge>
+                  {podcast.authors?.length > 0 && (
+                    <Badge variant="grey" className="flex items-center gap-1">
+                      <User size={12} />
+                      {podcast.authors.length} {podcast.authors.length === 1 ? 'host' : 'hosts'}
+                    </Badge>
+                  )}
+                  <Badge variant="grey" className="flex items-center gap-1">
+                    <Award size={12} />
+                    Premium
+                  </Badge>
                 </div>
               </div>
 
@@ -395,6 +432,14 @@ export default function PodcastClient({
                       Last updated {podcast.update_date ? new Date(podcast.update_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'}
                     </span>
                   </div>
+                </div>
+
+                {/* ── SIDEBAR 5: Community ── */}
+                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Community</h3>
+                  <p className="text-sm text-gray-600">
+                    This podcast includes access to a dedicated community where you can discuss, ask questions, and learn together with fellow listeners.
+                  </p>
                 </div>
 
               </div>

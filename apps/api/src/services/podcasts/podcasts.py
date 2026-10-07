@@ -687,6 +687,137 @@ async def delete_podcast_thumbnail(
     return podcast
 
 
+async def update_podcast_banner(
+    request: Request,
+    podcast_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+    banner_file: UploadFile | None = None,
+):
+    from src.services.podcasts.thumbnails import upload_podcast_banner, delete_podcast_banner_file
+
+    statement = select(Podcast).where(Podcast.podcast_uuid == podcast_uuid)
+    podcast = db_session.exec(statement).first()
+
+    if not podcast:
+        raise HTTPException(
+            status_code=404,
+            detail="Podcast not found",
+        )
+
+    # RBAC check
+    await check_resource_access(request, db_session, current_user, podcast.podcast_uuid, AccessAction.UPDATE)
+
+    # Get org uuid
+    org_statement = select(Organization).where(Organization.id == podcast.org_id)
+    org = db_session.exec(org_statement).first()
+
+    # Delete old banner file if exists
+    if podcast.banner_image:
+        await delete_podcast_banner_file(org.org_uuid, podcast.podcast_uuid, podcast.banner_image)
+
+    # Upload new banner
+    name_in_disk = None
+    if banner_file and banner_file.filename:
+        name_in_disk = await upload_podcast_banner(
+            banner_file, org.org_uuid, podcast.podcast_uuid
+        )
+
+    if not name_in_disk:
+        raise HTTPException(
+            status_code=500,
+            detail="Issue with banner upload",
+        )
+
+    podcast.banner_image = name_in_disk
+    podcast.update_date = str(datetime.now())
+
+    db_session.add(podcast)
+    db_session.commit()
+    db_session.refresh(podcast)
+
+    # Get podcast authors with their roles
+    authors_statement = (
+        select(ResourceAuthor, User)
+        .join(User, ResourceAuthor.user_id == User.id)
+        .where(ResourceAuthor.resource_uuid == podcast.podcast_uuid)
+        .order_by(ResourceAuthor.id.asc())
+    )
+    author_results = db_session.exec(authors_statement).all()
+
+    authors = [
+        AuthorWithRole(
+            user=UserRead.model_validate(user),
+            authorship=resource_author.authorship,
+            authorship_status=resource_author.authorship_status,
+            creation_date=resource_author.creation_date,
+            update_date=resource_author.update_date
+        )
+        for resource_author, user in author_results
+    ]
+
+    podcast = PodcastRead(**podcast.model_dump(), authors=authors)
+
+    return podcast
+
+
+async def delete_podcast_banner(
+    request: Request,
+    podcast_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+):
+    from src.services.podcasts.thumbnails import delete_podcast_banner_file
+
+    statement = select(Podcast).where(Podcast.podcast_uuid == podcast_uuid)
+    podcast = db_session.exec(statement).first()
+
+    if not podcast:
+        raise HTTPException(
+            status_code=404,
+            detail="Podcast not found",
+        )
+
+    await check_resource_access(request, db_session, current_user, podcast.podcast_uuid, AccessAction.UPDATE)
+
+    org_statement = select(Organization).where(Organization.id == podcast.org_id)
+    org = db_session.exec(org_statement).first()
+
+    if podcast.banner_image:
+        await delete_podcast_banner_file(org.org_uuid, podcast.podcast_uuid, podcast.banner_image)
+
+    podcast.banner_image = ""
+    podcast.update_date = str(datetime.now())
+
+    db_session.add(podcast)
+    db_session.commit()
+    db_session.refresh(podcast)
+
+    # Get podcast authors with their roles
+    authors_statement = (
+        select(ResourceAuthor, User)
+        .join(User, ResourceAuthor.user_id == User.id)
+        .where(ResourceAuthor.resource_uuid == podcast.podcast_uuid)
+        .order_by(ResourceAuthor.id.asc())
+    )
+    author_results = db_session.exec(authors_statement).all()
+
+    authors = [
+        AuthorWithRole(
+            user=UserRead.model_validate(user),
+            authorship=resource_author.authorship,
+            authorship_status=resource_author.authorship_status,
+            creation_date=resource_author.creation_date,
+            update_date=resource_author.update_date
+        )
+        for resource_author, user in author_results
+    ]
+
+    podcast = PodcastRead(**podcast.model_dump(), authors=authors)
+
+    return podcast
+
+
 async def update_podcast(
     request: Request,
     podcast_object: PodcastUpdate,

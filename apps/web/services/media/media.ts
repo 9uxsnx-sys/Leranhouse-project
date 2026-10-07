@@ -241,6 +241,18 @@ export function getPodcastThumbnailMediaDirectory(
 }
 
 /**
+ * Get the banner URL for a podcast
+ */
+export function getPodcastBannerMediaDirectory(
+  orgUUID: string,
+  podcastUUID: string,
+  fileId: string
+) {
+  let uri = `${getMediaUrl()}content/orgs/${orgUUID}/podcasts/${podcastUUID}/banners/${fileId}`
+  return uri
+}
+
+/**
  * Get the thumbnail URL for a podcast episode
  */
 export function getEpisodeThumbnailMediaDirectory(
