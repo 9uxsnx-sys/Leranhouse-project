@@ -1,7 +1,7 @@
 # Cloudflare Media & Storage Integration Plan
 
-> **Status:** Planned (not started)
-> **Target:** Next development cycle
+> **Status:** In Progress — Frontend player component built
+> **Target:** Next development cycle (backend + HLS integration)
 > **Type:** External service integration (SaaS)
 
 ---
@@ -674,42 +674,59 @@ v1_router.include_router(media_resources_router, tags=["media-resources"])
 
 **File:** `apps/web/components/Objects/Activities/Video/CloudflarePlayer.tsx`
 
-Full HLS video player using hls.js. Key requirements:
+> **Status: Built** — MP4 player ready; HLS integration pending Cloudflare Stream backend.
 
-- **No download** — `controlsList="nodownload"`, `disablePictureInPicture`
-- **No right-click** — context menu disabled on container
-- **Fetches signed URL** from backend on mount
-- **Reports progress** to existing TrailStep tracking system
-- **Auto-complete** at 95% playback
-- **Full controls** — play/pause, seek, volume, speed, fullscreen
-- **Buffering indicator** — spinner during load
+Current player is a fully-featured MP4 player used for testing. When Cloudflare Stream backend is ready, it will be upgraded to use hls.js for HLS streaming with adaptive bitrate.
+
+**Current capabilities (MP4 mode):**
+
+- Play/pause (click video or center icon, keyboard Space/K)
+- Skip forward/back 10s (J/L keyboard shortcuts, ←/→ arrows)
+- Volume control with visual fill slider (M to mute, ↑/↓ arrows)
+- Playback speed: 0.5x–4x ([/] keyboard shortcuts)
+- Picture-in-Picture (PiP) mode
+- Fullscreen toggle (F key)
+- Subtitles/CC toggle (when track provided)
+- YouTube-style center play icon (appears briefly on pause, hides on play)
+- Buffering indicator spinner
+- Progress reporting via `onProgress` callback
+- Auto-complete signal via `onComplete` callback
+- Keyboard shortcuts reference (shown in test harness)
+
+**Future HLS upgrades (when Cloudflare Stream is integrated):**
+
+- Replace `<video src={...}>` with hls.js loading signed HLS manifest
+- Add quality selector (auto/360p/720p/1080p) from HLS variants
+- Fetch signed URL from `GET /media/video/stream/{activity_uuid}` on mount
+- Integrate with TrailStep tracking for auto-save every 30s and resume position
+- Security: `controlsList="nodownload"`, disabled right-click, `disablePictureInPicture`
 
 ```tsx
 'use client'
 
 import React, { useRef, useState, useCallback, useEffect } from 'react'
-import Hls from 'hls.js'
-import { getAPIUrl } from '@services/config/config'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
 import {
-  Play, Pause, Volume2, VolumeX, Maximize, Minimize, Settings, Loader2,
+  Play, Pause, Volume2, VolumeX, Maximize, Minimize,
+  Loader2, RotateCcw, RotateCw, PictureInPicture2, Subtitles,
 } from 'lucide-react'
 
 interface CloudflarePlayerProps {
-  activityUuid: string
-  courseUuid: string
+  src: string
+  poster?: string
   onProgress?: (currentTime: number, duration: number) => void
   onComplete?: () => void
   autoplay?: boolean
+  subtitleUrl?: string
 }
 ```
 
 **Key implementation details:**
 
-1. **Mount flow:** Fetch `GET /media/video/stream/{activity_uuid}` -> get signed HLS URL -> initialize hls.js -> play
-2. **Auto-save:** Calls `onProgress` on time update -> existing TrailStep system saves every 30s
-3. **Resume:** Backend returns saved position from TrailStep -> frontend seeks on load
-4. **Security:** Video element has `controlsList="nodownload"` and `disablePictureInPicture`
+1. **Current (MP4 mode):** Uses standard `<video>` element with `src` prop. Simple and reliable for testing.
+2. **Future (HLS mode):** Fetch `GET /media/video/stream/{activity_uuid}` -> get signed HLS URL -> initialize hls.js -> play
+3. **Auto-save (future):** Calls `onProgress` on time update -> existing TrailStep system saves every 30s
+4. **Resume (future):** Backend returns saved position from TrailStep -> frontend seeks on load
+5. **Security (future):** Video element will have `controlsList="nodownload"` and `disablePictureInPicture`
 
 ### 8b. Cloudflare Image Component
 
@@ -880,7 +897,7 @@ Activity preview image -> CloudflareImage(variant="medium")
 | **P3** | Video API router | `apps/api/src/routers/media/video.py` | P2 | 3 hours |
 | **P4** | Cloudflare Images service + router | `apps/api/src/services/media/cloudflare_images.py` + router | None | 2 hours |
 | **P5** | Cloudflare R2 service + router | `apps/api/src/services/media/cloudflare_r2.py` + router + `CourseResource` table | None | 4 hours |
-| **P6** | CloudflarePlayer frontend component | `CloudflarePlayer.tsx` + hls.js install | P3 | 5 hours |
+| **P6** | CloudflarePlayer frontend component | `CloudflarePlayer.tsx` + hls.js install | P3 | ✅ Done (MP4 mode, HLS pending) |
 | **P7** | CloudflareImage frontend component | `CloudflareImage.tsx` | P4 | 1 hour |
 | **P8** | ResourceDownload + admin upload UI | `ResourceDownload.tsx` + course editor | P5 | 4 hours |
 | **P9** | Update VideoActivity to handle Cloudflare | `Video.tsx` | P1, P6 | 30 min |
