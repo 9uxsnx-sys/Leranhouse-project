@@ -7,11 +7,15 @@ from src.services.trail.trail import (
     Trail,
     add_activity_to_trail,
     add_course_to_trail,
+    add_episode_to_trail,
+    add_podcast_to_trail,
     create_user_trail,
     get_user_trails,
     get_user_trail_with_orgid,
-    remove_course_from_trail,
     remove_activity_from_trail,
+    remove_course_from_trail,
+    remove_episode_from_trail,
+    remove_podcast_from_trail,
 )
 
 
@@ -186,3 +190,99 @@ async def api_remove_activity_from_trail(
     Remove Activity from trail
     """
     return await remove_activity_from_trail(request, user, activity_uuid, db_session)
+
+
+@router.post(
+    "/add_podcast/{podcast_uuid}",
+    response_model=TrailRead,
+    summary="Add podcast to trail",
+    description="Attach a podcast to the current user's learning trail.",
+    responses={
+        200: {"description": "Podcast added to trail.", "model": TrailRead},
+        401: {"description": "Authentication required"},
+        403: {"description": "User does not have access to this podcast"},
+        404: {"description": "Podcast or trail not found"},
+    },
+)
+async def api_add_podcast_to_trail(
+    request: Request,
+    podcast_uuid: str,
+    user=Depends(get_current_user),
+    db_session=Depends(get_db_session),
+) -> TrailRead:
+    """
+    Add Podcast to trail
+    """
+    return await add_podcast_to_trail(request, user, podcast_uuid, db_session)
+
+
+@router.delete(
+    "/remove_podcast/{podcast_uuid}",
+    response_model=TrailRead,
+    summary="Remove podcast from trail",
+    description="Detach a podcast from the current user's learning trail.",
+    responses={
+        200: {"description": "Podcast removed from trail.", "model": TrailRead},
+        401: {"description": "Authentication required"},
+        403: {"description": "User does not have permission to modify this trail"},
+        404: {"description": "Podcast or trail not found"},
+    },
+)
+async def api_remove_podcast_from_trail(
+    request: Request,
+    podcast_uuid: str,
+    user=Depends(get_current_user),
+    db_session=Depends(get_db_session),
+) -> TrailRead:
+    """
+    Remove Podcast from trail
+    """
+    return await remove_podcast_from_trail(request, user, podcast_uuid, db_session)
+
+
+@router.post(
+    "/add_episode/{episode_uuid}",
+    response_model=TrailRead,
+    summary="Add episode to trail",
+    description="Mark an episode as completed on the current user's learning trail.",
+    responses={
+        200: {"description": "Episode added to trail.", "model": TrailRead},
+        401: {"description": "Authentication required"},
+        403: {"description": "User does not have access to this episode"},
+        404: {"description": "Episode or trail not found"},
+    },
+)
+async def api_add_episode_to_trail(
+    request: Request,
+    episode_uuid: str,
+    user=Depends(get_current_user),
+    db_session=Depends(get_db_session),
+) -> TrailRead:
+    """
+    Add Episode to trail (mark as listened)
+    """
+    return await add_episode_to_trail(request, user, episode_uuid, db_session)
+
+
+@router.delete(
+    "/remove_episode/{episode_uuid}",
+    response_model=TrailRead,
+    summary="Remove episode from trail",
+    description="Remove an episode completion from the current user's learning trail.",
+    responses={
+        200: {"description": "Episode removed from trail.", "model": TrailRead},
+        401: {"description": "Authentication required"},
+        403: {"description": "User does not have permission to modify this trail"},
+        404: {"description": "Episode or trail not found"},
+    },
+)
+async def api_remove_episode_from_trail(
+    request: Request,
+    episode_uuid: str,
+    user=Depends(get_current_user),
+    db_session=Depends(get_db_session),
+) -> TrailRead:
+    """
+    Remove Episode from trail
+    """
+    return await remove_episode_from_trail(request, user, episode_uuid, db_session)

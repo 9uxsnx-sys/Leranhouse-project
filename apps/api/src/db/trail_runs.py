@@ -9,6 +9,7 @@ from src.db.trail_steps import TrailStep
 
 class TrailRunEnum(str, Enum):
     RUN_TYPE_COURSE = "RUN_TYPE_COURSE"
+    RUN_TYPE_PODCAST = "RUN_TYPE_PODCAST"
 
 
 class StatusEnum(str, Enum):
@@ -23,12 +24,18 @@ class TrailRun(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     data: dict = Field(default_factory=dict, sa_column=Column(JSON))
     status: StatusEnum = StatusEnum.STATUS_IN_PROGRESS
+    run_type: TrailRunEnum = TrailRunEnum.RUN_TYPE_COURSE
     # foreign keys
     trail_id: int = Field(
         sa_column=Column(Integer, ForeignKey("trail.id", ondelete="CASCADE"), index=True)
     )
-    course_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("course.id", ondelete="CASCADE"), index=True)
+    course_id: Optional[int] = Field(
+        default=None,
+        sa_column=Column(Integer, ForeignKey("course.id", ondelete="CASCADE"), nullable=True, index=True)
+    )
+    podcast_id: Optional[int] = Field(
+        default=None,
+        sa_column=Column(Integer, ForeignKey("podcast.id", ondelete="CASCADE"), nullable=True, index=True)
     )
     org_id: int = Field(
         sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"))
@@ -44,8 +51,10 @@ class TrailRun(SQLModel, table=True):
 class TrailRunCreate(SQLModel):
     data: dict = Field(default_factory=dict)
     status: StatusEnum = StatusEnum.STATUS_IN_PROGRESS
+    run_type: TrailRunEnum = TrailRunEnum.RUN_TYPE_COURSE
     trail_id: int
-    course_id: int
+    course_id: Optional[int] = None
+    podcast_id: Optional[int] = None
     org_id: int
     user_id: int
     creation_date: str
@@ -57,16 +66,20 @@ class TrailRunRead(BaseModel):
     id: Optional[int] = None
     data: dict = Field(default_factory=dict)
     status: StatusEnum = StatusEnum.STATUS_IN_PROGRESS
+    run_type: TrailRunEnum = TrailRunEnum.RUN_TYPE_COURSE
     # foreign keys
     trail_id: Optional[int] = None
     course_id: Optional[int] = None
+    podcast_id: Optional[int] = None
     org_id: Optional[int] = None
     user_id: Optional[int] = None
-    # course object
+    # resolved objects
     course: Optional[dict] = None
+    podcast: Optional[dict] = None
     # timestamps
     creation_date: Optional[str] = None
     update_date: Optional[str] = None
-    # number of activities in course
+    # counts
     course_total_steps: int = 0
+    podcast_total_episodes: int = 0
     steps: list[TrailStep] = Field(default_factory=list)

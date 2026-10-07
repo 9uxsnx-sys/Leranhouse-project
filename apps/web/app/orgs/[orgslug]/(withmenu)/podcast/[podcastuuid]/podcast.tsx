@@ -6,7 +6,8 @@ import useSWR from 'swr'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
 import EpisodeCard from '@components/Objects/Podcasts/EpisodeCard'
 import { Podcast, PodcastEpisode, PodcastMeta } from '@services/podcasts/podcasts'
-import { Headphones, Loader2, Search, Clock, ArrowUpDown, SortAsc, RefreshCw, BookOpen, Award, User } from 'lucide-react'
+import { startPodcast } from '@services/podcasts/trail'
+import { Headphones, Loader2, Search, Clock, ArrowUpDown, SortAsc, RefreshCw, BookOpen, Award, User, Play } from 'lucide-react'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { useTranslation } from 'react-i18next'
 import { useMediaQuery } from 'usehooks-ts'
@@ -64,6 +65,36 @@ export default function PodcastClient({
   const episodes = data?.episodes || initialEpisodes
   const totalDurationSeconds = episodes.reduce((sum, ep) => sum + (ep.duration_seconds || 0), 0)
   const meta = (podcast as any).extra_metadata || {}
+
+  // ── Trail / Enrollment ──
+  const { data: trailData, mutate: mutateTrail } = useSWR(
+    access_token && org_id ? `${getAPIUrl()}trail/org/${org_id}/trail` : null,
+    (url) => swrFetcher(url, access_token),
+    { revalidateOnFocus: false, dedupingInterval: 30000 }
+  )
+
+  const podcastRun = React.useMemo(() => {
+    if (!podcast?.podcast_uuid || !trailData?.runs || !Array.isArray(trailData.runs)) return null
+    const cleanPodcastUuid = podcast.podcast_uuid.replace('podcast_', '')
+    return trailData.runs.find((run: any) => {
+      const cleanRunPodcastUuid = run.podcast?.podcast_uuid?.replace('podcast_', '')
+      return cleanRunPodcastUuid === cleanPodcastUuid
+    }) || null
+  }, [podcast, trailData])
+
+  const isEnrolled = !!podcastRun
+  const completedEpisodes = podcastRun?.steps?.length || 0
+  const totalEpisodes = episodes.length || 0
+  const progressPercent = totalEpisodes > 0 ? Math.round((completedEpisodes / totalEpisodes) * 100) : 0
+
+  const handleGetAccess = async () => {
+    try {
+      await startPodcast(podcast.podcast_uuid, orgslug, access_token)
+      mutateTrail()
+    } catch (e) {
+      console.error('Failed to start podcast trail', e)
+    }
+  }
 
   // Filter and sort episodes
   const filteredEpisodes = useMemo(() => {
@@ -226,16 +257,35 @@ export default function PodcastClient({
             <div className="w-full lg:w-72 xl:w-80 shrink-0">
               <div className="lg:sticky lg:top-8 space-y-4">
 
-                {/* ── SIDEBAR 1: Get Access ── */}
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-4">Get Access</h3>
-                  <p className="text-sm text-gray-500 mb-2 leading-snug">
-                    Get access to all episodes and updates
-                  </p>
-                  <Button variant="primary" size="large" className="w-full">
-                    Get Access
-                  </Button>
-                </div>
+                {/* ── SIDEBAR 1: In Progress / Get Access ── */}
+                {isEnrolled ? (
+                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">In Progress</h3>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-gray-900">{progressPercent}% Complete</span>
+                      <span className="text-sm text-gray-500">{completedEpisodes}/{totalEpisodes}</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
+                      <div className="h-full bg-black rounded-full transition-all" style={{ width: `${progressPercent}%` }} />
+                    </div>
+                    <Link href={getUriWithOrg(orgslug, `/podcast/${podcastUuid}`)} className="block w-full mt-4">
+                      <Button variant="primary" size="large" className="w-full">
+                        <Play size={16} className="mr-1.5" />
+                        Continue Listening
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-4">Get Access</h3>
+                    <p className="text-sm text-gray-500 mb-2 leading-snug">
+                      Get access to all episodes and updates
+                    </p>
+                    <Button variant="primary" size="large" className="w-full" onClick={handleGetAccess}>
+                      Get Access
+                    </Button>
+                  </div>
+                )}
 
                 {/* ── SIDEBAR 2: Podcast Stats ── */}
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">

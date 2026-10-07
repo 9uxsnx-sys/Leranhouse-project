@@ -6,7 +6,9 @@ from src.db.courses.chapter_activities import ChapterActivity
 from fastapi import HTTPException, Request, status
 from src.db.courses.activities import Activity
 from src.db.courses.courses import Course
-from src.db.trail_runs import TrailRun, TrailRunRead
+from src.db.podcasts.podcasts import Podcast
+from src.db.podcasts.episodes import PodcastEpisode
+from src.db.trail_runs import TrailRun, TrailRunEnum, TrailRunRead
 from src.db.trail_steps import TrailStep
 from src.db.trails import Trail, TrailCreate, TrailRead
 from src.db.users import AnonymousUser, PublicUser
@@ -31,9 +33,10 @@ def _build_trail_read(
         return TrailRead(**trail.model_dump(), runs=[])
 
     trail_run_ids = [tr.id for tr in trail_runs_raw]
-    course_ids = list({tr.course_id for tr in trail_runs_raw})
+    course_ids = list({tr.course_id for tr in trail_runs_raw if tr.course_id})
+    podcast_ids = list({tr.podcast_id for tr in trail_runs_raw if tr.podcast_id})
 
-    # Batch fetch all courses needed
+    # ── Batch fetch all courses needed ──
     course_map: dict[int, Course] = {}
     if course_ids:
         courses = db_session.exec(
@@ -41,7 +44,15 @@ def _build_trail_read(
         ).all()
         course_map = {c.id: c for c in courses}
 
-    # Batch fetch chapter activity counts per course (for total_steps)
+    # ── Batch fetch all podcasts needed ──
+    podcast_map: dict[int, Podcast] = {}
+    if podcast_ids:
+        podcasts = db_session.exec(
+            select(Podcast).where(Podcast.id.in_(podcast_ids))  # type: ignore
+        ).all()
+        podcast_map = {p.id: p for p in podcasts}
+
+    # ── Batch fetch chapter activity counts per course (for total_steps) ──
     course_total_steps_map: dict[int, int] = {}
     if with_course_info and course_ids:
         step_counts = db_session.exec(
@@ -51,7 +62,17 @@ def _build_trail_read(
         ).all()
         course_total_steps_map = {row[0]: row[1] for row in step_counts}
 
-    # Batch fetch all trail steps for these trail runs
+    # ── Batch fetch episode counts per podcast (for total_episodes) ──
+    podcast_total_episodes_map: dict[int, int] = {}
+    if podcast_ids:
+        episode_counts = db_session.exec(
+            select(PodcastEpisode.podcast_id, func.count(PodcastEpisode.id))  # type: ignore
+            .where(PodcastEpisode.podcast_id.in_(podcast_ids))  # type: ignore
+            .group_by(PodcastEpisode.podcast_id)
+        ).all()
+        podcast_total_episodes_map = {row[0]: row[1] for row in episode_counts}
+
+    # ── Batch fetch all trail steps for these trail runs ──
     steps_statement = select(TrailStep).where(
         TrailStep.trailrun_id.in_(trail_run_ids)  # type: ignore
     )
@@ -65,7 +86,7 @@ def _build_trail_read(
         steps_by_run.setdefault(step.trailrun_id, []).append(step)
 
     # Also fetch courses referenced by trail steps (may overlap with trail_run courses)
-    step_course_ids = list({s.course_id for s in all_steps} - set(course_map.keys()))
+    step_course_ids = list({s.course_id for s in all_steps if s.course_id} - set(course_map.keys()))
     if step_course_ids:
         extra_courses = db_session.exec(
             select(Course).where(Course.id.in_(step_course_ids))  # type: ignore
@@ -76,18 +97,21 @@ def _build_trail_read(
     # Build trail runs
     trail_runs = []
     for tr in trail_runs_raw:
-        course = course_map.get(tr.course_id)
+        course = course_map.get(tr.course_id) if tr.course_id else None
+        podcast = podcast_map.get(tr.podcast_id) if tr.podcast_id else None
         run = TrailRunRead(
             **tr.model_dump(),
             course=course.model_dump() if course else {},
+            podcast=podcast.model_dump() if podcast else {},
             steps=[],
-            course_total_steps=course_total_steps_map.get(tr.course_id, 0) if with_course_info else 0,
+            course_total_steps=course_total_steps_map.get(tr.course_id, 0) if with_course_info and tr.course_id else 0,
+            podcast_total_episodes=podcast_total_episodes_map.get(tr.podcast_id, 0) if tr.podcast_id else 0,
         )
 
-        # Attach steps with course data (expunge to avoid dirty-tracking the data override)
+        # Attach steps with course/podcast data (expunge to avoid dirty-tracking the data override)
         for step in steps_by_run.get(tr.id, []):
             db_session.expunge(step)
-            step_course = course_map.get(step.course_id)
+            step_course = course_map.get(step.course_id) if step.course_id else None
             step.data = dict(course=step_course)
             run.steps.append(step)
 
@@ -333,6 +357,244 @@ async def add_activity_to_trail(
             },
         )
 
+    statement = select(TrailRun).where(TrailRun.trail_id == trail.id, TrailRun.user_id == user.id)
+    trail_runs_raw = db_session.exec(statement).all()
+
+    return _build_trail_read(trail, list(trail_runs_raw), db_session, user_id=user.id)
+
+
+async def add_podcast_to_trail(
+    request: Request,
+    user: PublicUser,
+    podcast_uuid: str,
+    db_session: Session,
+) -> TrailRead:
+    statement = select(Podcast).where(Podcast.podcast_uuid == podcast_uuid)
+    podcast = db_session.exec(statement).first()
+
+    if not podcast:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Podcast not found"
+        )
+
+    # check if run already exists
+    statement = select(TrailRun).where(
+        TrailRun.podcast_id == podcast.id, TrailRun.user_id == user.id
+    )
+    trailrun = db_session.exec(statement).first()
+
+    if trailrun:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="TrailRun already exists"
+        )
+
+    statement = select(Trail).where(
+        Trail.org_id == podcast.org_id, Trail.user_id == user.id
+    )
+    trail = db_session.exec(statement).first()
+
+    if not trail:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Trail not found"
+        )
+
+    statement = select(TrailRun).where(
+        TrailRun.trail_id == trail.id, TrailRun.podcast_id == podcast.id, TrailRun.user_id == user.id
+    )
+    trail_run = db_session.exec(statement).first()
+
+    if not trail_run:
+        trail_run = TrailRun(
+            trail_id=trail.id if trail.id is not None else 0,
+            podcast_id=podcast.id if podcast.id is not None else 0,
+            run_type=TrailRunEnum.RUN_TYPE_PODCAST,
+            org_id=podcast.org_id,
+            user_id=user.id,
+            creation_date=str(datetime.now()),
+            update_date=str(datetime.now()),
+        )
+        db_session.add(trail_run)
+        db_session.commit()
+        db_session.refresh(trail_run)
+
+    statement = select(TrailRun).where(TrailRun.trail_id == trail.id, TrailRun.user_id == user.id)
+    trail_runs_raw = db_session.exec(statement).all()
+
+    return _build_trail_read(trail, list(trail_runs_raw), db_session, user_id=user.id)
+
+
+async def remove_podcast_from_trail(
+    request: Request,
+    user: PublicUser,
+    podcast_uuid: str,
+    db_session: Session,
+) -> TrailRead:
+    statement = select(Podcast).where(Podcast.podcast_uuid == podcast_uuid)
+    podcast = db_session.exec(statement).first()
+
+    if not podcast:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Podcast not found"
+        )
+
+    statement = select(Trail).where(
+        Trail.org_id == podcast.org_id, Trail.user_id == user.id
+    )
+    trail = db_session.exec(statement).first()
+
+    if not trail:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Trail not found"
+        )
+
+    statement = select(TrailRun).where(
+        TrailRun.trail_id == trail.id, TrailRun.podcast_id == podcast.id, TrailRun.user_id == user.id
+    )
+    trail_run = db_session.exec(statement).first()
+
+    if trail_run:
+        db_session.delete(trail_run)
+        db_session.commit()
+
+    # Delete all trail steps for this podcast
+    statement = select(TrailStep).where(TrailStep.podcast_id == podcast.id, TrailStep.user_id == user.id)
+    trail_steps = db_session.exec(statement).all()
+
+    for trail_step in trail_steps:
+        db_session.delete(trail_step)
+        db_session.commit()
+
+    statement = select(TrailRun).where(TrailRun.trail_id == trail.id, TrailRun.user_id == user.id)
+    trail_runs_raw = db_session.exec(statement).all()
+
+    return _build_trail_read(trail, list(trail_runs_raw), db_session, user_id=user.id)
+
+
+async def add_episode_to_trail(
+    request: Request,
+    user: PublicUser,
+    episode_uuid: str,
+    db_session: Session,
+) -> TrailRead:
+    # Look for the episode
+    statement = select(PodcastEpisode).where(PodcastEpisode.episode_uuid == episode_uuid)
+    episode = db_session.exec(statement).first()
+
+    if not episode:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Episode not found"
+        )
+
+    statement = select(Podcast).where(Podcast.id == episode.podcast_id)
+    podcast = db_session.exec(statement).first()
+
+    if not podcast:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Podcast not found"
+        )
+
+    trail = await check_trail_presence(
+        org_id=podcast.org_id,
+        user_id=user.id,
+        request=request,
+        user=user,
+        db_session=db_session,
+    )
+
+    statement = select(TrailRun).where(
+        TrailRun.trail_id == trail.id, TrailRun.podcast_id == podcast.id, TrailRun.user_id == user.id
+    )
+    trailrun = db_session.exec(statement).first()
+
+    if not trailrun:
+        trailrun = TrailRun(
+            trail_id=trail.id if trail.id is not None else 0,
+            podcast_id=podcast.id if podcast.id is not None else 0,
+            run_type=TrailRunEnum.RUN_TYPE_PODCAST,
+            org_id=podcast.org_id,
+            user_id=user.id,
+            creation_date=str(datetime.now()),
+            update_date=str(datetime.now()),
+        )
+        db_session.add(trailrun)
+        db_session.commit()
+        db_session.refresh(trailrun)
+
+    statement = select(TrailStep).where(
+        TrailStep.trailrun_id == trailrun.id, TrailStep.episode_id == episode.id, TrailStep.user_id == user.id
+    )
+    trailstep = db_session.exec(statement).first()
+
+    if not trailstep:
+        trailstep = TrailStep(
+            trailrun_id=trailrun.id if trailrun.id is not None else 0,
+            episode_id=episode.id if episode.id is not None else 0,
+            podcast_id=podcast.id if podcast.id is not None else 0,
+            trail_id=trail.id if trail.id is not None else 0,
+            org_id=podcast.org_id,
+            complete=True,
+            teacher_verified=False,
+            grade="",
+            user_id=user.id,
+            creation_date=str(datetime.now()),
+            update_date=str(datetime.now()),
+        )
+        db_session.add(trailstep)
+        db_session.commit()
+        db_session.refresh(trailstep)
+
+    statement = select(TrailRun).where(TrailRun.trail_id == trail.id, TrailRun.user_id == user.id)
+    trail_runs_raw = db_session.exec(statement).all()
+
+    return _build_trail_read(trail, list(trail_runs_raw), db_session, user_id=user.id)
+
+
+async def remove_episode_from_trail(
+    request: Request,
+    user: PublicUser,
+    episode_uuid: str,
+    db_session: Session,
+) -> TrailRead:
+    # Look for the episode
+    statement = select(PodcastEpisode).where(PodcastEpisode.episode_uuid == episode_uuid)
+    episode = db_session.exec(statement).first()
+
+    if not episode:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Episode not found"
+        )
+
+    statement = select(Podcast).where(Podcast.id == episode.podcast_id)
+    podcast = db_session.exec(statement).first()
+
+    if not podcast:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Podcast not found"
+        )
+
+    statement = select(Trail).where(
+        Trail.org_id == podcast.org_id, Trail.user_id == user.id
+    )
+    trail = db_session.exec(statement).first()
+
+    if not trail:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Trail not found"
+        )
+
+    # Delete the trail step for this episode
+    statement = select(TrailStep).where(
+        TrailStep.episode_id == episode.id,
+        TrailStep.user_id == user.id,
+        TrailStep.trail_id == trail.id
+    )
+    trail_step = db_session.exec(statement).first()
+
+    if trail_step:
+        db_session.delete(trail_step)
+        db_session.commit()
+
+    # Get updated trail data
     statement = select(TrailRun).where(TrailRun.trail_id == trail.id, TrailRun.user_id == user.id)
     trail_runs_raw = db_session.exec(statement).all()
 

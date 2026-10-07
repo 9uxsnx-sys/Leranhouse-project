@@ -26,11 +26,21 @@ class TrailStep(SQLModel, table=True):
     trail_id: int = Field(
         sa_column=Column(Integer, ForeignKey("trail.id", ondelete="CASCADE"))
     )
-    activity_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("activity.id", ondelete="CASCADE"))
+    activity_id: Optional[int] = Field(
+        default=None,
+        sa_column=Column(Integer, ForeignKey("activity.id", ondelete="CASCADE"), nullable=True)
     )
-    course_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("course.id", ondelete="CASCADE"), index=True)
+    course_id: Optional[int] = Field(
+        default=None,
+        sa_column=Column(Integer, ForeignKey("course.id", ondelete="CASCADE"), nullable=True, index=True)
+    )
+    episode_id: Optional[int] = Field(
+        default=None,
+        sa_column=Column(Integer, ForeignKey("podcastepisode.id", ondelete="CASCADE"), nullable=True, index=True)
+    )
+    podcast_id: Optional[int] = Field(
+        default=None,
+        sa_column=Column(Integer, ForeignKey("podcast.id", ondelete="CASCADE"), nullable=True, index=True)
     )
     org_id: int = Field(
         sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"))
