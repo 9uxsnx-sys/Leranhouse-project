@@ -8,7 +8,7 @@ import { revalidateTags } from '@services/utils/ts/requests'
 import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
 import { useTranslation } from 'react-i18next'
-import { Loader2, Eye, Check, SaveAllIcon, Globe, GlobeLock, UploadCloud, ImageIcon, Trash2 } from 'lucide-react'
+import { Loader2, Eye, Check, SaveAllIcon, Globe, GlobeLock, UploadCloud, ImageIcon, Trash2, Plus, X, ChevronRight } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { Input } from '@components/ui/input'
 import { Textarea } from '@components/ui/textarea'
@@ -30,6 +30,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
   const [isSaving, setIsSaving] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
   const [isThumbnailLoading, setIsThumbnailLoading] = useState(false)
+  const [expandedHosts, setExpandedHosts] = useState<Record<number, boolean>>({})
 
   const accessToken = session?.data?.tokens?.access_token
   const isPublished = podcast?.published ?? false
@@ -59,21 +60,21 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
     description: podcast.description || '',
     about: podcast.about || '',
     meta_total_duration: meta.total_duration?.toString() || '',
-    meta_host_name: meta.host_name || '',
-    meta_host_title: meta.host_title || '',
-    meta_host_avatar: meta.host_avatar || '',
+    meta_hosts: meta.hosts?.length > 0
+      ? meta.hosts.map((h: any) => ({ name: h.name || '', title: h.title || '', avatar: h.avatar || '' }))
+      : [],
   }
 
   const handleSubmit = async (values: typeof initialValues) => {
     setIsSaving(true)
     const toastId = toast.loading(t('podcasts.dashboard.saving'))
     try {
-      const { meta_total_duration, meta_host_name, meta_host_title, meta_host_avatar, ...rest } = values
+      const { meta_total_duration, meta_hosts, ...rest } = values
       const extra_metadata: Record<string, any> = {}
       if (meta_total_duration) extra_metadata.total_duration = parseInt(meta_total_duration, 10)
-      if (meta_host_name) extra_metadata.host_name = meta_host_name
-      if (meta_host_title) extra_metadata.host_title = meta_host_title
-      if (meta_host_avatar) extra_metadata.host_avatar = meta_host_avatar
+      if (meta_hosts && meta_hosts.length > 0) {
+        extra_metadata.hosts = meta_hosts.filter((h: any) => h.name.trim())
+      }
 
       await updatePodcast(
         podcast.podcast_uuid,
@@ -169,7 +170,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ values, handleChange, errors, touched, isValid, dirty, submitForm }) => (
+      {({ values, handleChange, errors, touched, isValid, dirty, submitForm, setFieldValue }) => (
         <Form>
           <div className="space-y-3">
             {/* ── ACTION ROW ── */}
@@ -306,6 +307,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                 Podcast Details
               </h3>
               <div className="space-y-4">
+                {/* Total Duration */}
                 <div className="grid mb-2.5">
                   <label className="font-medium leading-[35px] text-black grow text-sm">
                     Total Duration (minutes)
@@ -322,46 +324,164 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                   />
                 </div>
 
-                <div className="grid mb-2.5">
-                  <label className="font-medium leading-[35px] text-black grow text-sm">
-                    Host Name
+                {/* Hosts */}
+                <div>
+                  <label className="font-medium leading-[35px] text-black grow text-sm block">
+                    Hosts
                   </label>
-                  <Input
-                    id="meta_host_name"
-                    name="meta_host_name"
-                    value={values.meta_host_name}
-                    onChange={handleChange}
-                    placeholder="e.g. John Doe"
-                    className={fieldClassName}
-                  />
-                </div>
+                  <div className="space-y-3">
+                    {values.meta_hosts.map((host: any, index: number) => {
+                      const isOpen = expandedHosts[index] ?? true
+                      return (
+                        <div
+                          key={index}
+                          className="bg-gray-50 rounded-xl overflow-hidden border border-gray-100"
+                        >
+                          {/* Header - clickable to expand/collapse */}
+                          <button
+                            type="button"
+                            onClick={() => setExpandedHosts(prev => ({ ...prev, [index]: !isOpen }))}
+                            className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-100/50 transition-colors"
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <span className="text-sm font-semibold text-gray-800">Host {index + 1}</span>
+                              {!isOpen && host.name && (
+                                <span className="text-xs text-gray-400 truncate max-w-[120px]">{host.name}</span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {values.meta_hosts.length > 1 && (
+                                <span
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    const updated = values.meta_hosts.filter((_: any, i: number) => i !== index)
+                                    setFieldValue('meta_hosts', updated)
+                                  }}
+                                  className="text-red-400 hover:text-red-600 transition-colors cursor-pointer p-0.5 inline-flex"
+                                >
+                                  <X size={14} />
+                                </span>
+                              )}
+                              <ChevronRight
+                                size={16}
+                                className={`text-gray-400 transition-transform duration-200 ${
+                                  isOpen ? 'rotate-90' : ''
+                                }`}
+                              />
+                            </div>
+                          </button>
 
-                <div className="grid mb-2.5">
-                  <label className="font-medium leading-[35px] text-black grow text-sm">
-                    Host Title
-                  </label>
-                  <Input
-                    id="meta_host_title"
-                    name="meta_host_title"
-                    value={values.meta_host_title}
-                    onChange={handleChange}
-                    placeholder="e.g. Host &amp; Producer"
-                    className={fieldClassName}
-                  />
-                </div>
+                          {/* Expanded content */}
+                          <div
+                            className={`grid transition-all duration-300 ease-in-out ${
+                              isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                            }`}
+                          >
+                            <div className="overflow-hidden">
+                              <div className="px-4 pb-4 space-y-3">
+                                {/* Name */}
+                                <div>
+                                  <label className="text-xs font-medium text-gray-500 mb-1 block">Name</label>
+                                  <Input
+                                    name={`meta_hosts.${index}.name`}
+                                    value={host.name}
+                                    onChange={(e) => {
+                                      const updated = [...values.meta_hosts]
+                                      updated[index] = { ...updated[index], name: e.target.value }
+                                      setFieldValue('meta_hosts', updated)
+                                    }}
+                                    placeholder="e.g. John Doe"
+                                    className={`${fieldClassName} bg-white`}
+                                  />
+                                </div>
+                                {/* Title */}
+                                <div>
+                                  <label className="text-xs font-medium text-gray-500 mb-1 block">Title</label>
+                                  <Input
+                                    name={`meta_hosts.${index}.title`}
+                                    value={host.title}
+                                    onChange={(e) => {
+                                      const updated = [...values.meta_hosts]
+                                      updated[index] = { ...updated[index], title: e.target.value }
+                                      setFieldValue('meta_hosts', updated)
+                                    }}
+                                    placeholder="e.g. Host &amp; Producer"
+                                    className={`${fieldClassName} bg-white`}
+                                  />
+                                </div>
+                                {/* Photo - media section style row */}
+                                <div>
+                                  <label className="text-xs font-medium text-gray-500 mb-1 block">Photo</label>
+                                  {host.avatar ? (
+                                    <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-white">
+                                      <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden border border-gray-200">
+                                        <img src={host.avatar} alt={host.name || 'Host avatar'} className="w-full h-full object-cover" />
+                                      </div>
+                                      <div className="flex-1">
+                                        <p className="text-sm font-medium text-gray-700">Photo uploaded</p>
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const updated = [...values.meta_hosts]
+                                          updated[index] = { ...updated[index], avatar: '' }
+                                          setFieldValue('meta_hosts', updated)
+                                        }}
+                                        className="text-red-400 hover:text-red-600 transition-colors cursor-pointer"
+                                        title="Remove photo"
+                                      >
+                                        <Trash2 size={18} />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-4 p-4 border border-dashed border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors cursor-pointer"
+                                      onClick={() => {
+                                        const input = document.createElement('input')
+                                        input.type = 'file'
+                                        input.accept = '.jpg,.jpeg,.png,.webp'
+                                        input.onchange = (e: any) => {
+                                          const file = e.target?.files?.[0]
+                                          if (!file) return
+                                          const reader = new FileReader()
+                                          reader.onload = (event: any) => {
+                                            const dataUrl = event.target?.result as string
+                                            const updated = [...values.meta_hosts]
+                                            updated[index] = { ...updated[index], avatar: dataUrl }
+                                            setFieldValue('meta_hosts', updated)
+                                          }
+                                          reader.readAsDataURL(file)
+                                        }
+                                        input.click()
+                                      }}
+                                    >
+                                      <div className="flex-shrink-0">
+                                        <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
+                                      </div>
+                                      <div className="flex-1">
+                                        <p className="text-sm font-medium text-gray-700">Click to upload photo</p>
+                                      </div>
+                                      <UploadCloud size={18} className="text-gray-400" />
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
 
-                <div className="grid mb-2.5">
-                  <label className="font-medium leading-[35px] text-black grow text-sm">
-                    Host Avatar URL
-                  </label>
-                  <Input
-                    id="meta_host_avatar"
-                    name="meta_host_avatar"
-                    value={values.meta_host_avatar}
-                    onChange={handleChange}
-                    placeholder="https://example.com/avatar.jpg"
-                    className={fieldClassName}
-                  />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFieldValue('meta_hosts', [...values.meta_hosts, { name: '', title: '', avatar: '' }])
+                      }}
+                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl border-2 border-dashed border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+                    >
+                      <Plus size={16} />
+                      Add Host
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

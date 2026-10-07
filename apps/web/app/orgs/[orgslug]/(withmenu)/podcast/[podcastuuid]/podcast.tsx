@@ -265,60 +265,58 @@ export default function PodcastClient({
                 </div>
 
                 {/* ── SIDEBAR 3: Host ── */}
-                {(podcast.authors && podcast.authors.length > 0) || meta.host_name ? (
+                {(podcast.authors && podcast.authors.length > 0) || (meta.hosts && meta.hosts.length > 0) ? (
                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                     <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Hosted by</h3>
-                    <div className="flex items-center gap-3">
-                      {meta.host_name ? (
-                        <>
-                          <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden shrink-0">
-                            {meta.host_avatar ? (
-                              <img
-                                src={meta.host_avatar}
-                                alt={meta.host_name}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                <User size={14} />
-                              </div>
-                            )}
+                    <div className="space-y-3">
+                      {meta.hosts && meta.hosts.length > 0 ? (
+                        meta.hosts.map((host: any, index: number) => (
+                          <div key={index} className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden shrink-0">
+                              {host.avatar ? (
+                                <img src={host.avatar} alt={host.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                  <User size={14} />
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-gray-900">{host.name}</p>
+                              {host.title && <p className="text-xs text-gray-500">{host.title}</p>}
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-sm font-semibold text-gray-900">{meta.host_name}</p>
-                            {meta.host_title && (
-                              <p className="text-xs text-gray-500">{meta.host_title}</p>
-                            )}
-                          </div>
-                        </>
+                        ))
                       ) : (
-                        <>
-                          <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden shrink-0">
-                            {podcast.authors![0].user.avatar_image ? (
-                              <img
-                                src={podcast.authors![0].user.avatar_image}
-                                alt={`${podcast.authors![0].user.first_name} ${podcast.authors![0].user.last_name}`}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                <User size={14} />
-                              </div>
-                            )}
+                        podcast.authors && podcast.authors.map((author: any, index: number) => (
+                          <div key={index} className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden shrink-0">
+                              {author.user.avatar_image ? (
+                                <img
+                                  src={author.user.avatar_image}
+                                  alt={`${author.user.first_name} ${author.user.last_name}`}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                  <User size={14} />
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-gray-900">
+                                {author.user.first_name} {author.user.last_name}
+                              </p>
+                              <p className="text-xs text-gray-500 capitalize">
+                                {author.authorship === 'CREATOR' ? 'Host' : author.authorship.toLowerCase()}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-sm font-semibold text-gray-900">
-                              {podcast.authors![0].user.first_name} {podcast.authors![0].user.last_name}
-                            </p>
-                            <p className="text-xs text-gray-500 capitalize">
-                              {podcast.authors![0].authorship === 'CREATOR' ? 'Host' : podcast.authors![0].authorship.toLowerCase()}
-                            </p>
-                          </div>
-                        </>
+                        ))
                       )}
                     </div>
                   </div>
-                )}
+                ) : null}
 
                 {/* ── SIDEBAR 4: Updates ── */}
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
