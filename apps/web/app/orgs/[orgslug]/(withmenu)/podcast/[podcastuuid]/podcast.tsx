@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next'
 import { useMediaQuery } from 'usehooks-ts'
 import { usePodcastPlayer } from '@components/Contexts/PodcastPlayerContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useOrg } from '@components/Contexts/OrgContext'
 import { swrFetcher } from '@services/utils/ts/requests'
 import {
   DropdownMenu,
@@ -45,6 +46,7 @@ export default function PodcastClient({
   const { state } = usePodcastPlayer()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
+  const org = useOrg() as any
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<'recent' | 'oldest' | 'duration'>('recent')
 
