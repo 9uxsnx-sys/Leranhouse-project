@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MessageSquare, Send, Loader2, User, AlertCircle, Lock, UserPlus } from 'lucide-react'
+import { Loader2, User, AlertCircle, Lock, UserPlus } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrgMembership } from '@components/Contexts/OrgContext'
@@ -119,7 +119,7 @@ export function CommentSection({ discussionUuid, communityUuid, isLocked = false
               <p className="text-gray-400 text-sm">{t('communities.comments.no_replies')}</p>
             </div>
           ) : (
-            <>
+            <div className="space-y-2">
               {comments.map((comment) => (
                 <CommentCard
                   key={comment.comment_uuid}
@@ -129,13 +129,13 @@ export function CommentSection({ discussionUuid, communityUuid, isLocked = false
                   onUpdated={handleCommentUpdated}
                 />
               ))}
-            </>
+            </div>
           )}
         </div>
       </div>
 
       {/* Reply Input */}
-      <div className="border-t border-gray-100 pt-4 pb-4 px-0">
+      <div className="pt-4">
         {isLocked ? (
           <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 rounded-md">
             <Lock size={14} className="text-amber-600" />
@@ -176,7 +176,7 @@ export function CommentSection({ discussionUuid, communityUuid, isLocked = false
                   onKeyDown={handleKeyDown}
                   aria-label={t('communities.comments.write_reply')}
                   placeholder={t('communities.comments.write_reply')}
-                  className="flex-1 text-sm bg-transparent outline-none placeholder:text-gray-400 py-1.5"
+                  className="flex-1 text-sm bg-gray-50 border border-gray-200 rounded-md px-3 py-2 outline-none placeholder:text-gray-400 focus:border-gray-300 transition-colors"
                 />
                 <Button
                   type="submit"

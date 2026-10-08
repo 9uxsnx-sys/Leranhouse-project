@@ -129,6 +129,8 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
   }, [episodes, searchQuery, sortOrder, episodeOrder])
 
   const handleDragEnd = async (result: DropResult) => {
+    const override = document.getElementById('dnd-cursor-override')
+    if (override) override.remove()
     if (!result.destination || isReordering) return
 
     const items = Array.from(displayEpisodes)
@@ -155,6 +157,13 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
     } finally {
       setIsReordering(false)
     }
+  }
+
+  const handleDragStart = () => {
+    const style = document.createElement('style')
+    style.id = 'dnd-cursor-override'
+    style.textContent = 'body * { cursor: grabbing !important; }'
+    document.head.appendChild(style)
   }
 
   const handleDeleteEpisode = async (episode: PodcastEpisode) => {
@@ -276,7 +285,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
           </div>
 
           {/* Episode List — with drag-and-drop */}
-          <DragDropContext onDragEnd={handleDragEnd}>
+          <DragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
             <Droppable droppableId="episodes">
               {(provided) => (
                 <div
@@ -321,7 +330,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
                                   ? 'ring-2 ring-blue-500/40 border-blue-200 cursor-pointer'
                                   : 'hover:border-gray-200 cursor-pointer'
                                 : snapshot.isDragging
-                                  ? 'shadow-xl ring-2 ring-blue-500/20 rotate-1 scale-[1.02] z-50 cursor-grab'
+                                  ? 'shadow-xl ring-2 ring-blue-500/20 rotate-1 scale-[1.02] z-50 cursor-grabbing'
                                   : 'hover:border-gray-200 cursor-pointer'
                             }`}
                             style={{ ...provided.draggableProps.style }}
@@ -350,7 +359,8 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
                                 /* Drag Handle */
                                 <div
                                   {...provided.dragHandleProps}
-                                  className="flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-400 transition-colors"
+                                  className="flex-shrink-0 active:cursor-grabbing text-gray-300 hover:text-gray-400 transition-colors"
+                                  style={{ cursor: 'grab' }}
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   <GripVertical size={16} />

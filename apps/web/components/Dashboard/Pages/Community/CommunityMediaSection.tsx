@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useCommunity, useCommunityDispatch } from '@components/Contexts/CommunityContext'
-import { updateCommunityThumbnail, deleteCommunityThumbnail } from '@services/communities/communities'
+import { updateCommunityThumbnail, deleteCommunityThumbnail, updateCommunityBanner, deleteCommunityBanner } from '@services/communities/communities'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { mutate } from 'swr'
 import { getAPIUrl } from '@services/config/config'
@@ -24,11 +24,14 @@ const CommunityMediaSection: React.FC = () => {
   const communityDispatch = useCommunityDispatch()
   const accessToken = session?.data?.tokens?.access_token
   const imageInputRef = useRef<HTMLInputElement>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const bannerInputRef = useRef<HTMLInputElement>(null)
+  const [isCoverLoading, setIsCoverLoading] = useState(false)
+  const [isBannerLoading, setIsBannerLoading] = useState(false)
 
   if (!community) return null
 
   const hasThumbnail = !!community.thumbnail_image
+  const hasBanner = !!community.banner_image
 
   const showError = (message: string) => {
     toast.error(message, { duration: 3000, position: 'top-center' })
@@ -57,13 +60,11 @@ const CommunityMediaSection: React.FC = () => {
   }
 
   const uploadThumbnail = async (file: File) => {
-    setIsLoading(true)
+    setIsCoverLoading(true)
     try {
       const formData = new FormData()
       formData.append('thumbnail', file)
-      console.log('[CommunityMediaSection] Uploading thumbnail...')
       const res = await updateCommunityThumbnail(community.community_uuid, formData, accessToken)
-      console.log('[CommunityMediaSection] Upload response:', res)
       await revalidateTags(['communities'], org.slug)
       mutate(`${getAPIUrl()}communities/${community.community_uuid}`)
       if (org?.id) {
@@ -76,26 +77,21 @@ const CommunityMediaSection: React.FC = () => {
         if (res.data && communityDispatch) {
           communityDispatch({ type: 'setCommunity', payload: res.data })
         }
-        toast.success('Cover image updated successfully', {
-          duration: 3000,
-          position: 'top-center',
-        })
+        toast.success('Saved', { duration: 3000, position: 'top-center' })
         router.refresh()
       }
     } catch (err) {
       console.error('[CommunityMediaSection] Upload failed:', err)
       showError('Failed to update cover image')
     } finally {
-      setIsLoading(false)
+      setIsCoverLoading(false)
     }
   }
 
   const handleDeleteThumbnail = async () => {
-    setIsLoading(true)
+    setIsCoverLoading(true)
     try {
-      console.log('[CommunityMediaSection] Deleting thumbnail...')
       const res = await deleteCommunityThumbnail(community.community_uuid, accessToken)
-      console.log('[CommunityMediaSection] Delete response:', res)
       await revalidateTags(['communities'], org.slug)
       mutate(`${getAPIUrl()}communities/${community.community_uuid}`)
       if (org?.id) {
@@ -108,17 +104,80 @@ const CommunityMediaSection: React.FC = () => {
         if (res.data && communityDispatch) {
           communityDispatch({ type: 'setCommunity', payload: res.data })
         }
-        toast.success('Cover image removed', {
-          duration: 3000,
-          position: 'top-center',
-        })
+        toast.success('Removed', { duration: 3000, position: 'top-center' })
         router.refresh()
       }
     } catch (err) {
       console.error('[CommunityMediaSection] Delete failed:', err)
       showError('Failed to remove cover image')
     } finally {
-      setIsLoading(false)
+      setIsCoverLoading(false)
+    }
+  }
+
+  const handleBannerFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    if (!validateFile(file)) {
+      event.target.value = ''
+      return
+    }
+    await uploadBanner(file)
+  }
+
+  const uploadBanner = async (file: File) => {
+    setIsBannerLoading(true)
+    try {
+      const formData = new FormData()
+      formData.append('banner', file)
+      const res = await updateCommunityBanner(community.community_uuid, formData, accessToken)
+      await revalidateTags(['communities'], org.slug)
+      mutate(`${getAPIUrl()}communities/${community.community_uuid}`)
+      if (org?.id) {
+        mutate(`${getAPIUrl()}communities/org/${org.id}/page/1/limit/100`)
+      }
+      await new Promise((r) => setTimeout(r, 1000))
+      if (res.success === false) {
+        showError(res.HTTPmessage)
+      } else {
+        if (res.data && communityDispatch) {
+          communityDispatch({ type: 'setCommunity', payload: res.data })
+        }
+        toast.success('Saved', { duration: 3000, position: 'top-center' })
+        router.refresh()
+      }
+    } catch (err) {
+      console.error('[CommunityMediaSection] Banner upload failed:', err)
+      showError('Failed to update banner image')
+    } finally {
+      setIsBannerLoading(false)
+    }
+  }
+
+  const handleDeleteBanner = async () => {
+    setIsBannerLoading(true)
+    try {
+      const res = await deleteCommunityBanner(community.community_uuid, accessToken)
+      await revalidateTags(['communities'], org.slug)
+      mutate(`${getAPIUrl()}communities/${community.community_uuid}`)
+      if (org?.id) {
+        mutate(`${getAPIUrl()}communities/org/${org.id}/page/1/limit/100`)
+      }
+      await new Promise((r) => setTimeout(r, 1000))
+      if (res.success === false) {
+        showError(res.HTTPmessage)
+      } else {
+        if (res.data && communityDispatch) {
+          communityDispatch({ type: 'setCommunity', payload: res.data })
+        }
+        toast.success('Removed', { duration: 3000, position: 'top-center' })
+        router.refresh()
+      }
+    } catch (err) {
+      console.error('[CommunityMediaSection] Banner delete failed:', err)
+      showError('Failed to remove banner image')
+    } finally {
+      setIsBannerLoading(false)
     }
   }
 
@@ -128,7 +187,8 @@ const CommunityMediaSection: React.FC = () => {
         Media
       </h2>
 
-      <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50">
+      {/* Thumbnail row */}
+      <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50 mb-3">
         <div className="flex-shrink-0">
           <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
         </div>
@@ -137,7 +197,7 @@ const CommunityMediaSection: React.FC = () => {
           <p className="text-sm font-medium text-gray-700">Community Cover Image</p>
         </div>
 
-        {isLoading ? (
+        {isCoverLoading ? (
           <div className="w-[18px] h-[18px] border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
         ) : (
           <>
@@ -163,6 +223,50 @@ const CommunityMediaSection: React.FC = () => {
                 onClick={() => imageInputRef.current?.click()}
                 className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
                 title="Upload cover image"
+              >
+                <UploadCloud size={18} />
+              </button>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Banner row */}
+      <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50">
+        <div className="flex-shrink-0">
+          <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
+        </div>
+
+        <div className="flex-1">
+          <p className="text-sm font-medium text-gray-700">Community Banner Image</p>
+        </div>
+
+        {isBannerLoading ? (
+          <div className="w-[18px] h-[18px] border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+        ) : (
+          <>
+            <input
+              ref={bannerInputRef}
+              type="file"
+              className="hidden"
+              accept=".jpg,.jpeg,.png"
+              onChange={handleBannerFileChange}
+            />
+            {hasBanner ? (
+              <button
+                type="button"
+                onClick={handleDeleteBanner}
+                className="flex items-center justify-center text-red-400 hover:text-red-600 transition-colors cursor-pointer"
+                title="Remove banner image"
+              >
+                <Trash2 size={18} />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => bannerInputRef.current?.click()}
+                className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                title="Upload banner image"
               >
                 <UploadCloud size={18} />
               </button>

@@ -77,7 +77,7 @@ const PodcastMediaSection: React.FC = () => {
         if (res.data && setPodcast) {
           setPodcast({ ...podcast, thumbnail_image: res.data.thumbnail_image })
         }
-        toast.success('Cover image updated successfully', { duration: 3000, position: 'top-center' })
+        toast.success('Saved', { duration: 3000, position: 'top-center' })
         router.refresh()
       }
     } catch (err) {
@@ -101,7 +101,7 @@ const PodcastMediaSection: React.FC = () => {
         if (res.data && setPodcast) {
           setPodcast({ ...podcast, thumbnail_image: '' })
         }
-        toast.success('Cover image removed', { duration: 3000, position: 'top-center' })
+        toast.success('Removed', { duration: 3000, position: 'top-center' })
         router.refresh()
       }
     } catch (err) {
@@ -139,7 +139,7 @@ const PodcastMediaSection: React.FC = () => {
         if (res.data && setPodcast) {
           setPodcast({ ...podcast, banner_image: res.data.banner_image })
         }
-        toast.success('Banner image updated successfully', { duration: 3000, position: 'top-center' })
+        toast.success('Saved', { duration: 3000, position: 'top-center' })
         router.refresh()
       }
     } catch (err) {
@@ -163,7 +163,7 @@ const PodcastMediaSection: React.FC = () => {
         if (res.data && setPodcast) {
           setPodcast({ ...podcast, banner_image: '' })
         }
-        toast.success('Banner image removed', { duration: 3000, position: 'top-center' })
+        toast.success('Removed', { duration: 3000, position: 'top-center' })
         router.refresh()
       }
     } catch (err) {

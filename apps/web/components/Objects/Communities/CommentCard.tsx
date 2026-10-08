@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { MoreHorizontal, Pencil, Trash2, X, Check, Loader2, AlertCircle, ChevronUp } from 'lucide-react'
+import { MoreHorizontal, Pencil, Trash2, X, Check, Loader2, AlertCircle, Heart } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import {
@@ -149,7 +149,7 @@ export function CommentCard({
 
   return (
     <div
-      className="relative pl-[36px] border-b border-gray-100 last:border-b-0"
+      className="relative pl-[36px]"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -219,7 +219,7 @@ export function CommentCard({
                 <div className={`transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button aria-label="Comment actions" className="p-1 hover:bg-gray-100 rounded transition-colors">
+                      <button aria-label="Comment actions" className="p-1 hover:bg-gray-100 rounded-md transition-colors">
                         <MoreHorizontal size={14} className="text-gray-400" />
                       </button>
                     </DropdownMenuTrigger>
@@ -257,7 +257,7 @@ export function CommentCard({
                   hasVoted ? 'text-indigo-600' : 'text-gray-400 hover:text-gray-600'
                 } ${!canVote ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                <ChevronUp size={14} className={isVoting ? 'animate-pulse' : ''} />
+                <Heart size={14} className={isVoting ? 'animate-pulse' : ''} />
                 <span className="font-medium">{voteCount}</span>
               </button>
             </div>

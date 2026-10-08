@@ -17,8 +17,15 @@ from src.services.communities.communities import (
     link_community_to_course,
     unlink_community_from_course,
     get_community_user_rights,
+    update_community_banner,
+    delete_community_banner,
 )
-from src.services.communities.thumbnails import upload_community_thumbnail, delete_community_thumbnail_file
+from src.services.communities.thumbnails import (
+    upload_community_thumbnail,
+    delete_community_thumbnail_file,
+    upload_community_banner,
+    delete_community_banner_file,
+)
 from src.db.communities.communities import Community
 from src.security.rbac import check_resource_access, AccessAction
 
@@ -397,3 +404,60 @@ async def api_delete_community_thumbnail(
     db_session.refresh(community)
 
     return CommunityRead.model_validate(community.model_dump())
+
+
+@router.put(
+    "/{community_uuid}/banner",
+    response_model=CommunityRead,
+    summary="Upload a community banner",
+    description="Upload or replace the banner image for a community. Requires admin/maintainer role.",
+    responses={
+        200: {"description": "Banner uploaded and community updated.", "model": CommunityRead},
+        401: {"description": "Authentication required"},
+        403: {"description": "User lacks admin/maintainer role for this community"},
+        404: {"description": "Community or organization not found"},
+    },
+)
+async def api_update_community_banner(
+    request: Request,
+    community_uuid: str,
+    banner: UploadFile | None = None,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session: Session = Depends(get_db_session),
+) -> CommunityRead:
+    """
+    Upload or replace a community banner image.
+
+    Requires admin/maintainer role.
+    """
+    return await update_community_banner(
+        request, community_uuid, current_user, db_session, banner
+    )
+
+
+@router.delete(
+    "/{community_uuid}/banner",
+    response_model=CommunityRead,
+    summary="Delete a community banner",
+    description="Remove the banner image from a community. Requires admin/maintainer role.",
+    responses={
+        200: {"description": "Banner deleted and community updated.", "model": CommunityRead},
+        401: {"description": "Authentication required"},
+        403: {"description": "User lacks admin/maintainer role for this community"},
+        404: {"description": "Community or organization not found"},
+    },
+)
+async def api_delete_community_banner(
+    request: Request,
+    community_uuid: str,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session: Session = Depends(get_db_session),
+) -> CommunityRead:
+    """
+    Delete a community banner image.
+
+    Requires admin/maintainer role.
+    """
+    return await delete_community_banner(
+        request, community_uuid, current_user, db_session
+    )

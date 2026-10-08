@@ -9,12 +9,15 @@ import { CreateDiscussionModal } from '@components/Objects/Modals/Communities/Cr
 import { Community } from '@services/communities/communities'
 import { DiscussionWithAuthor, DiscussionSortBy, DISCUSSION_LABELS } from '@services/communities/discussions'
 import { useMediaQuery } from 'usehooks-ts'
-import { Search, Clock, Flame, TrendingUp, HelpCircle, Lightbulb, Megaphone, Star, MessageSquare, CheckSquare } from 'lucide-react'
+import { Search, Clock, Flame, TrendingUp, HelpCircle, Lightbulb, Megaphone, Star, MessageSquare, CheckSquare, MessageCircle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { IconButton } from '@/components/ui/icon-button'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { useCommunityRights } from '@components/Hooks/useCommunityRights'
 import { useOrgMembership } from '@components/Contexts/OrgContext'
+import { useOrg } from '@components/Contexts/OrgContext'
+import { getCommunityBannerMediaDirectory } from '@services/media/media'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -46,10 +49,57 @@ const CommunityClient = ({
   const { canManageCommunity, canCreateDiscussion: hasCreatePermission } = useCommunityRights(community.community_uuid)
   const { isUserPartOfTheOrg } = useOrgMembership()
   const canCreateDiscussion = hasCreatePermission && isUserPartOfTheOrg
+  const org = useOrg() as any
 
   return (
     <>
       <GeneralWrapperStyled>
+        {/* ── HERO BANNER IMAGE (centered, constrained) ── */}
+        <div className="relative w-full mx-auto max-w-7xl aspect-[3/1] rounded-xl overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-gray-100 ring-1 ring-inset ring-black/5">
+          {community.banner_image ? (
+            <img
+              src={getCommunityBannerMediaDirectory(org?.org_uuid, community?.community_uuid, community?.banner_image)}
+              alt={community.name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500/5 via-white to-indigo-500/10">
+              <div className="text-center">
+                <div className="w-20 h-20 rounded-2xl bg-white shadow-sm ring-1 ring-black/5 flex items-center justify-center mx-auto">
+                  <MessageCircle className="w-10 h-10 text-indigo-400" />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── COMMUNITY TITLE + DESCRIPTION ── */}
+        <div className="w-full mx-auto max-w-7xl mt-8 space-y-2">
+          <h1 className="text-2xl md:text-3xl font-semibold text-ui-fg-base leading-tight">{community.name}</h1>
+          {community.description && (
+            <p className="text-base text-ui-fg-subtle leading-relaxed">
+              {community.description}
+            </p>
+          )}
+          <div className="flex flex-wrap items-center gap-2 mt-4">
+            <Badge variant="grey" className="flex items-center gap-1">
+              <MessageSquare size={12} />
+              {initialDiscussions.length} {initialDiscussions.length === 1 ? 'discussion' : 'discussions'}
+            </Badge>
+            {community.public ? (
+              <Badge variant="grey" className="flex items-center gap-1">
+                <MessageCircle size={12} />
+                Public
+              </Badge>
+            ) : (
+              <Badge variant="grey" className="flex items-center gap-1">
+                <MessageCircle size={12} />
+                Private
+              </Badge>
+            )}
+          </div>
+        </div>
+
         {/* Forum Layout - Content Left, Sidebar Right */}
         <div className="w-full mx-auto max-w-7xl mt-8 space-y-8">
           <div className="flex flex-col lg:flex-row gap-10 justify-between">

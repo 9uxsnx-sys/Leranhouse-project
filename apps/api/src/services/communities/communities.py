@@ -263,6 +263,94 @@ async def update_community(
     return CommunityRead.model_validate(community.model_dump())
 
 
+async def update_community_banner(
+    request: Request,
+    community_uuid: str,
+    current_user: Union[PublicUser, AnonymousUser, APITokenUser],
+    db_session: Session,
+    banner_file,
+) -> CommunityRead:
+    """
+    Update a community's banner image.
+    Requires admin/maintainer role.
+    """
+    from src.services.communities.thumbnails import upload_community_banner
+
+    # Get community
+    statement = select(Community).where(Community.community_uuid == community_uuid)
+    community = db_session.exec(statement).first()
+
+    if not community:
+        raise HTTPException(status_code=404, detail="Community not found")
+
+    # RBAC check
+    await check_resource_access(request, db_session, current_user, community_uuid, AccessAction.UPDATE)
+
+    # Get org UUID for storage path
+    org_statement = select(Organization).where(Organization.id == community.org_id)
+    org = db_session.exec(org_statement).first()
+
+    if not org:
+        raise HTTPException(status_code=404, detail="Organization not found")
+
+    if banner_file:
+        filename = await upload_community_banner(
+            banner_file,
+            org.org_uuid,
+            community_uuid,
+        )
+        community.banner_image = filename
+
+    community.update_date = str(datetime.now())
+    db_session.add(community)
+    db_session.commit()
+    db_session.refresh(community)
+
+    return CommunityRead.model_validate(community.model_dump())
+
+
+async def delete_community_banner(
+    request: Request,
+    community_uuid: str,
+    current_user: Union[PublicUser, AnonymousUser, APITokenUser],
+    db_session: Session,
+) -> CommunityRead:
+    """
+    Delete a community's banner image.
+    Requires admin/maintainer role.
+    """
+    from src.services.communities.thumbnails import delete_community_banner_file
+
+    # Get community
+    statement = select(Community).where(Community.community_uuid == community_uuid)
+    community = db_session.exec(statement).first()
+
+    if not community:
+        raise HTTPException(status_code=404, detail="Community not found")
+
+    # RBAC check
+    await check_resource_access(request, db_session, current_user, community_uuid, AccessAction.UPDATE)
+
+    # Get org UUID for storage path
+    org_statement = select(Organization).where(Organization.id == community.org_id)
+    org = db_session.exec(org_statement).first()
+
+    if not org:
+        raise HTTPException(status_code=404, detail="Organization not found")
+
+    # Delete the banner file from storage
+    if community.banner_image:
+        await delete_community_banner_file(org.org_uuid, community_uuid, community.banner_image)
+
+    community.banner_image = ""
+    community.update_date = str(datetime.now())
+    db_session.add(community)
+    db_session.commit()
+    db_session.refresh(community)
+
+    return CommunityRead.model_validate(community.model_dump())
+
+
 async def delete_community(
     request: Request,
     community_uuid: str,

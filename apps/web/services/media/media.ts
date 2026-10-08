@@ -100,6 +100,15 @@ export function getCommunityThumbnailMediaDirectory(
   return uri
 }
 
+export function getCommunityBannerMediaDirectory(
+  orgUUID: string,
+  communityUUID: string,
+  fileId: string
+) {
+  let uri = `${getMediaUrl()}content/orgs/${orgUUID}/communities/${communityUUID}/banners/${fileId}`
+  return uri
+}
+
 export function getOrgLandingMediaDirectory(orgUUID: string, fileId: string) {
   let uri = `${getMediaUrl()}content/orgs/${orgUUID}/landing/${fileId}`
   return uri

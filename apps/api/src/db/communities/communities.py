@@ -23,6 +23,7 @@ class CommunityBase(SQLModel):
     public: bool = True
     published: bool = Field(default=False)
     thumbnail_image: Optional[str] = Field(default="")
+    banner_image: Optional[str] = Field(default="")
 
 
 class Community(CommunityBase, table=True):
@@ -58,6 +59,8 @@ class CommunityUpdate(SQLModel):
     description: Optional[str] = None
     public: Optional[bool] = None
     published: Optional[bool] = None
+    thumbnail_image: Optional[str] = None
+    banner_image: Optional[str] = None
     moderation_words: Optional[List[str]] = None
     moderation_settings: Optional[Dict[str, Any]] = None
 

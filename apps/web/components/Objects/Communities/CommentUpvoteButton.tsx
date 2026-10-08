@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useCallback } from 'react'
-import { ChevronUp } from 'lucide-react'
+import { Heart } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrgMembership } from '@components/Contexts/OrgContext'
@@ -78,7 +78,7 @@ export function CommentUpvoteButton({
       )}
       title={canVote ? (hasVoted ? 'Remove upvote' : 'Upvote this reply') : 'Join organization to vote'}
     >
-      <ChevronUp
+      <Heart
         size={14}
         className={cn(
           'transition-transform',

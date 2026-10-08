@@ -213,3 +213,28 @@ export async function deleteCommunityThumbnail(
   const res = await getResponseMetadata(result)
   return res
 }
+
+export async function updateCommunityBanner(
+  community_uuid: string,
+  formData: FormData,
+  access_token: string
+) {
+  const result: any = await fetch(
+    `${getAPIUrl()}communities/${community_uuid}/banner`,
+    RequestBodyFormWithAuthHeader('PUT', formData, null, access_token)
+  )
+  const res = await getResponseMetadata(result)
+  return res
+}
+
+export async function deleteCommunityBanner(
+  community_uuid: string,
+  access_token: string
+) {
+  const result: any = await fetch(
+    `${getAPIUrl()}communities/${community_uuid}/banner`,
+    RequestBodyWithAuthHeader('DELETE', null, null, access_token)
+  )
+  const res = await getResponseMetadata(result)
+  return res
+}

@@ -8,6 +8,8 @@ from src.services.communities.communities import (
     link_community_to_course,
     unlink_community_from_course,
     get_community_user_rights,
+    update_community_banner,
+    delete_community_banner,
 )
 from src.services.communities.discussions import (
     create_discussion,

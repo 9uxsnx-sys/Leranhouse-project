@@ -84,7 +84,7 @@ const CourseMediaSection: React.FC = () => {
         if (res.data && courseDispatch) {
           courseDispatch({ type: 'updateField', payload: { field: 'thumbnail_image', value: res.data.thumbnail_image } })
         }
-        toast.success('Cover image updated successfully', { duration: 3000, position: 'top-center' })
+        toast.success('Saved', { duration: 3000, position: 'top-center' })
         router.refresh()
       }
     } catch (err) {
@@ -111,7 +111,7 @@ const CourseMediaSection: React.FC = () => {
         if (res.data && courseDispatch) {
           courseDispatch({ type: 'updateField', payload: { field: 'thumbnail_image', value: '' } })
         }
-        toast.success('Cover image removed', { duration: 3000, position: 'top-center' })
+        toast.success('Removed', { duration: 3000, position: 'top-center' })
         router.refresh()
       }
     } catch (err) {
@@ -149,7 +149,7 @@ const CourseMediaSection: React.FC = () => {
         if (res.data && courseDispatch) {
           courseDispatch({ type: 'updateField', payload: { field: 'banner_image', value: res.data.banner_image } })
         }
-        toast.success('Banner image updated successfully', { duration: 3000, position: 'top-center' })
+        toast.success('Saved', { duration: 3000, position: 'top-center' })
         router.refresh()
       }
     } catch (err) {
@@ -173,7 +173,7 @@ const CourseMediaSection: React.FC = () => {
         if (res.data && courseDispatch) {
           courseDispatch({ type: 'updateField', payload: { field: 'banner_image', value: '' } })
         }
-        toast.success('Banner image removed', { duration: 3000, position: 'top-center' })
+        toast.success('Removed', { duration: 3000, position: 'top-center' })
         router.refresh()
       }
     } catch (err) {
