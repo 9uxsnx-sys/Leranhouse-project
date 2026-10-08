@@ -5,7 +5,7 @@ import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/Ge
 import { CommunitySidebar } from '@components/Objects/Communities/CommunitySidebar'
 import { CommunityActionsMobile } from '@components/Objects/Communities/CommunityActionsMobile'
 import { DiscussionList } from '@components/Objects/Communities/DiscussionList'
-import { CreateDiscussionModal } from '@components/Objects/Modals/Communities/CreateDiscussionModal'
+import { CreateDiscussionCard } from '@components/Objects/Communities/CreateDiscussionCard'
 import { Community } from '@services/communities/communities'
 import { DiscussionWithAuthor, DiscussionSortBy, DISCUSSION_LABELS } from '@services/communities/discussions'
 import { useMediaQuery } from 'usehooks-ts'
@@ -39,7 +39,7 @@ const CommunityClient = ({
   org_id,
 }: CommunityClientProps) => {
   const { t } = useTranslation()
-  const [isCreateDiscussionModalOpen, setIsCreateDiscussionModalOpen] = useState(false)
+  const [isCreatingDiscussion, setIsCreatingDiscussion] = useState(false)
   const [isSelectMode, setIsSelectMode] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<DiscussionSortBy>('recent')
@@ -138,11 +138,11 @@ const CommunityClient = ({
               <div className="flex-1" />
 
               {/* New Discussion Button */}
-              {canCreateDiscussion && !isSelectMode && (
+              {canCreateDiscussion && !isSelectMode && !isCreatingDiscussion && (
                 <Button
                   variant="primary"
                   size="small"
-                  onClick={() => setIsCreateDiscussionModalOpen(true)}
+                  onClick={() => setIsCreatingDiscussion(true)}
                   className="gap-x-1.5"
                 >
                   +&nbsp;&nbsp;New
@@ -215,11 +215,18 @@ const CommunityClient = ({
               </DropdownMenu>
             </div>
 
-            {/* Discussions List */}
-            <DiscussionList
+            {/* Create Discussion Card (replaces list) */}
+            {isCreatingDiscussion ? (
+              <CreateDiscussionCard
+                communityUuid={community.community_uuid}
+                orgSlug={orgslug}
+                onClose={() => setIsCreatingDiscussion(false)}
+              />
+            ) : (
+              <DiscussionList
                 communityUuid={community.community_uuid}
                 orgslug={orgslug}
-                onCreateClick={() => setIsCreateDiscussionModalOpen(true)}
+                onCreateClick={() => setIsCreatingDiscussion(true)}
                 initialDiscussions={initialDiscussions}
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
@@ -231,6 +238,7 @@ const CommunityClient = ({
                 onSelectModeToggle={() => setIsSelectMode(!isSelectMode)}
                 onFilteredCountChange={setDiscussionCount}
               />
+            )}
           </div>
 
           {/* Right Sidebar - Community Info (Desktop only) */}
@@ -255,17 +263,11 @@ const CommunityClient = ({
         <CommunityActionsMobile
           community={community}
           orgslug={orgslug}
-          onCreateDiscussion={() => setIsCreateDiscussionModalOpen(true)}
+          onCreateDiscussion={() => setIsCreatingDiscussion(true)}
         />
       )}
 
-      {/* Modals */}
-      <CreateDiscussionModal
-        isOpen={isCreateDiscussionModalOpen}
-        onClose={() => setIsCreateDiscussionModalOpen(false)}
-        communityUuid={community.community_uuid}
-        orgSlug={orgslug}
-      />
+
     </>
   )
 }
