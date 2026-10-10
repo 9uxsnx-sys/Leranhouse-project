@@ -1,7 +1,9 @@
-# Mobile App (React Native + Expo) — Architecture & Implementation Plan
+# Mobile App (React Native + Expo) — Architecture & Implementation Plan (ARCHIVED)
 
-> **Status:** Planned  
-> **Stack:** React Native + Expo (managed workflow)  
+> **Status:** Superseded  
+> **Stack:** This plan was written for React Native + Expo.  
+> **Decision:** The platform now uses **Capacitor** instead of React Native — same Next.js codebase wrapped in a native shell, no separate mobile codebase.  
+> **See:** [Mobile App Architecture (Capacitor)](../../08-features/mobile-app/mobile-app-architecture.md) for the current plan.  
 > **Target:** Post-redesign release, after Admin AI Agent  
 
 ---

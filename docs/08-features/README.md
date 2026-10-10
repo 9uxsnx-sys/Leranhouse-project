@@ -30,6 +30,25 @@ The documents in this section describe cross-cutting feature areas that touch mu
 |----------|-------------|
 | [Overview](./communities/overview.md) | Community access control model (3 dimensions), publish/unpublish, public/restricted, course linking, moderation, discussions |
 
+### Video & Media
+
+| Document | Description |
+|----------|-------------|
+| [Cloudflare Stream Integration](./video/cloudflare-stream-integration.md) | Video upload, encoding, and streaming via Cloudflare Stream |
+| [Video Protection & DRM](./video/video-protection-drm.md) | Multi-tier content protection strategy: signed URLs, DRM, screen recording prevention, offline downloads, CDN cost savings |
+
+### Mobile App
+
+| Document | Description |
+|----------|-------------|
+| [Mobile App Architecture](./mobile-app/mobile-app-architecture.md) | Cross-platform mobile app with Capacitor — same Next.js codebase, native features, app store distribution |
+
+### Desktop App
+
+| Document | Description |
+|----------|-------------|
+| [Desktop App Architecture](./desktop-app/desktop-app-architecture.md) | Cross-platform desktop app with Capacitor Electron — native OS protection, offline playback, app store distribution |
+
 ### Planned (Future)
 
 | Document | Description |
