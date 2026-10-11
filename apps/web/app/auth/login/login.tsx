@@ -1,22 +1,25 @@
 'use client'
-import FormLayout, {
-  FormField,
-  FormLabelAndMessage,
-  Input,
-} from '@components/Objects/StyledElements/Form/Form'
-import * as Form from '@radix-ui/react-form'
-import { useFormik } from 'formik'
+import { FormikErrors, useFormik } from 'formik'
 import React, { useState, useEffect } from 'react'
-import { AlertTriangle, Lock, Mail, Shield, X, Clock } from 'lucide-react'
+import { Loader2, Shield } from 'lucide-react'
+import Link from 'next/link'
 import { checkSSOEnabled, redirectToSSOLogin } from '@services/auth/sso'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { useAuth } from '@components/Contexts/AuthContext'
 import { getLEARNHOUSE_TOP_DOMAIN_VAL, getDeploymentMode } from '@services/config/config'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useTranslation } from 'react-i18next'
 import { resendVerificationEmail } from '@services/auth/auth'
 import AuthLayout from '@components/Auth/AuthLayout'
+import AuthAlert, { type AuthAlertVariant } from '@components/Auth/AuthAlert'
+import {
+  authFieldClass,
+  authPrimaryBtnClass,
+  authSecondaryBtnClass,
+  authLabelClass,
+  authMutedLinkClass,
+  authFieldErrorClass,
+} from '@components/Auth/authStyles'
 
 interface LoginClientProps {
   org: any
@@ -91,7 +94,7 @@ const LoginClient = (props: LoginClientProps) => {
   }
 
   const validate = (values: any) => {
-    const errors: any = {}
+    const errors: FormikErrors<any> = {}
 
     if (!values.email) {
       errors.email = t('validation.required')
@@ -110,7 +113,6 @@ const LoginClient = (props: LoginClientProps) => {
 
   const handleResendVerification = async () => {
     if (!unverifiedEmail || !props.org?.id) return
-
     setIsResendingVerification(true)
     try {
       const res = await resendVerificationEmail(unverifiedEmail, props.org.id)
@@ -203,174 +205,154 @@ const LoginClient = (props: LoginClientProps) => {
     },
   })
 
+  // Map the auth error state onto a single inline alert.
+  const errorAlert = (() => {
+    if (!showErrorModal || (!error && !verificationResent)) return null
+
+    let variant: AuthAlertVariant = 'error'
+    let message: React.ReactNode = error
+    let action: React.ReactNode
+
+    if (verificationResent) {
+      variant = 'success'
+      message = `${t('auth.verification_email_resent')} — ${t('auth.check_inbox_message')}`
+    } else if (errorType === 'EMAIL_NOT_VERIFIED') {
+      variant = 'warning'
+      message = t('auth.email_not_verified_message')
+      action = (
+        <button
+          type="button"
+          onClick={handleResendVerification}
+          disabled={isResendingVerification}
+          className="text-[13px] font-semibold underline disabled:opacity-50"
+        >
+          {isResendingVerification
+            ? t('common.loading')
+            : t('auth.resend_verification_email')}
+        </button>
+      )
+    } else if (errorType === 'ACCOUNT_LOCKED') {
+      variant = 'error'
+      message = `${t('auth.account_locked_message')}${
+        retryAfter
+          ? ` · ${t('auth.try_again_in', { minutes: Math.max(1, Math.ceil(retryAfter / 60)) })}`
+          : ''
+      }`
+    } else if (errorType === 'RATE_LIMITED') {
+      variant = 'warning'
+      message = `${t('auth.rate_limited_message')}${
+        retryAfter
+          ? ` · ${t('auth.try_again_in', { minutes: Math.max(1, Math.ceil(retryAfter / 60)) })}`
+          : ''
+      }`
+    }
+
+    return (
+      <AuthAlert variant={variant} className="mb-6" action={action}>
+        {message}
+      </AuthAlert>
+    )
+  })()
+
   return (
     <AuthLayout org={props.org} welcomeText={t('auth.login_to')}>
-        {/* Error Top Bar */}
-        {showErrorModal && (
-          <div className={`
-            w-full px-4 py-3 flex items-center justify-between gap-3 animate-in slide-in-from-top duration-200
-            ${errorType === 'EMAIL_NOT_VERIFIED' && !verificationResent ? 'bg-amber-500 text-white' : ''}
-            ${verificationResent ? 'bg-green-500 text-white' : ''}
-            ${errorType === 'ACCOUNT_LOCKED' ? 'bg-red-500 text-white' : ''}
-            ${errorType === 'RATE_LIMITED' ? 'bg-orange-500 text-white' : ''}
-            ${error && !verificationResent && errorType !== 'EMAIL_NOT_VERIFIED' && errorType !== 'ACCOUNT_LOCKED' && errorType !== 'RATE_LIMITED' ? 'bg-red-500 text-white' : ''}
-          `}>
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              {errorType === 'EMAIL_NOT_VERIFIED' && !verificationResent && <Mail size={18} className="shrink-0" />}
-              {verificationResent && <Mail size={18} className="shrink-0" />}
-              {errorType === 'ACCOUNT_LOCKED' && <Lock size={18} className="shrink-0" />}
-              {errorType === 'RATE_LIMITED' && <Clock size={18} className="shrink-0" />}
-              {error && !verificationResent && errorType !== 'EMAIL_NOT_VERIFIED' && errorType !== 'ACCOUNT_LOCKED' && errorType !== 'RATE_LIMITED' && <AlertTriangle size={18} className="shrink-0" />}
+      {errorAlert}
 
-              <div className="flex-1 min-w-0">
-                {errorType === 'EMAIL_NOT_VERIFIED' && !verificationResent && (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-medium">{t('auth.email_not_verified_message')}</span>
-                    <button
-                      type="button"
-                      onClick={handleResendVerification}
-                      disabled={isResendingVerification}
-                      className="text-sm underline hover:no-underline disabled:opacity-50"
-                    >
-                      {isResendingVerification ? t('common.loading') : t('auth.resend_verification_email')}
-                    </button>
-                  </div>
-                )}
-                {verificationResent && (
-                  <span className="text-sm font-medium">{t('auth.verification_email_resent')} - {t('auth.check_inbox_message')}</span>
-                )}
-                {errorType === 'ACCOUNT_LOCKED' && (
-                  <span className="text-sm font-medium">
-                    {t('auth.account_locked')}
-                    {retryAfter ? ` · ${t('auth.try_again_in', { minutes: Math.max(1, Math.ceil(retryAfter / 60)) })}` : ''}
-                  </span>
-                )}
-                {errorType === 'RATE_LIMITED' && (
-                  <span className="text-sm font-medium">
-                    {t('auth.rate_limited')}
-                    {retryAfter ? ` · ${t('auth.try_again_in', { minutes: Math.max(1, Math.ceil(retryAfter / 60)) })}` : ''}
-                  </span>
-                )}
-                {error && !verificationResent && errorType !== 'EMAIL_NOT_VERIFIED' && errorType !== 'ACCOUNT_LOCKED' && errorType !== 'RATE_LIMITED' && (
-                  <span className="text-sm font-medium">{error}</span>
-                )}
-              </div>
-            </div>
+      <form onSubmit={formik.handleSubmit} className="space-y-5" noValidate>
+        <div className="space-y-2">
+          <label htmlFor="login-email" className={authLabelClass}>
+            {t('auth.email')}
+          </label>
+          <input
+            id="login-email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            value={formik.values.email}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            className={authFieldClass}
+          />
+          {formik.touched.email && formik.errors.email && (
+            <p className={authFieldErrorClass}>{formik.errors.email}</p>
+          )}
+        </div>
 
-            <button
-              onClick={() => {
-                setShowErrorModal(false)
-                if (verificationResent) setVerificationResent(false)
-              }}
-              className="p-1 hover:bg-white/20 rounded transition-colors shrink-0"
-            >
-              <X size={18} />
-            </button>
-          </div>
-        )}
-
-        <div className="flex-1 flex flex-row">
-        <div className="m-auto w-full max-w-sm px-6 py-8 sm:py-0">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">{t('auth.welcome_back')}</h1>
-            <p className="text-gray-500 mt-1">{t('auth.enter_credentials')}</p>
-          </div>
-
-          {/* Login Form Card */}
-          <div className="bg-white rounded-xl p-6 nice-shadow">
-            <FormLayout onSubmit={formik.handleSubmit}>
-              <FormField name="email">
-                <FormLabelAndMessage
-                  label={t('auth.email')}
-                  message={formik.touched.email ? formik.errors.email : undefined}
-                />
-                <Form.Control asChild>
-                  <Input
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    value={formik.values.email}
-                    type="email"
-                  />
-                </Form.Control>
-              </FormField>
-
-              <FormField name="password">
-                <FormLabelAndMessage
-                  label={t('auth.password')}
-                  message={formik.touched.password ? formik.errors.password : undefined}
-                />
-                <Form.Control asChild>
-                  <Input
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    value={formik.values.password}
-                    type="password"
-                    autoComplete="current-password"
-                  />
-                </Form.Control>
-              </FormField>
-
-              <div className="flex justify-end">
-                <Link
-                  href="/forgot"
-                  className="text-xs text-gray-500 hover:text-gray-700 transition-colors"
-                >
-                  {t('auth.forgot_password')}
-                </Link>
-              </div>
-
-              <div className="pt-2">
-                <Form.Submit asChild>
-                  <button className="w-full bg-primary text-primary-foreground font-semibold text-center py-2.5 rounded-lg hover:bg-primary/90 transition-colors">
-                    {isSubmitting ? t('common.loading') : t('auth.login')}
-                  </button>
-                </Form.Submit>
-              </div>
-            </FormLayout>
-
-            {/* Divider */}
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-3 bg-white text-gray-400">{t('common.or')}</span>
-              </div>
-            </div>
-
-            {/* Social & SSO Buttons */}
-            <div className="space-y-2.5">
-              <button
-                onClick={handleGoogleSignIn}
-                className="flex items-center justify-center gap-2 w-full py-2.5 bg-white border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg" alt="" className="w-4 h-4" />
-                <span>{t('auth.sign_in_with_google')}</span>
-              </button>
-
-              {ssoEnabled && (
-                <button
-                  onClick={handleSSOLogin}
-                  disabled={ssoLoading}
-                  className="flex items-center justify-center gap-2 w-full py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
-                >
-                  <Shield size={16} />
-                  <span>{ssoLoading ? t('common.loading') : t('auth.sign_in_with_sso')}</span>
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Sign Up Link */}
-          <p className="text-center text-gray-600 mt-6">
-            {t('auth.no_account')}{' '}
-            <Link href="/signup" className="font-semibold text-gray-900 hover:underline">
-              {t('auth.sign_up')}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label htmlFor="login-password" className={authLabelClass}>
+              {t('auth.password')}
+            </label>
+            <Link href="/forgot" className={authMutedLinkClass}>
+              {t('auth.forgot_password')}
             </Link>
-          </p>
+          </div>
+          <input
+            id="login-password"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            value={formik.values.password}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            className={authFieldClass}
+          />
+          {formik.touched.password && formik.errors.password && (
+            <p className={authFieldErrorClass}>{formik.errors.password}</p>
+          )}
         </div>
+
+        <button type="submit" disabled={isSubmitting} className={authPrimaryBtnClass}>
+          {isSubmitting && <Loader2 size={16} className="animate-spin" />}
+          {isSubmitting ? t('common.loading') : t('auth.sign_in')}
+        </button>
+      </form>
+
+      {/* Divider */}
+      <div className="relative my-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-100" />
         </div>
+        <div className="relative flex justify-center text-xs">
+          <span className="px-3 bg-white text-gray-400">{t('common.or')}</span>
+        </div>
+      </div>
+
+      {/* Social & SSO */}
+      <div className="space-y-2.5">
+        <button
+          type="button"
+          onClick={handleGoogleSignIn}
+          className={authSecondaryBtnClass}
+        >
+          <img
+            src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg"
+            alt=""
+            className="w-4 h-4"
+          />
+          {t('auth.sign_in_with_google')}
+        </button>
+
+        {ssoEnabled && (
+          <button
+            type="button"
+            onClick={handleSSOLogin}
+            disabled={ssoLoading}
+            className={authSecondaryBtnClass}
+          >
+            <Shield size={16} />
+            {ssoLoading ? t('common.loading') : t('auth.sign_in_with_sso')}
+          </button>
+        )}
+      </div>
+
+      {/* Sign up */}
+      <p className="text-center text-sm text-gray-500 mt-6">
+        {t('auth.no_account')}{' '}
+        <Link href="/signup" className="font-semibold text-gray-900 hover:underline">
+          {t('auth.sign_up')}
+        </Link>
+      </p>
     </AuthLayout>
   )
 }

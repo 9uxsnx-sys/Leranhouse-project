@@ -71,7 +71,7 @@ username=johndoe&password=securepassword123
 | `401 Unauthorized` | Email not verified (SaaS mode only) |
 | `429 Too Many Requests` | Too many login attempts from this IP |
 
-**Cookies set:** `access_token_cookie`, `refresh_token_cookie`
+**Cookies set:** `LH_access`, `LH_refresh`
 
 ---
 
@@ -83,7 +83,7 @@ Obtain a new access token using the refresh token cookie.
 GET /api/v1/auth/refresh
 ```
 
-This endpoint reads the `refresh_token_cookie` from the request. No request body is needed.
+This endpoint reads the `LH_refresh` cookie from the request. No request body is needed.
 
 ### Response Body (200 OK)
 
@@ -102,7 +102,7 @@ This endpoint reads the `refresh_token_cookie` from the request. No request body
 | `401 Unauthorized` | Refresh token missing, expired, or revoked |
 | `429 Too Many Requests` | Too many refresh attempts from this IP |
 
-**Cookies set:** `access_token_cookie`, `refresh_token_cookie` (rotated)
+**Cookies set:** `LH_access`, `LH_refresh` (rotated)
 
 ---
 
@@ -116,7 +116,7 @@ DELETE /api/v1/auth/logout
 
 ### Response
 
-`204 No Content` on success. Tokens are revoked in Redis and cookies are cleared.
+`200 OK` with body `{"msg": "Successfully logout"}`. Every JWT for the user (access and refresh, across sessions) is revoked and the auth cookies are cleared.
 
 ### Errors
 
@@ -124,7 +124,7 @@ DELETE /api/v1/auth/logout
 |--------|-------------|
 | `401 Unauthorized` | Not authenticated |
 
-**Cookies cleared:** `access_token_cookie`, `refresh_token_cookie`
+**Cookies cleared:** `LH_access`, `LH_refresh`
 
 ---
 
@@ -133,12 +133,14 @@ DELETE /api/v1/auth/logout
 Create a new user account (organization-level registration).
 
 ```
-POST /api/v1/users
+POST /api/v1/users/{org_id}
 ```
 
 > **Note:** The registration endpoint is under the Users router, not the Auth router. See [Users API](./users.md) for details.
 
 Depending on the organization's signup mechanism (`open` vs `inviteOnly`), registration may require an invite code.
+
+With an invite code, use `POST /api/v1/users/{org_id}/invite/{invite_code}` instead. There is also an org-less variant at `POST /api/v1/users/`.
 
 ---
 
@@ -150,21 +152,23 @@ Authenticate using an external OAuth provider or SAML-based SSO.
 POST /api/v1/auth/oauth
 ```
 
+> **Optional query param:** `?org_id={org_id}` scopes the resulting account/membership to a specific organization.
+
 ### Request Body (JSON)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `provider` | string | Yes | OAuth provider identifier (e.g., `google`, `github`) |
-| `code` | string | Yes | Authorization code from the provider |
-| `redirect_uri` | string | Yes | The redirect URI used in the OAuth flow |
+| `email` | string | Yes | Email address returned by the provider |
+| `provider` | string | Yes | OAuth provider identifier — currently only `google` is accepted |
+| `access_token` | string | Yes | OAuth access/ID token obtained by the client from the provider |
 
 ### Example Request
 
 ```json
 {
+  "email": "john@example.com",
   "provider": "google",
-  "code": "4/0AX4XfWi...",
-  "redirect_uri": "https://koodook.com/auth/callback"
+  "access_token": "eyJhbGciOiJSUzI1NiIs..."
 }
 ```
 
@@ -197,7 +201,7 @@ POST /api/v1/auth/oauth
 | `401 Unauthorized` | OAuth provider rejected the authentication |
 | `401 Unauthorized` | Email not verified (SaaS mode only) |
 
-**Cookies set:** `access_token_cookie`, `refresh_token_cookie`
+**Cookies set:** `LH_access`, `LH_refresh`
 
 ---
 
@@ -214,24 +218,30 @@ POST /api/v1/auth/verify-email
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `token` | string | Yes | Email verification token |
+| `user_uuid` | string | Yes | UUID of the user being verified |
+| `org_uuid` | string | Yes | UUID of the organization |
+| `email` | string | No | Email address; when provided it is used as the rate-limit key |
 
 ### Example Request
 
 ```json
 {
-  "token": "verify_abc123def456"
+  "token": "verify_abc123def456",
+  "user_uuid": "a1b2c3d4-...",
+  "org_uuid": "e5f6g7h8-..."
 }
 ```
 
 ### Response
 
-`200 OK` on success. The user's email is marked as verified.
+`200 OK` on success (`{"message": "..."}`). The user's email is marked as verified.
 
 ### Errors
 
 | Status | Description |
 |--------|-------------|
 | `400 Bad Request` | Invalid or expired verification token |
+| `429 Too Many Requests` | Too many verification attempts (5 per 5 minutes per user) |
 
 ---
 
@@ -248,6 +258,7 @@ POST /api/v1/auth/resend-verification
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `email` | string | Yes | Email address to send verification to |
+| `org_id` | integer | No | Organization to scope the verification to |
 
 ### Example Request
 
@@ -259,14 +270,13 @@ POST /api/v1/auth/resend-verification
 
 ### Response
 
-`200 OK` on success. A new verification email is sent.
+`200 OK` on success (`{"message": "..."}`). A generic response is returned regardless of whether an account exists, to avoid user enumeration.
 
 ### Errors
 
 | Status | Description |
 |--------|-------------|
-| `400 Bad Request` | Email already verified |
-| `404 Not Found` | Email not associated with any account |
+| `429 Too Many Requests` | Too many verification email requests — rate limited |
 
 ---
 
@@ -277,7 +287,7 @@ Manage `lh_`-prefixed API tokens for headless and admin API access.
 ### Create API Token
 
 ```
-POST /api/v1/api-tokens/{org_id}/api-tokens
+POST /api/v1/orgs/{org_id}/api-tokens
 ```
 
 ### Request Body (JSON)
@@ -306,7 +316,7 @@ POST /api/v1/api-tokens/{org_id}/api-tokens
 ### List API Tokens
 
 ```
-GET /api/v1/api-tokens/{org_id}/api-tokens
+GET /api/v1/orgs/{org_id}/api-tokens
 ```
 
 Returns token metadata (prefix, name, created date) but never the full token secret.
@@ -314,25 +324,25 @@ Returns token metadata (prefix, name, created date) but never the full token sec
 ### Get API Token
 
 ```
-GET /api/v1/api-tokens/{org_id}/api-tokens/{token_uuid}
+GET /api/v1/orgs/{org_id}/api-tokens/{token_uuid}
 ```
 
 ### Update API Token
 
 ```
-PUT /api/v1/api-tokens/{org_id}/api-tokens/{token_uuid}
+PUT /api/v1/orgs/{org_id}/api-tokens/{token_uuid}
 ```
 
 ### Regenerate API Token
 
 ```
-POST /api/v1/api-tokens/{org_id}/api-tokens/{token_uuid}/regenerate
+POST /api/v1/orgs/{org_id}/api-tokens/{token_uuid}/regenerate
 ```
 
 ### Revoke (Delete) API Token
 
 ```
-DELETE /api/v1/api-tokens/{org_id}/api-tokens/{token_uuid}
+DELETE /api/v1/orgs/{org_id}/api-tokens/{token_uuid}
 ```
 
 ### Errors
@@ -370,7 +380,7 @@ After a successful login, failed attempt counters are reset.
 |----------|-------|-------|
 | `POST /login` | Per-IP configurable | IP address |
 | `GET /refresh` | Per-IP configurable | IP address |
-| `POST /api-tokens` | Per-IP configurable | IP address |
+| `POST /orgs/{org_id}/api-tokens` | Per-IP configurable | IP address |
 
 ---
 

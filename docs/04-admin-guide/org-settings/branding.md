@@ -1,136 +1,132 @@
 # Branding
 
-> Customize the visual identity of your Koodook platform with custom fonts, color schemes, logo assets, and advanced CSS to match your organization's brand.
+> Customize the visual identity of your Koodook organization — logo assets, favicon, logomark, card thumbnail, the platform's primary brand color, and the sign-in page background.
 
 ## Overview
 
-The Branding settings page gives you control over the look and feel of both the public-facing site and the admin dashboard. All branding changes are scoped to your organization and do not affect other tenants on the same Learnhouse instance.
+The Branding settings page controls the look and feel of your organization across the platform. Every setting here is scoped to your organization and does not affect other tenants on the same instance.
 
-## Custom Fonts & Typography
+The page is built from a top **Action Row** followed by three stacked section cards:
 
-### Font Selection
+| Card | Controls |
+|------|----------|
+| **Logo & Favicon** | Logo, Favicon, Logomark, Thumbnail uploads |
+| **Theme** | The organization's Primary Color |
+| **Auth** | The sign-in / sign-up page background and welcome message |
 
-- Choose from a curated library of **Google Fonts** or upload your own custom web font files.
-- Three font families can be configured:
-  - **Heading font** — Applied to all `<h1>` through `<h6>` elements.
-  - **Body font** — Applied to paragraphs, lists, and general text content.
-  - **Mono font** — Applied to code blocks, inline code, and technical content.
+> **Note:** Image uploads (Logo, Favicon, Logomark, Thumbnail) save **immediately** on upload. The Theme and Auth cards are saved with the **Save** button in the Action Row.
 
-### Font Loading
+---
 
-- When a Google Font is selected, Koodook automatically loads the font files via the Google Fonts CDN.
-- Custom font files (`.woff2`, `.woff`, `.ttf`) can be uploaded with a maximum file size of **5 MB** per file.
-- You can specify **font weights** to load (e.g., 400, 500, 600, 700). Lighter weights improve performance by reducing the amount of CSS downloaded.
+## Action Row (Save)
 
-### Typography Settings
+At the top-right of the page is a single Save button that tracks whether the Theme card has unsaved changes.
 
-- **Base font size** — Sets the root `font-size` in pixels (default: 16 px). All other text sizes are derived from this value using relative units.
-- **Line height** — Controls overall readability. Default: 1.5 for body text.
-- **Letter spacing** — Adjust tracking for headings (default: normal).
+| State | Icon | Meaning |
+|-------|------|---------|
+| **Saved** | ✓ Check | No pending changes — button is inactive |
+| **Save** | 💾 Save | You have unsaved Primary Color changes — click to save |
+| **Saving...** | Spinner | Request in progress |
 
-## Color Scheme Customization
+Only the **Primary Color** (Theme card) is tracked by this button. Uploads are persisted the moment you pick a file.
 
-Koodook exposes a full color palette system with the following categories:
+---
 
-### Primary Color
+## Logo & Favicon
 
-- The dominant brand color used for buttons, links, navigation bars, and interactive elements.
-- Input as a hex value (e.g., `#2563EB`) or use the built-in color picker.
-- Koodook automatically generates a full shade palette (50–900) from your primary color, ensuring sufficient contrast for accessible UI components.
+This card holds four upload rows. Each row shows an image placeholder icon on the left, the field label, and a single action on the right:
 
-### Secondary Color
+- **No file yet** → an **Upload** (cloud) icon. Click it to open the file picker.
+- **File present** → a **Remove** (trash) icon. Click it to replace the file.
 
-- Used for secondary buttons, badges, and accent elements that should not compete with the primary color.
-- A muted shade that complements the primary color.
-
-### Accent Color
-
-- Used for highlights, alerts, success states, and decorative elements.
-- Typically a contrasting color to the primary (e.g., a warm accent against a cool primary).
-
-### Neutral / Surface Colors
-
-- **Background** — The page background color (default: white).
-- **Surface** — Card, modal, and dropdown background color.
-- **Text** — Primary text color (default: near-black for light themes).
-- **Border** — Default border color for input fields, cards, and dividers.
-
-### Dark Mode
-
-- If dark mode is enabled for your organization (via Feature Flags), you can configure a separate set of colors for dark mode.
-- Use the **Dark Mode** toggle in the branding panel to switch between light and dark palette editors.
-
-## Logo & Favicon Upload
+Supported formats for all four fields: `.png`, `.jpg`, `.svg`.
 
 ### Logo
 
-- Upload a **primary logo** for light backgrounds and an optional **inverted logo** for dark backgrounds.
-- Supported formats: `.png`, `.svg`, `.jpg`, `.webp`.
-- Recommended dimensions: **200 × 60 px** (header) and **400 × 120 px** (footer/landing page).
-- Maximum file size: **2 MB** per logo.
-- Use **SVG** format for crisp rendering at any screen size.
-
-### Logo Icon (Mark)
-
-- Upload an **icon mark** (logomark) that appears in the collapsed sidebar state.
-- Supported formats: `.svg`, `.png`, `.jpg`, `.webp`.
-- Best results with **SVG** format for crisp rendering at small sizes.
-- Ideal size: a square icon between **100 × 100 px** and **512 × 512 px**.
-- If no logo icon is uploaded, the collapsed sidebar shows the first letter of the organization name.
+- The **primary organization logo**, shown in the public header, landing page, and (in its light-on-dark variant) branding surfaces.
+- Use **SVG** for crisp rendering at any size; PNG/JPG work too.
 
 ### Favicon
 
-- Upload a favicon that appears in browser tabs.
-- Recommended: **32 × 32 px** `.png` or `.ico` file.
-- An **Apple touch icon** (180 × 180 px) can also be uploaded for iOS home screen bookmarks.
+- The small icon shown in browser tabs.
+- Recommended: a square **32 × 32 px** `.png`.
 
-## Custom CSS
+### Logomark
 
-For advanced customization beyond the color and font pickers, Koodook supports custom CSS injection.
+- The compact **icon mark** shown in the collapsed sidebar state.
+- Square icon works best (e.g. 100 × 100 px or larger, up to 512 × 512 px).
+- If no logomark is set, the collapsed sidebar falls back to the organization's initial.
 
-### How It Works
+### Thumbnail
 
-- Enter raw CSS in the **Custom CSS** editor. The CSS is injected into the `<head>` of every page, scoped to your organization's domain.
-- The editor includes basic syntax highlighting and a character count.
+- The **card thumbnail** used when the organization is represented as a card (e.g. discovery/listing surfaces).
+- Recommended aspect ratio: landscape (e.g. 16:9).
 
-### What You Can Do with Custom CSS
+---
 
-- Adjust spacing, padding, and margins of specific components.
-- Hide or restructure UI elements (e.g., hide the footer, reposition the sidebar).
-- Apply custom animations or transitions.
-- Override any default style — your CSS loads after the theme stylesheet, so specificity is in your favor.
+## Theme — Primary Color
 
-### Limitations
+The Theme card defines the organization's **Primary Color** — the brand accent used for primary buttons, links, interactive elements, and focus rings across the platform.
 
-- JavaScript is **not** supported in custom CSS blocks.
-- Maximum custom CSS length: **50 KB**.
-- Very complex overrides may break when Koodook updates its UI components. Test after each platform update.
+The card is a single row containing:
 
-## Preview Before Publishing
+- A **color preview square** on the left (shows the current color, or white if none is set).
+- The **hex input** on the right — type a 6-digit hex value (e.g. `#6366F1`). Input is uppercase and capped at 7 characters (`#RRGGBB`).
+- A **clear (×)** button that appears once a color is set, resetting it to the platform default.
 
-Before saving your branding changes, you can preview how they will look:
+> **Note:** There is no native OS color-picker dialog. Enter the hex value directly in the field. The preview square reflects the value live.
 
-1. Click the **Preview** button at the top of the branding page.
-2. A new browser tab opens showing your organization's public landing page and a sample course page with the new branding applied.
-3. The preview uses **live data** — it shows your actual courses and content with the new theme.
-4. Preview mode is **not visible to end users**. Only admins with the preview link can see it.
-5. If the preview looks correct, return to the branding page and click **Save & Publish**.
+Changing the color marks the Action Row as having unsaved changes — click **Save** to apply. The platform derives the full shade palette (50–900) and contrast pairings from your primary color so components stay accessible.
 
-### Publishing Changes
+---
 
-- Clicking **Save & Publish** applies the branding to all pages immediately.
-- There is a **5-minute cache** on some static assets (fonts, CSS files). A hard refresh (Ctrl+Shift+R / Cmd+Shift+R) may be needed to see the latest changes.
-- You can revert to the **last published branding** using the **Revert** button in the top toolbar, which restores the previously saved theme.
+## Auth Page Branding
+
+The Auth card customizes the **sign-in / sign-up experience**. It has a settings panel on the left and a live **preview** on the right (a 4:3 mock showing the branded panel beside a form mock).
+
+### Welcome Message
+
+- A short message shown on the auth page (max **200 characters**).
+- Leave empty to hide it.
+
+### Background Type
+
+Choose one of three background modes:
+
+| Option | Behavior |
+|--------|----------|
+| **Gradient** | The default dark gradient (`#202020 → #000000`). No image. |
+| **Custom** | Upload your own background image (`.png`, `.jpg`, `.webp`). |
+| **Unsplash** | Pick a photo from the built-in Unsplash picker. Photographer credit metadata is stored with the selection. |
+
+All non-gradient backgrounds render behind a `black/30` overlay to keep text legible.
+
+### Text Color
+
+Controls the color of the text overlaid on the background:
+
+- **Light** — white text (use for dark/photographic backgrounds).
+- **Dark** — near-black text (use for light backgrounds).
+
+### Preview Panel
+
+The right-hand panel is a **live mock preview** — it reflects the selected background, text color, welcome message, and your current logo as you change them. It is a design aid only; it does not publish anything.
+
+### Saving Auth Branding
+
+Unlike the uploads, the Auth card is **not** auto-saved. Click **Save** below the settings panel to persist the welcome message, background, and text color. The background image upload itself is stored when selected, but the configuration is written on Save.
+
+---
 
 ## Best Practices
 
-- **Test on mobile** — Always preview your branding on a mobile viewport. Custom CSS can behave differently on small screens.
-- **Contrast compliance** — Ensure your primary text/background combination meets WCAG AA contrast ratios. Koodook's auto-generated shade palette is designed to be accessible, but custom colors may not be.
-- **Keep it lean** — Limit custom CSS to only what is necessary. Heavy CSS can slow down page load times.
-- **Brand consistency** — Use the same primary color across your logo, typography, and UI elements for a cohesive experience.
+- **Test contrast** — ensure the chosen Text Color is legible over your background (photos vary; the `black/30` overlay helps but is not a guarantee).
+- **Use SVG where possible** — logos and logomarks stay crisp on high-DPI displays.
+- **Keep the primary color brand-consistent** — the same accent should flow through your logo, buttons, and links.
+- **Preview on mobile** — the auth layout stacks vertically on small screens; check that the background still reads well.
 
 ## Related Sections
 
-- [General Settings](./general.md) — Organization name, logo, and favicon basics
-- [Landing Page Builder](./landing.md) — Build your public-facing homepage with branded content blocks
-- [Feature Flags](./features.md) — Enable dark mode and other branding-related features
+- [General Settings](./general.md) — Organization name, slug, and locale
+- [Landing Page Builder](./landing.md) — Build your public homepage
+- [Feature Flags](./features.md) — Enable platform features for the organization

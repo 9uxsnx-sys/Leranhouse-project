@@ -171,7 +171,26 @@ The `<Label>` component supports these size/weight combinations via `labelVarian
 
 ## Shadows
 
-All shadow utilities are defined as Tailwind v4 `@utility` classes in `globals.css`:
+All shadow utilities are defined as Tailwind v4 `@utility` classes in `globals.css`.
+
+### Card Recipe
+
+The standard dashboard surface is a plain utility combination, not a custom class:
+
+```
+bg-white rounded-xl border border-gray-100 shadow-sm p-6
+```
+
+The auth card uses `.card-shadow-rest` (defined in `globals.css`) instead:
+
+```css
+.card-shadow-rest {
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 1px 2px -1px rgba(0, 0, 0, 0.08),
+    0 2px 4px 0 rgba(0, 0, 0, 0.04);
+}
+```
 
 ### Card Elevation
 
@@ -219,6 +238,23 @@ All shadow utilities are defined as Tailwind v4 `@utility` classes in `globals.c
 | `rounded-lg` | 8px | Container cards, dropdown menu |
 | `rounded-xl` | 12px | Sectioned cards, module/lesson cards |
 | `rounded-full` | 9999px | Switch track, status dots |
+
+## Scrollbars
+
+Scrollbars are **hidden globally** to prevent layout shift when dropdowns/menus open (the disappearing scrollbar previously made content jump). Scrolling still works via wheel, keyboard, and touch.
+
+```css
+* {
+  scrollbar-width: none;          /* Firefox */
+}
+*::-webkit-scrollbar {
+  display: none;                  /* Chromium / WebKit */
+}
+```
+
+A `.scrollbar-hide` utility is also available for opt-in use on individual elements. The only exception is `.slash-commands-menu`, which keeps a visible slim scrollbar for its command list.
+
+---
 
 ## Z-Index Layering System
 

@@ -69,8 +69,13 @@ Each release provides a summary of changes organized by category:
 - **Select mode with checkboxes** — Clicking "Select" in the toolbar replaces drag handles with checkboxes on episodes, modules, and lessons. Drag-and-drop is disabled in select mode. Selected items show a blue ring and filled checkbox.
 - **Episode detail preview button** — The "Back to Episodes" button was replaced with a "Preview" button that opens the public podcast page in a new tab, matching the lesson preview pattern.
 - **Banner image for courses** — A new `banner_image` field was added to courses for the hero banner on the course detail page. Includes full CRUD support via API (PUT/DELETE `/courses/{uuid}/banner`) and a `CourseMediaSection` UI component in the General tab with two image fields: Card Cover (`thumbnail_image`) and Banner Image (`banner_image`).
+- **Redesigned authentication experience** — Sign in, Sign up, Forgot password, Reset password, and Verify email now share a unified split layout (image panel + card-styled form). Adds inline success/error alerts, a reusable "Check your email" state with a mail-provider shortcut (e.g. "Open Gmail" when the address is a known webmail domain), and a dev-only preview route at `/test-dev/auth`.
+- **Organization branding — Auth page branding** — Organizations can brand their sign-in page with a welcome message, a background (gradient / uploaded image / Unsplash), and a light/dark text color, with a live preview panel next to the settings.
 
 ### Improvements
+
+- **Organization branding tab redesign** — The Branding settings tab now uses unified section cards (Logo & Favicon, Theme, Auth) with a row-based upload-container pattern for Logo, Favicon, Logomark, and Thumbnail. The Primary Color field is hex-only (the native OS color picker was removed) and saves through a single top Action Row button.
+- **Community discussions redesign** — Discussion cards now use an inline create card and inline replies with smoother animations.
 
 - **Field size consistency** — Podcast episode title and description fields now use the same shadcn Input/Textarea components and fieldClassName as all other dashboard edit pages (Course, Community, Podcast General, etc.), ensuring consistent sizing and styling across the admin dashboard.
 - **Course detail page hero** — The course detail page hero banner now uses `banner_image` as the primary image source, with `thumbnail_image` as fallback. The old image/video toggle UI was removed.

@@ -1,38 +1,33 @@
 'use client'
 import React from 'react'
-import LanguageSwitcher from '@components/Utils/LanguageSwitcher'
 import AuthBrandingPanel from '@components/Auth/AuthBrandingPanel'
-import AuthMobileHeader from '@components/Auth/AuthMobileHeader'
+import { useTranslation } from 'react-i18next'
 
 interface AuthLayoutProps {
   org: any
+  /** Kept for call-site compatibility — branding content is added in a later pass. */
   welcomeText?: string
   children: React.ReactNode
 }
 
-export default function AuthLayout({ org, welcomeText, children }: AuthLayoutProps) {
+export default function AuthLayout({ org, children }: AuthLayoutProps) {
+  const { t } = useTranslation()
+
   return (
-    <div className="flex flex-col lg:grid lg:grid-cols-[1fr_600px] h-screen">
-      <div className="absolute top-4 right-4 z-dropdown">
-        <LanguageSwitcher />
+    <div className="flex flex-col lg:grid lg:grid-cols-[1.4fr_1fr] h-screen bg-gray-50">
+      {/* Left — branding image (content intentionally omitted for now) */}
+      <div className="h-[180px] lg:h-full">
+        <AuthBrandingPanel org={org} />
       </div>
 
-      {/* Mobile Header - visible only on small screens */}
-      <div className="lg:hidden">
-        <AuthMobileHeader org={org} />
-      </div>
-
-      {/* Left Panel - Branding (hidden on mobile) */}
-      <div className="hidden lg:block h-full">
-        <AuthBrandingPanel
-          org={org}
-          welcomeText={welcomeText}
-        />
-      </div>
-
-      {/* Right Panel - Content */}
-      <div className="bg-gray-50 flex flex-col relative flex-1 lg:h-full overflow-auto">
-        {children}
+      {/* Right — form */}
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 overflow-auto">
+        <div className="w-full max-w-[360px]">
+          <div className="bg-white rounded-xl card-shadow-rest p-8">{children}</div>
+          <p className="text-center text-xs text-gray-400 mt-6">
+            {t('auth.privacy')} · {t('auth.terms')}
+          </p>
+        </div>
       </div>
     </div>
   )

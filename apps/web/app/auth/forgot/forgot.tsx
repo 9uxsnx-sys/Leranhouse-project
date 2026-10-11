@@ -1,133 +1,131 @@
 'use client'
 import React from 'react'
-import FormLayout, {
-    FormField,
-    FormLabelAndMessage,
-    Input,
-} from '@components/Objects/StyledElements/Form/Form'
-import * as Form from '@radix-ui/react-form'
-import { AlertTriangle, ArrowLeft, CheckCircle, X } from 'lucide-react'
 import Link from 'next/link'
+import { ArrowLeft, Loader2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'motion/react'
 import { useFormik } from 'formik'
 import { sendResetLink } from '@services/auth/auth'
 import { useTranslation } from 'react-i18next'
 import AuthLayout from '@components/Auth/AuthLayout'
+import AuthAlert from '@components/Auth/AuthAlert'
+import CheckEmailState from '@components/Auth/CheckEmailState'
+import {
+  authFieldClass,
+  authPrimaryBtnClass,
+  authLabelClass,
+  authFieldErrorClass,
+} from '@components/Auth/authStyles'
+
+const fade = {
+  initial: { opacity: 0, y: 6 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -6 },
+  transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] as const },
+}
 
 const validate = (values: any, t: any) => {
-    const errors: any = {}
+  const errors: any = {}
 
-    if (!values.email) {
-        errors.email = t('validation.required')
-    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-        errors.email = t('validation.invalid_email')
-    }
+  if (!values.email) {
+    errors.email = t('validation.required')
+  } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
+    errors.email = t('validation.invalid_email')
+  }
 
-    return errors
+  return errors
 }
 
 interface ForgotPasswordClientProps {
-    org: any
+  org: any
 }
 
 function ForgotPasswordClient({ org }: ForgotPasswordClientProps) {
-    const { t } = useTranslation();
-    const [isSubmitting, setIsSubmitting] = React.useState(false)
-    const [error, setError] = React.useState('')
-    const [message, setMessage] = React.useState('')
-    const [showMessage, setShowMessage] = React.useState(false)
+  const { t } = useTranslation()
+  const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const [error, setError] = React.useState('')
+  const [sent, setSent] = React.useState(false)
 
-    const formik = useFormik({
-        initialValues: {
-            email: ''
-        },
-        validate: (values) => validate(values, t),
-        validateOnBlur: true,
-        onSubmit: async (values) => {
-            setIsSubmitting(true)
-            setError('')
-            setMessage('')
-            setShowMessage(false)
-            let res = await sendResetLink(values.email, org?.id)
-            if (res.status == 200) {
-                setMessage(res.data + ', ' + t('auth.check_email_message'))
-                setShowMessage(true)
-                setIsSubmitting(false)
-            } else {
-                setError(res.data.detail)
-                setShowMessage(true)
-                setIsSubmitting(false)
-            }
-        },
-    })
+  const formik = useFormik({
+    initialValues: {
+      email: '',
+    },
+    validate: (values) => validate(values, t),
+    validateOnBlur: true,
+    onSubmit: async (values) => {
+      setIsSubmitting(true)
+      setError('')
+      const res = await sendResetLink(values.email, org?.id)
+      if (res.status == 200) {
+        setSent(true)
+      } else {
+        setError(res.data?.detail ?? t('auth.error_generic'))
+      }
+      setIsSubmitting(false)
+    },
+  })
 
-    return (
-        <AuthLayout org={org} welcomeText={t('auth.reset_your_password')}>
-                {/* Message Top Bar */}
-                {showMessage && (error || message) && (
-                    <div className={`
-                        w-full px-4 py-3 flex items-center justify-between gap-3 animate-in slide-in-from-top duration-200
-                        ${error ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}
-                    `}>
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                            {error ? <AlertTriangle size={18} className="shrink-0" /> : <CheckCircle size={18} className="shrink-0" />}
-                            <span className="text-sm font-medium">{error || message}</span>
-                        </div>
-                        <button
-                            onClick={() => setShowMessage(false)}
-                            className="p-1 hover:bg-white/20 rounded transition-colors shrink-0"
-                        >
-                            <X size={18} />
-                        </button>
-                    </div>
+  return (
+    <AuthLayout org={org} welcomeText={t('auth.reset_your_password')}>
+      <AnimatePresence mode="wait" initial={false}>
+        {!sent ? (
+          <motion.div key="form" {...fade}>
+            {error && (
+              <AuthAlert variant="error" className="mb-6">
+                {error}
+              </AuthAlert>
+            )}
+
+            <form onSubmit={formik.handleSubmit} className="space-y-5" noValidate>
+              <div className="space-y-2">
+                <label htmlFor="forgot-email" className={authLabelClass}>
+                  {t('auth.email')}
+                </label>
+                <input
+                  id="forgot-email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  value={formik.values.email}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className={authFieldClass}
+                />
+                {formik.touched.email && formik.errors.email && (
+                  <p className={authFieldErrorClass}>{formik.errors.email}</p>
                 )}
+              </div>
 
-                <div className="flex-1 flex flex-row">
-                    <div className="m-auto w-full max-w-sm px-6 py-8 sm:py-0">
-                        {/* Header */}
-                        <div className="mb-8">
-                            <h1 className="text-2xl font-bold text-gray-900">{t('auth.forgot_password_title')}</h1>
-                            <p className="text-gray-500 mt-1">{t('auth.forgot_password_description')}</p>
-                        </div>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={authPrimaryBtnClass}
+              >
+                {isSubmitting && <Loader2 size={16} className="animate-spin" />}
+                {isSubmitting ? t('common.loading') : t('auth.send_reset_link')}
+              </button>
+            </form>
 
-                        {/* Form Card */}
-                        <div className="bg-white rounded-xl p-6 nice-shadow">
-                            <FormLayout onSubmit={formik.handleSubmit}>
-                                <FormField name="email">
-                                    <FormLabelAndMessage
-                                        label={t('auth.email')}
-                                        message={formik.errors.email}
-                                    />
-                                    <Form.Control asChild>
-                                        <Input
-                                            onChange={formik.handleChange}
-                                            value={formik.values.email}
-                                            type="email"
-                                            required
-                                        />
-                                    </Form.Control>
-                                </FormField>
-
-                                <div className="pt-2">
-                                    <Form.Submit asChild>
-                                        <button className="w-full bg-primary text-primary-foreground font-semibold text-center py-2.5 rounded-lg hover:bg-primary/90 transition-colors">
-                                            {isSubmitting ? t('common.loading') : t('auth.send_reset_link')}
-                                        </button>
-                                    </Form.Submit>
-                                </div>
-                            </FormLayout>
-                        </div>
-
-                        {/* Back to Login */}
-                        <p className="text-center text-gray-600 mt-6">
-                            <Link href="/login" className="inline-flex items-center gap-2 font-semibold text-gray-900 hover:underline">
-                                <ArrowLeft size={16} />
-                                {t('auth.back_to_login')}
-                            </Link>
-                        </p>
-                    </div>
-                </div>
-        </AuthLayout>
-    )
+            <p className="text-center text-sm text-gray-500 mt-6">
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-1.5 font-semibold text-gray-900 hover:underline"
+              >
+                <ArrowLeft size={14} />
+                {t('auth.back_to_sign_in')}
+              </Link>
+            </p>
+          </motion.div>
+        ) : (
+          <motion.div key="sent" {...fade}>
+            <CheckEmailState
+              email={formik.values.email}
+              message={t('auth.sent_reset_link_to')}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </AuthLayout>
+  )
 }
 
 export default ForgotPasswordClient

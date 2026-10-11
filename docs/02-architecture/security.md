@@ -11,15 +11,15 @@
 The platform uses JWT (JSON Web Tokens) for API authentication:
 
 - Tokens are issued on login via `POST /api/v1/auth/login`
-- Sent as `Authorization: Bearer <token>` header
-- Configurable expiry via `LEARNHOUSE_JWT_EXPIRATION` env var
-- Refresh tokens supported for session extension
+- The token pair is set as **httpOnly cookies** — `LH_access` (short-lived) and `LH_refresh` (long-lived) — and also returned in the response body
+- Clients may alternatively send an access token as an `Authorization: Bearer <token>` header
+- Refresh tokens are rotated on each use; the old token's `jti` is marked consumed in Redis so replay is rejected
+- Revoked tokens are tracked via a Redis blocklist for immediate invalidation
 
 ### OAuth / SSO
 
-- OAuth2 providers can be configured per organization
-- Supported: Google, GitHub, and generic OpenID Connect
-- SSO configuration per org in Org Settings
+- Google OAuth is the provider wired into `POST /api/v1/auth/oauth` (the `provider` field currently accepts `google` only)
+- Enterprise SSO (SAML / OIDC) is configured per organization in Org Settings > SSO and brokered through WorkOS
 
 ### API Tokens
 
@@ -35,18 +35,18 @@ The platform uses JWT (JSON Web Tokens) for API authentication:
 
 | Role | Scope | Capabilities |
 |------|-------|--------------|
-| Super Admin | Platform-wide | Everything |
-| Org Admin | Organization | Manage org settings, courses, users |
-| Course Creator | Organization | Create and edit courses |
-| Instructor | Course | Manage course content, grade assignments |
-| Learner | Platform | View and take courses |
+| Super Admin | Platform-wide | Full access across all organizations |
+| Admin (`role_id = 1`) | Organization | Full control: settings, courses, users, billing |
+| Maintainer (`role_id = 2`) | Organization | Manage content and most org resources, short of full admin |
+| Member (`role_id = 3+`) | Organization | Standard learner access; also the baseline for custom roles |
+| Custom roles | Organization | Configurable permission sets built on the Member baseline |
 
 ### Permission Model
 
 - Roles are assigned at the **organization level**
 - Course-level roles (Instructor) can be assigned per course
 - Custom roles can be created in Org Settings > Roles
-- Permissions are checked via middleware in `apps/api/src/middleware/`
+- Permissions are checked via FastAPI dependencies in `apps/api/src/security/rbac/`
 
 ---
 
@@ -71,9 +71,13 @@ The platform uses JWT (JSON Web Tokens) for API authentication:
 
 ## Key Security Practices
 
-- Passwords hashed with bcrypt
+- Passwords hashed with **argon2id** (via `pwdlib`)
 - SQL injection prevented via SQLModel parameterized queries
 - CORS configured in FastAPI middleware
-- Rate limiting on auth endpoints
-- Webhook signatures verified for payment callbacks (future)
+- CSRF protection on state-changing requests
+- IP-based rate limiting on auth endpoints (login, refresh, password reset, email verification)
+- Per-user **account lockout** after repeated failed login attempts
+- Email verification for new accounts
+- JWT revocation via a Redis blocklist (logout invalidates all of a user's tokens)
+- API tokens (`lh_`-prefixed) for server-to-server access
 - Environment variables for secrets (never hardcoded)
