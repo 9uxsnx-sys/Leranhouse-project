@@ -12,17 +12,26 @@ export function SectionCard({
   children,
   className,
   bodyClassName,
+  bleed,
 }: {
   title?: string
   right?: React.ReactNode
   children: React.ReactNode
   className?: string
   bodyClassName?: string
+  /** Full-bleed body: drops the horizontal card padding so table rows hover edge-to-edge. */
+  bleed?: boolean
 }) {
   return (
-    <div className={cn('bg-white rounded-xl border border-gray-100 shadow-sm p-6', className)}>
+    <div
+      className={cn(
+        'bg-white rounded-xl border border-gray-100 shadow-sm',
+        bleed ? 'pt-6 pb-2.5 overflow-hidden' : 'p-6',
+        className
+      )}
+    >
       {(title || right) && (
-        <div className="flex items-center justify-between mb-5">
+        <div className={cn('flex items-center justify-between mb-5', bleed && 'px-6')}>
           {title ? (
             <h3 className="text-[13px] font-semibold tracking-wide uppercase text-gray-500">{title}</h3>
           ) : (

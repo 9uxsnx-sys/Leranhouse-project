@@ -18,6 +18,12 @@ export interface ChartTheme {
   categorical: string[]
 }
 
+/**
+ * The platform's chart palette (see Dashboard/Analytics/CoreWidgetsRow + FunnelChart).
+ * Categorical series all come from this one indigo→violet ramp — never an ad-hoc rainbow.
+ */
+export const CHART_PALETTE = ['#6b8de3', '#818cf8', '#a78bfa', '#c4b5fd']
+
 const FALLBACK: ChartTheme = {
   primary: '#6366f1',
   primarySoft: 'rgba(99, 102, 241, 0.12)',
@@ -25,7 +31,7 @@ const FALLBACK: ChartTheme = {
   axis: '#71717a',
   positive: '#10b981',
   negative: '#f43f5e',
-  categorical: ['#6366f1', '#22c55e', '#f59e0b', '#06b6d4', '#8b5cf6', '#ec4899'],
+  categorical: CHART_PALETTE,
 }
 
 export function useChartTheme(): ChartTheme {
@@ -46,7 +52,7 @@ export function useChartTheme(): ChartTheme {
         axis: hsl('--muted-foreground', FALLBACK.axis),
         positive: FALLBACK.positive,
         negative: FALLBACK.negative,
-        categorical: [primary, '#22c55e', '#f59e0b', '#06b6d4', '#8b5cf6', '#ec4899'],
+        categorical: CHART_PALETTE,
       })
     } catch {
       /* SSR / no document — keep fallbacks */

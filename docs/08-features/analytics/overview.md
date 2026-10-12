@@ -157,86 +157,114 @@ These are **possible** with the same method but need extra plumbing (geo lookups
 
 ---
 
-## 6. UI — Analytics tab (proposal)
+## 6. UI — Analytics area
 
-**Approach:** the Analytics area behaves like every other dashboard section — a **left sub-navigation of tabs**, each tab built from **section cards** (white `rounded-xl border shadow-sm`). A **global filter action-row** at the top (date range + org/course) drives every card. Charts and tables are **reusable our-own components**.
+**Approach:** the Analytics area behaves like every other dashboard section — a **pill sub-navigation of tabs**, each tab built from **section cards** (white `rounded-xl border shadow-sm`, 13px uppercase gray-500 titles). A **date-range action row** sits above the content. Charts and tables are **reusable our-own components**.
 
-### Proposed sub-tabs
+**Layout rules** (12-column grid, top-to-bottom hierarchy):
 
-| # | Sub-tab | Who it's for | Core question it answers |
-|---|---------|--------------|--------------------------|
-| 1 | **Overview** | Everyone | "Is the platform healthy right now?" |
-| 2 | **Revenue** | Admin / owner | "Are we making money?" |
-| 3 | **Learning** | Admin / teacher | "Are learners using the content?" |
-| 4 | **Audience** | Admin / marketing | "Where does traffic come from?" |
-| 5 | **Learners** | Admin / support | "What is this specific user doing?" |
-| 6 | **Community** | Admin | "Is the community alive?" |
+- **Charts first — no KPI stat cards.** Stat cards are a *home page* pattern; inside an analytics tab they repeat one number each. Single numbers belong in the **card header** instead.
+- **12-column grid** with `items-start`: one full-width hero per view, then 2-up rows.
+- **One card = one question.** Features that answer the same question share one card.
+- **Small component vocabulary:** (a) **bar chart** — vertical for short labels, horizontal for long labels (course names); (b) **trend chart** (line/area) for anything over time; (c) **data table** for detail rows. Other chart types are avoided unless they earn their place.
+- **No entity filter in the global bar.** The filter belongs to the tab that owns the entity (a Courses tab selects a course, a Podcasts tab selects a podcast, a Community tab selects a community).
 
-*(Optional 7th: **Platform** — superadmin only, compares all orgs.)*
+### Sub-tabs
+
+| # | Sub-tab | Scope | Core question it answers |
+|---|---------|-------|--------------------------|
+| 1 | **Overview** | Org-wide | "Is the platform healthy right now?" |
+| 2 | **Learning** | Org-wide | "Are learners using the content?" |
+| 3 | **Audience** | Org-wide | "Where does traffic come from?" |
+| 4 | **Learners** | Org-wide (search) | "What is this specific user doing?" |
+| 5 | **Courses** | Select a course | "How is this course doing?" |
+| 6 | **Podcasts** | Select a podcast | "Is anyone listening?" |
+| 7 | **Community** | Select a community (+ table switch) | "Is the community alive?" |
+
+**"The entity owns its selector":** the org-wide tabs (Overview, Learning, Audience, Learners) carry no entity filter; **Courses**, **Podcasts** and **Community** each put their own selector in the shared action row.
+
+> **Revenue is not here.** Money is deep and audience-different (teachers, payouts, refunds, failures), so it is its own dashboard section — see [Revenue Analytics](../payments/revenue-analytics.md). The Revenue tab was **removed from the Analytics shell** for this reason.
+
+*(Optional future: **Platform** — superadmin only, compares all orgs. Open question: whether **Learning** merges into **Courses**, since both cover enrollments/completion.)*
 
 ### Section cards per sub-tab
 
-**1. Overview**
+**1. Overview** — org-wide, chart-only. Row 1 full width, then two 2-up rows.
 | Card | Content | Chart type |
 |------|---------|-----------|
-| KPI row | Active learners · New signups · Enrollments · Revenue · Completion % (each with Δ vs previous period) | Stat cards |
-| Activity trend | Active users over time | Line / area |
-| Enrollment funnel | Course view → enroll → start → complete | Funnel |
-| Top courses | Ranked list | Horizontal bar / table |
+| Activity over time | Active learners + new signups | Trend (area) |
+| Enrollments over time | Enrollments per period | Bar |
+| Enrollment by stage | View → enroll → start → complete | Bar (ordered) |
+| Top courses | Ranked by enrollments | Horizontal bar |
+| Completion by course | Completion rate per course | Horizontal bar |
 
-**2. Revenue**
+**2. Learning**
 | Card | Content | Chart type |
 |------|---------|-----------|
-| KPI row | Revenue · Sales · AOV · View→purchase % · Refunded | Stat cards |
-| Revenue over time | Daily/weekly revenue (DZD) | Area |
-| Sales by course | Which courses earn | Bar / table |
-| Checkout funnel | View → checkout started → paid | Funnel |
-| Failed payments | Recent failures + reasons | Table |
-| Teacher payouts | Gross → fees → net → 40/60 split | Table |
-
-**3. Learning**
-| Card | Content | Chart type |
-|------|---------|-----------|
-| KPI row | Enrollments · Completions · Avg completion % · Avg session | Stat cards |
-| Completion by course | Per-course completion rate | Bar + table |
-| Lesson drop-off | Where learners quit | Funnel / bar |
+| Completion by course | Per-course completion rate | Bar |
+| Lesson drop-off | Where learners quit | Bar (ordered) |
 | Time on activity | Minutes per activity | Bar |
-| Content type effectiveness | Video vs quiz vs PDF | Bar |
+| Content type effectiveness | Video vs quiz vs reading | Bar |
 
-**4. Audience**
+**3. Audience**
 | Card | Content | Chart type |
 |------|---------|-----------|
-| KPI row | Visitors · Pageviews · New vs returning · Avg session | Stat cards |
-| Traffic over time | Visits/pageviews | Line |
-| Top pages | Most-viewed pages | Table |
+| Traffic over time | Visits/pageviews | Trend |
 | Sources | Referrers / UTM | Bar |
 | Devices | Desktop / mobile / tablet | Breakdown list |
-| By org | Per-org traffic (multi-tenant) | Table |
+| Top pages | Most-viewed pages | Table |
 
-**5. Learners**
+**4. Learners**
 | Card | Content | Chart type |
 |------|---------|-----------|
-| Search + filters | Find a user (name/email/org) | Controls |
-| Learners table | Last active · Courses · Progress · Purchased · Status | Table |
+| Search + filters | Find a user (name/email) | Controls |
+| Learners table | Last active · Courses · Progress · Spent · Status | Table |
 | User detail (drill-in) | Activity history + progress timeline | Table + timeline |
 
-**6. Community**
+**5. Courses** — course-scoped (selector in the action row)
 | Card | Content | Chart type |
 |------|---------|-----------|
-| KPI row | Discussions · Posts · Comments · Active members | Stat cards |
-| Discussions trend | Posts over time | Line |
-| Top contributors | Most active members | Table |
+| Enrollments over time | New enrollments + active learners | Trend (area) |
+| Completion funnel | Enrolled → started → halfway → completed → certified | Bar |
+| Learner progress | Progress distribution (0–25 … 75–100%) | Bar |
+| Lesson drop-off | Views per lesson | Horizontal bar |
+| Time per lesson | Avg minutes per lesson | Horizontal bar |
+| Students | Learner · enrolled · progress · status | Table |
 
-### Shared UI pieces to build once
+**6. Podcasts** — podcast-scoped (selector in the action row)
+| Card | Content | Chart type |
+|------|---------|-----------|
+| Listening over time | Episode starts + completions | Trend (area) |
+| Episode plays | Plays per episode | Horizontal bar |
+| Episode completion | Completion % per episode | Horizontal bar |
+| Episode length vs listened | Minutes, grouped | Bar |
+| Series progress | How far listeners get | Bar |
+| Episodes | Episode · status · duration · plays · completion | Table |
 
-**Built & locked** (live in `apps/web/components/Analytics/`):
-- `StatCard` — KPI card (label + hero value + delta), fixed 300×150
-- `TrendChart` — area/line over time · `BarsChart` — categorical comparison · `RankedBars` — top-N ranking (auto-sized label column) · `BreakdownList` — distribution · `FunnelSteps` — conversion funnel
-- `DataTable` — sortable, fully column-driven (checkbox select, avatar cells, role dropdown, status dot, actions all via `render`). **No pagination** — the card grows with the list; **no in-table title** — the `SectionCard` owns it.
-- `AnalyticsToolbar` — date-range + org/course filters (action row above each tab)
-- `SectionCard` / `ChartCard` — the white card shells (13px uppercase gray-500 titles)
-- `DeltaBadge` (arrow + colored value, no pill) · `EmptyState` / `ChartSkeleton` (states)
-- `useChartTheme()` — reads live `:root` CSS vars so every chart inherits the org primary color
+**7. Community** — community-scoped (selector + cycle button in the action row)
+| Card | Content | Chart type |
+|------|---------|-----------|
+| Activity over time | Discussions + comments | Trend (area) |
+| Discussions by label | General / Q&A / Ideas / Show & Tell / Announcements | Bar |
+| Detail table (swaps) | Contributors · Top discussions · Unanswered — swapped by the cycle button | Table |
+
+### Shared UI pieces
+
+**Component library — built & locked** (live in `apps/web/components/Analytics/`):
+- `TrendChart` — area/line over time · `BarsChart` — vertical bars (single or grouped) · `RankedBars` — horizontal bars / top-N (auto-sized label column) · `BreakdownList` — distribution · `FunnelSteps` — conversion funnel (kept in the library; unused)
+- `DataTable` — sortable, fully column-driven (checkbox select, avatar cells, role dropdown, status dot, actions all via `render`). **No pagination** — the card grows with the list; **no in-table title** — the `SectionCard` owns it; uniform `px-6` gutters.
+- `SectionCard` / `ChartCard` — the white card shells (13px uppercase gray-500 titles). `SectionCard` has a **`bleed`** mode for tables: drops the horizontal padding so rows hover edge-to-edge.
+- `AnalyticsToolbar` — the shared action row (date range on the right, tab controls on the left)
+- `FilterSelect` — the entity selector used by the Courses / Podcasts / Community tabs: a filter-icon trigger + the platform's **card-styled dropdown menu** (no native `<select>` popup)
+- `SearchInput` — the Learners search field (Users/Contributors styling)
+- `DeltaBadge` (arrow + colored value, no pill) · `EmptyState` / `Skeleton` / `ChartSkeleton` (states)
+- `useChartTheme()` — reads live `:root` CSS vars; categorical series use the platform palette (`#6b8de3 · #818cf8 · #a78bfa · #c4b5fd`)
+- `StatCard` — kept for the **dashboard home**; never used inside analytics tabs
+
+**Assembled tabs** (live in `apps/web/components/Dashboard/Analytics/`):
+- `AnalyticsTabs` — the pill-tab shell (page title · pill tab bar · shared action row), same pattern as the dashboard settings pages; 7 tabs, each owning its selector when it has an entity
+- `tabs/OverviewTab` · `tabs/LearningTab` · `tabs/AudienceTab` · `tabs/LearnersTab` · `tabs/CoursesTab` · `tabs/PodcastsTab` · `tabs/CommunityTab`
+- `mockAnalytics.ts` — the placeholder dataset every tab renders from until the API is wired
 
 ---
 
@@ -265,4 +293,5 @@ Ingestion goes through the existing FastAPI (events validated against a whitelis
 
 - [PostHog Integration Plan](./posthog-integration-plan.md) — **rejected**; kept for the record
 - [Payments — Overview](../payments/overview.md) — payment/order data source
+- [Revenue Analytics](../payments/revenue-analytics.md) — the separate Revenue dashboard section (money moved out of Analytics)
 - [Data Model](../../02-architecture/data-model.md) — core entities

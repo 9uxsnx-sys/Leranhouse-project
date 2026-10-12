@@ -10,6 +10,8 @@ export interface BarsChartProps {
   series: SeriesDef[]
   height?: number
   formatter?: (v: number) => string
+  /** Shorten long category labels on the axis (the tooltip still shows the full value). */
+  xTickFormatter?: (v: any) => string
 }
 
 /**
@@ -17,13 +19,20 @@ export interface BarsChartProps {
  * Rounded top corners, 34px max bar width, horizontal-only grid, hidden `0` tick.
  * Supports a single series or grouped series.
  */
-export function BarsChart({ data, xKey, series, height = 260, formatter }: BarsChartProps) {
+export function BarsChart({ data, xKey, series, height = 260, formatter, xTickFormatter }: BarsChartProps) {
   const t = useChartTheme()
   return (
     <ResponsiveContainer width="100%" height={height}>
       <RechartsBarChart data={data} margin={{ top: 6, right: 8, left: -16, bottom: 0 }} barGap={4}>
         <CartesianGrid vertical={false} stroke={t.grid} />
-        <XAxis dataKey={xKey} tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: t.axis }} dy={4} />
+        <XAxis
+          dataKey={xKey}
+          tickLine={false}
+          axisLine={false}
+          tick={{ fontSize: 11, fill: t.axis }}
+          dy={4}
+          tickFormatter={xTickFormatter}
+        />
         <YAxis
           tickLine={false}
           axisLine={false}

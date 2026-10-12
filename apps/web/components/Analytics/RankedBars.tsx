@@ -22,11 +22,14 @@ export function RankedBars({ data, categoryKey, valueKey, height = 260, formatte
   // Size the label column to the data: short labels (Google, Direct…) get a tight
   // column, long course names get a wider one — so there is never dead space on the left.
   const longest = data.reduce((m, d) => Math.max(m, String(d[categoryKey] ?? '').length), 0)
-  const axisWidth = Math.min(160, Math.max(44, Math.round(longest * 6.2) + 8))
+  const axisWidth = Math.min(150, Math.max(40, Math.round(longest * 5.6) + 4))
+  // Evenly spaced background lines (8 → 7 equal gaps) across the value range.
+  const dataMax = data.reduce((m, d) => Math.max(m, Number(d[valueKey]) || 0), 0) || 1
+  const gridValues = Array.from({ length: 8 }, (_, i) => (dataMax / 7) * i)
   return (
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={data} layout="vertical" margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
-        <CartesianGrid horizontal={false} stroke={t.grid} />
+        <CartesianGrid horizontal={false} stroke={t.grid} verticalValues={gridValues} />
         <XAxis type="number" hide />
         <YAxis
           type="category"

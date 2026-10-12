@@ -198,5 +198,6 @@ Potential future providers could include Stripe (for international payments), Pa
 ---
 
 > See [Chargily Integration](./chargily-integration.md) for the detailed API integration plan.
+> See [Revenue Analytics](./revenue-analytics.md) for the planned Revenue dashboard section.
 > See [Payment Configuration (Admin Guide)](../../04-admin-guide/payments.md) for step-by-step admin setup.
 > See [Store (User Guide)](../../03-user-guide/store.md) for the learner's purchase experience.

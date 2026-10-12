@@ -1,7 +1,33 @@
 'use client'
 import React from 'react'
-import { ChevronDown } from 'lucide-react'
+import { Check, Filter, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+
+/** Compact search field for the analytics action row (same style as the Users/Contributors tabs). */
+export function SearchInput({
+  value,
+  onChange,
+  placeholder = 'Search…',
+  className,
+}: {
+  value: string
+  onChange?: (v: string) => void
+  placeholder?: string
+  className?: string
+}) {
+  return (
+    <div className={cn('relative w-80', className)}>
+      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+      <input
+        value={value}
+        onChange={(e) => onChange?.(e.target.value)}
+        placeholder={placeholder}
+        className="w-full h-7 pl-8 pr-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
+      />
+    </div>
+  )
+}
 
 /** Segmented date-range control for the analytics action row. */
 export function DateRangeFilter({
@@ -32,34 +58,44 @@ export function DateRangeFilter({
   )
 }
 
-/** Compact select for org / course / plan filters. */
+/**
+ * Compact filter dropdown for the analytics action row (community / entity selectors).
+ * Icon trigger + the platform's card-styled menu — no native OS popup.
+ */
 export function FilterSelect({
   value,
   onChange,
   options,
-  placeholder,
 }: {
   value: string
   onChange?: (v: string) => void
   options: { value: string; label: string }[]
-  placeholder?: string
 }) {
   return (
-    <div className="relative">
-      <select
-        value={value}
-        onChange={(e) => onChange?.(e.target.value)}
-        className="appearance-none h-8 pl-3 pr-8 text-xs rounded-lg border border-gray-200 bg-white text-gray-700 font-medium hover:bg-gray-50 focus:outline-none focus:border-gray-300 transition-colors cursor-pointer"
-      >
-        {placeholder && <option value="">{placeholder}</option>}
+    <DropdownMenu modal={false}>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          aria-label="Filter"
+          title="Filter"
+          className="inline-flex items-center justify-center h-7 w-7 text-gray-500 bg-white shadow-borders-base rounded-md hover:bg-gray-50 hover:text-gray-700 focus:outline-none transition-colors"
+        >
+          <Filter size={15} />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="min-w-[200px] rounded-lg border border-gray-200 bg-white p-1 shadow-md">
         {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
+          <DropdownMenuItem
+            key={o.value}
+            onClick={() => onChange?.(o.value)}
+            className="justify-between gap-6 text-sm rounded-md px-2.5 py-1.5 cursor-pointer text-gray-700 data-[highlighted]:bg-gray-100 focus:bg-gray-100"
+          >
+            <span className="truncate">{o.label}</span>
+            {o.value === value && <Check size={14} className="text-gray-500 shrink-0" />}
+          </DropdownMenuItem>
         ))}
-      </select>
-      <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-    </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 

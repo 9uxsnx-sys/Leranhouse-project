@@ -34,7 +34,7 @@ export function StatCard({
   const up = (delta ?? 0) >= 0
 
   return (
-    <div className="w-[300px] h-[150px] overflow-hidden bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+    <div className="w-full max-w-[300px] h-[150px] overflow-hidden bg-white rounded-xl border border-gray-100 shadow-sm p-6">
       {/* Title + icon */}
       <div className="flex h-7 items-start justify-between gap-3">
         <p className="text-[11px] font-semibold tracking-wide uppercase text-gray-400 truncate">{label}</p>

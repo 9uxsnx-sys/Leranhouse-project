@@ -84,7 +84,7 @@ export function DataTable<T extends Record<string, any>>({
                   style={{ width: col.width }}
                   onClick={canSort ? () => toggleSort(col) : undefined}
                   className={cn(
-                    'px-4 pb-2.5 text-[13px] font-semibold tracking-wide uppercase text-gray-500 whitespace-nowrap align-middle first:pl-0 last:pr-0',
+                    'px-6 pb-2.5 text-[13px] font-semibold tracking-wide uppercase text-gray-500 whitespace-nowrap align-middle',
                     alignClass(col.align),
                     canSort && 'cursor-pointer select-none transition-colors hover:text-gray-700'
                   )}
@@ -110,7 +110,7 @@ export function DataTable<T extends Record<string, any>>({
                 <td
                   key={col.key}
                   className={cn(
-                    'px-4 py-3.5 align-middle text-sm text-gray-700 first:pl-0 last:pr-0',
+                    'px-6 py-3.5 align-middle text-sm text-gray-700',
                     alignClass(col.align)
                   )}
                 >
