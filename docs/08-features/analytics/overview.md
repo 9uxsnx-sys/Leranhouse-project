@@ -210,7 +210,7 @@ These are **possible** with the same method but need extra plumbing (geo lookups
 | Traffic over time | Visits/pageviews | Line |
 | Top pages | Most-viewed pages | Table |
 | Sources | Referrers / UTM | Bar |
-| Devices | Desktop / mobile / tablet | Donut |
+| Devices | Desktop / mobile / tablet | Breakdown list |
 | By org | Per-org traffic (multi-tenant) | Table |
 
 **5. Learners**
@@ -228,11 +228,15 @@ These are **possible** with the same method but need extra plumbing (geo lookups
 | Top contributors | Most active members | Table |
 
 ### Shared UI pieces to build once
-- `StatCard` (label + value + delta)
-- `LineChart` / `AreaChart` / `BarChart` / `HorizontalBar` / `Donut` / `Funnel`
-- `DataTable` (sortable, paginated)
-- `DateRangeFilter` + `OrgCourseFilter` (in the action row)
-- `SectionCard` (the existing white card wrapper)
+
+**Built & locked** (live in `apps/web/components/Analytics/`):
+- `StatCard` — KPI card (label + hero value + delta), fixed 300×150
+- `TrendChart` — area/line over time · `BarsChart` — categorical comparison · `RankedBars` — top-N ranking (auto-sized label column) · `BreakdownList` — distribution · `FunnelSteps` — conversion funnel
+- `DataTable` — sortable, fully column-driven (checkbox select, avatar cells, role dropdown, status dot, actions all via `render`). **No pagination** — the card grows with the list; **no in-table title** — the `SectionCard` owns it.
+- `AnalyticsToolbar` — date-range + org/course filters (action row above each tab)
+- `SectionCard` / `ChartCard` — the white card shells (13px uppercase gray-500 titles)
+- `DeltaBadge` (arrow + colored value, no pill) · `EmptyState` / `ChartSkeleton` (states)
+- `useChartTheme()` — reads live `:root` CSS vars so every chart inherits the org primary color
 
 ---
 
