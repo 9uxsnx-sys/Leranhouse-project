@@ -56,6 +56,30 @@ from src.db.users import AnonymousUser, PublicUser, User
 
 
 # ---------------------------------------------------------------------------
+# SQLite compatibility
+# ---------------------------------------------------------------------------
+def _make_schema_sqlite_compatible() -> None:
+    """Rewrite the schema so it can be created on SQLite.
+
+    SQLite understands neither the JSONB type nor Postgres-cast server defaults
+    such as ``'{}'::jsonb`` (used by ``analytics_events.properties``). The model
+    metadata is global, so this runs once at import time — every test module
+    that builds its own in-memory SQLite engine benefits, not just those that
+    use the shared ``engine`` fixture below.
+    """
+    for table in SQLModel.metadata.tables.values():
+        for col in table.columns:
+            if isinstance(col.type, JSONB):
+                col.type = JSON()
+            default = col.server_default
+            if default is not None and "::" in str(getattr(default, "arg", "")):
+                col.server_default = None
+
+
+_make_schema_sqlite_compatible()
+
+
+# ---------------------------------------------------------------------------
 # Rights helpers
 # ---------------------------------------------------------------------------
 
@@ -142,16 +166,12 @@ USER_RIGHTS = Rights(
 
 @pytest.fixture
 def engine():
-    """In-memory SQLite engine with JSONB-to-JSON remapping."""
+    """In-memory SQLite engine (schema made SQLite-compatible at import)."""
     eng = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
-    for table in SQLModel.metadata.tables.values():
-        for col in table.columns:
-            if isinstance(col.type, JSONB):
-                col.type = JSON()
     SQLModel.metadata.create_all(eng)
     yield eng
     eng.dispose()
