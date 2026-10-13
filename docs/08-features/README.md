@@ -49,6 +49,12 @@ The documents in this section describe cross-cutting feature areas that touch mu
 |----------|-------------|
 | [Desktop App Architecture](./desktop-app/desktop-app-architecture.md) | Cross-platform desktop app with Capacitor Electron — native OS protection, offline playback, app store distribution |
 
+### Demo Data
+
+| Document | Description |
+|----------|-------------|
+| [Seed Plan](./demo-seed/seed-plan.md) | One-command demo seeder: fills a demo org with realistic courses, lessons, enrollments, podcasts, community and analytics so the platform can be demoed "fully alive" on demand |
+
 ### Planned (Future)
 
 | Document | Description |
