@@ -291,6 +291,7 @@ Ingestion goes through the existing FastAPI (events validated against a whitelis
 
 ## 8. Related
 
+- [Implementation Plan](./implementation-plan.md) — the frozen build contract: API surface, event schema, and the per-card metric map
 - [PostHog Integration Plan](./posthog-integration-plan.md) — **rejected**; kept for the record
 - [Payments — Overview](../payments/overview.md) — payment/order data source
 - [Revenue Analytics](../payments/revenue-analytics.md) — the separate Revenue dashboard section (money moved out of Analytics)

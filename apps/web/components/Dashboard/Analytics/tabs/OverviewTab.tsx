@@ -1,53 +1,43 @@
 'use client'
 import React from 'react'
-import { ChartCard } from '@components/Analytics/Card'
-import { TrendChart } from '@components/Analytics/TrendChart'
-import { BarsChart } from '@components/Analytics/BarsChart'
-import { RankedBars } from '@components/Analytics/RankedBars'
-import {
-  activityTrend,
-  completionRanked,
-  enrollmentFunnel,
-  enrollmentsTrend,
-  topCourses,
-} from '@components/Dashboard/Analytics/mockAnalytics'
+import { SectionCard } from '@components/Analytics/Card'
+import { EmptyState } from '@components/Analytics/Feedback'
+import { TabCard } from '@components/Analytics/TabCard'
+import { useAnalyticsTab } from '@services/analytics/tabs'
 
 /**
- * Overview — org-wide health. Chart-only (no KPI cards).
- * Row 1: full-width activity trend. Rows 2 & 3: two cards each.
+ * Overview — "is the platform healthy right now?" Chart-only (no KPI cards).
+ *
+ * Card contents come from `GET /analytics/tabs/overview`; this file owns only
+ * the grid layout: a full-width hero, then two 2-up rows.
  */
-export function OverviewTab() {
+export function OverviewTab({ range = '30d' }: { range?: string }) {
+  const { data, isLoading, error } = useAnalyticsTab('overview', range)
+  const cards = data?.cards
+
+  if (error) {
+    return (
+      <SectionCard>
+        <EmptyState
+          title="Couldn't load analytics"
+          description="Please try again in a moment."
+        />
+      </SectionCard>
+    )
+  }
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
       {/* Row 1 — full width */}
-      <ChartCard title="Activity over time" className="lg:col-span-12">
-        <TrendChart
-          data={activityTrend}
-          xKey="label"
-          series={[
-            { key: 'learners', name: 'Active learners' },
-            { key: 'signups', name: 'New signups' },
-          ]}
-        />
-      </ChartCard>
+      <TabCard card={cards?.activity_trend} loading={isLoading} className="lg:col-span-12" />
 
       {/* Row 2 — split */}
-      <ChartCard title="Enrollments over time" className="lg:col-span-6">
-        <BarsChart data={enrollmentsTrend} xKey="label" series={[{ key: 'value', name: 'Enrollments' }]} />
-      </ChartCard>
-
-      <ChartCard title="Enrollment by stage" className="lg:col-span-6">
-        <BarsChart data={enrollmentFunnel} xKey="label" series={[{ key: 'value', name: 'Users' }]} />
-      </ChartCard>
+      <TabCard card={cards?.enrollments_trend} loading={isLoading} className="lg:col-span-6" />
+      <TabCard card={cards?.enrollment_stage} loading={isLoading} className="lg:col-span-6" />
 
       {/* Row 3 — split */}
-      <ChartCard title="Top courses" className="lg:col-span-6">
-        <RankedBars data={topCourses} categoryKey="name" valueKey="value" />
-      </ChartCard>
-
-      <ChartCard title="Completion by course" className="lg:col-span-6">
-        <RankedBars data={completionRanked} categoryKey="name" valueKey="value" formatter={(v) => `${v}%`} />
-      </ChartCard>
+      <TabCard card={cards?.top_courses} loading={isLoading} className="lg:col-span-6" />
+      <TabCard card={cards?.completion_by_course} loading={isLoading} className="lg:col-span-6" />
     </div>
   )
 }

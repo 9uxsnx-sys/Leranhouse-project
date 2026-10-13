@@ -6,7 +6,6 @@ import { isFeatureAvailable } from '@services/plans/plans'
 import { usePlan } from '@components/Hooks/usePlan'
 import PlanRestrictedFeature from '@components/Dashboard/Shared/PlanRestricted/PlanRestrictedFeature'
 import { AnalyticsToolbar, FilterSelect, SearchInput } from '@components/Analytics/Filters'
-import { communities, courses, podcasts } from '@components/Dashboard/Analytics/mockAnalytics'
 import { OverviewTab } from '@components/Dashboard/Analytics/tabs/OverviewTab'
 import { LearningTab } from '@components/Dashboard/Analytics/tabs/LearningTab'
 import { CoursesTab } from '@components/Dashboard/Analytics/tabs/CoursesTab'
@@ -14,6 +13,7 @@ import { PodcastsTab } from '@components/Dashboard/Analytics/tabs/PodcastsTab'
 import { AudienceTab } from '@components/Dashboard/Analytics/tabs/AudienceTab'
 import { LearnersTab } from '@components/Dashboard/Analytics/tabs/LearnersTab'
 import { CommunityTab, COMMUNITY_TABLES } from '@components/Dashboard/Analytics/tabs/CommunityTab'
+import { useOrgCommunities, useOrgCourses, useOrgPodcasts } from '@services/analytics/tabs'
 
 type TabId = 'overview' | 'learning' | 'audience' | 'learners' | 'courses' | 'podcasts' | 'community'
 
@@ -42,6 +42,9 @@ export default function AnalyticsTabs() {
   const [podcast, setPodcast] = useState('all')
   const plan = usePlan()
   const isAnalyticsAvailable = isFeatureAvailable('analytics', plan)
+  const courseOptions = useOrgCourses()
+  const podcastOptions = useOrgPodcasts()
+  const communityOptions = useOrgCommunities()
 
   if (!isAnalyticsAvailable) {
     return (
@@ -104,14 +107,14 @@ export default function AnalyticsTabs() {
               <SearchInput value={query} onChange={setQuery} placeholder="Search learners…" />
             )}
             {tab === 'courses' && (
-              <FilterSelect value={course} onChange={setCourse} options={courses} />
+              <FilterSelect value={course} onChange={setCourse} options={courseOptions} />
             )}
             {tab === 'podcasts' && (
-              <FilterSelect value={podcast} onChange={setPodcast} options={podcasts} />
+              <FilterSelect value={podcast} onChange={setPodcast} options={podcastOptions} />
             )}
             {tab === 'community' && (
               <>
-                <FilterSelect value={community} onChange={setCommunity} options={communities} />
+                <FilterSelect value={community} onChange={setCommunity} options={communityOptions} />
                 <button
                   type="button"
                   onClick={() => setCommunityTable((i) => (i + 1) % COMMUNITY_TABLES.length)}
@@ -133,13 +136,15 @@ export default function AnalyticsTabs() {
           transition={{ duration: 0.1 }}
           className="space-y-6"
         >
-          {tab === 'overview' && <OverviewTab />}
-          {tab === 'learning' && <LearningTab />}
-          {tab === 'audience' && <AudienceTab />}
-          {tab === 'learners' && <LearnersTab query={query} />}
-          {tab === 'courses' && <CoursesTab course={course} />}
-          {tab === 'podcasts' && <PodcastsTab podcast={podcast} />}
-          {tab === 'community' && <CommunityTab community={community} table={COMMUNITY_TABLES[communityTable].id} />}
+          {tab === 'overview' && <OverviewTab range={range} />}
+          {tab === 'learning' && <LearningTab range={range} />}
+          {tab === 'audience' && <AudienceTab range={range} />}
+          {tab === 'learners' && <LearnersTab range={range} query={query} />}
+          {tab === 'courses' && <CoursesTab range={range} course={course} />}
+          {tab === 'podcasts' && <PodcastsTab range={range} podcast={podcast} />}
+          {tab === 'community' && (
+            <CommunityTab range={range} community={community} table={COMMUNITY_TABLES[communityTable].id} />
+          )}
         </motion.div>
       </div>
     </div>

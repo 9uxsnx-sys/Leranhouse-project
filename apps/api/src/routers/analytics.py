@@ -2,8 +2,9 @@ import csv
 import io
 import logging
 import re
+from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlmodel import Session, select
@@ -17,12 +18,14 @@ from src.db.courses.activities import Activity
 from src.db.trail_runs import TrailRun
 from src.security.auth import get_current_user, resolve_acting_user_id
 from src.security.superadmin import is_user_superadmin
-from src.security.features_utils.plan_check import get_org_plan
+from src.security.features_utils.plan_check import get_org_plan, _check_mode_bypass
 from src.security.features_utils.plans import plan_meets_requirement
 import httpx
 from src.services.analytics.analytics import track
 from src.services.analytics.cache import get_cached_result, set_cached_result
 from src.services.analytics.events import ALLOWED_FRONTEND_EVENTS
+from src.services.analytics.store import record_event
+from src.services.analytics.tabs._shared import RANGE_DAYS
 from src.services.analytics.queries import (
     ALL_QUERIES,
     ADVANCED_QUERIES,
@@ -43,6 +46,7 @@ class FrontendEvent(BaseModel):
     event_name: str
     org_id: int
     session_id: str = ""
+    visitor_id: str = ""
     properties: dict = {}
 
 
@@ -366,6 +370,19 @@ async def ingest_frontend_event(
     if country and country not in ("XX", "T1"):
         properties.setdefault("country_code", country.upper())
 
+    # PostgreSQL is the read source for the org-wide Analytics area (Tier B).
+    record_event(
+        db_session,
+        org_id=body.org_id,
+        event_name=body.event_name,
+        session_id=body.session_id,
+        user_id=resolve_acting_user_id(current_user),
+        visitor_id=body.visitor_id,
+        properties=properties,
+        user_agent=request.headers.get("user-agent", ""),
+    )
+
+    # Tinybird keeps feeding the legacy per-course analytics suite.
     await track(
         event_name=body.event_name,
         org_id=body.org_id,
@@ -376,6 +393,162 @@ async def ingest_frontend_event(
         ip=ip,
     )
     return {"ok": True}
+
+
+# -------------------------------------------------------------------
+# GET /tabs/{tab} — the org-wide Analytics area (PostgreSQL-backed)
+# Contract: docs/08-features/analytics/implementation-plan.md
+# -------------------------------------------------------------------
+def _tab_builders() -> dict:
+    """Registry of tab → board builder.
+
+    Every builder shares the same signature
+    ``board(session, org_id, range_token, entity, q, page, view)`` so the router
+    can call any tab uniformly; tabs that don't need a param simply ignore it.
+
+    Imported lazily so one heavy tab module can never break request startup
+    (and so the ingest path stays independent of the read path).
+    """
+    from src.services.analytics.tabs import (
+        audience,
+        community,
+        courses,
+        learners,
+        learning,
+        overview,
+        podcasts,
+    )
+
+    return {
+        "overview": overview.board,
+        "learning": learning.board,
+        "audience": audience.board,
+        "learners": learners.board,
+        "courses": courses.board,
+        "podcasts": podcasts.board,
+        "community": community.board,
+    }
+
+
+@router.get(
+    "/tabs/{tab}",
+    summary="Run an Analytics tab query",
+    description="Returns every card of one org-wide Analytics tab as a self-describing payload (meta + cards). Requires org admin privileges.",
+    responses={
+        200: {"description": "Tab payload: meta + cards keyed by card name"},
+        400: {"description": "Invalid range token"},
+        401: {"description": "Authentication required"},
+        403: {"description": "User is not a member/admin, or the plan is insufficient"},
+        404: {"description": "Unknown tab"},
+    },
+)
+async def query_tab(
+    tab: str,
+    org_id: int,
+    range_token: str = Query("30d", alias="range"),
+    entity: str = "all",
+    q: str = "",
+    page: int = 1,
+    view: str = "",
+    current_user: PublicUser | AnonymousUser | APITokenUser = Depends(get_current_user),
+    db_session: Session = Depends(get_db_session),
+):
+    if isinstance(current_user, AnonymousUser):
+        raise HTTPException(status_code=401, detail="Authentication required")
+
+    _verify_org_membership(resolve_acting_user_id(current_user), org_id, db_session)
+    _verify_org_admin(resolve_acting_user_id(current_user), org_id, db_session)
+
+    builder = _tab_builders().get(tab)
+    if builder is None:
+        raise HTTPException(status_code=404, detail="Unknown tab")
+
+    if range_token not in RANGE_DAYS:
+        raise HTTPException(status_code=400, detail="Invalid range")
+
+    # The Analytics area is a Standard+ feature (same gate as the frontend).
+    if _check_mode_bypass("analytics") is None:
+        current_plan = get_org_plan(org_id, db_session)
+        if not plan_meets_requirement(current_plan, "standard"):
+            raise HTTPException(
+                status_code=403,
+                detail="Analytics requires a Standard plan or higher.",
+            )
+
+    # Reuse the Tinybird-era cache helper: (query_name, org_id, days, entity).
+    days = RANGE_DAYS[range_token]
+    entity_key = None if entity in ("", "all") else entity
+    # `q`/`page` are Learners-only and `view` is Community-only; fold them into
+    # the variant so a search, page or view can never be served another query's
+    # cached payload.
+    if q.strip() or page > 1 or view.strip():
+        entity_key = (
+            f"{entity or 'all'}|q={q.strip().lower()}|p={page}|v={view.strip().lower()}"
+        )
+    cache_name = f"tab_{tab}"
+
+    cached = get_cached_result(cache_name, org_id, days, entity_key)
+    if cached is not None:
+        cached.setdefault("meta", {})["cached"] = True
+        return cached
+
+    payload = {
+        "tab": tab,
+        "meta": {
+            "org_id": org_id,
+            "range": range_token,
+            "entity": entity,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "cached": False,
+        },
+        "cards": builder(db_session, org_id, range_token, entity, q=q, page=page, view=view),
+    }
+    set_cached_result(cache_name, org_id, days, payload, entity_key)
+    return payload
+
+
+# -------------------------------------------------------------------
+# GET /learners/{user_id} — the learner-details dialog (Learners tab)
+# -------------------------------------------------------------------
+@router.get(
+    "/learners/{user_id}",
+    summary="Learner details",
+    description="Profile + per-course progress for one learner. Backs the Analytics → Learners details dialog. Requires org admin privileges.",
+    responses={
+        200: {"description": "Learner profile and per-course progress"},
+        401: {"description": "Authentication required"},
+        403: {"description": "User is not a member/admin, or the plan is insufficient"},
+        404: {"description": "Learner is not a member of this organization"},
+    },
+)
+async def learner_detail(
+    user_id: int,
+    org_id: int,
+    current_user: PublicUser | AnonymousUser | APITokenUser = Depends(get_current_user),
+    db_session: Session = Depends(get_db_session),
+):
+    if isinstance(current_user, AnonymousUser):
+        raise HTTPException(status_code=401, detail="Authentication required")
+
+    _verify_org_membership(resolve_acting_user_id(current_user), org_id, db_session)
+    _verify_org_admin(resolve_acting_user_id(current_user), org_id, db_session)
+
+    if _check_mode_bypass("analytics") is None:
+        current_plan = get_org_plan(org_id, db_session)
+        if not plan_meets_requirement(current_plan, "standard"):
+            raise HTTPException(
+                status_code=403,
+                detail="Analytics requires a Standard plan or higher.",
+            )
+
+    from src.services.analytics.tabs import learners
+
+    payload = learners.learner_detail(db_session, org_id, user_id)
+    if payload is None:
+        raise HTTPException(
+            status_code=404, detail="Learner is not a member of this organization"
+        )
+    return payload
 
 
 # -------------------------------------------------------------------
