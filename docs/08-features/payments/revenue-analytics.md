@@ -72,7 +72,7 @@ Pulled from the metrics catalog ([Analytics §2.3 / §2.5 / §2.7 / §2.9](../an
 ## 4. Data sources
 
 - **Tier A** — `payment_orders`, `course_purchases`, `resource_authors`, users (all existing Postgres tables).
-- **Tier B** — `analytics_events` (`checkout_started`, `properties.error`), needed only for **checkout conversion** and **failure reasons**. Everything else is Tier A.
+- **Tier B** — `analytics_events` (`checkout_started`, `properties.error`), needed only for **checkout conversion** and **failure reasons**. Everything else is Tier A. `checkout_started` is the one event here that is **not wired yet** — it is absent from the ingest whitelist (`apps/api/src/services/analytics/events.py`); add it when the checkout is instrumented. The table itself already exists — see [Analytics — implementation plan §3](../analytics/implementation-plan.md).
 
 ## 5. UI approach
 

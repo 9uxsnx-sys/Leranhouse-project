@@ -190,12 +190,21 @@ Subpages:
 
 **Route**: `/orgs/[orgslug]/dash/analytics` — File: `apps/web/app/orgs/[orgslug]/dash/analytics/page.tsx`
 
-- **Dashboard analytics**: Charts and metrics for:
-  - User growth and engagement
-  - Course completion rates
-  - Revenue trends
-  - Content performance
-  - Geographic distribution
+- **Analytics area**: a pill tab bar over 7 chart-first tabs (no KPI stat cards), with one shared date-range action row:
+
+  | Tab | Scope | Question |
+  |-----|-------|----------|
+  | Overview | Org-wide | Is the platform healthy right now? |
+  | Learning | Org-wide | Are learners using the content? |
+  | Audience | Org-wide | Where does traffic come from? |
+  | Learners | Org-wide (search + pagination) | What is this specific user doing? |
+  | Courses | Select a course | How is this course doing? |
+  | Podcasts | Select a podcast | Is anyone listening? |
+  | Community | Select a community (+ table switch) | Is the community alive? |
+
+- Courses / Podcasts / Community each add their own entity selector to the action row; Community also has a button that cycles its detail table (Contributors → Top discussions → Unanswered). The Learners row action opens a per-learner detail dialog.
+- Backed by `GET /api/v1/analytics/tabs/{tab}` (org admin, Standard+ plan), with the learner dialog on `GET /api/v1/analytics/learners/{user_id}`.
+- **Revenue and payouts are not part of this area** — money has its own section; see [Revenue Analytics](../../08-features/payments/revenue-analytics.md).
 
 ### Community Management
 

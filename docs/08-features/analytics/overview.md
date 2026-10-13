@@ -1,6 +1,6 @@
 # Analytics — Feature Catalog & Plan
 
-> **Status:** Proposed
+> **Status:** Implemented — the 7-tab Analytics area is live. The shipped contract (API surface, event schema, per-card metric map) is [implementation-plan.md](./implementation-plan.md); this file is the feature catalog + UI rules behind it.
 > **Approach:** Build on infrastructure we already run (Postgres) instead of adding a dedicated analytics engine.
 > **Out of scope:** Session replay, heatmaps, and AI anomaly detection (see §4).
 
@@ -43,7 +43,7 @@ Grouped by area. Every row here is achievable with the method above.
 | Metric | Example question | Source | Tier |
 |--------|------------------|--------|------|
 | Signups per day / org | "How many joined this week?" | `users`, `user_organizations` | A |
-| Email-verified rate | "How many verified?" | `users.is_verified` | A |
+| Email-verified rate | "How many verified?" | `users.email_verified` | A |
 | Visit → signup conversion | "200 visitors → 12 signups" | events ⋈ `users` | B |
 
 ### 2.3 Money (highest priority)
@@ -211,21 +211,23 @@ These are **possible** with the same method but need extra plumbing (geo lookups
 |------|---------|-----------|
 | Traffic over time | Visits/pageviews | Trend |
 | Sources | Referrers / UTM | Bar |
-| Devices | Desktop / mobile / tablet | Breakdown list |
+| Devices | Desktop / mobile / tablet | Bar (share %) |
 | Top pages | Most-viewed pages | Table |
 
 **4. Learners**
 | Card | Content | Chart type |
 |------|---------|-----------|
-| Search + filters | Find a user (name/email) | Controls |
-| Learners table | Last active · Courses · Progress · Spent · Status | Table |
-| User detail (drill-in) | Activity history + progress timeline | Table + timeline |
+| Search + filters | Find a user (name / username / email) | Controls |
+| Learners table | Name · Username · Email · Role · Status · Joined (+ a row action) | Table (server-side paginated) |
+| User detail (drill-in) | Role · Status · Joined · Last active + per-course progress | Dialog |
+
+> No money column: spend/orders are not part of Analytics (see §6 note on Revenue).
 
 **5. Courses** — course-scoped (selector in the action row)
 | Card | Content | Chart type |
 |------|---------|-----------|
 | Enrollments over time | New enrollments + active learners | Trend (area) |
-| Completion funnel | Enrolled → started → halfway → completed → certified | Bar |
+| Completion funnel | Enrolled → started → halfway → completed (no "certified" — the certificate table is EE-only, not in this checkout) | Bar |
 | Learner progress | Progress distribution (0–25 … 75–100%) | Bar |
 | Lesson drop-off | Views per lesson | Horizontal bar |
 | Time per lesson | Avg minutes per lesson | Horizontal bar |
@@ -251,8 +253,9 @@ These are **possible** with the same method but need extra plumbing (geo lookups
 ### Shared UI pieces
 
 **Component library — built & locked** (live in `apps/web/components/Analytics/`):
-- `TrendChart` — area/line over time · `BarsChart` — vertical bars (single or grouped) · `RankedBars` — horizontal bars / top-N (auto-sized label column) · `BreakdownList` — distribution · `FunnelSteps` — conversion funnel (kept in the library; unused)
-- `DataTable` — sortable, fully column-driven (checkbox select, avatar cells, role dropdown, status dot, actions all via `render`). **No pagination** — the card grows with the list; **no in-table title** — the `SectionCard` owns it; uniform `px-6` gutters.
+- `TrendChart` — area/line over time · `BarsChart` — vertical bars, single or grouped (long category labels truncate with `…` so they can't break the axis) · `RankedBars` — horizontal bars / top-N (label column auto-sized to the data, blank-row fallback so an empty card keeps its frame) · `BreakdownList` — distribution · `FunnelSteps` — conversion funnel (kept in the library; unused)
+- `DataTable` — sortable, fully column-driven (avatar cells, status dots, dates, mono paths, signed deltas, action cells all via `render`). **No in-table title** — the `SectionCard` owns it; uniform `px-6` gutters. Rows render in full by default; a tab that needs many rows (Learners) paginates **server-side** and reports `page` / `pageSize` / `total` on the card.
+- `TabCard` — **the single place that maps an API card to a component**: `kind` → `TrendChart` / `BarsChart` / `RankedBars` / `DataTable`, plus the `variant` → cell-renderer mapping (`mono`, `delta`, `percent`, `person`, `username`, `status`, `date`) and the optional `actionsColumn`. This is why each tab body is pure layout.
 - `SectionCard` / `ChartCard` — the white card shells (13px uppercase gray-500 titles). `SectionCard` has a **`bleed`** mode for tables: drops the horizontal padding so rows hover edge-to-edge.
 - `AnalyticsToolbar` — the shared action row (date range on the right, tab controls on the left)
 - `FilterSelect` — the entity selector used by the Courses / Podcasts / Community tabs: a filter-icon trigger + the platform's **card-styled dropdown menu** (no native `<select>` popup)
@@ -263,29 +266,16 @@ These are **possible** with the same method but need extra plumbing (geo lookups
 
 **Assembled tabs** (live in `apps/web/components/Dashboard/Analytics/`):
 - `AnalyticsTabs` — the pill-tab shell (page title · pill tab bar · shared action row), same pattern as the dashboard settings pages; 7 tabs, each owning its selector when it has an entity
-- `tabs/OverviewTab` · `tabs/LearningTab` · `tabs/AudienceTab` · `tabs/LearnersTab` · `tabs/CoursesTab` · `tabs/PodcastsTab` · `tabs/CommunityTab`
-- `mockAnalytics.ts` — the placeholder dataset every tab renders from until the API is wired
+- `tabs/OverviewTab` · `tabs/LearningTab` · `tabs/AudienceTab` · `tabs/LearnersTab` · `tabs/CoursesTab` · `tabs/PodcastsTab` · `tabs/CommunityTab` — each is pure grid layout over `useAnalyticsTab(tab, range, entity, extra)`
+- The data layer lives in `apps/web/services/analytics/tabs.ts`: the SWR hook, the card/column types, `useLearnerDetail`, and the real entity-option hooks (`useOrgCourses` / `useOrgPodcasts` / `useOrgCommunities`) that fill the action-row filters from the org rather than a fixture. There is **no mock dataset left**.
 
 ---
 
-## 7. `analytics_events` schema (Tier B)
+## 7. `analytics_events` (Tier B)
 
-```
-analytics_events
-├── id            bigserial   PK
-├── org_id        bigint      (multi-tenant filter)
-├── user_id       bigint NULL (null for anonymous visitors)
-├── visitor_id    text        (anonymous id, for new-vs-returning)
-├── session_id    text        (groups events into a visit)
-├── event_name    text        (page_view, course_view, checkout_started, …)
-├── properties    jsonb       (referrer, utm_*, course_id, price, error, …)
-└── created_at    timestamptz (indexed)
+The table exists and is written on every frontend event. The authoritative schema, the indexes, the event whitelist and the per-event `properties` contract live in [implementation-plan.md §3](./implementation-plan.md) — kept in one place so the two docs can't drift apart.
 
-Indexes: (org_id, created_at), (event_name, created_at), (user_id, created_at)
-Retention: keep raw 30–90 days; keep daily rollups long-term.
-```
-
-Ingestion goes through the existing FastAPI (events validated against a whitelist of `event_name`s). Queries are SQL, cached in Redis like the current analytics router.
+Ingestion goes through the existing FastAPI (validated against the `event_name` whitelist in `apps/api/src/services/analytics/events.py`), dual-written to Postgres (`services/analytics/store.py`) and to Tinybird (which still feeds the legacy per-course suite). Queries are SQL, cached in Redis for 60 s.
 
 ---
 
