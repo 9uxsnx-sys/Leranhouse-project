@@ -4,6 +4,7 @@ import React, { createContext, useContext, useReducer, useCallback, useRef, useE
 import { Podcast, PodcastEpisode } from '@services/podcasts/podcasts'
 import { saveEpisodeProgress, getEpisodeProgress } from '@services/podcasts/trail'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useAnalytics } from '@/hooks/useAnalytics'
 
 interface PodcastPlayerState {
   currentEpisode: PodcastEpisode | null
@@ -114,7 +115,25 @@ export function PodcastPlayerProvider({ children }: { children: React.ReactNode 
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const saveIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const session = useLHSession() as any
-  const access_token = session?.access_token || null
+  const access_token = session?.data?.tokens?.access_token || null
+  const { track } = useAnalytics()
+
+  // ── Listening time, accumulated from real playback (never wall-clock) ──
+  const listenedRef = useRef(0)     // seconds played since the last flush
+  const lastTimeRef = useRef(0)     // audio.currentTime at the previous tick
+  const lastWallRef = useRef(0)     // performance.now() at the previous tick
+
+  // ── Report the listening accumulated so far as one time_on_activity event ──
+  const flushListening = useCallback(() => {
+    const seconds = Math.round(listenedRef.current)
+    listenedRef.current = 0
+    if (seconds < 1 || !state.currentEpisode) return
+    track('time_on_activity', {
+      episode_uuid: state.currentEpisode.episode_uuid,
+      podcast_uuid: state.podcast?.podcast_uuid,
+      seconds_spent: seconds,
+    })
+  }, [track, state.currentEpisode, state.podcast])
 
   // ── Save current playback progress ──
   const saveProgress = useCallback(() => {
@@ -131,8 +150,12 @@ export function PodcastPlayerProvider({ children }: { children: React.ReactNode 
   }, [state.currentEpisode, state.duration, access_token])
 
   const playEpisode = useCallback((episode: PodcastEpisode, podcast: Podcast) => {
+    // Switching episodes ends the current listening session — report it first.
+    flushListening()
+    lastTimeRef.current = 0
+    lastWallRef.current = 0
     dispatch({ type: 'SET_EPISODE', payload: { episode, podcast } })
-  }, [])
+  }, [flushListening])
 
   const play = useCallback(() => {
     dispatch({ type: 'PLAY' })
@@ -144,17 +167,19 @@ export function PodcastPlayerProvider({ children }: { children: React.ReactNode 
     audioRef.current?.pause()
     // Save progress on pause
     saveProgress()
-  }, [saveProgress])
+    flushListening()
+  }, [saveProgress, flushListening])
 
   const togglePlay = useCallback(() => {
     if (state.isPlaying) {
       audioRef.current?.pause()
       saveProgress()
+      flushListening()
     } else {
       audioRef.current?.play()
     }
     dispatch({ type: 'TOGGLE_PLAY' })
-  }, [state.isPlaying, saveProgress])
+  }, [state.isPlaying, saveProgress, flushListening])
 
   const setTime = useCallback((time: number) => {
     dispatch({ type: 'SET_TIME', payload: time })
@@ -178,9 +203,10 @@ export function PodcastPlayerProvider({ children }: { children: React.ReactNode 
   const closePlayer = useCallback(() => {
     // Save progress before closing
     saveProgress()
+    flushListening()
     audioRef.current?.pause()
     dispatch({ type: 'CLOSE_PLAYER' })
-  }, [saveProgress])
+  }, [saveProgress, flushListening])
 
   const seekTo = useCallback((time: number) => {
     if (audioRef.current) {
@@ -205,16 +231,37 @@ export function PodcastPlayerProvider({ children }: { children: React.ReactNode 
     }
   }, [state.isPlaying, state.currentEpisode, access_token, saveProgress])
 
-  // ── Sync audio element with state ──
+  // ── Sync audio element with state + accumulate real listening time ──
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
 
     const handleTimeUpdate = () => {
-      dispatch({ type: 'SET_TIME', payload: audio.currentTime })
+      const time = audio.currentTime
+      const now = performance.now()
+      const prevTime = lastTimeRef.current
+      const prevWall = lastWallRef.current
+
+      // Only count forward audio that the wall clock can account for: a seek
+      // jumps far ahead of the clock and a rewind goes backwards, so neither is
+      // "listened" time. Background throttling just makes the ticks longer.
+      if (prevWall > 0 && !audio.paused) {
+        const played = time - prevTime
+        const elapsed = (now - prevWall) / 1000
+        if (played > 0 && played <= elapsed + 0.5) {
+          listenedRef.current += played
+        }
+      }
+
+      lastTimeRef.current = time
+      lastWallRef.current = now
+      dispatch({ type: 'SET_TIME', payload: time })
     }
 
     const handleLoadedMetadata = () => {
+      // New source — re-baseline so resuming mid-episode isn't read as a seek.
+      lastTimeRef.current = 0
+      lastWallRef.current = 0
       dispatch({ type: 'SET_DURATION', payload: audio.duration })
     }
 
@@ -222,6 +269,7 @@ export function PodcastPlayerProvider({ children }: { children: React.ReactNode 
       dispatch({ type: 'PAUSE' })
       // Save final progress (auto-marks complete on backend >=95%)
       saveProgress()
+      flushListening()
     }
 
     audio.addEventListener('timeupdate', handleTimeUpdate)
@@ -233,7 +281,23 @@ export function PodcastPlayerProvider({ children }: { children: React.ReactNode 
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata)
       audio.removeEventListener('ended', handleEnded)
     }
-  }, [saveProgress])
+  }, [saveProgress, flushListening])
+
+  // ── Best-effort flush when the tab is hidden or unloaded ──
+  useEffect(() => {
+    const handlePageHide = () => flushListening()
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden') flushListening()
+    }
+
+    window.addEventListener('pagehide', handlePageHide)
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      window.removeEventListener('pagehide', handlePageHide)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
+  }, [flushListening])
 
   // ── Resume playback from saved position when episode loads ──
   useEffect(() => {

@@ -224,13 +224,24 @@ def _episode_completion(session, params) -> dict[str, Any]:
 
 
 def _length_vs_listened(session, params) -> dict[str, Any]:
-    """Declared episode length vs average listened, in minutes (Tier B join)."""
+    """Declared episode length vs average minutes listened, in minutes (Tier B).
+
+    Deliberately *not* `AVG(duration_ms)`: the player can flush more than one
+    event per listener (a pause, a tab switch), so averaging rows would report
+    the average chunk instead of how long a person actually listened. Summing
+    all of a listener's time and dividing by the distinct listeners is stable
+    however the client chunks its reports.
+    """
     rows = _rows(
         session,
         f"""
         SELECT ep.episode_number,
                (ep.duration_seconds / 60.0)::int AS length,
-               COALESCE((AVG(e.duration_ms) / 60000.0)::int, 0) AS listened
+               COALESCE(
+                   (SUM(e.duration_ms) / 60000.0
+                    / GREATEST(COUNT(DISTINCT COALESCE(e.user_id::text, e.visitor_id)), 1))::int,
+                   0
+               ) AS listened
         FROM podcastepisode ep
         JOIN podcast p ON p.id = ep.podcast_id
         LEFT JOIN analytics_events e
