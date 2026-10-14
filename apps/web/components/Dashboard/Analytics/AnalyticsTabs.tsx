@@ -14,6 +14,7 @@ import { AudienceTab } from '@components/Dashboard/Analytics/tabs/AudienceTab'
 import { LearnersTab } from '@components/Dashboard/Analytics/tabs/LearnersTab'
 import { CommunityTab, COMMUNITY_TABLES } from '@components/Dashboard/Analytics/tabs/CommunityTab'
 import { useOrgCommunities, useOrgCourses, useOrgPodcasts } from '@services/analytics/tabs'
+import { PageTabs } from '@components/ui/page-tabs'
 
 type TabId = 'overview' | 'learning' | 'audience' | 'learners' | 'courses' | 'podcasts' | 'community'
 
@@ -70,33 +71,13 @@ export default function AnalyticsTabs() {
 
       {/* Row 2: Pill-style tab bar */}
       <div className="max-w-7xl mx-auto w-full py-4 px-4 sm:px-6 lg:px-8">
-        <div className="bg-gray-50/80 rounded-xl p-1 flex items-center w-full overflow-x-auto">
-          {TABS.map((t) => {
-            const isActive = tab === t.id
-            const Icon = t.icon
-            return (
-              <button key={t.id} type="button" onClick={() => setTab(t.id)} className="flex-1 relative min-w-fit">
-                <div
-                  className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 ${
-                    isActive ? 'text-ui-fg-base' : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="analytics-tab-indicator"
-                      className="absolute inset-0 bg-white rounded-lg shadow-sm border border-neutral-200/80"
-                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                  <span className="relative z-10 flex items-center gap-2 whitespace-nowrap">
-                    <Icon size={16} />
-                    <span>{t.label}</span>
-                  </span>
-                </div>
-              </button>
-            )
-          })}
-        </div>
+        <PageTabs
+          variant="pill"
+          indicatorId="analytics-tabs"
+          active={tab}
+          onSelect={(id) => setTab(id as TabId)}
+          tabs={TABS.map((t) => ({ id: t.id, label: t.label, icon: t.icon }))}
+        />
       </div>
 
       {/* Row 3: Action row + content */}
