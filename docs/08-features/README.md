@@ -55,6 +55,12 @@ The documents in this section describe cross-cutting feature areas that touch mu
 |----------|-------------|
 | [Seed Plan](./demo-seed/seed-plan.md) | One-command demo seeder: fills a demo org with realistic courses, lessons, enrollments, podcasts, community and analytics so the platform can be demoed "fully alive" on demand |
 
+### Internationalization & RTL
+
+| Document | Description |
+|----------|-------------|
+| [RTL Plan](./i18n-rtl/rtl-plan.md) | English / French / Arabic with accurate bidirectional layout: research on how RTL is done properly, the affected layout surface, ranked risks, and a phased plan |
+
 ### Planned (Future)
 
 | Document | Description |
