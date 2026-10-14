@@ -608,6 +608,11 @@
     "communities":  {
                         "title":  "Communautés",
                         "new_community":  "Nouvelle communauté",
+                        "search_placeholder":  "Rechercher des communautés...",
+                        "search_results":  "{{count}} communauté(s) trouvée(s) pour \"{{query}}\"",
+                        "select_communities":  "Sélectionner",
+                        "no_search_results":  "Aucune communauté trouvée",
+                        "try_different_search":  "Essayez un autre terme de recherche",
                         "no_communities":  "Aucune communauté",
                         "no_communities_description":  "Créez une communauté pour lancer les discussions",
                         "public":  "Publique",

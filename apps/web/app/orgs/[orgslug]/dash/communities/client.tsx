@@ -2,8 +2,10 @@
 
 import React, { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search, Users, MessagesSquare, Trash2, X, ChevronLeft, ChevronRight, CheckSquare, ListChecks } from 'lucide-react'
+import { Users, MessagesSquare, X, ChevronLeft, ChevronRight, CheckSquare, ListChecks } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { ActionRow, ActionRowSearch, ActionRowSpacer, ActionRowActions } from '@components/ui/action-row'
+import { ConceptIcon } from '@components/ui/icons'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { Community, deleteCommunity } from '@services/communities/communities'
@@ -214,27 +216,19 @@ const CommunitiesDashClient = ({
       </h1>
 
       {effectiveCommunities.length > 0 && (
-        <div className="flex items-center gap-3 mb-8">
-          <div className="flex items-center gap-3">
-            <div className="relative w-80">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search communities..."
-                className="w-full h-7 pl-8 pr-2 text-sm bg-white shadow-borders-base rounded-md placeholder:text-gray-400 focus:outline-none"
-              />
-            </div>
+        <ActionRow>
+          <ActionRowSearch
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+            placeholder={t('communities.search_placeholder')}
+            summary={
+              searchQuery
+                ? t('communities.search_results', { count: filteredCommunities.length, query: searchQuery })
+                : undefined
+            }
+          />
 
-            {searchQuery && (
-              <span className="txt-compact-xsmall text-ui-fg-muted whitespace-nowrap">
-                {filteredCommunities.length} result{filteredCommunities.length !== 1 ? 's' : ''} for &ldquo;{searchQuery}&rdquo;
-              </span>
-            )}
-          </div>
-
-          <div className="flex-1" />
+          <ActionRowSpacer />
 
           <AuthenticatedClientElement
             checkMethod="roles"
@@ -245,13 +239,15 @@ const CommunitiesDashClient = ({
             <Button
               variant="primary"
               size="small"
+              className="gap-x-1.5"
               onClick={() => setIsCreateModalOpen(true)}
             >
-              +&nbsp;New
+              <ConceptIcon.add size={14} />
+              {t('dashboard.courses.communities.new_community')}
             </Button>
           </AuthenticatedClientElement>
 
-          <div className="flex items-center gap-2">
+          <ActionRowActions>
             <Button
               variant="secondary"
               size="small"
@@ -259,7 +255,7 @@ const CommunitiesDashClient = ({
               onClick={() => { setIsSelectMode(prev => !prev); if (isSelectMode) clearSelection(); }}
             >
               <ListChecks size={14} />
-              <span>{isSelectMode ? 'Cancel' : 'Select'}</span>
+              <span>{isSelectMode ? t('cancel') : t('communities.select_communities')}</span>
             </Button>
 
             {selectedCommunities.size > 0 && (
@@ -269,7 +265,7 @@ const CommunitiesDashClient = ({
                 dialogTitle="Delete Communities"
                 dialogTrigger={
                   <Button variant="secondary" size="small" className="gap-x-1.5 text-red-600 border-red-200 hover:bg-red-50">
-                    <Trash2 size={14} />
+                    <ConceptIcon.delete size={14} />
                     <span>Delete {selectedCommunities.size}</span>
                   </Button>
                 }
@@ -277,14 +273,12 @@ const CommunitiesDashClient = ({
                 status="warning"
               />
             )}
-          </div>
+          </ActionRowActions>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="small" className="gap-x-1.5">
-                <svg width="14" height="14" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M2.5 4.5h10M4.5 7.5h6M6.5 10.5h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <ConceptIcon.filter size={14} />
                 <span>{filterLabel}</span>
               </Button>
             </DropdownMenuTrigger>
@@ -307,7 +301,7 @@ const CommunitiesDashClient = ({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
+        </ActionRow>
       )}
 
       <div className="flex-1 flex flex-col">
@@ -360,10 +354,10 @@ const CommunitiesDashClient = ({
                 <MessagesSquare className="w-8 h-8 text-ui-fg-muted" strokeWidth={1.5} />
               </div>
               <h2 className="text-xl font-semibold text-ui-fg-base mb-2">
-                No communities found
+                {t('communities.no_search_results')}
               </h2>
               <p className="txt-compact-small text-ui-fg-muted">
-                Try a different search term
+                {t('communities.try_different_search')}
               </p>
             </div>
           )}
@@ -388,10 +382,10 @@ const CommunitiesDashClient = ({
                 <Users className="w-8 h-8 text-ui-fg-muted" strokeWidth={1.5} />
               </div>
               <h1 className="text-xl font-semibold text-ui-fg-base mb-2">
-                No communities yet
+                {t('dashboard.courses.communities.no_communities')}
               </h1>
               <p className="txt-compact-small text-ui-fg-muted mb-6 text-center max-w-xs">
-                Communities will appear here once they are created
+                {t('dashboard.courses.communities.no_communities_description')}
               </p>
               <AuthenticatedClientElement
                 action="create"
@@ -402,9 +396,11 @@ const CommunitiesDashClient = ({
                 <Button
                   variant="primary"
                   size="small"
+                  className="gap-x-1.5"
                   onClick={() => setIsCreateModalOpen(true)}
                 >
-                  +&nbsp;New
+                  <ConceptIcon.add size={14} />
+                  {t('dashboard.courses.communities.new_community')}
                 </Button>
               </AuthenticatedClientElement>
             </div>

@@ -618,6 +618,11 @@
     "communities":  {
                         "title":  "المجتمعات",
                         "new_community":  "مجتمع جديد",
+                        "search_placeholder":  "البحث عن المجتمعات...",
+                        "search_results":  "تم العثور على {{count}} مجتمع لـ \"{{query}}\"",
+                        "select_communities":  "تحديد",
+                        "no_search_results":  "لم يتم العثور على مجتمعات",
+                        "try_different_search":  "جرّب مصطلح بحث آخر",
                         "no_communities":  "لا توجد مجتمعات بعد",
                         "no_communities_description":  "أنشئ مجتمعًا لبدء النقاشات",
                         "public":  "عام",
