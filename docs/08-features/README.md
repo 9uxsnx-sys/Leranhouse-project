@@ -55,6 +55,12 @@ The documents in this section describe cross-cutting feature areas that touch mu
 |----------|-------------|
 | [Seed Plan](./demo-seed/seed-plan.md) | One-command demo seeder: fills a demo org with realistic courses, lessons, enrollments, podcasts, community and analytics so the platform can be demoed "fully alive" on demand |
 
+### Dashboard Polish
+
+| Document | Description |
+|----------|-------------|
+| [Consistency Plan](./dashboard-polish/consistency-plan.md) | English-first audit + plan to unify dashboard buttons, action rows, tabs, icons and section naming, and make every string translation-ready (prerequisite for the Arabic pass) |
+
 ### Internationalization & RTL
 
 | Document | Description |
