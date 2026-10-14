@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import { MagnifyingGlass } from '@phosphor-icons/react'
+import { ConceptIcon } from '@components/ui/icons'
 import { useTranslation } from 'react-i18next'
 import { useCommandPalette } from './CommandPaletteContext'
 
@@ -27,7 +27,7 @@ export default function CommandPaletteTrigger({ isCollapsed = false }: Props) {
         aria-label={t('dashboard.search.trigger')}
         className="flex h-10 w-full items-center justify-center rounded-xl text-ui-fg-subtle transition-colors hover:bg-ui-bg-subtle-hover hover:text-ui-fg-base"
       >
-        <MagnifyingGlass size={18} />
+        <ConceptIcon.search size={18} />
       </button>
     )
   }
@@ -39,7 +39,7 @@ export default function CommandPaletteTrigger({ isCollapsed = false }: Props) {
       aria-label={t('dashboard.search.trigger')}
       className="group flex h-10 w-full items-center gap-x-2.5 rounded-xl px-4 text-left text-ui-fg-subtle transition-colors hover:bg-ui-bg-subtle-hover hover:text-ui-fg-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-fg-muted/20"
     >
-      <MagnifyingGlass size={18} className="shrink-0" />
+      <ConceptIcon.search size={18} className="shrink-0" />
       <span className="flex-1 text-sm font-medium">
         {t('dashboard.search.trigger')}
       </span>

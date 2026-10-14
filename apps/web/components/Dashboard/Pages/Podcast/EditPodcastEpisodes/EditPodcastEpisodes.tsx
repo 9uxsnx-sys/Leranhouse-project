@@ -21,7 +21,6 @@ import { getUriWithOrg } from '@services/config/config'
 import {
   Loader2,
   Trash2,
-  Upload,
   UploadCloud,
   MoreVertical,
   Music,
@@ -39,6 +38,7 @@ import {
   GripVertical,
   Eye,
 } from 'lucide-react'
+import { ConceptIcon } from '@components/ui/icons'
 import toast from 'react-hot-toast'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
@@ -809,7 +809,7 @@ function CreateEpisodeModal({
                 <span className="text-sm text-gray-700">{audioFile.name}</span>
               ) : (
                 <span className="text-sm text-gray-500 flex items-center">
-                  <Upload size={16} className="mr-2" />
+                  <ConceptIcon.upload size={16} className="mr-2" />
                   {t('podcasts.dashboard.episodes.upload_audio')}
                 </span>
               )}

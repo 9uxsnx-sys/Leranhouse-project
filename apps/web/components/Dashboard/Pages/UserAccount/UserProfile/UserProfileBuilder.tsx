@@ -1,6 +1,7 @@
 import React from 'react'
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
-import { Plus, Trash2, GripVertical, ImageIcon, Link as LinkIcon, Award, Edit, TextIcon, Briefcase, GraduationCap, MapPin, BookOpen } from 'lucide-react'
+import { Plus, GripVertical, ImageIcon, Link as LinkIcon, Award, TextIcon, Briefcase, GraduationCap, MapPin, BookOpen } from 'lucide-react'
+import { ConceptIcon } from '@components/ui/icons'
 import { Input } from "@components/ui/input"
 import { Textarea } from "@components/ui/textarea"
 import { Label } from "@components/ui/label"
@@ -440,7 +441,7 @@ const UserProfileBuilder = () => {
                                       : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
                                   }`}
                                 >
-                                  <Edit size={14} />
+                                  <ConceptIcon.edit size={14} />
                                 </button>
                                 <button
                                   onClick={(e) => {
@@ -449,7 +450,7 @@ const UserProfileBuilder = () => {
                                   }}
                                   className="p-1.5 text-red-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors duration-200"
                                 >
-                                  <Trash2 size={14} />
+                                  <ConceptIcon.delete size={14} />
                                 </button>
                               </div>
                             </div>
@@ -612,7 +613,7 @@ const ImageGalleryEditor: React.FC<{
                     }}
                     className="text-red-500 hover:text-red-600 hover:bg-red-50"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <ConceptIcon.delete className="h-4 w-4" />
                   </Button>
                 </div>
                 {image.url && (
@@ -747,7 +748,7 @@ const LinksEditor: React.FC<{
                   }}
                   className="text-red-500 hover:text-red-600 hover:bg-red-50"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <ConceptIcon.delete className="h-4 w-4" />
                 </Button>
               </div>
             ))}
@@ -850,7 +851,7 @@ const SkillsEditor: React.FC<{
                   }}
                   className="text-red-500 hover:text-red-600 hover:bg-red-50"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <ConceptIcon.delete className="h-4 w-4" />
                 </Button>
               </div>
             ))}
@@ -1007,7 +1008,7 @@ const ExperienceEditor: React.FC<{
                     }}
                     className="text-red-500 hover:text-red-600 hover:bg-red-50"
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
+                    <ConceptIcon.delete className="h-4 w-4 mr-2" />
                     {t('user.settings.general.remove')}
                   </Button>
                 </div>
@@ -1182,7 +1183,7 @@ const EducationEditor: React.FC<{
                     }}
                     className="text-red-500 hover:text-red-600 hover:bg-red-50"
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
+                    <ConceptIcon.delete className="h-4 w-4 mr-2" />
                     {t('user.settings.general.remove')}
                   </Button>
                 </div>
@@ -1296,7 +1297,7 @@ const AffiliationEditor: React.FC<{
                     }}
                     className="text-red-500 hover:text-red-600 hover:bg-red-50"
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
+                    <ConceptIcon.delete className="h-4 w-4 mr-2" />
                     {t('user.settings.general.remove')}
                   </Button>
                 </div>

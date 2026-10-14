@@ -9,7 +9,8 @@ import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { searchMatchesAny } from '@/lib/search/normalize'
 import { createUserGroup, updateUserGroup, deleteUserGroup, linkUsersToUserGroup, unlinkUsersFromUserGroup } from '@services/usergroups/usergroups'
 import { swrFetcher } from '@services/utils/ts/requests'
-import { Search, ArrowUpDown, CheckSquare, MoreVertical, Copy, Trash2, Users, Loader2, Check, SaveAllIcon, LogOut, ArrowLeft, Filter, ChevronLeft, ChevronRight, MoreHorizontal, X } from 'lucide-react'
+import { Search, ArrowUpDown, CheckSquare, MoreVertical, Copy, Trash2, Users, Loader2, Check, SaveAllIcon, LogOut, ArrowLeft, ChevronLeft, ChevronRight, MoreHorizontal, X } from 'lucide-react'
+import { ConceptIcon } from '@components/ui/icons'
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import toast from 'react-hot-toast'
 import useSWR, { mutate } from 'swr'
@@ -364,7 +365,7 @@ function OrgUserGroups() {
                         <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
                                 <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label="Filter members">
-                                    <Filter size={15} />
+                                    <ConceptIcon.filter size={15} />
                                 </IconButton>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent

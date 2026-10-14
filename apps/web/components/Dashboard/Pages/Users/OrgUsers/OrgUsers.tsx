@@ -8,7 +8,8 @@ import { getAPIUrl } from '@services/config/config'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { removeUserFromOrg, removeUsersFromOrg, updateUserRole } from '@services/organizations/orgs'
 import { swrFetcher } from '@services/utils/ts/requests'
-import { Check, Search, Filter, LogOut, ChevronLeft, ChevronRight, MoreHorizontal, X } from 'lucide-react'
+import { Check, Search, LogOut, ChevronLeft, ChevronRight, MoreHorizontal, X } from 'lucide-react'
+import { ConceptIcon } from '@components/ui/icons'
 import React, { useState, useCallback, useEffect } from 'react'
 import toast from 'react-hot-toast'
 import useSWR, { mutate } from 'swr'
@@ -297,7 +298,7 @@ function OrgUsers() {
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label="Filter users">
-              <Filter size={15} />
+              <ConceptIcon.filter size={15} />
             </IconButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent

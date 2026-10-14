@@ -2,12 +2,11 @@
 import React from 'react'
 import Link from 'next/link'
 import {
-  PlusCircle,
   ChartBar,
-  GearSix,
   Users,
   BookOpen,
 } from '@phosphor-icons/react'
+import { ConceptIcon } from '@components/ui/icons'
 import useSWR from 'swr'
 import { useTranslation } from 'react-i18next'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -75,7 +74,7 @@ export default function DashboardHome() {
                 href="/dash/courses?new=true"
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors"
               >
-                <PlusCircle size={14} weight="bold" />
+                <ConceptIcon.add size={14} />
                 {t('dashboard.home.create_course')}
               </Link>
               <Link
@@ -96,7 +95,7 @@ export default function DashboardHome() {
                 href="/dash/org/settings/general"
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-gray-600 bg-white rounded-lg nice-shadow hover:bg-gray-50 transition-colors"
               >
-                <GearSix size={14} weight="bold" />
+                <ConceptIcon.settings size={14} />
                 {t('dashboard.home.settings')}
               </Link>
             </div>

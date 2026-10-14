@@ -9,7 +9,8 @@ import { getAPIUrl } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
 import { SafeImage } from '@components/Objects/SafeImage'
-import { BookOpen, PlusCircle, Clock } from '@phosphor-icons/react'
+import { BookOpen, Clock } from '@phosphor-icons/react'
+import { ConceptIcon } from '@components/ui/icons'
 
 export default function RecentCourses() {
   const { t } = useTranslation()
@@ -85,7 +86,7 @@ export default function RecentCourses() {
               href="/dash/courses?new=true"
               className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700"
             >
-              <PlusCircle size={14} weight="bold" />
+              <ConceptIcon.add size={14} />
               {t('dashboard.home.create_your_first_course')}
             </Link>
           </div>

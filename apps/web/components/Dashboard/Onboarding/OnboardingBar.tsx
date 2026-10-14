@@ -10,7 +10,6 @@ import {
   CaretDown,
   CaretUp,
   RocketLaunch,
-  PlusCircle,
   Browsers,
   PlayCircle,
   FileText,
@@ -34,7 +33,7 @@ import {
   Check,
   GraduationCap,
 } from '@phosphor-icons/react'
-import { FilePenLine } from 'lucide-react'
+import { ConceptIcon } from '@components/ui/icons'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getUriWithOrg } from '@services/config/config'
 import { usePlan } from '@components/Hooks/usePlan'
@@ -502,7 +501,7 @@ export default function OnboardingBar() {
                                           onClick={() => navigateTo(actionHref)}
                                           className="relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors shrink-0"
                                         >
-                                          <PlusCircle size={14} weight="bold" />
+                                          <ConceptIcon.add size={14} />
                                           {t(`onboarding.steps.${step.id}.action`)}
                                         </button>
                                       )}
@@ -543,11 +542,7 @@ export default function OnboardingBar() {
                                             <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold shrink-0">
                                               1
                                             </div>
-                                            <PlusCircle
-                                              size={16}
-                                              weight="duotone"
-                                              className="text-gray-500 shrink-0"
-                                            />
+                                            <ConceptIcon.add size={16} className="text-gray-500 shrink-0" />
                                             <span className="text-[11px] font-medium text-gray-600">
                                               {t('onboarding.steps.experience_editor.add_activity')}
                                             </span>
@@ -575,7 +570,7 @@ export default function OnboardingBar() {
                                             <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold shrink-0">
                                               3
                                             </div>
-                                            <FilePenLine
+                                            <ConceptIcon.edit
                                               size={16}
                                               className="text-emerald-400 shrink-0"
                                             />

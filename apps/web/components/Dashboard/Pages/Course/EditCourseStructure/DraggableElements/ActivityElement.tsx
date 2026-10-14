@@ -15,18 +15,16 @@ import {
   Eye,
   EyeOff,
   File,
-  FilePenLine,
   Globe,
   GripVertical,
   Loader2,
   MoreVertical,
   Package,
   Pencil,
-  Save,
   Sparkles,
-  Trash2,
   Video,
 } from 'lucide-react'
+import { ConceptIcon } from '@components/ui/icons'
 import { MarkdownLogo, Globe as GlobePhosphor } from '@phosphor-icons/react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import Link from 'next/link'
@@ -295,7 +293,7 @@ function ActivityElement(props: ActivitiyElementProps) {
                   {isUpdatingName ? (
                     <Loader2 size={14} className="animate-spin" />
                   ) : (
-                    <Save size={14} />
+                    <ConceptIcon.save size={14} />
                   )}
                 </button>
               </div>
@@ -345,7 +343,7 @@ function ActivityElement(props: ActivitiyElementProps) {
                     ? t('dashboard.courses.structure.actions.edit_assignment')
                     : t('dashboard.courses.structure.actions.edit_page')}
                 >
-                  <FilePenLine size={15} />
+                  <ConceptIcon.edit size={15} />
                 </Link>
               ) : (
                 <div className="h-7 w-7" />
@@ -391,7 +389,7 @@ function ActivityElement(props: ActivitiyElementProps) {
                     }}
                     className="text-red-600 focus:text-red-600 focus:bg-red-50"
                   >
-                    <Trash2 size={14} />
+                    <ConceptIcon.delete size={14} />
                     {t('dashboard.courses.structure.bulk_actions.delete')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>

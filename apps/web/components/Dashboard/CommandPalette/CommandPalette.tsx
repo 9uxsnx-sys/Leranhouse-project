@@ -12,8 +12,8 @@ import {
   ChatCircle,
   Cube,
   Microphone,
-  MagnifyingGlass,
 } from '@phosphor-icons/react'
+import { ConceptIcon } from '@components/ui/icons'
 
 import { useCommandPalette } from './CommandPaletteContext'
 import { dashboardPages } from '@/lib/dashboard-search/registry'
@@ -206,7 +206,7 @@ export default function CommandPalette() {
           >
             {/* Header with search input */}
             <div className="flex items-center gap-3 px-4 py-3">
-              <MagnifyingGlass size={16} className="shrink-0 text-ui-fg-muted/50" />
+              <ConceptIcon.search size={16} className="shrink-0 text-ui-fg-muted/50" />
               <Command.Input
                 value={query}
                 onValueChange={setQuery}

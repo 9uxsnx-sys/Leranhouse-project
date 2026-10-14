@@ -8,9 +8,8 @@ import {
   MoreHorizontal,
   MoreVertical,
   Pencil,
-  Save,
-  Trash2,
 } from 'lucide-react'
+import { ConceptIcon } from '@components/ui/icons'
 import React from 'react'
 import { Draggable, Droppable } from '@hello-pangea/dnd'
 import ActivityElement from './ActivityElement'
@@ -259,7 +258,7 @@ function ChapterElement(props: ChapterElementProps) {
                       onClick={() => updateChapterName(props.chapter.id)}
                       className="bg-transparent text-neutral-700 hover:cursor-pointer hover:text-neutral-900"
                     >
-                      <Save size={15} />
+                      <ConceptIcon.save size={15} />
                     </button>
                   </div>
                 ) : (
@@ -293,7 +292,7 @@ function ChapterElement(props: ChapterElementProps) {
                     className="hover:cursor-pointer p-1 px-2 sm:px-3 bg-red-600 rounded-md shadow-sm flex items-center text-rose-100 text-sm"
                     rel="noopener noreferrer"
                   >
-                    <Trash2 size={15} className="text-rose-200" />
+                    <ConceptIcon.delete size={15} className="text-rose-200" />
                   </button>
                 }
                 functionToExecute={() => deleteChapterUI()}
@@ -343,7 +342,7 @@ function ChapterElement(props: ChapterElementProps) {
                     dialogTitle={t('dashboard.courses.structure.bulk_actions.delete_title')}
                     dialogTrigger={
                       <button className="h-7 px-2.5 rounded-md text-xs font-bold flex items-center gap-1 bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 transition-colors">
-                        <Trash2 size={12} />
+                        <ConceptIcon.delete size={12} />
                         <span className="hidden sm:inline">{t('dashboard.courses.structure.bulk_actions.delete')}</span>
                       </button>
                     }

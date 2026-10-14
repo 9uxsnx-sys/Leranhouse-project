@@ -9,10 +9,10 @@ import {
   BellAlert,
   BellAlertDone,
   GlobeEurope,
-  MagnifyingGlass,
   QuestionMark,
   TriangleRightMini,
 } from '@components/Objects/Icons/MedusaIcons'
+import { ConceptIcon } from '@components/ui/icons'
 import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
 import {
   DropdownMenu,
@@ -372,7 +372,7 @@ export function AdminTopBar({ className }: { className?: string }) {
                 aria-label={t('dashboard.search.trigger')}
                 onClick={() => setOpen(true)}
               >
-                <MagnifyingGlass />
+                <ConceptIcon.search />
               </IconButton>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="text-xs">
