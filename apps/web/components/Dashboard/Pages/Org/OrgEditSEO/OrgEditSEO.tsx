@@ -22,10 +22,12 @@ import FormLayout, {
   FormLabelAndMessage,
 } from '@components/Objects/StyledElements/Form/Form'
 import * as Form from '@radix-ui/react-form'
+import { useTranslation } from 'react-i18next'
 
 const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none"
 
 const OrgEditSEO: React.FC = () => {
+  const { t } = useTranslation()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
@@ -171,7 +173,7 @@ const OrgEditSEO: React.FC = () => {
                 {/* ===== Card 1: Quick Links ===== */}
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                   <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
-                    Quick Links
+                    {t('common.sections.quick_links')}
                   </h3>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -240,7 +242,7 @@ const OrgEditSEO: React.FC = () => {
                 {/* ===== Card 2: Default Meta Tags ===== */}
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                   <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
-                    Default Meta Tags
+                    {t('common.sections.default_meta_tags')}
                   </h3>
                   <div className="space-y-4">
                     <FormField name="default_meta_title_suffix">
@@ -271,7 +273,7 @@ const OrgEditSEO: React.FC = () => {
                 {/* ===== Card 3: Social & Open Graph ===== */}
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                   <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
-                    Social & Open Graph
+                    {t('common.sections.social_opengraph')}
                   </h3>
                   <div className="space-y-4">
                     <div>
@@ -342,7 +344,7 @@ const OrgEditSEO: React.FC = () => {
                 {/* ===== Card 4: Search Engine Verification ===== */}
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                   <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
-                    Search Engine Verification
+                    {t('common.sections.search_verification')}
                   </h3>
                   <div className="space-y-4">
                     <FormField name="google_site_verification">
@@ -362,7 +364,7 @@ const OrgEditSEO: React.FC = () => {
                 {/* ===== Card 5: Indexing Controls ===== */}
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                   <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
-                    Indexing Controls
+                    {t('common.sections.indexing_controls')}
                   </h3>
                   <div className="space-y-4">
                     <label className="flex items-center gap-3 cursor-pointer">

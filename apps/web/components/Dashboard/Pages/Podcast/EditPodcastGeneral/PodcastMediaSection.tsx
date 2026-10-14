@@ -13,6 +13,7 @@ import {
 } from '@services/podcasts/podcasts'
 import { revalidateTags } from '@services/utils/ts/requests'
 import toast from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 
 const MAX_FILE_SIZE = 8_000_000
 const VALID_IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png'] as const
@@ -31,6 +32,7 @@ const validateFile = (file: File): boolean => {
 }
 
 const PodcastMediaSection: React.FC = () => {
+  const { t } = useTranslation()
   const router = useRouter()
   const session = useLHSession() as any
   const org = useOrg() as any
@@ -179,7 +181,7 @@ const PodcastMediaSection: React.FC = () => {
   return (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
       <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
-        Media
+        {t('common.sections.media')}
       </h2>
 
       <div className="space-y-3">

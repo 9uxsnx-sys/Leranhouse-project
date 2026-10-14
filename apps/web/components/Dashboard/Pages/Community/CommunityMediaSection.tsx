@@ -10,12 +10,14 @@ import { revalidateTags } from '@services/utils/ts/requests'
 import { mutate } from 'swr'
 import { getAPIUrl } from '@services/config/config'
 import toast from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 
 const MAX_FILE_SIZE = 8_000_000
 const VALID_IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png'] as const
 type ValidImageMimeType = (typeof VALID_IMAGE_MIME_TYPES)[number]
 
 const CommunityMediaSection: React.FC = () => {
+  const { t } = useTranslation()
   const router = useRouter()
   const session = useLHSession() as any
   const org = useOrg() as any
@@ -184,7 +186,7 @@ const CommunityMediaSection: React.FC = () => {
   return (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
       <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
-        Media
+        {t('common.sections.media')}
       </h2>
 
       {/* Thumbnail row */}

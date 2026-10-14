@@ -48,8 +48,10 @@ import {
 import PlanRestrictedFeature from '@components/Dashboard/Shared/PlanRestricted/PlanRestrictedFeature'
 import { PlanLevel } from '@services/plans/plans'
 import { usePlan } from '@components/Hooks/usePlan'
+import { useTranslation } from 'react-i18next'
 
 const OrgEditDomains: React.FC = () => {
+  const { t } = useTranslation()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
@@ -338,7 +340,7 @@ const OrgEditDomains: React.FC = () => {
         {/* ===== Main Card ===== */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
           <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
-            Custom Domains
+            {t('common.sections.custom_domains')}
           </h2>
           {isLoading ? (
             <div className="flex justify-center py-8">

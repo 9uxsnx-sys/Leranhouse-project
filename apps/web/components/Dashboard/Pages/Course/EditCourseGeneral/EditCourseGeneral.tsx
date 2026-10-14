@@ -435,7 +435,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
 
               {/* ── BASIC INFORMATION ── */}
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Basic Information</h3>
+                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('common.sections.overview')}</h3>
                 <div className="space-y-4">
                   <FormField name="name">
                     <FormLabelAndMessage label={t('dashboard.courses.general.form.name_label')} message={formik.errors.name} />
@@ -514,7 +514,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
 
               {/* ── COURSE DETAILS ── */}
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Course Details</h3>
+                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('common.sections.details')}</h3>
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField name="meta_difficulty">
@@ -622,7 +622,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
 
               {/* ── INSTRUCTOR ── */}
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Instructor</h3>
+                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('common.sections.instructor')}</h3>
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField name="meta_instructor_name">

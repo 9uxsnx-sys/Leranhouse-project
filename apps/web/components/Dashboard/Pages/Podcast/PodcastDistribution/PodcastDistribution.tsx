@@ -7,6 +7,7 @@ import { Copy, ExternalLink } from 'lucide-react'
 import { SiApplepodcasts, SiSpotify, SiYoutubemusic, SiAudible } from '@icons-pack/react-simple-icons'
 import { Input } from '@components/ui/input'
 import toast from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 
 const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none"
 
@@ -16,6 +17,7 @@ interface PodcastDistributionProps {
 }
 
 function PodcastDistribution({ orgslug, podcastuuid }: PodcastDistributionProps) {
+  const { t } = useTranslation()
   const { podcast } = usePodcast()
   const org = useOrg() as any
 
@@ -32,7 +34,7 @@ function PodcastDistribution({ orgslug, podcastuuid }: PodcastDistributionProps)
       {/* RSS Feed URL */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
         <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-1">
-          RSS Feed
+          {t('common.sections.rss_feed')}
         </h3>
         <p className="text-gray-400 text-xs mb-4">
           Your podcast RSS feed is automatically generated. Use this URL to submit your podcast to directories.
@@ -69,7 +71,7 @@ function PodcastDistribution({ orgslug, podcastuuid }: PodcastDistributionProps)
       {/* Distribution Guide */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
         <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-1">
-          Submit to Podcast Directories
+          {t('common.sections.submit_to_directories')}
         </h3>
         <p className="text-gray-400 text-xs mb-6">
           Follow these steps to get your podcast listed on major platforms. Each platform requires you to submit your RSS feed URL.
@@ -201,7 +203,7 @@ function PodcastDistribution({ orgslug, podcastuuid }: PodcastDistributionProps)
       {/* Tips */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
         <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-3">
-          Tips for Successful Distribution
+          {t('common.sections.tips_for_distribution')}
         </h3>
         <ul className="text-sm text-gray-600 space-y-2">
           <li className="flex items-start space-x-2">

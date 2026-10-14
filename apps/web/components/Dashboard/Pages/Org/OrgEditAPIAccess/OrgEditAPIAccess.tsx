@@ -39,12 +39,14 @@ import { Textarea } from '@components/ui/textarea'
 import APIDocumentation from './APIDocumentation'
 import PlanRestrictedFeature from '@components/Dashboard/Shared/PlanRestricted/PlanRestrictedFeature'
 import { usePlan } from '@components/Hooks/usePlan'
+import { useTranslation } from 'react-i18next'
 
 type PageView = 'list' | 'detail'
 
 const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none"
 
 const OrgEditAPIAccess: React.FC = () => {
+  const { t } = useTranslation()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
@@ -284,7 +286,7 @@ const OrgEditAPIAccess: React.FC = () => {
       {!showDoc ? (
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
           <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
-            API Tokens
+            {t('common.sections.api_tokens')}
           </h2>
 
           {isLoading ? (
@@ -371,7 +373,7 @@ const OrgEditAPIAccess: React.FC = () => {
 
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
             <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
-              Token Created
+              {t('common.sections.token_created')}
             </h2>
 
             <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-5">
@@ -470,7 +472,7 @@ const OrgEditAPIAccess: React.FC = () => {
         {/* ===== Token Details Card ===== */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
           <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
-            Token Details
+            {t('common.sections.token_details')}
           </h3>
           <div className="space-y-4">
             <div>
@@ -504,7 +506,7 @@ const OrgEditAPIAccess: React.FC = () => {
         {/* ===== Permissions Card ===== */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
           <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
-            Permissions
+            {t('common.sections.permissions')}
           </h3>
           <div className="space-y-2">
             {/* Read Only - clickable container */}

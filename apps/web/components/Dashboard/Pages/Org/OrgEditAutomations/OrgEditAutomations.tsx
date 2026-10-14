@@ -26,6 +26,7 @@ import {
 } from '@services/webhooks/webhooks'
 import PlanRestrictedFeature from '@components/Dashboard/Shared/PlanRestricted/PlanRestrictedFeature'
 import { usePlan } from '@components/Hooks/usePlan'
+import { useTranslation } from 'react-i18next'
 
 type PageView = 'list' | 'detail'
 
@@ -54,6 +55,7 @@ function groupEventsByCategory(events: Record<string, any>): EventCategory[] {
 }
 
 const OrgEditAutomations: React.FC = () => {
+  const { t } = useTranslation()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
@@ -229,7 +231,7 @@ const OrgEditAutomations: React.FC = () => {
       {/* ===== Main Card ===== */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
         <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
-          Webhook Endpoints
+          {t('common.sections.webhook_endpoints')}
         </h2>
 
         {endpointsLoading ? (
@@ -346,7 +348,7 @@ const OrgEditAutomations: React.FC = () => {
         {/* ===== Endpoint Details Card ===== */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
           <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-4">
-            Endpoint Details
+            {t('common.sections.endpoint_details')}
           </h3>
           <div className="space-y-4">
             <div>
@@ -379,7 +381,7 @@ const OrgEditAutomations: React.FC = () => {
         {/* ===== Events Card ===== */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
           <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-4">
-            Events
+            {t('common.sections.events')}
           </h3>
           <p className="text-xs text-gray-400 mb-3">
             Select which events should trigger this webhook

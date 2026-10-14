@@ -616,7 +616,7 @@ function EpisodeDetailForm({
       {/* Basic Information */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
         <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
-          Basic Information
+          {t('common.sections.overview')}
         </h3>
         <div className="space-y-4">
           <div>
@@ -649,7 +649,7 @@ function EpisodeDetailForm({
       {/* Media */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
         <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
-          Media
+          {t('common.sections.media')}
         </h3>
         <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50">
           <div className="flex-shrink-0">

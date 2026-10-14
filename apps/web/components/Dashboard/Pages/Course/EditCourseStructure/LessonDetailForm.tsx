@@ -1,6 +1,7 @@
 'use client'
 import React, { useEffect, useState, useRef, useCallback } from 'react'
 import { useFormik } from 'formik'
+import { useTranslation } from 'react-i18next'
 import * as Form from '@radix-ui/react-form'
 import FormLayout, {
   FormField,
@@ -30,6 +31,7 @@ type LessonDetailFormProps = {
 const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none"
 
 function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: LessonDetailFormProps) {
+  const { t } = useTranslation()
   const session = useLHSession() as any
   const org = useOrg() as any
   const access_token = session?.data?.tokens?.access_token
@@ -353,7 +355,7 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
 
         {/* ── BASIC INFORMATION ── */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Basic Information</h3>
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('common.sections.overview')}</h3>
           <div className="space-y-4">
             <FormField name="name">
               <FormLabelAndMessage label="Lesson Name" message={formik.errors.name as string} />
@@ -385,7 +387,7 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
 
         {/* ── WHAT YOU'LL LEARN ── */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">What You&apos;ll Learn</h3>
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('common.sections.what_youll_learn')}</h3>
           <FormField name="learningObjectives">
             <Form.Control asChild>
               <LearningItemsList
@@ -398,7 +400,7 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
 
         {/* ── KEY TAKEAWAYS ── */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Key Takeaways</h3>
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('common.sections.key_takeaways')}</h3>
           <FormField name="takeaways">
             <Form.Control asChild>
               <TakeawayItemsList
@@ -411,7 +413,7 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
 
         {/* ── RESOURCES ── */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Resources</h3>
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('common.sections.resources')}</h3>
           <FormField name="resources">
             <Form.Control asChild>
               <ResourceItemsList
@@ -424,7 +426,7 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
 
         {/* ── KNOWLEDGE CHECKS ── */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Knowledge Checks</h3>
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('common.sections.knowledge_checks')}</h3>
           <FormField name="knowledge_checks">
             <Form.Control asChild>
               <KnowledgeCheckItemsList
