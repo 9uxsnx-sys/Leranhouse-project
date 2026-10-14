@@ -51,7 +51,7 @@ export const FeatureDisabledBanner: React.FC<{
         </span>
       </div>
       <Link
-        href={getUriWithOrg(orgslug, '/dash/org/settings/features')}
+        href={getUriWithOrg(orgslug, '/dash/org/settings/general')}
         className="flex items-center gap-2 px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors shrink-0"
       >
         <Settings size={16} />
@@ -113,7 +113,7 @@ const FeatureDisabledView: React.FC<FeatureDisabledViewProps> = ({
               </p>
 
               <Link
-                href={getUriWithOrg(orgslug, '/dash/org/settings/features')}
+                href={getUriWithOrg(orgslug, '/dash/org/settings/general')}
                 className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
               >
                 <Settings size={16} />

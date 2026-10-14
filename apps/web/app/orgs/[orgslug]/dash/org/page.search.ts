@@ -1,18 +1,20 @@
 import {
   Buildings,
   Palette,
-  Storefront,
   Compass,
-  Robot,
   Globe,
   Lightning,
   Key,
-  Sliders,
-  ChartBar,
-  DotsThree,
 } from '@phosphor-icons/react'
 import type { SearchMeta } from '@/lib/dashboard-search/types'
 
+/**
+ * Searchable org-settings sub-pages.
+ *
+ * IMPORTANT: every entry here must correspond to a sub-page actually rendered by
+ * `org/settings/[subpage]/page.tsx`. Entries for pages that don't render will
+ * send the command palette to a blank screen.
+ */
 export const searchMetas: SearchMeta[] = [
   {
     id: 'dash.org.general',
@@ -33,39 +35,12 @@ export const searchMetas: SearchMeta[] = [
     group: 'settings',
   },
   {
-    id: 'dash.org.features',
-    titleKey: 'dashboard.organization.settings.tabs.features',
-    descriptionKey: 'dashboard.search.entries.org_features.description',
-    keywordsKey: 'dashboard.search.entries.org_features.keywords',
-    icon: Sliders,
-    href: '/dash/org/settings/features',
-    group: 'settings',
-  },
-  {
-    id: 'dash.org.landing',
-    titleKey: 'dashboard.organization.settings.tabs.landing',
-    descriptionKey: 'dashboard.search.entries.org_landing.description',
-    keywordsKey: 'dashboard.search.entries.org_landing.keywords',
-    icon: Storefront,
-    href: '/dash/org/settings/landing',
-    group: 'settings',
-  },
-  {
     id: 'dash.org.seo',
     titleKey: 'dashboard.organization.settings.tabs.seo',
     descriptionKey: 'dashboard.search.entries.org_seo.description',
     keywordsKey: 'dashboard.search.entries.org_seo.keywords',
     icon: Compass,
     href: '/dash/org/settings/seo',
-    group: 'settings',
-  },
-  {
-    id: 'dash.org.ai',
-    titleKey: 'dashboard.organization.settings.tabs.ai',
-    descriptionKey: 'dashboard.search.entries.org_ai.description',
-    keywordsKey: 'dashboard.search.entries.org_ai.keywords',
-    icon: Robot,
-    href: '/dash/org/settings/ai',
     group: 'settings',
   },
   {
@@ -93,24 +68,6 @@ export const searchMetas: SearchMeta[] = [
     keywordsKey: 'dashboard.search.entries.org_api.keywords',
     icon: Key,
     href: '/dash/org/settings/api',
-    group: 'settings',
-  },
-  {
-    id: 'dash.org.usage',
-    titleKey: 'dashboard.organization.settings.tabs.usage',
-    descriptionKey: 'dashboard.search.entries.org_billing.description',
-    keywordsKey: 'dashboard.search.entries.org_billing.keywords',
-    icon: ChartBar,
-    href: '/dash/org/settings/usage',
-    group: 'settings',
-  },
-  {
-    id: 'dash.org.other',
-    titleKey: 'dashboard.organization.settings.tabs.other',
-    descriptionKey: 'dashboard.search.entries.org_other.description',
-    keywordsKey: 'dashboard.search.entries.org_other.keywords',
-    icon: DotsThree,
-    href: '/dash/org/settings/other',
     group: 'settings',
   },
 ]
