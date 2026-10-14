@@ -2,6 +2,7 @@
 import React from 'react'
 import { cn } from '@/lib/utils'
 import { ConceptIcon } from '@components/ui/icons'
+import { IconButton } from '@components/ui/icon-button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
 /** Compact search field for the analytics action row (same style as the Users/Contributors tabs). */
@@ -74,14 +75,15 @@ export function FilterSelect({
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <button
-          type="button"
+        <IconButton
+          size="small"
+          variant="transparent"
+          className="bg-white hover:bg-gray-50 shadow-borders-base"
           aria-label="Filter"
           title="Filter"
-          className="inline-flex items-center justify-center h-7 w-7 text-gray-500 bg-white shadow-borders-base rounded-md hover:bg-gray-50 hover:text-gray-700 focus:outline-none transition-colors"
         >
           <ConceptIcon.filter size={14} />
-        </button>
+        </IconButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-[200px] rounded-lg border border-gray-200 bg-white p-1 shadow-md">
         {options.map((o) => (

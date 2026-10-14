@@ -530,19 +530,35 @@ function CoursesHome(params: CourseProps) {
             )}
           </ActionRowActions>
 
-          {/* Filter — Button + DropdownMenu */}
+          {/* Filter — icon-only trigger + DropdownMenu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="secondary" size="small" className="gap-x-1.5">
+              <IconButton
+                size="small"
+                variant="transparent"
+                className="bg-white hover:bg-gray-50 shadow-borders-base"
+                aria-label="Filter"
+              >
                 <ConceptIcon.filter size={14} />
-                <span>{activeFilter}</span>
-              </Button>
+              </IconButton>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white min-w-0 w-28">
-              <DropdownMenuItem onClick={() => setActiveFilter('All')}>All Courses</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setActiveFilter('Easy')}>Easy</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setActiveFilter('Medium')}>Medium</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setActiveFilter('Hard')}>Hard</DropdownMenuItem>
+            <DropdownMenuContent align="end" className="bg-white min-w-0 w-40">
+              <DropdownMenuItem onClick={() => setActiveFilter('All')} className="flex items-center justify-between">
+                <span>All Courses</span>
+                {activeFilter === 'All' && <ConceptIcon.check size={12} className="text-gray-500" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setActiveFilter('Easy')} className="flex items-center justify-between">
+                <span>Easy</span>
+                {activeFilter === 'Easy' && <ConceptIcon.check size={12} className="text-gray-500" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setActiveFilter('Medium')} className="flex items-center justify-between">
+                <span>Medium</span>
+                {activeFilter === 'Medium' && <ConceptIcon.check size={12} className="text-gray-500" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setActiveFilter('Hard')} className="flex items-center justify-between">
+                <span>Hard</span>
+                {activeFilter === 'Hard' && <ConceptIcon.check size={12} className="text-gray-500" />}
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 

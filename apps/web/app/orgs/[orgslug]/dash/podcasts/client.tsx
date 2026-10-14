@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
-import { Headphones, Mic2, ChevronLeft, ChevronRight, ListChecks, CheckSquare } from 'lucide-react'
+import { Headphones, Mic2, ChevronLeft, ChevronRight, ListChecks } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { ActionRow, ActionRowSearch, ActionRowSpacer, ActionRowActions } from '@components/ui/action-row'
 import { ConceptIcon } from '@components/ui/icons'
@@ -22,6 +22,7 @@ import useSWR from 'swr'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { getAPIUrl } from '@services/config/config'
 import { Button } from '@/components/ui/button'
+import { IconButton } from '@components/ui/icon-button'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -254,23 +255,27 @@ const PodcastsDashClient = ({
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="secondary" size="small" className="gap-x-1.5">
+              <IconButton
+                size="small"
+                variant="transparent"
+                className="bg-white hover:bg-gray-50 shadow-borders-base"
+                aria-label="Filter"
+              >
                 <ConceptIcon.filter size={14} />
-                <span>{filterLabel}</span>
-              </Button>
+              </IconButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white min-w-0 w-40">
               <DropdownMenuItem onSelect={() => setActiveFilter('all')} className="flex items-center justify-between">
                 <span>All Podcasts</span>
-                {activeFilter === 'all' && <CheckSquare size={12} className="text-gray-500" />}
+                {activeFilter === 'all' && <ConceptIcon.check size={12} className="text-gray-500" />}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setActiveFilter('published')} className="flex items-center justify-between">
                 <span>Published</span>
-                {activeFilter === 'published' && <CheckSquare size={12} className="text-gray-500" />}
+                {activeFilter === 'published' && <ConceptIcon.check size={12} className="text-gray-500" />}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setActiveFilter('unpublished')} className="flex items-center justify-between">
                 <span>Unpublished</span>
-                {activeFilter === 'unpublished' && <CheckSquare size={12} className="text-gray-500" />}
+                {activeFilter === 'unpublished' && <ConceptIcon.check size={12} className="text-gray-500" />}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { Users, MessagesSquare, X, ChevronLeft, ChevronRight, CheckSquare, ListChecks } from 'lucide-react'
+import { Users, MessagesSquare, X, ChevronLeft, ChevronRight, ListChecks } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { ActionRow, ActionRowSearch, ActionRowSpacer, ActionRowActions } from '@components/ui/action-row'
 import { ConceptIcon } from '@components/ui/icons'
@@ -277,27 +277,31 @@ const CommunitiesDashClient = ({
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="secondary" size="small" className="gap-x-1.5">
+              <IconButton
+                size="small"
+                variant="transparent"
+                className="bg-white hover:bg-gray-50 shadow-borders-base"
+                aria-label="Filter"
+              >
                 <ConceptIcon.filter size={14} />
-                <span>{filterLabel}</span>
-              </Button>
+              </IconButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white min-w-0 w-40">
               <DropdownMenuItem onSelect={() => setActiveFilter('all')} className="flex items-center justify-between">
                 <span>All Communities</span>
-                {activeFilter === 'all' && <CheckSquare size={12} className="text-gray-500" />}
+                {activeFilter === 'all' && <ConceptIcon.check size={12} className="text-gray-500" />}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setActiveFilter('newest')} className="flex items-center justify-between">
                 <span>Newest</span>
-                {activeFilter === 'newest' && <CheckSquare size={12} className="text-gray-500" />}
+                {activeFilter === 'newest' && <ConceptIcon.check size={12} className="text-gray-500" />}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setActiveFilter('course')} className="flex items-center justify-between">
                 <span>Course Communities</span>
-                {activeFilter === 'course' && <CheckSquare size={12} className="text-gray-500" />}
+                {activeFilter === 'course' && <ConceptIcon.check size={12} className="text-gray-500" />}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setActiveFilter('general')} className="flex items-center justify-between">
                 <span>General</span>
-                {activeFilter === 'general' && <CheckSquare size={12} className="text-gray-500" />}
+                {activeFilter === 'general' && <ConceptIcon.check size={12} className="text-gray-500" />}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
