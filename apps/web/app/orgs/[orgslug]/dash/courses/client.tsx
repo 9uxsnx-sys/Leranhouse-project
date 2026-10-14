@@ -2,7 +2,7 @@
 import CreateCourseModal from '@components/Objects/Modals/Course/Create/CreateCourse'
 import CourseCreationTypeSelector from '@components/Objects/Modals/Course/Create/CourseCreationTypeSelector'
 import AICourseCreationModal from '@components/Objects/Modals/Course/Create/AICourse/AICourseCreationModal'
-import { BookCopy, Search, X, Trash2, ChevronLeft, ChevronRight, Upload, Users, Info, Download, Copy, ListChecks } from 'lucide-react'
+import { BookCopy, X, Trash2, ChevronLeft, ChevronRight, Upload, Users, Info, Download, Copy, ListChecks } from 'lucide-react'
 import ScormCourseImport from '../../../../../ee/components/Modals/ScormCourseImport'
 import { ImportTypeSelector, LearnHouseCourseImport } from '@components/Objects/Modals/Course/Import'
 import { removeCoursePrefix, AdminEditOptions } from '@components/Objects/Thumbnails/CourseThumbnail'
@@ -33,6 +33,8 @@ import FeatureDisabledView from '@components/Dashboard/Shared/FeatureDisabled/Fe
 import { usePlan } from '@components/Hooks/usePlan'
 import { searchMatchesAny } from '@/lib/search/normalize'
 import { IconButton } from '@components/ui/icon-button'
+import { ActionRow, ActionRowSearch, ActionRowSpacer, ActionRowActions } from '@components/ui/action-row'
+import { ConceptIcon } from '@components/ui/icons'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -435,31 +437,19 @@ function CoursesHome(params: CourseProps) {
 
       {/* Search + Filter toolbar (only if courses exist) */}
       {allCourses.length > 0 && (
-        <div className="flex items-center gap-3 mb-8">
-          {/* Search + results count group (left side) */}
-          <div className="flex items-center gap-3">
-            {/* Search — custom search bar with icon */}
-            <div className="relative w-80">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t('courses.search_courses')}
-                className="w-full h-7 pl-8 pr-2 text-sm bg-white shadow-borders-base rounded-md placeholder:text-gray-400 focus:outline-none"
-              />
-            </div>
+        <ActionRow>
+          <ActionRowSearch
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+            placeholder={t('courses.search_courses')}
+            summary={
+              searchQuery
+                ? t('courses.search_results', { count: filteredCourses.length, query: searchQuery })
+                : undefined
+            }
+          />
 
-            {/* Search results count — next to search bar */}
-            {searchQuery && (
-              <span className="txt-compact-xsmall text-ui-fg-muted whitespace-nowrap">
-                {t('courses.search_results', { count: filteredCourses.length, query: searchQuery })}
-              </span>
-            )}
-          </div>
-
-          {/* Spacer pushes actions to the right */}
-          <div className="flex-1" />
+          <ActionRowSpacer />
 
           {/* +New Course Button (opens create modal) */}
           <AuthenticatedClientElement
@@ -469,22 +459,24 @@ function CoursesHome(params: CourseProps) {
             orgId={params.org_id}
           >
             {courseLimitReached && (
-              <div className="text-xs text-gray-500 bg-gray-100 px-3 py-2 rounded-lg mr-2">
+              <div className="text-xs text-gray-500 bg-gray-100 px-3 py-2 rounded-lg me-2">
                 {t('dashboard.courses.limit_reached', { limit: courseLimit })}
               </div>
             )}
             <Button
               variant="primary"
               size="small"
+              className="gap-x-1.5"
               disabled={courseLimitReached}
               onClick={() => { setCreationType('scratch'); setNewCourseModal(true); }}
             >
-              +&nbsp;New
+              <ConceptIcon.add size={14} />
+              {t('courses.new_course')}
             </Button>
           </AuthenticatedClientElement>
 
           {/* Select Toggle (Admin feature) */}
-          <div className="flex items-center gap-2">
+          <ActionRowActions>
             <Button
               variant="secondary"
               size="small"
@@ -535,15 +527,13 @@ function CoursesHome(params: CourseProps) {
                 />
               </AuthenticatedClientElement>
             )}
-          </div>
+          </ActionRowActions>
 
           {/* Filter — Button + DropdownMenu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="small" className="gap-x-1.5">
-                <svg width="14" height="14" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M2.5 4.5h10M4.5 7.5h6M6.5 10.5h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <ConceptIcon.filter size={14} />
                 <span>{activeFilter}</span>
               </Button>
             </DropdownMenuTrigger>
@@ -559,11 +549,11 @@ function CoursesHome(params: CourseProps) {
           {usergroupsAvailable && usergroups.length > 0 && (
             <div className="relative flex items-center gap-1.5">
               <div className="relative">
-                <Users className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ui-fg-muted w-3.5 h-3.5 pointer-events-none" />
+                <Users className="absolute start-2.5 top-1/2 -translate-y-1/2 text-ui-fg-muted w-3.5 h-3.5 pointer-events-none" />
                 <select
                   value={selectedUsergroupId}
                   onChange={(e) => handleUsergroupChange(e.target.value)}
-                  className="h-7 pl-7 pr-7 txt-compact-small bg-ui-bg-field hover:bg-ui-bg-field-hover shadow-borders-base rounded-md appearance-none cursor-pointer min-w-[140px] outline-none focus-visible:shadow-borders-interactive-with-active"
+                  className="h-7 ps-7 pe-7 txt-compact-small bg-ui-bg-field hover:bg-ui-bg-field-hover shadow-borders-base rounded-md appearance-none cursor-pointer min-w-[140px] outline-none focus-visible:shadow-borders-interactive-with-active"
                 >
                   <option value="">{t('courses.usergroup_filter.all_courses')}</option>
                   {usergroups.map((ug: any) => (
@@ -580,14 +570,14 @@ function CoursesHome(params: CourseProps) {
                 <Info className="w-3.5 h-3.5" />
               </button>
               {showUsergroupInfo && (
-                <div className="absolute top-full left-0 mt-2 z-50 w-72 bg-ui-bg-component shadow-elevation-flyout rounded-lg p-3">
+                <div className="absolute top-full start-0 mt-2 z-50 w-72 bg-ui-bg-component shadow-elevation-flyout rounded-lg p-3">
                   <p className="txt-compact-xsmall-plus text-ui-fg-subtle mb-1">{t('courses.usergroup_filter.info_title')}</p>
                   <p className="txt-compact-xsmall text-ui-fg-muted leading-relaxed">{t('courses.usergroup_filter.info_description')}</p>
                 </div>
               )}
             </div>
           )}
-        </div>
+        </ActionRow>
       )}
 
       {/* Course Grid */}
