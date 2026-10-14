@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next'
 import { usePlan } from '@components/Hooks/usePlan'
 import { Button } from '@/components/ui/button'
 import { IconButton } from '@/components/ui/icon-button'
+import { ConceptIcon } from '@components/ui/icons'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import FormLayout, { FormField, FormLabelAndMessage } from '@components/Objects/StyledElements/Form/Form'
 import { Input } from "@/components/ui/input"
@@ -802,9 +803,7 @@ function OrgRoles() {
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label="Filter roles">
-                            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M2.5 4.5H12.5M4.5 7.5H10.5M6.5 10.5H8.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-                            </svg>
+                            <ConceptIcon.filter size={14} />
                         </IconButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="min-w-[170px] rounded-lg border border-gray-200 bg-white p-1 shadow-md" sideOffset={6}>
@@ -819,7 +818,7 @@ function OrgRoles() {
                                 className="justify-between text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
                             >
                                 <span className="text-gray-700 text-xs">{option.label}</span>
-                                {roleFilter === option.value && <Check size={12} className="text-gray-500" />}
+                                {roleFilter === option.value && <ConceptIcon.check size={12} className="text-gray-500" />}
                             </DropdownMenuItem>
                         ))}
                     </DropdownMenuContent>

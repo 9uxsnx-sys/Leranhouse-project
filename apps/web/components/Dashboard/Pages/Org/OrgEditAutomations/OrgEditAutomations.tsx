@@ -11,6 +11,7 @@ import {
   SaveAllIcon,
 } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { ConceptIcon } from '@components/ui/icons'
 import { getAPIUrl } from '@services/config/config'
 import useSWR, { mutate } from 'swr'
 import { swrFetcher } from '@services/utils/ts/requests'
@@ -475,9 +476,7 @@ const OrgEditAutomations: React.FC = () => {
               onClick={() => selectedEndpointId && handleDelete(selectedEndpointId)}
               className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-              </svg>
+              <ConceptIcon.delete size={14} />
               <span>Delete</span>
             </button>
           </div>
