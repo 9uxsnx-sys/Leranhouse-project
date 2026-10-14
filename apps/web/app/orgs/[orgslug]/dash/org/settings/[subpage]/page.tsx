@@ -1,7 +1,6 @@
 'use client'
 import React, { useEffect, use } from 'react';
 import { motion } from 'motion/react'
-import Link from 'next/link'
 import { getUriWithOrg } from '@services/config/config'
 import { TextIcon, LucideIcon, KeyIcon, Palette, Globe, Search, Zap } from 'lucide-react'
 import OrgEditGeneral from '@components/Dashboard/Pages/Org/OrgEditGeneral/OrgEditGeneral'
@@ -16,6 +15,7 @@ import { useOrg } from '@components/Contexts/OrgContext'
 import PlanBadge from '@components/Dashboard/Shared/PlanRestricted/PlanBadge'
 import { PlanLevel } from '@services/plans/plans'
 import { usePlan } from '@components/Hooks/usePlan'
+import { PageTabs } from '@components/ui/page-tabs'
 
 export type OrgParams = {
   subpage: string
@@ -26,7 +26,6 @@ interface TabItem {
   id: string
   label: string
   icon?: LucideIcon
-  customIcon?: string
   requiredPlan?: PlanLevel
 }
 
@@ -67,47 +66,20 @@ function OrgPage(props: { params: Promise<OrgParams> }) {
 
       {/* Row 2: Pill-style tab bar */}
       <div className="max-w-7xl mx-auto w-full py-4 px-4 sm:px-6 lg:px-8">
-        <div className="bg-gray-50/80 rounded-xl p-1 flex items-center w-full">
-          {SETTING_TABS.map((tab) => {
-            const isActive = params.subpage === tab.id
-
-            return (
-              <Link
-                key={tab.id}
-                prefetch={false}
-                href={getUriWithOrg(params.orgslug, '') + `/dash/org/settings/${tab.id}`}
-                className="flex-1 relative"
-              >
-                <div
-                  className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 ${
-                    isActive
-                      ? 'text-ui-fg-base'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="tab-indicator"
-                      className="absolute inset-0 bg-white rounded-lg shadow-sm border border-neutral-200/80"
-                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                  <span className="relative z-10 flex items-center gap-2">
-                    {tab.customIcon ? (
-                      <Image src={tab.customIcon} alt={tab.label} width={16} height={16} />
-                    ) : tab.icon ? (
-                      <tab.icon size={16} />
-                    ) : null}
-                    <span>{tab.label}</span>
-                    {tab.requiredPlan && (
-                      <PlanBadge currentPlan={currentPlan} requiredPlan={tab.requiredPlan} size="sm" noMargin />
-                    )}
-                  </span>
-                </div>
-              </Link>
-            )
-          })}
-        </div>
+        <PageTabs
+          variant="pill"
+          indicatorId="org-settings-tabs"
+          active={params.subpage}
+          tabs={SETTING_TABS.map((tab) => ({
+            id: tab.id,
+            label: tab.label,
+            icon: tab.icon,
+            href: getUriWithOrg(params.orgslug, '') + `/dash/org/settings/${tab.id}`,
+            badge: tab.requiredPlan ? (
+              <PlanBadge currentPlan={currentPlan} requiredPlan={tab.requiredPlan} size="sm" noMargin />
+            ) : undefined,
+          }))}
+        />
       </div>
 
       {/* Row 3: Content */}
