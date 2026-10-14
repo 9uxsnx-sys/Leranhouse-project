@@ -2,13 +2,13 @@
 import React, { use } from 'react'
 import { PodcastProvider, usePodcast } from '@components/Contexts/PodcastContext'
 import { motion } from 'motion/react'
-import { Info, ListMusic, Rss } from 'lucide-react'
 import EditPodcastGeneral from '@components/Dashboard/Pages/Podcast/EditPodcastGeneral/EditPodcastGeneral'
 import EditPodcastEpisodes from '@components/Dashboard/Pages/Podcast/EditPodcastEpisodes/EditPodcastEpisodes'
 import PodcastDistribution from '@components/Dashboard/Pages/Podcast/PodcastDistribution/PodcastDistribution'
 import { getUriWithOrg } from '@services/config/config'
 import { useTranslation } from 'react-i18next'
 import { PageTabs } from '@components/ui/page-tabs'
+import { SectionIcon } from '@components/ui/icons'
 
 export type PodcastOverviewParams = {
   orgslug: string
@@ -39,19 +39,19 @@ function PodcastOverviewPage(props: { params: Promise<PodcastOverviewParams> }) 
     {
       key: 'general',
       label: t('podcasts.dashboard.tabs.general'),
-      icon: Info,
+      icon: SectionIcon.general,
       href: `/dash/podcasts/podcast/${params.podcastuuid}/general`,
     },
     {
       key: 'content',
       label: t('podcasts.dashboard.tabs.episodes'),
-      icon: ListMusic,
+      icon: SectionIcon.episodes,
       href: `/dash/podcasts/podcast/${params.podcastuuid}/content`,
     },
     {
       key: 'distribution',
       label: 'Distribution',
-      icon: Rss,
+      icon: SectionIcon.distribution,
       href: `/dash/podcasts/podcast/${params.podcastuuid}/distribution`,
     },
   ]

@@ -1,7 +1,7 @@
 'use client'
 import React, { useState } from 'react'
 import { motion } from 'motion/react'
-import { BookOpen, ChartBar, Globe, GraduationCap, LineChart, MessagesSquare, Mic, Repeat2, Users } from 'lucide-react'
+import { ChartBar, Repeat2 } from 'lucide-react'
 import { isFeatureAvailable } from '@services/plans/plans'
 import { usePlan } from '@components/Hooks/usePlan'
 import PlanRestrictedFeature from '@components/Dashboard/Shared/PlanRestricted/PlanRestrictedFeature'
@@ -15,17 +15,18 @@ import { LearnersTab } from '@components/Dashboard/Analytics/tabs/LearnersTab'
 import { CommunityTab, COMMUNITY_TABLES } from '@components/Dashboard/Analytics/tabs/CommunityTab'
 import { useOrgCommunities, useOrgCourses, useOrgPodcasts } from '@services/analytics/tabs'
 import { PageTabs } from '@components/ui/page-tabs'
+import { SectionIcon } from '@components/ui/icons'
 
 type TabId = 'overview' | 'learning' | 'audience' | 'learners' | 'courses' | 'podcasts' | 'community'
 
 const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
-  { id: 'overview', label: 'Overview', icon: LineChart },
-  { id: 'learning', label: 'Learning', icon: GraduationCap },
-  { id: 'audience', label: 'Audience', icon: Globe },
-  { id: 'learners', label: 'Learners', icon: Users },
-  { id: 'courses', label: 'Courses', icon: BookOpen },
-  { id: 'podcasts', label: 'Podcasts', icon: Mic },
-  { id: 'community', label: 'Community', icon: MessagesSquare },
+  { id: 'overview', label: 'Overview', icon: SectionIcon.overview },
+  { id: 'learning', label: 'Learning', icon: SectionIcon.learning },
+  { id: 'audience', label: 'Audience', icon: SectionIcon.audience },
+  { id: 'learners', label: 'Learners', icon: SectionIcon.learners },
+  { id: 'courses', label: 'Courses', icon: SectionIcon.courses },
+  { id: 'podcasts', label: 'Podcasts', icon: SectionIcon.podcasts },
+  { id: 'community', label: 'Community', icon: SectionIcon.community },
 ]
 
 /**

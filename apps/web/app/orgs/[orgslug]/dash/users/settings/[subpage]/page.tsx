@@ -3,7 +3,7 @@ import React, { useEffect, use } from 'react';
 import { motion } from 'motion/react'
 import { useMediaQuery } from 'usehooks-ts'
 import { getUriWithOrg } from '@services/config/config'
-import { Monitor, Ticket, SquareUserRound, Users, Shield, ShieldAlert } from 'lucide-react'
+import { Monitor } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import OrgUsers from '@components/Dashboard/Pages/Users/OrgUsers/OrgUsers'
@@ -16,6 +16,7 @@ import PlanBadge from '@components/Dashboard/Shared/PlanRestricted/PlanBadge'
 import { PlanLevel } from '@services/plans/plans'
 import { usePlan } from '@components/Hooks/usePlan'
 import { PageTabs } from '@components/ui/page-tabs'
+import { SectionIcon } from '@components/ui/icons'
 
 export type SettingsParams = {
   subpage: string
@@ -57,33 +58,33 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
     {
       key: 'users',
       label: t('dashboard.users.settings.tabs.users'),
-      icon: Users,
+      icon: SectionIcon.users,
       href: `/dash/users/settings/users`,
     },
     {
       key: 'usergroups',
       label: t('dashboard.users.settings.tabs.usergroups'),
-      icon: SquareUserRound,
+      icon: SectionIcon.userGroups,
       href: `/dash/users/settings/usergroups`,
       requiresPlan: 'standard' as PlanLevel,
     },
     {
       key: 'roles',
       label: t('dashboard.users.settings.tabs.roles'),
-      icon: Shield,
+      icon: SectionIcon.roles,
       href: `/dash/users/settings/roles`,
       requiresPlan: 'pro' as PlanLevel,
     },
     {
       key: 'signups',
       label: t('dashboard.users.settings.tabs.signups'),
-      icon: Ticket,
+      icon: SectionIcon.signups,
       href: `/dash/users/settings/signups`,
     },
     {
       key: 'audit-logs',
       label: t('dashboard.users.settings.tabs.audit_logs'),
-      icon: ShieldAlert,
+      icon: SectionIcon.auditLogs,
       href: `/dash/users/settings/audit-logs`,
       requiresPlan: 'enterprise' as PlanLevel,
     },

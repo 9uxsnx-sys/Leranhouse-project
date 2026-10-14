@@ -2,7 +2,7 @@
 import React, { use, useEffect } from 'react';
 import { CourseProvider, useCourse } from '../../../../../../../../components/Contexts/CourseContext'
 import { motion } from 'motion/react'
-import { BookOpen, Globe, Settings, Users, Award, Lock, Search, BarChart3 } from 'lucide-react'
+import { Award, BarChart3, Lock, Search } from 'lucide-react'
 import EditCourseStructure from '@components/Dashboard/Pages/Course/EditCourseStructure/EditCourseStructure'
 import EditCourseGeneral from '@components/Dashboard/Pages/Course/EditCourseGeneral/EditCourseGeneral'
 import EditCourseAccess from '@components/Dashboard/Pages/Course/EditCourseAccess/EditCourseAccess'
@@ -21,6 +21,7 @@ import CourseAnalyticsTab from '@components/Dashboard/Analytics/Course/CourseAna
 import { usePlan } from '@components/Hooks/usePlan'
 import { CourseEditSidebar } from '@components/Dashboard/Misc/CourseEditSidebar'
 import { PageTabs } from '@components/ui/page-tabs'
+import { SectionIcon } from '@components/ui/icons'
 
 export type CourseOverviewParams = {
   orgslug: string
@@ -61,35 +62,35 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
     {
       key: 'general',
       label: t('dashboard.courses.settings.tabs.general'),
-      icon: Settings,
+      icon: SectionIcon.general,
       href: `/dash/courses/course/${params.courseuuid}/general`,
       requiredPermission: 'update' as const
     },
     {
       key: 'content',
       label: t('dashboard.courses.settings.tabs.content'),
-      icon: BookOpen,
+      icon: SectionIcon.content,
       href: `/dash/courses/course/${params.courseuuid}/content`,
       requiredPermission: 'update_content' as const
     },
     {
       key: 'access',
       label: t('dashboard.courses.settings.tabs.access'),
-      icon: Globe,
+      icon: SectionIcon.access,
       href: `/dash/courses/course/${params.courseuuid}/access`,
       requiredPermission: 'manage_access' as const
     },
     {
       key: 'contributors',
       label: t('dashboard.courses.settings.tabs.contributors'),
-      icon: Users,
+      icon: SectionIcon.contributors,
       href: `/dash/courses/course/${params.courseuuid}/contributors`,
       requiredPermission: 'manage_contributors' as const
     },
     {
       key: 'seo',
       label: t('dashboard.courses.settings.tabs.seo'),
-      icon: Search,
+      icon: SectionIcon.seo,
       href: `/dash/courses/course/${params.courseuuid}/seo`,
       requiredPermission: 'update' as const,
       requiresPlan: 'standard' as PlanLevel
@@ -97,7 +98,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
     {
       key: 'certification',
       label: t('dashboard.courses.settings.tabs.certification'),
-      icon: Award,
+      icon: SectionIcon.certification,
       href: `/dash/courses/course/${params.courseuuid}/certification`,
       requiredPermission: 'create_certifications' as const,
       requiresPlan: 'pro' as PlanLevel
@@ -105,7 +106,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
     {
       key: 'analytics',
       label: t('dashboard.courses.settings.tabs.analytics'),
-      icon: BarChart3,
+      icon: SectionIcon.analytics,
       href: `/dash/courses/course/${params.courseuuid}/analytics`,
       requiredPermission: 'update' as const,
       requiresPlan: 'pro' as PlanLevel

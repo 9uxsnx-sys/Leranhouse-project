@@ -1,19 +1,41 @@
 import {
   ArrowLeft,
+  Award,
+  BarChart3,
+  BookOpen,
   Check,
   ChevronDown,
   ChevronLeft,
   Copy,
   Download,
+  Globe,
+  GraduationCap,
+  Key,
+  LineChart,
+  Link2,
+  ListMusic,
+  Lock,
+  MessagesSquare,
+  Mic,
+  Palette,
   Pencil,
   Plus,
+  Rss,
   SaveAllIcon,
+  ScrollText,
   Search,
   Settings,
+  Shield,
+  ShieldCheck,
   SlidersHorizontal,
+  Ticket,
   Trash2,
   UploadCloud,
+  UserCheck,
+  Users,
+  UsersRound,
   X,
+  Zap,
 } from 'lucide-react'
 
 /**
@@ -64,3 +86,49 @@ export const ConceptIcon = {
 } as const
 
 export type ConceptName = keyof typeof ConceptIcon
+
+/**
+ * SectionIcon — one icon per dashboard section, from the same library (lucide).
+ *
+ * The settings tab bars had drifted: the "General" tab alone was drawn with
+ * three different icons (`TextIcon`, `Settings`, `Info`) depending on the area,
+ * and two different sections could share the same glyph. Import from here so a
+ * section always looks the same wherever it appears.
+ *
+ * @example
+ * import { SectionIcon } from '@/components/ui/icons'
+ * { id: 'general', label: 'General', icon: SectionIcon.general }
+ *
+ * If a section is missing, add it here rather than importing a one-off icon.
+ */
+export const SectionIcon = {
+  general: Settings,
+  content: BookOpen,
+  access: Lock,
+  contributors: Users,
+  seo: Search,
+  certification: Award,
+  analytics: BarChart3,
+  domains: Globe,
+  branding: Palette,
+  automations: Zap,
+  api: Key,
+  moderation: Shield,
+  linkedCourse: Link2,
+  episodes: ListMusic,
+  distribution: Rss,
+  users: Users,
+  userGroups: UsersRound,
+  roles: ShieldCheck,
+  signups: Ticket,
+  auditLogs: ScrollText,
+  overview: LineChart,
+  learning: GraduationCap,
+  audience: Globe,
+  learners: UserCheck,
+  courses: BookOpen,
+  podcasts: Mic,
+  community: MessagesSquare,
+} as const
+
+export type SectionName = keyof typeof SectionIcon

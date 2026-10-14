@@ -2,7 +2,7 @@
 import React, { useEffect, use } from 'react';
 import { motion } from 'motion/react'
 import { getUriWithOrg } from '@services/config/config'
-import { TextIcon, LucideIcon, KeyIcon, Palette, Globe, Search, Zap } from 'lucide-react'
+import { LucideIcon } from 'lucide-react'
 import OrgEditGeneral from '@components/Dashboard/Pages/Org/OrgEditGeneral/OrgEditGeneral'
 import OrgEditBranding from '@components/Dashboard/Pages/Org/OrgEditBranding/OrgEditBranding'
 import OrgEditAPIAccess from '@components/Dashboard/Pages/Org/OrgEditAPIAccess/OrgEditAPIAccess'
@@ -16,6 +16,7 @@ import PlanBadge from '@components/Dashboard/Shared/PlanRestricted/PlanBadge'
 import { PlanLevel } from '@services/plans/plans'
 import { usePlan } from '@components/Hooks/usePlan'
 import { PageTabs } from '@components/ui/page-tabs'
+import { SectionIcon } from '@components/ui/icons'
 
 export type OrgParams = {
   subpage: string
@@ -30,12 +31,12 @@ interface TabItem {
 }
 
 const getSettingTabs = (t: any): TabItem[] => [
-  { id: 'general', label: t('dashboard.organization.settings.tabs.general'), icon: TextIcon },
-  { id: 'branding', label: t('dashboard.organization.settings.tabs.branding'), icon: Palette },
-  { id: 'seo', label: 'SEO', icon: Search },
-  { id: 'domains', label: t('dashboard.organization.settings.tabs.domains') || 'Domains', icon: Globe, requiredPlan: 'standard' },
-  { id: 'automations', label: 'Automations', icon: Zap, requiredPlan: 'pro' },
-  { id: 'api', label: t('dashboard.organization.settings.tabs.api') || 'API Access', icon: KeyIcon, requiredPlan: 'pro' },
+  { id: 'general', label: t('dashboard.organization.settings.tabs.general'), icon: SectionIcon.general },
+  { id: 'branding', label: t('dashboard.organization.settings.tabs.branding'), icon: SectionIcon.branding },
+  { id: 'seo', label: 'SEO', icon: SectionIcon.seo },
+  { id: 'domains', label: t('dashboard.organization.settings.tabs.domains') || 'Domains', icon: SectionIcon.domains, requiredPlan: 'standard' },
+  { id: 'automations', label: 'Automations', icon: SectionIcon.automations, requiredPlan: 'pro' },
+  { id: 'api', label: t('dashboard.organization.settings.tabs.api') || 'API Access', icon: SectionIcon.api, requiredPlan: 'pro' },
 ]
 
 function OrgPage(props: { params: Promise<OrgParams> }) {

@@ -1,10 +1,11 @@
 'use client'
 import { getUriWithOrg } from '@services/config/config'
-import { TextIcon, LucideIcon, Link2, Shield, Users } from 'lucide-react'
+import { LucideIcon } from 'lucide-react'
 import React, { use } from 'react'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'motion/react'
 import { PageTabs } from '@components/ui/page-tabs'
+import { SectionIcon } from '@components/ui/icons'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { CommunityProvider, useCommunity } from '@components/Contexts/CommunityContext'
 import CommunityEditGeneral from '@components/Dashboard/Pages/Community/CommunityEditGeneral'
@@ -25,10 +26,10 @@ interface TabItem {
 }
 
 const SETTING_TABS: TabItem[] = [
-  { id: 'general', labelKey: 'dashboard.courses.communities.settings.tabs.general', icon: TextIcon },
-  { id: 'access', labelKey: 'dashboard.courses.communities.settings.tabs.access', icon: Users },
-  { id: 'course', labelKey: 'dashboard.courses.communities.settings.tabs.course', icon: Link2 },
-  { id: 'moderation', labelKey: 'dashboard.courses.communities.settings.tabs.moderation', icon: Shield },
+  { id: 'general', labelKey: 'dashboard.courses.communities.settings.tabs.general', icon: SectionIcon.general },
+  { id: 'access', labelKey: 'dashboard.courses.communities.settings.tabs.access', icon: SectionIcon.access },
+  { id: 'course', labelKey: 'dashboard.courses.communities.settings.tabs.course', icon: SectionIcon.linkedCourse },
+  { id: 'moderation', labelKey: 'dashboard.courses.communities.settings.tabs.moderation', icon: SectionIcon.moderation },
 ]
 
 function CommunityPageTitle() {
