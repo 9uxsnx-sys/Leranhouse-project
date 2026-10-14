@@ -142,8 +142,9 @@ Not polish — correctness:
 - Standardise on **shadcn `Select`** for all selects; delete native `<select>` and bespoke dropdowns.
 
 ### Phase 3 — Apply, area by area
-Convert each dashboard area to the primitives, one commit per area so it's reviewable:
-Courses → Podcasts → Communities → Boards → Playgrounds → Users/Groups/Roles → Payments → Org settings → Course settings → Account.
+Convert each dashboard area to the primitives, one commit per area so it's reviewable.
+**UI-only scope:** only areas the dashboard actually surfaces are converted. **Boards and Playgrounds are skipped** — they are not reachable from the sidebar or mobile nav (only from feature-gated Home widgets / onboarding / search), and this platform does not use them.
+Courses → Podcasts → Communities → Users/Groups/Roles → Payments → Org settings → Course settings → Account.
 
 ### Phase 4 — Translation-readiness sweep
 - Route **every** remaining visible string through `t()`.
