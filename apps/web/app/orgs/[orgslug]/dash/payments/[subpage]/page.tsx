@@ -17,6 +17,7 @@ import { PlanLevel } from '@services/plans/plans'
 import { BadgeDollarSign } from 'lucide-react'
 import { isOSSMode } from '@services/config/config'
 import { usePlan } from '@components/Hooks/usePlan'
+import { PageTabs } from '@components/ui/page-tabs'
 
 export type PaymentsParams = {
   subpage: string
@@ -125,32 +126,17 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
             </a>
           </div>
         </div>
-        <div className="flex space-x-0.5 font-black text-sm">
-          <TabLink
-            href={getUriWithOrg(params.orgslug, '/dash/payments/overview')}
-            icon={<Users size={16} />}
-            label="Overview"
-            isActive={subpage === 'overview'}
-          />
-          <TabLink
-            href={getUriWithOrg(params.orgslug, '/dash/payments/offers')}
-            icon={<Gem size={16} />}
-            label="Offers"
-            isActive={subpage === 'offers'}
-          />
-          <TabLink
-            href={getUriWithOrg(params.orgslug, '/dash/payments/groups')}
-            icon={<Layers size={16} />}
-            label="Payment Groups"
-            isActive={subpage === 'groups'}
-          />
-          <TabLink
-            href={getUriWithOrg(params.orgslug, '/dash/payments/configuration')}
-            icon={<Settings size={16} />}
-            label="Configuration"
-            isActive={subpage === 'configuration'}
-          />
-        </div>
+        <PageTabs
+          variant="underline"
+          indicatorId="payments-tabs"
+          active={subpage}
+          tabs={[
+            { id: 'overview', label: 'Overview', icon: Users, href: getUriWithOrg(params.orgslug, '/dash/payments/overview') },
+            { id: 'offers', label: 'Offers', icon: Gem, href: getUriWithOrg(params.orgslug, '/dash/payments/offers') },
+            { id: 'groups', label: 'Payment Groups', icon: Layers, href: getUriWithOrg(params.orgslug, '/dash/payments/groups') },
+            { id: 'configuration', label: 'Configuration', icon: Settings, href: getUriWithOrg(params.orgslug, '/dash/payments/configuration') },
+          ]}
+        />
       </div>
       <div className="h-6 flex-shrink-0"></div>
       <motion.div
@@ -170,18 +156,5 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
     </PlanRestrictedFeature>
   )
 }
-
-const TabLink = ({ href, icon, label, isActive }: { href: string, icon: React.ReactNode, label: string, isActive: boolean }) => (
-  <Link href={href}>
-    <div
-      className={`py-2 w-fit text-center border-black transition-all ease-linear ${isActive ? 'border-b-4' : 'opacity-50'} cursor-pointer`}
-    >
-      <div className="flex items-center space-x-2.5 mx-2">
-        {icon}
-        <div>{label}</div>
-      </div>
-    </div>
-  </Link>
-)
 
 export default PaymentsPage
