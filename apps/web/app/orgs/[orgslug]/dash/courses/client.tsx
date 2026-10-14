@@ -41,6 +41,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@components/ui/dropdown-menu'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select'
 import { Button } from '@components/ui/button'
 
 type CourseProps = {
@@ -550,18 +551,22 @@ function CoursesHome(params: CourseProps) {
             <div className="relative flex items-center gap-1.5">
               <div className="relative">
                 <Users className="absolute start-2.5 top-1/2 -translate-y-1/2 text-ui-fg-muted w-3.5 h-3.5 pointer-events-none" />
-                <select
+                <Select
                   value={selectedUsergroupId}
-                  onChange={(e) => handleUsergroupChange(e.target.value)}
-                  className="h-7 ps-7 pe-7 txt-compact-small bg-ui-bg-field hover:bg-ui-bg-field-hover shadow-borders-base rounded-md appearance-none cursor-pointer min-w-[140px] outline-none focus-visible:shadow-borders-interactive-with-active"
+                  onValueChange={(value) => handleUsergroupChange(value === '__all__' ? '' : value)}
                 >
-                  <option value="">{t('courses.usergroup_filter.all_courses')}</option>
-                  {usergroups.map((ug: any) => (
-                    <option key={ug.id} value={String(ug.id)}>
-                      {ug.name}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger className="h-7 ps-7 txt-compact-small min-w-[140px]">
+                    <SelectValue placeholder={t('courses.usergroup_filter.all_courses')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">{t('courses.usergroup_filter.all_courses')}</SelectItem>
+                    {usergroups.map((ug: any) => (
+                      <SelectItem key={ug.id} value={String(ug.id)}>
+                        {ug.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <button
                 onClick={() => setShowUsergroupInfo(!showUsergroupInfo)}

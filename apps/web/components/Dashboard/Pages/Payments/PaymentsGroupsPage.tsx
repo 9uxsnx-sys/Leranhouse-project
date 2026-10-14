@@ -23,6 +23,12 @@ import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { Textarea } from '@components/ui/textarea';
 import { Label } from '@components/ui/label';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@components/ui/dropdown-menu';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import toast from 'react-hot-toast';
@@ -209,19 +215,19 @@ function GroupSyncPanel({ group, orgId, token }: { group: any; orgId: number; to
       )}
 
       {available.length > 0 ? (
-        <div className="relative">
-          <select
-            className="w-full appearance-none text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-200 cursor-pointer pr-7"
-            value=""
-            onChange={(e) => { if (e.target.value) handleAdd(Number(e.target.value)); }}
-          >
-            <option value="">+ Link a UserGroup…</option>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="relative w-full appearance-none text-left text-xs border border-gray-200 rounded-lg px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-200 cursor-pointer pr-7">
+              + Link a UserGroup…
+              <ChevronDown size={12} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
             {available.map((ug: any) => (
-              <option key={ug.id} value={ug.id}>{ug.name}</option>
+              <DropdownMenuItem key={ug.id} onSelect={() => handleAdd(Number(ug.id))}>{ug.name}</DropdownMenuItem>
             ))}
-          </select>
-          <ChevronDown size={12} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-        </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
       ) : syncList.length === 0 ? (
         <p className="text-xs text-gray-400 italic">No UserGroups available to link.</p>
       ) : null}

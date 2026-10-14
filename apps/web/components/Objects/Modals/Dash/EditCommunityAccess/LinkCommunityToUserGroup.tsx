@@ -2,6 +2,7 @@
 import { useCommunity } from '@components/Contexts/CommunityContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { linkResourcesToUserGroup } from '@services/usergroups/usergroups'
 import { swrFetcher } from '@services/utils/ts/requests'
@@ -73,17 +74,22 @@ function LinkCommunityToUserGroup(props: LinkCommunityToUserGroupProps) {
               {t('dashboard.courses.communities.access.usergroups.modals.usergroup_name')}{' '}
             </span>
 
-            <select
-              onChange={(e) => setSelectedUserGroup(e.target.value)}
-              defaultValue={selectedUserGroup}
+            <Select
+              value={selectedUserGroup != null ? String(selectedUserGroup) : undefined}
+              onValueChange={(value) => setSelectedUserGroup(value)}
             >
-              {usergroups &&
-                usergroups.map((group: any) => (
-                  <option key={group.id} value={group.id}>
-                    {group.name}
-                  </option>
-                ))}
-            </select>
+              <SelectTrigger className="w-fit">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {usergroups &&
+                  usergroups.map((group: any) => (
+                    <SelectItem key={group.id} value={String(group.id)}>
+                      {group.name}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
           </div>
         )}
         {usergroups?.length == 0 && (

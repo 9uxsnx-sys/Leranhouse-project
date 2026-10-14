@@ -2,6 +2,7 @@
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { getAPIUrl, getUriWithOrg } from '@services/config/config';
 import { linkResourcesToUserGroup } from '@services/usergroups/usergroups';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -62,15 +63,19 @@ function LinkToUserGroup(props: LinkToUserGroupProps) {
                     <div className='py-1'>
                         <span className='px-3 text-gray-400 font-bold rounded-full py-1 bg-gray-100 mx-3'>{t('dashboard.courses.access.usergroups.modals.usergroup_name')} </span>
 
-                        <select
-                            onChange={(e) => setSelectedUserGroup(e.target.value)}
-                            defaultValue={selectedUserGroup}
+                        <Select
+                            value={selectedUserGroup != null ? String(selectedUserGroup) : undefined}
+                            onValueChange={(value) => setSelectedUserGroup(value)}
                         >
-                            {usergroups && usergroups.map((group: any) => (
-                                <option key={group.id} value={group.id}>{group.name}</option>
-                            ))}
-
-                        </select>
+                            <SelectTrigger className='w-fit'>
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {usergroups && usergroups.map((group: any) => (
+                                    <SelectItem key={group.id} value={String(group.id)}>{group.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
 
                     </div>}
                 {usergroups?.length == 0 &&

@@ -1,6 +1,7 @@
 'use client'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select'
 import FormLayout, {
   ButtonBlack,
   Flex,
@@ -40,9 +41,9 @@ function RolesUpdate(props: Props) {
     (url) => swrFetcher(url, access_token)
   )
 
-  const handleAssignedRole = (event: React.ChangeEvent<any>) => {
+  const handleAssignedRole = (value: string) => {
     setError(null)
-    setAssignedRole(event.target.value)
+    setAssignedRole(value)
   }
 
   const handleSubmit = async (e: any) => {
@@ -81,26 +82,23 @@ function RolesUpdate(props: Props) {
             </FormMessage>
           </Flex>
           <Form.Control asChild>
-            <select
-              onChange={handleAssignedRole}
-              defaultValue={assignedRole}
-              className="border border-gray-300 rounded-md p-2"
+            <Select
+              value={assignedRole || ''}
+              onValueChange={handleAssignedRole}
               required
               disabled={!roles || rolesError}
             >
-              {!roles || rolesError ? (
-                <option value="">Loading roles...</option>
-              ) : (
-                <>
-                  <option value="">Select a role</option>
-                  {roles.map((role: any) => (
-                    <option key={role.id} value={role.role_uuid || role.id}>
-                      {role.name}
-                    </option>
-                  ))}
-                </>
-              )}
-            </select>
+              <SelectTrigger className="border border-gray-300 rounded-md p-2">
+                <SelectValue placeholder={!roles || rolesError ? 'Loading roles...' : 'Select a role'} />
+              </SelectTrigger>
+              <SelectContent>
+                {roles?.map((role: any) => (
+                  <SelectItem key={role.id} value={String(role.role_uuid || role.id)}>
+                    {role.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </Form.Control>
         </FormField>
         <div className="h-full"></div>

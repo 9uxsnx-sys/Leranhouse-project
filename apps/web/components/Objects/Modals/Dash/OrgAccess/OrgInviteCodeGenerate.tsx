@@ -1,4 +1,5 @@
 import { useOrg } from '@components/Contexts/OrgContext'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { createInviteCode } from '@services/organizations/invites'
 import { swrFetcher } from '@services/utils/ts/requests'
@@ -93,17 +94,21 @@ function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
             {mode === 'usergroup' && usergroups && usergroups.length > 0 && (
                 <div className='bg-blue-50 rounded-lg p-3'>
                     <label className='text-xs font-medium text-blue-700 mb-1.5 block'>Select User Group</label>
-                    <select
-                        value={usergroup_id}
-                        onChange={(e) => setUsergroup_id(Number(e.target.value))}
-                        className='w-full p-2 rounded-md text-sm bg-white border border-blue-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none'
+                    <Select
+                        value={String(usergroup_id)}
+                        onValueChange={(value) => setUsergroup_id(Number(value))}
                     >
-                        {usergroups.map((usergroup: any) => (
-                            <option key={usergroup.id} value={usergroup.id}>
-                                {usergroup.name}
-                            </option>
-                        ))}
-                    </select>
+                        <SelectTrigger className='w-full p-2 rounded-md text-sm bg-white border border-blue-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none'>
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {usergroups.map((usergroup: any) => (
+                                <SelectItem key={usergroup.id} value={String(usergroup.id)}>
+                                    {usergroup.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </div>
             )}
 
