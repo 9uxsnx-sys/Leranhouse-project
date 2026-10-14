@@ -1,8 +1,10 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
-import { Search, Headphones, Mic2, Trash2, ChevronLeft, ChevronRight, ListChecks, CheckSquare } from 'lucide-react'
+import { Headphones, Mic2, ChevronLeft, ChevronRight, ListChecks, CheckSquare } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { ActionRow, ActionRowSearch, ActionRowSpacer, ActionRowActions } from '@components/ui/action-row'
+import { ConceptIcon } from '@components/ui/icons'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { PodcastWithEpisodeCount, deletePodcast, removePodcastPrefix } from '@services/podcasts/podcasts'
@@ -191,27 +193,19 @@ const PodcastsDashClient = ({
       </h1>
 
       {effectivePodcasts.length > 0 && (
-        <div className="flex items-center gap-3 mb-8">
-          <div className="flex items-center gap-3">
-            <div className="relative w-80">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search podcasts..."
-                className="w-full h-7 pl-8 pr-2 text-sm bg-white shadow-borders-base rounded-md placeholder:text-gray-400 focus:outline-none"
-              />
-            </div>
+        <ActionRow>
+          <ActionRowSearch
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+            placeholder={t('podcasts.search_placeholder')}
+            summary={
+              searchQuery
+                ? `${filteredPodcasts.length} result${filteredPodcasts.length !== 1 ? 's' : ''} for “${searchQuery}”`
+                : undefined
+            }
+          />
 
-            {searchQuery && (
-              <span className="txt-compact-xsmall text-ui-fg-muted whitespace-nowrap">
-                {filteredPodcasts.length} result{filteredPodcasts.length !== 1 ? 's' : ''} for &ldquo;{searchQuery}&rdquo;
-              </span>
-            )}
-          </div>
-
-          <div className="flex-1" />
+          <ActionRowSpacer />
 
           <AuthenticatedClientElement
             checkMethod="roles"
@@ -222,13 +216,15 @@ const PodcastsDashClient = ({
             <Button
               variant="primary"
               size="small"
+              className="gap-x-1.5"
               onClick={() => setIsCreateModalOpen(true)}
             >
-              +&nbsp;New
+              <ConceptIcon.add size={14} />
+              {t('podcasts.new_podcast')}
             </Button>
           </AuthenticatedClientElement>
 
-          <div className="flex items-center gap-2">
+          <ActionRowActions>
             <Button
               variant="secondary"
               size="small"
@@ -236,7 +232,7 @@ const PodcastsDashClient = ({
               onClick={() => { setIsSelectMode(prev => !prev); if (isSelectMode) clearSelection(); }}
             >
               <ListChecks size={14} />
-              <span>{isSelectMode ? 'Cancel' : 'Select'}</span>
+              <span>{isSelectMode ? t('cancel') : t('podcasts.select_podcasts')}</span>
             </Button>
 
             {selectedPodcasts.size > 0 && (
@@ -246,7 +242,7 @@ const PodcastsDashClient = ({
                 dialogTitle="Delete Podcasts"
                 dialogTrigger={
                   <Button variant="secondary" size="small" className="gap-x-1.5 text-red-600 border-red-200 hover:bg-red-50">
-                    <Trash2 size={14} />
+                    <ConceptIcon.delete size={14} />
                     <span>Delete {selectedPodcasts.size}</span>
                   </Button>
                 }
@@ -254,14 +250,12 @@ const PodcastsDashClient = ({
                 status="warning"
               />
             )}
-          </div>
+          </ActionRowActions>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="small" className="gap-x-1.5">
-                <svg width="14" height="14" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M2.5 4.5h10M4.5 7.5h6M6.5 10.5h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <ConceptIcon.filter size={14} />
                 <span>{filterLabel}</span>
               </Button>
             </DropdownMenuTrigger>
@@ -280,7 +274,7 @@ const PodcastsDashClient = ({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
+        </ActionRow>
       )}
 
       <div className="flex-1 flex flex-col">
@@ -340,10 +334,10 @@ const PodcastsDashClient = ({
                 <Headphones className="w-8 h-8 text-ui-fg-muted" strokeWidth={1.5} />
               </div>
               <h2 className="text-xl font-semibold text-ui-fg-base mb-2">
-                No podcasts found
+                {t('podcasts.no_search_results')}
               </h2>
               <p className="txt-compact-small text-ui-fg-muted">
-                Try a different search term
+                {t('podcasts.try_different_search')}
               </p>
             </div>
           )}
@@ -382,9 +376,11 @@ const PodcastsDashClient = ({
                 <Button
                   variant="primary"
                   size="small"
+                  className="gap-x-1.5"
                   onClick={() => setIsCreateModalOpen(true)}
                 >
-                  +&nbsp;New
+                  <ConceptIcon.add size={14} />
+                  {t('podcasts.new_podcast')}
                 </Button>
               </AuthenticatedClientElement>
             </div>
