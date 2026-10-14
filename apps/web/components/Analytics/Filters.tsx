@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
-import { Check, Filter, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ConceptIcon } from '@components/ui/icons'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
 /** Compact search field for the analytics action row (same style as the Users/Contributors tabs). */
@@ -18,7 +18,7 @@ export function SearchInput({
 }) {
   return (
     <div className={cn('relative w-80', className)}>
-      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+      <ConceptIcon.search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
       <input
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
@@ -80,7 +80,7 @@ export function FilterSelect({
           title="Filter"
           className="inline-flex items-center justify-center h-7 w-7 text-gray-500 bg-white shadow-borders-base rounded-md hover:bg-gray-50 hover:text-gray-700 focus:outline-none transition-colors"
         >
-          <Filter size={15} />
+          <ConceptIcon.filter size={14} />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-[200px] rounded-lg border border-gray-200 bg-white p-1 shadow-md">
@@ -91,7 +91,7 @@ export function FilterSelect({
             className="justify-between gap-6 text-sm rounded-md px-2.5 py-1.5 cursor-pointer text-gray-700 data-[highlighted]:bg-gray-100 focus:bg-gray-100"
           >
             <span className="truncate">{o.label}</span>
-            {o.value === value && <Check size={14} className="text-gray-500 shrink-0" />}
+            {o.value === value && <ConceptIcon.check size={14} className="text-gray-500 shrink-0" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

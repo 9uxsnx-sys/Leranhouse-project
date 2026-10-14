@@ -298,7 +298,7 @@ function OrgUsers() {
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label="Filter users">
-              <ConceptIcon.filter size={15} />
+              <ConceptIcon.filter size={14} />
             </IconButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
