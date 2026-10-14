@@ -4,6 +4,7 @@ import * as React from 'react'
 import Link from 'next/link'
 import { motion } from 'motion/react'
 import { cn } from '@/lib/utils'
+import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 
 export interface PageTab {
   id: string
@@ -17,6 +18,8 @@ export interface PageTab {
   badge?: React.ReactNode
   /** Native tooltip, useful on disabled tabs. */
   title?: string
+  /** Rich tooltip shown on a disabled tab (e.g. why access is denied). */
+  tooltip?: React.ReactNode
 }
 
 interface PageTabsProps {
@@ -95,8 +98,22 @@ function PageTabs({
             : isPill
               ? 'text-gray-500 hover:text-gray-700'
               : 'text-gray-500 border-transparent hover:text-gray-700',
-          tab.disabled && 'opacity-50 cursor-not-allowed pointer-events-none'
+          tab.disabled && 'opacity-50 cursor-not-allowed',
+          // A tooltip needs hover, so keep pointer events alive when one is set.
+          tab.disabled && !tab.tooltip && 'pointer-events-none'
         )
+
+        // Locked tab with an explanation: non-interactive element inside the styled
+        // tooltip, so the reason is readable on hover.
+        if (tab.disabled && tab.tooltip) {
+          return (
+            <ToolTip key={tab.id} content={tab.tooltip}>
+              <div role="tab" aria-selected={false} aria-disabled="true" className={classes}>
+                {inner}
+              </div>
+            </ToolTip>
+          )
+        }
 
         if (tab.href && !tab.disabled) {
           return (

@@ -1,7 +1,6 @@
 'use client'
 import React, { use, useEffect } from 'react';
 import { CourseProvider, useCourse } from '../../../../../../../../components/Contexts/CourseContext'
-import Link from 'next/link'
 import { motion } from 'motion/react'
 import { BookOpen, Globe, Settings, Users, Award, Lock, Search, BarChart3 } from 'lucide-react'
 import EditCourseStructure from '@components/Dashboard/Pages/Course/EditCourseStructure/EditCourseStructure'
@@ -12,7 +11,6 @@ import EditCourseCertification from '@components/Dashboard/Pages/Course/EditCour
 import EditCourseSEO from '@components/Dashboard/Pages/Course/EditCourseSEO/EditCourseSEO'
 import { useCourseRights } from '@hooks/useCourseRights'
 import { useRouter } from 'next/navigation'
-import ToolTip from '@components/Objects/StyledElements/Tooltip/Tooltip'
 import { getUriWithOrg } from '@services/config/config';
 import { useTranslation } from 'react-i18next';
 import { useOrg } from '@components/Contexts/OrgContext';
@@ -22,6 +20,7 @@ import PlanRestrictedFeature from '@components/Dashboard/Shared/PlanRestricted/P
 import CourseAnalyticsTab from '@components/Dashboard/Analytics/Course/CourseAnalyticsTab';
 import { usePlan } from '@components/Hooks/usePlan'
 import { CourseEditSidebar } from '@components/Dashboard/Misc/CourseEditSidebar'
+import { PageTabs } from '@components/ui/page-tabs'
 
 export type CourseOverviewParams = {
   orgslug: string
@@ -163,66 +162,32 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
 
         {/* Row 2: Pill-style tab bar */}
         <div className="max-w-7xl mx-auto w-full py-4 px-4 sm:px-6 lg:px-8">
-          <div className="bg-gray-50/80 rounded-xl p-1 flex items-center w-full">
-            {tabs.map((tab) => {
-              const IconComponent = tab.icon
-              const isActive = params.subpage.toString() === tab.key
+          <PageTabs
+            variant="pill"
+            indicatorId="course-settings-tabs"
+            active={params.subpage.toString()}
+            tabs={tabs.map((tab) => {
               const hasAccess = hasPermission(tab.requiredPermission)
-
-              if (!hasAccess) {
-                return (
-                  <ToolTip
-                    key={tab.key}
-                    content={
-                      <div className="text-center">
-                        <div className="font-medium text-gray-900">{t('dashboard.courses.settings.access_restricted.title')}</div>
-                        <div className="text-sm text-gray-600">
-                          {t('dashboard.courses.settings.access_restricted.message', { tab: tab.label })}
-                        </div>
-                      </div>
-                    }
-                  >
-                    <div className="flex-1 relative px-4 py-2 text-sm font-medium rounded-lg opacity-30 cursor-not-allowed flex items-center justify-center gap-2 select-none">
-                      <IconComponent size={16} />
-                      <span>{tab.label}</span>
+              return {
+                id: tab.key,
+                label: tab.label,
+                icon: tab.icon,
+                href: getUriWithOrg(params.orgslug, '') + tab.href,
+                disabled: !hasAccess,
+                tooltip: !hasAccess ? (
+                  <div className="text-center">
+                    <div className="font-medium text-gray-900">{t('dashboard.courses.settings.access_restricted.title')}</div>
+                    <div className="text-sm text-gray-600">
+                      {t('dashboard.courses.settings.access_restricted.message', { tab: tab.label })}
                     </div>
-                  </ToolTip>
-                )
-              }
-
-              return (
-                <Link
-                  key={tab.key}
-                  prefetch={false}
-                  href={getUriWithOrg(params.orgslug, '') + tab.href}
-                  className="flex-1 relative"
-                >
-                  <div
-                    className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center justify-center gap-2 ${
-                      isActive
-                        ? 'text-ui-fg-base'
-                        : 'text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    {isActive && (
-                      <motion.div
-                        layoutId="tab-indicator"
-                        className="absolute inset-0 bg-white rounded-lg shadow-sm border border-neutral-200/80"
-                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                      />
-                    )}
-                    <span className="relative z-10 flex items-center gap-2">
-                      <IconComponent size={16} />
-                      <span>{tab.label}</span>
-                      {(tab as any).requiresPlan && (
-                        <PlanBadge currentPlan={currentPlan} requiredPlan={(tab as any).requiresPlan} size="sm" noMargin />
-                      )}
-                    </span>
                   </div>
-                </Link>
-              )
+                ) : undefined,
+                badge: (tab as any).requiresPlan ? (
+                  <PlanBadge currentPlan={currentPlan} requiredPlan={(tab as any).requiresPlan} size="sm" noMargin />
+                ) : undefined,
+              }
             })}
-          </div>
+          />
         </div>
 
         {/* Row 3: Content — sidebar removed, content centered */}
