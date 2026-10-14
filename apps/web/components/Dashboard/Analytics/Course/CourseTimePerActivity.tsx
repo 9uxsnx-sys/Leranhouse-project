@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import { useCoursePipe } from '../useAnalyticsDashboard'
 import { getUriWithOrg } from '@services/config/config'
-import { Hourglass } from '@phosphor-icons/react'
+import { Hourglass } from 'lucide-react'
 import type { ActivityMap } from './CourseAnalyticsTab'
 import CourseWidgetCard, { WidgetIcon, usePagination, PaginationBar } from './CourseWidgetCard'
 

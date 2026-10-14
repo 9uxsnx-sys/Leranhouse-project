@@ -11,7 +11,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from 'recharts'
-import { UsersThree } from '@phosphor-icons/react'
+import { Users } from 'lucide-react'
 import CourseWidgetCard, { WidgetIcon, AnimatedNumber } from './CourseWidgetCard'
 
 const kFormatter = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v))
@@ -38,7 +38,7 @@ export default function CourseActiveLearners({
 
   return (
     <CourseWidgetCard
-      icon={<WidgetIcon icon={UsersThree} bg="bg-emerald-50" color="text-emerald-500" />}
+      icon={<WidgetIcon icon={Users} bg="bg-emerald-50" color="text-emerald-500" />}
       title={t('analytics.course_analytics.active_learners.title')}
       subtitle={t('analytics.course_analytics.active_learners.subtitle')}
       modalContent={

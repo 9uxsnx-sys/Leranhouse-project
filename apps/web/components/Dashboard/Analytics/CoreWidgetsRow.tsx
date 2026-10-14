@@ -7,15 +7,15 @@ import Link from 'next/link'
 import {
   Funnel,
   Trophy,
-  Lightning,
+  Zap,
   Eye,
   Users as UsersIcon,
-  CheckCircle,
+  CheckCircle2,
   BookOpen,
   Play,
   Timer,
-  ArrowsOutSimple,
-} from '@phosphor-icons/react'
+  Maximize2,
+} from 'lucide-react'
 import {
   ResponsiveContainer,
   BarChart,
@@ -40,7 +40,7 @@ function ExpandButton({ onClick }: { onClick: () => void }) {
       className="p-1 rounded-md hover:bg-gray-100 transition-colors text-gray-300 hover:text-gray-500"
       title="Expand"
     >
-      <ArrowsOutSimple size={14} />
+      <Maximize2 size={14} />
     </button>
   )
 }
@@ -84,7 +84,7 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
         {/* {t('analytics.overview.enrollment_funnel')} */}
         <div className="flex-1 p-5 min-w-0">
           <div className="flex items-center gap-2 mb-4">
-            <Funnel size={16} weight="duotone" className="text-indigo-400" />
+            <Funnel size={16} className="text-indigo-400" />
             <h3 className="text-sm font-semibold text-gray-700">
               {t('analytics.overview.enrollment_funnel')}
             </h3>
@@ -143,7 +143,7 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
         {/* Top Courses */}
         <div className="flex-1 p-5 min-w-0">
           <div className="flex items-center gap-2 mb-4">
-            <Trophy size={16} weight="duotone" className="text-amber-400" />
+            <Trophy size={16} className="text-amber-400" />
             <h3 className="text-sm font-semibold text-gray-700">{t('analytics.overview.top_courses')}</h3>
             <div className="ml-auto">
               <ExpandButton onClick={() => setCoursesOpen(true)} />
@@ -169,7 +169,7 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
         {/* {t('analytics.overview.activity_engagement')} */}
         <div className="flex-1 p-5 min-w-0">
           <div className="flex items-center gap-2 mb-4">
-            <Lightning size={16} weight="duotone" className="text-green-400" />
+            <Zap size={16} className="text-green-400" />
             <h3 className="text-sm font-semibold text-gray-700">
               {t('analytics.overview.activity_engagement')}
             </h3>
@@ -202,7 +202,7 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
         open={funnelOpen}
         onClose={() => setFunnelOpen(false)}
         title="{t('analytics.overview.enrollment_funnel')}"
-        icon={<Funnel size={20} weight="duotone" className="text-indigo-400" />}
+        icon={<Funnel size={20} className="text-indigo-400" />}
       >
         {chartData.length === 0 ? (
           <div className="text-center text-gray-300 py-12">{t('analytics.common.no_data')}</div>
@@ -291,7 +291,7 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
         open={coursesOpen}
         onClose={() => setCoursesOpen(false)}
         title="Top Courses"
-        icon={<Trophy size={20} weight="duotone" className="text-amber-400" />}
+        icon={<Trophy size={20} className="text-amber-400" />}
       >
         {courseRows.length === 0 ? (
           <div className="text-center text-gray-300 py-12">{t('analytics.common.no_data')}</div>
@@ -343,7 +343,6 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
                       ) : (
                         <BookOpen
                           size={16}
-                          weight="duotone"
                           className="text-gray-300"
                         />
                       )}
@@ -379,7 +378,7 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
         onClose={() => setActivityOpen(false)}
         title="{t('analytics.overview.activity_engagement')}"
         icon={
-          <Lightning size={20} weight="duotone" className="text-green-400" />
+          <Zap size={20} className="text-green-400" />
         }
       >
         {activityRows.length === 0 ? (
@@ -397,11 +396,10 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
             {activityRows.map((row: any, i: number) => {
               const typeIcon =
                 row.activity_type === 'video' ? (
-                  <Play size={14} weight="duotone" className="text-blue-300" />
+                  <Play size={14} className="text-blue-300" />
                 ) : (
                   <BookOpen
                     size={14}
-                    weight="duotone"
                     className="text-gray-300"
                   />
                 )
@@ -481,7 +479,7 @@ function CourseRow({ row, org }: { row: any; org: any }) {
         {thumbnail ? (
           <img src={thumbnail} alt="" className="w-full h-full object-cover" />
         ) : (
-          <BookOpen size={18} weight="duotone" className="text-gray-300" />
+          <BookOpen size={18} className="text-gray-300" />
         )}
       </div>
       <div className="flex-1 min-w-0">
@@ -498,7 +496,7 @@ function CourseRow({ row, org }: { row: any; org: any }) {
             {row.enrollments}
           </span>
           <span className="flex items-center gap-0.5">
-            <CheckCircle size={11} />
+            <CheckCircle2 size={11} />
             {row.completions}
           </span>
         </div>
@@ -510,9 +508,9 @@ function CourseRow({ row, org }: { row: any; org: any }) {
 function ActivityRow({ row }: { row: any }) {
   const typeIcon =
     row.activity_type === 'video' ? (
-      <Play size={14} weight="duotone" className="text-blue-300" />
+      <Play size={14} className="text-blue-300" />
     ) : (
-      <BookOpen size={14} weight="duotone" className="text-gray-300" />
+      <BookOpen size={14} className="text-gray-300" />
     )
   const cleanCourseUuid = row.course_uuid ? row.course_uuid.replace('course_', '') : null
   const cleanActivityUuid = row.activity_uuid ? row.activity_uuid.replace('activity_', '') : null
@@ -542,7 +540,7 @@ function ActivityRow({ row }: { row: any }) {
             {row.views}
           </span>
           <span className="flex items-center gap-0.5">
-            <CheckCircle size={11} />
+            <CheckCircle2 size={11} />
             {row.completions}
           </span>
           {row.avg_seconds_spent ? (

@@ -2,7 +2,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCoursePipe } from '../useAnalyticsDashboard'
-import { Cube } from '@phosphor-icons/react'
+import { Box } from 'lucide-react'
 import CourseWidgetCard, { WidgetIcon } from './CourseWidgetCard'
 
 const TYPE_COLORS: Record<string, string> = {
@@ -49,7 +49,7 @@ export default function CourseActivityTypeBreakdown({
 
   return (
     <CourseWidgetCard
-      icon={<WidgetIcon icon={Cube} bg="bg-teal-50" color="text-teal-500" />}
+      icon={<WidgetIcon icon={Box} bg="bg-teal-50" color="text-teal-500" />}
       title={t('analytics.course_analytics.activity_type_breakdown.title')}
       subtitle={t('analytics.course_analytics.activity_type_breakdown.subtitle')}
       modalContent={

@@ -3,7 +3,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCoursePipe } from '../useAnalyticsDashboard'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell, ResponsiveContainer } from 'recharts'
-import { ChartBar } from '@phosphor-icons/react'
+import { BarChart3 } from 'lucide-react'
 import CourseWidgetCard, { WidgetIcon, AnimatedNumber } from './CourseWidgetCard'
 
 const BAR_COLORS = ['#c4b5fd', '#a78bfa', '#8b5cf6', '#7c3aed', '#6d28d9', '#5b21b6']
@@ -65,7 +65,7 @@ export default function CourseLearnerProgress({
 
   return (
     <CourseWidgetCard
-      icon={<WidgetIcon icon={ChartBar} bg="bg-purple-50" color="text-purple-500" />}
+      icon={<WidgetIcon icon={BarChart3} bg="bg-purple-50" color="text-purple-500" />}
       title={t('analytics.course_analytics.learner_progress.title')}
       subtitle={t('analytics.course_analytics.learner_progress.subtitle')}
       modalContent={

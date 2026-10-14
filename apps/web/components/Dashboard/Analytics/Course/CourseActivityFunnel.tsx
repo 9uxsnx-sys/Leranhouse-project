@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import { useCoursePipe } from '../useAnalyticsDashboard'
 import { getUriWithOrg } from '@services/config/config'
-import { Funnel, Eye, CheckCircle, WarningCircle } from '@phosphor-icons/react'
+import { Funnel, Eye, CheckCircle2, AlertCircle } from 'lucide-react'
 import type { ActivityMap } from './CourseAnalyticsTab'
 import CourseWidgetCard, { WidgetIcon, AnimatedNumber, usePagination, PaginationBar } from './CourseWidgetCard'
 
@@ -72,16 +72,16 @@ function FunnelStep({
           </div>
           <div className="flex items-center gap-4 text-xs">
             <span className="flex items-center gap-1 text-indigo-500">
-              <Eye size={12} weight="bold" />
+              <Eye size={12} />
               {row.views} {t('analytics.course_analytics.units.views')}
             </span>
             <span className="flex items-center gap-1 text-emerald-500">
-              <CheckCircle size={12} weight="fill" />
+              <CheckCircle2 size={12} />
               {row.completions} {t('analytics.course_analytics.units.completed')}
             </span>
             {rate < 30 && row.views > 5 && (
               <span className="flex items-center gap-1 text-rose-400">
-                <WarningCircle size={12} weight="fill" />
+                <AlertCircle size={12} />
                 {t('analytics.course_analytics.common.low_conversion')}
               </span>
             )}

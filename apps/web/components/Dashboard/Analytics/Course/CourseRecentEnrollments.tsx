@@ -2,7 +2,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCourseAnalyticsDetail } from '../useAnalyticsDashboard'
-import { UserList } from '@phosphor-icons/react'
+import { Users } from 'lucide-react'
 import UserAvatar from '@components/Objects/UserAvatar'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import CourseWidgetCard, { WidgetIcon, AnimatedNumber, usePagination, PaginationBar } from './CourseWidgetCard'
@@ -86,7 +86,7 @@ export default function CourseRecentEnrollments({
 
   return (
     <CourseWidgetCard
-      icon={<WidgetIcon icon={UserList} bg="bg-indigo-50" color="text-indigo-500" />}
+      icon={<WidgetIcon icon={Users} bg="bg-indigo-50" color="text-indigo-500" />}
       title={t('analytics.course_analytics.recent_enrollments.title')}
       subtitle={t('analytics.course_analytics.recent_enrollments.subtitle')}
       modalContent={

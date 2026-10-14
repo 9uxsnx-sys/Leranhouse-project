@@ -2,7 +2,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCourseAnalyticsDetail } from '../useAnalyticsDashboard'
-import { Trophy, Medal } from '@phosphor-icons/react'
+import { Trophy, Medal } from 'lucide-react'
 import UserAvatar from '@components/Objects/UserAvatar'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import CourseWidgetCard, { WidgetIcon, AnimatedNumber, usePagination, PaginationBar } from './CourseWidgetCard'
@@ -42,7 +42,7 @@ function LearnerRow({
   return (
     <div className="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-gray-50">
       {index < 3 ? (
-        <Medal size={compact ? 16 : 20} weight="fill" className={RANK_COLORS[index]} />
+        <Medal size={compact ? 16 : 20} className={RANK_COLORS[index]} />
       ) : (
         <span className={`${compact ? 'text-[10px] w-4' : 'text-xs w-5'} text-gray-400 text-right font-medium`}>
           {index + 1}
@@ -117,7 +117,7 @@ export default function CourseTopLearners({
 
   return (
     <CourseWidgetCard
-      icon={<WidgetIcon icon={Trophy} bg="bg-amber-50" color="text-amber-500" weight="fill" />}
+      icon={<WidgetIcon icon={Trophy} bg="bg-amber-50" color="text-amber-500" />}
       title={t('analytics.course_analytics.top_learners.title')}
       subtitle={t('analytics.course_analytics.top_learners.subtitle')}
       modalContent={

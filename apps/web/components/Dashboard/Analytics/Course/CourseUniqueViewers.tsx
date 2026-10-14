@@ -11,7 +11,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from 'recharts'
-import { Binoculars } from '@phosphor-icons/react'
+import { Telescope } from 'lucide-react'
 import CourseWidgetCard, { WidgetIcon, AnimatedNumber } from './CourseWidgetCard'
 
 const kFormatter = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v))
@@ -36,7 +36,7 @@ export default function CourseUniqueViewers({
 
   return (
     <CourseWidgetCard
-      icon={<WidgetIcon icon={Binoculars} bg="bg-sky-50" color="text-sky-500" />}
+      icon={<WidgetIcon icon={Telescope} bg="bg-sky-50" color="text-sky-500" />}
       title={t('analytics.course_analytics.unique_viewers.title')}
       subtitle={t('analytics.course_analytics.unique_viewers.subtitle')}
       modalContent={

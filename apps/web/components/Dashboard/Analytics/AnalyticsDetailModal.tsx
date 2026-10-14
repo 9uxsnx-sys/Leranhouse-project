@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect } from 'react'
-import { X } from '@phosphor-icons/react'
+import { X } from 'lucide-react'
 
 interface AnalyticsDetailModalProps {
   open: boolean

@@ -2,7 +2,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCoursePipe } from '../useAnalyticsDashboard'
-import { Certificate } from '@phosphor-icons/react'
+import { Award } from 'lucide-react'
 import CourseWidgetCard, { WidgetIcon, ProgressRing } from './CourseWidgetCard'
 
 export default function CourseCertificationRate({
@@ -22,7 +22,7 @@ export default function CourseCertificationRate({
 
   return (
     <CourseWidgetCard
-      icon={<WidgetIcon icon={Certificate} bg="bg-emerald-50" color="text-emerald-500" weight="fill" />}
+      icon={<WidgetIcon icon={Award} bg="bg-emerald-50" color="text-emerald-500" />}
       title={t('analytics.course_analytics.certification_rate.title')}
       subtitle={t('analytics.course_analytics.certification_rate.subtitle')}
       modalContent={

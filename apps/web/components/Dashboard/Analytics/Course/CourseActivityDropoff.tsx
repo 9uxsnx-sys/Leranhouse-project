@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import { useCoursePipe } from '../useAnalyticsDashboard'
 import { getUriWithOrg } from '@services/config/config'
-import { SignOut } from '@phosphor-icons/react'
+import { LogOut } from 'lucide-react'
 import type { ActivityMap } from './CourseAnalyticsTab'
 import CourseWidgetCard, { WidgetIcon, AnimatedNumber, usePagination, PaginationBar } from './CourseWidgetCard'
 
@@ -121,7 +121,7 @@ export default function CourseActivityDropoff({
 
   return (
     <CourseWidgetCard
-      icon={<WidgetIcon icon={SignOut} bg="bg-rose-50" color="text-rose-500" />}
+      icon={<WidgetIcon icon={LogOut} bg="bg-rose-50" color="text-rose-500" />}
       title={t('analytics.course_analytics.activity_dropoff.title')}
       subtitle={t('analytics.course_analytics.activity_dropoff.subtitle')}
       modalContent={

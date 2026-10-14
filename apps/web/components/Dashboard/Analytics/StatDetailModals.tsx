@@ -9,11 +9,11 @@ import {
 } from '@components/ui/dialog'
 import { useAnalyticsDetail } from './useAnalyticsDashboard'
 import {
-  Broadcast,
+  Radio,
   UserPlus,
   GraduationCap,
-  CheckCircle,
-} from '@phosphor-icons/react'
+  CheckCircle2,
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 

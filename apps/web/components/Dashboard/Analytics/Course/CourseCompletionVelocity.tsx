@@ -2,7 +2,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCoursePipe } from '../useAnalyticsDashboard'
-import { Lightning } from '@phosphor-icons/react'
+import { Zap } from 'lucide-react'
 import CourseWidgetCard, { WidgetIcon } from './CourseWidgetCard'
 
 function formatVelocity(hours: number, t: any): { value: string; unit: string } {
@@ -29,7 +29,7 @@ export default function CourseCompletionVelocity({
 
   return (
     <CourseWidgetCard
-      icon={<WidgetIcon icon={Lightning} bg="bg-amber-50" color="text-amber-500" weight="fill" />}
+      icon={<WidgetIcon icon={Zap} bg="bg-amber-50" color="text-amber-500" />}
       title={t('analytics.course_analytics.completion_velocity.title')}
       subtitle={t('analytics.course_analytics.completion_velocity.subtitle')}
       modalContent={
@@ -38,7 +38,7 @@ export default function CourseCompletionVelocity({
         ) : !row || !velocity ? (
           <div className="h-60 flex flex-col items-center justify-center text-gray-400 gap-3">
             <div className="p-4 rounded-full bg-gray-50">
-              <Lightning size={36} weight="fill" className="text-gray-200" />
+              <Zap size={36} className="text-gray-200" />
             </div>
             <p className="text-sm font-medium">{t('analytics.course_analytics.completion_velocity.not_enough_data')}</p>
             <p className="text-xs text-gray-400">{t('analytics.course_analytics.completion_velocity.need_transitions')}</p>
@@ -47,7 +47,7 @@ export default function CourseCompletionVelocity({
           <div className="space-y-8 py-6">
             <div className="text-center">
               <div className="inline-flex items-center gap-3 bg-amber-50 rounded-2xl px-8 py-5">
-                <Lightning size={32} weight="fill" className="text-amber-500" />
+                <Zap size={32} className="text-amber-500" />
                 <div>
                   <p className="text-5xl font-black text-gray-900">{velocity.value}</p>
                   <p className="text-sm text-gray-500 mt-1">{t('analytics.course_analytics.completion_velocity.avg_between', { unit: velocity.unit })}</p>
@@ -76,7 +76,7 @@ export default function CourseCompletionVelocity({
       ) : !row || !velocity ? (
         <div className="h-48 flex flex-col items-center justify-center text-gray-300 gap-2">
           <div className="p-3 rounded-full bg-gray-50">
-            <Lightning size={24} weight="fill" className="text-gray-200" />
+            <Zap size={24} className="text-gray-200" />
           </div>
           <p className="text-sm">{t('analytics.course_analytics.completion_velocity.not_enough_data_short')}</p>
           <p className="text-[10px] text-gray-300">{t('analytics.course_analytics.completion_velocity.need_transitions_short')}</p>
@@ -84,7 +84,7 @@ export default function CourseCompletionVelocity({
       ) : (
         <div className="flex flex-col items-center justify-center h-48 gap-3">
           <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50">
-            <Lightning size={28} weight="fill" className="text-amber-500" />
+            <Zap size={28} className="text-amber-500" />
           </div>
           <div className="text-center">
             <p className="text-4xl font-black text-gray-900">{velocity.value}</p>

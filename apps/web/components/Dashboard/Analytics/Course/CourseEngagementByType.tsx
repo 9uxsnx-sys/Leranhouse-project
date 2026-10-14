@@ -2,7 +2,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCoursePipe } from '../useAnalyticsDashboard'
-import { Pulse } from '@phosphor-icons/react'
+import { Activity } from 'lucide-react'
 import CourseWidgetCard, { WidgetIcon, AnimatedNumber } from './CourseWidgetCard'
 
 function formatDuration(seconds: number | null): string {
@@ -35,7 +35,7 @@ export default function CourseEngagementByType({
 
   return (
     <CourseWidgetCard
-      icon={<WidgetIcon icon={Pulse} bg="bg-orange-50" color="text-orange-500" />}
+      icon={<WidgetIcon icon={Activity} bg="bg-orange-50" color="text-orange-500" />}
       title={t('analytics.course_analytics.engagement_by_type.title')}
       subtitle={t('analytics.course_analytics.engagement_by_type.subtitle')}
       modalContent={

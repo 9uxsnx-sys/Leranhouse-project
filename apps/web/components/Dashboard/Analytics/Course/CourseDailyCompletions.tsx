@@ -11,7 +11,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from 'recharts'
-import { CheckCircle } from '@phosphor-icons/react'
+import { CheckCircle2 } from 'lucide-react'
 import CourseWidgetCard, { WidgetIcon, AnimatedNumber } from './CourseWidgetCard'
 
 const kFormatter = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v))
@@ -37,7 +37,7 @@ export default function CourseDailyCompletions({
 
   return (
     <CourseWidgetCard
-      icon={<WidgetIcon icon={CheckCircle} bg="bg-emerald-50" color="text-emerald-500" weight="fill" />}
+      icon={<WidgetIcon icon={CheckCircle2} bg="bg-emerald-50" color="text-emerald-500" />}
       title={t('analytics.course_analytics.daily_completions.title')}
       subtitle={t('analytics.course_analytics.daily_completions.subtitle')}
       modalContent={

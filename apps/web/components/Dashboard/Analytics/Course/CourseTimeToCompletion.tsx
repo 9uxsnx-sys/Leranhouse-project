@@ -2,7 +2,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCoursePipe } from '../useAnalyticsDashboard'
-import { Timer } from '@phosphor-icons/react'
+import { Timer } from 'lucide-react'
 import CourseWidgetCard, { WidgetIcon, ProgressRing } from './CourseWidgetCard'
 
 export default function CourseTimeToCompletion({
@@ -23,7 +23,7 @@ export default function CourseTimeToCompletion({
 
   return (
     <CourseWidgetCard
-      icon={<WidgetIcon icon={Timer} bg="bg-blue-50" color="text-blue-500" weight="fill" />}
+      icon={<WidgetIcon icon={Timer} bg="bg-blue-50" color="text-blue-500" />}
       title={t('analytics.course_analytics.time_to_completion.title')}
       subtitle={t('analytics.course_analytics.time_to_completion.subtitle')}
       modalContent={
@@ -35,7 +35,7 @@ export default function CourseTimeToCompletion({
           <div className="space-y-8 py-6">
             <div className="text-center">
               <div className="inline-flex items-center gap-3 bg-blue-50 rounded-2xl px-8 py-5">
-                <Timer size={32} weight="fill" className="text-blue-500" />
+                <Timer size={32} className="text-blue-500" />
                 <div>
                   <p className="text-5xl font-black text-gray-900">{median}</p>
                   <p className="text-sm text-gray-500 mt-1">{t('analytics.course_analytics.time_to_completion.median_days_to_complete')}</p>

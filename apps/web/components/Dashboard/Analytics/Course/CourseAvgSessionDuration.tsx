@@ -3,7 +3,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCoursePipe } from '../useAnalyticsDashboard'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { ClockCountdown } from '@phosphor-icons/react'
+import { TimerReset } from 'lucide-react'
 import CourseWidgetCard, { WidgetIcon } from './CourseWidgetCard'
 
 function formatSeconds(seconds: number): string {
@@ -77,7 +77,7 @@ export default function CourseAvgSessionDuration({
 
   return (
     <CourseWidgetCard
-      icon={<WidgetIcon icon={ClockCountdown} bg="bg-purple-50" color="text-purple-500" />}
+      icon={<WidgetIcon icon={TimerReset} bg="bg-purple-50" color="text-purple-500" />}
       title={t('analytics.course_analytics.avg_session_duration.title')}
       subtitle={t('analytics.course_analytics.avg_session_duration.subtitle')}
       modalContent={

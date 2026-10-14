@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useMemo } from 'react'
-import { ArrowsOutSimple, CaretLeft, CaretRight } from '@phosphor-icons/react'
+import { Maximize2, ChevronLeft, ChevronRight } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -54,7 +54,7 @@ export default function CourseWidgetCard({
           {!noExpand && (
             <div className="opacity-0 group-hover:opacity-100 transition-opacity">
               <div className="p-1.5 rounded-lg bg-gray-100 text-gray-400">
-                <ArrowsOutSimple size={12} weight="bold" />
+                <Maximize2 size={12} />
               </div>
             </div>
           )}
@@ -90,16 +90,14 @@ export function WidgetIcon({
   icon: Icon,
   bg,
   color,
-  weight = 'bold',
 }: {
   icon: React.ComponentType<any>
   bg: string
   color: string
-  weight?: string
 }) {
   return (
     <div className={`p-2 rounded-lg ${bg} shrink-0`}>
-      <Icon size={18} weight={weight} className={color} />
+      <Icon size={18} className={color} />
     </div>
   )
 }
@@ -235,7 +233,7 @@ export function PaginationBar({
           disabled={!hasPrev}
           className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
-          <CaretLeft size={14} weight="bold" className="text-gray-500" />
+          <ChevronLeft size={14} className="text-gray-500" />
         </button>
         {pages.map((p, i) =>
           p === 'dots' ? (
@@ -259,7 +257,7 @@ export function PaginationBar({
           disabled={!hasNext}
           className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
-          <CaretRight size={14} weight="bold" className="text-gray-500" />
+          <ChevronRight size={14} className="text-gray-500" />
         </button>
       </div>
     </div>

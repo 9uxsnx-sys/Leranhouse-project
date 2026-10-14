@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react'
-import { DownloadSimple, CaretDown } from '@phosphor-icons/react'
+import { Download, ChevronDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { getAPIUrl } from '@services/config/config'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -85,11 +85,11 @@ export default function ExportAnalyticsButton({
         disabled={downloading}
         className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors disabled:opacity-50"
       >
-        <DownloadSimple size={14} />
+        <Download size={14} />
         {downloading
           ? t('analytics.export.downloading')
           : t('analytics.export.button')}
-        {!downloading && <CaretDown aria-hidden="true" size={10} />}
+        {!downloading && <ChevronDown aria-hidden="true" size={10} />}
       </button>
 
       {open && (

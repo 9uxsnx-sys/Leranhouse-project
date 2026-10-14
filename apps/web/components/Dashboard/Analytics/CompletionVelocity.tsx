@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import { useAnalyticsPipe } from './useAnalyticsDashboard'
-import { Lightning } from '@phosphor-icons/react'
+import { Zap } from 'lucide-react'
 
 function formatVelocity(hours: number): { value: string; unit: string } {
   if (hours < 1) {
@@ -38,7 +38,7 @@ export default function CompletionVelocity({ days = '90' }: { days?: string }) {
       ) : (
         <div className="flex flex-col items-center justify-center h-48 gap-3">
           <div className="p-3 rounded-full bg-amber-50">
-            <Lightning size={24} weight="fill" className="text-amber-500" />
+            <Zap size={24} className="text-amber-500" />
           </div>
           <div className="text-center">
             <p className="text-4xl font-bold text-gray-900">{velocity.value}</p>

@@ -2,7 +2,7 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCoursePipe } from '../useAnalyticsDashboard'
-import { Eye, UserPlus, GraduationCap, TrendUp } from '@phosphor-icons/react'
+import { Eye, UserPlus, GraduationCap, TrendingUp } from 'lucide-react'
 import { AnimatedNumber, ProgressRing } from './CourseWidgetCard'
 
 function StatCard({
@@ -27,7 +27,7 @@ function StatCard({
   return (
     <div className="bg-white rounded-xl nice-shadow p-5 flex items-center gap-4 group hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200">
       <div className={`p-3 rounded-lg ${bgColor}`}>
-        <Icon size={20} weight="bold" className="text-white" />
+        <Icon size={20} className="text-white" />
       </div>
       <div className="flex-1">
         <p className="text-xs text-gray-400 font-medium">{label}</p>
@@ -97,7 +97,7 @@ export default function CourseOverviewStats({
         value={`${completionRate}%`}
         numericValue={completionRate}
         suffix="%"
-        icon={TrendUp}
+        icon={TrendingUp}
         bgColor="bg-amber-500"
         ringColor="#f59e0b"
         ringPercent={completionRate}

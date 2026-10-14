@@ -3,7 +3,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCoursePipe } from '../useAnalyticsDashboard'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { UsersFour } from '@phosphor-icons/react'
+import { Users } from 'lucide-react'
 import CourseWidgetCard, { WidgetIcon, AnimatedNumber } from './CourseWidgetCard'
 
 export default function CourseLearnerRetention({
@@ -84,7 +84,7 @@ export default function CourseLearnerRetention({
 
   return (
     <CourseWidgetCard
-      icon={<WidgetIcon icon={UsersFour} bg="bg-indigo-50" color="text-indigo-500" />}
+      icon={<WidgetIcon icon={Users} bg="bg-indigo-50" color="text-indigo-500" />}
       title={t('analytics.course_analytics.learner_retention.title')}
       subtitle={t('analytics.course_analytics.learner_retention.subtitle')}
       modalContent={

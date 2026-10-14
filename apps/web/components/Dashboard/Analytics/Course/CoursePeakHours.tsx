@@ -2,7 +2,7 @@
 import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCoursePipe } from '../useAnalyticsDashboard'
-import { Clock } from '@phosphor-icons/react'
+import { Clock } from 'lucide-react'
 import CourseWidgetCard, { WidgetIcon } from './CourseWidgetCard'
 
 const HOUR_LABELS = Array.from({ length: 24 }, (_, i) =>

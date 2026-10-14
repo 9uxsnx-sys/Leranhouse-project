@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import { useAnalyticsPipe } from './useAnalyticsDashboard'
-import { Broadcast } from '@phosphor-icons/react'
+import { Radio } from 'lucide-react'
 
 export default function LiveUsersCounter() {
   const { data, isLoading } = useAnalyticsPipe('live_users', {}, 120000)
@@ -10,7 +10,7 @@ export default function LiveUsersCounter() {
   return (
     <div className="bg-white rounded-xl nice-shadow p-5 overflow-hidden min-w-0">
       <div className="flex items-center gap-2 mb-1">
-        <Broadcast className="text-green-500" size={16} weight="fill" />
+        <Radio className="text-green-500" size={16} />
         <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Live Now</span>
       </div>
       <div className="text-3xl font-bold text-gray-900">

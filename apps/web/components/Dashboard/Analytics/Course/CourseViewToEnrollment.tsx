@@ -3,7 +3,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCoursePipe } from '../useAnalyticsDashboard'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { ArrowsLeftRight } from '@phosphor-icons/react'
+import { ArrowLeftRight } from 'lucide-react'
 import CourseWidgetCard, { WidgetIcon } from './CourseWidgetCard'
 
 function shortDate(v: string) {
@@ -82,7 +82,7 @@ export default function CourseViewToEnrollment({
 
   return (
     <CourseWidgetCard
-      icon={<WidgetIcon icon={ArrowsLeftRight} bg="bg-sky-50" color="text-sky-500" />}
+      icon={<WidgetIcon icon={ArrowLeftRight} bg="bg-sky-50" color="text-sky-500" />}
       title={t('analytics.course_analytics.view_to_enrollment.title')}
       subtitle={t('analytics.course_analytics.view_to_enrollment.subtitle')}
       modalContent={

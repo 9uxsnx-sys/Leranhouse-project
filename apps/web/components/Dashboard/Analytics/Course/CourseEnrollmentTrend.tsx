@@ -11,7 +11,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from 'recharts'
-import { TrendUp } from '@phosphor-icons/react'
+import { TrendingUp } from 'lucide-react'
 import CourseWidgetCard, { WidgetIcon, AnimatedNumber } from './CourseWidgetCard'
 
 const kFormatter = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v))
@@ -38,7 +38,7 @@ export default function CourseEnrollmentTrend({
 
   return (
     <CourseWidgetCard
-      icon={<WidgetIcon icon={TrendUp} bg="bg-indigo-50" color="text-indigo-500" />}
+      icon={<WidgetIcon icon={TrendingUp} bg="bg-indigo-50" color="text-indigo-500" />}
       title={t('analytics.course_analytics.enrollment_trend.title')}
       subtitle={t('analytics.course_analytics.enrollment_trend.subtitle')}
       modalContent={

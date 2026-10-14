@@ -9,18 +9,18 @@ import {
   CompletionsDetail,
 } from './StatDetailModals'
 import {
-  Broadcast,
+  Radio,
   UserPlus,
   GraduationCap,
-  CheckCircle,
+  CheckCircle2,
   FileText,
-  ArrowsOutSimple,
-  GlobeHemisphereWest,
-  DeviceMobile,
-  Desktop,
-  Devices,
-  LinkSimple,
-} from '@phosphor-icons/react'
+  Maximize2,
+  Globe,
+  Smartphone,
+  Monitor,
+  MonitorSmartphone,
+  Link,
+} from 'lucide-react'
 import {
   ResponsiveContainer,
   AreaChart,
@@ -45,25 +45,25 @@ const EVENT_META: Record<
 > = {
   user_signed_up: {
     labelKey: 'analytics.overview.signups',
-    icon: <UserPlus size={16} weight="duotone" className="text-blue-400" />,
+    icon: <UserPlus size={16} className="text-blue-400" />,
     dotColor: 'bg-blue-400',
     modalKey: 'signups',
   },
   course_enrolled: {
     labelKey: 'analytics.overview.enrollments',
-    icon: <GraduationCap size={16} weight="duotone" className="text-indigo-400" />,
+    icon: <GraduationCap size={16} className="text-indigo-400" />,
     dotColor: 'bg-indigo-400',
     modalKey: 'enrollments',
   },
   course_completed: {
     labelKey: 'analytics.overview.completions',
-    icon: <CheckCircle size={16} weight="duotone" className="text-green-400" />,
+    icon: <CheckCircle2 size={16} className="text-green-400" />,
     dotColor: 'bg-green-400',
     modalKey: 'completions',
   },
   assignment_submitted: {
     labelKey: 'analytics.overview.submissions',
-    icon: <FileText size={16} weight="duotone" className="text-amber-400" />,
+    icon: <FileText size={16} className="text-amber-400" />,
     dotColor: 'bg-amber-400',
   },
 }
@@ -76,10 +76,10 @@ const DEVICE_COLORS: Record<string, string> = {
 }
 
 const DEVICE_ICONS: Record<string, React.ReactNode> = {
-  desktop: <Desktop size={13} weight="duotone" className="text-blue-400" />,
-  mobile: <DeviceMobile size={13} weight="duotone" className="text-indigo-400" />,
-  tablet: <Devices size={13} weight="duotone" className="text-purple-400" />,
-  unknown: <Devices size={13} weight="duotone" className="text-gray-400" />,
+  desktop: <Monitor size={13} className="text-blue-400" />,
+  mobile: <Smartphone size={13} className="text-indigo-400" />,
+  tablet: <MonitorSmartphone size={13} className="text-purple-400" />,
+  unknown: <MonitorSmartphone size={13} className="text-gray-400" />,
 }
 
 export default function EventOverview({ days = '30' }: { days?: string }) {
@@ -200,9 +200,9 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
           className="px-5 py-4 cursor-pointer hover:bg-gray-50 transition-colors group relative"
           onClick={() => setActiveModal('live')}
         >
-          <ArrowsOutSimple size={14} className="absolute top-3 right-3 text-gray-300 transition-opacity" />
+          <Maximize2 size={14} className="absolute top-3 right-3 text-gray-300 transition-opacity" />
           <div className="flex items-center gap-1.5 mb-1">
-            <Broadcast size={14} weight="fill" className="text-green-500" />
+            <Radio size={14} className="text-green-500" />
             <span className="text-xs font-medium text-gray-400">{t('analytics.overview.live_now')}</span>
           </div>
           <div className="text-2xl font-bold text-gray-900">
@@ -217,7 +217,7 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
               className={`px-5 py-4 ${card.modalKey ? 'cursor-pointer hover:bg-gray-50 transition-colors group relative' : ''}`}
               onClick={card.modalKey ? () => setActiveModal(card.modalKey!) : undefined}
             >
-              {card.modalKey && <ArrowsOutSimple size={14} className="absolute top-3 right-3 text-gray-300 transition-opacity" />}
+              {card.modalKey && <Maximize2 size={14} className="absolute top-3 right-3 text-gray-300 transition-opacity" />}
               <div className="flex items-center gap-1.5 mb-1">
                 {card.icon}
                 <span className="text-xs font-medium text-gray-400">
@@ -292,7 +292,7 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
       <div className="border-t border-gray-100 grid grid-cols-3 divide-x divide-gray-100">
         <div className="p-5">
           <div className="flex items-center gap-2 mb-3">
-            <GlobeHemisphereWest size={15} weight="duotone" className="text-blue-400" />
+            <Globe size={15} className="text-blue-400" />
             <h3 className="text-sm font-semibold text-gray-700">{t('analytics.overview.countries')}</h3>
           </div>
           {countryLoading ? (
@@ -328,7 +328,7 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
 
         <div className="p-5">
           <div className="flex items-center gap-2 mb-3">
-            <Devices size={15} weight="duotone" className="text-indigo-400" />
+            <MonitorSmartphone size={15} className="text-indigo-400" />
             <h3 className="text-sm font-semibold text-gray-700">{t('analytics.overview.devices')}</h3>
           </div>
           {deviceLoading ? (
@@ -391,7 +391,7 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
 
         <div className="p-5">
           <div className="flex items-center gap-2 mb-3">
-            <LinkSimple size={15} weight="duotone" className="text-green-400" />
+            <Link size={15} className="text-green-400" />
             <h3 className="text-sm font-semibold text-gray-700">{t('analytics.overview.top_referrers')}</h3>
           </div>
           {referrerLoading ? (
@@ -432,7 +432,7 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
         onOpenChange={(open) => !open && setActiveModal(null)}
         title={t('analytics.modals.live_users.title')}
         description={t('analytics.modals.live_users.description')}
-        icon={<Broadcast size={18} weight="fill" className="text-green-500" />}
+        icon={<Radio size={18} className="text-green-500" />}
       >
         <LiveUsersDetail days={days} />
       </AnalyticsDetailModal>
@@ -442,7 +442,7 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
         onOpenChange={(open) => !open && setActiveModal(null)}
         title={t('analytics.modals.signups.title')}
         description={t('analytics.modals.signups.description', { days })}
-        icon={<UserPlus size={18} weight="duotone" className="text-blue-400" />}
+        icon={<UserPlus size={18} className="text-blue-400" />}
       >
         <SignupsDetail days={days} />
       </AnalyticsDetailModal>
@@ -452,7 +452,7 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
         onOpenChange={(open) => !open && setActiveModal(null)}
         title={t('analytics.modals.enrollments.title')}
         description={t('analytics.modals.enrollments.description', { days })}
-        icon={<GraduationCap size={18} weight="duotone" className="text-indigo-400" />}
+        icon={<GraduationCap size={18} className="text-indigo-400" />}
       >
         <EnrollmentsDetail days={days} />
       </AnalyticsDetailModal>
@@ -462,7 +462,7 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
         onOpenChange={(open) => !open && setActiveModal(null)}
         title={t('analytics.modals.completions.title')}
         description={t('analytics.modals.completions.description', { days })}
-        icon={<CheckCircle size={18} weight="duotone" className="text-green-400" />}
+        icon={<CheckCircle2 size={18} className="text-green-400" />}
       >
         <CompletionsDetail days={days} />
       </AnalyticsDetailModal>

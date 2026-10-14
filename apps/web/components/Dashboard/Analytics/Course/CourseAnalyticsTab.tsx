@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import { useTranslation } from 'react-i18next'
-import { ChartBar } from '@phosphor-icons/react'
+import { BarChart3 } from 'lucide-react'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useCourse } from '@components/Contexts/CourseContext'
 import { isFeatureAvailable, PlanLevel } from '@services/plans/plans'
@@ -101,7 +101,7 @@ export default function CourseAnalyticsTab({ courseUUID }: { courseUUID: string 
         <PlanRestrictedFeature
           currentPlan={currentPlan}
           requiredPlan="pro"
-          icon={ChartBar}
+          icon={BarChart3}
           titleKey="common.plans.feature_restricted.course_analytics.title"
           descriptionKey="common.plans.feature_restricted.course_analytics.description"
         >
