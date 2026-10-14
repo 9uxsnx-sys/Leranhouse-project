@@ -10,7 +10,7 @@ import React, { useEffect, useRef, useMemo } from 'react';
 import { useCourseFieldSync } from '@components/Contexts/CourseContext';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import SimpleDropdown from "./SimpleDropdown";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { useTranslation } from 'react-i18next';
 
 type EditCourseSEOProps = {
@@ -323,18 +323,19 @@ function EditCourseSEO(props: EditCourseSEOProps) {
                   <FormLabelAndMessage
                     label={t('dashboard.courses.seo.form.twitter_card_label')}
                   />
-                  <SimpleDropdown
-                    value={formik.values.twitter_card}
-                    onValueChange={(value) => {
-                      if (!value) return;
-                      formik.setFieldValue('twitter_card', value);
-                    }}
-                    options={[
-                      { value: 'summary', label: t('dashboard.courses.seo.form.twitter_card_summary') },
-                      { value: 'summary_large_image', label: t('dashboard.courses.seo.form.twitter_card_summary_large') },
-                    ]}
+                  <Select
+                    value={formik.values.twitter_card || undefined}
+                    onValueChange={(value) => formik.setFieldValue('twitter_card', value)}
                     disabled={isSaving}
-                  />
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="summary">{t('dashboard.courses.seo.form.twitter_card_summary')}</SelectItem>
+                      <SelectItem value="summary_large_image">{t('dashboard.courses.seo.form.twitter_card_summary_large')}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </FormField>
 
                 <FormField name="twitter_title">

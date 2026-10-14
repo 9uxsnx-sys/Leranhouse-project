@@ -18,6 +18,7 @@ import {
 import LearningItemsList from './LearningItemsList';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { useTranslation } from 'react-i18next';
 import { SafeImage } from '@components/Objects/SafeImage';
 
@@ -94,7 +95,6 @@ const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base
 function EditCourseGeneral(props: EditCourseStructureProps) {
   const { t } = useTranslation()
   const [error, setError] = useState('');
-  const [difficultyOpen, setDifficultyOpen] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isManualSaving, setIsManualSaving] = useState(false);
   const dispatchCourse = useCourseDispatch() as any;
@@ -519,45 +519,22 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField name="meta_difficulty">
                       <FormLabelAndMessage label="Difficulty" />
-                      <div className="relative">
-                        <button
-                          type="button"
-                          onClick={() => setDifficultyOpen(!difficultyOpen)}
-                          disabled={isSaving}
-                          className={`flex h-9 w-full items-center justify-between rounded-md px-3 py-2 text-sm ${fieldClassName} ${!formik.values.meta_difficulty ? 'text-gray-400' : ''}`}
-                        >
-                          <span>{formik.values.meta_difficulty || 'Select difficulty'}</span>
-                          <svg className={`h-4 w-4 text-gray-400 transition-transform ${difficultyOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </button>
-                        {difficultyOpen && (
-                          <>
-                            <div className="fixed inset-0 z-10" onClick={() => setDifficultyOpen(false)} />
-                            <div className="absolute z-20 mt-1 w-full min-w-[8rem] overflow-hidden rounded-md border border-ui-border-base bg-white shadow-md">
-                              {['Beginner', 'Intermediate', 'Advanced'].map((option) => (
-                                <div
-                                  key={option}
-                                  className={`relative flex cursor-default select-none items-center rounded-sm py-1.5 pl-3 pr-8 text-sm hover:bg-gray-100 ${formik.values.meta_difficulty === option ? 'bg-gray-50 font-medium' : ''}`}
-                                  onClick={() => {
-                                    formik.setFieldValue('meta_difficulty', option);
-                                    setDifficultyOpen(false);
-                                  }}
-                                >
-                                  {option}
-                                  {formik.values.meta_difficulty === option && (
-                                    <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">
-                                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                      </svg>
-                                    </span>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </>
-                        )}
-                      </div>
+                      <Select
+                        value={formik.values.meta_difficulty || undefined}
+                        onValueChange={(value) => formik.setFieldValue('meta_difficulty', value)}
+                        disabled={isSaving}
+                      >
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="Select difficulty" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {['Beginner', 'Intermediate', 'Advanced'].map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </FormField>
 
                     <FormField name="meta_duration">

@@ -16,7 +16,7 @@ import {
   createCertification, 
   deleteCertification 
 } from '@services/courses/certifications';
-import SimpleDropdown from "../EditCourseSEO/SimpleDropdown";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import useSWR from 'swr';
 import { getAPIUrl } from '@services/config/config';
 import toast from 'react-hot-toast';
@@ -328,15 +328,22 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
 
                       <FormField name="certification_type">
                         <FormLabelAndMessage label={t('dashboard.courses.certification.form.certification_type_label')} />
-                        <SimpleDropdown
-                          value={formik.values.certification_type}
-                          onValueChange={(value) => {
-                            if (!value) return;
-                            formik.setFieldValue('certification_type', value);
-                          }}
-                          options={certificationTypeOptions}
+                        <Select
+                          value={formik.values.certification_type || undefined}
+                          onValueChange={(value) => formik.setFieldValue('certification_type', value)}
                           disabled={isSaving}
-                        />
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {certificationTypeOptions.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </FormField>
                     </div>
 
