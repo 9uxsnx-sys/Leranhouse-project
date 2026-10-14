@@ -40,6 +40,8 @@
                    "all_assignments":  "Tous les devoirs",
                    "recent":  "Récent",
                    "expand":  "Développer",
+                   "collapse":  "Réduire",
+                   "view_all":  "Voir tout",
                    "help":  "Aide",
                    "help_menu":  {
                                      "documentation":  "Documentation",

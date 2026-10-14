@@ -129,7 +129,7 @@ function UserLeftMenu() {
     <nav
       aria-label="User sidebar navigation"
       className={cn(
-        "hidden lg:flex flex-col h-screen sticky top-0 z-overlay border-r border-gray-200 bg-ui-bg-subtle transition-all duration-300",
+        "hidden lg:flex flex-col shrink-0 h-screen sticky top-0 z-overlay border-e border-gray-200 bg-ui-bg-subtle transition-all duration-300",
         isCollapsed ? "w-[72px]" : "w-64"
       )}
     >
@@ -309,7 +309,7 @@ function UserLeftMenu() {
           <HoverMenu
             align="end"
             content={
-              <HoverMenuContent className="w-64 max-h-96 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              <HoverMenuContent className="w-52 max-h-96 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 {AVAILABLE_LANGUAGES.map((language) => (
                   <HoverMenuItem
                     key={language.code}

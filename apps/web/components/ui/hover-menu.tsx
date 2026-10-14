@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import * as Portal from "@radix-ui/react-portal"
+import { useDirection } from "@radix-ui/react-direction"
 import { cn } from "@/lib/utils"
 
 interface HoverMenuProps {
@@ -18,6 +19,11 @@ const HoverMenu = React.forwardRef<HTMLDivElement, HoverMenuProps>(
     const [position, setPosition] = React.useState<{ top: number; left: number } | null>(null)
     const hoverTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
     const leaveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+    // Direction comes from the app-wide DirectionProvider. Under RTL the trigger
+    // sits near the right edge, so anchoring to the physical right would push the
+    // menu off-screen — we must open towards the inline end instead.
+    const dir = useDirection()
+    const isRTL = dir === "rtl"
 
     const updatePosition = React.useCallback(() => {
       if (triggerRef.current) {
@@ -32,10 +38,10 @@ const HoverMenu = React.forwardRef<HTMLDivElement, HoverMenuProps>(
 
         setPosition({
           top,
-          left: rect.right + 8, // 8px gap (ml-2)
+          left: isRTL ? rect.left - 8 : rect.right + 8, // 8px gap
         })
       }
-    }, [align])
+    }, [align, isRTL])
 
     const handleMouseEnter = React.useCallback(() => {
       if (leaveTimeoutRef.current) {
@@ -88,7 +94,12 @@ const HoverMenu = React.forwardRef<HTMLDivElement, HoverMenuProps>(
                 position: 'fixed',
                 top: position.top,
                 left: position.left,
-                transform: align === "end" ? "translateY(-100%)" : align === "center" ? "translateY(-50%)" : undefined,
+                // RTL anchors the menu by its right edge, so shift it back by its
+                // own width to keep it on-screen.
+                transform: [
+                  align === "end" ? "translateY(-100%)" : align === "center" ? "translateY(-50%)" : "",
+                  isRTL ? "translateX(-100%)" : "",
+                ].filter(Boolean).join(" ") || undefined,
               }}
               className={cn(
                 "z-modal-backdrop pointer-events-none transition-opacity duration-150",
@@ -97,7 +108,7 @@ const HoverMenu = React.forwardRef<HTMLDivElement, HoverMenuProps>(
               )}
             >
               {/* Invisible bridge to prevent gap issues */}
-              <div className="absolute -left-2 top-0 bottom-0 w-2" />
+              <div className={cn("absolute top-0 bottom-0 w-2", isRTL ? "-right-2" : "-left-2")} />
               {content}
             </div>
           </Portal.Root>

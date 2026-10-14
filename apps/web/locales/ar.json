@@ -40,6 +40,8 @@
                    "all_assignments":  "جميع الواجبات",
                    "recent":  "الأخيرة",
                    "expand":  "توسيع",
+                   "collapse":  "تصغير",
+                   "view_all":  "عرض الكل",
                    "help":  "مساعدة",
                    "help_menu":  {
                                      "documentation":  "الوثائق",

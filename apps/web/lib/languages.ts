@@ -4,26 +4,17 @@ export interface Language {
   nativeName: string
 }
 
+/**
+ * The languages the platform ships.
+ *
+ * Keep this in sync with `supportedLngs` in `lib/i18n.ts` — the platform only
+ * ships these three. Other locale files still exist under `locales/`, but they
+ * are unreachable until re-added here.
+ */
 export const AVAILABLE_LANGUAGES: Language[] = [
   { code: 'en', translationKey: 'common.english', nativeName: 'English' },
   { code: 'fr', translationKey: 'common.french', nativeName: 'Français' },
-  { code: 'de', translationKey: 'common.german', nativeName: 'Deutsch' },
-  { code: 'es', translationKey: 'common.spanish', nativeName: 'Español' },
   { code: 'ar', translationKey: 'common.arabic', nativeName: 'العربية' },
-  { code: 'ja', translationKey: 'common.japanese', nativeName: '日本語' },
-  { code: 'pt', translationKey: 'common.portuguese', nativeName: 'Português' },
-  { code: 'ru', translationKey: 'common.russian', nativeName: 'Русский' },
-  { code: 'zh', translationKey: 'common.chinese', nativeName: '简体中文' },
-  { code: 'hi', translationKey: 'common.hindi', nativeName: 'हिन्दी' },
-  { code: 'ko', translationKey: 'common.korean', nativeName: '한국어' },
-  { code: 'it', translationKey: 'common.italian', nativeName: 'Italiano' },
-  { code: 'tr', translationKey: 'common.turkish', nativeName: 'Türkçe' },
-  { code: 'vi', translationKey: 'common.vietnamese', nativeName: 'Tiếng Việt' },
-  { code: 'id', translationKey: 'common.indonesian', nativeName: 'Bahasa Indonesia' },
-  { code: 'pl', translationKey: 'common.polish', nativeName: 'Polski' },
-  { code: 'nl', translationKey: 'common.dutch', nativeName: 'Nederlands' },
-  { code: 'th', translationKey: 'common.thai', nativeName: 'ไทย' },
-  { code: 'bn', translationKey: 'common.bengali', nativeName: 'বাংলা' },
 ]
 
 export const getLanguageByCode = (code: string): Language | undefined => {

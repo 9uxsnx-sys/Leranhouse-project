@@ -50,6 +50,11 @@ i18n
   .init({
     resources,
     fallbackLng: 'en',
+    // Only these three are shipped — see AVAILABLE_LANGUAGES in lib/languages.ts.
+    // Anything else the browser reports (or a stale value in localStorage) resolves
+    // to English instead of rendering an unreachable language.
+    supportedLngs: ['en', 'fr', 'ar'],
+    nonExplicitSupportedLngs: true,
     ns: ['common'],
     defaultNS: 'common',
     interpolation: {
