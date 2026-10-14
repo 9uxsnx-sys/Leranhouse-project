@@ -2,12 +2,12 @@
 import React from 'react'
 import Link from 'next/link'
 import {
-  Broadcast,
+  Radio,
   UserPlus,
   GraduationCap,
-  CheckCircle,
-  ChartBar,
-} from '@phosphor-icons/react'
+  CheckCircle2,
+  BarChart3,
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import {
   useAnalyticsPipe,
@@ -35,7 +35,7 @@ export default function QuickStats() {
       <div className="bg-white rounded-xl nice-shadow p-5">
         <div className="flex flex-col items-center justify-center py-6 text-center">
           <div className="p-2.5 rounded-full bg-gray-100 mb-2.5">
-            <ChartBar size={18} weight="duotone" className="text-gray-400" />
+            <BarChart3 size={18} className="text-gray-400" />
           </div>
           <h3 className="text-xs font-semibold text-gray-600 mb-1">
             {t('dashboard.home.analytics')}
@@ -84,7 +84,7 @@ function QuickStatsContent() {
       label: t('dashboard.home.live_now'),
       value: liveCount,
       loading: liveLoading,
-      icon: Broadcast,
+      icon: Radio,
       color: 'text-green-500',
       bg: 'bg-green-50',
     },
@@ -108,7 +108,7 @@ function QuickStatsContent() {
       label: t('dashboard.home.completions_30d'),
       value: completions,
       loading: eventsLoading,
-      icon: CheckCircle,
+      icon: CheckCircle2,
       color: 'text-emerald-500',
       bg: 'bg-emerald-50',
     },
@@ -130,7 +130,7 @@ function QuickStatsContent() {
           <div key={stat.label} className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className={`p-1.5 rounded-lg ${stat.bg}`}>
-                <stat.icon size={13} weight="duotone" className={stat.color} />
+                <stat.icon size={13} className={stat.color} />
               </div>
               <span className="text-xs text-gray-500">{stat.label}</span>
             </div>

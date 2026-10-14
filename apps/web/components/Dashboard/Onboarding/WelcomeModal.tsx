@@ -5,15 +5,15 @@ import { useOnboarding } from '@components/Hooks/useOnboarding'
 import {
   ArrowRight,
   BookOpen,
-  Lightning,
+  Zap,
   Users,
-  Microphone,
-  ChalkboardSimple,
-  ChatsCircle,
+  Mic,
+  Presentation,
+  MessagesSquare,
   Files,
-  Certificate,
-  ChartBar,
-} from '@phosphor-icons/react'
+  Award,
+  BarChart3,
+} from 'lucide-react'
 import WelcomeGlobe from './WelcomeGlobe'
 import { useTranslation } from 'react-i18next'
 
@@ -30,7 +30,7 @@ const FEATURES = [
     patternSize: '10px 10px',
   },
   {
-    icon: Lightning,
+    icon: Zap,
     labelKey: 'onboarding.welcome.features.interactive',
     descKey: 'onboarding.welcome.features.interactive_desc',
     gradient: 'from-amber-50/40 to-amber-50/10',
@@ -38,7 +38,7 @@ const FEATURES = [
     pattern: `repeating-linear-gradient(-45deg, transparent, transparent 6px, rgba(245,158,11,0.06) 6px, rgba(245,158,11,0.06) 7px)`,
   },
   {
-    icon: ChatsCircle,
+    icon: MessagesSquare,
     labelKey: 'onboarding.welcome.features.community',
     descKey: 'onboarding.welcome.features.community_desc',
     gradient: 'from-emerald-50/40 to-emerald-50/10',
@@ -55,7 +55,7 @@ const FEATURES = [
     pattern: `repeating-linear-gradient(45deg, transparent, transparent 6px, rgba(139,92,246,0.06) 6px, rgba(139,92,246,0.06) 7px)`,
   },
   {
-    icon: ChalkboardSimple,
+    icon: Presentation,
     labelKey: 'onboarding.welcome.features.collaborate',
     descKey: 'onboarding.welcome.features.collaborate_desc',
     gradient: 'from-rose-50/40 to-rose-50/10',
@@ -63,7 +63,7 @@ const FEATURES = [
     pattern: `repeating-linear-gradient(0deg, transparent, transparent 8px, rgba(244,63,94,0.05) 8px, rgba(244,63,94,0.05) 9px), repeating-linear-gradient(90deg, transparent, transparent 8px, rgba(244,63,94,0.05) 8px, rgba(244,63,94,0.05) 9px)`,
   },
   {
-    icon: Microphone,
+    icon: Mic,
     labelKey: 'onboarding.welcome.features.voice',
     descKey: 'onboarding.welcome.features.voice_desc',
     gradient: 'from-purple-50/40 to-purple-50/10',
@@ -72,7 +72,7 @@ const FEATURES = [
     patternSize: '12px 12px',
   },
   {
-    icon: Certificate,
+    icon: Award,
     labelKey: 'onboarding.welcome.features.certify',
     descKey: 'onboarding.welcome.features.certify_desc',
     gradient: 'from-sky-50/40 to-sky-50/10',
@@ -80,7 +80,7 @@ const FEATURES = [
     pattern: `repeating-linear-gradient(135deg, transparent, transparent 6px, rgba(14,165,233,0.06) 6px, rgba(14,165,233,0.06) 7px)`,
   },
   {
-    icon: ChartBar,
+    icon: BarChart3,
     labelKey: 'onboarding.welcome.features.impact',
     descKey: 'onboarding.welcome.features.impact_desc',
     gradient: 'from-indigo-50/40 to-indigo-50/10',
@@ -199,7 +199,7 @@ export default function WelcomeModal() {
                             }}
                           />
                           <div className="relative">
-                            <f.icon size={28} weight="duotone" className={f.iconColor} />
+                            <f.icon size={28} className={f.iconColor} />
                           </div>
                           <div className="relative text-center">
                             <p className="text-sm font-semibold text-gray-700">{t(f.labelKey)}</p>
@@ -235,7 +235,7 @@ export default function WelcomeModal() {
                   transition={{ delay: 0.6, duration: 0.4, ease }}
                 >
                   {t('onboarding.welcome.get_started')}
-                  <ArrowRight size={16} weight="bold" />
+                  <ArrowRight size={16} />
                 </motion.button>
               ) : (
                 <button
@@ -243,7 +243,7 @@ export default function WelcomeModal() {
                   className="w-full flex items-center justify-center gap-2 py-3 text-sm font-semibold text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors"
                 >
                   {t('onboarding.welcome.lets_go')}
-                  <ArrowRight size={16} weight="bold" />
+                  <ArrowRight size={16} />
                 </button>
               )}
             </div>

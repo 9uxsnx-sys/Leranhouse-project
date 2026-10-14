@@ -7,7 +7,7 @@ import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getAPIUrl } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
-import { Users, ShieldCheck, Clock, EnvelopeSimple } from '@phosphor-icons/react'
+import { Users, ShieldCheck, Clock, Mail } from 'lucide-react'
 
 export default function RecentMembers() {
   const { t } = useTranslation()
@@ -64,7 +64,7 @@ export default function RecentMembers() {
         <div className="px-5 pb-5">
           <div className="flex flex-col items-center justify-center py-6 text-center">
             <div className="p-3 rounded-full bg-gray-100 mb-3">
-              <Users size={20} weight="duotone" className="text-gray-400" />
+              <Users size={20} className="text-gray-400" />
             </div>
             <p className="text-xs text-gray-400">{t('dashboard.home.no_members_yet')}</p>
           </div>
@@ -113,7 +113,7 @@ export default function RecentMembers() {
                   </div>
                   <div className="flex items-center gap-3 mt-0.5">
                     <span className="flex items-center gap-1 text-[10px] text-gray-400 truncate">
-                      <EnvelopeSimple size={10} />
+                      <Mail size={10} />
                       {user.email}
                     </span>
                     {joinedAt && (

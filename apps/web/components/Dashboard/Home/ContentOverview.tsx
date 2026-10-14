@@ -5,10 +5,10 @@ import useSWR from 'swr'
 import {
   BookOpen,
   Users,
-  ChatCircle,
-  Microphone,
-  Chalkboard,
-} from '@phosphor-icons/react'
+  MessageCircle,
+  Mic,
+  Presentation,
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -112,7 +112,7 @@ export default function ContentOverview() {
       label: t('dashboard.home.communities'),
       value: communities.length,
       sub: `${communities.filter((c: any) => c.public).length} ${t('dashboard.home.public')}`,
-      icon: ChatCircle,
+      icon: MessageCircle,
       iconColor: 'text-violet-500',
       iconBg: 'bg-violet-50',
       href: '/dash/communities',
@@ -122,7 +122,7 @@ export default function ContentOverview() {
       label: t('dashboard.home.podcasts'),
       value: podcasts.length,
       sub: `${podcasts.reduce((sum: number, p: any) => sum + (p.episode_count || 0), 0)} ${t('dashboard.home.episodes')}`,
-      icon: Microphone,
+      icon: Mic,
       iconColor: 'text-amber-500',
       iconBg: 'bg-amber-50',
       href: '/dash/podcasts',
@@ -132,7 +132,7 @@ export default function ContentOverview() {
       label: t('dashboard.home.boards'),
       value: boards.length,
       sub: `${boards.reduce((sum: number, b: any) => sum + (b.member_count || 0), 0)} ${t('dashboard.home.participants')}`,
-      icon: Chalkboard,
+      icon: Presentation,
       iconColor: 'text-rose-500',
       iconBg: 'bg-rose-50',
       href: '/dash/boards',
@@ -160,7 +160,6 @@ export default function ContentOverview() {
             <div className={`p-1.5 rounded-lg ${card.iconBg}`}>
               <card.icon
                 size={14}
-                weight="duotone"
                 className={card.iconColor}
               />
             </div>

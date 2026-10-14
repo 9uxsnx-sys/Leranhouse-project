@@ -6,33 +6,33 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import {
   BookOpen,
-  CheckCircle,
-  CaretDown,
-  CaretUp,
-  RocketLaunch,
-  Browsers,
-  PlayCircle,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Rocket,
+  AppWindow,
+  CirclePlay,
   FileText,
   Backpack,
-  MarkdownLogo,
   Globe,
-  ArrowsOutSimple,
-  ArrowsInSimple,
-  ArrowCounterClockwise,
-  PencilSimple,
-  Lightning,
+  Maximize2,
+  Minimize2,
+  RotateCcw,
+  Pencil,
+  Zap,
   SkipForward,
   Lock,
-  DotsThree,
+  MoreHorizontal,
   Palette,
   Command,
-  TextT,
+  Type,
   Image as ImageIcon,
   Video,
   Table,
   Check,
   GraduationCap,
-} from '@phosphor-icons/react'
+} from 'lucide-react'
+import { MarkdownLogo } from '@phosphor-icons/react'
 import { ConceptIcon } from '@components/ui/icons'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getUriWithOrg } from '@services/config/config'
@@ -43,8 +43,8 @@ import WelcomeGlobe from './WelcomeGlobe'
 import { useTranslation } from 'react-i18next'
 
 const ACTIVITY_TYPES = [
-  { icon: Browsers, color: 'text-blue-400', label: 'Page' },
-  { icon: PlayCircle, color: 'text-violet-400', label: 'Video' },
+  { icon: AppWindow, color: 'text-blue-400', label: 'Page' },
+  { icon: CirclePlay, color: 'text-violet-400', label: 'Video' },
   { icon: FileText, color: 'text-emerald-400', label: 'Document' },
   { icon: Backpack, color: 'text-amber-400', label: 'Assignment' },
   { icon: MarkdownLogo, color: 'text-rose-400', label: 'Markdown' },
@@ -71,21 +71,21 @@ const STEP_CONFIG: Record<
     iconColor: 'text-blue-400',
   },
   add_activities: {
-    icon: Browsers,
+    icon: AppWindow,
     actionLabel: 'Go to Content',
     actionHref: '',
     pattern: `repeating-linear-gradient(-45deg, transparent, transparent 8px, rgba(196,181,253,0.1) 8px, rgba(196,181,253,0.1) 9px)`,
     iconColor: 'text-violet-400',
   },
   experience_editor: {
-    icon: PencilSimple,
+    icon: Pencil,
     actionLabel: '',
     actionHref: '',
     pattern: `repeating-linear-gradient(0deg, transparent, transparent 8px, rgba(167,243,208,0.1) 8px, rgba(167,243,208,0.1) 9px), repeating-linear-gradient(90deg, transparent, transparent 8px, rgba(167,243,208,0.1) 8px, rgba(167,243,208,0.1) 9px)`,
     iconColor: 'text-emerald-400',
   },
   try_playgrounds: {
-    icon: Lightning,
+    icon: Zap,
     actionLabel: 'Try Playgrounds',
     actionHref: '/dash/playgrounds',
     pattern: `radial-gradient(circle, rgba(253,230,138,0.12) 1px, transparent 1px), radial-gradient(circle, rgba(253,186,116,0.08) 1px, transparent 1px)`,
@@ -241,7 +241,7 @@ export default function OnboardingBar() {
               onClick={toggleMinimized}
               className="pointer-events-auto mb-6 mr-4 flex items-center gap-3 px-4 py-2.5 bg-white/85 backdrop-blur-lg text-gray-900 rounded-xl nice-shadow cursor-pointer hover:bg-white transition-colors"
             >
-              <RocketLaunch size={18} weight="duotone" className="text-gray-700" />
+              <Rocket size={18} className="text-gray-700" />
               <div className="flex flex-col items-start">
                 <span className="text-xs font-bold">{t('onboarding.getting_started')}</span>
                 <div className="flex items-center gap-2 mt-1">
@@ -256,7 +256,7 @@ export default function OnboardingBar() {
                   </span>
                 </div>
               </div>
-              <CaretUp size={14} weight="bold" className="text-gray-400" />
+              <ChevronUp size={14} className="text-gray-400" />
             </motion.button>
           ) : (
             <motion.div
@@ -309,9 +309,8 @@ export default function OnboardingBar() {
                 {/* Header */}
                 <div className="flex items-center justify-between px-4 py-3">
                   <div className="flex items-center gap-2.5">
-                    <RocketLaunch
+                    <Rocket
                       size={20}
-                      weight="duotone"
                       className="text-gray-700"
                     />
                     <span className="text-sm font-bold text-gray-900">
@@ -330,7 +329,7 @@ export default function OnboardingBar() {
                         className="p-1 text-gray-400 hover:text-red-500 rounded-lg transition-colors"
                         title="Reset onboarding (dev only)"
                       >
-                        <ArrowCounterClockwise size={16} weight="bold" />
+                        <RotateCcw size={16} />
                       </button>
                     )}
                     <button
@@ -338,16 +337,16 @@ export default function OnboardingBar() {
                       className="p-1 text-gray-400 hover:text-gray-600 rounded-lg transition-colors"
                     >
                       {expanded ? (
-                        <ArrowsInSimple size={16} weight="bold" />
+                        <Minimize2 size={16} />
                       ) : (
-                        <ArrowsOutSimple size={16} weight="bold" />
+                        <Maximize2 size={16} />
                       )}
                     </button>
                     <button
                       onClick={toggleMinimized}
                       className="p-1 text-gray-400 hover:text-gray-600 rounded-lg transition-colors"
                     >
-                      <CaretDown size={16} weight="bold" />
+                      <ChevronDown size={16} />
                     </button>
                   </div>
                 </div>
@@ -376,9 +375,8 @@ export default function OnboardingBar() {
                             backgroundSize: '14px 14px',
                           }}
                         />
-                        <CheckCircle
+                        <CheckCircle2
                           size={28}
-                          weight="duotone"
                           className="relative text-emerald-400"
                         />
                         <div className="relative">
@@ -432,26 +430,22 @@ export default function OnboardingBar() {
                                         step.skipped ? (
                                           <SkipForward
                                             size={24}
-                                            weight="duotone"
                                             className="text-gray-400 shrink-0"
                                           />
                                         ) : (
-                                          <CheckCircle
+                                          <CheckCircle2
                                             size={24}
-                                            weight="duotone"
                                             className="text-emerald-400 shrink-0"
                                           />
                                         )
                                       ) : isLocked ? (
                                         <Lock
                                           size={24}
-                                          weight="duotone"
                                           className="text-amber-400 shrink-0"
                                         />
                                       ) : (
                                         <Icon
                                           size={24}
-                                          weight="duotone"
                                           className={`shrink-0 ${
                                             config?.iconColor || 'text-gray-400'
                                           }`}
@@ -491,7 +485,7 @@ export default function OnboardingBar() {
                                           onClick={() => skipStep(step.id)}
                                           className="relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors shrink-0"
                                         >
-                                          <SkipForward size={14} weight="bold" />
+                                          <SkipForward size={14} />
                                           {t('onboarding.skip')}
                                         </button>
                                       )}
@@ -520,7 +514,6 @@ export default function OnboardingBar() {
                                             >
                                               <activity.icon
                                                 size={20}
-                                                weight="duotone"
                                                 className={activity.color}
                                               />
                                               <span className="text-[10px] font-medium text-gray-500">
@@ -554,9 +547,8 @@ export default function OnboardingBar() {
                                             <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold shrink-0">
                                               2
                                             </div>
-                                            <Browsers
+                                            <AppWindow
                                               size={16}
-                                              weight="duotone"
                                               className="text-blue-400 shrink-0"
                                             />
                                             <span className="text-[11px] font-medium text-gray-600">
@@ -592,37 +584,37 @@ export default function OnboardingBar() {
                                         </p>
                                         <div className="grid grid-cols-2 gap-2">
                                           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white nice-shadow">
-                                            <Command size={16} weight="duotone" className="text-gray-500 shrink-0" />
+                                            <Command size={16} className="text-gray-500 shrink-0" />
                                             <span className="text-[11px] font-medium text-gray-600">
                                               {t('onboarding.steps.experience_editor.slash_commands')}
                                             </span>
                                           </div>
                                           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white nice-shadow">
-                                            <TextT size={16} weight="duotone" className="text-blue-400 shrink-0" />
+                                            <Type size={16} className="text-blue-400 shrink-0" />
                                             <span className="text-[11px] font-medium text-gray-600">
                                               {t('onboarding.steps.experience_editor.headings_lists')}
                                             </span>
                                           </div>
                                           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white nice-shadow">
-                                            <ImageIcon size={16} weight="duotone" className="text-violet-400 shrink-0" />
+                                            <ImageIcon size={16} className="text-violet-400 shrink-0" />
                                             <span className="text-[11px] font-medium text-gray-600">
                                               {t('onboarding.steps.experience_editor.images_media')}
                                             </span>
                                           </div>
                                           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white nice-shadow">
-                                            <Video size={16} weight="duotone" className="text-rose-400 shrink-0" />
+                                            <Video size={16} className="text-rose-400 shrink-0" />
                                             <span className="text-[11px] font-medium text-gray-600">
                                               {t('onboarding.steps.experience_editor.video_embeds')}
                                             </span>
                                           </div>
                                           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white nice-shadow">
-                                            <Table size={16} weight="duotone" className="text-amber-400 shrink-0" />
+                                            <Table size={16} className="text-amber-400 shrink-0" />
                                             <span className="text-[11px] font-medium text-gray-600">
                                               {t('onboarding.steps.experience_editor.tables_callouts')}
                                             </span>
                                           </div>
                                           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white nice-shadow">
-                                            <Lightning size={16} weight="duotone" className="text-emerald-400 shrink-0" />
+                                            <Zap size={16} className="text-emerald-400 shrink-0" />
                                             <span className="text-[11px] font-medium text-gray-600">
                                               {t('onboarding.steps.experience_editor.interactive_blocks')}
                                             </span>
@@ -632,7 +624,7 @@ export default function OnboardingBar() {
                                           onClick={() => completeStep('experience_editor')}
                                           className="w-full flex items-center justify-center gap-2 py-2 mt-1 text-xs font-medium text-gray-600 bg-white nice-shadow rounded-lg hover:bg-gray-50 transition-colors"
                                         >
-                                          <Check size={14} weight="bold" />
+                                          <Check size={14} />
                                           {t('onboarding.got_it')}
                                         </button>
                                       </div>
@@ -693,7 +685,7 @@ export default function OnboardingBar() {
                                           }}
                                           className="w-full flex items-center justify-center gap-2 py-2.5 mt-1 text-xs font-semibold text-primary-foreground bg-primary nice-shadow rounded-lg hover:bg-primary/90 transition-colors"
                                         >
-                                          <Check size={14} weight="bold" />
+                                          <Check size={14} />
                                           {t('onboarding.done')}
                                         </button>
                                       </div>
@@ -711,7 +703,7 @@ export default function OnboardingBar() {
                               onClick={toggleShowAllSteps}
                               className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors rounded-lg hover:bg-gray-50"
                             >
-                              <DotsThree size={18} weight="bold" />
+                              <MoreHorizontal size={18} />
                               {showAllSteps
                                 ? t('onboarding.show_less')
                                 : t('onboarding.more_steps', { count: hiddenCount })}

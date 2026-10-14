@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { StarFour } from '@phosphor-icons/react'
+import { Sparkles } from 'lucide-react'
 import { usePlan } from '@components/Hooks/usePlan'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getUpgradeUrl } from '@services/config/config'
@@ -28,7 +28,7 @@ export default function FreePlanUpgradeBanner() {
             backgroundImage: `repeating-linear-gradient(-45deg, transparent, transparent 8px, rgba(14,165,233,0.08) 8px, rgba(14,165,233,0.08) 9px)`,
           }}
         />
-        <StarFour size={14} weight="duotone" className="relative text-sky-600 flex-shrink-0" />
+        <Sparkles size={14} className="relative text-sky-600 flex-shrink-0" />
         <p className="relative text-xs font-medium text-sky-800">
           {t('banner.free_plan_upgrade')}
         </p>

@@ -2,10 +2,10 @@
 import React from 'react'
 import Link from 'next/link'
 import {
-  ChartBar,
+  BarChart3,
   Users,
   BookOpen,
-} from '@phosphor-icons/react'
+} from 'lucide-react'
 import { ConceptIcon } from '@components/ui/icons'
 import useSWR from 'swr'
 import { useTranslation } from 'react-i18next'
@@ -81,14 +81,14 @@ export default function DashboardHome() {
                 href="/dash/analytics"
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-gray-600 bg-white rounded-lg nice-shadow hover:bg-gray-50 transition-colors"
               >
-                <ChartBar size={14} weight="bold" />
+                <BarChart3 size={14} />
                 {t('dashboard.home.analytics')}
               </Link>
               <Link
                 href="/dash/users/settings/users"
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-gray-600 bg-white rounded-lg nice-shadow hover:bg-gray-50 transition-colors"
               >
-                <Users size={14} weight="bold" />
+                <Users size={14} />
                 {t('dashboard.home.members')}
               </Link>
               <Link

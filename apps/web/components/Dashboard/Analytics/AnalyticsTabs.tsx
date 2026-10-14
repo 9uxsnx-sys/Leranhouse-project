@@ -1,7 +1,7 @@
 'use client'
 import React, { useState } from 'react'
 import { motion } from 'motion/react'
-import { ChartBar, Repeat2 } from 'lucide-react'
+import { BarChart3, Repeat2 } from 'lucide-react'
 import { isFeatureAvailable } from '@services/plans/plans'
 import { usePlan } from '@components/Hooks/usePlan'
 import PlanRestrictedFeature from '@components/Dashboard/Shared/PlanRestricted/PlanRestrictedFeature'
@@ -53,7 +53,7 @@ export default function AnalyticsTabs() {
       <PlanRestrictedFeature
         currentPlan={plan}
         requiredPlan="standard"
-        icon={ChartBar}
+        icon={BarChart3}
         titleKey="common.plans.feature_restricted.analytics.title"
         descriptionKey="common.plans.feature_restricted.analytics.description"
         fullScreen

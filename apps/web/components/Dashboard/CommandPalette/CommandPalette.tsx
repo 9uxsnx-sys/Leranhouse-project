@@ -6,13 +6,13 @@ import { Command } from 'cmdk'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import {
   BookOpen,
-  Stack,
+  Layers,
   User as UserIcon,
-  ChatsCircle,
-  ChatCircle,
-  Cube,
-  Microphone,
-} from '@phosphor-icons/react'
+  MessagesSquare,
+  MessageCircle,
+  Box,
+  Mic,
+} from 'lucide-react'
 import { ConceptIcon } from '@components/ui/icons'
 
 import { useCommandPalette } from './CommandPaletteContext'
@@ -29,12 +29,12 @@ import { normalizeForSearch } from '@/lib/search/normalize'
 
 const CONTENT_TYPE_ICON: Record<ContentResultType, SearchMeta['icon']> = {
   course: BookOpen,
-  collection: Stack,
+  collection: Layers,
   user: UserIcon,
-  community: ChatsCircle,
-  discussion: ChatCircle,
-  playground: Cube,
-  podcast: Microphone,
+  community: MessagesSquare,
+  discussion: MessageCircle,
+  playground: Box,
+  podcast: Mic,
 }
 
 const CONTENT_TYPE_GROUP_KEY: Record<ContentResultType, string> = {

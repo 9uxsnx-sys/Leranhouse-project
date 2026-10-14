@@ -9,7 +9,7 @@ import { getAPIUrl } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
 import { SafeImage } from '@components/Objects/SafeImage'
-import { BookOpen, Clock } from '@phosphor-icons/react'
+import { BookOpen, Clock } from 'lucide-react'
 import { ConceptIcon } from '@components/ui/icons'
 
 export default function RecentCourses() {
@@ -77,7 +77,6 @@ export default function RecentCourses() {
             <div className="p-3 rounded-full bg-gray-100 mb-3">
               <BookOpen
                 size={20}
-                weight="duotone"
                 className="text-gray-400"
               />
             </div>
@@ -128,7 +127,6 @@ export default function RecentCourses() {
                   ) : (
                     <BookOpen
                       size={16}
-                      weight="duotone"
                       className="text-gray-300"
                     />
                   )}

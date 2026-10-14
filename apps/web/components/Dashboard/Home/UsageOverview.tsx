@@ -6,12 +6,12 @@ import {
   BookOpen,
   Users,
   ShieldCheck,
-  Chalkboard,
-  ChatCircle,
-  Microphone,
+  Presentation,
+  MessageCircle,
+  Mic,
   ArrowRight,
-  Lightning,
-} from '@phosphor-icons/react'
+  Zap,
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -102,21 +102,21 @@ export default function UsageOverview() {
     {
       key: 'communities',
       label: t('dashboard.home.communities'),
-      icon: ChatCircle,
+      icon: MessageCircle,
       enabled: orgFeatures?.communities?.enabled !== false,
       href: '/dash/communities',
     },
     {
       key: 'podcasts',
       label: t('dashboard.home.podcasts'),
-      icon: Microphone,
+      icon: Mic,
       enabled: orgFeatures?.podcasts?.enabled === true,
       href: '/dash/podcasts',
     },
     {
       key: 'boards',
       label: t('dashboard.home.boards'),
-      icon: Chalkboard,
+      icon: Presentation,
       enabled: orgFeatures?.boards?.enabled === true,
       href: '/dash/boards',
     },
@@ -163,7 +163,6 @@ export default function UsageOverview() {
                     <div className="flex items-center gap-2">
                       <Icon
                         size={13}
-                        weight="duotone"
                         className="text-gray-400"
                       />
                       <span className="text-xs font-medium text-gray-600">
@@ -230,7 +229,6 @@ export default function UsageOverview() {
                 />
                 <feature.icon
                   size={14}
-                  weight="duotone"
                   className={
                     feature.enabled ? 'text-gray-500' : 'text-gray-300'
                   }
@@ -296,7 +294,7 @@ function AICreditsSection({ credits }: { credits: AICreditsSummary }) {
     <div>
       <div className="flex items-center justify-between mb-1.5">
         <div className="flex items-center gap-2">
-          <Lightning size={13} weight="duotone" className="text-violet-400" />
+          <Zap size={13} className="text-violet-400" />
           <span className="text-xs font-medium text-gray-600">{t('dashboard.home.ai_credits')}</span>
         </div>
         <span className="text-[11px] text-gray-400 tabular-nums">

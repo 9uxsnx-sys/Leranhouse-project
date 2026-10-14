@@ -25,7 +25,7 @@ import {
   Video,
 } from 'lucide-react'
 import { ConceptIcon } from '@components/ui/icons'
-import { MarkdownLogo, Globe as GlobePhosphor } from '@phosphor-icons/react'
+import { MarkdownLogo } from '@phosphor-icons/react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -445,7 +445,7 @@ const ActivityTypeIndicator = ({activityType, activitySubType, isMobile} : { act
   const {displayNameKey, Icon} = isMarkdown
     ? { displayNameKey: 'markdown', Icon: MarkdownLogo }
     : isEmbed
-    ? { displayNameKey: 'embed', Icon: GlobePhosphor }
+    ? { displayNameKey: 'embed', Icon: Globe }
     : ACTIVITIES[activityType]
 
   return (

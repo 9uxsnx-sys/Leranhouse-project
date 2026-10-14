@@ -6,19 +6,19 @@ import {
   X,
   ArrowRight,
   Notebook,
-  UsersThree,
-  ChatsCircle,
+  Users,
+  MessagesSquare,
   CreditCard,
-  Microphone,
-  ChartBar,
-  Robot,
-  Certificate,
+  Mic,
+  BarChart3,
+  Bot,
+  Award,
   ShieldCheck,
   Globe,
-  Lightning,
+  Zap,
   Code,
-  CheckCircle,
-} from '@phosphor-icons/react'
+  CheckCircle2,
+} from 'lucide-react'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getUpgradeUrl } from '@services/config/config'
 import { usePlan } from '@components/Hooks/usePlan'
@@ -34,21 +34,21 @@ interface UpgradeModalProps {
 
 const STANDARD_HIGHLIGHTS = [
   { icon: Notebook, labelKey: 'upgrade_modal.plans.standard.highlights.courses', descKey: 'upgrade_modal.plans.standard.highlights.courses_desc', iconColor: 'text-blue-500' },
-  { icon: UsersThree, labelKey: 'upgrade_modal.plans.standard.highlights.members', descKey: 'upgrade_modal.plans.standard.highlights.members_desc', iconColor: 'text-indigo-500' },
+  { icon: Users, labelKey: 'upgrade_modal.plans.standard.highlights.members', descKey: 'upgrade_modal.plans.standard.highlights.members_desc', iconColor: 'text-indigo-500' },
   { icon: CreditCard, labelKey: 'upgrade_modal.plans.standard.highlights.payments', descKey: 'upgrade_modal.plans.standard.highlights.payments_desc', iconColor: 'text-emerald-500' },
-  { icon: ChatsCircle, labelKey: 'upgrade_modal.plans.standard.highlights.communities', descKey: 'upgrade_modal.plans.standard.highlights.communities_desc', iconColor: 'text-teal-500' },
-  { icon: Microphone, labelKey: 'upgrade_modal.plans.standard.highlights.podcasts', descKey: 'upgrade_modal.plans.standard.highlights.podcasts_desc', iconColor: 'text-purple-500' },
-  { icon: Robot, labelKey: 'upgrade_modal.plans.standard.highlights.ai', descKey: 'upgrade_modal.plans.standard.highlights.ai_desc', iconColor: 'text-violet-500' },
-  { icon: ChartBar, labelKey: 'upgrade_modal.plans.standard.highlights.analytics', descKey: 'upgrade_modal.plans.standard.highlights.analytics_desc', iconColor: 'text-amber-500' },
+  { icon: MessagesSquare, labelKey: 'upgrade_modal.plans.standard.highlights.communities', descKey: 'upgrade_modal.plans.standard.highlights.communities_desc', iconColor: 'text-teal-500' },
+  { icon: Mic, labelKey: 'upgrade_modal.plans.standard.highlights.podcasts', descKey: 'upgrade_modal.plans.standard.highlights.podcasts_desc', iconColor: 'text-purple-500' },
+  { icon: Bot, labelKey: 'upgrade_modal.plans.standard.highlights.ai', descKey: 'upgrade_modal.plans.standard.highlights.ai_desc', iconColor: 'text-violet-500' },
+  { icon: BarChart3, labelKey: 'upgrade_modal.plans.standard.highlights.analytics', descKey: 'upgrade_modal.plans.standard.highlights.analytics_desc', iconColor: 'text-amber-500' },
 ]
 
 const PRO_HIGHLIGHTS = [
-  { icon: UsersThree, labelKey: 'upgrade_modal.plans.pro.highlights.members', descKey: 'upgrade_modal.plans.pro.highlights.members_desc', iconColor: 'text-indigo-500' },
-  { icon: Robot, labelKey: 'upgrade_modal.plans.pro.highlights.ai', descKey: 'upgrade_modal.plans.pro.highlights.ai_desc', iconColor: 'text-violet-500' },
-  { icon: Certificate, labelKey: 'upgrade_modal.plans.pro.highlights.certifications', descKey: 'upgrade_modal.plans.pro.highlights.certifications_desc', iconColor: 'text-sky-500' },
+  { icon: Users, labelKey: 'upgrade_modal.plans.pro.highlights.members', descKey: 'upgrade_modal.plans.pro.highlights.members_desc', iconColor: 'text-indigo-500' },
+  { icon: Bot, labelKey: 'upgrade_modal.plans.pro.highlights.ai', descKey: 'upgrade_modal.plans.pro.highlights.ai_desc', iconColor: 'text-violet-500' },
+  { icon: Award, labelKey: 'upgrade_modal.plans.pro.highlights.certifications', descKey: 'upgrade_modal.plans.pro.highlights.certifications_desc', iconColor: 'text-sky-500' },
   { icon: Globe, labelKey: 'upgrade_modal.plans.pro.highlights.custom_domain', descKey: 'upgrade_modal.plans.pro.highlights.custom_domain_desc', iconColor: 'text-cyan-500' },
   { icon: ShieldCheck, labelKey: 'upgrade_modal.plans.pro.highlights.roles', descKey: 'upgrade_modal.plans.pro.highlights.roles_desc', iconColor: 'text-rose-500' },
-  { icon: Lightning, labelKey: 'upgrade_modal.plans.pro.highlights.playgrounds', descKey: 'upgrade_modal.plans.pro.highlights.playgrounds_desc', iconColor: 'text-amber-500' },
+  { icon: Zap, labelKey: 'upgrade_modal.plans.pro.highlights.playgrounds', descKey: 'upgrade_modal.plans.pro.highlights.playgrounds_desc', iconColor: 'text-amber-500' },
   { icon: Code, labelKey: 'upgrade_modal.plans.pro.highlights.api', descKey: 'upgrade_modal.plans.pro.highlights.api_desc', iconColor: 'text-gray-500' },
 ]
 
@@ -85,7 +85,7 @@ export default function UpgradeModal({ open, onClose }: UpgradeModalProps) {
                 onClick={onClose}
                 className="absolute top-4 right-4 z-10 p-1.5 text-gray-400 hover:text-gray-600 rounded-lg transition-colors"
               >
-                <X size={18} weight="bold" />
+                <X size={18} />
               </button>
 
               {/* Header */}
@@ -126,7 +126,7 @@ export default function UpgradeModal({ open, onClose }: UpgradeModalProps) {
                       <div className="space-y-3 flex-1">
                         {STANDARD_HIGHLIGHTS.map((h) => (
                           <div key={h.labelKey} className="flex items-start gap-2">
-                            <h.icon size={15} weight="duotone" className={`flex-shrink-0 mt-0.5 ${h.iconColor}`} />
+                            <h.icon size={15} className={`flex-shrink-0 mt-0.5 ${h.iconColor}`} />
                             <div>
                               <span className="text-xs font-semibold text-gray-700 block">{t(h.labelKey)}</span>
                               <span className="text-[11px] text-gray-400 leading-snug block">{t(h.descKey)}</span>
@@ -142,7 +142,7 @@ export default function UpgradeModal({ open, onClose }: UpgradeModalProps) {
                         className="mt-5 w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold rounded-lg transition-colors bg-primary hover:bg-primary/90 text-primary-foreground"
                       >
                         {t('upgrade_modal.choose_plan', { plan: 'Standard' })}
-                        <ArrowRight size={14} weight="bold" />
+                        <ArrowRight size={14} />
                       </a>
                     </div>
                   </div>
@@ -165,14 +165,14 @@ export default function UpgradeModal({ open, onClose }: UpgradeModalProps) {
 
                       {/* Standard included */}
                       <div className="flex items-center gap-1.5 mb-3 pb-3 border-b border-gray-100">
-                        <CheckCircle size={14} weight="duotone" className="text-emerald-400 flex-shrink-0" />
+                        <CheckCircle2 size={14} className="text-emerald-400 flex-shrink-0" />
                         <span className="text-[11px] font-medium text-gray-400">{t('upgrade_modal.plans.pro.includes_standard')}</span>
                       </div>
 
                       <div className="space-y-3 flex-1">
                         {PRO_HIGHLIGHTS.map((h) => (
                           <div key={h.labelKey} className="flex items-start gap-2">
-                            <h.icon size={15} weight="duotone" className={`flex-shrink-0 mt-0.5 ${h.iconColor}`} />
+                            <h.icon size={15} className={`flex-shrink-0 mt-0.5 ${h.iconColor}`} />
                             <div>
                               <span className="text-xs font-semibold text-gray-700 block">{t(h.labelKey)}</span>
                               <span className="text-[11px] text-gray-400 leading-snug block">{t(h.descKey)}</span>
@@ -188,7 +188,7 @@ export default function UpgradeModal({ open, onClose }: UpgradeModalProps) {
                         className="mt-5 w-full flex items-center justify-center gap-2 py-2.5 text-xs font-semibold rounded-lg transition-colors bg-primary hover:bg-primary/90 text-primary-foreground"
                       >
                         {t('upgrade_modal.choose_plan', { plan: 'Pro' })}
-                        <ArrowRight size={14} weight="bold" />
+                        <ArrowRight size={14} />
                       </a>
                     </div>
                   </div>
