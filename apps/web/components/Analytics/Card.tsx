@@ -3,6 +3,13 @@ import React from 'react'
 import { cn } from '@/lib/utils'
 
 /**
+ * The single card shell used everywhere in the dashboard.
+ * Keep this in one place — the home page tiles import it too, so the border,
+ * radius and shadow can never drift between "cards" and "section cards".
+ */
+export const CARD_SHELL = 'bg-white rounded-xl border border-gray-100 shadow-sm'
+
+/**
  * The white section card used across the analytics tabs.
  * Section heading style matches the rest of the platform.
  */
@@ -25,7 +32,7 @@ export function SectionCard({
   return (
     <div
       className={cn(
-        'bg-white rounded-xl border border-gray-100 shadow-sm',
+        CARD_SHELL,
         bleed ? 'pt-6 pb-2.5 overflow-hidden' : 'p-6',
         className
       )}
@@ -62,7 +69,7 @@ export function ChartCard({
   className?: string
 }) {
   return (
-    <div className={cn('bg-white rounded-xl border border-gray-100 shadow-sm p-6', className)}>
+    <div className={cn(CARD_SHELL, 'p-6', className)}>
       <div className="flex items-center justify-between mb-5">
         <h3 className="text-[13px] font-semibold tracking-wide uppercase text-gray-500">{title}</h3>
         {actions}

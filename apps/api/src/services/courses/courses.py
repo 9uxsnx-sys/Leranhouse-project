@@ -402,9 +402,14 @@ async def get_courses_count_orgslug(
     current_user: PublicUser | AnonymousUser | APITokenUser,
     org_slug: str,
     db_session: Session,
+    published: bool | None = None,
 ) -> int:
     """
-    Get total count of courses for an organization (respecting visibility rules)
+    Get total count of courses for an organization (respecting visibility rules).
+
+    `published` optionally narrows the count to published / draft courses — the
+    admin dashboard uses it for the "drafts waiting" action item without having
+    to page through the catalog.
     """
     acting_user_id = resolve_acting_user_id(current_user)
 
@@ -415,11 +420,33 @@ async def get_courses_count_orgslug(
         .where(Organization.slug == org_slug)
     )
 
+    org = db_session.exec(
+        select(Organization).where(Organization.slug == org_slug)
+    ).first()
+    if not org:
+        return 0
+
+    # Mirror the list endpoint's admin bypass: org admins and maintainers see
+    # every course (published or not), so dashboard counts match what they manage.
+    can_view_unpublished = False
+    if not isinstance(current_user, AnonymousUser):
+        can_view_unpublished = is_user_superadmin(acting_user_id, db_session)
+        if not can_view_unpublished:
+            user_roles = db_session.exec(
+                select(Role)
+                .join(UserOrganization)
+                .where(UserOrganization.org_id == org.id)
+                .where(UserOrganization.user_id == acting_user_id)
+            ).all()
+            can_view_unpublished = any(
+                role.id in ADMIN_OR_MAINTAINER_ROLE_IDS for role in user_roles
+            )
+
     if isinstance(current_user, AnonymousUser):
         # For anonymous users, only count public AND published courses
         query = query.where(Course.public == True, Course.published == True)
-    elif not isinstance(current_user, AnonymousUser) and is_user_superadmin(acting_user_id, db_session):
-        # Superadmins see all courses (no additional filter)
+    elif can_view_unpublished:
+        # Admins see every course in the organization (no additional filter)
         pass
     else:
         # For authenticated users, count:
@@ -446,6 +473,9 @@ async def get_courses_count_orgslug(
                 ResourceAuthor.user_id.isnot(None)  # Courses where user is an ACTIVE resource author
             ))
         )
+
+    if published is not None:
+        query = query.where(Course.published == published)
 
     count = db_session.exec(query).one()
     return count

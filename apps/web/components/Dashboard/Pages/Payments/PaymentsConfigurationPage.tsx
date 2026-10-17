@@ -79,15 +79,14 @@ const PaymentsConfigurationPage: React.FC = () => {
     return () => window.removeEventListener('message', handleMessage);
   }, [org?.id, access_token]);
 
-  if (isLoading) return <div className="p-6 text-sm text-gray-500">{t('common.loading')}</div>;
-  if (error) return <div className="p-6 text-sm text-red-500">{t('dashboard.payments.configuration.error_loading')}</div>;
+  if (isLoading) return <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 text-sm text-gray-500">{t('common.loading')}</div>;
+  if (error) return <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 text-sm text-red-500">{t('dashboard.payments.configuration.error_loading')}</div>;
 
   const configs: any[] = Array.isArray(paymentConfigs) ? paymentConfigs : [];
 
   return (
-    <div className="ml-10 mr-10 mx-auto bg-white rounded-xl nice-shadow px-4 py-4">
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
       <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 rounded-md mb-4">
-        <h1 className="font-bold text-xl text-gray-800">{t('dashboard.payments.configuration.title')}</h1>
         <h2 className="text-gray-500 text-sm">
           {t('dashboard.payments.configuration.subtitle')}
         </h2>

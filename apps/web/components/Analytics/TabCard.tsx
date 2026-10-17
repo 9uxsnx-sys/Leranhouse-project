@@ -5,7 +5,7 @@ import { TrendChart } from './TrendChart'
 import { BarsChart } from './BarsChart'
 import { RankedBars } from './RankedBars'
 import { DataTable, Column } from './DataTable'
-import { ChartSkeleton, Skeleton } from './Feedback'
+import { ChartSkeleton } from './Feedback'
 import { formatNumber } from './chartTheme'
 import { cn } from '@/lib/utils'
 import type { AnalyticsCard, CardColumn, CardFormat } from '@services/analytics/tabs'
@@ -110,12 +110,15 @@ export function TabCard({
   loading,
   className,
   actionsColumn,
+  chartHeight = 260,
 }: {
   card?: AnalyticsCard
   loading?: boolean
   className?: string
   /** Optional trailing cell, for tables whose rows open a detail view. */
   actionsColumn?: (row: Record<string, any>) => React.ReactNode
+  /** Chart body height when the card needs to match a neighbouring column. */
+  chartHeight?: number
 }) {
   if (!card) {
     return (
@@ -125,8 +128,7 @@ export function TabCard({
           className
         )}
       >
-        <Skeleton className="h-3 w-28" />
-        <div className="mt-5">{loading ? <ChartSkeleton /> : <Skeleton className="h-[260px] w-full" />}</div>
+        <ChartSkeleton height={chartHeight} />
       </div>
     )
   }
@@ -155,6 +157,7 @@ export function TabCard({
     <ChartCard
       title={card.title}
       className={className}
+      height={chartHeight}
       actions={card.heading ? <span className="text-xs text-gray-400">{card.heading}</span> : undefined}
     >
       {card.kind === 'trend' && (
@@ -162,6 +165,7 @@ export function TabCard({
           data={card.data ?? []}
           xKey={card.xKey ?? 'label'}
           series={card.series ?? []}
+          height={chartHeight}
           formatter={formatter}
         />
       )}
@@ -170,6 +174,7 @@ export function TabCard({
           data={card.data ?? []}
           xKey={card.xKey ?? 'label'}
           series={card.series ?? []}
+          height={chartHeight}
           formatter={formatter}
           xTickFormatter={truncateAxisLabel}
         />
@@ -179,6 +184,7 @@ export function TabCard({
           data={card.data ?? []}
           categoryKey={card.categoryKey ?? 'name'}
           valueKey={card.valueKey ?? 'value'}
+          height={chartHeight}
           formatter={formatter}
         />
       )}

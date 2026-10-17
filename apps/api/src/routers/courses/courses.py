@@ -557,6 +557,10 @@ async def api_get_course_by_orgslug(
 async def api_get_courses_count(
     request: Request,
     org_slug: str,
+    published: bool | None = Query(
+        default=None,
+        description="Optionally count only published (true) or draft (false) courses.",
+    ),
     db_session: Session = Depends(get_db_session),
     current_user: PublicUser = Depends(get_current_user),
 ) -> int:
@@ -564,7 +568,7 @@ async def api_get_courses_count(
     Get total count of courses for an organization
     """
     return await get_courses_count_orgslug(
-        request, current_user, org_slug, db_session
+        request, current_user, org_slug, db_session, published
     )
 
 

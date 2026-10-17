@@ -152,6 +152,46 @@ The `course_purchases` table records that a specific user purchased access to a 
 
 Admins can view all transactions in **Admin Dashboard → Payments → Transactions**, which displays: transaction ID, course name, customer name and email, amount (DZD), payment method, status, and date. Each transaction can be expanded for full details.
 
+## Admin Dashboard UI (v1 — implemented, UI-only)
+
+The `/dash/payments/{subpage}` section uses the same shell as **Organization Settings** and **Users Settings**:
+
+- `bg-[#f8f8f8]` page, three `max-w-7xl` rows (title → tab bar → content)
+- `text-3xl md:text-4xl font-semibold text-ui-fg-base` page title
+- one `PageTabs variant="pill"` row (sliding white indicator), no nested tab bars
+- content in `mt-8 pb-10` with the shared `rounded-xl border border-gray-100 shadow-sm` card shell
+
+### Tabs
+
+| Tab | Route | Content |
+|---|---|---|
+| **Overview** | `/dash/payments/overview` | Date-range action row + *Preview shop*, full-width revenue area chart, recent payments table (10 rows) |
+| **Transactions** | `/dash/payments/transactions` | Search + status filter, table: learner, course, method (EDAHABIA/CIB), amount, status, date |
+| **Offers** | `/dash/payments/offers` | Offer cards, create/edit modals, archived offers, resources panel |
+| **Payment Groups** | `/dash/payments/groups` | Bundles of courses for subscriptions / multi-course offers, UserGroup syncs |
+| **Payouts** | `/dash/payments/payouts` | Month picker, editable monthly costs, live 40/60 profit split, pro-rata teacher payout table |
+| **Configuration** | `/dash/payments/configuration` | Chargily connection, sandbox/live keys, webhook status |
+
+Removed in this pass: the old `overview | offers | groups | configuration` underline bar, the header buttons, and the **second** tab bar inside Overview (`customers | transactions | subscriptions`). Customers and subscriptions are folded into **Transactions**; Stripe-only surfaces are dropped because Chargily has no subscription model.
+
+### Status
+
+- **UI-only.** The `payment_orders` / `course_purchases` tables and the `/payments/*` router do not exist in this build, so Overview, Transactions and Payouts render labelled sample data.
+- The dashboard is display-only until the Chargily backend lands. Wiring points are marked in code comments (`GET /payments/org/{org_id}/orders`, `/offers`, `/groups`, `/config`).
+- Local design preview: `OSS_GATE = false` in `apps/web/app/orgs/[orgslug]/dash/payments/[subpage]/page.tsx`. **Set it back to `true` before shipping** — payments is EE-only.
+- Configuration currently shows "Error loading payment configuration" because `GET /payments/{org_id}/config` returns 404 in this build.
+
+### Frontend files
+
+| File | Purpose |
+|---|---|
+| `app/orgs/[orgslug]/dash/payments/[subpage]/page.tsx` | Shell, tab set, plan/feature gates |
+| `components/Dashboard/Pages/Payments/PaymentsOverviewPage.tsx` | Overview tab |
+| `components/Dashboard/Pages/Payments/PaymentsTransactionsPage.tsx` | Transactions tab |
+| `components/Dashboard/Pages/Payments/PaymentsPayoutsPage.tsx` | Payouts tab |
+| `components/Dashboard/Pages/Payments/PaymentStatus.tsx` | Shared status square (paid / failed / pending / refunded) |
+| `components/Dashboard/Home/PaymentsTable.tsx` | Recent payments table, reused by Overview |
+
 ## Refund Flow
 
 1. Admin navigates to **Admin Dashboard → Payments → Transactions** and opens a completed transaction.

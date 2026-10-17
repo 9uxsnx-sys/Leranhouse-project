@@ -22,7 +22,7 @@ const STEPS = [
 
 function UnconfiguredPaymentsDisclaimer() {
   return (
-    <div className="ml-10 mr-10 mx-auto bg-white rounded-xl nice-shadow px-4 py-4">
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-4 py-4">
       {/* Empty state */}
       <div className="flex flex-col items-center py-12 px-6 text-center">
         {/* Icon cluster */}

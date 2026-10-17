@@ -1,21 +1,17 @@
 'use client'
 import React, { use } from 'react';
 import { motion } from 'motion/react'
-import Link from 'next/link'
+import { isOSSMode } from '@services/config/config'
 import { getUriWithOrg } from '@services/config/config'
-import { Settings, Users, Gem, CreditCard, Layers, ShoppingBag, ExternalLink } from 'lucide-react'
-import { SiStripe } from '@icons-pack/react-simple-icons'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useOrg } from '@components/Contexts/OrgContext'
+import { BadgeDollarSign, Gem, Layers, LineChart, ScrollText, Settings, Users } from 'lucide-react'
 import PaymentsConfigurationPage from '@components/Dashboard/Pages/Payments/PaymentsConfigurationPage'
-import PaymentsCustomersPage from '@components/Dashboard/Pages/Payments/PaymentsCustomersPage'
-import PaymentsOffersPage from '@components/Dashboard/Pages/Payments/PaymentsOffersPage'
 import PaymentsGroupsPage from '@components/Dashboard/Pages/Payments/PaymentsGroupsPage'
+import PaymentsOffersPage from '@components/Dashboard/Pages/Payments/PaymentsOffersPage'
+import PaymentsOverviewPage from '@components/Dashboard/Pages/Payments/PaymentsOverviewPage'
+import PaymentsPayoutsPage from '@components/Dashboard/Pages/Payments/PaymentsPayoutsPage'
+import PaymentsTransactionsPage from '@components/Dashboard/Pages/Payments/PaymentsTransactionsPage'
 import PlanRestrictedFeature from '@components/Dashboard/Shared/PlanRestricted/PlanRestrictedFeature'
 import FeatureDisabledView from '@components/Dashboard/Shared/FeatureDisabled/FeatureDisabledView'
-import { PlanLevel } from '@services/plans/plans'
-import { BadgeDollarSign } from 'lucide-react'
-import { isOSSMode } from '@services/config/config'
 import { usePlan } from '@components/Hooks/usePlan'
 import { PageTabs } from '@components/ui/page-tabs'
 import { useTranslation } from 'react-i18next'
@@ -25,49 +21,30 @@ export type PaymentsParams = {
   orgslug: string
 }
 
+/**
+ * TODO(design-preview): payments is EE-only, but this build ships without the
+ * payments backend. The OSS gate is kept for production and bypassed locally so
+ * the new tab UI can be reviewed. Restore it when the Chargily backend lands.
+ */
+const OSS_GATE = false
+
 function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
   const { t } = useTranslation()
   const params = use(props.params);
-  const session = useLHSession() as any
-  const org = useOrg() as any
   const subpage = params.subpage || 'overview'
   const currentPlan = usePlan()
 
-  const getPageTitle = () => {
-    switch (subpage) {
-      case 'overview':
-        return {
-          h1: 'Overview',
-          h2: 'Revenue, transactions, subscriptions and customers'
-        }
-      case 'offers':
-        return {
-          h1: 'Offers',
-          h2: 'Manage your offers and subscriptions'
-        }
-      case 'groups':
-        return {
-          h1: 'Payment Groups',
-          h2: 'Bundle resources for subscriptions and multi-course offers'
-        }
-      case 'configuration':
-        return {
-          h1: 'Payment Configuration',
-          h2: 'Set up and manage your payment gateway'
-        }
-      default:
-        return {
-          h1: 'Payments',
-          h2: 'Overview of your payment settings and transactions'
-        }
-    }
-  }
-
-  const { h1, h2 } = getPageTitle()
-  const paymentsEnabled = org?.config?.config?.resolved_features?.payments?.enabled ?? org?.config?.config?.features?.payments?.enabled !== false
+  const tabs = [
+    { id: 'overview', label: t('dashboard.payments.tabs.overview'), icon: LineChart },
+    { id: 'transactions', label: t('dashboard.payments.tabs.transactions'), icon: ScrollText },
+    { id: 'offers', label: t('dashboard.payments.tabs.offers'), icon: Gem },
+    { id: 'groups', label: t('dashboard.payments.tabs.groups'), icon: Layers },
+    { id: 'payouts', label: t('dashboard.payments.tabs.payouts'), icon: Users },
+    { id: 'configuration', label: t('dashboard.payments.tabs.configuration'), icon: Settings },
+  ]
 
   // Gate 1: OSS deployment → payments is EE-only, blocked entirely
-  if (isOSSMode()) {
+  if (OSS_GATE && isOSSMode()) {
     return (
       <PlanRestrictedFeature
         currentPlan={currentPlan}
@@ -82,6 +59,52 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
     )
   }
 
+  const content = (
+    <div className="min-h-screen w-full bg-[#f8f8f8]">
+      {/* Row 1: Page title */}
+      <div className="max-w-7xl mx-auto w-full pt-8 px-4 sm:px-6 lg:px-8">
+        <h1 className="text-3xl md:text-4xl font-semibold text-ui-fg-base leading-tight">
+          {t(`dashboard.payments.pages.${subpage}.title`, { defaultValue: t('dashboard.payments.title') })}
+        </h1>
+      </div>
+
+      {/* Row 2: Pill-style tab bar */}
+      <div className="max-w-7xl mx-auto w-full py-4 px-4 sm:px-6 lg:px-8">
+        <PageTabs
+          variant="pill"
+          indicatorId="payments-tabs"
+          active={subpage}
+          tabs={tabs.map((tab) => ({
+            id: tab.id,
+            label: tab.label,
+            icon: tab.icon,
+            href: getUriWithOrg(params.orgslug, '') + `/dash/payments/${tab.id}`,
+          }))}
+        />
+      </div>
+
+      {/* Row 3: Content */}
+      <div className="w-full mx-auto max-w-7xl mt-8 pb-10 px-4 sm:px-6 lg:px-8">
+        <main className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.1, type: 'spring', stiffness: 80 }}
+            className="space-y-8 rounded-xl"
+          >
+            {subpage === 'overview' && <PaymentsOverviewPage />}
+            {subpage === 'transactions' && <PaymentsTransactionsPage />}
+            {subpage === 'offers' && <PaymentsOffersPage />}
+            {subpage === 'groups' && <PaymentsGroupsPage />}
+            {subpage === 'payouts' && <PaymentsPayoutsPage />}
+            {subpage === 'configuration' && <PaymentsConfigurationPage />}
+          </motion.div>
+        </main>
+      </div>
+    </div>
+  )
+
   // Gate 2: plan-based restriction for cloud users (standard required)
   return (
     <PlanRestrictedFeature
@@ -92,69 +115,13 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
       descriptionKey="common.plans.feature_restricted.payments.description"
       fullScreen
     >
-    <FeatureDisabledView featureName="payments" orgslug={params.orgslug} context="dashboard">
-    <div className="h-screen w-full bg-[#f8f8f8] flex flex-col">
-      <div className="pl-10 pr-10 tracking-tight bg-[#fcfbfc] z-10 nice-shadow flex-shrink-0 relative">
-        <div className="my-2 py-2 flex items-end justify-between">
-          <div className="w-100 flex flex-col space-y-1">
-            <div className="pt-3 flex font-bold text-4xl tracking-tighter">
-              {h1}
-            </div>
-            <div className="flex font-medium text-gray-400 text-md">
-              {h2}
-            </div>
-          </div>
-          <div className="flex items-center space-x-2 pb-1">
-            {paymentsEnabled && (
-              <Link
-                href={getUriWithOrg(params.orgslug, '/store')}
-                target="_blank"
-                className="flex items-center space-x-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                <ShoppingBag size={14} />
-                <span>Preview Shop</span>
-                <ExternalLink size={12} className="text-gray-400" />
-              </Link>
-            )}
-            <a
-              href="https://dashboard.stripe.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center space-x-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              <SiStripe size={14} className="text-[#635BFF]" />
-              <span>{t('dashboard.payments.stripe_dashboard')}</span>
-              <ExternalLink size={12} className="text-gray-400" />
-            </a>
-          </div>
-        </div>
-        <PageTabs
-          variant="underline"
-          indicatorId="payments-tabs"
-          active={subpage}
-          tabs={[
-            { id: 'overview', label: t('dashboard.payments.tabs.overview'), icon: Users, href: getUriWithOrg(params.orgslug, '/dash/payments/overview') },
-            { id: 'offers', label: t('dashboard.payments.tabs.offers'), icon: Gem, href: getUriWithOrg(params.orgslug, '/dash/payments/offers') },
-            { id: 'groups', label: t('dashboard.payments.tabs.groups'), icon: Layers, href: getUriWithOrg(params.orgslug, '/dash/payments/groups') },
-            { id: 'configuration', label: t('dashboard.payments.tabs.configuration'), icon: Settings, href: getUriWithOrg(params.orgslug, '/dash/payments/configuration') },
-          ]}
-        />
-      </div>
-      <div className="h-6 flex-shrink-0"></div>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.1, type: 'spring', stiffness: 80 }}
-        className="flex-1 overflow-y-auto"
-      >
-        {subpage === 'configuration' && <PaymentsConfigurationPage />}
-        {subpage === 'offers' && <PaymentsOffersPage />}
-        {subpage === 'groups' && <PaymentsGroupsPage />}
-        {(subpage === 'overview' || subpage === 'customers') && <PaymentsCustomersPage />}
-      </motion.div>
-    </div>
-    </FeatureDisabledView>
+      {OSS_GATE ? (
+        <FeatureDisabledView featureName="payments" orgslug={params.orgslug} context="dashboard">
+          {content}
+        </FeatureDisabledView>
+      ) : (
+        content
+      )}
     </PlanRestrictedFeature>
   )
 }

@@ -79,7 +79,9 @@ export function useAnalyticsTab(
   tab: string,
   range = '30d',
   entity = 'all',
-  extra: Record<string, string | number> = {}
+  extra: Record<string, string | number> = {},
+  /** Set false to skip the request entirely (e.g. the plan doesn't include Analytics). */
+  enabled = true
 ) {
   const org = useOrg() as any
   const session = useLHSession() as any
@@ -90,7 +92,7 @@ export function useAnalyticsTab(
   for (const [key, value] of Object.entries(extra)) {
     if (value !== '' && value !== undefined && value !== null) params.set(key, String(value))
   }
-  const url = orgId && token ? `${getAPIUrl()}analytics/tabs/${tab}?${params}` : null
+  const url = orgId && token && enabled ? `${getAPIUrl()}analytics/tabs/${tab}?${params}` : null
 
   return useSWR<AnalyticsTabPayload>(url, (u) => fetcher(u, token), {
     revalidateOnFocus: false,

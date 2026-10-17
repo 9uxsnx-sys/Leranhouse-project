@@ -35,10 +35,13 @@ export function DateRangeFilter({
   value,
   onChange,
   options = ['7d', '30d', '90d', '12m'],
+  labels,
 }: {
   value: string
   onChange?: (v: string) => void
   options?: string[]
+  /** Optional display labels keyed by option value (the value itself stays the token). */
+  labels?: Record<string, string>
 }) {
   return (
     <div className="inline-flex items-center gap-0.5 p-0.5 rounded-lg bg-gray-100">
@@ -52,7 +55,7 @@ export function DateRangeFilter({
             value === o ? 'bg-white text-gray-900 font-semibold shadow-sm' : 'text-gray-500 font-medium hover:text-gray-900'
           )}
         >
-          {o}
+          {labels?.[o] ?? o}
         </button>
       ))}
     </div>

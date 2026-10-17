@@ -1843,6 +1843,12 @@
                                    "create_your_first_course":  "Create your first course",
                                    "chapter":  "chapter",
                                    "chapters":  "chapters",
+                                   "completion_rate":  "Completion rate",
+                                   "last_period":  "last {{range}}",
+                                   "analytics_locked_title":  "Analytics is a Standard feature",
+                                   "analytics_locked_description":  "Upgrade to Standard or higher to see activity, enrollments and completion on this page.",
+                                   "analytics_unavailable":  "Analytics data is unavailable right now.",
+                                   "upgrade":  "Upgrade",
                                    "recent_members":  "Recent Members",
                                    "total":  "total",
                                    "no_members_yet":  "No members yet",
@@ -1858,7 +1864,83 @@
                                    "ai_credits":  "AI Credits",
                                    "used":  "used",
                                    "no_credits_remaining":  "No credits remaining",
-                                   "includes_purchased":  "Includes {{count}} purchased"
+                                   "includes_purchased":  "Includes {{count}} purchased",
+                                   "needs_attention":  {
+                                                           "title":  "Needs attention",
+                                                           "unverified":  "Unverified members",
+                                                           "unverified_hint":  "Waiting for email verification",
+                                                           "drafts":  "Draft courses",
+                                                           "drafts_hint":  "Not published yet",
+                                                           "questions":  "Unanswered questions",
+                                                           "questions_hint":  "Open questions in Communities",
+                                                           "usage":  "Plan limits",
+                                                           "usage_full":  "Limits reached — review your plan",
+                                                           "review":  "Review",
+                                                           "manage":  "Manage",
+                                                           "all_clear":  "All clear"
+                                                       },
+                                   "pulse":  {
+                                                 "title":  "Learning pulse",
+                                                 "enrolled":  "Enrolled",
+                                                 "started":  "Started",
+                                                 "completed":  "Completed",
+                                                 "rate_hint":  "completed ÷ enrolled",
+                                                 "rate_sub":  "{{completed}} of {{enrolled}} enrollments completed",
+                                                 "rate_empty":  "No enrollments in this period"
+                                             },
+                                   "health":  {
+                                                  "title":  "Course health"
+                                              },
+                                   "latest":  {
+                                                  "title":  "Latest"
+                                              },
+                                   "payments":  {
+                                                    "title":  "Recent payments",
+                                                    "paid":  "Paid",
+                                                    "failed":  "Failed",
+                                                    "pending":  "Pending",
+                                                    "refunded":  "Refunded",
+                                                    "learner":  "Learner",
+                                                    "course":  "Course",
+                                                    "amount":  "Amount",
+                                                    "status":  "Status",
+                                                    "date":  "Date",
+                                                    "empty_title":  "No payments yet",
+                                                    "empty_description":  "Transactions will appear here once payments are enabled."
+                                                },
+                                   "charts":  {
+                                                  "enrollment_trend":  {
+                                                                           "title":  "Enrollments over time",
+                                                                           "series":  {
+                                                                                          "enrollments":  "New enrollments",
+                                                                                          "active":  "Active learners"
+                                                                                      }
+                                                                       },
+                                                  "completion_funnel":  {
+                                                                            "title":  "Completion funnel",
+                                                                            "series":  {
+                                                                                           "value":  "Learners"
+                                                                                       },
+                                                                            "labels":  {
+                                                                                           "enrolled":  "Enrolled",
+                                                                                           "started":  "Started",
+                                                                                           "halfway":  "Halfway",
+                                                                                           "completed":  "Completed"
+                                                                                       }
+                                                                        },
+                                                  "learner_progress":  {
+                                                                           "title":  "Learner progress",
+                                                                           "series":  {
+                                                                                          "value":  "Learners"
+                                                                                      }
+                                                                       }
+                                              },
+                                   "range":  {
+                                                 "7d":  "7d",
+                                                 "30d":  "30d",
+                                                 "90d":  "90d",
+                                                 "12m":  "12m"
+                                             }
                                },
                       "courses":  {
                                       "title":  "Courses",
@@ -4850,12 +4932,75 @@
                                                  }
                                  },
     "payments":  {
+                     "title":  "Payments",
                      "tabs":  {
                                    "overview":  "Overview",
+                                   "transactions":  "Transactions",
                                    "offers":  "Offers",
                                    "groups":  "Payment Groups",
+                                   "payouts":  "Payouts",
                                    "configuration":  "Configuration"
                                },
+                     "pages":  {
+                                   "overview":  { "title":  "Overview" },
+                                   "transactions":  { "title":  "Transactions" },
+                                   "offers":  { "title":  "Offers" },
+                                   "groups":  { "title":  "Payment Groups" },
+                                   "payouts":  { "title":  "Payouts" },
+                                   "configuration":  { "title":  "Payment Configuration" }
+                               },
+                     "overview":  {
+                                      "preview_shop":  "Preview shop",
+                                      "revenue_title":  "Revenue",
+                                      "revenue_series":  "Revenue",
+                                      "recent_payments":  "Recent payments"
+                                  },
+                     "transactions":  {
+                                          "title":  "Transactions",
+                                          "learner":  "Learner",
+                                          "course":  "Course",
+                                          "method":  "Method",
+                                          "amount":  "Amount",
+                                          "status":  "Status",
+                                          "date":  "Date",
+                                          "paid":  "Paid",
+                                          "pending":  "Pending",
+                                          "failed":  "Failed",
+                                          "refunded":  "Refunded",
+                                          "search_placeholder":  "Search learner, course or order",
+                                          "all_statuses":  "All statuses",
+                                          "empty_title":  "No transactions found",
+                                          "empty_description":  "Try a different search or status filter."
+                                      },
+                     "payouts":  {
+                                     "teacher":  "Teacher",
+                                     "course_count_one":  "{{count}} course",
+                                     "course_count_other":  "{{count}} courses",
+                                     "gross":  "Gross revenue",
+                                     "share":  "Share",
+                                     "payout":  "Payout",
+                                     "status":  "Status",
+                                     "paid":  "Paid",
+                                     "pending":  "Pending",
+                                     "failed":  "Failed",
+                                     "refunded":  "Refunded",
+                                     "minimum":  "Minimum payout {{amount}}",
+                                     "monthly_costs":  "Monthly costs",
+                                     "total_costs":  "Total costs",
+                                     "profit_split":  "Profit split",
+                                     "gross_revenue":  "Gross revenue",
+                                     "costs_label":  "Operating costs",
+                                     "net_profit":  "Net profit",
+                                     "teacher_pool":  "Teacher pool (40%)",
+                                     "platform_pool":  "Platform pool (60%)",
+                                     "teacher_payouts":  "Teacher payouts",
+                                     "costs":  {
+                                                    "hosting":  "Hosting & infrastructure",
+                                                    "marketing":  "Marketing & ads",
+                                                    "fees":  "Payment gateway fees",
+                                                    "other":  "Other operating costs"
+                                                }
+                                 },
                      "stripe_dashboard":  "Stripe Dashboard",
                      "configuration":  {
                                            "title":  "Payments Configuration",

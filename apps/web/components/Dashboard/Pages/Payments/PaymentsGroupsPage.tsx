@@ -422,7 +422,7 @@ export default function PaymentsGroupsPage() {
   };
 
   return (
-    <div className="ml-10 mr-10 mx-auto bg-white rounded-xl nice-shadow px-4 py-4">
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
       <Modal
         isDialogOpen={isCreateOpen}
         onOpenChange={setIsCreateOpen}
@@ -449,11 +449,8 @@ export default function PaymentsGroupsPage() {
       />
 
       {/* Page header */}
-      <div className="flex items-center justify-between bg-gray-50 px-5 py-3 rounded-md mb-5">
-        <div className="-space-y-0.5">
-          <h1 className="font-bold text-xl text-gray-800">{t('dashboard.payments.groups.title')}</h1>
-          <p className="text-gray-500 text-sm">{t('dashboard.payments.groups.subtitle')}</p>
-        </div>
+      <div className="flex items-center justify-between mb-5">
+        <p className="text-sm text-gray-500">{t('dashboard.payments.groups.subtitle')}</p>
         <Button onClick={() => setIsCreateOpen(true)} size="sm">
           <Plus size={14} className="mr-1.5" /> {t('dashboard.payments.groups.new_group')}
         </Button>

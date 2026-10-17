@@ -71,8 +71,8 @@ function PaymentsOffersPage() {
   if (!offers) return <div>{t('common.loading')}</div>;
 
   return (
-    <div className="h-full w-full bg-[#f8f8f8]">
-      <div className="pl-10 pr-10 mx-auto">
+    <div className="w-full">
+      <div className="w-full">
         <Modal
           isDialogOpen={isCreateModalOpen}
           onOpenChange={setIsCreateModalOpen}
@@ -98,7 +98,7 @@ function PaymentsOffersPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {offers.data.map((offer: any) => (
-            <div key={offer.id} className="bg-white p-4 rounded-lg nice-shadow flex flex-col h-full">
+            <div key={offer.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col h-full">
               {editingOfferId === String(offer.id) ? (
                 <EditOfferForm
                   offer={offer}

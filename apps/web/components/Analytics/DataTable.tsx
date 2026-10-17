@@ -68,8 +68,10 @@ export function DataTable<T extends Record<string, any>>({
     }
   }
 
+  // Logical alignment: `end` is the right edge in LTR and the left edge in RTL,
+  // so numeric/date columns stay on the inline end when the page flips.
   const alignClass = (a?: Column<T>['align']) =>
-    a === 'right' ? 'text-right' : a === 'center' ? 'text-center' : 'text-left'
+    a === 'right' ? 'text-end' : a === 'center' ? 'text-center' : 'text-start'
 
   return (
     <div className="overflow-x-auto">

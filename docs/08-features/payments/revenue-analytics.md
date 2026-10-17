@@ -1,10 +1,18 @@
 # Revenue Analytics — Dashboard Section
 
-> **Status:** Planned
-> **Route:** `/orgs/{orgslug}/dash/revenue/{subpage}`
+> **Status:** Planned (v1 folded into Payments)
+> **Route (future split):** `/orgs/{orgslug}/dash/revenue/{subpage}`
 > **Sits beside:** [Payments](./overview.md) · [Teacher Payout Plan](./teacher-payout-plan.md)
 
 Money gets its **own top-level dashboard section**, not a tab inside Analytics.
+
+---
+
+> **v1 note (implemented):** the first two money surfaces already live inside
+> `/dash/payments/*` — **Overview** carries the revenue-over-time chart and
+> **Payouts** carries the 40/60 split, monthly costs and teacher payout table.
+> This document describes the future split into a dedicated `/dash/revenue`
+> section, which is deferred until the payments backend exists.
 
 ---
 

@@ -1559,6 +1559,12 @@
                                    "create_your_first_course":  "أنشئ دورتك الأولى",
                                    "chapter":  "فصل",
                                    "chapters":  "فصول",
+                                   "completion_rate":  "نسبة الإكمال",
+                                   "last_period":  "آخر {{range}}",
+                                   "analytics_locked_title":  "التحليلات متاحة في خطة Standard",
+                                   "analytics_locked_description":  "قم بالترقية إلى Standard أو أعلى لعرض النشاط والالتحاقات والإكمال في هذه الصفحة.",
+                                   "analytics_unavailable":  "بيانات التحليلات غير متاحة حاليًا.",
+                                   "upgrade":  "ترقية",
                                    "recent_members":  "الأعضاء الجدد",
                                    "total":  "الإجمالي",
                                    "no_members_yet":  "لا يوجد أعضاء بعد",
@@ -1574,7 +1580,82 @@
                                    "ai_credits":  "أرصدة الذكاء الاصطناعي",
                                    "used":  "مستخدَم",
                                    "no_credits_remaining":  "لا توجد أرصدة متبقية",
-                                   "includes_purchased":  "يشمل {{count}} مشتراة"
+                                   "includes_purchased":  "يشمل {{count}} مشتراة",
+                                   "needs_attention":  {
+                                                           "title":  "بحاجة إلى إجراء",
+                                                           "unverified":  "أعضاء غير مُتحققين",
+                                                           "unverified_hint":  "بانتظار التحقق من البريد الإلكتروني",
+                                                           "drafts":  "دورات كمسودة",
+                                                           "drafts_hint":  "لم تُنشر بعد",
+                                                           "questions":  "أسئلة بلا إجابة",
+                                                           "questions_hint":  "أسئلة مفتوحة في المجتمعات",
+                                                           "usage":  "حدود الخطة",
+                                                           "usage_full":  "تم الوصول للحدود — راجع خطتك",
+                                                           "review":  "مراجعة",
+                                                           "manage":  "إدارة",
+                                                           "all_clear":  "لا شيء معلّق"
+                                                       },
+                                   "pulse":  {
+                                                 "title":  "نبض التعلّم",
+                                                 "enrolled":  "الملتحقون",
+                                                 "started":  "البدء",
+                                                 "completed":  "المكتملون",
+                                                 "rate_hint":  "المكتملون ÷ الملتحقون",
+                                                 "rate_sub":  "{{completed}} من {{enrolled}} التحاق مكتمل",
+                                                 "rate_empty":  "لا توجد التحاقات في هذه الفترة"
+                                             },
+                                   "health":  {
+                                                  "title":  "صحة الدورات"
+                                              },
+                                   "latest":  {
+                                                  "title":  "أحدث الإضافات"
+                                              },
+                                   "payments":  {
+                                                    "title":  "المدفوعات الأخيرة",
+                                                    "paid":  "مدفوع",
+                                                    "failed":  "فشل",
+                                                    "pending":  "قيد الانتظار",
+                                                    "refunded":  "مُسترد",
+                                                    "learner":  "المتعلم",
+                                                    "course":  "الدورة",
+                                                    "amount":  "المبلغ",
+                                                    "status":  "الحالة",
+                                                    "date":  "التاريخ",
+                                                    "empty_title":  "لا توجد مدفوعات بعد",
+                                                    "empty_description":  "ستظهر المعاملات هنا عند تفعيل المدفوعات."
+                                                },
+                                   "charts":  {
+                                                  "enrollment_trend":  {
+                                                                           "title":  "الالتحاقات عبر الوقت",
+                                                                           "series":  {
+                                                                                          "enrollments":  "الالتحاقات الجديدة",
+                                                                                          "active":  "المتعلمون النشطون"
+                                                                                      }
+                                                                       },
+                                                  "completion_funnel":  {
+                                                                            "title":  "قمع الإكمال",
+                                                                            "series":  {
+                                                                                           "value":  "المتعلمون"
+                                                                                       },
+                                                                            "labels":  {
+                                                                                           "enrolled":  "الملتحقون",
+                                                                                           "started":  "بدأوا",
+                                                                                           "halfway":  "منتصف الطريق",
+                                                                                           "completed":  "أكملوا"
+                                                                                       }
+                                                                        },
+                                                  "learner_progress":  {
+                                                                           "title":  "تقدم المتعلمين",
+                                                                           "series":  {
+                                                                                          "value":  "المتعلمون"
+                                                                                      }
+                                                                       }
+                                              },
+                                   "range":  {
+                                                 "7d":  "7 أيام",
+                                                 "30d":  "30 يومًا",
+                                                 "90d":  "90 يومًا"
+                                             }
                                },
                       "courses":  {
                                       "title":  "الدورات",

@@ -1524,6 +1524,12 @@
                                    "boards":  "Tableaux",
                                    "chapter":  "chapitre",
                                    "chapters":  "chapitres",
+                                   "completion_rate":  "Taux d\u0027achèvement",
+                                   "last_period":  "derniers {{range}}",
+                                   "analytics_locked_title":  "Les analytiques nécessitent le forfait Standard",
+                                   "analytics_locked_description":  "Passez au forfait Standard ou supérieur pour voir l\u0027activité, les enrôlements et l\u0027achèvement sur cette page.",
+                                   "analytics_unavailable":  "Les données analytiques sont indisponibles pour le moment.",
+                                   "upgrade":  "Mettre à niveau",
                                    "communities":  "Communautés",
                                    "completions_30d":  "Achèvements (30 j)",
                                    "courses":  "Cours",
@@ -1564,7 +1570,82 @@
                                    "usage_data_unavailable":  "Données d\u0027utilisation non disponibles",
                                    "used":  "utilisé",
                                    "view_all":  "Tout voir",
-                                   "welcome_back":  "Bienvenue"
+                                   "welcome_back":  "Bienvenue",
+                                   "needs_attention":  {
+                                                           "title":  "À traiter",
+                                                           "unverified":  "Membres non vérifiés",
+                                                           "unverified_hint":  "En attente de vérification e-mail",
+                                                           "drafts":  "Cours en brouillon",
+                                                           "drafts_hint":  "Pas encore publiés",
+                                                           "questions":  "Questions sans réponse",
+                                                           "questions_hint":  "Questions ouvertes dans les communautés",
+                                                           "usage":  "Limites du forfait",
+                                                           "usage_full":  "Limites atteintes — vérifiez votre forfait",
+                                                           "review":  "Examiner",
+                                                           "manage":  "Gérer",
+                                                           "all_clear":  "Tout est à jour"
+                                                       },
+                                   "pulse":  {
+                                                 "title":  "Pouls pédagogique",
+                                                 "enrolled":  "Inscrits",
+                                                 "started":  "Commencés",
+                                                 "completed":  "Terminés",
+                                                 "rate_hint":  "terminés ÷ inscrits",
+                                                 "rate_sub":  "{{completed}} sur {{enrolled}} inscriptions terminées",
+                                                 "rate_empty":  "Aucune inscription sur cette période"
+                                             },
+                                   "health":  {
+                                                  "title":  "Santé des cours"
+                                              },
+                                   "latest":  {
+                                                  "title":  "Derniers ajouts"
+                                              },
+                                   "payments":  {
+                                                    "title":  "Paiements récents",
+                                                    "paid":  "Payé",
+                                                    "failed":  "Échoué",
+                                                    "pending":  "En attente",
+                                                    "refunded":  "Remboursé",
+                                                    "learner":  "Apprenant",
+                                                    "course":  "Cours",
+                                                    "amount":  "Montant",
+                                                    "status":  "Statut",
+                                                    "date":  "Date",
+                                                    "empty_title":  "Aucun paiement",
+                                                    "empty_description":  "Les transactions apparaîtront ici une fois les paiements activés."
+                                                },
+                                   "charts":  {
+                                                  "enrollment_trend":  {
+                                                                           "title":  "Inscriptions dans le temps",
+                                                                           "series":  {
+                                                                                          "enrollments":  "Nouvelles inscriptions",
+                                                                                          "active":  "Apprenants actifs"
+                                                                                      }
+                                                                       },
+                                                  "completion_funnel":  {
+                                                                            "title":  "Entonnoir d\u0027achèvement",
+                                                                            "series":  {
+                                                                                           "value":  "Apprenants"
+                                                                                       },
+                                                                            "labels":  {
+                                                                                           "enrolled":  "Inscrits",
+                                                                                           "started":  "Commencés",
+                                                                                           "halfway":  "À mi-parcours",
+                                                                                           "completed":  "Terminés"
+                                                                                       }
+                                                                        },
+                                                  "learner_progress":  {
+                                                                           "title":  "Progression des apprenants",
+                                                                           "series":  {
+                                                                                          "value":  "Apprenants"
+                                                                                      }
+                                                                       }
+                                              },
+                                   "range":  {
+                                                 "7d":  "7 j",
+                                                 "30d":  "30 j",
+                                                 "90d":  "90 j"
+                                             }
                                },
                       "courses":  {
                                       "title":  "Cours",

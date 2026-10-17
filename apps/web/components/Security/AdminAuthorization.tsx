@@ -12,15 +12,13 @@ type AuthorizationProps = {
   authorizationMode: 'component' | 'page';
 };
 
-const ADMIN_PATHS = [
-  '/dash/org/*',
-  '/dash/org',
-  '/dash/users/*',
-  '/dash/users',
-  '/dash/courses/*',
-  '/dash/courses',
-  '/dash/org/settings/general',
-];
+/**
+ * The whole dashboard is admin-only — instructors never enter it.
+ * One rule for the entire `/dash` tree instead of a hand-maintained path list
+ * (which kept leaving newer pages such as the home, communities and podcasts
+ * outside the gate).
+ */
+const DASH_PREFIX = '/dash';
 
 const AdminAuthorization: React.FC<AuthorizationProps> = ({ children, authorizationMode }) => {
   const session = useLHSession() as any;
@@ -32,21 +30,14 @@ const AdminAuthorization: React.FC<AuthorizationProps> = ({ children, authorizat
 
   const isUserAuthenticated = useMemo(() => session.status === 'authenticated', [session.status]);
 
-  const checkPathname = useCallback((pattern: string, pathname: string) => {
-    // Ensure the inputs are strings
-    if (typeof pattern !== 'string' || typeof pathname !== 'string') {
-      return false;
-    }
-
-    // Convert pattern to a regex pattern
-    const regexPattern = new RegExp(`^${pattern.replace(/[\/.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\\*/g, '.*')}$`);
-
-    // Test the pathname against the regex pattern
-    return regexPattern.test(pathname);
-  }, []);
-
-
-  const isAdminPath = useMemo(() => ADMIN_PATHS.some(path => checkPathname(path, pathname)), [pathname, checkPathname]);
+  // The middleware rewrites `/dash/*` to `/orgs/{slug}/dash/*`, but
+  // `usePathname()` can still report either form (SSR vs client navigation),
+  // so normalise before matching.
+  const isAdminPath = useMemo(() => {
+    if (typeof pathname !== 'string') return false;
+    const normalized = pathname.replace(/^\/orgs\/[^/]+/, '');
+    return normalized === DASH_PREFIX || normalized.startsWith(`${DASH_PREFIX}/`);
+  }, [pathname]);
 
   const authorizeUser = useCallback(() => {
     if (loading) {
@@ -64,7 +55,8 @@ const AdminAuthorization: React.FC<AuthorizationProps> = ({ children, authorizat
           setIsAuthorized(true);
         } else {
           setIsAuthorized(false);
-          router.push('/dash');
+          // Never send them back to `/dash` — that page is gated too.
+          router.push(getUriWithOrg(org.slug, '/'));
         }
       } else {
         setIsAuthorized(true);
@@ -72,7 +64,7 @@ const AdminAuthorization: React.FC<AuthorizationProps> = ({ children, authorizat
     } else if (authorizationMode === 'component') {
       setIsAuthorized(isAdmin);
     }
-  }, [loading, isUserAuthenticated, isAdmin, isAdminPath, authorizationMode, router]);
+  }, [loading, isUserAuthenticated, isAdmin, isAdminPath, authorizationMode, router, org.slug]);
 
   useEffect(() => {
     authorizeUser();

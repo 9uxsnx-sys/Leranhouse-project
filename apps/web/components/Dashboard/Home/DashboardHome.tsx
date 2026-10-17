@@ -1,125 +1,144 @@
 'use client'
-import React from 'react'
-import Link from 'next/link'
-import {
-  BarChart3,
-  Users,
-  BookOpen,
-} from 'lucide-react'
-import { ConceptIcon } from '@components/ui/icons'
-import useSWR from 'swr'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useOrg } from '@components/Contexts/OrgContext'
-import { getAPIUrl } from '@services/config/config'
-import { OrgUsageResponse, orgUsageFetcher } from '@services/orgs/usage'
-import AdminAuthorization from '@components/Security/AdminAuthorization'
 import { usePlan } from '@components/Hooks/usePlan'
-import QuickStats from './QuickStats'
-import RecentCourses from './RecentCourses'
-import RecentMembers from './RecentMembers'
-import ContentOverview from './ContentOverview'
-import UsageOverview from './UsageOverview'
+import { planMeetsRequirement } from '@services/plans/plans'
+import { useAnalyticsTab, useOrgCourses } from '@services/analytics/tabs'
+import type { AnalyticsCard } from '@services/analytics/tabs'
+import { DateRangeFilter, FilterSelect } from '@components/Analytics/Filters'
+import { TabCard } from '@components/Analytics/TabCard'
+import { SectionCard } from '@components/Analytics/Card'
+import PaymentsTable from './PaymentsTable'
 
-const PLAN_COLORS: Record<string, { bg: string; text: string }> = {
-  free: { bg: 'bg-gray-100', text: 'text-gray-600' },
-  oss: { bg: 'bg-emerald-100', text: 'text-emerald-700' },
-  standard: { bg: 'bg-blue-100', text: 'text-blue-700' },
-  pro: { bg: 'bg-purple-100', text: 'text-purple-700' },
-  enterprise: { bg: 'bg-amber-100', text: 'text-amber-700' },
+const RANGES = ['7d', '30d', '90d']
+
+/**
+ * The API sends English card titles, series names and category labels.
+ * Translate them on the client without touching the payload contract.
+ */
+function localizeCard(
+  card: AnalyticsCard | undefined,
+  key: string,
+  t: (key: string, options?: any) => string
+): AnalyticsCard | undefined {
+  if (!card) return card
+  return {
+    ...card,
+    title: t(`dashboard.home.charts.${key}.title`, { defaultValue: card.title }),
+    series: card.series?.map((series) => ({
+      ...series,
+      name: t(`dashboard.home.charts.${key}.series.${series.key}`, {
+        defaultValue: series.name,
+      }),
+    })),
+    data: card.data?.map((row) => {
+      if (!row.name) return row
+      const slug = String(row.name)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_|_$/g, '')
+      return {
+        ...row,
+        name: t(`dashboard.home.charts.${key}.labels.${slug}`, {
+          defaultValue: row.name,
+        }),
+      }
+    }),
+  }
 }
 
+/**
+ * Admin home — welcome block, analytics action row, one full-width chart.
+ * Everything reuses the components and spacing of the Analytics area.
+ */
 export default function DashboardHome() {
   const { t } = useTranslation()
   const session = useLHSession() as any
-  const org = useOrg() as any
 
-  const token = session?.data?.tokens?.access_token
-  const orgId = org?.id
   const username = session?.data?.user?.username || ''
+  const plan = usePlan()
+  const analyticsEnabled = planMeetsRequirement(plan, 'standard')
 
-  // SWR will dedupe with UsageOverview's identical call
-  const { data: usageData } = useSWR<OrgUsageResponse>(
-    token && orgId ? `${getAPIUrl()}orgs/${orgId}/usage` : null,
-    (url) => orgUsageFetcher(url, token),
-    { revalidateOnFocus: false, dedupingInterval: 30000 }
+  const [range, setRange] = useState('30d')
+  const [course, setCourse] = useState('all')
+  const courseOptions = useOrgCourses()
+
+  const { data, isLoading } = useAnalyticsTab(
+    'courses',
+    range,
+    course,
+    {},
+    analyticsEnabled
   )
 
-  const plan = usePlan()
-  const planStyle = PLAN_COLORS[plan] || PLAN_COLORS.free
+  const enrollmentTrend = localizeCard(
+    data?.cards?.course_enrollment_trend,
+    'enrollment_trend',
+    t
+  )
+  const completionFunnel = localizeCard(
+    data?.cards?.course_completion_funnel,
+    'completion_funnel',
+    t
+  )
+  const learnerProgress = localizeCard(
+    data?.cards?.course_learner_progress,
+    'learner_progress',
+    t
+  )
+
+  const rangeLabels = {
+    '7d': t('dashboard.home.range.7d'),
+    '30d': t('dashboard.home.range.30d'),
+    '90d': t('dashboard.home.range.90d'),
+  }
 
   return (
-    <div className="h-full w-full bg-[#f8f8f8]">
-      <div className="px-10 pt-8 pb-10">
-        <div className="space-y-6 max-w-[1600px] mx-auto w-full">
-          {/* Welcome Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                {t('dashboard.home.welcome_back')}{username ? `, ${username}` : ''}
-              </h1>
-              <div className="flex items-center gap-2 mt-1.5">
-                <span
-                  className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full capitalize ${planStyle.bg} ${planStyle.text}`}
-                >
-                  {plan === 'oss' ? 'OSS' : `${plan} ${t('dashboard.home.plan')}`}
-                </span>
-                {org?.name && (
-                  <span className="text-xs text-gray-400">{org.name}</span>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Link
-                href="/dash/courses?new=true"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors"
-              >
-                <ConceptIcon.add size={14} />
-                {t('dashboard.home.create_course')}
-              </Link>
-              <Link
-                href="/dash/analytics"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-gray-600 bg-white rounded-lg nice-shadow hover:bg-gray-50 transition-colors"
-              >
-                <BarChart3 size={14} />
-                {t('dashboard.home.analytics')}
-              </Link>
-              <Link
-                href="/dash/users/settings/users"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-gray-600 bg-white rounded-lg nice-shadow hover:bg-gray-50 transition-colors"
-              >
-                <Users size={14} />
-                {t('dashboard.home.members')}
-              </Link>
-              <Link
-                href="/dash/org/settings/general"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-gray-600 bg-white rounded-lg nice-shadow hover:bg-gray-50 transition-colors"
-              >
-                <ConceptIcon.settings size={14} />
-                {t('dashboard.home.settings')}
-              </Link>
-            </div>
-          </div>
+    <div className="pt-8 px-6 pb-10">
+      {/* Page title — exact size/weight used by the Courses, Communities and Podcasts listings */}
+      <h1 className="text-[28px] font-semibold text-ui-fg-base mb-6">
+        {t('dashboard.home.welcome_back')}
+        {username ? `, ${username}` : ''}
+      </h1>
 
-          <AdminAuthorization authorizationMode="component">
-            <div className="space-y-6">
-              {/* Content counts row */}
-              <ContentOverview />
+      {/* Action row */}
+      <div className="flex items-center justify-between gap-3 mb-8">
+        <DateRangeFilter
+          value={range}
+          onChange={setRange}
+          options={RANGES}
+          labels={rangeLabels}
+        />
+        <FilterSelect value={course} onChange={setCourse} options={courseOptions} />
+      </div>
 
-              {/* Main grid: courses + members + usage */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 space-y-6">
-                  <RecentCourses />
-                  <RecentMembers />
-                </div>
-                <div className="space-y-6">
-                  <UsageOverview />
-                  <QuickStats />
-                </div>
-              </div>
-            </div>
-          </AdminAuthorization>
+      {/* Full-row chart */}
+      {analyticsEnabled ? (
+        <TabCard card={enrollmentTrend} loading={isLoading} />
+      ) : (
+        <SectionCard title={t('dashboard.home.analytics')}>
+          <p className="text-xs text-gray-500 py-4">
+            {t('dashboard.home.analytics_locked_description')}
+          </p>
+        </SectionCard>
+      )}
+
+      {/* Row 2 — payments (UI only) + completion funnel */}
+      <div className="grid grid-cols-12 gap-6 mt-6">
+        <div className={`col-span-12 ${analyticsEnabled ? 'lg:col-span-7' : ''}`}>
+          <PaymentsTable />
         </div>
+        {analyticsEnabled && (
+          <div className="col-span-12 lg:col-span-5 flex flex-col justify-between gap-6">
+            <TabCard
+              card={completionFunnel}
+              loading={isLoading}
+              chartHeight={280}
+            />
+            <TabCard card={learnerProgress} loading={isLoading} chartHeight={268} />
+          </div>
+        )}
       </div>
     </div>
   )
