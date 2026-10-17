@@ -16,8 +16,7 @@ learnhouse-dev/
 ├── packages/
 │   └── ...                # Shared packages
 ├── docs/                  # Documentation
-├── .learnhouse/           # Docker compose configs
-└── medusa/                # Vendored Medusa e-commerce (UI reference only)
+└── .learnhouse/           # Docker compose configs
 ```
 
 ---
