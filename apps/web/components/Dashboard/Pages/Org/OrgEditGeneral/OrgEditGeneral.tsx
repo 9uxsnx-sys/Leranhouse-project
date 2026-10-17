@@ -23,18 +23,6 @@ import { getAPIUrl } from '@services/config/config'
 import { useTranslation } from 'react-i18next'
 import { ChevronRight, Globe, Check, Loader2, SaveAllIcon } from 'lucide-react'
 
-const validationSchema = Yup.object().shape({
-  name: Yup.string()
-    .required('Name is required')
-    .max(60, 'Organization name must be 60 characters or less'),
-  description: Yup.string()
-    .required('Short description is required')
-    .max(100, 'Short description must be 100 characters or less'),
-  about: Yup.string()
-    .optional()
-    .max(400, 'About text must be 400 characters or less'),
-})
-
 interface OrganizationValues {
   name: string
   description: string
@@ -48,6 +36,18 @@ const OrgEditGeneral: React.FC = () => {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
+
+  const validationSchema = React.useMemo(() => Yup.object().shape({
+    name: Yup.string()
+      .required(t('dashboard.organization.settings.validation.name_required'))
+      .max(60, t('dashboard.organization.settings.validation.name_too_long')),
+    description: Yup.string()
+      .required(t('dashboard.organization.settings.validation.description_required'))
+      .max(100, t('dashboard.organization.settings.validation.description_too_long')),
+    about: Yup.string()
+      .optional()
+      .max(400, t('dashboard.organization.settings.validation.about_too_long')),
+  }), [t])
 
   // Default language state
   const [defaultLanguage, setDefaultLanguage] = React.useState<string>(
@@ -135,10 +135,10 @@ const OrgEditGeneral: React.FC = () => {
                     )}
                     <span>
                       {isActiveSaving
-                        ? 'Saving...'
+                        ? t('common.saving')
                         : isSaved
-                          ? 'Saved'
-                          : 'Save'}
+                          ? t('dashboard.organization.settings.saved')
+                          : t('common.save')}
                     </span>
                   </button>
                 </div>

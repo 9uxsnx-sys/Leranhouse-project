@@ -54,7 +54,7 @@ const OrgEditSEO: React.FC = () => {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
-    toast.success('Copied to clipboard')
+    toast.success(t('dashboard.organization.seo.copied'))
   }
 
   const handleOgImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,9 +97,9 @@ const OrgEditSEO: React.FC = () => {
       mutate(`${getAPIUrl()}orgs/slug/${org.slug}`)
       setOgImageFile(null)
       setIsSaved(true)
-      toast.success('SEO settings saved successfully')
+      toast.success(t('dashboard.organization.seo.save_success'))
     } catch (err) {
-      toast.error('Failed to save SEO settings')
+      toast.error(t('dashboard.organization.seo.save_error'))
     } finally {
       setIsManualSaving(false)
     }
@@ -161,10 +161,10 @@ const OrgEditSEO: React.FC = () => {
                       )}
                       <span>
                         {isActiveSaving
-                          ? 'Saving...'
+                          ? t('common.saving')
                           : isSaved
-                            ? 'Saved'
-                            : 'Save'}
+                            ? t('dashboard.organization.seo.saved')
+                            : t('common.save')}
                       </span>
                     </button>
                   </div>
@@ -178,7 +178,7 @@ const OrgEditSEO: React.FC = () => {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <div className="flex items-center space-x-2 min-w-0 flex-1">
-                        <span className="text-sm font-medium text-gray-700 shrink-0">Sitemap:</span>
+                        <span className="text-sm font-medium text-gray-700 shrink-0">{t('dashboard.organization.seo.sitemap')}</span>
                         <a
                           href={sitemapUrl}
                           target="_blank"
@@ -208,7 +208,7 @@ const OrgEditSEO: React.FC = () => {
                     </div>
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <div className="flex items-center space-x-2 min-w-0 flex-1">
-                        <span className="text-sm font-medium text-gray-700 shrink-0">Robots.txt:</span>
+                        <span className="text-sm font-medium text-gray-700 shrink-0">{t('dashboard.organization.seo.robots')}</span>
                         <a
                           href={robotsUrl}
                           target="_blank"
@@ -246,24 +246,24 @@ const OrgEditSEO: React.FC = () => {
                   </h3>
                   <div className="space-y-4">
                     <FormField name="default_meta_title_suffix">
-                      <FormLabelAndMessage label="Title Suffix" />
+                      <FormLabelAndMessage label={t('dashboard.organization.seo.fields.title_suffix')} />
                       <Form.Control asChild>
                         <Input
                           className={fieldClassName}
                           onChange={handleFieldChange}
                           value={values.default_meta_title_suffix}
-                          placeholder=" | My Academy"
+                          placeholder={t('dashboard.organization.seo.fields.title_suffix_placeholder')}
                         />
                       </Form.Control>
                     </FormField>
                     <FormField name="default_meta_description">
-                      <FormLabelAndMessage label="Default Description" />
+                      <FormLabelAndMessage label={t('dashboard.organization.seo.fields.default_description')} />
                       <Form.Control asChild>
                         <Textarea
                           className={`${fieldClassName} min-h-[80px]`}
                           onChange={handleFieldChange}
                           value={values.default_meta_description}
-                          placeholder="A brief description of your organization for search engines"
+                          placeholder={t('dashboard.organization.seo.fields.description_placeholder')}
                         />
                       </Form.Control>
                     </FormField>
@@ -277,9 +277,9 @@ const OrgEditSEO: React.FC = () => {
                   </h3>
                   <div className="space-y-4">
                     <div>
-                      <label className="text-sm font-semibold text-gray-700">Default OG Image</label>
+                      <label className="text-sm font-semibold text-gray-700">{t('dashboard.organization.seo.og_image.label')}</label>
                       <p className="text-xs text-gray-500 mb-2 mt-0">
-                        Default sharing image for social media (1200x630 recommended)
+                        {t('dashboard.organization.seo.og_image.description')}
                       </p>
                       <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-ui-bg-field">
                         <div className="flex-shrink-0">
@@ -287,7 +287,7 @@ const OrgEditSEO: React.FC = () => {
                         </div>
                         <div className="flex-1">
                           <p className="text-sm font-medium text-gray-700">
-                            {existingOgImageUrl || ogImagePreview ? 'OG Image set' : 'No OG Image set'}
+                            {existingOgImageUrl || ogImagePreview ? t('dashboard.organization.seo.og_image.set') : t('dashboard.organization.seo.og_image.not_set')}
                           </p>
                         </div>
                         <input
@@ -302,7 +302,7 @@ const OrgEditSEO: React.FC = () => {
                             type="button"
                             onClick={clearOgImage}
                             className="flex items-center justify-center text-red-400 hover:text-red-600 transition-colors cursor-pointer"
-                            title="Remove OG image"
+                            title={t('dashboard.organization.seo.og_image.remove')}
                           >
                             <Trash2 size={18} />
                           </button>
@@ -311,7 +311,7 @@ const OrgEditSEO: React.FC = () => {
                             type="button"
                             onClick={() => ogImageInputRef.current?.click()}
                             className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
-                            title="Upload OG image"
+                            title={t('dashboard.organization.seo.og_image.upload')}
                           >
                             <UploadCloud size={18} />
                           </button>
@@ -321,20 +321,20 @@ const OrgEditSEO: React.FC = () => {
                         <div className="mt-3 max-w-[480px]">
                           <img
                             src={ogImagePreview || existingOgImageUrl || ''}
-                            alt="OG Image Preview"
+                            alt={t('dashboard.organization.seo.og_image.preview_alt')}
                             className="w-full aspect-video object-cover rounded-lg border border-gray-200"
                           />
                         </div>
                       )}
                     </div>
                     <FormField name="twitter_handle">
-                      <FormLabelAndMessage label="Twitter Handle" />
+                      <FormLabelAndMessage label={t('dashboard.organization.seo.fields.twitter_handle')} />
                       <Form.Control asChild>
                         <Input
                           className={fieldClassName}
                           onChange={handleFieldChange}
                           value={values.twitter_handle}
-                          placeholder="@yourhandle"
+                          placeholder={t('dashboard.organization.seo.fields.twitter_handle_placeholder')}
                         />
                       </Form.Control>
                     </FormField>
@@ -348,13 +348,13 @@ const OrgEditSEO: React.FC = () => {
                   </h3>
                   <div className="space-y-4">
                     <FormField name="google_site_verification">
-                      <FormLabelAndMessage label="Google Search Console" />
+                      <FormLabelAndMessage label={t('dashboard.organization.seo.fields.google_search_console')} />
                       <Form.Control asChild>
                         <Input
                           className={fieldClassName}
                           onChange={handleFieldChange}
                           value={values.google_site_verification}
-                          placeholder="Google verification code"
+                          placeholder={t('dashboard.organization.seo.fields.google_verification_placeholder')}
                         />
                       </Form.Control>
                     </FormField>
@@ -392,7 +392,7 @@ const OrgEditSEO: React.FC = () => {
                           id="noindex_communities"
                         />
                       </div>
-                      <span className="text-sm text-gray-600 select-none">Hide Communities</span>
+                      <span className="text-sm text-gray-600 select-none">{t('dashboard.organization.seo.hide_communities')}</span>
                     </label>
                   </div>
                 </div>

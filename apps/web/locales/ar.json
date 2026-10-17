@@ -2280,7 +2280,15 @@
                                                             "watermark_desc":  "إظهار علامة LearnHouse المائية على صفحات منظمتك",
                                                             "watermark_free_plan":  "يتم عرض العلامة المائية دائمًا في الخطة المجانية",
                                                             "watermark_label":  "علامة \"صنع بواسطة LearnHouse\" المائية",
-                                                            "watermark_ee":  "مخفي بترخيص الإصدار المؤسسي"
+                                                            "watermark_ee":  "مخفي بترخيص الإصدار المؤسسي",
+                                                            "saved":  "تم الحفظ",
+                                                            "validation":  {
+                                                               "name_required":  "الاسم مطلوب",
+                                                               "name_too_long":  "يجب أن يكون اسم المنظمة 60 حرفًا أو أقل",
+                                                               "description_required":  "الوصف القصير مطلوب",
+                                                               "description_too_long":  "يجب أن يكون الوصف القصير 100 حرف أو أقل",
+                                                               "about_too_long":  "يجب أن يكون نص حول 400 حرف أو أقل"
+                                                            }
                                                         },
                                            "images":  {
                                                           "title":  "الصور والمعاينات",
@@ -2341,8 +2349,263 @@
                                                                          "social":  "روابط التواصل",
                                                                          "theme":  "السمة",
                                                                          "auth":  "المصادقة"
-                                                                     }
+                                                                     },
+                                              "images":  {
+                                                 "header":  "الشعار والأيقونة",
+                                                 "favicon":  "أيقونة الموقع",
+                                                 "logomark":  "الرمز",
+                                                 "uploading_logomark":  "جاري رفع الرمز...",
+                                                 "remove_logo":  "إزالة الشعار",
+                                                 "upload_logo":  "رفع شعار",
+                                                 "remove_favicon":  "إزالة أيقونة الموقع",
+                                                 "upload_favicon":  "رفع أيقونة الموقع",
+                                                 "remove_logomark":  "إزالة الرمز",
+                                                 "upload_logomark":  "رفع الرمز",
+                                                 "remove_thumbnail":  "إزالة الصورة المصغرة",
+                                                 "upload_thumbnail":  "رفع صورة مصغرة",
+                                                 "toasts":  {
+                                                    "logomark_success":  "تم تحديث الرمز",
+                                                    "logomark_error":  "فشل رفع الرمز"
+                                                 }
+                                              },
+                                              "font":  {
+                                                 "typography":  "الخط",
+                                                 "search_placeholder":  "البحث عن الخطوط...",
+                                                 "showing_all":  "عرض النتائج من جميع خطوط Google",
+                                                 "no_results":  "لم يتم العثور على خطوط",
+                                                 "default":  "افتراضي",
+                                                 "default_value":  "{{font}} (افتراضي)",
+                                                 "description":  "اختر خطًا لصفحاتك العامة. ابحث لتصفح جميع خطوط Google.",
+                                                 "preview":  "معاينة",
+                                                 "preview_text":  "نص حكيم له سر قاطع وذو شأن عظيم مكتوب على ثوب أخضر ومغلف بجلد أزرق"
+                                              },
+                                              "theme":  {
+                                                 "no_color":  "بدون لون"
+                                              },
+                                              "saved":  "تم الحفظ"
                                                         },
+                                           "domains":  {
+                                              "add_domain":  "إضافة نطاق",
+                                              "verify":  "تحقق",
+                                              "copied":  "تم النسخ إلى الحافظة",
+                                              "never":  "أبدًا",
+                                              "empty":  {
+                                                 "title":  "لا توجد نطاقات مخصصة بعد",
+                                                 "description":  "أضف نطاقك الأول للبدء"
+                                              },
+                                              "add_dialog":  {
+                                                 "title":  "إضافة نطاق مخصص",
+                                                 "description":  "أدخل النطاق الذي تريد استخدامه لمنظمتك.",
+                                                 "hint":  "أدخل نطاقًا أو نطاقًا فرعيًا (مثل learn.mycompany.com أو academy.example.org)"
+                                              },
+                                              "fields":  {
+                                                 "domain":  "النطاق",
+                                                 "domain_placeholder":  "learn.mycompany.com"
+                                              },
+                                              "verify_dialog":  {
+                                                 "dns_required_title":  "مطلوب تكوين DNS",
+                                                 "dns_required_description":  "أضف هذه السجلات لدى مسجل النطاق الخاص بك (مثل Cloudflare أو GoDaddy أو Namecheap). قد تستغرق تغييرات DNS حتى 48 ساعة لتنتشر.",
+                                                 "txt_record":  "سجل TXT",
+                                                 "for_verification":  "للتحقق",
+                                                 "cname_record":  "سجل CNAME",
+                                                 "for_routing":  "للتوجيه",
+                                                 "host_name":  "المضيف / الاسم",
+                                                 "value":  "القيمة",
+                                                 "value_target":  "القيمة / الهدف",
+                                                 "ssl_certificate":  "شهادة SSL",
+                                                 "https_status":  "حالة HTTPS",
+                                                 "check":  "فحص",
+                                                 "checking_ssl":  "جاري فحص حالة SSL...",
+                                                 "verifying":  "جاري التحقق...",
+                                                 "verify_dns":  "تحقق من DNS"
+                                              },
+                                              "delete_dialog":  {
+                                                 "title":  "حذف النطاق المخصص",
+                                                 "description":  "هل أنت متأكد من أنك تريد حذف هذا النطاق؟ لا يمكن التراجع عن هذا الإجراء.",
+                                                 "confirm":  "حذف النطاق"
+                                              },
+                                              "status":  {
+                                                 "verified":  "تم التحقق",
+                                                 "pending":  "قيد الانتظار",
+                                                 "failed":  "فشل"
+                                              },
+                                              "ssl":  {
+                                                 "checking":  "جاري الفحص...",
+                                                 "active":  "SSL نشط",
+                                                 "provisioning":  "جاري التجهيز",
+                                                 "invalid":  "غير صالح",
+                                                 "tooltip":  "الجهة المصدرة: {{issuer}}\nتنتهي في: {{expires}}",
+                                                 "issuer":  "الجهة المصدرة: {{issuer}}",
+                                                 "expires":  "تنتهي في: {{expires}}",
+                                                 "check_failed":  "تعذر فحص حالة SSL."
+                                              },
+                                              "toasts":  {
+                                                 "domain_required":  "النطاق مطلوب",
+                                                 "adding":  "جاري إضافة النطاق...",
+                                                 "added":  "تمت إضافة النطاق بنجاح",
+                                                 "add_failed":  "فشل في إضافة النطاق",
+                                                 "verifying":  "جاري التحقق من النطاق...",
+                                                 "verified":  "تم التحقق من النطاق بنجاح!",
+                                                 "verification_failed":  "فشل التحقق",
+                                                 "deleting":  "جاري حذف النطاق...",
+                                                 "deleted":  "تم حذف النطاق بنجاح",
+                                                 "delete_failed":  "فشل في حذف النطاق"
+                                              }
+                                           },
+                                           "automations":  {
+                                              "add_endpoint":  "إضافة نقطة نهاية",
+                                              "new_endpoint":  "(نقطة نهاية جديدة)",
+                                              "no_description":  "لا يوجد وصف",
+                                              "saved":  "تم الحفظ",
+                                              "events_count_zero":  "{{count}} حدث",
+                                              "events_count_one":  "{{count}} حدث",
+                                              "events_count_two":  "{{count}} حدثان",
+                                              "events_count_few":  "{{count}} أحداث",
+                                              "events_count_many":  "{{count}} حدثًا",
+                                              "events_count_other":  "{{count}} حدث",
+                                              "status":  {
+                                                 "active":  "نشط",
+                                                 "inactive":  "غير نشط"
+                                              },
+                                              "empty":  {
+                                                 "title":  "لا توجد نقاط نهاية webhook بعد",
+                                                 "description":  "أنشئ نقطة النهاية الأولى لبدء استقبال الأحداث"
+                                              },
+                                              "fields":  {
+                                                 "endpoint_url":  "رابط نقطة النهاية",
+                                                 "endpoint_url_placeholder":  "https://hooks.make.com/...",
+                                                 "description":  "الوصف",
+                                                 "description_placeholder":  "ما الغرض من نقطة النهاية هذه؟"
+                                              },
+                                              "events":  {
+                                                 "select_hint":  "اختر الأحداث التي يجب أن تشغّل هذا الـ webhook",
+                                                 "selected_of":  "{{selected}} من {{total}}",
+                                                 "select_all":  "تحديد الكل",
+                                                 "deselect_all":  "إلغاء تحديد الكل"
+                                              },
+                                              "toasts":  {
+                                                 "created":  "تم إنشاء نقطة النهاية",
+                                                 "create_failed":  "فشل في إنشاء نقطة النهاية",
+                                                 "saved":  "تم حفظ نقطة النهاية",
+                                                 "update_failed":  "فشل في تحديث نقطة النهاية",
+                                                 "save_error":  "حدث خطأ أثناء الحفظ",
+                                                 "deleted":  "تم حذف نقطة النهاية",
+                                                 "delete_failed":  "فشل في حذف نقطة النهاية",
+                                                 "delete_error":  "حدث خطأ أثناء الحذف"
+                                              }
+                                           },
+                                           "api_access":  {
+                                              "search_placeholder":  "البحث عن نقاط النهاية...",
+                                              "tabs":  {
+                                                 "api":  "API",
+                                                 "doc":  "المستندات"
+                                              },
+                                              "create_token":  "إنشاء رمز",
+                                              "new_token_name":  "رمز جديد",
+                                              "back_to_tokens":  "العودة إلى الرموز",
+                                              "regenerate":  "إعادة الإنشاء",
+                                              "saved":  "تم الحفظ",
+                                              "never":  "أبدًا",
+                                              "last_used":  "آخر استخدام: {{date}}",
+                                              "expires_at":  "تنتهي في: {{date}}",
+                                              "status":  {
+                                                 "active":  "نشط",
+                                                 "revoked":  "ملغى"
+                                              },
+                                              "empty":  {
+                                                 "title":  "لا توجد رموز API بعد",
+                                                 "description":  "أنشئ رمزك الأول للبدء"
+                                              },
+                                              "token_reveal":  {
+                                                 "title":  "احفظ رمزك الآن!",
+                                                 "description":  "هذه هي المرة الوحيدة التي سترى فيها هذا الرمز. انسخه واحفظه في مكان آمن.",
+                                                 "label":  "رمز API الخاص بك"
+                                              },
+                                              "fields":  {
+                                                 "token_name":  "اسم الرمز",
+                                                 "token_name_placeholder":  "مثال: خط أنابيب CI/CD، تطبيق الجوال",
+                                                 "description":  "الوصف",
+                                                 "description_placeholder":  "فيم سيُستخدم هذا الرمز؟"
+                                              },
+                                              "permissions":  {
+                                                 "read_only":  "قراءة فقط",
+                                                 "full_access":  "وصول كامل",
+                                                 "custom":  "مخصص",
+                                                 "resource":  "المورد",
+                                                 "resources_count_zero":  "{{count}} مورد",
+                                                 "resources_count_one":  "{{count}} مورد",
+                                                 "resources_count_two":  "{{count}} موردان",
+                                                 "resources_count_few":  "{{count}} موارد",
+                                                 "resources_count_many":  "{{count}} موردًا",
+                                                 "resources_count_other":  "{{count}} مورد",
+                                                 "create":  "إنشاء",
+                                                 "read":  "قراءة",
+                                                 "update":  "تحديث",
+                                                 "resources":  {
+                                                    "courses":  "الدورات",
+                                                    "activities":  "الأنشطة",
+                                                    "chapters":  "الفصول",
+                                                    "collections":  "المجموعات",
+                                                    "certifications":  "الشهادات",
+                                                    "user_groups":  "مجموعات المستخدمين",
+                                                    "payments":  "المدفوعات",
+                                                    "search":  "البحث"
+                                                 }
+                                              },
+                                              "docs":  {
+                                                 "load_failed":  "فشل في تحميل وثائق API",
+                                                 "loading":  "جاري تحميل وثائق API...",
+                                                 "retry":  "إعادة المحاولة",
+                                                 "parameters":  "المعاملات",
+                                                 "required":  "مطلوب",
+                                                 "request_body":  "نص الطلب",
+                                                 "responses":  "الاستجابات",
+                                                 "no_results":  "لم يتم العثور على نقاط نهاية تطابق بحثك."
+                                              },
+                                              "toasts":  {
+                                                 "copied":  "تم نسخ الرمز إلى الحافظة",
+                                                 "created":  "تم إنشاء رمز API",
+                                                 "create_failed":  "فشل في إنشاء الرمز",
+                                                 "create_error":  "حدث خطأ أثناء إنشاء الرمز",
+                                                 "saved":  "تم حفظ الرمز",
+                                                 "update_failed":  "فشل في تحديث الرمز",
+                                                 "save_error":  "حدث خطأ أثناء الحفظ",
+                                                 "revoked":  "تم إلغاء الرمز",
+                                                 "revoke_failed":  "فشل في إلغاء الرمز",
+                                                 "revoke_error":  "حدث خطأ أثناء الإلغاء",
+                                                 "regenerated":  "تم إعادة إنشاء الرمز",
+                                                 "regenerate_failed":  "فشل في إعادة إنشاء الرمز",
+                                                 "regenerate_error":  "حدث خطأ أثناء إعادة الإنشاء"
+                                              }
+                                           },
+                                           "seo":  {
+                                              "copied":  "تم النسخ إلى الحافظة",
+                                              "save_success":  "تم حفظ إعدادات SEO بنجاح",
+                                              "save_error":  "فشل في حفظ إعدادات SEO",
+                                              "saved":  "تم الحفظ",
+                                              "sitemap":  "خريطة الموقع:",
+                                              "robots":  "Robots.txt:",
+                                              "og_image":  {
+                                                 "label":  "صورة OG الافتراضية",
+                                                 "description":  "صورة المشاركة الافتراضية لوسائل التواصل الاجتماعي (يُوصى بـ 1200x630)",
+                                                 "set":  "تم تعيين صورة OG",
+                                                 "not_set":  "لم يتم تعيين صورة OG",
+                                                 "remove":  "إزالة صورة OG",
+                                                 "upload":  "رفع صورة OG",
+                                                 "preview_alt":  "معاينة صورة OG"
+                                              },
+                                              "fields":  {
+                                                 "title_suffix":  "لاحقة العنوان",
+                                                 "title_suffix_placeholder":  " | أكاديميتي",
+                                                 "default_description":  "الوصف الافتراضي",
+                                                 "description_placeholder":  "وصف موجز لمنظمتك لمحركات البحث",
+                                                 "twitter_handle":  "حساب تويتر",
+                                                 "twitter_handle_placeholder":  "@حسابك",
+                                                 "google_search_console":  "Google Search Console",
+                                                 "google_verification_placeholder":  "رمز تحقق Google"
+                                              },
+                                              "hide_communities":  "إخفاء المجتمعات"
+                                           },
                                            "auth_branding":  {
                                                                  "title":  "تخصيص صفحة المصادقة",
                                                                  "subtitle":  "خصص مظهر صفحات تسجيل الدخول والتسجيل",

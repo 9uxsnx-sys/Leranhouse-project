@@ -2270,7 +2270,15 @@
                                                             "watermark_desc":  "Afficher le filigrane LearnHouse sur les pages de votre organisation",
                                                             "watermark_free_plan":  "Le filigrane est toujours affiché sur le plan gratuit",
                                                             "watermark_label":  "Filigrane \"Made with LearnHouse\"",
-                                                            "watermark_ee":  "Masqué par votre licence Enterprise Edition"
+                                                            "watermark_ee":  "Masqué par votre licence Enterprise Edition",
+                                                            "saved":  "Enregistré",
+                                                            "validation":  {
+                                                               "name_required":  "Le nom est requis",
+                                                               "name_too_long":  "Le nom de l'organisation doit comporter 60 caractères ou moins",
+                                                               "description_required":  "La description courte est requise",
+                                                               "description_too_long":  "La description courte doit comporter 100 caractères ou moins",
+                                                               "about_too_long":  "Le texte À propos doit comporter 400 caractères ou moins"
+                                                            }
                                                         },
                                            "images":  {
                                                           "title":  "Images et aperçus",
@@ -2331,8 +2339,263 @@
                                                                          "social":  "Réseaux sociaux",
                                                                          "theme":  "Thème",
                                                                          "auth":  "Authentification"
-                                                                     }
+                                                                     },
+                                              "images":  {
+                                                 "header":  "Logo et favicon",
+                                                 "favicon":  "Favicon",
+                                                 "logomark":  "Symbole",
+                                                 "uploading_logomark":  "Téléchargement du symbole...",
+                                                 "remove_logo":  "Supprimer le logo",
+                                                 "upload_logo":  "Télécharger un logo",
+                                                 "remove_favicon":  "Supprimer le favicon",
+                                                 "upload_favicon":  "Télécharger un favicon",
+                                                 "remove_logomark":  "Supprimer le symbole",
+                                                 "upload_logomark":  "Télécharger un symbole",
+                                                 "remove_thumbnail":  "Supprimer la miniature",
+                                                 "upload_thumbnail":  "Télécharger une miniature",
+                                                 "toasts":  {
+                                                    "logomark_success":  "Symbole mis à jour",
+                                                    "logomark_error":  "Échec du téléchargement du symbole"
+                                                 }
+                                              },
+                                              "font":  {
+                                                 "typography":  "Typographie",
+                                                 "search_placeholder":  "Rechercher des polices...",
+                                                 "showing_all":  "Affichage des résultats de toutes les Google Fonts",
+                                                 "no_results":  "Aucune police trouvée",
+                                                 "default":  "par défaut",
+                                                 "default_value":  "{{font}} (par défaut)",
+                                                 "description":  "Choisissez une police pour vos pages publiques. Recherchez pour parcourir toutes les Google Fonts.",
+                                                 "preview":  "Aperçu",
+                                                 "preview_text":  "Portez ce vieux whisky au juge blond qui fume"
+                                              },
+                                              "theme":  {
+                                                 "no_color":  "Aucune couleur"
+                                              },
+                                              "saved":  "Enregistré"
                                                         },
+                                           "domains":  {
+                                              "add_domain":  "Ajouter un domaine",
+                                              "verify":  "Vérifier",
+                                              "copied":  "Copié dans le presse-papiers",
+                                              "never":  "Jamais",
+                                              "empty":  {
+                                                 "title":  "Aucun domaine personnalisé pour le moment",
+                                                 "description":  "Ajoutez votre premier domaine pour commencer"
+                                              },
+                                              "add_dialog":  {
+                                                 "title":  "Ajouter un domaine personnalisé",
+                                                 "description":  "Entrez le domaine que vous souhaitez utiliser pour votre organisation.",
+                                                 "hint":  "Entrez un domaine ou un sous-domaine (par ex., learn.monentreprise.com ou academy.example.org)"
+                                              },
+                                              "fields":  {
+                                                 "domain":  "Domaine",
+                                                 "domain_placeholder":  "learn.monentreprise.com"
+                                              },
+                                              "verify_dialog":  {
+                                                 "dns_required_title":  "Configuration DNS requise",
+                                                 "dns_required_description":  "Ajoutez ces enregistrements chez votre registraire de domaine (par ex., Cloudflare, GoDaddy, Namecheap). Les modifications DNS peuvent prendre jusqu'à 48 heures pour se propager.",
+                                                 "txt_record":  "Enregistrement TXT",
+                                                 "for_verification":  "Pour la vérification",
+                                                 "cname_record":  "Enregistrement CNAME",
+                                                 "for_routing":  "Pour le routage",
+                                                 "host_name":  "Hôte / Nom",
+                                                 "value":  "Valeur",
+                                                 "value_target":  "Valeur / Cible",
+                                                 "ssl_certificate":  "Certificat SSL",
+                                                 "https_status":  "Statut HTTPS",
+                                                 "check":  "Vérifier",
+                                                 "checking_ssl":  "Vérification du statut SSL...",
+                                                 "verifying":  "Vérification...",
+                                                 "verify_dns":  "Vérifier le DNS"
+                                              },
+                                              "delete_dialog":  {
+                                                 "title":  "Supprimer le domaine personnalisé",
+                                                 "description":  "Êtes-vous sûr de vouloir supprimer ce domaine ? Cette action est irréversible.",
+                                                 "confirm":  "Supprimer le domaine"
+                                              },
+                                              "status":  {
+                                                 "verified":  "Vérifié",
+                                                 "pending":  "En attente",
+                                                 "failed":  "Échoué"
+                                              },
+                                              "ssl":  {
+                                                 "checking":  "Vérification...",
+                                                 "active":  "SSL actif",
+                                                 "provisioning":  "Provisionnement",
+                                                 "invalid":  "Invalide",
+                                                 "tooltip":  "Émetteur : {{issuer}}\nExpire : {{expires}}",
+                                                 "issuer":  "Émetteur : {{issuer}}",
+                                                 "expires":  "Expire : {{expires}}",
+                                                 "check_failed":  "Impossible de vérifier le statut SSL."
+                                              },
+                                              "toasts":  {
+                                                 "domain_required":  "Le domaine est requis",
+                                                 "adding":  "Ajout du domaine...",
+                                                 "added":  "Domaine ajouté avec succès",
+                                                 "add_failed":  "Échec de l'ajout du domaine",
+                                                 "verifying":  "Vérification du domaine...",
+                                                 "verified":  "Domaine vérifié avec succès !",
+                                                 "verification_failed":  "Échec de la vérification",
+                                                 "deleting":  "Suppression du domaine...",
+                                                 "deleted":  "Domaine supprimé avec succès",
+                                                 "delete_failed":  "Échec de la suppression du domaine"
+                                              }
+                                           },
+                                           "automations":  {
+                                              "add_endpoint":  "Ajouter un point de terminaison",
+                                              "new_endpoint":  "(Nouveau point de terminaison)",
+                                              "no_description":  "Aucune description",
+                                              "saved":  "Enregistré",
+                                              "events_count_zero":  "{{count}} événement",
+                                              "events_count_one":  "{{count}} événement",
+                                              "events_count_two":  "{{count}} événements",
+                                              "events_count_few":  "{{count}} événements",
+                                              "events_count_many":  "{{count}} événements",
+                                              "events_count_other":  "{{count}} événements",
+                                              "status":  {
+                                                 "active":  "Actif",
+                                                 "inactive":  "Inactif"
+                                              },
+                                              "empty":  {
+                                                 "title":  "Aucun point de terminaison de webhook pour le moment",
+                                                 "description":  "Créez votre premier point de terminaison pour commencer à recevoir des événements"
+                                              },
+                                              "fields":  {
+                                                 "endpoint_url":  "URL du point de terminaison",
+                                                 "endpoint_url_placeholder":  "https://hooks.make.com/...",
+                                                 "description":  "Description",
+                                                 "description_placeholder":  "À quoi sert ce point de terminaison ?"
+                                              },
+                                              "events":  {
+                                                 "select_hint":  "Sélectionnez les événements qui doivent déclencher ce webhook",
+                                                 "selected_of":  "{{selected}} sur {{total}}",
+                                                 "select_all":  "Tout sélectionner",
+                                                 "deselect_all":  "Tout désélectionner"
+                                              },
+                                              "toasts":  {
+                                                 "created":  "Point de terminaison créé",
+                                                 "create_failed":  "Échec de la création du point de terminaison",
+                                                 "saved":  "Point de terminaison enregistré",
+                                                 "update_failed":  "Échec de la mise à jour du point de terminaison",
+                                                 "save_error":  "Une erreur s'est produite lors de l'enregistrement",
+                                                 "deleted":  "Point de terminaison supprimé",
+                                                 "delete_failed":  "Échec de la suppression du point de terminaison",
+                                                 "delete_error":  "Une erreur s'est produite lors de la suppression"
+                                              }
+                                           },
+                                           "api_access":  {
+                                              "search_placeholder":  "Rechercher des points de terminaison...",
+                                              "tabs":  {
+                                                 "api":  "API",
+                                                 "doc":  "Doc"
+                                              },
+                                              "create_token":  "Créer un jeton",
+                                              "new_token_name":  "Nouveau jeton",
+                                              "back_to_tokens":  "Retour aux jetons",
+                                              "regenerate":  "Régénérer",
+                                              "saved":  "Enregistré",
+                                              "never":  "Jamais",
+                                              "last_used":  "Dernière utilisation : {{date}}",
+                                              "expires_at":  "Expire : {{date}}",
+                                              "status":  {
+                                                 "active":  "Actif",
+                                                 "revoked":  "Révoqué"
+                                              },
+                                              "empty":  {
+                                                 "title":  "Aucun jeton API pour le moment",
+                                                 "description":  "Créez votre premier jeton pour commencer"
+                                              },
+                                              "token_reveal":  {
+                                                 "title":  "Enregistrez votre jeton maintenant !",
+                                                 "description":  "C'est la seule fois où vous verrez ce jeton. Copiez-le et conservez-le en lieu sûr.",
+                                                 "label":  "Votre jeton API"
+                                              },
+                                              "fields":  {
+                                                 "token_name":  "Nom du jeton",
+                                                 "token_name_placeholder":  "par ex., Pipeline CI/CD, Application mobile",
+                                                 "description":  "Description",
+                                                 "description_placeholder":  "À quoi servira ce jeton ?"
+                                              },
+                                              "permissions":  {
+                                                 "read_only":  "Lecture seule",
+                                                 "full_access":  "Accès complet",
+                                                 "custom":  "Personnalisé",
+                                                 "resource":  "Ressource",
+                                                 "resources_count_zero":  "{{count}} ressource",
+                                                 "resources_count_one":  "{{count}} ressource",
+                                                 "resources_count_two":  "{{count}} ressources",
+                                                 "resources_count_few":  "{{count}} ressources",
+                                                 "resources_count_many":  "{{count}} ressources",
+                                                 "resources_count_other":  "{{count}} ressources",
+                                                 "create":  "Créer",
+                                                 "read":  "Lire",
+                                                 "update":  "Mettre à jour",
+                                                 "resources":  {
+                                                    "courses":  "Cours",
+                                                    "activities":  "Activités",
+                                                    "chapters":  "Chapitres",
+                                                    "collections":  "Collections",
+                                                    "certifications":  "Certifications",
+                                                    "user_groups":  "Groupes d'utilisateurs",
+                                                    "payments":  "Paiements",
+                                                    "search":  "Recherche"
+                                                 }
+                                              },
+                                              "docs":  {
+                                                 "load_failed":  "Échec du chargement de la documentation API",
+                                                 "loading":  "Chargement de la documentation API...",
+                                                 "retry":  "Réessayer",
+                                                 "parameters":  "Paramètres",
+                                                 "required":  "requis",
+                                                 "request_body":  "Corps de la requête",
+                                                 "responses":  "Réponses",
+                                                 "no_results":  "Aucun point de terminaison ne correspond à votre recherche."
+                                              },
+                                              "toasts":  {
+                                                 "copied":  "Jeton copié dans le presse-papiers",
+                                                 "created":  "Jeton API créé",
+                                                 "create_failed":  "Échec de la création du jeton",
+                                                 "create_error":  "Une erreur s'est produite lors de la création du jeton",
+                                                 "saved":  "Jeton enregistré",
+                                                 "update_failed":  "Échec de la mise à jour du jeton",
+                                                 "save_error":  "Une erreur s'est produite lors de l'enregistrement",
+                                                 "revoked":  "Jeton révoqué",
+                                                 "revoke_failed":  "Échec de la révocation du jeton",
+                                                 "revoke_error":  "Une erreur s'est produite lors de la révocation",
+                                                 "regenerated":  "Jeton régénéré",
+                                                 "regenerate_failed":  "Échec de la régénération du jeton",
+                                                 "regenerate_error":  "Une erreur s'est produite lors de la régénération"
+                                              }
+                                           },
+                                           "seo":  {
+                                              "copied":  "Copié dans le presse-papiers",
+                                              "save_success":  "Paramètres SEO enregistrés avec succès",
+                                              "save_error":  "Échec de l'enregistrement des paramètres SEO",
+                                              "saved":  "Enregistré",
+                                              "sitemap":  "Sitemap :",
+                                              "robots":  "Robots.txt :",
+                                              "og_image":  {
+                                                 "label":  "Image OG par défaut",
+                                                 "description":  "Image de partage par défaut pour les réseaux sociaux (1200x630 recommandé)",
+                                                 "set":  "Image OG définie",
+                                                 "not_set":  "Aucune image OG définie",
+                                                 "remove":  "Supprimer l'image OG",
+                                                 "upload":  "Télécharger une image OG",
+                                                 "preview_alt":  "Aperçu de l'image OG"
+                                              },
+                                              "fields":  {
+                                                 "title_suffix":  "Suffixe du titre",
+                                                 "title_suffix_placeholder":  " | Mon académie",
+                                                 "default_description":  "Description par défaut",
+                                                 "description_placeholder":  "Une brève description de votre organisation pour les moteurs de recherche",
+                                                 "twitter_handle":  "Pseudo Twitter",
+                                                 "twitter_handle_placeholder":  "@votrepseudo",
+                                                 "google_search_console":  "Google Search Console",
+                                                 "google_verification_placeholder":  "Code de vérification Google"
+                                              },
+                                              "hide_communities":  "Masquer les communautés"
+                                           },
                                            "auth_branding":  {
                                                                  "title":  "Personnalisation de la page d\u0027authentification",
                                                                  "subtitle":  "Personnalisez l\u0027apparence de vos pages de connexion et d\u0027inscription",

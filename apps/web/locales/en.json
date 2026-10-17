@@ -2571,7 +2571,15 @@
                                                             "watermark_label":  "\"Made with LearnHouse\" watermark",
                                                             "watermark_desc":  "Show the LearnHouse branding watermark on your organization pages",
                                                             "watermark_free_plan":  "Watermark is always shown on the free plan",
-                                                            "watermark_ee":  "Hidden by your Enterprise Edition license"
+                                                            "watermark_ee":  "Hidden by your Enterprise Edition license",
+                                                            "saved":  "Saved",
+                                                            "validation":  {
+                                                               "name_required":  "Name is required",
+                                                               "name_too_long":  "Organization name must be 60 characters or less",
+                                                               "description_required":  "Short description is required",
+                                                               "description_too_long":  "Short description must be 100 characters or less",
+                                                               "about_too_long":  "About text must be 400 characters or less"
+                                                            }
                                                         },
                                            "images":  {
                                                           "title":  "Images \u0026 Previews",
@@ -2632,8 +2640,263 @@
                                                                          "theme":  "Theme",
                                                                          "social":  "Social Links",
                                                                          "auth":  "Auth"
-                                                                     }
+                                                                     },
+                                              "images":  {
+                                                 "header":  "Logo & Favicon",
+                                                 "favicon":  "Favicon",
+                                                 "logomark":  "Logomark",
+                                                 "uploading_logomark":  "Uploading logomark...",
+                                                 "remove_logo":  "Remove logo",
+                                                 "upload_logo":  "Upload logo",
+                                                 "remove_favicon":  "Remove favicon",
+                                                 "upload_favicon":  "Upload favicon",
+                                                 "remove_logomark":  "Remove logomark",
+                                                 "upload_logomark":  "Upload logomark",
+                                                 "remove_thumbnail":  "Remove thumbnail",
+                                                 "upload_thumbnail":  "Upload thumbnail",
+                                                 "toasts":  {
+                                                    "logomark_success":  "Logomark updated",
+                                                    "logomark_error":  "Failed to upload logomark"
+                                                 }
+                                              },
+                                              "font":  {
+                                                 "typography":  "Typography",
+                                                 "search_placeholder":  "Search fonts...",
+                                                 "showing_all":  "Showing results from all Google Fonts",
+                                                 "no_results":  "No fonts found",
+                                                 "default":  "default",
+                                                 "default_value":  "{{font}} (default)",
+                                                 "description":  "Choose a font for your public pages. Search to browse all Google Fonts.",
+                                                 "preview":  "Preview",
+                                                 "preview_text":  "The quick brown fox jumps over the lazy dog"
+                                              },
+                                              "theme":  {
+                                                 "no_color":  "No color"
+                                              },
+                                              "saved":  "Saved"
                                                         },
+                                           "domains":  {
+                                              "add_domain":  "Add Domain",
+                                              "verify":  "Verify",
+                                              "copied":  "Copied to clipboard",
+                                              "never":  "Never",
+                                              "empty":  {
+                                                 "title":  "No custom domains yet",
+                                                 "description":  "Add your first domain to get started"
+                                              },
+                                              "add_dialog":  {
+                                                 "title":  "Add Custom Domain",
+                                                 "description":  "Enter the domain you want to use for your organization.",
+                                                 "hint":  "Enter a domain or subdomain (e.g., learn.mycompany.com or academy.example.org)"
+                                              },
+                                              "fields":  {
+                                                 "domain":  "Domain",
+                                                 "domain_placeholder":  "learn.mycompany.com"
+                                              },
+                                              "verify_dialog":  {
+                                                 "dns_required_title":  "DNS Configuration Required",
+                                                 "dns_required_description":  "Add these records at your domain registrar (e.g., Cloudflare, GoDaddy, Namecheap). DNS changes may take up to 48 hours to propagate.",
+                                                 "txt_record":  "TXT Record",
+                                                 "for_verification":  "For verification",
+                                                 "cname_record":  "CNAME Record",
+                                                 "for_routing":  "For routing",
+                                                 "host_name":  "Host / Name",
+                                                 "value":  "Value",
+                                                 "value_target":  "Value / Target",
+                                                 "ssl_certificate":  "SSL Certificate",
+                                                 "https_status":  "HTTPS status",
+                                                 "check":  "Check",
+                                                 "checking_ssl":  "Checking SSL status...",
+                                                 "verifying":  "Verifying...",
+                                                 "verify_dns":  "Verify DNS"
+                                              },
+                                              "delete_dialog":  {
+                                                 "title":  "Delete Custom Domain",
+                                                 "description":  "Are you sure you want to delete this domain? This action cannot be undone.",
+                                                 "confirm":  "Delete Domain"
+                                              },
+                                              "status":  {
+                                                 "verified":  "Verified",
+                                                 "pending":  "Pending",
+                                                 "failed":  "Failed"
+                                              },
+                                              "ssl":  {
+                                                 "checking":  "Checking...",
+                                                 "active":  "SSL Active",
+                                                 "provisioning":  "Provisioning",
+                                                 "invalid":  "Invalid",
+                                                 "tooltip":  "Issuer: {{issuer}}\nExpires: {{expires}}",
+                                                 "issuer":  "Issuer: {{issuer}}",
+                                                 "expires":  "Expires: {{expires}}",
+                                                 "check_failed":  "Could not check SSL status."
+                                              },
+                                              "toasts":  {
+                                                 "domain_required":  "Domain is required",
+                                                 "adding":  "Adding domain...",
+                                                 "added":  "Domain added successfully",
+                                                 "add_failed":  "Failed to add domain",
+                                                 "verifying":  "Verifying domain...",
+                                                 "verified":  "Domain verified successfully!",
+                                                 "verification_failed":  "Verification failed",
+                                                 "deleting":  "Deleting domain...",
+                                                 "deleted":  "Domain deleted successfully",
+                                                 "delete_failed":  "Failed to delete domain"
+                                              }
+                                           },
+                                           "automations":  {
+                                              "add_endpoint":  "Add Endpoint",
+                                              "new_endpoint":  "(New endpoint)",
+                                              "no_description":  "No description",
+                                              "saved":  "Saved",
+                                              "events_count_zero":  "{{count}} events",
+                                              "events_count_one":  "{{count}} event",
+                                              "events_count_two":  "{{count}} events",
+                                              "events_count_few":  "{{count}} events",
+                                              "events_count_many":  "{{count}} events",
+                                              "events_count_other":  "{{count}} events",
+                                              "status":  {
+                                                 "active":  "Active",
+                                                 "inactive":  "Inactive"
+                                              },
+                                              "empty":  {
+                                                 "title":  "No webhook endpoints yet",
+                                                 "description":  "Create your first endpoint to start receiving events"
+                                              },
+                                              "fields":  {
+                                                 "endpoint_url":  "Endpoint URL",
+                                                 "endpoint_url_placeholder":  "https://hooks.make.com/...",
+                                                 "description":  "Description",
+                                                 "description_placeholder":  "What is this endpoint for?"
+                                              },
+                                              "events":  {
+                                                 "select_hint":  "Select which events should trigger this webhook",
+                                                 "selected_of":  "{{selected}} of {{total}}",
+                                                 "select_all":  "Select all",
+                                                 "deselect_all":  "Deselect all"
+                                              },
+                                              "toasts":  {
+                                                 "created":  "Endpoint created",
+                                                 "create_failed":  "Failed to create endpoint",
+                                                 "saved":  "Endpoint saved",
+                                                 "update_failed":  "Failed to update endpoint",
+                                                 "save_error":  "An error occurred while saving",
+                                                 "deleted":  "Endpoint deleted",
+                                                 "delete_failed":  "Failed to delete endpoint",
+                                                 "delete_error":  "An error occurred while deleting"
+                                              }
+                                           },
+                                           "api_access":  {
+                                              "search_placeholder":  "Search endpoints...",
+                                              "tabs":  {
+                                                 "api":  "API",
+                                                 "doc":  "Doc"
+                                              },
+                                              "create_token":  "Create Token",
+                                              "new_token_name":  "New Token",
+                                              "back_to_tokens":  "Back to tokens",
+                                              "regenerate":  "Regenerate",
+                                              "saved":  "Saved",
+                                              "never":  "Never",
+                                              "last_used":  "Last used: {{date}}",
+                                              "expires_at":  "Expires: {{date}}",
+                                              "status":  {
+                                                 "active":  "Active",
+                                                 "revoked":  "Revoked"
+                                              },
+                                              "empty":  {
+                                                 "title":  "No API tokens yet",
+                                                 "description":  "Create your first token to get started"
+                                              },
+                                              "token_reveal":  {
+                                                 "title":  "Save your token now!",
+                                                 "description":  "This is the only time you'll see this token. Copy it and store it securely.",
+                                                 "label":  "Your API Token"
+                                              },
+                                              "fields":  {
+                                                 "token_name":  "Token Name",
+                                                 "token_name_placeholder":  "e.g., CI/CD Pipeline, Mobile App",
+                                                 "description":  "Description",
+                                                 "description_placeholder":  "What will this token be used for?"
+                                              },
+                                              "permissions":  {
+                                                 "read_only":  "Read Only",
+                                                 "full_access":  "Full Access",
+                                                 "custom":  "Custom",
+                                                 "resource":  "Resource",
+                                                 "resources_count_zero":  "{{count}} resources",
+                                                 "resources_count_one":  "{{count}} resource",
+                                                 "resources_count_two":  "{{count}} resources",
+                                                 "resources_count_few":  "{{count}} resources",
+                                                 "resources_count_many":  "{{count}} resources",
+                                                 "resources_count_other":  "{{count}} resources",
+                                                 "create":  "Create",
+                                                 "read":  "Read",
+                                                 "update":  "Update",
+                                                 "resources":  {
+                                                    "courses":  "Courses",
+                                                    "activities":  "Activities",
+                                                    "chapters":  "Chapters",
+                                                    "collections":  "Collections",
+                                                    "certifications":  "Certifications",
+                                                    "user_groups":  "User Groups",
+                                                    "payments":  "Payments",
+                                                    "search":  "Search"
+                                                 }
+                                              },
+                                              "docs":  {
+                                                 "load_failed":  "Failed to load API documentation",
+                                                 "loading":  "Loading API documentation...",
+                                                 "retry":  "Retry",
+                                                 "parameters":  "Parameters",
+                                                 "required":  "required",
+                                                 "request_body":  "Request Body",
+                                                 "responses":  "Responses",
+                                                 "no_results":  "No endpoints found matching your search."
+                                              },
+                                              "toasts":  {
+                                                 "copied":  "Token copied to clipboard",
+                                                 "created":  "API token created",
+                                                 "create_failed":  "Failed to create token",
+                                                 "create_error":  "An error occurred while creating token",
+                                                 "saved":  "Token saved",
+                                                 "update_failed":  "Failed to update token",
+                                                 "save_error":  "An error occurred while saving",
+                                                 "revoked":  "Token revoked",
+                                                 "revoke_failed":  "Failed to revoke token",
+                                                 "revoke_error":  "An error occurred while revoking",
+                                                 "regenerated":  "Token regenerated",
+                                                 "regenerate_failed":  "Failed to regenerate token",
+                                                 "regenerate_error":  "An error occurred while regenerating"
+                                              }
+                                           },
+                                           "seo":  {
+                                              "copied":  "Copied to clipboard",
+                                              "save_success":  "SEO settings saved successfully",
+                                              "save_error":  "Failed to save SEO settings",
+                                              "saved":  "Saved",
+                                              "sitemap":  "Sitemap:",
+                                              "robots":  "Robots.txt:",
+                                              "og_image":  {
+                                                 "label":  "Default OG Image",
+                                                 "description":  "Default sharing image for social media (1200x630 recommended)",
+                                                 "set":  "OG Image set",
+                                                 "not_set":  "No OG Image set",
+                                                 "remove":  "Remove OG image",
+                                                 "upload":  "Upload OG image",
+                                                 "preview_alt":  "OG Image Preview"
+                                              },
+                                              "fields":  {
+                                                 "title_suffix":  "Title Suffix",
+                                                 "title_suffix_placeholder":  " | My Academy",
+                                                 "default_description":  "Default Description",
+                                                 "description_placeholder":  "A brief description of your organization for search engines",
+                                                 "twitter_handle":  "Twitter Handle",
+                                                 "twitter_handle_placeholder":  "@yourhandle",
+                                                 "google_search_console":  "Google Search Console",
+                                                 "google_verification_placeholder":  "Google verification code"
+                                              },
+                                              "hide_communities":  "Hide Communities"
+                                           },
                                            "auth_branding":  {
                                                                  "title":  "Auth Page Branding",
                                                                  "subtitle":  "Customize the look and feel of your login and signup pages",

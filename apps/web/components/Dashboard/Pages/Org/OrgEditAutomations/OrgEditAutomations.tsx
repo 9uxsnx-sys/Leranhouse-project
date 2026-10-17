@@ -144,11 +144,11 @@ const OrgEditAutomations: React.FC = () => {
         }
         const res = await createWebhookEndpoint(org.id, data, access_token)
         if (res.status === 200 || res.status === 201) {
-          toast.success('Endpoint created')
+          toast.success(t('dashboard.organization.automations.toasts.created'))
           mutate(endpointsUrl)
           goBackToList()
         } else {
-          toast.error(res.data?.detail || 'Failed to create endpoint')
+          toast.error(res.data?.detail || t('dashboard.organization.automations.toasts.create_failed'))
         }
       } else if (selectedEndpointId) {
         // Update
@@ -160,15 +160,15 @@ const OrgEditAutomations: React.FC = () => {
         }
         const res = await updateWebhookEndpoint(org.id, selectedEndpointId, data, access_token)
         if (res.status === 200) {
-          toast.success('Endpoint saved')
+          toast.success(t('dashboard.organization.automations.toasts.saved'))
           setIsSaved(true)
           mutate(endpointsUrl)
         } else {
-          toast.error(res.data?.detail || 'Failed to update endpoint')
+          toast.error(res.data?.detail || t('dashboard.organization.automations.toasts.update_failed'))
         }
       }
     } catch {
-      toast.error('An error occurred while saving')
+      toast.error(t('dashboard.organization.automations.toasts.save_error'))
     } finally {
       setIsManualSaving(false)
     }
@@ -180,14 +180,14 @@ const OrgEditAutomations: React.FC = () => {
     try {
       const res = await deleteWebhookEndpoint(org.id, uuid, access_token)
       if (res.status === 200) {
-        toast.success('Endpoint deleted')
+        toast.success(t('dashboard.organization.automations.toasts.deleted'))
         mutate(endpointsUrl)
         goBackToList()
       } else {
-        toast.error(res.data?.detail || 'Failed to delete endpoint')
+        toast.error(res.data?.detail || t('dashboard.organization.automations.toasts.delete_failed'))
       }
     } catch {
-      toast.error('An error occurred while deleting')
+      toast.error(t('dashboard.organization.automations.toasts.delete_error'))
     }
   }
 
@@ -225,7 +225,7 @@ const OrgEditAutomations: React.FC = () => {
           className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border bg-black text-white border-black hover:opacity-90 cursor-pointer transition-colors"
         >
           <Plus size={14} />
-          <span>Add Endpoint</span>
+          <span>{t('dashboard.organization.automations.add_endpoint')}</span>
         </button>
       </div>
 
@@ -252,19 +252,19 @@ const OrgEditAutomations: React.FC = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-medium truncate">
-                        {endpoint.url || '(New endpoint)'}
+                        {endpoint.url || t('dashboard.organization.automations.new_endpoint')}
                       </span>
                       <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full border bg-gray-100 text-gray-500 border-transparent">
-                        {endpoint.is_active ? 'Active' : 'Inactive'}
+                        {endpoint.is_active ? t('dashboard.organization.automations.status.active') : t('dashboard.organization.automations.status.inactive')}
                       </span>
                     </div>
                     <div className="flex items-center gap-3 mt-0.5">
                       <p className="text-xs text-gray-500 truncate">
-                        {endpoint.description || 'No description'}
+                        {endpoint.description || t('dashboard.organization.automations.no_description')}
                       </p>
                       {endpoint.events.length > 0 && (
                         <span className="text-[11px] text-gray-400 shrink-0">
-                          {endpoint.events.length} event{endpoint.events.length > 1 ? 's' : ''}
+                          {t('dashboard.organization.automations.events_count', { count: endpoint.events.length })}
                         </span>
                       )}
                     </div>
@@ -276,8 +276,8 @@ const OrgEditAutomations: React.FC = () => {
         ) : (
           <div className="text-center py-12 text-gray-500">
             <Zap size={48} className="mx-auto mb-4 opacity-50" />
-            <p>No webhook endpoints yet</p>
-            <p className="text-sm">Create your first endpoint to start receiving events</p>
+            <p>{t('dashboard.organization.automations.empty.title')}</p>
+            <p className="text-sm">{t('dashboard.organization.automations.empty.description')}</p>
           </div>
         )}
       </div>
@@ -301,7 +301,7 @@ const OrgEditAutomations: React.FC = () => {
             className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
           >
             <ChevronRight size={16} className="rotate-180" />
-            <span>Back</span>
+            <span>{t('common.back')}</span>
           </button>
           <div className="flex items-center gap-2">
             {/* Active/Inactive Toggle (only for existing endpoints) */}
@@ -312,7 +312,7 @@ const OrgEditAutomations: React.FC = () => {
                 className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
               >
                 <span className={`w-2.5 h-2.5 rounded-full ${isActive ? 'bg-green-500' : 'bg-red-500'}`} />
-                {isActive ? 'Active' : 'Inactive'}
+                {isActive ? t('dashboard.organization.automations.status.active') : t('dashboard.organization.automations.status.inactive')}
               </button>
             )}
             {/* Save Button */}
@@ -337,10 +337,10 @@ const OrgEditAutomations: React.FC = () => {
               )}
               <span>
                 {isActiveSaving
-                  ? 'Saving...'
+                  ? t('common.saving')
                   : isSaved
-                    ? 'Saved'
-                    : 'Save'}
+                    ? t('dashboard.organization.automations.saved')
+                    : t('common.save')}
               </span>
             </button>
           </div>
@@ -354,24 +354,24 @@ const OrgEditAutomations: React.FC = () => {
           <div className="space-y-4">
             <div>
               <label className="text-xs font-semibold text-gray-500 mb-1.5 block">
-                Endpoint URL
+                {t('dashboard.organization.automations.fields.endpoint_url')}
               </label>
               <input
                 type="url"
                 value={editUrl}
                 onChange={(e) => { setEditUrl(e.target.value); setIsSaved(false) }}
-                placeholder="https://hooks.make.com/..."
+                placeholder={t('dashboard.organization.automations.fields.endpoint_url_placeholder')}
                 className="w-full px-3 py-2 text-sm bg-ui-bg-field !shadow-none border border-ui-border-base rounded-lg focus:border-ui-border-strong focus-visible:!shadow-none transition-none outline-none"
               />
             </div>
             <div>
               <label className="text-xs font-semibold text-gray-500 mb-1.5 block">
-                Description
+                {t('dashboard.organization.automations.fields.description')}
               </label>
               <textarea
                 value={editDescription}
                 onChange={(e) => { setEditDescription(e.target.value); setIsSaved(false) }}
-                placeholder="What is this endpoint for?"
+                placeholder={t('dashboard.organization.automations.fields.description_placeholder')}
                 rows={2}
                 className="w-full px-3 py-2 text-sm bg-ui-bg-field !shadow-none border border-ui-border-base rounded-lg focus:border-ui-border-strong focus-visible:!shadow-none transition-none outline-none resize-none"
               />
@@ -385,7 +385,7 @@ const OrgEditAutomations: React.FC = () => {
             {t('common.sections.events')}
           </h3>
           <p className="text-xs text-gray-400 mb-3">
-            Select which events should trigger this webhook
+            {t('dashboard.organization.automations.events.select_hint')}
           </p>
           <div className="space-y-2">
             {eventCategories.map((category) => {
@@ -426,14 +426,14 @@ const OrgEditAutomations: React.FC = () => {
                       {/* Info row: counter + select all */}
                       <div className="flex items-center justify-between px-4 py-2">
                         <span className="text-xs text-gray-400 tabular-nums">
-                          {selectedCount} of {categoryEventIds.length}
+                          {t('dashboard.organization.automations.events.selected_of', { selected: selectedCount, total: categoryEventIds.length })}
                         </span>
                         <button
                           type="button"
                           onClick={() => toggleCategory(category.events)}
                           className="text-xs text-gray-800 hover:text-gray-600 font-medium transition-colors"
                         >
-                          {allSelected ? 'Deselect all' : 'Select all'}
+                          {allSelected ? t('dashboard.organization.automations.events.deselect_all') : t('dashboard.organization.automations.events.select_all')}
                         </button>
                       </div>
 
@@ -477,7 +477,7 @@ const OrgEditAutomations: React.FC = () => {
               className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
             >
               <ConceptIcon.delete size={14} />
-              <span>Delete</span>
+              <span>{t('common.delete')}</span>
             </button>
           </div>
         )}

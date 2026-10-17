@@ -121,16 +121,16 @@ export default function OrgEditBranding() {
       const file = event.target.files[0]
       setLocalLogoIcon(URL.createObjectURL(file))
       setIsLogoIconUploading(true)
-      const loadingToast = toast.loading('Uploading logomark...')
+      const loadingToast = toast.loading(t('dashboard.organization.branding.images.uploading_logomark'))
       try {
         await uploadOrganizationLogoIcon(org.id, file, access_token)
         await new Promise((r) => setTimeout(r, 1500))
-        toast.success('Logomark updated', { id: loadingToast })
+        toast.success(t('dashboard.organization.branding.images.toasts.logomark_success'), { id: loadingToast })
         await revalidateTags(['organizations'], org.slug)
         mutate(`${getAPIUrl()}orgs/slug/${org.slug}`)
         router.refresh()
       } catch (err) {
-        toast.error('Failed to upload logomark', { id: loadingToast })
+        toast.error(t('dashboard.organization.branding.images.toasts.logomark_error'), { id: loadingToast })
       } finally {
         setIsLogoIconUploading(false)
       }
@@ -192,10 +192,10 @@ export default function OrgEditBranding() {
             )}
             <span>
               {isActiveSaving
-                ? 'Saving...'
+                ? t('common.saving')
                 : isSaved
-                  ? 'Saved'
-                  : 'Save'}
+                  ? t('dashboard.organization.branding.saved')
+                  : t('common.save')}
             </span>
           </button>
         </div>
@@ -204,7 +204,7 @@ export default function OrgEditBranding() {
       {/* Logo & Favicon Card */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
         <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
-          {t('dashboard.organization.images.tabs.logo')} &amp; Favicon
+          {t('dashboard.organization.branding.images.header')}
         </h3>
         <div className="space-y-3">
           {/* Logo Upload */}
@@ -213,7 +213,7 @@ export default function OrgEditBranding() {
               <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-700">Logo</p>
+              <p className="text-sm font-medium text-gray-700">{t('dashboard.organization.images.tabs.logo')}</p>
             </div>
             {isLogoUploading ? (
               <div className="w-[18px] h-[18px] border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
@@ -231,7 +231,7 @@ export default function OrgEditBranding() {
                     type="button"
                     onClick={() => logoInputRef.current?.click()}
                     className="flex items-center justify-center text-red-400 hover:text-red-600 transition-colors cursor-pointer"
-                    title="Remove logo"
+                    title={t('dashboard.organization.branding.images.remove_logo')}
                   >
                     <Trash2 size={18} />
                   </button>
@@ -240,7 +240,7 @@ export default function OrgEditBranding() {
                     type="button"
                     onClick={() => logoInputRef.current?.click()}
                     className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
-                    title="Upload logo"
+                    title={t('dashboard.organization.branding.images.upload_logo')}
                   >
                     <UploadCloud size={18} />
                   </button>
@@ -255,7 +255,7 @@ export default function OrgEditBranding() {
               <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-700">Favicon</p>
+              <p className="text-sm font-medium text-gray-700">{t('dashboard.organization.branding.images.favicon')}</p>
             </div>
             {isFaviconUploading ? (
               <div className="w-[18px] h-[18px] border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
@@ -273,7 +273,7 @@ export default function OrgEditBranding() {
                     type="button"
                     onClick={() => faviconInputRef.current?.click()}
                     className="flex items-center justify-center text-red-400 hover:text-red-600 transition-colors cursor-pointer"
-                    title="Remove favicon"
+                    title={t('dashboard.organization.branding.images.remove_favicon')}
                   >
                     <Trash2 size={18} />
                   </button>
@@ -282,7 +282,7 @@ export default function OrgEditBranding() {
                     type="button"
                     onClick={() => faviconInputRef.current?.click()}
                     className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
-                    title="Upload favicon"
+                    title={t('dashboard.organization.branding.images.upload_favicon')}
                   >
                     <UploadCloud size={18} />
                   </button>
@@ -297,7 +297,7 @@ export default function OrgEditBranding() {
               <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-700">Logomark</p>
+              <p className="text-sm font-medium text-gray-700">{t('dashboard.organization.branding.images.logomark')}</p>
             </div>
             {isLogoIconUploading ? (
               <div className="w-[18px] h-[18px] border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
@@ -315,7 +315,7 @@ export default function OrgEditBranding() {
                     type="button"
                     onClick={() => logoIconInputRef.current?.click()}
                     className="flex items-center justify-center text-red-400 hover:text-red-600 transition-colors cursor-pointer"
-                    title="Remove logomark"
+                    title={t('dashboard.organization.branding.images.remove_logomark')}
                   >
                     <Trash2 size={18} />
                   </button>
@@ -324,7 +324,7 @@ export default function OrgEditBranding() {
                     type="button"
                     onClick={() => logoIconInputRef.current?.click()}
                     className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
-                    title="Upload logomark"
+                    title={t('dashboard.organization.branding.images.upload_logomark')}
                   >
                     <UploadCloud size={18} />
                   </button>
@@ -357,7 +357,7 @@ export default function OrgEditBranding() {
                     type="button"
                     onClick={() => thumbnailInputRef.current?.click()}
                     className="flex items-center justify-center text-red-400 hover:text-red-600 transition-colors cursor-pointer"
-                    title="Remove thumbnail"
+                    title={t('dashboard.organization.branding.images.remove_thumbnail')}
                   >
                     <Trash2 size={18} />
                   </button>
@@ -366,7 +366,7 @@ export default function OrgEditBranding() {
                     type="button"
                     onClick={() => thumbnailInputRef.current?.click()}
                     className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
-                    title="Upload thumbnail"
+                    title={t('dashboard.organization.branding.images.upload_thumbnail')}
                   >
                     <UploadCloud size={18} />
                   </button>
@@ -400,7 +400,7 @@ export default function OrgEditBranding() {
               type="text"
               value={primaryColor}
               onChange={handleHexInputChange}
-              placeholder="No color"
+              placeholder={t('dashboard.organization.branding.theme.no_color')}
               className="w-24 h-10 rounded-lg border border-gray-100 !shadow-sm font-mono text-sm uppercase bg-white focus-visible:!shadow-sm focus-visible:border-gray-100 focus:outline-none"
               maxLength={7}
             />
@@ -409,7 +409,7 @@ export default function OrgEditBranding() {
                 type="button"
                 onClick={handleClearColor}
                 className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
-                title="Clear color"
+                title={t('dashboard.organization.theme.clear_color')}
               >
                 <X size={18} />
               </button>

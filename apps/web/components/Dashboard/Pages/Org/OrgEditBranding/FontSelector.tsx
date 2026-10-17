@@ -87,14 +87,14 @@ export default function FontSelector({ value, onChange }: FontSelectorProps) {
     setSearch('')
   }
 
-  const displayValue = value || `${DEFAULT_FONT} (default)`
+  const displayValue = value || t('dashboard.organization.branding.font.default_value', { font: DEFAULT_FONT })
 
   return (
     <div className="space-y-4">
       <div>
         <Label className="text-sm font-medium text-gray-700 mb-3 block">
           <Type className="inline h-4 w-4 mr-1.5 -mt-0.5" />
-          Typography
+          {t('dashboard.organization.branding.font.typography')}
         </Label>
 
         <div className="flex items-center gap-2">
@@ -118,7 +118,7 @@ export default function FontSelector({ value, onChange }: FontSelectorProps) {
             <PopoverContent className="w-72 p-0" align="start">
               <div className="p-2 border-b">
                 <Input
-                  placeholder="Search fonts..."
+                  placeholder={t('dashboard.organization.branding.font.search_placeholder')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="h-8 text-sm"
@@ -127,13 +127,13 @@ export default function FontSelector({ value, onChange }: FontSelectorProps) {
               </div>
               {showingFullCatalog && filteredFonts.length > 0 && (
                 <div className="px-3 py-1.5 text-[11px] text-gray-400 bg-gray-50/50">
-                  Showing results from all Google Fonts
+                  {t('dashboard.organization.branding.font.showing_all')}
                 </div>
               )}
               <div ref={listRef} className="max-h-60 overflow-y-auto p-1">
                 {filteredFonts.length === 0 ? (
                   <div className="py-6 text-center text-sm text-gray-500">
-                    No fonts found
+                    {t('dashboard.organization.branding.font.no_results')}
                   </div>
                 ) : (
                   filteredFonts.map((font) => (
@@ -155,7 +155,7 @@ export default function FontSelector({ value, onChange }: FontSelectorProps) {
                         {font}
                       </span>
                       {font === DEFAULT_FONT && (
-                        <span className="ml-auto text-[10px] text-gray-400">default</span>
+                        <span className="ml-auto text-[10px] text-gray-400">{t('dashboard.organization.branding.font.default')}</span>
                       )}
                     </button>
                   ))
@@ -178,18 +178,18 @@ export default function FontSelector({ value, onChange }: FontSelectorProps) {
         </div>
 
         <p className="text-xs text-gray-400 mt-2">
-          Choose a font for your public pages. Search to browse all Google Fonts.
+          {t('dashboard.organization.branding.font.description')}
         </p>
       </div>
 
       {/* Preview */}
       <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <p className="text-xs text-gray-400 mb-2">Preview</p>
+        <p className="text-xs text-gray-400 mb-2">{t('dashboard.organization.branding.font.preview')}</p>
         <div
           style={{ fontFamily: `'${previewFont || DEFAULT_FONT}', sans-serif` }}
         >
           <p className="text-2xl font-bold text-gray-900 mb-1">
-            The quick brown fox jumps over the lazy dog
+            {t('dashboard.organization.branding.font.preview_text')}
           </p>
           <p className="text-sm text-gray-600">
             ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789

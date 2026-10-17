@@ -78,17 +78,17 @@ const OrgEditDomains: React.FC = () => {
 
   const handleAddDomain = async () => {
     if (!newDomain.trim()) {
-      toast.error('Domain is required')
+      toast.error(t('dashboard.organization.domains.toasts.domain_required'))
       return
     }
 
-    const loadingToast = toast.loading('Adding domain...')
+    const loadingToast = toast.loading(t('dashboard.organization.domains.toasts.adding'))
     try {
       const response = await addCustomDomain(org.id, { domain: newDomain.trim() }, access_token)
 
       if (response.success) {
         mutate(domainsUrl)
-        toast.success('Domain added successfully', { id: loadingToast })
+        toast.success(t('dashboard.organization.domains.toasts.added'), { id: loadingToast })
         setNewDomain('')
         setIsAddDialogOpen(false)
         // Open verification dialog
@@ -96,10 +96,10 @@ const OrgEditDomains: React.FC = () => {
         await loadVerificationInfo(response.data.domain_uuid)
         setIsVerifyDialogOpen(true)
       } else {
-        toast.error(response.data?.detail || 'Failed to add domain', { id: loadingToast })
+        toast.error(response.data?.detail || t('dashboard.organization.domains.toasts.add_failed'), { id: loadingToast })
       }
     } catch (error: any) {
-      toast.error(error.message || 'Failed to add domain', { id: loadingToast })
+      toast.error(error.message || t('dashboard.organization.domains.toasts.add_failed'), { id: loadingToast })
     }
   }
 
@@ -116,21 +116,21 @@ const OrgEditDomains: React.FC = () => {
     if (!selectedDomain) return
 
     setIsVerifying(true)
-    const loadingToast = toast.loading('Verifying domain...')
+    const loadingToast = toast.loading(t('dashboard.organization.domains.toasts.verifying'))
     try {
       const response = await verifyCustomDomain(org.id, selectedDomain.domain_uuid, access_token)
 
       if (response.success) {
         mutate(domainsUrl)
-        toast.success('Domain verified successfully!', { id: loadingToast })
+        toast.success(t('dashboard.organization.domains.toasts.verified'), { id: loadingToast })
         setIsVerifyDialogOpen(false)
         setSelectedDomain(null)
         setVerificationInfo(null)
       } else {
-        toast.error(response.data?.detail || 'Verification failed', { id: loadingToast })
+        toast.error(response.data?.detail || t('dashboard.organization.domains.toasts.verification_failed'), { id: loadingToast })
       }
     } catch (error: any) {
-      toast.error(error.message || 'Verification failed', { id: loadingToast })
+      toast.error(error.message || t('dashboard.organization.domains.toasts.verification_failed'), { id: loadingToast })
     } finally {
       setIsVerifying(false)
     }
@@ -139,27 +139,27 @@ const OrgEditDomains: React.FC = () => {
   const handleDeleteDomain = async () => {
     if (!selectedDomain) return
 
-    const loadingToast = toast.loading('Deleting domain...')
+    const loadingToast = toast.loading(t('dashboard.organization.domains.toasts.deleting'))
     try {
       const response = await deleteCustomDomain(org.id, selectedDomain.domain_uuid, access_token)
 
       if (response.success) {
         mutate(domainsUrl)
-        toast.success('Domain deleted successfully', { id: loadingToast })
+        toast.success(t('dashboard.organization.domains.toasts.deleted'), { id: loadingToast })
         setIsDeleteDialogOpen(false)
         setSelectedDomain(null)
       } else {
-        toast.error(response.data?.detail || 'Failed to delete domain', { id: loadingToast })
+        toast.error(response.data?.detail || t('dashboard.organization.domains.toasts.delete_failed'), { id: loadingToast })
       }
     } catch (error: any) {
-      toast.error(error.message || 'Failed to delete domain', { id: loadingToast })
+      toast.error(error.message || t('dashboard.organization.domains.toasts.delete_failed'), { id: loadingToast })
     }
   }
 
   const copyToClipboard = async (text: string, field: string) => {
     await navigator.clipboard.writeText(text)
     setCopiedField(field)
-    toast.success('Copied to clipboard')
+    toast.success(t('dashboard.organization.domains.copied'))
     setTimeout(() => setCopiedField(null), 2000)
   }
 
@@ -174,13 +174,13 @@ const OrgEditDomains: React.FC = () => {
         [domain.domain_uuid]: {
           has_ssl: false,
           status: 'unknown',
-          message: 'Could not check SSL status.',
+          message: t('dashboard.organization.domains.ssl.check_failed'),
         },
       }))
     } finally {
       setSslLoading((prev) => ({ ...prev, [domain.domain_uuid]: false }))
     }
-  }, [org?.id, access_token])
+  }, [org?.id, access_token, t])
 
   // Auto-check SSL for all verified domains on load and every 30s
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -223,7 +223,7 @@ const OrgEditDomains: React.FC = () => {
       return (
         <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-600">
           <Loader2 size={12} className="mr-1 animate-spin" />
-          Checking...
+          {t('dashboard.organization.domains.ssl.checking')}
         </Badge>
       )
     }
@@ -232,7 +232,7 @@ const OrgEditDomains: React.FC = () => {
       return (
         <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500">
           <Shield size={12} className="mr-1" />
-          Checking...
+          {t('dashboard.organization.domains.ssl.checking')}
         </Badge>
       )
     }
@@ -240,30 +240,30 @@ const OrgEditDomains: React.FC = () => {
     switch (sslStatus.status) {
       case 'active':
         return (
-          <Badge variant="outline" className="border-transparent bg-green-100 text-green-800" title={`Issuer: ${sslStatus.issuer || 'Unknown'}\nExpires: ${sslStatus.expires || 'Unknown'}`}>
+          <Badge variant="outline" className="border-transparent bg-green-100 text-green-800" title={t('dashboard.organization.domains.ssl.tooltip', { issuer: sslStatus.issuer || t('common.unknown'), expires: sslStatus.expires || t('common.unknown') })}>
             <ShieldCheck size={12} className="mr-1" />
-            SSL Active
+            {t('dashboard.organization.domains.ssl.active')}
           </Badge>
         )
       case 'provisioning':
         return (
           <Badge variant="outline" className="border-transparent bg-yellow-100 text-yellow-800" title={sslStatus.message}>
             <Loader2 size={12} className="mr-1 animate-spin" />
-            Provisioning
+            {t('dashboard.organization.domains.ssl.provisioning')}
           </Badge>
         )
       case 'invalid':
         return (
           <Badge variant="outline" className="border-transparent bg-red-100 text-red-800" title={sslStatus.message}>
             <ShieldAlert size={12} className="mr-1" />
-            Invalid
+            {t('dashboard.organization.domains.ssl.invalid')}
           </Badge>
         )
       default:
         return (
           <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-600" title={sslStatus.message}>
             <ShieldAlert size={12} className="mr-1" />
-            Unknown
+            {t('common.unknown')}
           </Badge>
         )
     }
@@ -275,21 +275,21 @@ const OrgEditDomains: React.FC = () => {
         return (
           <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500">
             <CheckCircle2 size={12} className="mr-1" />
-            Verified
+            {t('dashboard.organization.domains.status.verified')}
           </Badge>
         )
       case 'pending':
         return (
           <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500">
             <Clock size={12} className="mr-1" />
-            Pending
+            {t('dashboard.organization.domains.status.pending')}
           </Badge>
         )
       case 'failed':
         return (
           <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500">
             <XCircle size={12} className="mr-1" />
-            Failed
+            {t('dashboard.organization.domains.status.failed')}
           </Badge>
         )
       default:
@@ -302,7 +302,7 @@ const OrgEditDomains: React.FC = () => {
   }
 
   const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return 'Never'
+    if (!dateStr) return t('dashboard.organization.domains.never')
     try {
       return new Date(dateStr).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -333,7 +333,7 @@ const OrgEditDomains: React.FC = () => {
             className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border bg-black text-white border-black hover:opacity-90 cursor-pointer transition-colors"
           >
             <Plus size={14} />
-            <span>Add Domain</span>
+            <span>{t('dashboard.organization.domains.add_domain')}</span>
           </button>
         </div>
 
@@ -384,7 +384,7 @@ const OrgEditDomains: React.FC = () => {
                           }}
                         >
                           <RefreshCw size={12} />
-                          Verify
+                          {t('dashboard.organization.domains.verify')}
                         </button>
                       )}
                       <button
@@ -404,8 +404,8 @@ const OrgEditDomains: React.FC = () => {
           ) : (
             <div className="text-center py-12 text-gray-500">
               <Globe size={48} className="mx-auto mb-4 opacity-50" />
-              <p>No custom domains yet</p>
-              <p className="text-sm">Add your first domain to get started</p>
+              <p>{t('dashboard.organization.domains.empty.title')}</p>
+              <p className="text-sm">{t('dashboard.organization.domains.empty.description')}</p>
             </div>
           )}
         </div>
@@ -415,30 +415,30 @@ const OrgEditDomains: React.FC = () => {
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogContent>
             <DialogHeader className="px-6 pt-6">
-              <DialogTitle>Add Custom Domain</DialogTitle>
+              <DialogTitle>{t('dashboard.organization.domains.add_dialog.title')}</DialogTitle>
               <DialogDescription>
-                Enter the domain you want to use for your organization.
+                {t('dashboard.organization.domains.add_dialog.description')}
               </DialogDescription>
             </DialogHeader>
             <div className="px-6 pb-6 space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="domain">Domain</Label>
+                <Label htmlFor="domain">{t('dashboard.organization.domains.fields.domain')}</Label>
                 <Input
                   id="domain"
                   value={newDomain}
                   onChange={(e) => setNewDomain(e.target.value)}
-                  placeholder="learn.mycompany.com"
+                  placeholder={t('dashboard.organization.domains.fields.domain_placeholder')}
                 />
                 <p className="text-xs text-gray-500">
-                  Enter a domain or subdomain (e.g., learn.mycompany.com or academy.example.org)
+                  {t('dashboard.organization.domains.add_dialog.hint')}
                 </p>
               </div>
 
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
-                <Button onClick={handleAddDomain}>Add Domain</Button>
+                <Button onClick={handleAddDomain}>{t('dashboard.organization.domains.add_domain')}</Button>
               </DialogFooter>
             </div>
           </DialogContent>
@@ -453,10 +453,9 @@ const OrgEditDomains: React.FC = () => {
                   <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100">
                     <AlertTriangle className="text-gray-400 shrink-0 mt-0.5" size={20} />
                     <div>
-                      <p className="text-sm font-semibold text-gray-700">DNS Configuration Required</p>
+                      <p className="text-sm font-semibold text-gray-700">{t('dashboard.organization.domains.verify_dialog.dns_required_title')}</p>
                       <p className="text-xs text-gray-500 mt-1">
-                        Add these records at your domain registrar (e.g., Cloudflare, GoDaddy, Namecheap).
-                        DNS changes may take up to 48 hours to propagate.
+                        {t('dashboard.organization.domains.verify_dialog.dns_required_description')}
                       </p>
                     </div>
                   </div>
@@ -464,12 +463,12 @@ const OrgEditDomains: React.FC = () => {
                   {/* TXT Record */}
                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500 text-xs">TXT Record</Badge>
-                      <span className="text-xs text-gray-400">For verification</span>
+                      <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500 text-xs">{t('dashboard.organization.domains.verify_dialog.txt_record')}</Badge>
+                      <span className="text-xs text-gray-400">{t('dashboard.organization.domains.verify_dialog.for_verification')}</span>
                     </div>
                     <div className="space-y-3">
                       <div>
-                        <label className="text-xs font-semibold text-gray-500">Host / Name</label>
+                        <label className="text-xs font-semibold text-gray-500">{t('dashboard.organization.domains.verify_dialog.host_name')}</label>
                         <div className="flex gap-2 mt-1.5">
                           <code className="flex-1 bg-gray-50 px-3 py-2 rounded-lg text-sm font-mono text-gray-700 border border-gray-100 break-all">
                             {verificationInfo.txt_record_host}
@@ -484,7 +483,7 @@ const OrgEditDomains: React.FC = () => {
                         </div>
                       </div>
                       <div>
-                        <label className="text-xs font-semibold text-gray-500">Value</label>
+                        <label className="text-xs font-semibold text-gray-500">{t('dashboard.organization.domains.verify_dialog.value')}</label>
                         <div className="flex gap-2 mt-1.5">
                           <code className="flex-1 bg-gray-50 px-3 py-2 rounded-lg text-sm font-mono text-gray-700 border border-gray-100 break-all">
                             {verificationInfo.txt_record_value}
@@ -504,12 +503,12 @@ const OrgEditDomains: React.FC = () => {
                   {/* CNAME Record */}
                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500 text-xs">CNAME Record</Badge>
-                      <span className="text-xs text-gray-400">For routing</span>
+                      <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500 text-xs">{t('dashboard.organization.domains.verify_dialog.cname_record')}</Badge>
+                      <span className="text-xs text-gray-400">{t('dashboard.organization.domains.verify_dialog.for_routing')}</span>
                     </div>
                     <div className="space-y-3">
                       <div>
-                        <label className="text-xs font-semibold text-gray-500">Host / Name</label>
+                        <label className="text-xs font-semibold text-gray-500">{t('dashboard.organization.domains.verify_dialog.host_name')}</label>
                         <div className="flex gap-2 mt-1.5">
                           <code className="flex-1 bg-gray-50 px-3 py-2 rounded-lg text-sm font-mono text-gray-700 border border-gray-100 break-all">
                             {verificationInfo.cname_record_host}
@@ -524,7 +523,7 @@ const OrgEditDomains: React.FC = () => {
                         </div>
                       </div>
                       <div>
-                        <label className="text-xs font-semibold text-gray-500">Value / Target</label>
+                        <label className="text-xs font-semibold text-gray-500">{t('dashboard.organization.domains.verify_dialog.value_target')}</label>
                         <div className="flex gap-2 mt-1.5">
                           <code className="flex-1 bg-gray-50 px-3 py-2 rounded-lg text-sm font-mono text-gray-700 border border-gray-100 break-all">
                             {verificationInfo.cname_record_value}
@@ -546,8 +545,8 @@ const OrgEditDomains: React.FC = () => {
                     <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500 text-xs">SSL Certificate</Badge>
-                          <span className="text-xs text-gray-400">HTTPS status</span>
+                          <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500 text-xs">{t('dashboard.organization.domains.verify_dialog.ssl_certificate')}</Badge>
+                          <span className="text-xs text-gray-400">{t('dashboard.organization.domains.verify_dialog.https_status')}</span>
                         </div>
                         <button
                           type="button"
@@ -560,7 +559,7 @@ const OrgEditDomains: React.FC = () => {
                           ) : (
                             <RefreshCw size={12} />
                           )}
-                          Check
+                          {t('dashboard.organization.domains.verify_dialog.check')}
                         </button>
                       </div>
                       {sslStatuses[selectedDomain.domain_uuid] ? (
@@ -592,10 +591,10 @@ const OrgEditDomains: React.FC = () => {
                               {sslStatuses[selectedDomain.domain_uuid].has_ssl && (
                                 <div className="text-xs text-green-700 mt-1 space-y-0.5">
                                   {sslStatuses[selectedDomain.domain_uuid].issuer && (
-                                    <p>Issuer: {sslStatuses[selectedDomain.domain_uuid].issuer}</p>
+                                    <p>{t('dashboard.organization.domains.ssl.issuer', { issuer: sslStatuses[selectedDomain.domain_uuid].issuer })}</p>
                                   )}
                                   {sslStatuses[selectedDomain.domain_uuid].expires && (
-                                    <p>Expires: {sslStatuses[selectedDomain.domain_uuid].expires}</p>
+                                    <p>{t('dashboard.organization.domains.ssl.expires', { expires: sslStatuses[selectedDomain.domain_uuid].expires })}</p>
                                   )}
                                 </div>
                               )}
@@ -605,7 +604,7 @@ const OrgEditDomains: React.FC = () => {
                       ) : (
                         <div className="flex items-center gap-2 text-sm text-gray-500">
                           <Loader2 size={14} className="animate-spin" />
-                          Checking SSL status...
+                          {t('dashboard.organization.domains.verify_dialog.checking_ssl')}
                         </div>
                       )}
                     </div>
@@ -624,7 +623,7 @@ const OrgEditDomains: React.FC = () => {
                   setVerificationInfo(null)
                 }}
               >
-                Close
+                {t('common.close')}
               </button>
               <button
                 type="button"
@@ -635,12 +634,12 @@ const OrgEditDomains: React.FC = () => {
                 {isVerifying ? (
                   <>
                     <RefreshCw size={14} className="animate-spin" />
-                    <span>Verifying...</span>
+                    <span>{t('dashboard.organization.domains.verify_dialog.verifying')}</span>
                   </>
                 ) : (
                   <>
                     <Check size={14} />
-                    <span>Verify DNS</span>
+                    <span>{t('dashboard.organization.domains.verify_dialog.verify_dns')}</span>
                   </>
                 )}
               </button>
@@ -654,10 +653,10 @@ const OrgEditDomains: React.FC = () => {
             <DialogHeader className="px-6 pt-6">
               <DialogTitle className="flex items-center gap-2 text-red-600">
                 <AlertTriangle size={20} />
-                Delete Custom Domain
+                {t('dashboard.organization.domains.delete_dialog.title')}
               </DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete this domain? This action cannot be undone.
+                {t('dashboard.organization.domains.delete_dialog.description')}
               </DialogDescription>
             </DialogHeader>
             <div className="px-6 pb-6">
@@ -671,10 +670,10 @@ const OrgEditDomains: React.FC = () => {
               )}
               <DialogFooter>
                 <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
                 <Button variant="destructive" onClick={handleDeleteDomain}>
-                  Delete Domain
+                  {t('dashboard.organization.domains.delete_dialog.confirm')}
                 </Button>
               </DialogFooter>
             </div>

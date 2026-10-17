@@ -83,7 +83,7 @@ const OrgEditAPIAccess: React.FC = () => {
   )
 
   const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return 'Never'
+    if (!dateStr) return t('dashboard.organization.api_access.never')
     try {
       return new Date(dateStr).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -100,7 +100,7 @@ const OrgEditAPIAccess: React.FC = () => {
   const copyToClipboard = async (text: string) => {
     await navigator.clipboard.writeText(text)
     setCopiedToken(true)
-    toast.success('Token copied to clipboard')
+    toast.success(t('dashboard.organization.api_access.toasts.copied'))
     setTimeout(() => setCopiedToken(false), 2000)
   }
 
@@ -110,7 +110,7 @@ const OrgEditAPIAccess: React.FC = () => {
     setIsManualSaving(true)
     try {
       const data: APITokenCreateRequest = {
-        name: 'New Token',
+        name: t('dashboard.organization.api_access.new_token_name'),
         rights: getReadOnlyRights(),
       }
       const res = await createAPIToken(org.id, data, access_token)
@@ -120,12 +120,12 @@ const OrgEditAPIAccess: React.FC = () => {
         setSelectedTokenId(res.data.token_uuid || 'new')
         setCurrentView('detail')
         mutate(tokensUrl)
-        toast.success('API token created')
+        toast.success(t('dashboard.organization.api_access.toasts.created'))
       } else {
-        toast.error(res.data?.detail || 'Failed to create token')
+        toast.error(res.data?.detail || t('dashboard.organization.api_access.toasts.create_failed'))
       }
     } catch {
-      toast.error('An error occurred while creating token')
+      toast.error(t('dashboard.organization.api_access.toasts.create_error'))
     } finally {
       setIsManualSaving(false)
     }
@@ -168,14 +168,14 @@ const OrgEditAPIAccess: React.FC = () => {
       }
       const res = await updateAPIToken(org.id, selectedTokenId, data, access_token)
       if (res.status === 200) {
-        toast.success('Token saved')
+        toast.success(t('dashboard.organization.api_access.toasts.saved'))
         setIsSaved(true)
         mutate(tokensUrl)
       } else {
-        toast.error(res.data?.detail || 'Failed to update token')
+        toast.error(res.data?.detail || t('dashboard.organization.api_access.toasts.update_failed'))
       }
     } catch {
-      toast.error('An error occurred while saving')
+      toast.error(t('dashboard.organization.api_access.toasts.save_error'))
     } finally {
       setIsManualSaving(false)
     }
@@ -187,14 +187,14 @@ const OrgEditAPIAccess: React.FC = () => {
     try {
       const res = await revokeAPIToken(org.id, selectedTokenId, access_token)
       if (res.success) {
-        toast.success('Token revoked')
+        toast.success(t('dashboard.organization.api_access.toasts.revoked'))
         mutate(tokensUrl)
         goBackToList()
       } else {
-        toast.error(res.data?.detail || 'Failed to revoke token')
+        toast.error(res.data?.detail || t('dashboard.organization.api_access.toasts.revoke_failed'))
       }
     } catch {
-      toast.error('An error occurred while revoking')
+      toast.error(t('dashboard.organization.api_access.toasts.revoke_error'))
     }
   }
 
@@ -208,12 +208,12 @@ const OrgEditAPIAccess: React.FC = () => {
         setNewTokenValue(res.data.token)
         setShowTokenValue(true)
         mutate(tokensUrl)
-        toast.success('Token regenerated')
+        toast.success(t('dashboard.organization.api_access.toasts.regenerated'))
       } else {
-        toast.error(res.data?.detail || 'Failed to regenerate token')
+        toast.error(res.data?.detail || t('dashboard.organization.api_access.toasts.regenerate_failed'))
       }
     } catch {
-      toast.error('An error occurred while regenerating')
+      toast.error(t('dashboard.organization.api_access.toasts.regenerate_error'))
     } finally {
       setIsManualSaving(false)
     }
@@ -243,7 +243,7 @@ const OrgEditAPIAccess: React.FC = () => {
               type="text"
               value={docSearchQuery}
               onChange={(e) => setDocSearchQuery(e.target.value)}
-              placeholder="Search endpoints..."
+              placeholder={t('dashboard.organization.api_access.search_placeholder')}
               className="w-full h-7 pl-8 pr-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
             />
           </div>
@@ -259,12 +259,12 @@ const OrgEditAPIAccess: React.FC = () => {
             {!showDoc ? (
               <>
                 <Key size={14} />
-                API
+                {t('dashboard.organization.api_access.tabs.api')}
               </>
             ) : (
               <>
                 <ChevronRight size={14} className="rotate-90" />
-                Doc
+                {t('dashboard.organization.api_access.tabs.doc')}
               </>
             )}
           </button>
@@ -276,7 +276,7 @@ const OrgEditAPIAccess: React.FC = () => {
               className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border bg-black text-white border-black hover:opacity-90 cursor-pointer transition-colors"
             >
               <Plus size={14} />
-              <span>Create Token</span>
+              <span>{t('dashboard.organization.api_access.create_token')}</span>
             </button>
           )}
         </div>
@@ -311,7 +311,7 @@ const OrgEditAPIAccess: React.FC = () => {
                             ? 'bg-gray-200 text-gray-600 border-transparent'
                             : 'bg-red-100 text-red-700 border-transparent'
                         }`}>
-                          {token.is_active ? 'Active' : 'Revoked'}
+                          {token.is_active ? t('dashboard.organization.api_access.status.active') : t('dashboard.organization.api_access.status.revoked')}
                         </span>
                         <code className="text-xs bg-gray-200/60 px-1.5 py-0.5 rounded font-mono text-gray-500">
                           {token.token_prefix}...
@@ -324,10 +324,10 @@ const OrgEditAPIAccess: React.FC = () => {
                           </p>
                         )}
                         <span className="text-[11px] text-gray-400">
-                          Last used: {formatDate(token.last_used_at)}
+                          {t('dashboard.organization.api_access.last_used', { date: formatDate(token.last_used_at) })}
                         </span>
                         <span className="text-[11px] text-gray-400">
-                          Expires: {token.expires_at ? formatDate(token.expires_at) : 'Never'}
+                          {t('dashboard.organization.api_access.expires_at', { date: token.expires_at ? formatDate(token.expires_at) : t('dashboard.organization.api_access.never') })}
                         </span>
                       </div>
                     </div>
@@ -338,8 +338,8 @@ const OrgEditAPIAccess: React.FC = () => {
           ) : (
             <div className="text-center py-12 text-gray-500">
               <Key size={48} className="mx-auto mb-4 opacity-50" />
-              <p>No API tokens yet</p>
-              <p className="text-sm">Create your first token to get started</p>
+              <p>{t('dashboard.organization.api_access.empty.title')}</p>
+              <p className="text-sm">{t('dashboard.organization.api_access.empty.description')}</p>
             </div>
           )}
         </div>
@@ -367,7 +367,7 @@ const OrgEditAPIAccess: React.FC = () => {
               className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
             >
               <ChevronRight size={16} className="rotate-180" />
-              <span>Back to tokens</span>
+              <span>{t('dashboard.organization.api_access.back_to_tokens')}</span>
             </button>
           </div>
 
@@ -380,9 +380,9 @@ const OrgEditAPIAccess: React.FC = () => {
               <div className="flex items-start gap-3">
                 <AlertTriangle size={20} className="text-yellow-600 shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-semibold text-yellow-800">Save your token now!</p>
+                  <p className="font-semibold text-yellow-800">{t('dashboard.organization.api_access.token_reveal.title')}</p>
                   <p className="text-sm text-yellow-700">
-                    This is the only time you&apos;ll see this token. Copy it and store it securely.
+                    {t('dashboard.organization.api_access.token_reveal.description')}
                   </p>
                 </div>
               </div>
@@ -390,7 +390,7 @@ const OrgEditAPIAccess: React.FC = () => {
 
             <div className="space-y-3">
               <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
-                Your API Token
+                {t('dashboard.organization.api_access.token_reveal.label')}
               </label>
               <div className="flex gap-2">
                 <input
@@ -431,7 +431,7 @@ const OrgEditAPIAccess: React.FC = () => {
             className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
           >
             <ChevronRight size={16} className="rotate-180" />
-            <span>Back to tokens</span>
+            <span>{t('dashboard.organization.api_access.back_to_tokens')}</span>
           </button>
           <div className="flex items-center gap-2">
             <button
@@ -441,7 +441,7 @@ const OrgEditAPIAccess: React.FC = () => {
               className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50 cursor-pointer"
             >
               <RefreshCw size={14} />
-              Regenerate
+              {t('dashboard.organization.api_access.regenerate')}
             </button>
             <button
               type="button"
@@ -463,7 +463,7 @@ const OrgEditAPIAccess: React.FC = () => {
                 <SaveAllIcon size={14} />
               )}
               <span>
-                {isActiveSaving ? 'Saving...' : isSaved ? 'Saved' : 'Save'}
+                {isActiveSaving ? t('common.saving') : isSaved ? t('dashboard.organization.api_access.saved') : t('common.save')}
               </span>
             </button>
           </div>
@@ -477,25 +477,25 @@ const OrgEditAPIAccess: React.FC = () => {
           <div className="space-y-4">
             <div>
               <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
-                Token Name <span className="text-red-400">*</span>
+                {t('dashboard.organization.api_access.fields.token_name')} <span className="text-red-400">*</span>
               </label>
               <Input
                 className={fieldClassName}
                 value={tokenName}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => { setTokenName(e.target.value); setIsSaved(false) }}
-                placeholder="e.g., CI/CD Pipeline, Mobile App"
+                placeholder={t('dashboard.organization.api_access.fields.token_name_placeholder')}
                 maxLength={100}
               />
             </div>
             <div>
               <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
-                Description
+                {t('dashboard.organization.api_access.fields.description')}
               </label>
               <Textarea
                 className={`${fieldClassName} min-h-[60px]`}
                 value={tokenDescription}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => { setTokenDescription(e.target.value); setIsSaved(false) }}
-                placeholder="What will this token be used for?"
+                placeholder={t('dashboard.organization.api_access.fields.description_placeholder')}
                 rows={2}
                 maxLength={500}
               />
@@ -519,7 +519,7 @@ const OrgEditAPIAccess: React.FC = () => {
               }`}
             >
               <Eye size={16} className="text-gray-400 shrink-0" />
-              <span className="text-sm font-semibold text-gray-800">Read Only</span>
+              <span className="text-sm font-semibold text-gray-800">{t('dashboard.organization.api_access.permissions.read_only')}</span>
             </div>
 
             {/* Full Access - clickable container */}
@@ -532,7 +532,7 @@ const OrgEditAPIAccess: React.FC = () => {
               }`}
             >
               <Key size={16} className="text-gray-400 shrink-0" />
-              <span className="text-sm font-semibold text-gray-800">Full Access</span>
+              <span className="text-sm font-semibold text-gray-800">{t('dashboard.organization.api_access.permissions.full_access')}</span>
             </div>
 
             {/* Custom - expandable container */}
@@ -569,6 +569,7 @@ const CustomPermissionContainer: React.FC<{
   rights: APITokenRights
   onRightsChange: (rights: APITokenRights) => void
 }> = ({ isCustom, onActivate, rights, onRightsChange }) => {
+  const { t } = useTranslation()
   const [isExpanded, setIsExpanded] = React.useState(false)
 
   const handleToggle = (resource: string, permission: string) => {
@@ -588,21 +589,21 @@ const CustomPermissionContainer: React.FC<{
   }
 
   const resources = [
-    { key: 'courses', label: 'Courses' },
-    { key: 'activities', label: 'Activities' },
-    { key: 'coursechapters', label: 'Chapters' },
-    { key: 'collections', label: 'Collections' },
-    { key: 'certifications', label: 'Certifications' },
-    { key: 'usergroups', label: 'User Groups' },
-    { key: 'payments', label: 'Payments' },
-    { key: 'search', label: 'Search' },
+    { key: 'courses', label: t('dashboard.organization.api_access.permissions.resources.courses') },
+    { key: 'activities', label: t('dashboard.organization.api_access.permissions.resources.activities') },
+    { key: 'coursechapters', label: t('dashboard.organization.api_access.permissions.resources.chapters') },
+    { key: 'collections', label: t('dashboard.organization.api_access.permissions.resources.collections') },
+    { key: 'certifications', label: t('dashboard.organization.api_access.permissions.resources.certifications') },
+    { key: 'usergroups', label: t('dashboard.organization.api_access.permissions.resources.user_groups') },
+    { key: 'payments', label: t('dashboard.organization.api_access.permissions.resources.payments') },
+    { key: 'search', label: t('dashboard.organization.api_access.permissions.resources.search') },
   ]
 
   const crudItems = [
-    { key: 'action_create', label: 'Create' },
-    { key: 'action_read', label: 'Read' },
-    { key: 'action_update', label: 'Update' },
-    { key: 'action_delete', label: 'Delete' },
+    { key: 'action_create', label: t('dashboard.organization.api_access.permissions.create') },
+    { key: 'action_read', label: t('dashboard.organization.api_access.permissions.read') },
+    { key: 'action_update', label: t('dashboard.organization.api_access.permissions.update') },
+    { key: 'action_delete', label: t('common.delete') },
   ]
 
   const isSearchResource = (key: string) => key === 'search'
@@ -615,6 +616,13 @@ const CustomPermissionContainer: React.FC<{
       return (rights as any)[res.key]?.[item.key] || false
     })
   )
+
+  const selectedResourcesCount = resources.filter((res) =>
+    crudItems.some((item) => {
+      if (isCrudDisabled(res.key, item.key)) return false
+      return (rights as any)[res.key]?.[item.key]
+    })
+  ).length
 
   return (
     <div className="rounded-xl overflow-hidden border border-gray-100">
@@ -629,15 +637,10 @@ const CustomPermissionContainer: React.FC<{
       >
         <div className="flex items-center gap-3">
           <SlidersHorizontal size={16} className="text-gray-400 shrink-0" />
-          <span className="text-sm font-semibold text-gray-800">Custom</span>
+          <span className="text-sm font-semibold text-gray-800">{t('dashboard.organization.api_access.permissions.custom')}</span>
           {anyChecked && (
             <span className="text-xs text-gray-400 tabular-nums">
-              {resources.filter((res) =>
-                crudItems.some((item) => {
-                  if (isCrudDisabled(res.key, item.key)) return false
-                  return (rights as any)[res.key]?.[item.key]
-                })
-              ).length} resources
+              {t('dashboard.organization.api_access.permissions.resources_count', { count: selectedResourcesCount })}
             </span>
           )}
         </div>
@@ -656,7 +659,7 @@ const CustomPermissionContainer: React.FC<{
             <div className="space-y-1">
               {/* Header row */}
               <div className="flex items-center px-4 py-2 border-b border-gray-100">
-                <div className="flex-1 text-xs font-semibold text-gray-400">Resource</div>
+                <div className="flex-1 text-xs font-semibold text-gray-400">{t('dashboard.organization.api_access.permissions.resource')}</div>
                 <div className="flex items-center gap-4">
                   {crudItems.map((item) => (
                     <span key={item.key} className="w-8 text-center text-xs font-semibold text-gray-400">

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { fetchOpenAPISpec } from '@services/api_tokens/api_tokens'
+import { useTranslation } from 'react-i18next'
 
 interface OpenAPIPath {
   [method: string]: {
@@ -99,6 +100,7 @@ interface APIDocumentationProps {
 }
 
 const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
+  const { t } = useTranslation()
   const [spec, setSpec] = useState<OpenAPISpec | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -115,8 +117,8 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
       const data = await fetchOpenAPISpec()
       setSpec(data)
     } catch (err: any) {
-      setError(err.message || 'Failed to load API documentation')
-      toast.error(err.message || 'Failed to load API documentation')
+      setError(err.message || t('dashboard.organization.api_access.docs.load_failed'))
+      toast.error(err.message || t('dashboard.organization.api_access.docs.load_failed'))
     } finally {
       setLoading(false)
     }
@@ -269,7 +271,7 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
       <div className="pb-4">
         <div className="flex justify-center items-center py-12">
           <RefreshCw className="animate-spin text-gray-400 mr-2" size={24} />
-          <span className="text-gray-500">Loading API documentation...</span>
+          <span className="text-gray-500">{t('dashboard.organization.api_access.docs.loading')}</span>
         </div>
       </div>
     )
@@ -282,7 +284,7 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
           <p className="text-red-500 mb-4">{error}</p>
           <Button onClick={loadSpec} variant="outline">
             <RefreshCw size={16} className="mr-2" />
-            Retry
+            {t('dashboard.organization.api_access.docs.retry')}
           </Button>
         </div>
       </div>
@@ -346,14 +348,14 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
                         {/* Parameters */}
                         {endpoint.parameters && endpoint.parameters.length > 0 && (
                           <div>
-                            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Parameters</h4>
+                            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t('dashboard.organization.api_access.docs.parameters')}</h4>
                             <div className="bg-white rounded-lg border border-gray-100 divide-y divide-gray-100">
                               {endpoint.parameters.map((param: any) => (
                                 <div key={param.name} className="flex items-center gap-3 px-3 py-2">
                                   <code className="text-sm text-gray-800 font-medium">{param.name}</code>
                                   <Badge variant="outline" className="text-xs">{param.in}</Badge>
                                   {param.required && (
-                                    <span className="text-xs text-red-500">required</span>
+                                    <span className="text-xs text-red-500">{t('dashboard.organization.api_access.docs.required')}</span>
                                   )}
                                   <span className="text-xs text-gray-400 ml-auto">
                                     {param.schema?.type || 'any'}
@@ -373,7 +375,7 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
                           return (
                             <div>
                               <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                                Request Body
+                                {t('dashboard.organization.api_access.docs.request_body')}
                                 <span className="font-mono text-gray-400 ml-2">
                                   {getSchemaTypeLabel(endpoint.requestBody.content['application/json'].schema)}
                                 </span>
@@ -386,7 +388,7 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
                                     return (
                                       <div key={key} className="flex items-center gap-3 px-3 py-2">
                                         <code className="text-sm text-gray-800 font-medium">{key}</code>
-                                        {isRequired && <span className="text-xs text-red-500">required</span>}
+                                        {isRequired && <span className="text-xs text-red-500">{t('dashboard.organization.api_access.docs.required')}</span>}
                                         <span className="text-xs text-gray-400 ml-auto">{resolvedProp?.type || 'any'}</span>
                                         {resolvedProp?.description && (
                                           <span className="text-xs text-gray-500 truncate max-w-[200px]">{resolvedProp.description}</span>
@@ -403,7 +405,7 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
                         {/* Response Schemas */}
                         {endpoint.responses && Object.keys(endpoint.responses).length > 0 && (
                           <div>
-                            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Responses</h4>
+                            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t('dashboard.organization.api_access.docs.responses')}</h4>
                             <div className="space-y-2">
                               {Object.entries(endpoint.responses).map(([code, res]: [string, any]) => {
                                 const responseSchema = res?.content?.['application/json']?.schema
@@ -463,7 +465,7 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
 
       {groups.length === 0 && (
         <div className="text-center py-12 text-gray-400">
-          <p className="text-sm">No endpoints found matching your search.</p>
+          <p className="text-sm">{t('dashboard.organization.api_access.docs.no_results')}</p>
         </div>
       )}
     </div>
