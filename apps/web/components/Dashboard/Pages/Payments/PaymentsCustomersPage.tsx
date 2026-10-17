@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import useSWR from 'swr'
@@ -68,24 +69,27 @@ function CardChip({ brand, last4 }: { brand?: string; last4?: string }) {
   )
 }
 
-const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
-  active:    { label: 'Active',    cls: 'bg-green-100 text-green-700' },
-  completed: { label: 'Completed', cls: 'bg-blue-100 text-blue-700' },
-  succeeded: { label: 'Paid',      cls: 'bg-green-100 text-green-700' },
-  pending:   { label: 'Pending',   cls: 'bg-amber-100 text-amber-700' },
-  failed:    { label: 'Failed',    cls: 'bg-red-100 text-red-600' },
-  cancelled: { label: 'Cancelled', cls: 'bg-gray-100 text-gray-500' },
-  canceled:  { label: 'Cancelled', cls: 'bg-gray-100 text-gray-500' },
-  refunded:  { label: 'Refunded',  cls: 'bg-purple-100 text-purple-700' },
-  trialing:  { label: 'Trialing',  cls: 'bg-sky-100 text-sky-700' },
-  past_due:  { label: 'Past due',  cls: 'bg-red-100 text-red-600' },
+const STATUS_BADGE: Record<string, { labelKey: string; cls: string }> = {
+  active:    { labelKey: 'dashboard.payments.customers.status_active',    cls: 'bg-green-100 text-green-700' },
+  completed: { labelKey: 'dashboard.payments.customers.status_completed', cls: 'bg-blue-100 text-blue-700' },
+  succeeded: { labelKey: 'dashboard.payments.customers.status_paid',      cls: 'bg-green-100 text-green-700' },
+  pending:   { labelKey: 'dashboard.payments.customers.status_pending',   cls: 'bg-amber-100 text-amber-700' },
+  failed:    { labelKey: 'dashboard.payments.customers.status_failed',    cls: 'bg-red-100 text-red-600' },
+  cancelled: { labelKey: 'dashboard.payments.customers.status_cancelled', cls: 'bg-gray-100 text-gray-500' },
+  canceled:  { labelKey: 'dashboard.payments.customers.status_cancelled', cls: 'bg-gray-100 text-gray-500' },
+  refunded:  { labelKey: 'dashboard.payments.customers.status_refunded',  cls: 'bg-purple-100 text-purple-700' },
+  trialing:  { labelKey: 'dashboard.payments.customers.status_trialing',  cls: 'bg-sky-100 text-sky-700' },
+  past_due:  { labelKey: 'dashboard.payments.customers.status_past_due',  cls: 'bg-red-100 text-red-600' },
 }
 
 function StatusPill({ status }: { status: string }) {
-  const s = STATUS_BADGE[status] ?? { label: status, cls: 'bg-gray-100 text-gray-500' }
+  const { t } = useTranslation()
+  const s = STATUS_BADGE[status]
+  const label = s ? t(s.labelKey) : status
+  const cls = s?.cls ?? 'bg-gray-100 text-gray-500'
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${s.cls}`}>
-      {s.label}
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${cls}`}>
+      {label}
     </span>
   )
 }
@@ -116,16 +120,17 @@ function MetricCard({
 type Tab = 'overview' | 'customers' | 'transactions' | 'subscriptions'
 
 const TABS: { id: Tab; label: string; icon: any }[] = [
-  { id: 'overview',      label: 'Overview',      icon: Activity },
-  { id: 'customers',     label: 'Customers',     icon: Users },
-  { id: 'transactions',  label: 'Transactions',  icon: CreditCard },
-  { id: 'subscriptions', label: 'Subscriptions', icon: RefreshCcw },
+  { id: 'overview',      label: 'dashboard.payments.customers.tab_overview',      icon: Activity },
+  { id: 'customers',     label: 'dashboard.payments.customers.tab_customers',     icon: Users },
+  { id: 'transactions',  label: 'dashboard.payments.customers.tab_transactions',  icon: CreditCard },
+  { id: 'subscriptions', label: 'dashboard.payments.customers.tab_subscriptions', icon: RefreshCcw },
 ]
 
 // ---------------------------------------------------------------------------
 // Overview tab
 // ---------------------------------------------------------------------------
 function OverviewTab({ orgId, accessToken }: { orgId: number; accessToken: string }) {
+  const { t } = useTranslation()
   const { data, error, isLoading } = useSWR(
     [`/stripe/overview/${orgId}`, accessToken],
     () => getStripeOverview(orgId, accessToken),
@@ -141,21 +146,21 @@ function OverviewTab({ orgId, accessToken }: { orgId: number; accessToken: strin
     <div className="space-y-6">
       {/* Metric cards */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
-        <MetricCard label="MRR"               value={fmt(d.mrr)}            icon={TrendingUp}  color="bg-blue-100 text-blue-600" />
-        <MetricCard label="ARR"               value={fmt(d.arr)}            icon={TrendingUp}  color="bg-indigo-100 text-indigo-600" />
-        <MetricCard label="Total revenue"     value={fmt(d.total_revenue)}  icon={DollarSign}  color="bg-green-100 text-green-600" />
-        <MetricCard label="Active subscribers" value={String(d.active_subscribers)} icon={RefreshCcw} color="bg-violet-100 text-violet-600" />
-        <MetricCard label="Total customers"   value={String(d.total_customers)} icon={Users}   color="bg-purple-100 text-purple-600" />
-        <MetricCard label="Churned (30d)"     value={String(d.churn_30d)}   icon={Activity}    color="bg-red-100 text-red-500" />
+        <MetricCard label={t('dashboard.payments.customers.mrr')}               value={fmt(d.mrr)}            icon={TrendingUp}  color="bg-blue-100 text-blue-600" />
+        <MetricCard label={t('dashboard.payments.customers.arr')}               value={fmt(d.arr)}            icon={TrendingUp}  color="bg-indigo-100 text-indigo-600" />
+        <MetricCard label={t('dashboard.payments.customers.total_revenue')}     value={fmt(d.total_revenue)}  icon={DollarSign}  color="bg-green-100 text-green-600" />
+        <MetricCard label={t('dashboard.payments.customers.active_subscribers')} value={String(d.active_subscribers)} icon={RefreshCcw} color="bg-violet-100 text-violet-600" />
+        <MetricCard label={t('dashboard.payments.customers.total_customers')}   value={String(d.total_customers)} icon={Users}   color="bg-purple-100 text-purple-600" />
+        <MetricCard label={t('dashboard.payments.customers.churned_30d')}     value={String(d.churn_30d)}   icon={Activity}    color="bg-red-100 text-red-500" />
       </div>
 
       {/* Recent charges */}
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
-          <span className="font-semibold text-gray-800 text-sm">Recent transactions</span>
+          <span className="font-semibold text-gray-800 text-sm">{t('dashboard.payments.customers.recent_transactions')}</span>
         </div>
         {d.recent_charges.length === 0 ? (
-          <div className="px-5 py-8 text-center text-sm text-gray-400">No transactions yet</div>
+          <div className="px-5 py-8 text-center text-sm text-gray-400">{t('dashboard.payments.customers.no_transactions')}</div>
         ) : (
           <div className="divide-y divide-gray-50">
             {d.recent_charges.map((ch: any) => (
@@ -166,7 +171,7 @@ function OverviewTab({ orgId, accessToken }: { orgId: number; accessToken: strin
                   </div>
                   <div>
                     <div className="text-sm font-medium text-gray-800">
-                      {ch.customer?.name ?? ch.customer?.email ?? ch.customer?.id ?? 'Unknown'}
+                      {ch.customer?.name ?? ch.customer?.email ?? ch.customer?.id ?? t('common.unknown')}
                     </div>
                     <div className="text-xs text-gray-400">{fmtDate(ch.created)}</div>
                   </div>
@@ -189,6 +194,7 @@ function OverviewTab({ orgId, accessToken }: { orgId: number; accessToken: strin
 // Customers tab
 // ---------------------------------------------------------------------------
 function CustomersTab({ orgId, accessToken }: { orgId: number; accessToken: string }) {
+  const { t } = useTranslation()
   const { data: customers, error, isLoading } = useSWR(
     [`/payments/${orgId}/customers`, accessToken],
     () => getOrgCustomers(orgId, accessToken),
@@ -197,14 +203,14 @@ function CustomersTab({ orgId, accessToken }: { orgId: number; accessToken: stri
 
   useEffect(() => {
     if (error) {
-      toast.error('Error loading customers')
+      toast.error(t('dashboard.payments.customers.error_loading_customers'))
     }
   }, [error])
 
   if (isLoading) return <PageLoading />
-  if (error) return <div className="p-6 text-sm text-red-500">Error loading customers</div>
+  if (error) return <div className="p-6 text-sm text-red-500">{t('dashboard.payments.customers.error_loading_customers')}</div>
   if (!customers || customers.length === 0) {
-    return <Empty message="No customers yet" />
+    return <Empty message={t('dashboard.payments.customers.no_customers')} />
   }
 
   return (
@@ -212,15 +218,15 @@ function CustomersTab({ orgId, accessToken }: { orgId: number; accessToken: stri
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Customer</TableHead>
-            <TableHead>Offer</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Amount</TableHead>
-            <TableHead>Payment method</TableHead>
-            <TableHead>Last charge</TableHead>
-            <TableHead>Next billing</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Since</TableHead>
+            <TableHead>{t('dashboard.payments.customers.col_customer')}</TableHead>
+            <TableHead>{t('dashboard.payments.customers.col_offer')}</TableHead>
+            <TableHead>{t('dashboard.payments.customers.col_type')}</TableHead>
+            <TableHead>{t('dashboard.payments.customers.col_amount')}</TableHead>
+            <TableHead>{t('dashboard.payments.customers.col_payment_method')}</TableHead>
+            <TableHead>{t('dashboard.payments.customers.col_last_charge')}</TableHead>
+            <TableHead>{t('dashboard.payments.customers.col_next_billing')}</TableHead>
+            <TableHead>{t('common.status')}</TableHead>
+            <TableHead>{t('dashboard.payments.customers.col_since')}</TableHead>
             <TableHead></TableHead>
           </TableRow>
         </TableHeader>
@@ -249,9 +255,9 @@ function CustomersTab({ orgId, accessToken }: { orgId: number; accessToken: stri
                 <TableCell className="font-medium">{offer?.name ?? '—'}</TableCell>
                 <TableCell>
                   {offer?.offer_type === 'subscription' ? (
-                    <Badge variant="outline" className="flex items-center gap-1 w-fit"><RefreshCcw size={11} /><span>Subscription</span></Badge>
+                    <Badge variant="outline" className="flex items-center gap-1 w-fit"><RefreshCcw size={11} /><span>{t('dashboard.payments.customers.subscription_label')}</span></Badge>
                   ) : (
-                    <Badge variant="outline" className="flex items-center gap-1 w-fit"><SquareCheck size={11} /><span>One-time</span></Badge>
+                    <Badge variant="outline" className="flex items-center gap-1 w-fit"><SquareCheck size={11} /><span>{t('dashboard.payments.customers.one_time_label')}</span></Badge>
                   )}
                 </TableCell>
                 <TableCell>{offer ? fmt(offer.amount, offer.currency) : '—'}</TableCell>
@@ -270,7 +276,7 @@ function CustomersTab({ orgId, accessToken }: { orgId: number; accessToken: stri
                   {stripe?.next_billing_date ? (
                     <div className="flex flex-col">
                       <span className="text-sm">{fmtDate(stripe.next_billing_date)}</span>
-                      {stripe.cancel_at_period_end && <span className="text-xs text-red-500">Cancels then</span>}
+                      {stripe.cancel_at_period_end && <span className="text-xs text-red-500">{t('dashboard.payments.customers.cancels_then')}</span>}
                     </div>
                   ) : <span className="text-gray-400">—</span>}
                 </TableCell>
@@ -296,6 +302,7 @@ function CustomersTab({ orgId, accessToken }: { orgId: number; accessToken: stri
 // Transactions tab (paginated, direct from Stripe)
 // ---------------------------------------------------------------------------
 function TransactionsTab({ orgId, accessToken }: { orgId: number; accessToken: string }) {
+  const { t } = useTranslation()
   const [cursor, setCursor] = useState<string | undefined>(undefined)
   const [cursorStack, setCursorStack] = useState<string[]>([])
 
@@ -320,7 +327,7 @@ function TransactionsTab({ orgId, accessToken }: { orgId: number; accessToken: s
 
   if (isLoading) return <PageLoading />
   if (error) return <StripeUnavailable />
-  if (!data?.data?.length) return <Empty message="No transactions yet" />
+  if (!data?.data?.length) return <Empty message={t('dashboard.payments.customers.no_transactions')} />
 
   return (
     <div className="space-y-3">
@@ -328,13 +335,13 @@ function TransactionsTab({ orgId, accessToken }: { orgId: number; accessToken: s
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Customer</TableHead>
-              <TableHead>Payment method</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Refunded</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Description</TableHead>
+              <TableHead>{t('dashboard.payments.customers.col_date')}</TableHead>
+              <TableHead>{t('dashboard.payments.customers.col_customer')}</TableHead>
+              <TableHead>{t('dashboard.payments.customers.col_payment_method')}</TableHead>
+              <TableHead>{t('dashboard.payments.customers.col_amount')}</TableHead>
+              <TableHead>{t('dashboard.payments.customers.col_refunded')}</TableHead>
+              <TableHead>{t('common.status')}</TableHead>
+              <TableHead>{t('dashboard.payments.customers.col_description')}</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
@@ -361,7 +368,7 @@ function TransactionsTab({ orgId, accessToken }: { orgId: number; accessToken: s
                 <TableCell className="text-sm text-gray-500 max-w-[200px] truncate">{ch.description ?? '—'}</TableCell>
                 <TableCell>
                   {ch.receipt_url && (
-                    <a href={ch.receipt_url} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-600 transition" title="View receipt">
+                    <a href={ch.receipt_url} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-gray-600 transition" title={t('dashboard.payments.customers.view_receipt')}>
                       <ExternalLink size={13} />
                     </a>
                   )}
@@ -375,10 +382,10 @@ function TransactionsTab({ orgId, accessToken }: { orgId: number; accessToken: s
       {/* Pagination */}
       <div className="flex items-center justify-end space-x-2">
         <Button variant="outline" size="sm" onClick={goPrev} disabled={cursorStack.length === 0}>
-          <ChevronLeft size={14} className="mr-1" /> Previous
+          <ChevronLeft size={14} className="mr-1" /> {t('common.previous')}
         </Button>
         <Button variant="outline" size="sm" onClick={goNext} disabled={!data?.has_more}>
-          Next <ChevronRight size={14} className="ml-1" />
+          {t('common.next')} <ChevronRight size={14} className="ml-1" />
         </Button>
       </div>
     </div>
@@ -389,6 +396,7 @@ function TransactionsTab({ orgId, accessToken }: { orgId: number; accessToken: s
 // Subscriptions tab (direct from Stripe)
 // ---------------------------------------------------------------------------
 function SubscriptionsTab({ orgId, accessToken }: { orgId: number; accessToken: string }) {
+  const { t } = useTranslation()
   const [status, setStatus] = useState('active')
 
   const { data, error, isLoading } = useSWR(
@@ -398,6 +406,13 @@ function SubscriptionsTab({ orgId, accessToken }: { orgId: number; accessToken: 
   )
 
   const statuses = ['active', 'trialing', 'past_due', 'canceled', 'all']
+  const statusLabelKeys: Record<string, string> = {
+    active: 'dashboard.payments.customers.status_active',
+    trialing: 'dashboard.payments.customers.status_trialing',
+    past_due: 'dashboard.payments.customers.status_past_due',
+    canceled: 'dashboard.payments.customers.status_cancelled',
+    all: 'common.all',
+  }
 
   if (isLoading) return <PageLoading />
   if (error) return <StripeUnavailable />
@@ -414,23 +429,23 @@ function SubscriptionsTab({ orgId, accessToken }: { orgId: number; accessToken: 
               status === s ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            {s}
+            {t(statusLabelKeys[s])}
           </button>
         ))}
       </div>
 
-      {(!data?.data?.length) ? <Empty message={`No ${status} subscriptions`} /> : (
+      {(!data?.data?.length) ? <Empty message={t('dashboard.payments.customers.no_subscriptions_status', { status: t(statusLabelKeys[status]) })} /> : (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Customer</TableHead>
-                <TableHead>Plan</TableHead>
-                <TableHead>Payment method</TableHead>
-                <TableHead>Current period</TableHead>
-                <TableHead>Next billing</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Started</TableHead>
+                <TableHead>{t('dashboard.payments.customers.col_customer')}</TableHead>
+                <TableHead>{t('dashboard.payments.customers.col_plan')}</TableHead>
+                <TableHead>{t('dashboard.payments.customers.col_payment_method')}</TableHead>
+                <TableHead>{t('dashboard.payments.customers.col_current_period')}</TableHead>
+                <TableHead>{t('dashboard.payments.customers.col_next_billing')}</TableHead>
+                <TableHead>{t('common.status')}</TableHead>
+                <TableHead>{t('dashboard.payments.customers.col_started')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -461,7 +476,7 @@ function SubscriptionsTab({ orgId, accessToken }: { orgId: number; accessToken: 
                       <span className="text-sm">{fmtDate(sub.current_period_end)}</span>
                       {sub.cancel_at_period_end && (
                         <span className="text-xs text-red-500 flex items-center gap-1">
-                          <Clock size={10} /> Cancels then
+                          <Clock size={10} /> {t('dashboard.payments.customers.cancels_then')}
                         </span>
                       )}
                     </div>
@@ -486,14 +501,15 @@ function Empty({ message }: { message: string }) {
 }
 
 function StripeUnavailable() {
+  const { t } = useTranslation()
   useEffect(() => {
-    toast.error('Could not reach Stripe. Check your connection or configuration.')
+    toast.error(t('dashboard.payments.customers.stripe_unavailable'))
   }, [])
 
   return (
     <div className="bg-white border border-gray-200 rounded-xl py-10 text-center space-y-1">
       <AlertCircle size={20} className="mx-auto text-gray-400" />
-      <p className="text-sm text-gray-500">Could not reach Stripe. Check your connection or configuration.</p>
+      <p className="text-sm text-gray-500">{t('dashboard.payments.customers.stripe_unavailable')}</p>
     </div>
   )
 }
@@ -504,6 +520,7 @@ function StripeUnavailable() {
 function PaymentsCustomersPage() {
   const org = useOrg() as any
   const session = useLHSession() as any
+  const { t } = useTranslation()
   const access_token = session?.data?.tokens?.access_token
   const { isEnabled, isLoading } = usePaymentsEnabled()
   const [activeTab, setActiveTab] = useState<Tab>('overview')
@@ -526,7 +543,7 @@ function PaymentsCustomersPage() {
             }`}
           >
             <Icon size={15} />
-            <span>{label}</span>
+            <span>{t(label)}</span>
           </button>
         ))}
       </div>

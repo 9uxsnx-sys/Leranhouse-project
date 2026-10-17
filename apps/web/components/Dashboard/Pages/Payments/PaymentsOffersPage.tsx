@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import useSWR, { mutate } from 'swr';
@@ -22,17 +23,18 @@ import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/Unconfigu
 import CreateOfferForm from './SubComponents/CreateOfferForm';
 import OfferResourcesPanel from './SubComponents/OfferResourcesPanel';
 
-const editValidationSchema = Yup.object().shape({
-  name: Yup.string().required('Name is required'),
-  description: Yup.string().required('Description is required'),
-  amount: Yup.number().min(0, 'Amount must be positive').required('Amount is required'),
+const getEditValidationSchema = (t: any) => Yup.object().shape({
+  name: Yup.string().required(t('dashboard.payments.offers.validation_name_required')),
+  description: Yup.string().required(t('dashboard.payments.offers.validation_description_required')),
+  amount: Yup.number().min(0, t('dashboard.payments.offers.validation_amount_positive')).required(t('dashboard.payments.offers.validation_amount_required')),
   benefits: Yup.string(),
-  currency: Yup.string().required('Currency is required'),
-  offer_type: Yup.string().oneOf(['one_time', 'subscription']).required('Offer type is required'),
-  price_type: Yup.string().oneOf(['fixed_price', 'customer_choice']).required('Price type is required'),
+  currency: Yup.string().required(t('dashboard.payments.offers.validation_currency_required')),
+  offer_type: Yup.string().oneOf(['one_time', 'subscription']).required(t('dashboard.payments.offers.validation_offer_type_required')),
+  price_type: Yup.string().oneOf(['fixed_price', 'customer_choice']).required(t('dashboard.payments.offers.validation_price_type_required')),
 });
 
 function PaymentsOffersPage() {
+  const { t } = useTranslation();
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -51,9 +53,9 @@ function PaymentsOffersPage() {
     const res = await archiveOffer(org.id, offerId, session.data?.tokens?.access_token);
     mutate([`/payments/${org.id}/offers`, session.data?.tokens?.access_token]);
     if (res.status === 200) {
-      toast.success('Offer archived successfully');
+      toast.success(t('dashboard.payments.offers.archived'));
     } else {
-      toast.error(res.data?.detail || 'Failed to archive offer');
+      toast.error(res.data?.detail || t('dashboard.payments.offers.failed_archive'));
     }
   };
 
@@ -65,8 +67,8 @@ function PaymentsOffersPage() {
     return <UnconfiguredPaymentsDisclaimer />;
   }
 
-  if (error) return <div>Failed to load offers</div>;
-  if (!offers) return <div>Loading…</div>;
+  if (error) return <div>{t('dashboard.payments.offers.error_loading')}</div>;
+  if (!offers) return <div>{t('common.loading')}</div>;
 
   return (
     <div className="h-full w-full bg-[#f8f8f8]">
@@ -74,8 +76,8 @@ function PaymentsOffersPage() {
         <Modal
           isDialogOpen={isCreateModalOpen}
           onOpenChange={setIsCreateModalOpen}
-          dialogTitle="Create New Offer"
-          dialogDescription="Add a new offer linked to a UserGroup"
+          dialogTitle={t('dashboard.payments.offers.create_title')}
+          dialogDescription={t('dashboard.payments.offers.create_description')}
           dialogContent={<CreateOfferForm onSuccess={() => setIsCreateModalOpen(false)} />}
         />
 
@@ -83,8 +85,8 @@ function PaymentsOffersPage() {
           <Modal
             isDialogOpen={!!resourcesPanelOffer}
             onOpenChange={(open) => { if (!open) setResourcesPanelOffer(null); }}
-            dialogTitle={`Resources — ${resourcesPanelOffer.name}`}
-            dialogDescription="Resources accessible to enrolled users"
+            dialogTitle={t('dashboard.payments.offers.resources_dialog_title', { name: resourcesPanelOffer.name })}
+            dialogDescription={t('dashboard.payments.offers.resources_dialog_description')}
             dialogContent={
               <OfferResourcesPanel
                 offerId={resourcesPanelOffer.id}
@@ -110,7 +112,7 @@ function PaymentsOffersPage() {
                       <Badge className="w-fit flex items-center space-x-2" variant="outline">
                         {offer.offer_type === 'subscription' ? <RefreshCcw size={12} /> : <SquareCheck size={12} />}
                         <span className="text-sm">
-                          {offer.offer_type === 'subscription' ? 'Subscription' : 'One-time payment'}
+                          {offer.offer_type === 'subscription' ? t('dashboard.payments.offers.offer_type_subscription') : t('dashboard.payments.offers.offer_type_one_time')}
                         </span>
                       </Badge>
                       <h3 className="font-bold text-lg">{offer.name}</h3>
@@ -123,9 +125,9 @@ function PaymentsOffersPage() {
                         <Pencil size={16} />
                       </button>
                       <ConfirmationModal
-                        confirmationButtonText="Archive Offer"
-                        confirmationMessage="Are you sure you want to archive this offer?"
-                        dialogTitle={`Archive ${offer.name}?`}
+                        confirmationButtonText={t('dashboard.payments.offers.archive_offer')}
+                        confirmationMessage={t('dashboard.payments.offers.archive_confirm_message')}
+                        dialogTitle={t('dashboard.payments.offers.archive_dialog_title', { name: offer.name })}
                         dialogTrigger={
                           <button className="text-red-500 hover:text-red-700">
                             <Archive size={16} />
@@ -146,7 +148,7 @@ function PaymentsOffersPage() {
                       <p className="text-gray-600">{offer.description}</p>
                       {offer.benefits && (
                         <div className="mt-2">
-                          <h4 className="font-semibold text-sm">Benefits:</h4>
+                          <h4 className="font-semibold text-sm">{t('dashboard.payments.offers.benefits')}</h4>
                           <p className="text-sm text-gray-600">{offer.benefits}</p>
                         </div>
                       )}
@@ -159,9 +161,9 @@ function PaymentsOffersPage() {
                       className="text-slate-500 hover:text-slate-700 text-sm flex items-center"
                     >
                       {expandedOffers[offer.id] ? (
-                        <><ChevronUp size={16} /><span>Show less</span></>
+                        <><ChevronUp size={16} /><span>{t('dashboard.payments.offers.show_less')}</span></>
                       ) : (
-                        <><ChevronDown size={16} /><span>Show more</span></>
+                        <><ChevronDown size={16} /><span>{t('dashboard.payments.offers.show_more')}</span></>
                       )}
                     </button>
                   </div>
@@ -169,7 +171,7 @@ function PaymentsOffersPage() {
                   {offer.payments_group_id && (
                     <div className="mt-1.5 flex items-center gap-1.5 text-xs text-violet-600">
                       <Layers size={12} />
-                      <span>Payment Group #{offer.payments_group_id}</span>
+                      <span>{t('dashboard.payments.offers.payment_group_number', { id: offer.payments_group_id })}</span>
                     </div>
                   )}
 
@@ -179,12 +181,12 @@ function PaymentsOffersPage() {
                       className="text-sm flex items-center space-x-1 text-indigo-600 hover:text-indigo-800"
                     >
                       <Users size={14} />
-                      <span>Manage Resources</span>
+                      <span>{t('dashboard.payments.offers.manage_resources')}</span>
                     </button>
                   </div>
 
                   <div className="mt-2 flex items-center justify-between bg-gray-100 rounded-md p-2">
-                    <span className="text-sm text-gray-600">Price:</span>
+                    <span className="text-sm text-gray-600">{t('dashboard.payments.offers.price')}</span>
                     <span className="font-semibold text-lg">
                       {new Intl.NumberFormat('en-US', {
                         style: 'currency',
@@ -201,7 +203,7 @@ function PaymentsOffersPage() {
         {offers.data.length === 0 && (
           <div className="flex mx-auto space-x-2 font-semibold mt-3 text-gray-600 items-center">
             <Info size={20} />
-            <p>No offers available. Create a new offer to get started.</p>
+            <p>{t('dashboard.payments.offers.empty')}</p>
           </div>
         )}
 
@@ -211,7 +213,7 @@ function PaymentsOffersPage() {
             className="mb-4 flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-linear-to-bl text-white font-medium from-gray-700 to-gray-900 border border-gray-600 shadow-gray-900/20 nice-shadow transition duration-300 hover:from-gray-600 hover:to-gray-800"
           >
             <Plus size={18} />
-            <span className="text-sm font-bold">Create New Offer</span>
+            <span className="text-sm font-bold">{t('dashboard.payments.offers.create_title')}</span>
           </button>
         </div>
       </div>
@@ -228,6 +230,7 @@ const EditOfferForm = ({
   onSuccess: () => void;
   onCancel: () => void;
 }) => {
+  const { t } = useTranslation();
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const [currencies, setCurrencies] = useState<{ code: string; name: string }[]>([]);
@@ -258,33 +261,33 @@ const EditOfferForm = ({
       await updateOffer(org.id, offer.id, values, session.data?.tokens?.access_token);
       mutate([`/payments/${org.id}/offers`, session.data?.tokens?.access_token]);
       onSuccess();
-      toast.success('Offer updated successfully');
+      toast.success(t('dashboard.payments.offers.updated'));
     } catch {
-      toast.error('Failed to update offer');
+      toast.error(t('dashboard.payments.offers.failed_update'));
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <Formik initialValues={initialValues} validationSchema={editValidationSchema} onSubmit={handleSubmit}>
+    <Formik initialValues={initialValues} validationSchema={getEditValidationSchema(t)} onSubmit={handleSubmit}>
       {({ isSubmitting, values, setFieldValue }) => (
         <Form className="space-y-4">
           <div className="px-1.5 py-2 flex-col space-y-3">
             <div>
-              <Label htmlFor="name">Offer Name</Label>
-              <Field name="name" as={Input} placeholder="Offer Name" />
+              <Label htmlFor="name">{t('dashboard.payments.offers.field_offer_name')}</Label>
+              <Field name="name" as={Input} placeholder={t('dashboard.payments.offers.field_offer_name')} />
               <ErrorMessage name="name" component="div" className="text-red-500 text-sm mt-1" />
             </div>
 
             <div>
-              <Label htmlFor="description">Description</Label>
-              <Field name="description" as={Textarea} placeholder="Offer Description" />
+              <Label htmlFor="description">{t('dashboard.payments.offers.field_description')}</Label>
+              <Field name="description" as={Textarea} placeholder={t('dashboard.payments.offers.placeholder_offer_description')} />
               <ErrorMessage name="description" component="div" className="text-red-500 text-sm mt-1" />
             </div>
 
             <div>
-              <Label htmlFor="offer_type">Offer Type</Label>
+              <Label htmlFor="offer_type">{t('dashboard.payments.offers.field_offer_type')}</Label>
               <Select
                 value={values.offer_type}
                 onValueChange={(value) => {
@@ -294,29 +297,29 @@ const EditOfferForm = ({
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Offer Type" />
+                  <SelectValue placeholder={t('dashboard.payments.offers.field_offer_type')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="one_time">One Time</SelectItem>
-                  <SelectItem value="subscription">Subscription</SelectItem>
+                  <SelectItem value="one_time">{t('dashboard.payments.offers.option_one_time')}</SelectItem>
+                  <SelectItem value="subscription">{t('dashboard.payments.offers.option_subscription')}</SelectItem>
                 </SelectContent>
               </Select>
               <ErrorMessage name="offer_type" component="div" className="text-red-500 text-sm mt-1" />
             </div>
 
             <div>
-              <Label htmlFor="price_type">Price Type</Label>
+              <Label htmlFor="price_type">{t('dashboard.payments.offers.field_price_type')}</Label>
               <Select
                 value={values.price_type}
                 onValueChange={(value) => setFieldValue('price_type', value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Price Type" />
+                  <SelectValue placeholder={t('dashboard.payments.offers.field_price_type')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="fixed_price">Fixed Price</SelectItem>
+                  <SelectItem value="fixed_price">{t('dashboard.payments.offers.option_fixed_price')}</SelectItem>
                   {values.offer_type !== 'subscription' && (
-                    <SelectItem value="customer_choice">Customer Choice</SelectItem>
+                    <SelectItem value="customer_choice">{t('dashboard.payments.offers.option_customer_choice')}</SelectItem>
                   )}
                 </SelectContent>
               </Select>
@@ -326,24 +329,24 @@ const EditOfferForm = ({
             <div className="flex space-x-2">
               <div className="grow">
                 <Label htmlFor="amount">
-                  {values.price_type === 'fixed_price' ? 'Price' : 'Minimum Amount'}
+                  {values.price_type === 'fixed_price' ? t('dashboard.payments.offers.field_price') : t('dashboard.payments.offers.field_minimum_amount')}
                 </Label>
                 <Field
                   name="amount"
                   as={Input}
                   type="number"
-                  placeholder={values.price_type === 'fixed_price' ? 'Price' : 'Minimum Amount'}
+                  placeholder={values.price_type === 'fixed_price' ? t('dashboard.payments.offers.field_price') : t('dashboard.payments.offers.field_minimum_amount')}
                 />
                 <ErrorMessage name="amount" component="div" className="text-red-500 text-sm mt-1" />
               </div>
               <div className="w-1/3">
-                <Label htmlFor="currency">Currency</Label>
+                <Label htmlFor="currency">{t('dashboard.payments.offers.field_currency')}</Label>
                 <Select
                   value={values.currency}
                   onValueChange={(value) => setFieldValue('currency', value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Currency" />
+                    <SelectValue placeholder={t('dashboard.payments.offers.field_currency')} />
                   </SelectTrigger>
                   <SelectContent>
                     {currencies.map((c) => (
@@ -358,15 +361,15 @@ const EditOfferForm = ({
             </div>
 
             <div>
-              <Label htmlFor="benefits">Benefits</Label>
-              <Field name="benefits" as={Textarea} placeholder="Comma-separated benefits" />
+              <Label htmlFor="benefits">{t('dashboard.payments.offers.field_benefits')}</Label>
+              <Field name="benefits" as={Textarea} placeholder={t('dashboard.payments.offers.placeholder_benefits')} />
             </div>
           </div>
 
           <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={onCancel}>{t('common.cancel')}</Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving…' : 'Save'}
+              {isSubmitting ? t('common.saving') : t('common.save')}
             </Button>
           </div>
         </Form>

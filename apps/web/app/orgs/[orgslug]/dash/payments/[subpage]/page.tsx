@@ -18,6 +18,7 @@ import { BadgeDollarSign } from 'lucide-react'
 import { isOSSMode } from '@services/config/config'
 import { usePlan } from '@components/Hooks/usePlan'
 import { PageTabs } from '@components/ui/page-tabs'
+import { useTranslation } from 'react-i18next'
 
 export type PaymentsParams = {
   subpage: string
@@ -25,6 +26,7 @@ export type PaymentsParams = {
 }
 
 function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
+  const { t } = useTranslation()
   const params = use(props.params);
   const session = useLHSession() as any
   const org = useOrg() as any
@@ -121,7 +123,7 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
               className="flex items-center space-x-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             >
               <SiStripe size={14} className="text-[#635BFF]" />
-              <span>Stripe Dashboard</span>
+              <span>{t('dashboard.payments.stripe_dashboard')}</span>
               <ExternalLink size={12} className="text-gray-400" />
             </a>
           </div>
@@ -131,10 +133,10 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
           indicatorId="payments-tabs"
           active={subpage}
           tabs={[
-            { id: 'overview', label: 'Overview', icon: Users, href: getUriWithOrg(params.orgslug, '/dash/payments/overview') },
-            { id: 'offers', label: 'Offers', icon: Gem, href: getUriWithOrg(params.orgslug, '/dash/payments/offers') },
-            { id: 'groups', label: 'Payment Groups', icon: Layers, href: getUriWithOrg(params.orgslug, '/dash/payments/groups') },
-            { id: 'configuration', label: 'Configuration', icon: Settings, href: getUriWithOrg(params.orgslug, '/dash/payments/configuration') },
+            { id: 'overview', label: t('dashboard.payments.tabs.overview'), icon: Users, href: getUriWithOrg(params.orgslug, '/dash/payments/overview') },
+            { id: 'offers', label: t('dashboard.payments.tabs.offers'), icon: Gem, href: getUriWithOrg(params.orgslug, '/dash/payments/offers') },
+            { id: 'groups', label: t('dashboard.payments.tabs.groups'), icon: Layers, href: getUriWithOrg(params.orgslug, '/dash/payments/groups') },
+            { id: 'configuration', label: t('dashboard.payments.tabs.configuration'), icon: Settings, href: getUriWithOrg(params.orgslug, '/dash/payments/configuration') },
           ]}
         />
       </div>

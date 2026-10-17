@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { createOffer } from '@services/payments/offers';
@@ -18,14 +19,14 @@ import useSWR from 'swr';
 import { BookOpen, X, Plus, Layers } from 'lucide-react';
 import { getOrgCourses } from '@services/courses/courses';
 
-const validationSchema = Yup.object().shape({
-  name: Yup.string().required('Name is required'),
-  description: Yup.string().required('Description is required'),
-  amount: Yup.number().min(1, 'Amount must be greater than zero').required('Amount is required'),
+const getValidationSchema = (t: any) => Yup.object().shape({
+  name: Yup.string().required(t('dashboard.payments.create_offer.validation_name_required')),
+  description: Yup.string().required(t('dashboard.payments.create_offer.validation_description_required')),
+  amount: Yup.number().min(1, t('dashboard.payments.create_offer.validation_amount_positive')).required(t('dashboard.payments.create_offer.validation_amount_required')),
   benefits: Yup.string(),
-  currency: Yup.string().required('Currency is required'),
-  offer_type: Yup.string().oneOf(['one_time', 'subscription']).required('Offer type is required'),
-  price_type: Yup.string().oneOf(['fixed_price', 'customer_choice']).required('Price type is required'),
+  currency: Yup.string().required(t('dashboard.payments.create_offer.validation_currency_required')),
+  offer_type: Yup.string().oneOf(['one_time', 'subscription']).required(t('dashboard.payments.create_offer.validation_offer_type_required')),
+  price_type: Yup.string().oneOf(['fixed_price', 'customer_choice']).required(t('dashboard.payments.create_offer.validation_price_type_required')),
 });
 
 interface OfferFormValues {
@@ -41,6 +42,7 @@ interface OfferFormValues {
 }
 
 const CreateOfferForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
+  const { t } = useTranslation();
   const org = useOrg() as any;
   const session = useLHSession() as any;
   const token = session?.data?.tokens?.access_token;
@@ -89,39 +91,39 @@ const CreateOfferForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
       };
       const res = await createOffer(org.id, payload, token);
       if (res.success) {
-        toast.success('Offer created successfully');
+        toast.success(t('dashboard.payments.create_offer.created'));
         mutate([`/payments/${org.id}/offers`, token]);
         resetForm();
         onSuccess();
       } else {
-        toast.error(res.data?.detail || 'Failed to create offer');
+        toast.error(res.data?.detail || t('dashboard.payments.create_offer.failed_create'));
       }
     } catch (error) {
-      toast.error('An error occurred while creating the offer');
+      toast.error(t('dashboard.payments.create_offer.generic_error'));
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
+    <Formik initialValues={initialValues} validationSchema={getValidationSchema(t)} onSubmit={handleSubmit}>
       {({ isSubmitting, values, setFieldValue }) => (
         <Form className="space-y-4">
           <div className="px-1.5 py-2 flex-col space-y-3">
             <div>
-              <Label htmlFor="name">Offer Name</Label>
-              <Field name="name" as={Input} placeholder="Offer Name" />
+              <Label htmlFor="name">{t('dashboard.payments.create_offer.field_offer_name')}</Label>
+              <Field name="name" as={Input} placeholder={t('dashboard.payments.create_offer.field_offer_name')} />
               <ErrorMessage name="name" component="div" className="text-red-500 text-sm mt-1" />
             </div>
 
             <div>
-              <Label htmlFor="description">Description</Label>
-              <Field name="description" as={Textarea} placeholder="Offer Description" />
+              <Label htmlFor="description">{t('dashboard.payments.create_offer.field_description')}</Label>
+              <Field name="description" as={Textarea} placeholder={t('dashboard.payments.create_offer.placeholder_description')} />
               <ErrorMessage name="description" component="div" className="text-red-500 text-sm mt-1" />
             </div>
 
             <div>
-              <Label htmlFor="offer_type">Offer Type</Label>
+              <Label htmlFor="offer_type">{t('dashboard.payments.create_offer.field_offer_type')}</Label>
               <Select
                 value={values.offer_type}
                 onValueChange={(value) => {
@@ -130,29 +132,29 @@ const CreateOfferForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Offer Type" />
+                  <SelectValue placeholder={t('dashboard.payments.create_offer.field_offer_type')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="one_time">One Time</SelectItem>
-                  <SelectItem value="subscription">Subscription</SelectItem>
+                  <SelectItem value="one_time">{t('dashboard.payments.create_offer.option_one_time')}</SelectItem>
+                  <SelectItem value="subscription">{t('dashboard.payments.create_offer.option_subscription')}</SelectItem>
                 </SelectContent>
               </Select>
               <ErrorMessage name="offer_type" component="div" className="text-red-500 text-sm mt-1" />
             </div>
 
             <div>
-              <Label htmlFor="price_type">Price Type</Label>
+              <Label htmlFor="price_type">{t('dashboard.payments.create_offer.field_price_type')}</Label>
               <Select
                 value={values.price_type}
                 onValueChange={(value) => setFieldValue('price_type', value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Price Type" />
+                  <SelectValue placeholder={t('dashboard.payments.create_offer.field_price_type')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="fixed_price">Fixed Price</SelectItem>
+                  <SelectItem value="fixed_price">{t('dashboard.payments.create_offer.option_fixed_price')}</SelectItem>
                   {values.offer_type !== 'subscription' && (
-                    <SelectItem value="customer_choice">Customer Choice</SelectItem>
+                    <SelectItem value="customer_choice">{t('dashboard.payments.create_offer.option_customer_choice')}</SelectItem>
                   )}
                 </SelectContent>
               </Select>
@@ -162,24 +164,24 @@ const CreateOfferForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
             <div className="flex space-x-2">
               <div className="grow">
                 <Label htmlFor="amount">
-                  {values.price_type === 'fixed_price' ? 'Price' : 'Minimum Amount'}
+                  {values.price_type === 'fixed_price' ? t('dashboard.payments.create_offer.field_price') : t('dashboard.payments.create_offer.field_minimum_amount')}
                 </Label>
                 <Field
                   name="amount"
                   as={Input}
                   type="number"
-                  placeholder={values.price_type === 'fixed_price' ? 'Price' : 'Minimum Amount'}
+                  placeholder={values.price_type === 'fixed_price' ? t('dashboard.payments.create_offer.field_price') : t('dashboard.payments.create_offer.field_minimum_amount')}
                 />
                 <ErrorMessage name="amount" component="div" className="text-red-500 text-sm mt-1" />
               </div>
               <div className="w-1/3">
-                <Label htmlFor="currency">Currency</Label>
+                <Label htmlFor="currency">{t('dashboard.payments.create_offer.field_currency')}</Label>
                 <Select
                   value={values.currency}
                   onValueChange={(value) => setFieldValue('currency', value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Currency" />
+                    <SelectValue placeholder={t('dashboard.payments.create_offer.field_currency')} />
                   </SelectTrigger>
                   <SelectContent>
                     {currencies.map((c) => (
@@ -194,22 +196,21 @@ const CreateOfferForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
             </div>
 
             <div>
-              <Label htmlFor="benefits">Benefits</Label>
-              <Field name="benefits" as={Textarea} placeholder="Comma-separated benefits" />
+              <Label htmlFor="benefits">{t('dashboard.payments.create_offer.field_benefits')}</Label>
+              <Field name="benefits" as={Textarea} placeholder={t('dashboard.payments.create_offer.placeholder_benefits')} />
               <ErrorMessage name="benefits" component="div" className="text-red-500 text-sm mt-1" />
             </div>
 
             {/* ── Access ───────────────────────────────────────────────── */}
             <div className="border rounded-md p-3 space-y-3 bg-gray-50">
-              <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Access</p>
+              <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">{t('dashboard.payments.create_offer.access_title')}</p>
               <p className="text-xs text-gray-500">
-                Add individual courses directly, or link to a Payment Group to grant access to a bundle of resources.
-                You can use both at the same time.
+                {t('dashboard.payments.create_offer.access_description')}
               </p>
 
               {/* Direct course picker */}
               <div>
-                <Label className="text-xs">Courses (direct)</Label>
+                <Label className="text-xs">{t('dashboard.payments.create_offer.courses_direct')}</Label>
                 {values.resource_uuids.length > 0 && (
                   <ul className="mb-1 space-y-0.5">
                     {values.resource_uuids.map((uuid) => {
@@ -250,7 +251,7 @@ const CreateOfferForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
                   <SelectTrigger className="text-xs h-8">
                     <div className="flex items-center gap-1 text-gray-500">
                       <Plus size={11} />
-                      <span>Add a course…</span>
+                      <span>{t('dashboard.payments.create_offer.add_course')}</span>
                     </div>
                   </SelectTrigger>
                   <SelectContent>
@@ -274,7 +275,7 @@ const CreateOfferForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
               {/* Payment Group picker */}
               <div>
                 <Label className="text-xs">
-                  Payment Group <span className="text-gray-400 font-normal">(optional — for bundles/subscriptions)</span>
+                  {t('dashboard.payments.create_offer.payment_group')} <span className="text-gray-400 font-normal">{t('dashboard.payments.create_offer.payment_group_optional')}</span>
                 </Label>
                 <Select
                   value={String(values.payments_group_id)}
@@ -283,10 +284,10 @@ const CreateOfferForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
                   }
                 >
                   <SelectTrigger className="text-xs">
-                    <SelectValue placeholder="Link to a Payment Group…" />
+                    <SelectValue placeholder={t('dashboard.payments.create_offer.link_payment_group')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="none">{t('dashboard.payments.create_offer.none')}</SelectItem>
                     {groups.map((g: any) => (
                       <SelectItem key={g.id} value={String(g.id)}>
                         <div className="flex items-center gap-1.5">
@@ -298,8 +299,9 @@ const CreateOfferForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-gray-400 mt-1">
-                  All resources in the selected Payment Group will be accessible to enrolled users.
-                  Manage group resources from the <strong>Payment Groups</strong> tab.
+                  {t('dashboard.payments.create_offer.payment_group_help_prefix')}{' '}
+                  <strong>{t('dashboard.payments.create_offer.payment_groups_tab')}</strong>{' '}
+                  {t('dashboard.payments.create_offer.payment_group_help_suffix')}
                 </p>
               </div>
             </div>
@@ -307,7 +309,7 @@ const CreateOfferForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
 
           <div className="flex justify-end">
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Creating...' : 'Create Offer'}
+              {isSubmitting ? t('dashboard.payments.create_offer.creating') : t('dashboard.payments.create_offer.submit')}
             </Button>
           </div>
         </Form>

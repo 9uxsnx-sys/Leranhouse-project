@@ -19,6 +19,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import useSWR, { mutate } from 'swr';
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
 import { Button } from '@components/ui/button';
@@ -43,7 +44,7 @@ const PAYMENT_PROVIDERS: PaymentProviderDef[] = [
     id: 'stripe',
     name: 'Stripe',
     Icon: SiStripe,
-    tagline: 'Accept one-time payments and subscriptions via Stripe Connect.',
+    tagline: 'dashboard.payments.configuration.stripe_tagline',
     docsUrl: 'https://stripe.com/docs',
     callbackPath: '/payments/stripe/connect/oauth',
     async getConnectUrl(orgId, accessToken, redirectUri) {
@@ -59,6 +60,7 @@ const PAYMENT_PROVIDERS: PaymentProviderDef[] = [
 const PaymentsConfigurationPage: React.FC = () => {
   const org = useOrg() as any;
   const session = useLHSession() as any;
+  const { t } = useTranslation();
   const access_token = session?.data?.tokens?.access_token;
 
   const { data: paymentConfigs, error, isLoading } = useSWR(
@@ -77,17 +79,17 @@ const PaymentsConfigurationPage: React.FC = () => {
     return () => window.removeEventListener('message', handleMessage);
   }, [org?.id, access_token]);
 
-  if (isLoading) return <div className="p-6 text-sm text-gray-500">Loading...</div>;
-  if (error) return <div className="p-6 text-sm text-red-500">Error loading payment configuration</div>;
+  if (isLoading) return <div className="p-6 text-sm text-gray-500">{t('common.loading')}</div>;
+  if (error) return <div className="p-6 text-sm text-red-500">{t('dashboard.payments.configuration.error_loading')}</div>;
 
   const configs: any[] = Array.isArray(paymentConfigs) ? paymentConfigs : [];
 
   return (
     <div className="ml-10 mr-10 mx-auto bg-white rounded-xl nice-shadow px-4 py-4">
       <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 rounded-md mb-4">
-        <h1 className="font-bold text-xl text-gray-800">Payments Configuration</h1>
+        <h1 className="font-bold text-xl text-gray-800">{t('dashboard.payments.configuration.title')}</h1>
         <h2 className="text-gray-500 text-sm">
-          Connect a payment provider to accept payments from your learners.
+          {t('dashboard.payments.configuration.subtitle')}
         </h2>
       </div>
 
@@ -120,6 +122,7 @@ interface ProviderCardProps {
 }
 
 const ProviderCard: React.FC<ProviderCardProps> = ({ provider, config, orgId, accessToken }) => {
+  const { t } = useTranslation();
   const [isConnecting, setIsConnecting] = useState(false);
   const [disconnectError, setDisconnectError] = useState<{ count: number } | null>(null);
   const isConnected = !!(config?.provider_specific_id && config?.active);
@@ -135,7 +138,7 @@ const ProviderCard: React.FC<ProviderCardProps> = ({ provider, config, orgId, ac
       const url = await provider.getConnectUrl(orgId, accessToken, redirectUri);
       window.open(url, '_blank');
     } catch {
-      toast.error(`Failed to connect ${provider.name}`);
+      toast.error(t('dashboard.payments.configuration.failed_connect', { provider: provider.name }));
     } finally {
       setIsConnecting(false);
     }
@@ -145,7 +148,7 @@ const ProviderCard: React.FC<ProviderCardProps> = ({ provider, config, orgId, ac
     setDisconnectError(null);
     try {
       await deletePaymentConfig(orgId, config.id, accessToken);
-      toast.success(`${provider.name} connection removed`);
+      toast.success(t('dashboard.payments.configuration.connection_removed', { provider: provider.name }));
       mutate([`/payments/${orgId}/config`, accessToken]);
     } catch (err: any) {
       if (err?.status === 409 || err?.response?.status === 409) {
@@ -156,7 +159,7 @@ const ProviderCard: React.FC<ProviderCardProps> = ({ provider, config, orgId, ac
           return;
         }
       }
-      toast.error(`Failed to remove ${provider.name} connection`);
+      toast.error(t('dashboard.payments.configuration.failed_remove_connection', { provider: provider.name }));
     }
   };
 
@@ -175,21 +178,21 @@ const ProviderCard: React.FC<ProviderCardProps> = ({ provider, config, orgId, ac
                 isConnected ? (
                   <span className="inline-flex items-center space-x-1 text-xs text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
                     <CheckCircle2 size={10} />
-                    <span>Connected</span>
+                    <span>{t('dashboard.payments.configuration.connected')}</span>
                   </span>
                 ) : (
                   <span className="inline-flex items-center space-x-1 text-xs text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
                     <XCircle size={10} />
-                    <span>Authorization required</span>
+                    <span>{t('dashboard.payments.configuration.authorization_required')}</span>
                   </span>
                 )
               ) : (
                 <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                  Not configured
+                  {t('dashboard.payments.configuration.not_configured')}
                 </span>
               )}
             </div>
-            <p className="text-sm text-gray-500 mt-0.5">{provider.tagline}</p>
+            <p className="text-sm text-gray-500 mt-0.5">{t(provider.tagline)}</p>
             {isConnected && (
               <p className="text-xs text-gray-400 mt-0.5 font-mono truncate max-w-xs">
                 {config.provider_specific_id}
@@ -205,7 +208,7 @@ const ProviderCard: React.FC<ProviderCardProps> = ({ provider, config, orgId, ac
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-400 hover:text-gray-600 transition p-1"
-            title={`${provider.name} docs`}
+            title={t('dashboard.payments.configuration.docs', { provider: provider.name })}
           >
             <ExternalLink size={15} />
           </a>
@@ -224,16 +227,16 @@ const ProviderCard: React.FC<ProviderCardProps> = ({ provider, config, orgId, ac
                 ) : (
                   <UnplugIcon size={12} className="mr-1" />
                 )}
-                Reconnect
+                {t('dashboard.payments.configuration.reconnect')}
               </Button>
               <ConfirmationModal
-                confirmationButtonText="Remove"
-                confirmationMessage={`Remove the ${provider.name} connection? This will disable payments for this organization.`}
-                dialogTitle={`Remove ${provider.name} Connection`}
+                confirmationButtonText={t('dashboard.payments.configuration.remove')}
+                confirmationMessage={t('dashboard.payments.configuration.remove_confirm_message', { provider: provider.name })}
+                dialogTitle={t('dashboard.payments.configuration.remove_dialog_title', { provider: provider.name })}
                 dialogTrigger={
                   <Button variant="destructive" size="sm" className="text-xs">
                     <Trash2 size={12} className="mr-1" />
-                    Remove
+                    {t('dashboard.payments.configuration.remove')}
                   </Button>
                 }
                 functionToExecute={handleDelete}
@@ -252,7 +255,7 @@ const ProviderCard: React.FC<ProviderCardProps> = ({ provider, config, orgId, ac
               ) : (
                 <UnplugIcon size={12} className="mr-1" />
               )}
-              {config ? 'Complete Setup' : 'Connect'}
+              {config ? t('dashboard.payments.configuration.complete_setup') : t('dashboard.payments.configuration.connect')}
             </Button>
           )}
         </div>
@@ -264,8 +267,9 @@ const ProviderCard: React.FC<ProviderCardProps> = ({ provider, config, orgId, ac
           <div className="flex items-start space-x-2">
             <AlertTriangle size={16} className="shrink-0 mt-0.5" />
             <p>
-              You have <strong>{disconnectError.count} active subscriber{disconnectError.count !== 1 ? 's' : ''}</strong>.
-              Cancel all subscriptions first via your Stripe dashboard before removing.
+              {t('dashboard.payments.configuration.active_subscribers_prefix')}{' '}
+              <strong>{t('dashboard.payments.configuration.active_subscribers', { count: disconnectError.count })}</strong>
+              {t('dashboard.payments.configuration.active_subscribers_suffix')}
             </p>
           </div>
         </div>
@@ -277,17 +281,18 @@ const ProviderCard: React.FC<ProviderCardProps> = ({ provider, config, orgId, ac
           <div className="flex items-center space-x-1.5">
             <Info size={12} className="shrink-0" />
             <span>
-              Configuration started but OAuth authorization is not complete. Click{' '}
-              <strong>Complete Setup</strong> to finish connecting.
+              {t('dashboard.payments.configuration.oauth_incomplete_prefix')}{' '}
+              <strong>{t('dashboard.payments.configuration.complete_setup')}</strong>{' '}
+              {t('dashboard.payments.configuration.oauth_incomplete_suffix')}
             </span>
           </div>
           <ConfirmationModal
-            confirmationButtonText="Start Over"
-            confirmationMessage={`This will delete the current ${provider.name} configuration so you can start fresh.`}
-            dialogTitle="Start Over?"
+            confirmationButtonText={t('dashboard.payments.configuration.start_over')}
+            confirmationMessage={t('dashboard.payments.configuration.start_over_confirm_message', { provider: provider.name })}
+            dialogTitle={t('dashboard.payments.configuration.start_over_dialog_title')}
             dialogTrigger={
               <button className="ml-4 shrink-0 underline hover:text-amber-900 transition-colors cursor-pointer">
-                Start over
+                {t('dashboard.payments.configuration.start_over')}
               </button>
             }
             functionToExecute={handleDelete}
