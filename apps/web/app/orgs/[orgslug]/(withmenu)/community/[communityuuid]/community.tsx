@@ -18,6 +18,7 @@ import { useCommunityRights } from '@components/Hooks/useCommunityRights'
 import { useOrgMembership } from '@components/Contexts/OrgContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getCommunityBannerMediaDirectory } from '@services/media/media'
+import { useRegisterBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -50,6 +51,12 @@ const CommunityClient = ({
   const { isUserPartOfTheOrg } = useOrgMembership()
   const canCreateDiscussion = hasCreatePermission && isUserPartOfTheOrg
   const org = useOrg() as any
+
+  // The feed is inline (cards expand in place), so the trail stops at the community.
+  useRegisterBreadcrumb([
+    { label: t('communities.title'), href: '/communities' },
+    { label: community.name },
+  ])
 
   return (
     <>

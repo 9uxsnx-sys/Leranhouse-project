@@ -2,11 +2,9 @@
 
 import React from 'react'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
-import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
+import { useRegisterBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
 import { AccountSidebar } from '@components/Objects/Account/AccountSidebar'
 import { AccountActionsMobile } from '@components/Objects/Account/AccountActionsMobile'
-import { User } from 'lucide-react'
-import { getUriWithOrg } from '@services/config/config'
 import { useMediaQuery } from 'usehooks-ts'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useTranslation } from 'react-i18next'
@@ -37,6 +35,11 @@ const AccountClient = ({ orgslug, org_id, subpage }: AccountClientProps) => {
   const user = session?.data?.user
   const { t } = useTranslation()
 
+  useRegisterBreadcrumb([
+    { label: t('account.title'), href: `/account/general` },
+    { label: getSubpageTitle(subpage, t) },
+  ])
+
   const renderSubpage = () => {
     switch (subpage) {
       case 'general':
@@ -55,20 +58,6 @@ const AccountClient = ({ orgslug, org_id, subpage }: AccountClientProps) => {
   return (
     <>
       <GeneralWrapperStyled>
-        {/* Breadcrumbs */}
-        <div className="pb-4">
-          <Breadcrumbs
-            items={[
-              {
-                label: t('account.title'),
-                href: getUriWithOrg(orgslug, '/account'),
-                icon: <User size={14} />,
-              },
-              { label: getSubpageTitle(subpage, t) },
-            ]}
-          />
-        </div>
-
         {/* Layout - Sidebar Left, Content Right */}
         <div className="flex flex-col md:flex-row gap-6 pt-2">
           {/* Left Sidebar - User Info (Desktop only) */}

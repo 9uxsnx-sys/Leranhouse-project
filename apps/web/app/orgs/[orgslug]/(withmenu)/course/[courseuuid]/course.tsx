@@ -10,11 +10,11 @@ import {
   getCourseThumbnailMediaDirectory,
   getCourseBannerMediaDirectory,
 } from '@services/media/media'
-import { Backpack, Check, File, StickyNote, Video, Square, Image as ImageIcon, BookCopy, Lock, Clock, BookOpen, Award, Download, ChevronDown, BarChart3, RefreshCw } from 'lucide-react'
+import { Backpack, Check, File, StickyNote, Video, Square, Image as ImageIcon, Lock, Clock, BookOpen, Award, Download, ChevronDown, BarChart3, RefreshCw } from 'lucide-react'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useMediaQuery } from 'usehooks-ts'
 import CourseActionsMobile from '@components/Objects/Courses/CourseActions/CourseActionsMobile'
-import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
+import { useRegisterBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import useSWR from 'swr'
 import { useTranslation } from 'react-i18next'
@@ -55,6 +55,11 @@ const CourseClient = (props: any) => {
 
   // Use server-provided course data, or client-fetched data as fallback
   const course = initialCourse || clientCourseData;
+
+  useRegisterBreadcrumb([
+    { label: t('courses.courses'), href: '/courses' },
+    { label: course?.name || t('navigation.breadcrumb.course_fallback') },
+  ])
 
   const { track } = useAnalytics()
 

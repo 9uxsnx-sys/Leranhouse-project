@@ -22,6 +22,7 @@ import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { getCoursesByUser } from '@services/users/users'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import CourseThumbnailLanding from '@components/Objects/Thumbnails/CourseThumbnailLanding'
+import { useRegisterBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
 import { useTranslation } from 'react-i18next'
 
 interface UserProfileClientProps {
@@ -73,6 +74,15 @@ const ImageModal: React.FC<{
 
 function UserProfileClient({ userData, profile }: UserProfileClientProps) {
   const { t } = useTranslation()
+
+  useRegisterBreadcrumb([
+    {
+      label:
+        `${userData.first_name ?? ''} ${userData.last_name ?? ''}`.trim() ||
+        userData.username ||
+        t('navigation.breadcrumb.profile_fallback'),
+    },
+  ])
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const [selectedImage, setSelectedImage] = React.useState<{ url: string; caption?: string } | null>(null);

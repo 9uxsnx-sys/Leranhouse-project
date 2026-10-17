@@ -366,6 +366,24 @@
                        "title_required":  "Title is required",
                        "content_required":  "Content is required"
                    },
+    "navigation":  {
+                       "breadcrumb":  {
+                                          "store":  "Store",
+                                          "copilot":  "Copilot",
+                                          "account":  "Account",
+                                          "certificate_verification":  "Certificate Verification",
+                                          "course_complete":  "Course Complete",
+                                          "course_fallback":  "Course",
+                                          "collection_fallback":  "Collection",
+                                          "podcast_fallback":  "Podcast",
+                                          "community_fallback":  "Community",
+                                          "discussion_fallback":  "Discussion",
+                                          "playground_fallback":  "Playground",
+                                          "offer_fallback":  "Offer",
+                                          "profile_fallback":  "Profile",
+                                          "lesson_fallback":  "Lesson"
+                                      }
+                   },
     "courses":  {
                     "my_courses":  "My Courses",
                     "courses":  "Courses",

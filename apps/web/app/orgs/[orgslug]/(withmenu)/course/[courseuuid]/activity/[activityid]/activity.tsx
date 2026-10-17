@@ -28,8 +28,7 @@ import ActivityShareDropdown from '@components/Pages/Activity/ActivityShareDropd
 import FixedActivitySecondaryBar from '@components/Pages/Activity/FixedActivitySecondaryBar'
 import CourseEndView from '@components/Pages/Activity/CourseEndView'
 import { motion, AnimatePresence } from 'motion/react'
-import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
-import { BookCopy } from 'lucide-react'
+import { useRegisterBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
 import MiniInfoTooltip from '@components/Objects/MiniInfoTooltip'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
 import UserAvatar from '@components/Objects/UserAvatar'
@@ -175,6 +174,42 @@ function ActivityClient(props: ActivityClientProps) {
   const orgslug = props.orgslug
   const activity = props.activity
   const course = props.course
+
+  const currentChapter = useMemo(
+    () =>
+      course?.chapters?.find((chapter: any) =>
+        chapter.activities?.some((item: any) => item.id === activity?.id),
+      ),
+    [course, activity],
+  )
+
+  useRegisterBreadcrumb(
+    activityid === 'end'
+      ? [
+          { label: t('courses.courses'), href: '/courses' },
+          {
+            label: course?.name || t('navigation.breadcrumb.course_fallback'),
+            href: `/course/${courseuuid}`,
+          },
+          { label: t('navigation.breadcrumb.course_complete') },
+        ]
+      : [
+          { label: t('courses.courses'), href: '/courses' },
+          {
+            label: course?.name || t('navigation.breadcrumb.course_fallback'),
+            href: `/course/${courseuuid}`,
+          },
+          ...(currentChapter
+            ? [{ label: currentChapter.name, mobileHidden: true }]
+            : []),
+          {
+            label:
+              activity?.name ||
+              t('navigation.breadcrumb.lesson_fallback', 'Lesson'),
+          },
+        ],
+  )
+
   const org = useOrg() as any
   const session = useLHSession() as any;
   const pathname = usePathname()
@@ -639,15 +674,6 @@ function ActivityClient(props: ActivityClientProps) {
                   />
                 ) : (
                   <div className="space-y-5 pt-0 relative">
-                    {/* ── Breadcrumbs ── */}
-                    <div className="pt-2 pb-1">
-                      <Breadcrumbs items={[
-                        { label: t('courses.courses'), href: getUriWithOrg(orgslug, '/courses'), icon: <BookCopy size={14} /> },
-                        { label: course.name, href: getUriWithOrg(orgslug, `/course/${courseuuid}`) },
-                        { label: activity.name }
-                      ]} />
-                    </div>
-
                     {/* ── Simplified Header ── */}
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
                       <div className="flex-1 min-w-0">

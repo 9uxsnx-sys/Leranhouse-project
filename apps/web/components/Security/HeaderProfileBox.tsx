@@ -86,7 +86,7 @@ export const HeaderProfileBox = ({ primaryColor = '' }: { primaryColor?: string 
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild className="bg-ui-bg-base">
-              <Link href="/account/general" className="flex items-center gap-2">
+              <Link href={getUriWithOrg(org?.slug, '/account/general')} className="flex items-center gap-2">
                 <IdBadge className="h-4 w-4" />
                 <span>{t('user.user_settings')}</span>
               </Link>

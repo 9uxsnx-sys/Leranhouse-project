@@ -358,6 +358,24 @@
                        "title_required":  "العنوان مطلوب",
                        "content_required":  "المحتوى مطلوب"
                    },
+    "navigation":  {
+                       "breadcrumb":  {
+                                          "store":  "المتجر",
+                                          "copilot":  "Copilot",
+                                          "account":  "الحساب",
+                                          "certificate_verification":  "التحقق من الشهادة",
+                                          "course_complete":  "اكتمل المقرر",
+                                          "course_fallback":  "المقرر",
+                                          "collection_fallback":  "المجموعة",
+                                          "podcast_fallback":  "البودكاست",
+                                          "community_fallback":  "المجتمع",
+                                          "discussion_fallback":  "النقاش",
+                                          "playground_fallback":  "ساحة تعلم",
+                                          "offer_fallback":  "العرض",
+                                          "profile_fallback":  "الملف الشخصي",
+                                          "lesson_fallback":  "الدرس"
+                                      }
+                   },
     "courses":  {
                     "my_courses":  "دوراتي",
                     "courses":  "الدورات",

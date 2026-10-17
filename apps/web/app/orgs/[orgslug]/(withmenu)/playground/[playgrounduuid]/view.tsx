@@ -16,7 +16,8 @@ import {
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
-import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
+import { useRegisterBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
+import { useTranslation } from 'react-i18next'
 import { PlaygroundReactionButton } from '@components/Playground/PlaygroundReactionButton'
 import UserAvatar from '@components/Objects/UserAvatar'
 import { Playground } from '@services/playgrounds/playgrounds'
@@ -40,8 +41,13 @@ export default function PlaygroundViewClient({
   playground,
   canEdit,
 }: PlaygroundViewClientProps) {
+  const { t } = useTranslation()
   const [isFullscreen, setIsFullscreen] = useState(false)
   const iframeContainerRef = useRef<HTMLDivElement>(null)
+
+  useRegisterBreadcrumb([
+    { label: playground.name || t('navigation.breadcrumb.playground_fallback') },
+  ])
 
   const thumbnailUrl =
     playground.thumbnail_image && playground.org_uuid
@@ -92,16 +98,6 @@ export default function PlaygroundViewClient({
 
   return (
     <GeneralWrapperStyled>
-      {/* Breadcrumbs */}
-      <div className="pb-4">
-        <Breadcrumbs
-          items={[
-            { label: 'Playgrounds', href: '/playgrounds', icon: <Sparkle size={14} /> },
-            { label: playground.name },
-          ]}
-        />
-      </div>
-
       <div className="flex flex-col md:flex-row gap-5 pt-2">
 
         {/* ── Left Sidebar — 220px ── */}

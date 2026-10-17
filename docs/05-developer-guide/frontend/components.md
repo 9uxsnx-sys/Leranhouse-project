@@ -25,6 +25,7 @@ components/
 │   └── Shared/
 ├── Objects/              # Shared domain objects
 │   ├── Activities/
+│   ├── Breadcrumbs/      # Learner breadcrumb context + trail resolver
 │   ├── Courses/
 │   ├── Communities/
 │   ├── Menus/
@@ -49,6 +50,34 @@ components/
 ├── Footer/
 └── Providers.tsx         # Global provider composition
 ```
+
+### Breadcrumbs
+
+There are two independent breadcrumb systems:
+
+| System | Implementation | Scope |
+|--------|----------------|-------|
+| Learner shell | `Objects/Breadcrumbs/UserBreadcrumbContext.tsx` + `BreadcrumbNav` in `Objects/Menus/OrgMenu.tsx` | `app/orgs/[orgslug]/(withmenu)/**` |
+| Admin dashboard | `AdminBreadcrumbNav` in `Dashboard/Menus/AdminTopBar.tsx` | `app/orgs/[orgslug]/dash/**` |
+
+Learner pages register their trail with `useRegisterBreadcrumb([...])`. The trail **excludes `Home`** — the top bar always prepends it:
+
+```tsx
+useRegisterBreadcrumb([
+  { label: t('courses.courses'), href: '/courses' },
+  { label: course.name, href: `/course/${courseuuid}` },
+  { label: chapter.name, mobileHidden: true },
+  { label: activity.name },
+])
+```
+
+- `href` is org-relative; the top bar wraps it with `getUriWithOrg`.
+- `mobileHidden` hides a crumb below `lg` (used for the module crumb).
+- The trail clears on unmount. If a page registers nothing, `buildRouteTrail()` derives one from the pathname.
+- Surfaces that are inline (community discussion cards, podcast episodes) must **not** register a detail crumb — the URL does not change.
+- Orphaned listings (`/collections`, `/playgrounds`, `/boards`) are deliberately not used as section parents.
+
+See [user-breadcrumbs-plan.md](../../08-features/navigation/user-breadcrumbs-plan.md) for the full route map.
 
 ---
 

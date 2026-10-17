@@ -16,6 +16,7 @@ import { usePodcastPlayer } from '@components/Contexts/PodcastPlayerContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { swrFetcher } from '@services/utils/ts/requests'
+import { useRegisterBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -69,6 +70,11 @@ export default function PodcastClient({
   const episodes = data?.episodes || initialEpisodes
   const totalDurationSeconds = episodes.reduce((sum, ep) => sum + (ep.duration_seconds || 0), 0)
   const meta = (podcast as any).extra_metadata || {}
+
+  useRegisterBreadcrumb([
+    { label: t('podcasts.podcasts'), href: '/podcasts' },
+    { label: podcast?.name || t('navigation.breadcrumb.podcast_fallback') },
+  ])
 
   // ── Trail / Enrollment ──
   const { data: trailData, mutate: mutateTrail } = useSWR(

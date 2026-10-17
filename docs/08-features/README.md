@@ -61,6 +61,12 @@ The documents in this section describe cross-cutting feature areas that touch mu
 |----------|-------------|
 | [Consistency Plan](./dashboard-polish/consistency-plan.md) | Delivered dashboard consistency sweep: shared `ActionRow` / `PageTabs` / `ConceptIcon` / `SectionIcon` primitives, unified filters and selects, and translation-ready strings across en / fr / ar (Phase 5 guardrails pending) |
 
+### Navigation
+
+| Document | Description |
+|----------|-------------|
+| [User Breadcrumbs Plan](./navigation/user-breadcrumbs-plan.md) | Learner-side breadcrumbs: one trail per screen resolved from the route plus page-registered entity names (`Home > Courses > Course > Lesson`), translated across en / fr / ar; inline-only surfaces (community feed, podcast episodes) intentionally add no crumb |
+
 ### Internationalization & RTL
 
 | Document | Description |

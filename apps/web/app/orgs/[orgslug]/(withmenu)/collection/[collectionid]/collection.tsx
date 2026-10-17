@@ -9,6 +9,7 @@ import { getAPIUrl } from '@services/config/config'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
 import { CourseCard } from '@components/Objects/Thumbnails/CourseCard'
 import PageLoading from '@components/Objects/Loaders/PageLoading'
+import { useRegisterBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
 import useSWR from 'swr'
 import { swrFetcher } from '@services/utils/ts/requests'
 
@@ -24,6 +25,11 @@ const CollectionClient = ({ orgslug, collectionid }: { orgslug: string; collecti
     collectionid && access_token ? [`collections/collection_${collectionid}`, access_token] : null,
     ([, token]) => swrFetcher(`${getAPIUrl()}collections/collection_${collectionid}`, token)
   )
+
+  // No `Collections` parent: the listing is not reachable in the learner UI.
+  useRegisterBreadcrumb([
+    { label: col?.name || t('navigation.breadcrumb.collection_fallback') },
+  ])
 
   if (error) {
     return (

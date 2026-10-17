@@ -37,6 +37,7 @@ import { FeedbackModal } from '@components/Objects/Modals/FeedbackModal'
 import { SearchModal } from '@components/Objects/Modals/SearchModal'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import { useJoinBannerVisible, JOIN_BANNER_HEIGHT } from '@components/Objects/Banners/OrgJoinBanner'
+import { useUserBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
 import { usePlan } from '@components/Hooks/usePlan'
 import Watermark from '@components/Objects/Watermark'
 import {
@@ -79,72 +80,59 @@ const NavigationBar = () => {
   )
 }
 
-// shell.tsx Breadcrumbs — muted 13px medium, TriangleRightMini separators, mobile `...`
+// shell.tsx Breadcrumbs — muted 13px medium, TriangleRightMini separators.
+// Trail comes from UserBreadcrumbContext: page-registered first, route-derived
+// fallback otherwise. Mobile collapses middle crumbs to `...`.
 const BreadcrumbNav = ({ orgslug }: { orgslug: string }) => {
-  const pathname = usePathname()
   const { t } = useTranslation()
-
-  // Derive segments relative to the org base URL (works for single + multi tenancy)
-  const orgBase = getUriWithOrg(orgslug, '/')
-  const rest = pathname && pathname.startsWith(orgBase) ? pathname.slice(orgBase.length) : (pathname ?? '')
-  const segs = rest.split('/').filter(Boolean)
-
-  const labels: Record<string, string> = {
-    courses: t('courses.courses'),
-    collections: t('collections.collections'),
-    podcasts: t('podcasts.podcasts'),
-    communities: t('communities.title'),
-    playgrounds: 'Playgrounds',
-    store: 'Store',
-    trail: t('courses.progress'),
-    boards: 'Boards',
-    copilot: 'Copilot',
-  }
+  const trail = useUserBreadcrumb()
 
   const crumbs: { label: string; href?: string }[] = [
     { label: t('common.home'), href: getUriWithOrg(orgslug, '/') },
+    ...trail,
   ]
 
-  if (segs.length > 0) {
-    const section = segs[0]
-    const label = labels[section] ?? section.charAt(0).toUpperCase() + section.slice(1)
-    // Last crumb is the current page. On detail pages we show the section label
-    // (entity data lives on the page itself).
-    crumbs.push({ label })
-  }
-
-  const isSingle = crumbs.length === 1
-
   return (
-    <ol className="text-ui-fg-muted txt-compact-small-plus flex select-none items-center">
-      {crumbs.map((crumb, index) => {
-        const isLast = index === crumbs.length - 1
-        return (
-          <li key={index} className="flex items-center">
-            {!isLast && crumb.href ? (
-              <Link
-                href={crumb.href}
-                className="transition-fg hover:text-ui-fg-subtle"
-              >
-                {crumb.label}
-              </Link>
-            ) : (
-              <div>
-                {!isSingle && <span className="block lg:hidden">...</span>}
-                <span className={isSingle ? '' : 'hidden lg:block'}>
-                  {crumb.label}
-                </span>
-              </div>
-            )}
-            {!isLast && (
-              <span className="mx-2">
-                <TriangleRightMini className="rtl:rotate-180" />
-              </span>
-            )}
-          </li>
-        )
-      })}
-    </ol>
+    <nav aria-label="Breadcrumb">
+      <ol className="text-ui-fg-muted txt-compact-small-plus flex select-none items-center">
+        {crumbs.map((crumb, index) => {
+          const isFirst = index === 0
+          const isLast = index === crumbs.length - 1
+          const isMiddle = !isFirst && !isLast
+
+          return (
+            <React.Fragment key={index}>
+              {/* Mobile-only collapse: Home > ... > Current */}
+              {isLast && crumbs.length > 2 && (
+                <li className="flex items-center lg:hidden">
+                  <span>...</span>
+                  <span className="mx-2">
+                    <TriangleRightMini className="rtl:rotate-180" />
+                  </span>
+                </li>
+              )}
+              <li className={`items-center ${isMiddle ? 'hidden lg:flex' : 'flex'}`}>
+                {!isLast && crumb.href ? (
+                  <Link
+                    href={getUriWithOrg(orgslug, crumb.href)}
+                    className="transition-fg hover:text-ui-fg-subtle"
+                  >
+                    {crumb.label}
+                  </Link>
+                ) : (
+                  <span aria-current={isLast ? 'page' : undefined}>{crumb.label}</span>
+                )}
+                {!isLast && (
+                  <span className="mx-2">
+                    <TriangleRightMini className="rtl:rotate-180" />
+                  </span>
+                )}
+              </li>
+            </React.Fragment>
+          )
+        })}
+      </ol>
+    </nav>
   )
 }
 

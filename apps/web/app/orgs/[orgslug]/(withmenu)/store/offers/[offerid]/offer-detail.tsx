@@ -11,6 +11,8 @@ import {
   Mic, Puzzle, AlertCircle, Loader2, ShoppingBag
 } from 'lucide-react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useRegisterBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
+import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
 
 interface Resource {
@@ -98,7 +100,13 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
   const session = useLHSession() as any
   const token = session?.data?.tokens?.access_token ?? access_token
   const router = useRouter()
+  const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
+
+  useRegisterBreadcrumb([
+    { label: t('navigation.breadcrumb.store', 'Store'), href: '/store' },
+    { label: offer?.name || t('navigation.breadcrumb.offer_fallback') },
+  ])
 
   if (!offer) {
     return (

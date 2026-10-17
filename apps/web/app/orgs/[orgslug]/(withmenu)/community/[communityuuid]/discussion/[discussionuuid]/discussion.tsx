@@ -5,12 +5,11 @@ import { useRouter } from 'next/navigation'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
 import { DiscussionDetail } from '@components/Objects/Communities/DiscussionDetail'
 import { DiscussionSidebar } from '@components/Objects/Communities/DiscussionSidebar'
-import { Breadcrumbs } from '@components/Objects/Breadcrumbs/Breadcrumbs'
+import { useRegisterBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
 import { EditDiscussionModal } from '@components/Objects/Modals/Communities/EditDiscussionModal'
 import { Community } from '@services/communities/communities'
 import { DiscussionWithAuthor } from '@services/communities/discussions'
-import { MessageCircle } from 'lucide-react'
-import { getUriWithOrg } from '@services/config/config'
+import { useTranslation } from 'react-i18next'
 
 interface DiscussionPageClientProps {
   discussion: DiscussionWithAuthor
@@ -24,6 +23,7 @@ const DiscussionPageClient = ({
   orgslug,
 }: DiscussionPageClientProps) => {
   const router = useRouter()
+  const { t } = useTranslation()
   const [discussion, setDiscussion] = useState(initialDiscussion)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
@@ -32,17 +32,17 @@ const DiscussionPageClient = ({
     router.refresh()
   }
 
+  useRegisterBreadcrumb([
+    { label: t('communities.title'), href: '/communities' },
+    {
+      label: community.name,
+      href: `/community/${community.community_uuid.replace('community_', '')}`,
+    },
+    { label: discussion.title },
+  ])
+
   return (
     <GeneralWrapperStyled>
-      {/* Breadcrumbs */}
-      <div className="pb-4">
-        <Breadcrumbs items={[
-          { label: 'Communities', href: getUriWithOrg(orgslug, '/communities'), icon: <MessageCircle size={14} /> },
-          { label: community.name, href: getUriWithOrg(orgslug, `/community/${community.community_uuid.replace('community_', '')}`) },
-          { label: discussion.title }
-        ]} />
-      </div>
-
       {/* Layout - Sidebar Left, Content Right */}
       <div className="flex flex-col md:flex-row gap-6 pt-2">
         {/* Left Sidebar - Discussion Info (Desktop only) */}
