@@ -227,7 +227,7 @@ function DashLeftMenu() {
           <div className="relative" ref={navContainerRef}>
             {/* Floating active indicator */}
             <div
-              className="absolute left-0 right-0 bg-ui-bg-base shadow-elevation-card-rest rounded-xl transition-all duration-200 ease-out pointer-events-none"
+              className="absolute left-0 right-0 bg-white border border-gray-100 rounded-xl shadow-sm transition-all duration-200 ease-out pointer-events-none"
               style={{ top: indicatorTop, height: 40, opacity: indicatorOpacity }}
             />
             <div className="flex flex-col">
