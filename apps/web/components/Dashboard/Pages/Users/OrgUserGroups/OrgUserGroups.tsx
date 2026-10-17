@@ -212,26 +212,26 @@ function OrgUserGroups() {
     const handleAddMembers = async () => {
         if (selectedMemberIds.size === 0 || !membersGroupId) return
         const ids = Array.from(selectedMemberIds)
-        const toastId = toast.loading(`Adding ${ids.length} user(s)...`)
+        const toastId = toast.loading(t('dashboard.users.usergroups.members.toasts.adding', { count: ids.length }))
         try {
             const res = await linkUsersToUserGroup(membersGroupId, ids, org.id, access_token)
             if (res.status === 200) {
                 setSelectedMemberIds(new Set())
                 const baseUrl = `${getAPIUrl()}orgs/${org.id}/users`
                 mutate((key: string) => typeof key === 'string' && key.startsWith(baseUrl))
-                toast.success(`${ids.length} user(s) added`, { id: toastId })
+                toast.success(t('dashboard.users.usergroups.members.toasts.added', { count: ids.length }), { id: toastId })
             } else {
-                toast.error('Failed to add users', { id: toastId })
+                toast.error(t('dashboard.users.usergroups.members.toasts.add_error'), { id: toastId })
             }
         } catch {
-            toast.error('Failed to add users', { id: toastId })
+            toast.error(t('dashboard.users.usergroups.members.toasts.add_error'), { id: toastId })
         }
     }
 
     const handleRemoveMembers = async () => {
         if (selectedMemberIds.size === 0 || !membersGroupId) return
         const ids = Array.from(selectedMemberIds)
-        const toastId = toast.loading(`Removing ${ids.length} user(s)...`)
+        const toastId = toast.loading(t('dashboard.users.usergroups.members.toasts.removing', { count: ids.length }))
         try {
             const res = await unlinkUsersFromUserGroup(membersGroupId, ids, org.id, access_token)
             if (res.status === 200) {
@@ -239,12 +239,12 @@ function OrgUserGroups() {
                 // Invalidate all org users cache keys (URL varies by search/page)
                 const baseUrl = `${getAPIUrl()}orgs/${org.id}/users`
                 mutate((key: string) => typeof key === 'string' && key.startsWith(baseUrl))
-                toast.success(`${ids.length} user(s) removed`, { id: toastId })
+                toast.success(t('dashboard.users.usergroups.members.toasts.removed', { count: ids.length }), { id: toastId })
             } else {
-                toast.error('Failed to remove users', { id: toastId })
+                toast.error(t('dashboard.users.usergroups.members.toasts.remove_error'), { id: toastId })
             }
         } catch {
-            toast.error('Failed to remove users', { id: toastId })
+            toast.error(t('dashboard.users.usergroups.members.toasts.remove_error'), { id: toastId })
         }
     }
 
@@ -298,12 +298,12 @@ function OrgUserGroups() {
             const res = await createUserGroup(body, access_token)
             if (res.status === 200 || res.status === 201) {
                 mutate(`${getAPIUrl()}usergroups/org/${org.id}?org_id=${org.id}`)
-                toast.success('User group created')
+                toast.success(t('dashboard.users.usergroups.modals.create.toasts.success'))
             } else {
-                toast.error('Failed to create user group')
+                toast.error(t('dashboard.users.usergroups.modals.create.toasts.error'))
             }
         } catch {
-            toast.error('Failed to create user group')
+            toast.error(t('dashboard.users.usergroups.modals.create.toasts.error'))
         } finally {
             setIsCreating(false)
         }
@@ -342,7 +342,7 @@ function OrgUserGroups() {
                                 setMembersPage(1)
                                 setSelectedMemberIds(new Set())
                             }}
-                            placeholder="Search members..."
+                            placeholder={t('dashboard.users.usergroups.members.search_placeholder')}
                             className="w-full h-7 pl-8 pr-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
                         />
                         </div>
@@ -359,12 +359,12 @@ function OrgUserGroups() {
                             }`}
                         >
                             {isMembersSearchActive ? <Users size={14} /> : <LogOut size={14} />}
-                            {isMembersSearchActive ? 'Add' : 'Remove'} {selectedMemberIds.size || 0}
+                            {isMembersSearchActive ? t('dashboard.users.usergroups.members.add') : t('dashboard.users.usergroups.members.remove')} {selectedMemberIds.size || 0}
                         </button>
 
                         <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
-                                <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label="Filter members">
+                                <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label={t('dashboard.users.usergroups.members.filter')}>
                                     <ConceptIcon.filter size={14} />
                                 </IconButton>
                             </DropdownMenuTrigger>
@@ -374,9 +374,9 @@ function OrgUserGroups() {
                                 sideOffset={6}
                             >
                                 {[
-                                    { value: '', label: 'All statuses' },
-                                    { value: 'verified', label: 'Verified' },
-                                    { value: 'unverified', label: 'Unverified' },
+                                    { value: '', label: t('dashboard.users.usergroups.members.status.all') },
+                                    { value: 'verified', label: t('dashboard.users.usergroups.members.status.verified') },
+                                    { value: 'unverified', label: t('dashboard.users.usergroups.members.status.unverified') },
                                 ].map((option) => (
                                     <DropdownMenuItem
                                         key={option.value}
@@ -391,8 +391,8 @@ function OrgUserGroups() {
                                 <DropdownMenuSeparator />
 
                                 {[
-                                    { value: 'name-asc', label: 'A-Z' },
-                                    { value: 'name-desc', label: 'Z-A' },
+                                    { value: 'name-asc', label: t('dashboard.users.usergroups.sort.name_asc') },
+                                    { value: 'name-desc', label: t('dashboard.users.usergroups.sort.name_desc') },
                                 ].map((option) => (
                                     <DropdownMenuItem
                                         key={option.value}
@@ -442,19 +442,19 @@ function OrgUserGroups() {
                                                     </label>
                                                 </TableHead>
                                                 <TableHead className="w-[160px]">
-                                                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">Name</span>
+                                                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.users.usergroups.table.name')}</span>
                                                 </TableHead>
                                                 <TableHead className="w-[130px]">
-                                                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">Username</span>
+                                                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.users.usergroups.table.username')}</span>
                                                 </TableHead>
                                                 <TableHead className="w-[180px]">
-                                                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">Email</span>
+                                                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.users.usergroups.table.email')}</span>
                                                 </TableHead>
                                                 <TableHead className="w-[120px]">
-                                                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">Status</span>
+                                                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.users.usergroups.table.status')}</span>
                                                 </TableHead>
                                                 <TableHead className="w-[140px]">
-                                                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">Joined</span>
+                                                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.users.usergroups.table.joined')}</span>
                                                 </TableHead>
                                                 <TableHead className="w-[50px]"></TableHead>
                                             </TableRow>
@@ -467,8 +467,8 @@ function OrgUserGroups() {
                                                             <Users size={32} className="text-gray-300" />
                                                             <span className="text-sm text-gray-400 font-medium">
                                                                 {membersSearch
-                                                                    ? 'No members found matching your search'
-                                                                    : 'No users in this group yet'
+                                                                    ? t('dashboard.users.usergroups.members.no_results')
+                                                                    : t('dashboard.users.usergroups.members.no_users')
                                                                 }
                                                             </span>
                                                         </div>
@@ -528,7 +528,7 @@ function OrgUserGroups() {
                                                         <TableCell>
                                                             <span className="inline-flex items-center gap-1.5 text-sm">
                                                                 <span className={`w-2.5 h-2.5 rounded ${user.email_verified ? 'bg-green-500' : 'bg-red-500'}`} />
-                                                                {user.email_verified ? 'Verified' : 'Unverified'}
+                                                                {user.email_verified ? t('dashboard.users.usergroups.members.status.verified') : t('dashboard.users.usergroups.members.status.unverified')}
                                                             </span>
                                                         </TableCell>
                                                         <TableCell className="text-gray-500 text-sm">
@@ -541,7 +541,7 @@ function OrgUserGroups() {
                                                                     setDetailUser(user)
                                                                 }}
                                                                 className="p-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
-                                                                title="View details"
+                                                                title={t('common.view_details')}
                                                             >
                                                                 <MoreHorizontal size={16} />
                                                             </button>
@@ -560,7 +560,11 @@ function OrgUserGroups() {
                     {totalMembers > ITEMS_PER_PAGE && (
                         <div className="flex items-center justify-between px-6 py-4 mt-4 border border-gray-200 rounded-xl bg-gray-50/50">
                             <div className="text-xs text-gray-500 font-medium">
-                                Showing {(membersPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(membersPage * ITEMS_PER_PAGE, totalMembers)} of {totalMembers}
+                                {t('dashboard.users.usergroups.members.pagination.showing', {
+                                    start: (membersPage - 1) * ITEMS_PER_PAGE + 1,
+                                    end: Math.min(membersPage * ITEMS_PER_PAGE, totalMembers),
+                                    total: totalMembers,
+                                })}
                             </div>
                             <div className="flex items-center gap-2">
                                 <button
@@ -571,7 +575,7 @@ function OrgUserGroups() {
                                     <ChevronLeft className="w-4 h-4 text-gray-600" />
                                 </button>
                                 <span className="text-sm text-gray-600 font-medium min-w-[80px] text-center bg-white px-3 py-2 rounded-lg border border-gray-200">
-                                    Page {membersPage} of {totalMembersPages}
+                                    {t('dashboard.users.usergroups.members.pagination.page', { current: membersPage, total: totalMembersPages })}
                                 </span>
                                 <button
                                     onClick={() => handleMembersPageChange(membersPage + 1)}
@@ -628,10 +632,10 @@ function OrgUserGroups() {
 
                                     <div className="px-6 py-4 space-y-3">
                                         <div className="flex justify-between items-center">
-                                            <span className="text-xs text-gray-400">Status</span>
+                                            <span className="text-xs text-gray-400">{t('common.status')}</span>
                                             <span className="flex items-center gap-1.5 text-sm text-gray-700">
                                                 <span className={`w-2 h-2 rounded-full ${detailUser.email_verified ? 'bg-green-500' : 'bg-amber-500'}`} />
-                                                {detailUser.email_verified ? 'Verified' : 'Unverified'}
+                                                {detailUser.email_verified ? t('dashboard.users.usergroups.members.status.verified') : t('dashboard.users.usergroups.members.status.unverified')}
                                             </span>
                                         </div>
                                     </div>
@@ -640,11 +644,11 @@ function OrgUserGroups() {
 
                                     <div className="px-6 py-4 space-y-3">
                                         <div className="flex justify-between items-center">
-                                            <span className="text-xs text-gray-400">Joined</span>
+                                            <span className="text-xs text-gray-400">{t('dashboard.users.usergroups.table.joined')}</span>
                                             <span className="text-sm text-gray-700">{formatDate(detailUser.creation_date)}</span>
                                         </div>
                                         <div className="flex justify-between items-center">
-                                            <span className="text-xs text-gray-400">Last login</span>
+                                            <span className="text-xs text-gray-400">{t('dashboard.users.usergroups.table.last_login')}</span>
                                             <span className="text-sm text-gray-700">{formatDate(detailUser.last_login_at)}</span>
                                         </div>
                                     </div>
@@ -670,7 +674,7 @@ function OrgUserGroups() {
         const handleSaveGroup = async () => {
             if (!access_token || !org || !group) return
             if (!editName.trim()) {
-                toast.error('Name is required')
+                toast.error(t('dashboard.users.usergroups.modals.edit.form.name_required'))
                 return
             }
             setIsSaving(true)
@@ -685,10 +689,10 @@ function OrgUserGroups() {
                     mutate(`${getAPIUrl()}usergroups/org/${org.id}?org_id=${org.id}`)
                     setJustSaved(true)
                 } else {
-                    toast.error(res.data?.message || 'Failed to save group')
+                    toast.error(res.data?.message || t('dashboard.users.usergroups.modals.edit.toasts.error'))
                 }
             } catch {
-                toast.error('Failed to save group')
+                toast.error(t('dashboard.users.usergroups.modals.edit.toasts.error'))
             } finally {
                 setIsSaving(false)
             }
@@ -723,7 +727,7 @@ function OrgUserGroups() {
                                 ) : (
                                     <SaveAllIcon size={14} />
                                 )}
-                                <span>{isSaving ? 'Saving...' : justSaved ? 'Saved' : 'Save'}</span>
+                                <span>{isSaving ? t('common.saving') : justSaved ? t('dashboard.users.usergroups.actions.saved') : t('common.save')}</span>
                             </button>
                         </div>
                     </div>
@@ -734,23 +738,23 @@ function OrgUserGroups() {
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                                    Name
+                                    {t('dashboard.users.usergroups.modals.edit.form.name')}
                                 </label>
                                 <Input
                                     value={editName}
                                     onChange={(e) => { setEditName(e.target.value); setJustSaved(false) }}
-                                    placeholder="Group name"
+                                    placeholder={t('dashboard.users.usergroups.form.name_placeholder')}
                                     className="bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none"
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                                    Description
+                                    {t('dashboard.users.usergroups.modals.edit.form.description')}
                                 </label>
                                 <Textarea
                                     value={editDescription}
                                     onChange={(e) => { setEditDescription(e.target.value); setJustSaved(false) }}
-                                    placeholder="Group description"
+                                    placeholder={t('dashboard.users.usergroups.form.description_placeholder')}
                                     rows={3}
                                     className="bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none"
                                 />
@@ -798,12 +802,12 @@ function OrgUserGroups() {
                     ) : (
                         '+'
                     )}
-                    &nbsp;&nbsp;Create
+                    &nbsp;&nbsp;{t('dashboard.users.usergroups.actions.create_group')}
                 </Button>
 
                 <Button variant="secondary" size="small" onClick={() => setIsSelectMode(!isSelectMode)} className="gap-1.5">
                     <CheckSquare size={14} strokeWidth={2.5} />
-                    <span className="font-semibold">{isSelectMode ? 'Cancel' : 'Select'}</span>
+                    <span className="font-semibold">{isSelectMode ? t('common.cancel') : t('dashboard.users.usergroups.actions.select')}</span>
                 </Button>
 
                 <IconButton
@@ -811,7 +815,7 @@ function OrgUserGroups() {
                     variant="transparent"
                     className="bg-white hover:bg-gray-50 shadow-borders-base"
                     onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                    aria-label="Sort groups"
+                    aria-label={t('dashboard.users.usergroups.actions.sort_groups')}
                 >
                     <ArrowUpDown size={15} />
                 </IconButton>
@@ -834,7 +838,7 @@ function OrgUserGroups() {
                         </p>
                         <p className="text-xs text-gray-300 mt-1">
                             {searchValue
-                                ? 'Try a different search term'
+                                ? t('dashboard.users.usergroups.no_results_hint')
                                 : t('dashboard.users.usergroups.actions.create')
                             }
                         </p>

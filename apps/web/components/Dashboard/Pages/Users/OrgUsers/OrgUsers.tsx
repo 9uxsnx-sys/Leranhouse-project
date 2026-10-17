@@ -143,14 +143,14 @@ function OrgUsers() {
 
   const handleBatchRemove = async () => {
     const ids = Array.from(selectedUserIds)
-    const toastId = toast.loading(`Removing ${ids.length} user(s)...`);
+    const toastId = toast.loading(t('dashboard.users.users.toasts.removing', { count: ids.length }));
     const res = await removeUsersFromOrg(org.id, ids, access_token)
     if (res.status === 200) {
       setSelectedUserIds(new Set())
       await mutate(usersUrl)
-      toast.success(`${ids.length} user(s) removed successfully`, {id:toastId});
+      toast.success(t('dashboard.users.users.toasts.remove_success', { count: ids.length }), {id:toastId});
     } else {
-      toast.error('Error removing users', {id:toastId});
+      toast.error(t('dashboard.users.users.toasts.remove_error'), {id:toastId});
     }
   }
 
@@ -209,17 +209,17 @@ function OrgUsers() {
   }, [orgUsers])
 
   const handleRoleChange = async (userId: number, roleId: number) => {
-    const toastId = toast.loading('Updating role...')
+    const toastId = toast.loading(t('dashboard.users.active_users.actions.updating_role'))
     try {
       const res = await updateUserRole(org.id, userId, roleId, access_token)
       if (res.status === 200) {
         await mutate(usersUrl)
-        toast.success('Role updated successfully', { id: toastId })
+        toast.success(t('dashboard.users.active_users.actions.role_update_success'), { id: toastId })
       } else {
-        toast.error('Failed to update role', { id: toastId })
+        toast.error(t('dashboard.users.active_users.actions.role_update_error'), { id: toastId })
       }
     } catch {
-      toast.error('Failed to update role', { id: toastId })
+      toast.error(t('dashboard.users.active_users.actions.role_update_error'), { id: toastId })
     }
   }
 
@@ -258,7 +258,7 @@ function OrgUsers() {
     return (
       <span className="inline-flex items-center gap-1.5 text-sm">
         <span className={`w-2.5 h-2.5 rounded ${isVerified ? 'bg-green-500' : 'bg-red-500'}`} />
-        {isVerified ? 'Verified' : 'Unverified'}
+        {isVerified ? t('dashboard.users.users.status.verified') : t('dashboard.users.users.status.unverified')}
       </span>
     )
   }
@@ -276,7 +276,7 @@ function OrgUsers() {
             type="text"
             value={searchValue}
             onChange={(e) => handleSearchChange(e.target.value)}
-            placeholder={t('dashboard.users.active_users.search_placeholder') || 'Search users...'}
+            placeholder={t('dashboard.users.active_users.search_placeholder')}
             className="w-full h-7 pl-8 pr-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
           />
         </div>
@@ -291,13 +291,13 @@ function OrgUsers() {
           }`}
         >
           <LogOut size={14} />
-          Remove {selectedUserIds.size || 0}
+          {t('dashboard.users.users.bulk_remove', { count: selectedUserIds.size || 0 })}
         </button>
 
         {/* Filter dropdown with Role, Status, Group, and Sort */}
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
-            <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label="Filter users">
+            <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label={t('dashboard.users.users.filters.filter_users')}>
               <ConceptIcon.filter size={14} />
             </IconButton>
           </DropdownMenuTrigger>
@@ -308,7 +308,7 @@ function OrgUsers() {
           >
             {/* Role section */}
             {[
-              { value: '', label: 'All roles' },
+              { value: '', label: t('dashboard.users.users.filters.all_roles') },
               ...(roles?.map((r: any) => ({ value: r.name, label: r.name })) || []),
             ].map((option) => (
               <DropdownMenuItem
@@ -325,9 +325,9 @@ function OrgUsers() {
 
             {/* Status section */}
             {[
-              { value: '', label: 'All statuses' },
-              { value: 'verified', label: 'Verified' },
-              { value: 'unverified', label: 'Unverified' },
+              { value: '', label: t('dashboard.users.users.filters.all_statuses') },
+              { value: 'verified', label: t('dashboard.users.users.status.verified') },
+              { value: 'unverified', label: t('dashboard.users.users.status.unverified') },
             ].map((option) => (
               <DropdownMenuItem
                 key={option.value}
@@ -343,7 +343,7 @@ function OrgUsers() {
 
             {/* Group section */}
             {[
-              { value: '', label: 'All groups' },
+              { value: '', label: t('dashboard.users.users.filters.all_groups') },
               ...allGroups.map((g) => ({ value: g, label: g })),
             ].map((option) => (
               <DropdownMenuItem
@@ -360,8 +360,8 @@ function OrgUsers() {
 
             {/* Sort section */}
             {[
-              { value: 'name-asc', label: 'A-Z' },
-              { value: 'name-desc', label: 'Z-A' },
+              { value: 'name-asc', label: t('dashboard.users.users.sort.name_asc') },
+              { value: 'name-desc', label: t('dashboard.users.users.sort.name_desc') },
             ].map((option) => (
               <DropdownMenuItem
                 key={option.value}
@@ -386,8 +386,8 @@ function OrgUsers() {
           <div className="flex flex-col items-center gap-3">
             <p className="text-gray-400 text-sm font-medium">
               {searchValue
-                ? 'No users found matching your search'
-                : 'No users in this organization yet'
+                ? t('dashboard.users.active_users.no_results')
+                : t('dashboard.users.active_users.no_users')
               }
             </p>
           </div>
@@ -420,22 +420,22 @@ function OrgUsers() {
                     </label>
                   </TableHead>
                   <TableHead className="w-[160px]">
-                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">Name</span>
+                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.users.users.table.name')}</span>
                   </TableHead>
                   <TableHead className="w-[130px]">
-                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">Username</span>
+                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.users.users.table.username')}</span>
                   </TableHead>
                   <TableHead className="w-[180px]">
-                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">Email</span>
+                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.users.users.table.email')}</span>
                   </TableHead>
                   <TableHead className="w-[130px]">
-                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">Role</span>
+                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.users.active_users.table.role')}</span>
                   </TableHead>
                   <TableHead className="w-[120px]">
-                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">Status</span>
+                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('common.status')}</span>
                   </TableHead>
                   <TableHead className="w-[140px]">
-                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">Joined</span>
+                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.users.users.table.joined')}</span>
                   </TableHead>
                   <TableHead className="w-[50px]"></TableHead>
                 </TableRow>
@@ -507,7 +507,7 @@ function OrgUsers() {
                           setDetailUser(user)
                         }}
                         className="p-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
-                        title="View details"
+                        title={t('common.view_details')}
                       >
                         <MoreHorizontal size={16} />
                       </button>
@@ -528,7 +528,7 @@ function OrgUsers() {
               start: (page - 1) * ITEMS_PER_PAGE + 1,
               end: Math.min(page * ITEMS_PER_PAGE, total),
               total
-            }) || `Showing ${(page - 1) * ITEMS_PER_PAGE + 1}-${Math.min(page * ITEMS_PER_PAGE, total)} of ${total}`}
+            })}
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -539,7 +539,7 @@ function OrgUsers() {
               <ChevronLeft className="w-4 h-4 text-gray-600" />
             </button>
             <span className="text-sm text-gray-600 font-medium min-w-[80px] text-center bg-white px-3 py-2 rounded-lg border border-gray-200">
-              {t('dashboard.users.active_users.pagination.page', { current: page, total: Math.ceil(total / ITEMS_PER_PAGE) }) || `Page ${page} of ${Math.ceil(total / ITEMS_PER_PAGE)}`}
+              {t('dashboard.users.active_users.pagination.page', { current: page, total: Math.ceil(total / ITEMS_PER_PAGE) })}
             </span>
             <button
               onClick={() => handlePageChange(page + 1)}
@@ -602,14 +602,14 @@ function OrgUsers() {
               {/* Info rows */}
               <div className="px-6 py-4 space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-400">Role</span>
+                  <span className="text-xs text-gray-400">{t('dashboard.users.active_users.table.role')}</span>
                   <span className="text-sm text-gray-700">{detailUser.role.name}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-400">Status</span>
+                  <span className="text-xs text-gray-400">{t('common.status')}</span>
                   <span className="flex items-center gap-1.5 text-sm text-gray-700">
                     <span className={`w-2 h-2 rounded-full ${detailUser.user.email_verified ? 'bg-green-500' : 'bg-amber-500'}`} />
-                    {detailUser.user.email_verified ? 'Verified' : 'Unverified'}
+                    {detailUser.user.email_verified ? t('dashboard.users.users.status.verified') : t('dashboard.users.users.status.unverified')}
                   </span>
                 </div>
               </div>
@@ -621,7 +621,7 @@ function OrgUsers() {
 
                   {/* Groups */}
                   <div className="px-6 py-4 space-y-2.5">
-                    <span className="text-xs text-gray-400 block">Groups</span>
+                    <span className="text-xs text-gray-400 block">{t('dashboard.users.users.groups')}</span>
                     {detailUser.usergroups.map((g: any) => (
                       <div key={g.id} className="flex justify-between items-center">
                         <span className="text-sm text-gray-700">{g.name}</span>
@@ -638,11 +638,11 @@ function OrgUsers() {
               {/* Date rows */}
               <div className="px-6 py-4 space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-400">Joined</span>
+                  <span className="text-xs text-gray-400">{t('dashboard.users.users.table.joined')}</span>
                   <span className="text-sm text-gray-700">{formatDate(detailUser.joined_at)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-400">Last login</span>
+                  <span className="text-xs text-gray-400">{t('dashboard.users.users.table.last_login')}</span>
                   <span className="text-sm text-gray-700">{formatDate(detailUser.user.last_login_at)}</span>
                 </div>
               </div>

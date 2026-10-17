@@ -145,38 +145,32 @@ const getRightsSummary = (rights: any) => {
     return `${totalPermissions} permission${totalPermissions !== 1 ? 's' : ''}`
 }
 
-const formatActionName = (action: string) => {
-    return action
-        .replace('action_', '')
+const formatActionName = (action: string, t: any) => {
+    const actionKey = action.replace('action_', '')
+    const translationKey = `dashboard.users.roles.rights.actions.${actionKey}`
+    const translated = t(translationKey)
+    if (translated !== translationKey) return translated
+    return actionKey
         .split('_')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ')
 }
 
-const formatResourceName = (resource: string) => {
-    const resourceNames: Record<string, string> = {
-        courses: 'Courses',
-        users: 'Users',
-        usergroups: 'User Groups',
-        organizations: 'Organizations',
-        coursechapters: 'Modules',
-        activities: 'Lessons',
-        roles: 'Roles',
-        dashboard: 'Dashboard',
-        communities: 'Communities',
-        discussions: 'Discussions',
-        podcasts: 'Podcasts',
-    }
-    return resourceNames[resource] || resource.charAt(0).toUpperCase() + resource.slice(1)
+const formatResourceName = (resource: string, t: any) => {
+    const translationKey = `dashboard.users.roles.rights.sections.${resource}`
+    const translated = t(translationKey)
+    if (translated !== translationKey) return translated
+    return resource.charAt(0).toUpperCase() + resource.slice(1)
 }
 
 // ── Sub-components ──
 
 const RightsDetailView = ({ rights }: { rights: any }) => {
+    const { t } = useTranslation()
     if (!rights || Object.keys(rights).length === 0) {
         return (
             <div className="text-center py-8 text-gray-500">
-                No permissions configured
+                {t('dashboard.users.roles.rights.no_permissions_configured')}
             </div>
         )
     }
@@ -186,7 +180,7 @@ const RightsDetailView = ({ rights }: { rights: any }) => {
             {Object.entries(rights).map(([resource, actions]: [string, any]) => (
                 <div key={resource} className="border border-gray-200 rounded-lg overflow-hidden">
                     <div className="bg-gray-50 px-4 py-2 font-medium text-gray-700 border-b border-gray-200">
-                        {formatResourceName(resource)}
+                        {formatResourceName(resource, t)}
                     </div>
                     <div className="p-3">
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -204,7 +198,7 @@ const RightsDetailView = ({ rights }: { rights: any }) => {
                                     ) : (
                                         <XCircle className="w-4 h-4 text-gray-300" />
                                     )}
-                                    <span>{formatActionName(action)}</span>
+                                    <span>{formatActionName(action, t)}</span>
                                 </div>
                             ))}
                         </div>
@@ -232,6 +226,7 @@ const PermissionSection = ({
     onRightChange: (section: keyof Rights, action: string, value: boolean) => void
     onSelectAll: (section: keyof Rights, value: boolean) => void
 }) => {
+    const { t } = useTranslation()
     const sectionRights = (rights[section] || {}) as any
     const allSelected = permissions.every((perm) => sectionRights[perm])
     const selectedCount = permissions.filter((perm) => sectionRights[perm]).length
@@ -272,14 +267,14 @@ const PermissionSection = ({
                 {/* Info row: counter + select all */}
                 <div className="flex items-center justify-between px-4 py-2">
                     <span className="text-xs text-gray-400 tabular-nums">
-                        {selectedCount} of {permissions.length}
+                        {t('dashboard.users.roles.rights.selected_of', { selected: selectedCount, total: permissions.length })}
                     </span>
                     <button
                         type="button"
                         onClick={() => onSelectAll(section, !allSelected)}
                         className="text-xs text-gray-800 hover:text-gray-600 font-medium transition-colors"
                     >
-                        {allSelected ? 'Deselect all' : 'Select all'}
+                        {allSelected ? t('dashboard.users.roles.modals.create.permissions.deselect_all') : t('dashboard.users.roles.modals.create.permissions.select_all')}
                     </button>
                 </div>
 
@@ -300,7 +295,7 @@ const PermissionSection = ({
                                     </div>
                                 </div>
                                 <span className="text-xs text-gray-700 capitalize">
-                                    {formatActionName(permission)}
+                                    {formatActionName(permission, t)}
                                 </span>
                             </label>
                         ))}
@@ -392,12 +387,12 @@ function OrgRoles() {
                 setSelectedRole(newRole)
                 setRights(newRole.rights || defaultRights)
                 setView('edit')
-                toast.success('Role created')
+                toast.success(t('dashboard.users.roles.modals.create.toasts.success'))
             } else {
-                toast.error('Failed to create role')
+                toast.error(t('dashboard.users.roles.modals.create.toasts.error'))
             }
         } catch {
-            toast.error('Failed to create role')
+            toast.error(t('dashboard.users.roles.modals.create.toasts.error'))
         } finally {
             setIsCreating(false)
         }
@@ -416,13 +411,13 @@ function OrgRoles() {
     }
 
     const deleteRoleUI = async (role_id: any) => {
-        const toastId = toast.loading('Deleting role...')
+        const toastId = toast.loading(t('dashboard.users.roles.toasts.deleting'))
         const res = await deleteRole(role_id, org.id, access_token)
         if (res.status === 200) {
             mutate(`${getAPIUrl()}roles/org/${org.id}`)
-            toast.success('Role deleted', { id: toastId })
+            toast.success(t('dashboard.users.roles.toasts.delete_success'), { id: toastId })
         } else {
-            toast.error('Failed to delete role', { id: toastId })
+            toast.error(t('dashboard.users.roles.toasts.delete_error'), { id: toastId })
         }
     }
 
@@ -436,10 +431,10 @@ function OrgRoles() {
         enableReinitialize: true,
         validate: (values) => {
             const errors: any = {}
-            if (!values.name) errors.name = 'Name is required'
-            else if (values.name.length < 2) errors.name = 'Name must be at least 2 characters'
-            if (!values.description) errors.description = 'Description is required'
-            else if (values.description.length < 10) errors.description = 'Description must be at least 10 characters'
+            if (!values.name) errors.name = t('dashboard.users.roles.modals.create.validation.name_required')
+            else if (values.name.length < 2) errors.name = t('dashboard.users.roles.modals.create.validation.name_min_length')
+            if (!values.description) errors.description = t('dashboard.users.roles.modals.create.validation.description_required')
+            else if (values.description.length < 10) errors.description = t('dashboard.users.roles.modals.create.validation.description_min_length')
             return errors
         },
         onSubmit: async (values) => {
@@ -540,7 +535,7 @@ function OrgRoles() {
                 formik.resetForm({ values: { name: values.name, description: values.description } })
                 setIsSaved(true)
             } else {
-                toast.error('Failed to save role')
+                toast.error(t('dashboard.users.roles.modals.edit.toasts.error'))
             }
             setIsSaving(false)
         },
@@ -603,7 +598,7 @@ function OrgRoles() {
                                         <SaveAllIcon size={14} />
                                     )}
                                     <span>
-                                        {isSaving ? 'Saving...' : !formik.dirty && isSaved ? 'Saved' : 'Save Role'}
+                                        {isSaving ? t('common.saving') : !formik.dirty && isSaved ? t('dashboard.users.roles.actions.saved') : t('dashboard.users.roles.modals.edit.form.submit')}
                                     </span>
                                 </button>
                             </Form.Submit>
@@ -614,7 +609,7 @@ function OrgRoles() {
                             <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('common.sections.overview')}</h3>
                             <div className="space-y-4">
                                 <FormField name="name">
-                                    <FormLabelAndMessage label="Role Name" message={formik.errors.name} />
+                                    <FormLabelAndMessage label={t('dashboard.users.roles.modals.edit.form.role_name')} message={formik.errors.name} />
                                     <Form.Control asChild>
                                         <Input
                                             className={fieldClassName}
@@ -622,20 +617,20 @@ function OrgRoles() {
                                             value={formik.values.name}
                                             type="text"
                                             required
-                                            placeholder="e.g. Course Manager"
+                                            placeholder={t('dashboard.users.roles.modals.create.form.role_name_placeholder')}
                                         />
                                     </Form.Control>
                                 </FormField>
 
                                 <FormField name="description">
-                                    <FormLabelAndMessage label="Description" message={formik.errors.description} />
+                                    <FormLabelAndMessage label={t('dashboard.users.roles.modals.edit.form.description')} message={formik.errors.description} />
                                     <Form.Control asChild>
                                         <Textarea
                                             className={fieldClassName}
                                             onChange={formik.handleChange}
                                             value={formik.values.description}
                                             required
-                                            placeholder="Describe what this role can do..."
+                                            placeholder={t('dashboard.users.roles.modals.create.form.description_placeholder')}
                                         />
                                     </Form.Control>
                                 </FormField>
@@ -647,7 +642,7 @@ function OrgRoles() {
                             <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('common.sections.permissions')}</h3>
                             <div className="space-y-4">
                                 <PermissionSection
-                                    title="Courses"
+                                    title={t('dashboard.users.roles.rights.sections.courses')}
                                     icon={BookOpen}
                                     section="courses"
                                     permissions={['action_create', 'action_read', 'action_read_own', 'action_update', 'action_update_own', 'action_delete', 'action_delete_own']}
@@ -656,7 +651,7 @@ function OrgRoles() {
                                     onSelectAll={handleSelectAll}
                                 />
                                 <PermissionSection
-                                    title="Modules"
+                                    title={t('dashboard.users.roles.rights.sections.coursechapters')}
                                     icon={FileText}
                                     section="coursechapters"
                                     permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
@@ -665,7 +660,7 @@ function OrgRoles() {
                                     onSelectAll={handleSelectAll}
                                 />
                                 <PermissionSection
-                                    title="Lessons"
+                                    title={t('dashboard.users.roles.rights.sections.activities')}
                                     icon={Activity}
                                     section="activities"
                                     permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
@@ -674,7 +669,7 @@ function OrgRoles() {
                                     onSelectAll={handleSelectAll}
                                 />
                                 <PermissionSection
-                                    title="Users"
+                                    title={t('dashboard.users.roles.rights.sections.users')}
                                     icon={Users}
                                     section="users"
                                     permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
@@ -683,7 +678,7 @@ function OrgRoles() {
                                     onSelectAll={handleSelectAll}
                                 />
                                 <PermissionSection
-                                    title="User Groups"
+                                    title={t('dashboard.users.roles.rights.sections.usergroups')}
                                     icon={UserCheck}
                                     section="usergroups"
                                     permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
@@ -692,7 +687,7 @@ function OrgRoles() {
                                     onSelectAll={handleSelectAll}
                                 />
                                 <PermissionSection
-                                    title="Roles"
+                                    title={t('dashboard.users.roles.rights.sections.roles')}
                                     icon={Shield}
                                     section="roles"
                                     permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
@@ -701,7 +696,7 @@ function OrgRoles() {
                                     onSelectAll={handleSelectAll}
                                 />
                                 <PermissionSection
-                                    title="Communities"
+                                    title={t('dashboard.users.roles.rights.sections.communities')}
                                     icon={Globe}
                                     section="communities"
                                     permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
@@ -710,7 +705,7 @@ function OrgRoles() {
                                     onSelectAll={handleSelectAll}
                                 />
                                 <PermissionSection
-                                    title="Discussions"
+                                    title={t('dashboard.users.roles.rights.sections.discussions')}
                                     icon={MessageCircle}
                                     section="discussions"
                                     permissions={['action_create', 'action_read', 'action_read_own', 'action_update', 'action_update_own', 'action_delete', 'action_delete_own']}
@@ -719,7 +714,7 @@ function OrgRoles() {
                                     onSelectAll={handleSelectAll}
                                 />
                                 <PermissionSection
-                                    title="Podcasts"
+                                    title={t('dashboard.users.roles.rights.sections.podcasts')}
                                     icon={Radio}
                                     section="podcasts"
                                     permissions={['action_create', 'action_read', 'action_read_own', 'action_update', 'action_update_own', 'action_delete', 'action_delete_own']}
@@ -728,7 +723,7 @@ function OrgRoles() {
                                     onSelectAll={handleSelectAll}
                                 />
                                 <PermissionSection
-                                    title="Dashboard"
+                                    title={t('dashboard.users.roles.rights.sections.dashboard')}
                                     icon={Monitor}
                                     section="dashboard"
                                     permissions={['action_access']}
@@ -737,7 +732,7 @@ function OrgRoles() {
                                     onSelectAll={handleSelectAll}
                                 />
                                 <PermissionSection
-                                    title="Organizations"
+                                    title={t('dashboard.users.roles.rights.sections.organizations')}
                                     icon={Building}
                                     section="organizations"
                                     permissions={['action_create', 'action_read', 'action_update', 'action_delete']}
@@ -765,13 +760,15 @@ function OrgRoles() {
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search roles..."
+                        placeholder={t('dashboard.users.roles.search_placeholder')}
                         className="w-full h-7 pl-8 pr-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
                     />
                 </div>
 
                 <span className="text-xs text-gray-400 whitespace-nowrap">
-                    {filteredRoles.length} {filteredRoles.length === 1 ? 'role' : 'roles'}
+                    {filteredRoles.length} {filteredRoles.length === 1
+                        ? t('dashboard.users.roles.count.singular')
+                        : t('dashboard.users.roles.count.plural')}
                 </span>
 
                 <div className="flex-1" />
@@ -784,7 +781,7 @@ function OrgRoles() {
                         ) : (
                             '+'
                         )}
-                        &nbsp;&nbsp;Create
+                        &nbsp;&nbsp;{t('dashboard.users.roles.actions.create_short')}
                     </Button>
                 ) : (
                     <div className="flex items-center space-x-2">
@@ -793,7 +790,7 @@ function OrgRoles() {
                             className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-semibold rounded-lg bg-gray-200 text-gray-400 cursor-not-allowed transition-colors"
                         >
                             <Lock size={14} />
-                            <span>Create</span>
+                            <span>{t('dashboard.users.roles.actions.create_short')}</span>
                         </button>
                         <PlanBadge currentPlan={currentPlan} requiredPlan={(rf?.roles?.required_plan || 'pro') as PlanLevel} />
                     </div>
@@ -802,15 +799,15 @@ function OrgRoles() {
                 {/* Filter dropdown */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label="Filter roles">
+                        <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label={t('dashboard.users.roles.filters.filter_roles')}>
                             <ConceptIcon.filter size={14} />
                         </IconButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="min-w-[170px] rounded-lg border border-gray-200 bg-white p-1 shadow-md" sideOffset={6}>
                         {[
-                            { value: 'all', label: 'All roles' },
-                            { value: 'system', label: 'System roles' },
-                            { value: 'custom', label: 'Custom roles' },
+                            { value: 'all', label: t('dashboard.users.roles.filters.all') },
+                            { value: 'system', label: t('dashboard.users.roles.filters.system') },
+                            { value: 'custom', label: t('dashboard.users.roles.filters.custom') },
                         ].map((option) => (
                             <DropdownMenuItem
                                 key={option.value}
@@ -836,14 +833,14 @@ function OrgRoles() {
                         <Shield size={40} className="mx-auto mb-3 text-gray-300" />
                         <p className="text-sm text-gray-400">
                             {searchQuery || roleFilter !== 'all'
-                                ? 'No roles match your search'
-                                : 'No roles yet'
+                                ? t('dashboard.users.roles.no_results')
+                                : t('dashboard.users.roles.no_roles')
                             }
                         </p>
                         <p className="text-xs text-gray-300 mt-1">
                             {searchQuery || roleFilter !== 'all'
-                                ? 'Try a different search term or filter'
-                                : 'Click "Create" to add your first role'
+                                ? t('dashboard.users.roles.no_results_hint')
+                                : t('dashboard.users.roles.no_roles_hint')
                             }
                         </p>
                     </div>
@@ -886,15 +883,15 @@ function OrgRoles() {
                                             className="gap-2 text-sm rounded-md px-2.5 py-1.5 cursor-pointer"
                                         >
                                             <Eye size={14} />
-                                            View Rights
+                                            {t('dashboard.users.roles.actions.view_rights')}
                                         </DropdownMenuItem>
                                         {!isSystem && (
                                             <>
                                                 <DropdownMenuSeparator />
                                                 <ConfirmationModal
-                                                    confirmationButtonText="Delete"
-                                                    confirmationMessage={`Are you sure you want to delete the role "${role.name}"? This action cannot be undone.`}
-                                                    dialogTitle="Delete Role"
+                                                    confirmationButtonText={t('common.delete')}
+                                                    confirmationMessage={t('dashboard.users.roles.delete_confirmation_message', { role: role.name })}
+                                                    dialogTitle={t('dashboard.users.roles.modals.delete.title')}
                                                     dialogTrigger={
                                                         <div
                                                             className="flex items-center gap-2 text-sm rounded-md px-2.5 py-1.5 text-red-600 cursor-pointer hover:bg-red-50"
@@ -904,7 +901,7 @@ function OrgRoles() {
                                                             tabIndex={0}
                                                         >
                                                             <Trash2 size={14} />
-                                                            Delete
+                                                            {t('common.delete')}
                                                         </div>
                                                     }
                                                     functionToExecute={() => {
@@ -929,8 +926,8 @@ function OrgRoles() {
                 minHeight="md"
                 minWidth="lg"
                 dialogContent={<RightsDetailView rights={modalRole?.rights} />}
-                dialogTitle={`Rights: ${modalRole?.name || ''}`}
-                dialogDescription="Detailed view of all permissions for this role."
+                dialogTitle={t('dashboard.users.roles.modals.view_rights.title', { roleName: modalRole?.name || '' })}
+                dialogDescription={t('dashboard.users.roles.modals.view_rights.description')}
             />
         </>
     )

@@ -2733,7 +2733,8 @@
                                                                                   "today":  "Aujourd\u0027hui",
                                                                                   "7d":  "7 derniers jours",
                                                                                   "30d":  "30 derniers jours",
-                                                                                  "custom":  "Plage personnalisée"
+                                                                                  "custom":  "Plage personnalisée",
+                                                                                  "to":  "à"
                                                                               },
                                                               "table":  {
                                                                             "timestamp":  "Horodatage",
@@ -2746,6 +2747,8 @@
                                                                         },
                                                               "loading":  "Chargement de l\u0027activité...",
                                                               "no_logs":  "Aucun log trouvé",
+                                                              "system_user":  "Système",
+                                                              "user_id":  "ID : {{id}}",
                                                               "pagination":  {
                                                                                  "showing":  "Affichage de {{start}} à {{end}} sur {{total}} logs"
                                                                              },
@@ -3045,9 +3048,46 @@
                                                                             "page":  "Page {{current}} sur {{total}}"
                                                                         }
                                                      },
+                                    "users":  {
+                                                  "table":  {
+                                                                "name":  "Nom",
+                                                                "username":  "Nom d\u0027utilisateur",
+                                                                "email":  "E-mail",
+                                                                "joined":  "Inscrit le",
+                                                                "last_login":  "Dernière connexion"
+                                                            },
+                                                  "status":  {
+                                                                 "verified":  "Vérifié",
+                                                                 "unverified":  "Non vérifié"
+                                                             },
+                                                  "filters":  {
+                                                                  "filter_users":  "Filtrer les utilisateurs",
+                                                                  "all_roles":  "Tous les rôles",
+                                                                  "all_statuses":  "Tous les statuts",
+                                                                  "all_groups":  "Tous les groupes"
+                                                              },
+                                                  "sort":  {
+                                                               "name_asc":  "A-Z",
+                                                               "name_desc":  "Z-A"
+                                                           },
+                                                  "groups":  "Groupes",
+                                                  "bulk_remove_one":  "Retirer {{count}}",
+                                                  "bulk_remove_other":  "Retirer {{count}}",
+                                                  "toasts":  {
+                                                                 "removing_one":  "Suppression de {{count}} utilisateur...",
+                                                                 "removing_other":  "Suppression de {{count}} utilisateurs...",
+                                                                 "remove_success_one":  "{{count}} utilisateur retiré avec succès",
+                                                                 "remove_success_other":  "{{count}} utilisateurs retirés avec succès",
+                                                                 "remove_error":  "Erreur lors du retrait des utilisateurs"
+                                                             }
+                                              },
                                     "signups":  {
                                                     "title":  "Méthode d\u0027adhésion",
                                                     "subtitle":  "Choisissez comment les utilisateurs peuvent rejoindre votre organisation",
+                                                    "toggle":  {
+                                                                   "on":  "Activé",
+                                                                   "off":  "Désactivé"
+                                                               },
                                                     "open":  {
                                                                  "title":  "Ouvert",
                                                                  "description":  "Les utilisateurs peuvent s\u0027inscrire librement depuis la page d\u0027inscription",
@@ -3078,11 +3118,19 @@
                                                                                        "linked_to_usergroup":  "Lié à un groupe d\u0027utilisateurs",
                                                                                        "normal":  "Normal"
                                                                                    },
+                                                                         "copy_actions":  {
+                                                                                              "click_to_copy":  "Cliquer pour copier",
+                                                                                              "copy_to_clipboard":  "Copier dans le presse-papiers"
+                                                                                          },
+                                                                         "no_codes":  "Aucun code d\u0027invitation pour le moment",
+                                                                         "no_codes_hint":  "Générez des codes pour inviter des utilisateurs dans votre organisation",
+                                                                         "usage":  "{{used}} / 6 codes d\u0027invitation utilisés",
                                                                          "actions":  {
                                                                                          "delete_code":  "Supprimer le code",
                                                                                          "delete_confirmation_title":  "Supprimer le code ?",
                                                                                          "delete_confirmation_message":  "Êtes-vous sûr de vouloir supprimer ce code d\u0027invitation ?",
                                                                                          "generate":  "Générer un code d\u0027invitation",
+                                                                                         "generating":  "Génération...",
                                                                                          "generate_title":  "Générer un code d\u0027invitation",
                                                                                          "generate_description":  "Générez un nouveau code d\u0027invitation pour votre organisation"
                                                                                      },
@@ -3092,7 +3140,10 @@
                                                                                         "delete_error":  "Erreur lors de la suppression",
                                                                                         "changing_method":  "Changement de la méthode d\u0027adhésion...",
                                                                                         "change_success":  "Méthode d\u0027adhésion changée en {{method}}",
-                                                                                        "change_error":  "Erreur lors du changement de méthode d\u0027adhésion"
+                                                                                        "change_error":  "Erreur lors du changement de méthode d\u0027adhésion",
+                                                                                        "generating":  "Génération du code d\u0027invitation...",
+                                                                                        "generate_success":  "Code d\u0027invitation généré",
+                                                                                        "generate_error":  "Impossible de générer le code"
                                                                                     }
                                                                      },
                                                     "generate_modal":  {
@@ -3168,14 +3219,28 @@
                                                                      "usergroup":  "Groupe d\u0027utilisateurs",
                                                                      "description":  "Description",
                                                                      "manage_users":  "Gérer les utilisateurs",
-                                                                     "actions":  "Actions"
+                                                                     "actions":  "Actions",
+                                                                     "name":  "Nom",
+                                                                     "username":  "Nom d\u0027utilisateur",
+                                                                     "email":  "E-mail",
+                                                                     "status":  "Statut",
+                                                                     "joined":  "Inscrit le",
+                                                                     "last_login":  "Dernière connexion"
                                                                  },
                                                        "actions":  {
                                                                        "manage_users":  "Gérer les utilisateurs",
                                                                        "edit":  "Modifier",
                                                                        "delete":  "Supprimer",
-                                                                       "create":  "Créer un groupe d\u0027utilisateurs"
+                                                                       "create":  "Créer un groupe d\u0027utilisateurs",
+                                                                       "create_group":  "Créer",
+                                                                       "select":  "Sélectionner",
+                                                                       "saved":  "Enregistré",
+                                                                       "sort_groups":  "Trier les groupes"
                                                                    },
+                                                       "form":  {
+                                                                    "name_placeholder":  "Nom du groupe",
+                                                                    "description_placeholder":  "Description du groupe"
+                                                                },
                                                        "modals":  {
                                                                       "manage_users":  {
                                                                                            "title":  "Gérer les utilisateurs du groupe",
@@ -3261,6 +3326,40 @@
                                                                                      "button":  "Supprimer le groupe d\u0027utilisateurs"
                                                                                  }
                                                                   },
+                                                       "members":  {
+                                                                       "search_placeholder":  "Rechercher des membres...",
+                                                                       "filter":  "Filtrer les membres",
+                                                                       "no_results":  "Aucun membre trouvé correspondant à votre recherche",
+                                                                       "no_users":  "Aucun utilisateur dans ce groupe pour le moment",
+                                                                       "add":  "Ajouter",
+                                                                       "remove":  "Retirer",
+                                                                       "status":  {
+                                                                                      "all":  "Tous les statuts",
+                                                                                      "verified":  "Vérifié",
+                                                                                      "unverified":  "Non vérifié"
+                                                                                  },
+                                                                       "pagination":  {
+                                                                                          "showing":  "Affichage de {{start}}-{{end}} sur {{total}}",
+                                                                                          "page":  "Page {{current}} sur {{total}}"
+                                                                                      },
+                                                                       "toasts":  {
+                                                                                      "adding_one":  "Ajout de {{count}} utilisateur...",
+                                                                                      "adding_other":  "Ajout de {{count}} utilisateurs...",
+                                                                                      "added_one":  "{{count}} utilisateur ajouté",
+                                                                                      "added_other":  "{{count}} utilisateurs ajoutés",
+                                                                                      "add_error":  "Impossible d\u0027ajouter les utilisateurs",
+                                                                                      "removing_one":  "Retrait de {{count}} utilisateur...",
+                                                                                      "removing_other":  "Retrait de {{count}} utilisateurs...",
+                                                                                      "removed_one":  "{{count}} utilisateur retiré",
+                                                                                      "removed_other":  "{{count}} utilisateurs retirés",
+                                                                                      "remove_error":  "Impossible de retirer les utilisateurs"
+                                                                                  }
+                                                                   },
+                                                       "sort":  {
+                                                                    "name_asc":  "A-Z",
+                                                                    "name_desc":  "Z-A"
+                                                                },
+                                                       "no_results_hint":  "Essayez un autre terme de recherche",
                                                        "toasts":  {
                                                                       "deleting":  "Suppression...",
                                                                       "delete_success":  "Groupe d\u0027utilisateurs supprimé",
@@ -3291,11 +3390,29 @@
                                                   "no_permissions":  "Aucune permission",
                                                   "permissions_count":  "{{count}} permissions",
                                                   "system_wide":  "Système",
+                                                  "search_placeholder":  "Rechercher des rôles...",
+                                                  "count":  {
+                                                                "singular":  "rôle",
+                                                                "plural":  "rôles"
+                                                            },
+                                                  "filters":  {
+                                                                  "filter_roles":  "Filtrer les rôles",
+                                                                  "all":  "Tous les rôles",
+                                                                  "system":  "Rôles système",
+                                                                  "custom":  "Rôles personnalisés"
+                                                              },
+                                                  "no_results":  "Aucun rôle ne correspond à votre recherche",
+                                                  "no_roles":  "Aucun rôle pour le moment",
+                                                  "no_results_hint":  "Essayez un autre terme de recherche ou filtre",
+                                                  "no_roles_hint":  "Cliquez sur « Créer » pour ajouter votre premier rôle",
+                                                  "delete_confirmation_message":  "Êtes-vous sûr de vouloir supprimer le rôle « {{role}} » ? Cette action est irréversible.",
                                                   "actions":  {
                                                                   "edit":  "Modifier",
                                                                   "delete":  "Supprimer",
                                                                   "create":  "Créer un rôle",
-                                                                  "view_rights":  "Voir les droits"
+                                                                  "view_rights":  "Voir les droits",
+                                                                  "create_short":  "Créer",
+                                                                  "saved":  "Enregistré"
                                                               },
                                                   "modals":  {
                                                                  "create":  {
@@ -3471,7 +3588,33 @@
                                                                                    "roles":  "Rôles",
                                                                                    "usergroups":  "Groupes d\u0027utilisateurs",
                                                                                    "users":  "Utilisateurs"
-                                                                               }
+                                                                               },
+                                                                 "sections":  {
+                                                                                  "courses":  "Cours",
+                                                                                  "users":  "Utilisateurs",
+                                                                                  "usergroups":  "Groupes d\u0027utilisateurs",
+                                                                                  "collections":  "Collections",
+                                                                                  "organizations":  "Organisations",
+                                                                                  "coursechapters":  "Modules",
+                                                                                  "activities":  "Leçons",
+                                                                                  "roles":  "Rôles",
+                                                                                  "dashboard":  "Tableau de bord",
+                                                                                  "communities":  "Communautés",
+                                                                                  "discussions":  "Discussions",
+                                                                                  "podcasts":  "Podcasts"
+                                                                              },
+                                                                 "actions":  {
+                                                                                 "create":  "Créer",
+                                                                                 "read":  "Lire",
+                                                                                 "read_own":  "Lire les siens",
+                                                                                 "update":  "Modifier",
+                                                                                 "update_own":  "Modifier les siens",
+                                                                                 "delete":  "Supprimer",
+                                                                                 "delete_own":  "Supprimer les siens",
+                                                                                 "access":  "Accéder"
+                                                                             },
+                                                                 "selected_of":  "{{selected}} sur {{total}}",
+                                                                 "no_permissions_configured":  "Aucune permission configurée"
                                                              }
                                               }
                                 },

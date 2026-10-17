@@ -2743,7 +2743,8 @@
                                                                                   "today":  "اليوم",
                                                                                   "7d":  "آخر 7 أيام",
                                                                                   "30d":  "آخر 30 يوماً",
-                                                                                  "custom":  "نطاق مخصص"
+                                                                                  "custom":  "نطاق مخصص",
+                                                                                  "to":  "إلى"
                                                                               },
                                                               "table":  {
                                                                             "timestamp":  "الطابع الزمني",
@@ -2756,6 +2757,8 @@
                                                                         },
                                                               "loading":  "جاري تحميل النشاط...",
                                                               "no_logs":  "لم يتم العثور على سجلات",
+                                                              "system_user":  "النظام",
+                                                              "user_id":  "المعرّف: {{id}}",
                                                               "pagination":  {
                                                                                  "showing":  "عرض {{start}} إلى {{end}} من {{total}} سجلات"
                                                                              },
@@ -3055,9 +3058,58 @@
                                                                             "page":  "صفحة {{current}} من {{total}}"
                                                                         }
                                                      },
+                                    "users":  {
+                                                  "table":  {
+                                                                "name":  "الاسم",
+                                                                "username":  "اسم المستخدم",
+                                                                "email":  "البريد الإلكتروني",
+                                                                "joined":  "تاريخ الانضمام",
+                                                                "last_login":  "آخر تسجيل دخول"
+                                                            },
+                                                  "status":  {
+                                                                 "verified":  "موثّق",
+                                                                 "unverified":  "غير موثّق"
+                                                             },
+                                                  "filters":  {
+                                                                  "filter_users":  "تصفية المستخدمين",
+                                                                  "all_roles":  "جميع الأدوار",
+                                                                  "all_statuses":  "جميع الحالات",
+                                                                  "all_groups":  "جميع المجموعات"
+                                                              },
+                                                  "sort":  {
+                                                               "name_asc":  "أ-ي",
+                                                               "name_desc":  "ي-أ"
+                                                           },
+                                                  "groups":  "المجموعات",
+                                                  "bulk_remove_zero":  "إزالة {{count}}",
+                                                  "bulk_remove_one":  "إزالة {{count}}",
+                                                  "bulk_remove_two":  "إزالة {{count}}",
+                                                  "bulk_remove_few":  "إزالة {{count}}",
+                                                  "bulk_remove_many":  "إزالة {{count}}",
+                                                  "bulk_remove_other":  "إزالة {{count}}",
+                                                  "toasts":  {
+                                                                 "removing_zero":  "جاري إزالة {{count}} مستخدم...",
+                                                                 "removing_one":  "جاري إزالة مستخدم واحد...",
+                                                                 "removing_two":  "جاري إزالة مستخدمين...",
+                                                                 "removing_few":  "جاري إزالة {{count}} مستخدمين...",
+                                                                 "removing_many":  "جاري إزالة {{count}} مستخدماً...",
+                                                                 "removing_other":  "جاري إزالة {{count}} مستخدم...",
+                                                                 "remove_success_zero":  "تمت إزالة {{count}} مستخدم بنجاح",
+                                                                 "remove_success_one":  "تمت إزالة مستخدم واحد بنجاح",
+                                                                 "remove_success_two":  "تمت إزالة مستخدمين بنجاح",
+                                                                 "remove_success_few":  "تمت إزالة {{count}} مستخدمين بنجاح",
+                                                                 "remove_success_many":  "تمت إزالة {{count}} مستخدماً بنجاح",
+                                                                 "remove_success_other":  "تمت إزالة {{count}} مستخدم بنجاح",
+                                                                 "remove_error":  "حدث خطأ أثناء إزالة المستخدمين"
+                                                             }
+                                              },
                                     "signups":  {
                                                     "title":  "طريقة الانضمام",
                                                     "subtitle":  "اختر كيف يمكن للمستخدمين الانضمام لمنظمتك",
+                                                    "toggle":  {
+                                                                   "on":  "مفعّل",
+                                                                   "off":  "معطّل"
+                                                               },
                                                     "open":  {
                                                                  "title":  "مفتوح",
                                                                  "description":  "يمكن للمستخدمين التسجيل بحرية من صفحة التسجيل",
@@ -3088,11 +3140,19 @@
                                                                                        "linked_to_usergroup":  "مرتبط بمجموعة مستخدمين",
                                                                                        "normal":  "عادي"
                                                                                    },
+                                                                         "copy_actions":  {
+                                                                                              "click_to_copy":  "انقر للنسخ",
+                                                                                              "copy_to_clipboard":  "نسخ إلى الحافظة"
+                                                                                          },
+                                                                         "no_codes":  "لا توجد أكواد دعوة بعد",
+                                                                         "no_codes_hint":  "أنشئ أكواداً لدعوة المستخدمين إلى منظمتك",
+                                                                         "usage":  "{{used}} / 6 أكواد دعوة مستخدمة",
                                                                          "actions":  {
                                                                                          "delete_code":  "حذف الكود",
                                                                                          "delete_confirmation_title":  "حذف الكود؟",
                                                                                          "delete_confirmation_message":  "هل أنت متأكد أنك تريد حذف كود الدعوة هذا؟",
                                                                                          "generate":  "إنشاء كود دعوة",
+                                                                                         "generating":  "جاري الإنشاء...",
                                                                                          "generate_title":  "إنشاء كود دعوة",
                                                                                          "generate_description":  "أنشئ كود دعوة جديد لمنظمتك"
                                                                                      },
@@ -3102,7 +3162,10 @@
                                                                                         "delete_error":  "فشل الحذف",
                                                                                         "changing_method":  "جاري تغيير طريقة الانضمام...",
                                                                                         "change_success":  "تم تغيير طريقة الانضمام إلى {{method}}",
-                                                                                        "change_error":  "فشل تغيير طريقة الانضمام"
+                                                                                        "change_error":  "فشل تغيير طريقة الانضمام",
+                                                                                        "generating":  "جاري إنشاء كود الدعوة...",
+                                                                                        "generate_success":  "تم إنشاء كود الدعوة",
+                                                                                        "generate_error":  "فشل إنشاء الكود"
                                                                                     }
                                                                      },
                                                     "generate_modal":  {
@@ -3178,14 +3241,28 @@
                                                                      "usergroup":  "مجموعة المستخدمين",
                                                                      "description":  "الوصف",
                                                                      "manage_users":  "إدارة المستخدمين",
-                                                                     "actions":  "الإجراءات"
+                                                                     "actions":  "الإجراءات",
+                                                                     "name":  "الاسم",
+                                                                     "username":  "اسم المستخدم",
+                                                                     "email":  "البريد الإلكتروني",
+                                                                     "status":  "الحالة",
+                                                                     "joined":  "تاريخ الانضمام",
+                                                                     "last_login":  "آخر تسجيل دخول"
                                                                  },
                                                        "actions":  {
                                                                        "manage_users":  "إدارة المستخدمين",
                                                                        "edit":  "تعديل",
                                                                        "delete":  "حذف",
-                                                                       "create":  "إنشاء مجموعة مستخدمين"
+                                                                       "create":  "إنشاء مجموعة مستخدمين",
+                                                                       "create_group":  "إنشاء",
+                                                                       "select":  "تحديد",
+                                                                       "saved":  "تم الحفظ",
+                                                                       "sort_groups":  "فرز المجموعات"
                                                                    },
+                                                       "form":  {
+                                                                    "name_placeholder":  "اسم المجموعة",
+                                                                    "description_placeholder":  "وصف المجموعة"
+                                                                },
                                                        "modals":  {
                                                                       "manage_users":  {
                                                                                            "title":  "إدارة أعضاء المجموعة",
@@ -3271,6 +3348,56 @@
                                                                                      "button":  "حذف المجموعة"
                                                                                  }
                                                                   },
+                                                       "members":  {
+                                                                       "search_placeholder":  "البحث عن الأعضاء...",
+                                                                       "filter":  "تصفية الأعضاء",
+                                                                       "no_results":  "لم يتم العثور على أعضاء مطابقين لبحثك",
+                                                                       "no_users":  "لا يوجد مستخدمون في هذه المجموعة بعد",
+                                                                       "add":  "إضافة",
+                                                                       "remove":  "إزالة",
+                                                                       "status":  {
+                                                                                      "all":  "جميع الحالات",
+                                                                                      "verified":  "موثّق",
+                                                                                      "unverified":  "غير موثّق"
+                                                                                  },
+                                                                       "pagination":  {
+                                                                                          "showing":  "عرض {{start}}-{{end}} من {{total}}",
+                                                                                          "page":  "صفحة {{current}} من {{total}}"
+                                                                                      },
+                                                                       "toasts":  {
+                                                                                      "adding_zero":  "جاري إضافة {{count}} مستخدم...",
+                                                                                      "adding_one":  "جاري إضافة مستخدم واحد...",
+                                                                                      "adding_two":  "جاري إضافة مستخدمين...",
+                                                                                      "adding_few":  "جاري إضافة {{count}} مستخدمين...",
+                                                                                      "adding_many":  "جاري إضافة {{count}} مستخدماً...",
+                                                                                      "adding_other":  "جاري إضافة {{count}} مستخدم...",
+                                                                                      "added_zero":  "تمت إضافة {{count}} مستخدم",
+                                                                                      "added_one":  "تمت إضافة مستخدم واحد",
+                                                                                      "added_two":  "تمت إضافة مستخدمين",
+                                                                                      "added_few":  "تمت إضافة {{count}} مستخدمين",
+                                                                                      "added_many":  "تمت إضافة {{count}} مستخدماً",
+                                                                                      "added_other":  "تمت إضافة {{count}} مستخدم",
+                                                                                      "add_error":  "فشل إضافة المستخدمين",
+                                                                                      "removing_zero":  "جاري إزالة {{count}} مستخدم...",
+                                                                                      "removing_one":  "جاري إزالة مستخدم واحد...",
+                                                                                      "removing_two":  "جاري إزالة مستخدمين...",
+                                                                                      "removing_few":  "جاري إزالة {{count}} مستخدمين...",
+                                                                                      "removing_many":  "جاري إزالة {{count}} مستخدماً...",
+                                                                                      "removing_other":  "جاري إزالة {{count}} مستخدم...",
+                                                                                      "removed_zero":  "تمت إزالة {{count}} مستخدم",
+                                                                                      "removed_one":  "تمت إزالة مستخدم واحد",
+                                                                                      "removed_two":  "تمت إزالة مستخدمين",
+                                                                                      "removed_few":  "تمت إزالة {{count}} مستخدمين",
+                                                                                      "removed_many":  "تمت إزالة {{count}} مستخدماً",
+                                                                                      "removed_other":  "تمت إزالة {{count}} مستخدم",
+                                                                                      "remove_error":  "فشل إزالة المستخدمين"
+                                                                                  }
+                                                                   },
+                                                       "sort":  {
+                                                                    "name_asc":  "أ-ي",
+                                                                    "name_desc":  "ي-أ"
+                                                                },
+                                                       "no_results_hint":  "جرّب كلمة بحث أخرى",
                                                        "toasts":  {
                                                                       "deleting":  "جاري الحذف...",
                                                                       "delete_success":  "تم حذف مجموعة المستخدمين",
@@ -3301,11 +3428,29 @@
                                                   "no_permissions":  "لا توجد صلاحيات",
                                                   "permissions_count":  "{{count}} صلاحيات",
                                                   "system_wide":  "على مستوى النظام",
+                                                  "search_placeholder":  "البحث عن الأدوار...",
+                                                  "count":  {
+                                                                "singular":  "دور",
+                                                                "plural":  "أدوار"
+                                                            },
+                                                  "filters":  {
+                                                                  "filter_roles":  "تصفية الأدوار",
+                                                                  "all":  "جميع الأدوار",
+                                                                  "system":  "أدوار النظام",
+                                                                  "custom":  "أدوار مخصصة"
+                                                              },
+                                                  "no_results":  "لا توجد أدوار تطابق بحثك",
+                                                  "no_roles":  "لا توجد أدوار بعد",
+                                                  "no_results_hint":  "جرّب كلمة بحث أو تصفية أخرى",
+                                                  "no_roles_hint":  "انقر على «إنشاء» لإضافة أول دور لك",
+                                                  "delete_confirmation_message":  "هل أنت متأكد أنك تريد حذف الدور «{{role}}»؟ لا يمكن التراجع عن هذا الإجراء.",
                                                   "actions":  {
                                                                   "edit":  "تعديل",
                                                                   "delete":  "حذف",
                                                                   "create":  "إنشاء دور",
-                                                                  "view_rights":  "عرض الصلاحيات"
+                                                                  "view_rights":  "عرض الصلاحيات",
+                                                                  "create_short":  "إنشاء",
+                                                                  "saved":  "تم الحفظ"
                                                               },
                                                   "modals":  {
                                                                  "create":  {
@@ -3481,7 +3626,33 @@
                                                                                    "roles":  "الأدوار",
                                                                                    "usergroups":  "مجموعات المستخدمين",
                                                                                    "users":  "المستخدمون"
-                                                                               }
+                                                                               },
+                                                                 "sections":  {
+                                                                                  "courses":  "الدورات",
+                                                                                  "users":  "المستخدمون",
+                                                                                  "usergroups":  "مجموعات المستخدمين",
+                                                                                  "collections":  "المجموعات",
+                                                                                  "organizations":  "المنظمات",
+                                                                                  "coursechapters":  "الوحدات",
+                                                                                  "activities":  "الدروس",
+                                                                                  "roles":  "الأدوار",
+                                                                                  "dashboard":  "لوحة التحكم",
+                                                                                  "communities":  "المجتمعات",
+                                                                                  "discussions":  "المناقشات",
+                                                                                  "podcasts":  "البودكاست"
+                                                                              },
+                                                                 "actions":  {
+                                                                                 "create":  "إنشاء",
+                                                                                 "read":  "قراءة",
+                                                                                 "read_own":  "قراءة الخاصة",
+                                                                                 "update":  "تحديث",
+                                                                                 "update_own":  "تحديث الخاصة",
+                                                                                 "delete":  "حذف",
+                                                                                 "delete_own":  "حذف الخاصة",
+                                                                                 "access":  "وصول"
+                                                                             },
+                                                                 "selected_of":  "{{selected}} من {{total}}",
+                                                                 "no_permissions_configured":  "لا توجد صلاحيات مهيأة"
                                                              }
                                               }
                                 },

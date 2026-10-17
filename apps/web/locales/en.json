@@ -3083,7 +3083,8 @@
                                                                                   "today":  "Today",
                                                                                   "7d":  "Last 7 Days",
                                                                                   "30d":  "Last 30 Days",
-                                                                                  "custom":  "Custom Range"
+                                                                                  "custom":  "Custom Range",
+                                                                                  "to":  "to"
                                                                               },
                                                               "table":  {
                                                                             "timestamp":  "Timestamp",
@@ -3096,6 +3097,8 @@
                                                                         },
                                                               "loading":  "Loading activity...",
                                                               "no_logs":  "No logs found",
+                                                              "system_user":  "System",
+                                                              "user_id":  "ID: {{id}}",
                                                               "pagination":  {
                                                                                  "showing":  "Showing {{start}} to {{end}} of {{total}} logs"
                                                                              },
@@ -3341,9 +3344,46 @@
                                                                                         }
                                                                     }
                                                      },
+                                    "users":  {
+                                                  "table":  {
+                                                                "name":  "Name",
+                                                                "username":  "Username",
+                                                                "email":  "Email",
+                                                                "joined":  "Joined",
+                                                                "last_login":  "Last login"
+                                                            },
+                                                  "status":  {
+                                                                 "verified":  "Verified",
+                                                                 "unverified":  "Unverified"
+                                                             },
+                                                  "filters":  {
+                                                                  "filter_users":  "Filter users",
+                                                                  "all_roles":  "All roles",
+                                                                  "all_statuses":  "All statuses",
+                                                                  "all_groups":  "All groups"
+                                                              },
+                                                  "sort":  {
+                                                               "name_asc":  "A-Z",
+                                                               "name_desc":  "Z-A"
+                                                           },
+                                                  "groups":  "Groups",
+                                                  "bulk_remove_one":  "Remove {{count}}",
+                                                  "bulk_remove_other":  "Remove {{count}}",
+                                                  "toasts":  {
+                                                                 "removing_one":  "Removing {{count}} user...",
+                                                                 "removing_other":  "Removing {{count}} users...",
+                                                                 "remove_success_one":  "{{count}} user removed successfully",
+                                                                 "remove_success_other":  "{{count}} users removed successfully",
+                                                                 "remove_error":  "Error removing users"
+                                                             }
+                                              },
                                     "signups":  {
                                                     "title":  "Join method",
                                                     "subtitle":  "Choose how users can join your organization",
+                                                    "toggle":  {
+                                                                   "on":  "On",
+                                                                   "off":  "Off"
+                                                               },
                                                     "open":  {
                                                                  "title":  "Open",
                                                                  "description":  "Users can join freely from the signup page",
@@ -3374,11 +3414,19 @@
                                                                                        "linked_to_usergroup":  "Linked to a UserGroup",
                                                                                        "normal":  "Normal"
                                                                                    },
+                                                                         "copy_actions":  {
+                                                                                              "click_to_copy":  "Click to copy",
+                                                                                              "copy_to_clipboard":  "Copy to clipboard"
+                                                                                          },
+                                                                         "no_codes":  "No invite codes yet",
+                                                                         "no_codes_hint":  "Generate codes to invite users to your organization",
+                                                                         "usage":  "{{used}} / 6 invite codes used",
                                                                          "actions":  {
                                                                                          "delete_code":  "Delete code",
                                                                                          "delete_confirmation_title":  "Delete code ?",
                                                                                          "delete_confirmation_message":  "Are you sure you want remove this invite code ?",
                                                                                          "generate":  "Generate invite code",
+                                                                                         "generating":  "Generating...",
                                                                                          "generate_title":  "Generate Invite Code",
                                                                                          "generate_description":  "Generate a new invite code for your organization"
                                                                                      },
@@ -3388,7 +3436,10 @@
                                                                                         "delete_error":  "Error deleting",
                                                                                         "changing_method":  "Changing join method...",
                                                                                         "change_success":  "Changed join method to {{method}}",
-                                                                                        "change_error":  "Error changing join method"
+                                                                                        "change_error":  "Error changing join method",
+                                                                                        "generating":  "Generating invite code...",
+                                                                                        "generate_success":  "Invite code generated",
+                                                                                        "generate_error":  "Failed to generate code"
                                                                                     }
                                                                      },
                                                     "generate_modal":  {
@@ -3422,14 +3473,28 @@
                                                                      "usergroup":  "UserGroup",
                                                                      "description":  "Description",
                                                                      "manage_users":  "Manage Users",
-                                                                     "actions":  "Actions"
+                                                                     "actions":  "Actions",
+                                                                     "name":  "Name",
+                                                                     "username":  "Username",
+                                                                     "email":  "Email",
+                                                                     "status":  "Status",
+                                                                     "joined":  "Joined",
+                                                                     "last_login":  "Last login"
                                                                  },
                                                        "actions":  {
                                                                        "manage_users":  "Manage Users",
                                                                        "edit":  "Edit",
                                                                        "delete":  "Delete",
-                                                                       "create":  "Create a UserGroup"
+                                                                       "create":  "Create a UserGroup",
+                                                                       "create_group":  "Create",
+                                                                       "select":  "Select",
+                                                                       "saved":  "Saved",
+                                                                       "sort_groups":  "Sort groups"
                                                                    },
+                                                       "form":  {
+                                                                    "name_placeholder":  "Group name",
+                                                                    "description_placeholder":  "Group description"
+                                                                },
                                                        "modals":  {
                                                                       "manage_users":  {
                                                                                            "title":  "Manage UserGroup Users",
@@ -3515,6 +3580,40 @@
                                                                                      "button":  "Delete UserGroup"
                                                                                  }
                                                                   },
+                                                       "members":  {
+                                                                       "search_placeholder":  "Search members...",
+                                                                       "filter":  "Filter members",
+                                                                       "no_results":  "No members found matching your search",
+                                                                       "no_users":  "No users in this group yet",
+                                                                       "add":  "Add",
+                                                                       "remove":  "Remove",
+                                                                       "status":  {
+                                                                                      "all":  "All statuses",
+                                                                                      "verified":  "Verified",
+                                                                                      "unverified":  "Unverified"
+                                                                                  },
+                                                                       "pagination":  {
+                                                                                          "showing":  "Showing {{start}}-{{end}} of {{total}}",
+                                                                                          "page":  "Page {{current}} of {{total}}"
+                                                                                      },
+                                                                       "toasts":  {
+                                                                                      "adding_one":  "Adding {{count}} user...",
+                                                                                      "adding_other":  "Adding {{count}} users...",
+                                                                                      "added_one":  "{{count}} user added",
+                                                                                      "added_other":  "{{count}} users added",
+                                                                                      "add_error":  "Failed to add users",
+                                                                                      "removing_one":  "Removing {{count}} user...",
+                                                                                      "removing_other":  "Removing {{count}} users...",
+                                                                                      "removed_one":  "{{count}} user removed",
+                                                                                      "removed_other":  "{{count}} users removed",
+                                                                                      "remove_error":  "Failed to remove users"
+                                                                                  }
+                                                                   },
+                                                       "sort":  {
+                                                                    "name_asc":  "A-Z",
+                                                                    "name_desc":  "Z-A"
+                                                                },
+                                                       "no_results_hint":  "Try a different search term",
                                                        "toasts":  {
                                                                       "deleting":  "Deleting...",
                                                                       "delete_success":  "Deleted usergroup",
@@ -3534,11 +3633,29 @@
                                                   "no_permissions":  "No permissions",
                                                   "permissions_count":  "{{count}} permissions",
                                                   "system_wide":  "System-wide",
+                                                  "search_placeholder":  "Search roles...",
+                                                  "count":  {
+                                                                "singular":  "role",
+                                                                "plural":  "roles"
+                                                            },
+                                                  "filters":  {
+                                                                  "filter_roles":  "Filter roles",
+                                                                  "all":  "All roles",
+                                                                  "system":  "System roles",
+                                                                  "custom":  "Custom roles"
+                                                              },
+                                                  "no_results":  "No roles match your search",
+                                                  "no_roles":  "No roles yet",
+                                                  "no_results_hint":  "Try a different search term or filter",
+                                                  "no_roles_hint":  "Click \"Create\" to add your first role",
+                                                  "delete_confirmation_message":  "Are you sure you want to delete the role \"{{role}}\"? This action cannot be undone.",
                                                   "actions":  {
                                                                   "edit":  "Edit",
                                                                   "delete":  "Delete",
                                                                   "create":  "Create a Role",
-                                                                  "view_rights":  "View Rights"
+                                                                  "view_rights":  "View Rights",
+                                                                  "create_short":  "Create",
+                                                                  "saved":  "Saved"
                                                               },
                                                   "modals":  {
                                                                  "create":  {
@@ -3709,7 +3826,33 @@
                                                                                    "activities":  "Activities",
                                                                                    "roles":  "Roles",
                                                                                    "dashboard":  "Dashboard"
-                                                                               }
+                                                                               },
+                                                                 "sections":  {
+                                                                                  "courses":  "Courses",
+                                                                                  "users":  "Users",
+                                                                                  "usergroups":  "User Groups",
+                                                                                  "collections":  "Collections",
+                                                                                  "organizations":  "Organizations",
+                                                                                  "coursechapters":  "Modules",
+                                                                                  "activities":  "Lessons",
+                                                                                  "roles":  "Roles",
+                                                                                  "dashboard":  "Dashboard",
+                                                                                  "communities":  "Communities",
+                                                                                  "discussions":  "Discussions",
+                                                                                  "podcasts":  "Podcasts"
+                                                                              },
+                                                                 "actions":  {
+                                                                                 "create":  "Create",
+                                                                                 "read":  "Read",
+                                                                                 "read_own":  "Read own",
+                                                                                 "update":  "Update",
+                                                                                 "update_own":  "Update own",
+                                                                                 "delete":  "Delete",
+                                                                                 "delete_own":  "Delete own",
+                                                                                 "access":  "Access"
+                                                                             },
+                                                                 "selected_of":  "{{selected}} of {{total}}",
+                                                                 "no_permissions_configured":  "No permissions configured"
                                                              },
                                                   "toasts":  {
                                                                  "deleting":  "Deleting...",

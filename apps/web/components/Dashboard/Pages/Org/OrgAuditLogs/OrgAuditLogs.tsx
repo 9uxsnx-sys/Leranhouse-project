@@ -306,7 +306,7 @@ const OrgAuditLogs = () => {
                       setOffset(0)
                     }}
                   />
-                  <span className="text-gray-400 text-xs">to</span>
+                  <span className="text-gray-400 text-xs">{t('dashboard.organization.audit_logs.date_ranges.to')}</span>
                   <Input
                     type="date"
                     className="h-9 text-xs w-[130px]"
@@ -370,10 +370,10 @@ const OrgAuditLogs = () => {
                         />
                         <div className="flex flex-col">
                             <span className="text-sm font-medium text-gray-800">
-                                @{log.username || 'System'}
+                                @{log.username || t('dashboard.organization.audit_logs.system_user')}
                             </span>
                             {log.user_id && (
-                                <span className="text-[10px] text-gray-400 font-mono tracking-tighter">ID: {log.user_id}</span>
+                                <span className="text-[10px] text-gray-400 font-mono tracking-tighter">{t('dashboard.organization.audit_logs.user_id', { id: log.user_id })}</span>
                             )}
                         </div>
                     </div>

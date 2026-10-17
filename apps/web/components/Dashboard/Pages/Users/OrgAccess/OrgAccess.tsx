@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next'
 
 function CopyButton({ text, children }: { text: string; children?: React.ReactNode }) {
   const [copied, setCopied] = React.useState(false)
+  const { t } = useTranslation()
 
   const handleCopy = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -29,7 +30,7 @@ function CopyButton({ text, children }: { text: string; children?: React.ReactNo
 
   if (children) {
     return (
-      <div onClick={handleCopy} className="inline-flex" title="Click to copy">
+      <div onClick={handleCopy} className="inline-flex" title={t('dashboard.users.signups.invite_codes.copy_actions.click_to_copy')}>
         {children}
       </div>
     )
@@ -39,7 +40,7 @@ function CopyButton({ text, children }: { text: string; children?: React.ReactNo
     <button
       onClick={handleCopy}
       className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
-      title="Copy to clipboard"
+      title={t('dashboard.users.signups.invite_codes.copy_actions.copy_to_clipboard')}
     >
       {copied ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5" />}
     </button>
@@ -114,17 +115,17 @@ function OrgAccess() {
   async function handleGenerate() {
     if (isGenerating) return
     setIsGenerating(true)
-    const toastId = toast.loading('Generating invite code...')
+    const toastId = toast.loading(t('dashboard.users.signups.invite_codes.toasts.generating'))
     try {
       const res = await createInviteCode(org.id, access_token)
       if (res.status === 200) {
         mutate(`${getAPIUrl()}orgs/${org.id}/invites`)
-        toast.success('Invite code generated', { id: toastId })
+        toast.success(t('dashboard.users.signups.invite_codes.toasts.generate_success'), { id: toastId })
       } else {
-        toast.error(res.data?.detail || 'Failed to generate code', { id: toastId })
+        toast.error(res.data?.detail || t('dashboard.users.signups.invite_codes.toasts.generate_error'), { id: toastId })
       }
     } catch {
-      toast.error('Failed to generate code', { id: toastId })
+      toast.error(t('dashboard.users.signups.invite_codes.toasts.generate_error'), { id: toastId })
     }
     setIsGenerating(false)
   }
@@ -144,7 +145,7 @@ function OrgAccess() {
               className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isGenerating ? <Loader2 size={14} className="animate-spin" /> : <Ticket size={14} />}
-              <span>{isGenerating ? 'Generating...' : t('dashboard.users.signups.invite_codes.actions.generate')}</span>
+              <span>{isGenerating ? t('dashboard.users.signups.invite_codes.actions.generating') : t('dashboard.users.signups.invite_codes.actions.generate')}</span>
             </button>
 
             <div className="flex items-center gap-2">
@@ -159,7 +160,7 @@ function OrgAccess() {
                 ) : (
                   <span className={`w-2.5 h-2.5 rounded ${isInviteOnly ? 'bg-green-500' : 'bg-red-500'}`} />
                 )}
-                {isToggling ? '...' : isInviteOnly ? 'On' : 'Off'}
+                {isToggling ? '...' : isInviteOnly ? t('dashboard.users.signups.toggle.on') : t('dashboard.users.signups.toggle.off')}
               </button>
             </div>
           </div>
@@ -217,13 +218,13 @@ function OrgAccess() {
             ) : (
               <div className="text-center py-8">
                 <Ticket className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                <p className="text-sm text-gray-400">No invite codes yet</p>
-                <p className="text-xs text-gray-300 mt-1">Generate codes to invite users to your organization</p>
+                <p className="text-sm text-gray-400">{t('dashboard.users.signups.invite_codes.no_codes')}</p>
+                <p className="text-xs text-gray-300 mt-1">{t('dashboard.users.signups.invite_codes.no_codes_hint')}</p>
               </div>
             )}
 
             <div className="flex items-center justify-between mt-4">
-              <span className="text-xs text-gray-400">{inviteCount} / 6 invite codes used</span>
+              <span className="text-xs text-gray-400">{t('dashboard.users.signups.invite_codes.usage', { used: inviteCount })}</span>
             </div>
           </div>
 
