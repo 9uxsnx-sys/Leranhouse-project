@@ -32,7 +32,7 @@ function CommunityCard(props: PropsType) {
 
   return (
     <div
-      className="group relative flex flex-col bg-white rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01]"
+      className="group relative flex flex-col bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden w-full"
     >
 
       <Link

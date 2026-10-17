@@ -15,8 +15,7 @@ export function CourseCard({ id, title, description, image, lessons, duration, d
   return (
     <Link
       href={href || `/course/${id}`}
-      className="flex flex-col h-full bg-white border border-[#E7E7E7] rounded-[12px] overflow-hidden transition-all duration-200 hover:-translate-y-[1px] hover:border-[#DADADA] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
-      style={{ transformOrigin: 'top center' }}
+      className="flex flex-col h-full bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden"
     >
       {/* 16:9 Cover Image */}
       <div className="relative overflow-hidden bg-gray-100 shrink-0" style={{ aspectRatio: '16/9' }}>
