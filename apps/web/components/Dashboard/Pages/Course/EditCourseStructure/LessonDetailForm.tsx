@@ -167,7 +167,7 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
         }
       } catch (e) {
         console.error('Failed to save lesson:', e)
-        toast.error('Failed to save lesson')
+        toast.error(t('dashboard.courses.structure.lesson_detail.save_error'))
       } finally {
         setIsSavingLesson(false)
       }
@@ -287,7 +287,7 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
         }
       } catch (e) {
         console.error('Failed to save lesson:', e)
-        toast.error('Failed to save lesson')
+        toast.error(t('dashboard.courses.structure.lesson_detail.save_error'))
       } finally {
         setIsSavingLesson(false)
       }
@@ -306,7 +306,7 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
             className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
           >
             <Eye size={14} />
-            <span>Preview</span>
+            <span>{t('dashboard.courses.preview')}</span>
           </Link>
 
           {/* Right: Save + Publish */}
@@ -331,10 +331,10 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
               )}
               <span>
                 {isSavingLesson
-                  ? 'Saving...'
+                  ? t('dashboard.courses.save.saving')
                   : hasUnsavedChanges
-                    ? 'Save'
-                    : 'Saved'}
+                    ? t('dashboard.courses.save.save')
+                    : t('dashboard.courses.save.saved')}
               </span>
             </button>
             <button
@@ -347,7 +347,7 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
                 <GlobeLock size={14} />
               )}
               <span>
-                {published ? 'Published' : 'Unpublished'}
+                {published ? t('dashboard.courses.published') : t('dashboard.courses.unpublished')}
               </span>
             </button>
           </div>
@@ -358,7 +358,7 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
           <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('common.sections.overview')}</h3>
           <div className="space-y-4">
             <FormField name="name">
-              <FormLabelAndMessage label="Lesson Name" message={formik.errors.name as string} />
+              <FormLabelAndMessage label={t('dashboard.courses.structure.lesson_detail.name_label')} message={formik.errors.name as string} />
               <Form.Control asChild>
                 <Input
                   className={fieldClassName}
@@ -371,14 +371,14 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
             </FormField>
 
             <FormField name="description">
-              <FormLabelAndMessage label="Description" message={formik.errors.description as string} />
+              <FormLabelAndMessage label={t('dashboard.courses.structure.lesson_detail.description_label')} message={formik.errors.description as string} />
               <Form.Control asChild>
                 <Input
                   className={fieldClassName}
                   onChange={formik.handleChange}
                   value={formik.values.description}
                   type="text"
-                  placeholder="Brief description of what this lesson covers"
+                  placeholder={t('dashboard.courses.structure.lesson_detail.description_placeholder')}
                 />
               </Form.Control>
             </FormField>

@@ -1514,6 +1514,7 @@
                                                                    "learnings_min_items":  "مطلوب عنصر تعليمي واحد على الأقل",
                                                                    "learnings_empty_text":  "جميع عناصر التعلم يجب أن تحتوي على نص",
                                                                    "learnings_invalid_json":  "تنسيق JSON غير صالح",
+                                                                   "requirements_label":  "المتطلبات",
                                                                    "tags_label":  "الوسوم",
                                                                    "tags_placeholder":  "اضغط Enter للإضافة...",
                                                                    "thumbnail_type_label":  "نوع الصورة المصغرة",
@@ -1536,6 +1537,107 @@
                                                                                                   "video":  "التنسيقات المدعومة: MP4, WebM (بحد أقصى 100 ميجابايت)"
                                                                                               }
                                                                     },
+                                                      "details":  {
+                                                                       "difficulty_label":  "الصعوبة",
+                                                                       "difficulty_placeholder":  "اختر مستوى الصعوبة",
+                                                                       "difficulty_beginner":  "مبتدئ",
+                                                                       "difficulty_intermediate":  "متوسط",
+                                                                       "difficulty_advanced":  "متقدم",
+                                                                       "duration_label":  "المدة (مثال: \u00276 ساعات\u0027)",
+                                                                       "video_hours_label":  "ساعات الفيديو",
+                                                                       "resources_count_label":  "عدد الموارد",
+                                                                       "offers_certificate_label":  "يمنح شهادة",
+                                                                       "offers_certificate_description":  "يمنح هذا المقرر شهادة إتمام",
+                                                                       "instructor_name_label":  "اسم المدرب",
+                                                                       "instructor_title_label":  "المسمى الوظيفي للمدرب",
+                                                                       "instructor_bio_label":  "نبذة عن المدرب",
+                                                                       "requirements_empty_text":  "يجب أن تحتوي جميع عناصر المتطلبات على نص"
+                                                                   },
+                                                      "learnings":  {
+                                                                        "empty_title":  "لا توجد أهداف تعلم بعد",
+                                                                        "empty_description":  "انقر على «إضافة» أدناه لإنشاء الهدف الأول.",
+                                                                        "drag_to_reorder":  "اسحب لإعادة الترتيب",
+                                                                        "placeholder":  "ماذا سيتعلم المتعلمون؟",
+                                                                        "remove":  "إزالة",
+                                                                        "add_button":  "إضافة هدف تعلم"
+                                                                    },
+                                                      "resources":  {
+                                                                        "empty_title":  "لا توجد موارد بعد",
+                                                                        "empty_description":  "انقر على «إضافة» أدناه لإنشاء المورد الأول.",
+                                                                        "drag_to_reorder":  "اسحب لإعادة الترتيب",
+                                                                        "name_placeholder":  "اسم المورد",
+                                                                        "url_placeholder":  "الصق الرابط",
+                                                                        "add_link":  "إضافة رابط",
+                                                                        "upload_file":  "رفع ملف",
+                                                                        "remove":  "إزالة",
+                                                                        "add_button":  "إضافة مورد"
+                                                                    },
+                                                      "takeaways":  {
+                                                                        "empty_title":  "لا توجد نقاط رئيسية بعد",
+                                                                        "empty_description":  "انقر على «إضافة» أدناه لإنشاء النقطة الرئيسية الأولى.",
+                                                                        "drag_to_reorder":  "اسحب لإعادة الترتيب",
+                                                                        "main_placeholder":  "نقطة رئيسية",
+                                                                        "remove":  "إزالة",
+                                                                        "sub_placeholder":  "نقطة فرعية",
+                                                                        "remove_sub":  "إزالة النقطة الفرعية",
+                                                                        "add_sub_button":  "+ إضافة نقطة فرعية",
+                                                                        "add_button":  "إضافة نقطة رئيسية"
+                                                                    },
+                                                      "knowledge_checks":  {
+                                                                               "empty_title":  "لا توجد اختبارات معرفة بعد",
+                                                                               "empty_description":  "انقر على «إضافة» أدناه لإنشاء الأول.",
+                                                                               "drag_to_reorder":  "اسحب لإعادة الترتيب",
+                                                                               "question_placeholder":  "السؤال",
+                                                                               "remove":  "إزالة",
+                                                                               "answer_placeholder":  "الإجابة",
+                                                                               "add_button":  "إضافة اختبار معرفة"
+                                                                           },
+                                                      "media":  {
+                                                                    "file_too_large":  "يجب أن يكون حجم الملف أقل من 8 ميغابايت",
+                                                                    "invalid_file_type":  "يجب أن يكون الملف صورة JPEG أو PNG",
+                                                                    "cover_title":  "غلاف بطاقة المقرر",
+                                                                    "cover_update_failed":  "فشل تحديث صورة الغلاف",
+                                                                    "cover_remove_failed":  "فشل إزالة صورة الغلاف",
+                                                                    "remove_cover":  "إزالة صورة الغلاف",
+                                                                    "upload_cover":  "رفع صورة الغلاف",
+                                                                    "banner_title":  "صورة بانر المقرر",
+                                                                    "banner_update_failed":  "فشل تحديث صورة البانر",
+                                                                    "banner_remove_failed":  "فشل إزالة صورة البانر",
+                                                                    "remove_banner":  "إزالة صورة البانر",
+                                                                    "upload_banner":  "رفع صورة البانر",
+                                                                    "removed":  "تمت الإزالة"
+                                                                },
+                                                      "unsplash":  {
+                                                                       "dialog_title":  "اختر صورة من Unsplash",
+                                                                       "load_failed":  "فشل تحميل الصور من Unsplash",
+                                                                       "track_failed":  "فشل تتبع تنزيل الصورة",
+                                                                       "photo_by":  "صورة بواسطة",
+                                                                       "on":  "على",
+                                                                       "load_more":  "تحميل المزيد",
+                                                                       "photos_from":  "صور من",
+                                                                       "categories":  {
+                                                                                          "nature":  "الطبيعة",
+                                                                                          "technology":  "التكنولوجيا",
+                                                                                          "business":  "الأعمال",
+                                                                                          "education":  "التعليم",
+                                                                                          "health":  "الصحة",
+                                                                                          "art":  "الفن",
+                                                                                          "science":  "العلوم",
+                                                                                          "travel":  "السفر",
+                                                                                          "food":  "الطعام",
+                                                                                          "sports":  "الرياضة",
+                                                                                          "music":  "الموسيقى",
+                                                                                          "fashion":  "الأزياء",
+                                                                                          "history":  "التاريخ",
+                                                                                          "architecture":  "العمارة",
+                                                                                          "fitness":  "اللياقة البدنية",
+                                                                                          "photography":  "التصوير",
+                                                                                          "biology":  "علم الأحياء",
+                                                                                          "finance":  "التمويل",
+                                                                                          "lifestyle":  "أسلوب الحياة",
+                                                                                          "gaming":  "الألعاب"
+                                                                                      }
+                                                                   },
                                                       "errors":  {
                                                                      "save_failed":  "فشل حفظ هيكل الدورة."
                                                                  }
@@ -1543,6 +1645,7 @@
                                       "access":  {
                                                      "title":  "الوصول للدورة",
                                                      "subtitle":  "اختر ما إذا كانت دورتك متاحة للجميع على الإنترنت أم للمستخدمين المسجلين فقط",
+                                                     "active":  "نشط",
                                                      "public":  {
                                                                     "title":  "عام",
                                                                     "description":  "الدورة متاحة لأي شخص على الإنترنت، مؤرشفة في محركات البحث ومفتوحة للجميع",
@@ -1562,6 +1665,12 @@
                                                      "usergroups":  {
                                                                         "title":  "مجموعات المستخدمين",
                                                                         "subtitle":  "يمكنك منح الوصول لهذه الدورة لمجموعات مستخدمين محددة فقط عن طريق ربطها بالمجموعة",
+                                                                        "group_count_zero":  "لا مجموعات",
+                                                                        "group_count_one":  "مجموعة واحدة",
+                                                                        "group_count_two":  "مجموعتان",
+                                                                        "group_count_few":  "{{count}} مجموعات",
+                                                                        "group_count_many":  "{{count}} مجموعة",
+                                                                        "group_count_other":  "{{count}} مجموعة",
                                                                         "table":  {
                                                                                       "name":  "الاسم",
                                                                                       "actions":  "الإجراءات"
@@ -1626,7 +1735,8 @@
                                                                          "creator":  "منشئ",
                                                                          "contributor":  "مساهم",
                                                                          "maintainer":  "مسؤول صيانة",
-                                                                         "reporter":  "مبلغ"
+                                                                         "reporter":  "مبلغ",
+                                                                         "user":  "مستخدم"
                                                                      },
                                                            "statuses":  {
                                                                             "active":  "نشط",
@@ -1641,11 +1751,14 @@
                                                                            "selected_contributors":  "تم اختيار {{count}} مساهم",
                                                                            "selected_contributors_plural":  "تم اختيار {{count}} مساهمين",
                                                                            "remove_selected":  "إزالة المختارين",
+                                                                           "remove_count":  "إزالة {{count}}",
                                                                            "already_contributor":  "مساهم بالفعل"
                                                                        },
                                                            "toasts":  {
                                                                           "add_success":  "تم إضافة {{count}} مساهم بنجاح",
+                                                                          "add_user_success":  "تمت إضافة {{username}} كـ {{role}}",
                                                                           "add_error":  "فشل إضافة {{username}}: {{reason}}",
+                                                                          "add_user_error":  "فشل إضافة {{username}} كمساهم",
                                                                           "add_failed":  "فشل إضافة المساهمين",
                                                                           "update_success":  "تم تحديث المساهم بنجاح",
                                                                           "update_error":  "خطأ: {{detail}}",
@@ -1653,7 +1766,14 @@
                                                                           "remove_success":  "تم إزالة {{count}} مساهم بنجاح",
                                                                           "remove_failed":  "فشل إزالة المساهمين",
                                                                           "cannot_modify_creator":  "لا يمكن تعديل دور أو حالة المنشئ"
-                                                                      }
+                                                                      },
+                                                           "sort":  {
+                                                                        "aria_label":  "ترتيب المساهمين",
+                                                                        "name_asc":  "الاسم أ-ي",
+                                                                        "name_desc":  "الاسم ي-أ",
+                                                                        "newest":  "الأحدث أولاً",
+                                                                        "oldest":  "الأقدم أولاً"
+                                                                    }
                                                        },
                                       "certification":  {
                                                             "title":  "شهادات الدورة",
@@ -1670,7 +1790,8 @@
                                                                          "certification_description_placeholder":  "صف ما تؤكده هذه الشهادة وقيمتها...",
                                                                          "certificate_pattern_label":  "نمط الشهادة",
                                                                          "certificate_instructor_label":  "اسم المدرس (اختياري)",
-                                                                         "certificate_instructor_placeholder":  "مثال: د. أحمد محمد"
+                                                                         "certificate_instructor_placeholder":  "مثال: د. أحمد محمد",
+                                                                         "select_placeholder":  "اختر..."
                                                                      },
                                                             "types":  {
                                                                           "completion":  "إكمال دورة",
@@ -1739,6 +1860,16 @@
                                                                                              "subtitle":  "معاينة مباشرة لشهادتك"
                                                                                          }
                                                                          },
+                                                            "preview":  {
+                                                                            "id_label":  "المعرف:",
+                                                                            "certificate_heading":  "شهادة",
+                                                                            "name_placeholder":  "اسم الشهادة",
+                                                                            "description_placeholder":  "سيظهر وصف الشهادة هنا...",
+                                                                            "instructor_label":  "المدرب",
+                                                                            "awarded_label":  "مُنحت",
+                                                                            "qr_code_alt":  "رمز QR للشهادة",
+                                                                            "organization_logo_alt":  "شعار المؤسسة"
+                                                                        },
                                                             "states":  {
                                                                            "disabled":  {
                                                                                             "title":  "الشهادات غير مكونة",
@@ -2132,7 +2263,64 @@
                                                                          "descriptions":  {
                                                                                               "scorm":  "حزمة تعليمية متوافقة مع SCORM"
                                                                                           }
-                                                                     }
+                                                                     },
+                                                        "toasts":  {
+                                                                       "module_created":  "تم إنشاء الوحدة",
+                                                                       "module_create_error":  "فشل إنشاء الوحدة",
+                                                                       "module_delete_error":  "فشل حذف الوحدة",
+                                                                       "modules_reordered":  "تمت إعادة ترتيب الوحدات",
+                                                                       "modules_reorder_error":  "فشل إعادة ترتيب الوحدات",
+                                                                       "lesson_created":  "تم إنشاء الدرس",
+                                                                       "lesson_create_error":  "فشل إنشاء الدرس",
+                                                                       "lesson_deleted":  "تم حذف الدرس",
+                                                                       "lesson_delete_error":  "فشل حذف الدرس",
+                                                                       "lessons_reordered":  "تمت إعادة ترتيب الدروس",
+                                                                       "lessons_reorder_error":  "فشل إعادة ترتيب الدروس"
+                                                                   },
+                                                        "course_structure":  {
+                                                                                 "search_modules_placeholder":  "البحث عن وحدات...",
+                                                                                 "module_count_zero":  "لا وحدات",
+                                                                                 "module_count_one":  "وحدة واحدة",
+                                                                                 "module_count_two":  "وحدتان",
+                                                                                 "module_count_few":  "{{count}} وحدات",
+                                                                                 "module_count_many":  "{{count}} وحدة",
+                                                                                 "module_count_other":  "{{count}} وحدة",
+                                                                                 "new_button":  "جديد",
+                                                                                 "select_button":  "تحديد",
+                                                                                 "sort_modules":  "ترتيب الوحدات",
+                                                                                 "untitled_module":  "وحدة بلا عنوان",
+                                                                                 "duplicate_soon":  "ميزة التكرار قريباً",
+                                                                                 "duplicate":  "تكرار",
+                                                                                 "no_modules_match":  "لا توجد وحدات تطابق بحثك",
+                                                                                 "no_modules":  "لا توجد وحدات بعد",
+                                                                                 "try_different_search":  "جرّب مصطلح بحث آخر",
+                                                                                 "add_module_hint":  "انقر على «إضافة وحدة» للبدء"
+                                                                             },
+                                                        "module_form":  {
+                                                                            "search_lessons_placeholder":  "البحث عن دروس...",
+                                                                            "lesson_count_zero":  "لا دروس",
+                                                                            "lesson_count_one":  "درس واحد",
+                                                                            "lesson_count_two":  "درسان",
+                                                                            "lesson_count_few":  "{{count}} دروس",
+                                                                            "lesson_count_many":  "{{count}} درساً",
+                                                                            "lesson_count_other":  "{{count}} درس",
+                                                                            "new_button":  "جديد",
+                                                                            "select_button":  "تحديد",
+                                                                            "sort_lessons":  "ترتيب الدروس",
+                                                                            "untitled_lesson":  "درس بلا عنوان",
+                                                                            "duplicate_soon":  "ميزة التكرار قريباً",
+                                                                            "duplicate":  "تكرار",
+                                                                            "no_lessons_match":  "لا توجد دروس تطابق بحثك",
+                                                                            "no_lessons":  "لا توجد دروس في هذه الوحدة بعد",
+                                                                            "try_different_search":  "جرّب مصطلح بحث آخر",
+                                                                            "new_lesson_hint":  "انقر على «جديد» لإضافة درسك الأول"
+                                                                        },
+                                                        "lesson_detail":  {
+                                                                              "name_label":  "اسم الدرس",
+                                                                              "description_label":  "الوصف",
+                                                                              "description_placeholder":  "وصف موجز لمحتوى هذا الدرس",
+                                                                              "save_error":  "فشل حفظ الدرس"
+                                                                          }
                                                     },
                                       "seo":  {
                                                   "errors":  {
@@ -2169,6 +2357,7 @@
                                                                "twitter_card_summary_large":  "ملخص مع صورة كبيرة",
                                                                "twitter_description_label":  "وصف تويتر",
                                                                "twitter_description_placeholder":  "وصف مخصص لمشاركة تويتر",
+                                                               "select_placeholder":  "اختر...",
                                                                "twitter_title_label":  "عنوان تويتر",
                                                                "twitter_title_placeholder":  "عنوان مخصص لمشاركة تويتر"
                                                            },

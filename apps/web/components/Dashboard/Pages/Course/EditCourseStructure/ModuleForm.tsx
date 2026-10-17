@@ -143,9 +143,9 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
         { chapter_order_by_ids: chapterOrderByIds },
         access_token
       )
-      toast.success('Lessons reordered')
+      toast.success(t('dashboard.courses.structure.toasts.lessons_reordered'))
     } catch {
-      toast.error('Failed to reorder lessons')
+      toast.error(t('dashboard.courses.structure.toasts.lessons_reorder_error'))
       setActivityOrder(null) // Revert on error
     } finally {
       setIsReordering(false)
@@ -173,9 +173,9 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
     try {
       await deleteActivity(activity.activity_uuid, access_token)
       await refreshCourseData()
-      toast.success('Lesson deleted')
+      toast.success(t('dashboard.courses.structure.toasts.lesson_deleted'))
     } catch (e) {
-      toast.error('Failed to delete lesson')
+      toast.error(t('dashboard.courses.structure.toasts.lesson_delete_error'))
     } finally {
       setIsDeletingActivity(null)
     }
@@ -197,9 +197,9 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
         throw new Error(result?.detail?.[0]?.msg || 'API error')
       }
       await refreshCourseData()
-      toast.success('Lesson created')
+      toast.success(t('dashboard.courses.structure.toasts.lesson_created'))
     } catch (e) {
-      toast.error('Failed to create lesson')
+      toast.error(t('dashboard.courses.structure.toasts.lesson_create_error'))
     } finally {
       setIsCreatingLesson(false)
     }
@@ -216,14 +216,14 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search lessons..."
+            placeholder={t('dashboard.courses.structure.module_form.search_lessons_placeholder')}
             className="w-full h-7 pl-8 pr-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
           />
         </div>
 
         {/* Lesson count */}
         <span className="text-xs text-gray-400 whitespace-nowrap">
-          {displayActivities.length} {displayActivities.length === 1 ? 'lesson' : 'lessons'}
+          {t('dashboard.courses.structure.module_form.lesson_count', { count: displayActivities.length })}
         </span>
 
         {/* Spacer pushes actions to the right */}
@@ -241,7 +241,7 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
           ) : (
             '+'
           )}
-          &nbsp;&nbsp;New
+          &nbsp;&nbsp;{t('dashboard.courses.structure.module_form.new_button')}
         </Button>
 
         {/* Select Mode Button */}
@@ -252,11 +252,11 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
           className="gap-1.5"
         >
           <CheckSquare size={14} strokeWidth={2.5} />
-          <span className="font-semibold">{isSelectMode ? 'Cancel' : 'Select'}</span>
+          <span className="font-semibold">{isSelectMode ? t('common.cancel') : t('dashboard.courses.structure.module_form.select_button')}</span>
         </Button>
 
         {/* Sort toggle button */}
-        <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')} aria-label="Sort lessons">
+        <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')} aria-label={t('dashboard.courses.structure.module_form.sort_lessons')}>
           <ArrowUpDown size={15} />
         </IconButton>
       </div>
@@ -344,7 +344,7 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
                           )}
                           <FileText size={18} className="text-gray-400 flex-shrink-0" />
                           <p className="text-sm font-medium text-gray-900 truncate">
-                            {activity.name || 'Untitled Lesson'}
+                            {activity.name || t('dashboard.courses.structure.module_form.untitled_lesson')}
                           </p>
                         </div>
                         <DropdownMenu>
@@ -360,12 +360,12 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
                             <DropdownMenuItem
                               onClick={(e) => {
                                 e.stopPropagation()
-                                toast.success('Duplicate feature coming soon')
+                                toast.success(t('dashboard.courses.structure.module_form.duplicate_soon'))
                               }}
                               className="gap-2"
                             >
                               <Copy size={14} />
-                              Duplicate
+                              {t('dashboard.courses.structure.module_form.duplicate')}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -381,7 +381,7 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
                               ) : (
                                 <Trash2 size={14} />
                               )}
-                              Delete
+                              {t('common.delete')}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -396,10 +396,10 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
                 <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-100">
                   <BookOpen size={40} className="mx-auto mb-3 text-gray-300" />
                   <p className="text-sm text-gray-400">
-                    {searchQuery ? 'No lessons match your search' : 'No lessons in this module yet'}
+                    {searchQuery ? t('dashboard.courses.structure.module_form.no_lessons_match') : t('dashboard.courses.structure.module_form.no_lessons')}
                   </p>
                   <p className="text-xs text-gray-300 mt-1">
-                    {searchQuery ? 'Try a different search term' : 'Click "New" to add your first lesson'}
+                    {searchQuery ? t('dashboard.courses.structure.module_form.try_different_search') : t('dashboard.courses.structure.module_form.new_lesson_hint')}
                   </p>
                 </div>
               )}

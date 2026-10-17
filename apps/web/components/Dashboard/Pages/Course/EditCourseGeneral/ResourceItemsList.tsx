@@ -1,5 +1,6 @@
 import React, { useState, memo, useCallback, useMemo, useRef } from 'react'
 import { Plus, X, GripVertical, UploadCloud, Link2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface ResourceItem {
   name: string
@@ -29,6 +30,7 @@ const parseItems = (value: string): ResourceItem[] => {
 }
 
 const ResourceItemsList = ({ value, onChange, error }: ResourceItemsListProps) => {
+  const { t } = useTranslation()
   const items = useMemo(() => parseItems(value), [value])
   const [dragIdx, setDragIdx] = useState<number | null>(null)
   const [expandedUrl, setExpandedUrl] = useState<Record<number, boolean>>({})
@@ -106,9 +108,9 @@ const ResourceItemsList = ({ value, onChange, error }: ResourceItemsListProps) =
       <div className="rounded-xl border border-gray-200 bg-ui-bg-field">
         {isEmpty && (
           <div className="px-4 py-8 text-center">
-            <div className="text-sm text-gray-400 mb-1">No resources yet</div>
+            <div className="text-sm text-gray-400 mb-1">{t('dashboard.courses.general.resources.empty_title')}</div>
             <div className="text-xs text-gray-300">
-              Click &ldquo;Add&rdquo; below to create the first resource.
+              {t('dashboard.courses.general.resources.empty_description')}
             </div>
           </div>
         )}
@@ -129,7 +131,7 @@ const ResourceItemsList = ({ value, onChange, error }: ResourceItemsListProps) =
                 onDragStart={onDragStart(idx)}
                 onDragEnd={() => setDragIdx(null)}
                 className="shrink-0 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing p-0.5"
-                title="Drag to reorder"
+                title={t('dashboard.courses.general.resources.drag_to_reorder')}
               >
                 <GripVertical size={14} />
               </div>
@@ -139,7 +141,7 @@ const ResourceItemsList = ({ value, onChange, error }: ResourceItemsListProps) =
                 type="text"
                 value={item.name}
                 onChange={(e) => updateField(idx, 'name', e.target.value)}
-                placeholder="Resource name"
+                placeholder={t('dashboard.courses.general.resources.name_placeholder')}
                 className="flex-1 min-w-0 text-sm text-gray-700 bg-transparent border-none outline-none placeholder:text-gray-300 py-1"
               />
 
@@ -158,7 +160,7 @@ const ResourceItemsList = ({ value, onChange, error }: ResourceItemsListProps) =
                     type="text"
                     value={item.url}
                     onChange={(e) => updateField(idx, 'url', e.target.value)}
-                    placeholder="Paste URL"
+                    placeholder={t('dashboard.courses.general.resources.url_placeholder')}
                     className="w-40 text-sm text-gray-600 bg-white border border-gray-200 rounded-md px-2 py-0.5 outline-none placeholder:text-gray-300 focus:border-gray-400 transition-colors h-7"
                     autoFocus
                     onBlur={() => {
@@ -172,7 +174,7 @@ const ResourceItemsList = ({ value, onChange, error }: ResourceItemsListProps) =
                     type="button"
                     onClick={() => toggleUrl(idx)}
                     className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
-                    title="Add link"
+                    title={t('dashboard.courses.general.resources.add_link')}
                   >
                     <Link2 size={14} />
                   </button>
@@ -184,7 +186,7 @@ const ResourceItemsList = ({ value, onChange, error }: ResourceItemsListProps) =
                 type="button"
                 onClick={() => fileInputRefs.current[idx]?.click()}
                 className="shrink-0 p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
-                title="Upload file"
+                title={t('dashboard.courses.general.resources.upload_file')}
               >
                 <UploadCloud size={14} />
               </button>
@@ -194,7 +196,7 @@ const ResourceItemsList = ({ value, onChange, error }: ResourceItemsListProps) =
                 type="button"
                 onClick={() => removeItem(idx)}
                 className="shrink-0 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
-                title="Remove"
+                title={t('dashboard.courses.general.resources.remove')}
               >
                 <X size={14} />
               </button>
@@ -208,7 +210,7 @@ const ResourceItemsList = ({ value, onChange, error }: ResourceItemsListProps) =
           className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors rounded-b-xl"
         >
           <Plus size={13} className="text-blue-500 shrink-0" />
-          Add resource
+          {t('dashboard.courses.general.resources.add_button')}
         </button>
       </div>
 

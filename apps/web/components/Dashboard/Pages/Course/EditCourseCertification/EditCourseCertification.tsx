@@ -334,7 +334,7 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
                           disabled={isSaving}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Select..." />
+                            <SelectValue placeholder={t('dashboard.courses.certification.form.select_placeholder')} />
                           </SelectTrigger>
                           <SelectContent>
                             {certificationTypeOptions.map((option) => (

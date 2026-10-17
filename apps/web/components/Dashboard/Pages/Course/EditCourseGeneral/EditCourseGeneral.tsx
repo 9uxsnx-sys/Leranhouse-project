@@ -79,7 +79,7 @@ const validate = (values: any, t: any) => {
       if (Array.isArray(reqItems)) {
         const hasEmptyText = reqItems.some(item => !item.text || item.text.trim() === '');
         if (hasEmptyText) {
-          errors.meta_requirements = 'All requirement items must have text';
+          errors.meta_requirements = t('dashboard.courses.general.details.requirements_empty_text');
         }
       }
     } catch (e) {
@@ -342,10 +342,10 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
       await revalidateTags(['courses'], props.orgslug);
 
       dispatchCourse({ type: 'setIsSaved' });
-      toast.success('Changes saved');
+      toast.success(t('dashboard.courses.save.success'));
     } catch (error) {
-      dispatchCourse({ type: 'setSaveError', payload: 'Failed to save' });
-      toast.error('Failed to save');
+      dispatchCourse({ type: 'setSaveError', payload: t('dashboard.courses.save.error') });
+      toast.error(t('dashboard.courses.save.error'));
     } finally {
       dispatchCourse({ type: 'setSaving', payload: false });
       setIsManualSaving(false);
@@ -379,7 +379,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                   className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
                 >
                   <Eye size={14} />
-                  <span>Preview</span>
+                  <span>{t('dashboard.courses.preview')}</span>
                 </Link>
 
                 {/* Right: Save + Publish */}
@@ -404,10 +404,10 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                     )}
                     <span>
                       {isActiveSaving
-                        ? 'Saving...'
+                        ? t('dashboard.courses.save.saving')
                         : isSaved
-                          ? 'Saved'
-                          : 'Save'}
+                          ? t('dashboard.courses.save.saved')
+                          : t('dashboard.courses.save.save')}
                     </span>
                   </button>
                   <button
@@ -424,10 +424,10 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                     )}
                     <span>
                       {isPublishing
-                        ? 'Processing...'
+                        ? t('dashboard.courses.processing')
                         : isPublished
-                          ? 'Published'
-                          : 'Unpublished'}
+                          ? t('dashboard.courses.published')
+                          : t('dashboard.courses.unpublished')}
                     </span>
                   </button>
                 </div>
@@ -493,7 +493,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                   </FormField>
 
                   <FormField name="meta_requirements">
-                    <FormLabelAndMessage label="Requirements" message={formik.touched.meta_requirements ? formik.errors.meta_requirements : undefined} />
+                    <FormLabelAndMessage label={t('dashboard.courses.general.form.requirements_label')} message={formik.touched.meta_requirements ? formik.errors.meta_requirements : undefined} />
                     <Form.Control asChild>
                       <LearningItemsList
                         value={formik.values.meta_requirements}
@@ -518,19 +518,19 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField name="meta_difficulty">
-                      <FormLabelAndMessage label="Difficulty" />
+                      <FormLabelAndMessage label={t('dashboard.courses.general.details.difficulty_label')} />
                       <Select
                         value={formik.values.meta_difficulty || undefined}
                         onValueChange={(value) => formik.setFieldValue('meta_difficulty', value)}
                         disabled={isSaving}
                       >
                         <SelectTrigger className="h-9">
-                          <SelectValue placeholder="Select difficulty" />
+                          <SelectValue placeholder={t('dashboard.courses.general.details.difficulty_placeholder')} />
                         </SelectTrigger>
                         <SelectContent>
                           {['Beginner', 'Intermediate', 'Advanced'].map((option) => (
                             <SelectItem key={option} value={option}>
-                              {option}
+                              {t(`dashboard.courses.general.details.difficulty_${option.toLowerCase()}`)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -538,7 +538,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                     </FormField>
 
                     <FormField name="meta_duration">
-                      <FormLabelAndMessage label="Duration (e.g. '6 hours')" />
+                      <FormLabelAndMessage label={t('dashboard.courses.general.details.duration_label')} />
                       <Form.Control asChild>
                         <Input
                           className={fieldClassName}
@@ -551,7 +551,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                     </FormField>
 
                     <FormField name="meta_video_hours">
-                      <FormLabelAndMessage label="Video Hours" />
+                      <FormLabelAndMessage label={t('dashboard.courses.general.details.video_hours_label')} />
                       <Form.Control asChild>
                         <Input
                           className={fieldClassName}
@@ -564,7 +564,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                     </FormField>
 
                     <FormField name="meta_resources_count">
-                      <FormLabelAndMessage label="Number of Resources" />
+                      <FormLabelAndMessage label={t('dashboard.courses.general.details.resources_count_label')} />
                       <Form.Control asChild>
                         <Input
                           className={fieldClassName}
@@ -578,7 +578,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                   </div>
 
                   <FormField name="meta_has_certificate">
-                    <FormLabelAndMessage label="Offers Certificate" />
+                    <FormLabelAndMessage label={t('dashboard.courses.general.details.offers_certificate_label')} />
                     <label className="flex items-center gap-3 pt-1 cursor-pointer">
                       <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${formik.values.meta_has_certificate ? 'bg-black' : 'bg-gray-300'} ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}>
                         <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${formik.values.meta_has_certificate ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
@@ -590,7 +590,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                           disabled={isSaving}
                         />
                       </div>
-                      <span className="text-sm text-gray-600 select-none">This course offers a certificate of completion</span>
+                      <span className="text-sm text-gray-600 select-none">{t('dashboard.courses.general.details.offers_certificate_description')}</span>
                     </label>
                   </FormField>
 
@@ -603,7 +603,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField name="meta_instructor_name">
-                      <FormLabelAndMessage label="Instructor Name" />
+                      <FormLabelAndMessage label={t('dashboard.courses.general.details.instructor_name_label')} />
                       <Form.Control asChild>
                         <Input
                           className={fieldClassName}
@@ -616,7 +616,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                     </FormField>
 
                     <FormField name="meta_instructor_title">
-                      <FormLabelAndMessage label="Instructor Title" />
+                      <FormLabelAndMessage label={t('dashboard.courses.general.details.instructor_title_label')} />
                       <Form.Control asChild>
                         <Input
                           className={fieldClassName}
@@ -630,7 +630,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                   </div>
 
                   <FormField name="meta_instructor_bio">
-                    <FormLabelAndMessage label="Instructor Bio" />
+                    <FormLabelAndMessage label={t('dashboard.courses.general.details.instructor_bio_label')} />
                     <Form.Control asChild>
                       <Textarea
                         className={`${fieldClassName} min-h-[100px]`}

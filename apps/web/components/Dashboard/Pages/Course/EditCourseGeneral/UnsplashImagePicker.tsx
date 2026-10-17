@@ -78,11 +78,11 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
       }
     } catch (error) {
       console.error('Error fetching images:', error);
-      toast.error('Failed to load images from Unsplash');
+      toast.error(t('dashboard.courses.general.unsplash.load_failed'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const fetchDefaultImages = useCallback(async (pageNum: number) => {
     setLoading(true);
@@ -97,11 +97,11 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
       }
     } catch (error) {
       console.error('Error fetching default images:', error);
-      toast.error('Failed to load images from Unsplash');
+      toast.error(t('dashboard.courses.general.unsplash.load_failed'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const debouncedFetchImages = useCallback(
     debounce((searchQuery: string) => {
@@ -148,7 +148,7 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
       }
     } catch (error) {
       console.error('Error tracking Unsplash download:', error);
-      toast.error('Failed to track image download');
+      toast.error(t('dashboard.courses.general.unsplash.track_failed'));
     }
     const meta: UnsplashPhotoMeta = {
       photo_url: image?.links?.html || '',
@@ -180,7 +180,7 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
               className="px-3 py-1 bg-neutral-100 rounded-lg hover:bg-neutral-200 nice-shadow transition-colors flex items-center gap-1 space-x-1"
             >
               <label.icon size={16} />
-              <span>{label.name}</span>
+              <span>{t(`dashboard.courses.general.unsplash.categories.${label.name.toLowerCase()}`)}</span>
             </button>
           ))}
         </div>
@@ -199,7 +199,7 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
                 />
               </div>
               <p className="text-[11px] text-gray-500 truncate">
-                Photo by{' '}
+                {t('dashboard.courses.general.unsplash.photo_by')}{' '}
                 <a
                   href={withUtm(image.user?.links?.html)}
                   target="_blank"
@@ -209,7 +209,7 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
                 >
                   {image.user?.name}
                 </a>
-                {' '}on{' '}
+                {' '}{t('dashboard.courses.general.unsplash.on')}{' '}
                 <a
                   href={`https://unsplash.com/${UNSPLASH_UTM}`}
                   target="_blank"
@@ -223,19 +223,19 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
             </div>
           ))}
         </div>
-        {loading && <p className="text-center mt-4">Loading...</p>}
+        {loading && <p className="text-center mt-4">{t('common.loading')}</p>}
         {!loading && images.length > 0 && (
           <button
             onClick={handleLoadMore}
             className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
           >
-            Load More
+            {t('dashboard.courses.general.unsplash.load_more')}
           </button>
         )}
       </div>
 
       <div className="border-t border-gray-100 px-4 py-2 text-[11px] text-gray-500 text-center">
-        Photos from{' '}
+        {t('dashboard.courses.general.unsplash.photos_from')}{' '}
         <a
           href={`https://unsplash.com/${UNSPLASH_UTM}`}
           target="_blank"
@@ -250,7 +250,7 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
 
   return (
     <Modal
-      dialogTitle="Choose an image from Unsplash"
+      dialogTitle={t('dashboard.courses.general.unsplash.dialog_title')}
       dialogContent={modalContent}
       onOpenChange={onClose}
       isDialogOpen={isOpen}

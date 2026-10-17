@@ -28,6 +28,7 @@ type AccessCardProps = {
 
 const AccessCard = React.forwardRef<HTMLDivElement, AccessCardProps>(
     function AccessCard({ icon: Icon, title, description, selected, className, ...rest }, ref) {
+        const { t } = useTranslation()
         return (
             <div
                 ref={ref}
@@ -49,7 +50,7 @@ const AccessCard = React.forwardRef<HTMLDivElement, AccessCardProps>(
                         <span className="w-4 h-4 rounded-full bg-indigo-600 flex items-center justify-center">
                             <Check size={10} strokeWidth={3.5} className="text-white" />
                         </span>
-                        <span>Active</span>
+                        <span>{t('dashboard.courses.access.active')}</span>
                     </div>
                 )}
 
@@ -265,7 +266,7 @@ function UserGroupsSection({ usergroups }: { usergroups: any[] }) {
                 <div className="flex items-center gap-3">
                     {hasGroups && (
                         <div className="text-sm text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg font-medium">
-                            {usergroups.length} {usergroups.length === 1 ? 'group' : 'groups'}
+                            {t('dashboard.courses.access.usergroups.group_count', { count: usergroups.length })}
                         </div>
                     )}
                     <Modal

@@ -329,7 +329,7 @@ function EditCourseSEO(props: EditCourseSEOProps) {
                     disabled={isSaving}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select..." />
+                      <SelectValue placeholder={t('dashboard.courses.seo.form.select_placeholder')} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="summary">{t('dashboard.courses.seo.form.twitter_card_summary')}</SelectItem>

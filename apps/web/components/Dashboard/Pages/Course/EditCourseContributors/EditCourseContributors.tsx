@@ -174,10 +174,10 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
             if (response.status === 200) {
                 await editContributor(courseStructure.course_uuid, userUuid, role, 'ACTIVE', access_token);
                 mutate(`${getAPIUrl()}courses/${courseStructure.course_uuid}/contributors`);
-                toast.success(`${username} added as ${t(`dashboard.courses.contributors.roles.${role.toLowerCase()}`)}`);
+                toast.success(t('dashboard.courses.contributors.toasts.add_user_success', { username, role: t(`dashboard.courses.contributors.roles.${role.toLowerCase()}`) }));
             }
         } catch (error) {
-            toast.error(`Failed to add ${username} as contributor`);
+            toast.error(t('dashboard.courses.contributors.toasts.add_user_error', { username }));
         }
     };
 
@@ -279,7 +279,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
             <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                     <span className="cursor-pointer px-1.5 py-0.5 rounded hover:bg-gray-100 transition-colors text-gray-700 text-sm">
-                        User
+                        {t('dashboard.courses.contributors.roles.user')}
                     </span>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
@@ -376,7 +376,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Search by users..."
+                                placeholder={t('dashboard.courses.contributors.search.placeholder')}
                                 className="w-full h-7 pl-8 pr-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
                             />
                         </div>
@@ -395,12 +395,12 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                                 onClick={handleBulkRemove}
                                 className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-red-600 border-gray-200 hover:bg-gray-50"
                             >
-                                Remove {selectedContributors.length}
+                                {t('dashboard.courses.contributors.actions.remove_count', { count: selectedContributors.length })}
                             </button>
                         )}
                         <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
-                                <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label="Sort contributors">
+                                <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label={t('dashboard.courses.contributors.sort.aria_label')}>
                                     <ArrowUpDown size={15} />
                                 </IconButton>
                             </DropdownMenuTrigger>
@@ -410,10 +410,10 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                                 sideOffset={6}
                             >
                                 {([
-                                    { value: 'name-asc', label: 'Name A-Z' },
-                                    { value: 'name-desc', label: 'Name Z-A' },
-                                    { value: 'newest', label: 'Newest first' },
-                                    { value: 'oldest', label: 'Oldest first' },
+                                    { value: 'name-asc', label: t('dashboard.courses.contributors.sort.name_asc') },
+                                    { value: 'name-desc', label: t('dashboard.courses.contributors.sort.name_desc') },
+                                    { value: 'newest', label: t('dashboard.courses.contributors.sort.newest') },
+                                    { value: 'oldest', label: t('dashboard.courses.contributors.sort.oldest') },
                                 ] as const).map((option) => (
                                     <DropdownMenuItem
                                         key={option.value}

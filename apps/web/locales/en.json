@@ -1799,6 +1799,7 @@
                                                                    "learnings_min_items":  "At least one learning item is required",
                                                                    "learnings_empty_text":  "All learning items must have text",
                                                                    "learnings_invalid_json":  "Invalid JSON format",
+                                                                   "requirements_label":  "Requirements",
                                                                    "tags_label":  "Tags",
                                                                    "tags_placeholder":  "Enter to add...",
                                                                    "thumbnail_type_label":  "Thumbnail Type",
@@ -1821,6 +1822,107 @@
                                                                                                   "video":  "Supported formats: MP4, WebM (max 100MB)"
                                                                                               }
                                                                     },
+                                                      "details":  {
+                                                                       "difficulty_label":  "Difficulty",
+                                                                       "difficulty_placeholder":  "Select difficulty",
+                                                                       "difficulty_beginner":  "Beginner",
+                                                                       "difficulty_intermediate":  "Intermediate",
+                                                                       "difficulty_advanced":  "Advanced",
+                                                                       "duration_label":  "Duration (e.g. \u00276 hours\u0027)",
+                                                                       "video_hours_label":  "Video Hours",
+                                                                       "resources_count_label":  "Number of Resources",
+                                                                       "offers_certificate_label":  "Offers Certificate",
+                                                                       "offers_certificate_description":  "This course offers a certificate of completion",
+                                                                       "instructor_name_label":  "Instructor Name",
+                                                                       "instructor_title_label":  "Instructor Title",
+                                                                       "instructor_bio_label":  "Instructor Bio",
+                                                                       "requirements_empty_text":  "All requirement items must have text"
+                                                                   },
+                                                      "learnings":  {
+                                                                        "empty_title":  "No learning objectives yet",
+                                                                        "empty_description":  "Click \u0022Add\u0022 below to create the first one.",
+                                                                        "drag_to_reorder":  "Drag to reorder",
+                                                                        "placeholder":  "What will learners achieve?",
+                                                                        "remove":  "Remove",
+                                                                        "add_button":  "Add learning objective"
+                                                                    },
+                                                      "resources":  {
+                                                                        "empty_title":  "No resources yet",
+                                                                        "empty_description":  "Click \u0022Add\u0022 below to create the first resource.",
+                                                                        "drag_to_reorder":  "Drag to reorder",
+                                                                        "name_placeholder":  "Resource name",
+                                                                        "url_placeholder":  "Paste URL",
+                                                                        "add_link":  "Add link",
+                                                                        "upload_file":  "Upload file",
+                                                                        "remove":  "Remove",
+                                                                        "add_button":  "Add resource"
+                                                                    },
+                                                      "takeaways":  {
+                                                                        "empty_title":  "No takeaways yet",
+                                                                        "empty_description":  "Click \u0022Add\u0022 below to create the first main point.",
+                                                                        "drag_to_reorder":  "Drag to reorder",
+                                                                        "main_placeholder":  "Main takeaway point",
+                                                                        "remove":  "Remove",
+                                                                        "sub_placeholder":  "Sub-point",
+                                                                        "remove_sub":  "Remove sub-point",
+                                                                        "add_sub_button":  "+ Add sub-point",
+                                                                        "add_button":  "Add main point"
+                                                                    },
+                                                      "knowledge_checks":  {
+                                                                               "empty_title":  "No knowledge checks yet",
+                                                                               "empty_description":  "Click \u0022Add\u0022 below to create the first one.",
+                                                                               "drag_to_reorder":  "Drag to reorder",
+                                                                               "question_placeholder":  "Question",
+                                                                               "remove":  "Remove",
+                                                                               "answer_placeholder":  "Answer",
+                                                                               "add_button":  "Add knowledge check"
+                                                                           },
+                                                      "media":  {
+                                                                    "file_too_large":  "File size must be less than 8MB",
+                                                                    "invalid_file_type":  "File must be a JPEG or PNG image",
+                                                                    "cover_title":  "Course Card Cover",
+                                                                    "cover_update_failed":  "Failed to update cover image",
+                                                                    "cover_remove_failed":  "Failed to remove cover image",
+                                                                    "remove_cover":  "Remove cover image",
+                                                                    "upload_cover":  "Upload cover image",
+                                                                    "banner_title":  "Course Banner Image",
+                                                                    "banner_update_failed":  "Failed to update banner image",
+                                                                    "banner_remove_failed":  "Failed to remove banner image",
+                                                                    "remove_banner":  "Remove banner image",
+                                                                    "upload_banner":  "Upload banner image",
+                                                                    "removed":  "Removed"
+                                                                },
+                                                      "unsplash":  {
+                                                                       "dialog_title":  "Choose an image from Unsplash",
+                                                                       "load_failed":  "Failed to load images from Unsplash",
+                                                                       "track_failed":  "Failed to track image download",
+                                                                       "photo_by":  "Photo by",
+                                                                       "on":  "on",
+                                                                       "load_more":  "Load More",
+                                                                       "photos_from":  "Photos from",
+                                                                       "categories":  {
+                                                                                          "nature":  "Nature",
+                                                                                          "technology":  "Technology",
+                                                                                          "business":  "Business",
+                                                                                          "education":  "Education",
+                                                                                          "health":  "Health",
+                                                                                          "art":  "Art",
+                                                                                          "science":  "Science",
+                                                                                          "travel":  "Travel",
+                                                                                          "food":  "Food",
+                                                                                          "sports":  "Sports",
+                                                                                          "music":  "Music",
+                                                                                          "fashion":  "Fashion",
+                                                                                          "history":  "History",
+                                                                                          "architecture":  "Architecture",
+                                                                                          "fitness":  "Fitness",
+                                                                                          "photography":  "Photography",
+                                                                                          "biology":  "Biology",
+                                                                                          "finance":  "Finance",
+                                                                                          "lifestyle":  "Lifestyle",
+                                                                                          "gaming":  "Gaming"
+                                                                                      }
+                                                                   },
                                                       "errors":  {
                                                                      "save_failed":  "Failed to save course structure."
                                                                  }
@@ -1828,6 +1930,7 @@
                                       "access":  {
                                                      "title":  "Access to the course",
                                                      "subtitle":  "Choose if you want your course to be publicly available on the internet or only accessible to signed in users",
+                                                     "active":  "Active",
                                                      "public":  {
                                                                     "title":  "Public",
                                                                     "description":  "The Course is publicly available on the internet, it is indexed by search engines and can be accessed by anyone",
@@ -1847,6 +1950,8 @@
                                                      "usergroups":  {
                                                                         "title":  "UserGroups",
                                                                         "subtitle":  "You can choose to give access to this course to specific groups of users only by linking it to a UserGroup",
+                                                                        "group_count_one":  "{{count}} group",
+                                                                        "group_count_other":  "{{count}} groups",
                                                                         "table":  {
                                                                                       "name":  "Name",
                                                                                       "actions":  "Actions"
@@ -1911,7 +2016,8 @@
                                                                          "creator":  "Creator",
                                                                          "contributor":  "Contributor",
                                                                          "maintainer":  "Maintainer",
-                                                                         "reporter":  "Reporter"
+                                                                         "reporter":  "Reporter",
+                                                                         "user":  "User"
                                                                      },
                                                            "statuses":  {
                                                                             "active":  "ACTIVE",
@@ -1926,11 +2032,14 @@
                                                                            "selected_contributors":  "{{count}} contributor selected",
                                                                            "selected_contributors_plural":  "{{count}} contributors selected",
                                                                            "remove_selected":  "Remove Selected",
+                                                                           "remove_count":  "Remove {{count}}",
                                                                            "already_contributor":  "Already a contributor"
                                                                        },
                                                            "toasts":  {
                                                                           "add_success":  "Successfully added {{count}} contributor(s)",
+                                                                          "add_user_success":  "{{username}} added as {{role}}",
                                                                           "add_error":  "Failed to add {{username}}: {{reason}}",
+                                                                          "add_user_error":  "Failed to add {{username}} as contributor",
                                                                           "add_failed":  "Failed to add contributors",
                                                                           "update_success":  "Successfully updated contributor",
                                                                           "update_error":  "Error: {{detail}}",
@@ -1938,7 +2047,14 @@
                                                                           "remove_success":  "Successfully removed {{count}} contributor(s)",
                                                                           "remove_failed":  "Failed to remove contributors",
                                                                           "cannot_modify_creator":  "Cannot modify a creator\u0027s role or status"
-                                                                      }
+                                                                      },
+                                                           "sort":  {
+                                                                        "aria_label":  "Sort contributors",
+                                                                        "name_asc":  "Name A-Z",
+                                                                        "name_desc":  "Name Z-A",
+                                                                        "newest":  "Newest first",
+                                                                        "oldest":  "Oldest first"
+                                                                    }
                                                        },
                                       "seo":  {
                                                   "title":  "SEO Settings",
@@ -1988,6 +2104,7 @@
                                                                "twitter_title_placeholder":  "Custom title for Twitter sharing",
                                                                "twitter_description_label":  "Twitter Description",
                                                                "twitter_description_placeholder":  "Custom description for Twitter sharing",
+                                                               "select_placeholder":  "Select...",
                                                                "robots_noindex_label":  "Prevent search engine indexing (noindex)",
                                                                "robots_noindex_hint":  "When enabled, search engines will not index this course",
                                                                "robots_nofollow_label":  "Prevent following links (nofollow)",
@@ -2023,7 +2140,8 @@
                                                                          "certification_description_placeholder":  "Describe what this certification represents and its value...",
                                                                          "certificate_pattern_label":  "Certificate Pattern",
                                                                          "certificate_instructor_label":  "Instructor Name (Optional)",
-                                                                         "certificate_instructor_placeholder":  "e.g., Dr. Jane Smith"
+                                                                         "certificate_instructor_placeholder":  "e.g., Dr. Jane Smith",
+                                                                         "select_placeholder":  "Select..."
                                                                      },
                                                             "types":  {
                                                                           "completion":  "Course Completion",
@@ -2092,6 +2210,16 @@
                                                                                              "subtitle":  "Live preview of your certificate"
                                                                                          }
                                                                          },
+                                                            "preview":  {
+                                                                            "id_label":  "ID:",
+                                                                            "certificate_heading":  "Certificate",
+                                                                            "name_placeholder":  "Certification Name",
+                                                                            "description_placeholder":  "Certification description will appear here...",
+                                                                            "instructor_label":  "Instructor",
+                                                                            "awarded_label":  "Awarded",
+                                                                            "qr_code_alt":  "Certificate QR Code",
+                                                                            "organization_logo_alt":  "Organization Logo"
+                                                                        },
                                                             "states":  {
                                                                            "disabled":  {
                                                                                             "title":  "No Certification Configured",
@@ -2492,7 +2620,56 @@
                                                                          "descriptions":  {
                                                                                               "scorm":  "SCORM-compliant learning package"
                                                                                           }
-                                                                     }
+                                                                     },
+                                                        "toasts":  {
+                                                                       "module_created":  "Module created",
+                                                                       "module_create_error":  "Failed to create module",
+                                                                       "module_delete_error":  "Failed to delete module",
+                                                                       "modules_reordered":  "Modules reordered",
+                                                                       "modules_reorder_error":  "Failed to reorder modules",
+                                                                       "lesson_created":  "Lesson created",
+                                                                       "lesson_create_error":  "Failed to create lesson",
+                                                                       "lesson_deleted":  "Lesson deleted",
+                                                                       "lesson_delete_error":  "Failed to delete lesson",
+                                                                       "lessons_reordered":  "Lessons reordered",
+                                                                       "lessons_reorder_error":  "Failed to reorder lessons"
+                                                                   },
+                                                        "course_structure":  {
+                                                                                 "search_modules_placeholder":  "Search modules...",
+                                                                                 "module_count_one":  "{{count}} module",
+                                                                                 "module_count_other":  "{{count}} modules",
+                                                                                 "new_button":  "New",
+                                                                                 "select_button":  "Select",
+                                                                                 "sort_modules":  "Sort modules",
+                                                                                 "untitled_module":  "Untitled Module",
+                                                                                 "duplicate_soon":  "Duplicate feature coming soon",
+                                                                                 "duplicate":  "Duplicate",
+                                                                                 "no_modules_match":  "No modules match your search",
+                                                                                 "no_modules":  "No modules yet",
+                                                                                 "try_different_search":  "Try a different search term",
+                                                                                 "add_module_hint":  "Click \u0022Add Module\u0022 to get started"
+                                                                             },
+                                                        "module_form":  {
+                                                                            "search_lessons_placeholder":  "Search lessons...",
+                                                                            "lesson_count_one":  "{{count}} lesson",
+                                                                            "lesson_count_other":  "{{count}} lessons",
+                                                                            "new_button":  "New",
+                                                                            "select_button":  "Select",
+                                                                            "sort_lessons":  "Sort lessons",
+                                                                            "untitled_lesson":  "Untitled Lesson",
+                                                                            "duplicate_soon":  "Duplicate feature coming soon",
+                                                                            "duplicate":  "Duplicate",
+                                                                            "no_lessons_match":  "No lessons match your search",
+                                                                            "no_lessons":  "No lessons in this module yet",
+                                                                            "try_different_search":  "Try a different search term",
+                                                                            "new_lesson_hint":  "Click \u0022New\u0022 to add your first lesson"
+                                                                        },
+                                                        "lesson_detail":  {
+                                                                              "name_label":  "Lesson Name",
+                                                                              "description_label":  "Description",
+                                                                              "description_placeholder":  "Brief description of what this lesson covers",
+                                                                              "save_error":  "Failed to save lesson"
+                                                                          }
                                                     }
                                   },
                       "organization":  {

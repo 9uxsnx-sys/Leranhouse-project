@@ -1,5 +1,6 @@
 import React, { useState, memo, useCallback, useMemo } from 'react'
 import { Plus, X, GripVertical } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface TakeawayItem {
   title: string
@@ -29,6 +30,7 @@ const parseItems = (value: string): TakeawayItem[] => {
 }
 
 const TakeawayItemsList = ({ value, onChange, error }: TakeawayItemsListProps) => {
+  const { t } = useTranslation()
   const items = useMemo(() => parseItems(value), [value])
 
   const [dragIdx, setDragIdx] = useState<number | null>(null)
@@ -150,9 +152,9 @@ const TakeawayItemsList = ({ value, onChange, error }: TakeawayItemsListProps) =
       <div className="rounded-xl border border-gray-200 bg-ui-bg-field">
         {isEmpty && (
           <div className="px-4 py-8 text-center">
-            <div className="text-sm text-gray-400 mb-1">No takeaways yet</div>
+            <div className="text-sm text-gray-400 mb-1">{t('dashboard.courses.general.takeaways.empty_title')}</div>
             <div className="text-xs text-gray-300">
-              Click &ldquo;Add&rdquo; below to create the first main point.
+              {t('dashboard.courses.general.takeaways.empty_description')}
             </div>
           </div>
         )}
@@ -173,7 +175,7 @@ const TakeawayItemsList = ({ value, onChange, error }: TakeawayItemsListProps) =
                   onDragStart={onMainDragStart(idx)}
                   onDragEnd={() => setDragIdx(null)}
                   className="shrink-0 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing p-0.5 mt-1.5"
-                  title="Drag to reorder"
+                  title={t('dashboard.courses.general.takeaways.drag_to_reorder')}
                 >
                   <GripVertical size={14} />
                 </div>
@@ -181,14 +183,14 @@ const TakeawayItemsList = ({ value, onChange, error }: TakeawayItemsListProps) =
                   type="text"
                   value={item.title}
                   onChange={(e) => updateTitle(idx, e.target.value)}
-                  placeholder="Main takeaway point"
+                  placeholder={t('dashboard.courses.general.takeaways.main_placeholder')}
                   className="flex-1 min-w-0 text-sm font-medium text-gray-700 bg-transparent border-none outline-none placeholder:text-gray-300 py-1"
                 />
                 <button
                   type="button"
                   onClick={() => removeMain(idx)}
                   className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors shrink-0 mt-0.5"
-                  title="Remove"
+                  title={t('dashboard.courses.general.takeaways.remove')}
                 >
                   <X size={13} />
                 </button>
@@ -210,7 +212,7 @@ const TakeawayItemsList = ({ value, onChange, error }: TakeawayItemsListProps) =
                         onDragStart={onSubDragStart(idx, subIdx)}
                         onDragEnd={() => setDragSub(null)}
                         className="shrink-0 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing p-0.5"
-                        title="Drag to reorder"
+                        title={t('dashboard.courses.general.takeaways.drag_to_reorder')}
                       >
                         <GripVertical size={12} />
                       </div>
@@ -218,14 +220,14 @@ const TakeawayItemsList = ({ value, onChange, error }: TakeawayItemsListProps) =
                         type="text"
                         value={sub}
                         onChange={(e) => updateSubItem(idx, subIdx, e.target.value)}
-                        placeholder="Sub-point"
+                        placeholder={t('dashboard.courses.general.takeaways.sub_placeholder')}
                         className="flex-1 min-w-0 text-sm text-gray-600 bg-transparent border-none outline-none placeholder:text-gray-300 py-1"
                       />
                       <button
                         type="button"
                         onClick={() => removeSubItem(idx, subIdx)}
                         className="p-1 text-gray-400 hover:text-red-500 rounded transition-colors shrink-0"
-                        title="Remove sub-point"
+                        title={t('dashboard.courses.general.takeaways.remove_sub')}
                       >
                         <X size={11} />
                       </button>
@@ -237,7 +239,7 @@ const TakeawayItemsList = ({ value, onChange, error }: TakeawayItemsListProps) =
                   onClick={() => addSubItem(idx)}
                   className="text-xs text-gray-500 hover:text-gray-700 py-1"
                 >
-                  + Add sub-point
+                  {t('dashboard.courses.general.takeaways.add_sub_button')}
                 </button>
               </div>
             </div>
@@ -250,7 +252,7 @@ const TakeawayItemsList = ({ value, onChange, error }: TakeawayItemsListProps) =
           className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors rounded-b-xl"
         >
           <Plus size={13} className="text-blue-500 shrink-0" />
-          Add main point
+          {t('dashboard.courses.general.takeaways.add_button')}
         </button>
       </div>
 

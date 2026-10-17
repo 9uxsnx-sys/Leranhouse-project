@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Award, CheckCircle, QrCode, Building, User, Calendar, Hash } from 'lucide-react';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getOrgLogoMediaDirectory } from '@services/media/media';
+import { useTranslation } from 'react-i18next';
 
 interface CertificatePreviewProps {
   certificationName: string;
@@ -24,6 +25,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
   awardedDate,
   qrCodeLink
 }) => {
+  const { t } = useTranslation();
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   const org = useOrg() as any;
 
@@ -439,7 +441,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
         <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20">
           <div className="flex items-center space-x-1">
             <Hash className={`w-3 h-3 sm:w-4 sm:h-4 ${theme.icon}`} />
-            <span className={`text-xs sm:text-sm ${theme.secondary} font-medium`}>ID: {certificateId || 'LH-2024-001'}</span>
+            <span className={`text-xs sm:text-sm ${theme.secondary} font-medium`}>{t('dashboard.courses.certification.preview.id_label')} {certificateId || 'LH-2024-001'}</span>
           </div>
         </div>
 
@@ -449,7 +451,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
             {qrCodeUrl ? (
               <img
                 src={qrCodeUrl}
-                alt="Certificate QR Code"
+                alt={t('dashboard.courses.certification.preview.qr_code_alt')}
                 className="w-full h-full object-contain"
               />
             ) : (
@@ -465,7 +467,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
           {/* Header with decorative line */}
           <div className="flex items-center justify-center space-x-2 mb-2">
             <div className={`w-6 sm:w-8 h-px bg-gradient-to-r from-transparent ${theme.secondary.replace('text-', 'to-')}`}></div>
-            <div className={`text-xs sm:text-sm ${theme.secondary} font-medium uppercase tracking-wider`}>Certificate</div>
+            <div className={`text-xs sm:text-sm ${theme.secondary} font-medium uppercase tracking-wider`}>{t('dashboard.courses.certification.preview.certificate_heading')}</div>
             <div className={`w-6 sm:w-8 h-px bg-gradient-to-l from-transparent ${theme.secondary.replace('text-', 'to-')}`}></div>
           </div>
 
@@ -486,10 +488,10 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
           {/* Certificate Content */}
           <div className="flex flex-col justify-center items-center flex-1 max-w-full">
             <h4 className={`font-bold text-sm sm:text-base ${theme.primary} mb-2 text-center`}>
-              {certificationName || 'Certification Name'}
+              {certificationName || t('dashboard.courses.certification.preview.name_placeholder')}
             </h4>
             <p className={`text-xs sm:text-sm ${theme.secondary} text-center leading-relaxed max-w-xs sm:max-w-sm`}>
-              {certificationDescription || 'Certification description will appear here...'}
+              {certificationDescription || t('dashboard.courses.certification.preview.description_placeholder')}
             </p>
           </div>
 
@@ -504,15 +506,15 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
           <div className={`inline-flex items-center space-x-1 text-xs sm:text-sm ${theme.badge} px-3 py-1 rounded-full border`}>
             <CheckCircle size={12} />
             <span className="font-medium">
-              {certificationType === 'completion' ? 'Course Completion' :
-               certificationType === 'achievement' ? 'Achievement Based' :
-               certificationType === 'assessment' ? 'Assessment Based' :
-               certificationType === 'participation' ? 'Participation' :
-               certificationType === 'mastery' ? 'Skill Mastery' :
-               certificationType === 'professional' ? 'Professional Development' :
-               certificationType === 'continuing' ? 'Continuing Education' :
-               certificationType === 'workshop' ? 'Workshop Attendance' :
-               certificationType === 'specialization' ? 'Specialization' : 'Course Completion'}
+              {certificationType === 'completion' ? t('dashboard.courses.certification.types.completion') :
+               certificationType === 'achievement' ? t('dashboard.courses.certification.types.achievement') :
+               certificationType === 'assessment' ? t('dashboard.courses.certification.types.assessment') :
+               certificationType === 'participation' ? t('dashboard.courses.certification.types.participation') :
+               certificationType === 'mastery' ? t('dashboard.courses.certification.types.mastery') :
+               certificationType === 'professional' ? t('dashboard.courses.certification.types.professional') :
+               certificationType === 'continuing' ? t('dashboard.courses.certification.types.continuing') :
+               certificationType === 'workshop' ? t('dashboard.courses.certification.types.workshop') :
+               certificationType === 'specialization' ? t('dashboard.courses.certification.types.specialization') : t('dashboard.courses.certification.types.completion')}
             </span>
           </div>
         </div>
@@ -524,7 +526,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
             <div className="flex flex-col items-start space-y-1 flex-1">
               <div className="flex items-center space-x-1">
                 <User className={`w-2.5 h-2.5 sm:w-3 sm:h-3 ${theme.icon}`} />
-                <span className={`text-xs ${theme.secondary} font-medium`}>Instructor</span>
+                <span className={`text-xs ${theme.secondary} font-medium`}>{t('dashboard.courses.certification.preview.instructor_label')}</span>
               </div>
               <div className={`text-xs ${theme.primary} font-semibold`}>
                 {certificateInstructor || 'Dr. Jane Smith'}
@@ -538,7 +540,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
                 {org?.logo_image ? (
                   <img
                     src={`${getOrgLogoMediaDirectory(org.org_uuid, org?.logo_image)}`}
-                    alt="Organization Logo"
+                    alt={t('dashboard.courses.certification.preview.organization_logo_alt')}
                     className="w-full h-full object-contain"
                   />
                 ) : (
@@ -556,7 +558,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
             <div className="flex flex-col items-end space-y-1 flex-1">
               <div className="flex items-center space-x-1">
                 <Calendar className={`w-2.5 h-2.5 sm:w-3 sm:h-3 ${theme.icon}`} />
-                <span className={`text-xs ${theme.secondary} font-medium`}>Awarded</span>
+                <span className={`text-xs ${theme.secondary} font-medium`}>{t('dashboard.courses.certification.preview.awarded_label')}</span>
               </div>
               <div className={`text-xs ${theme.primary} font-semibold`}>
                 {awardedDate || 'Dec 15, 2024'}

@@ -133,9 +133,9 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
         { chapter_order_by_ids: chapterOrderByIds },
         access_token
       )
-      toast.success('Modules reordered')
+      toast.success(t('dashboard.courses.structure.toasts.modules_reordered'))
     } catch {
-      toast.error('Failed to reorder modules')
+      toast.error(t('dashboard.courses.structure.toasts.modules_reorder_error'))
       setChapterOrder(null) // Revert on error
     } finally {
       setIsReordering(false)
@@ -158,10 +158,10 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
       await createChapter(chapter_object, access_token)
       await revalidateTags(['courses'], props.orgslug)
       await mutate(getCourseMetaCacheKey(course_uuid, withUnpublishedActivities), undefined, { revalidate: true })
-      toast.success('Module created')
+      toast.success(t('dashboard.courses.structure.toasts.module_created'))
       setSelectedChapterIndex(chapters.length)
     } catch (e) {
-      toast.error('Failed to create module')
+      toast.error(t('dashboard.courses.structure.toasts.module_create_error'))
     } finally {
       setIsCreating(false)
     }
@@ -180,7 +180,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
         setSelectedChapterIndex(selectedChapterIndex - 1)
       }
     } catch (e) {
-      toast.error('Failed to delete module')
+      toast.error(t('dashboard.courses.structure.toasts.module_delete_error'))
     }
   }
 
@@ -248,14 +248,14 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search modules..."
+            placeholder={t('dashboard.courses.structure.course_structure.search_modules_placeholder')}
             className="w-full h-7 pl-8 pr-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
           />
         </div>
 
         {/* Module count */}
         <span className="text-xs text-gray-400 whitespace-nowrap">
-          {displayChapters.length} {displayChapters.length === 1 ? 'module' : 'modules'}
+          {t('dashboard.courses.structure.course_structure.module_count', { count: displayChapters.length })}
         </span>
 
         {/* Spacer pushes actions to the right */}
@@ -274,7 +274,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
           ) : (
             '+'
           )}
-          &nbsp;&nbsp;New
+          &nbsp;&nbsp;{t('dashboard.courses.structure.course_structure.new_button')}
         </Button>
 
         {/* Select Mode Button */}
@@ -285,11 +285,11 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
           className="gap-1.5"
         >
           <CheckSquare size={14} strokeWidth={2.5} />
-          <span className="font-semibold">{isSelectMode ? 'Cancel' : 'Select'}</span>
+          <span className="font-semibold">{isSelectMode ? t('common.cancel') : t('dashboard.courses.structure.course_structure.select_button')}</span>
         </Button>
 
         {/* Sort toggle button */}
-        <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')} aria-label="Sort modules">
+        <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')} aria-label={t('dashboard.courses.structure.course_structure.sort_modules')}>
           <ArrowUpDown size={15} />
         </IconButton>
       </div>
@@ -378,7 +378,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
                           )}
                           <Folder size={18} className="text-gray-400 flex-shrink-0" />
                           <p className="text-sm font-medium text-gray-900 truncate">
-                            {chapter.name || 'Untitled Module'}
+                            {chapter.name || t('dashboard.courses.structure.course_structure.untitled_module')}
                           </p>
                         </div>
                         <DropdownMenu>
@@ -394,12 +394,12 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
                             <DropdownMenuItem
                               onClick={(e) => {
                                 e.stopPropagation()
-                                toast.success('Duplicate feature coming soon')
+                                toast.success(t('dashboard.courses.structure.course_structure.duplicate_soon'))
                               }}
                               className="gap-2"
                             >
                               <Copy size={14} />
-                              Duplicate
+                              {t('dashboard.courses.structure.course_structure.duplicate')}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -410,7 +410,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
                               className="text-red-600 gap-2"
                             >
                               <Trash2 size={14} />
-                              Delete
+                              {t('common.delete')}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -425,10 +425,10 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
                 <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-100">
                   <Folder size={40} className="mx-auto mb-3 text-gray-300" />
                   <p className="text-sm text-gray-400">
-                    {searchQuery ? 'No modules match your search' : 'No modules yet'}
+                    {searchQuery ? t('dashboard.courses.structure.course_structure.no_modules_match') : t('dashboard.courses.structure.course_structure.no_modules')}
                   </p>
                   <p className="text-xs text-gray-300 mt-1">
-                    {searchQuery ? 'Try a different search term' : 'Click "Add Module" to get started'}
+                    {searchQuery ? t('dashboard.courses.structure.course_structure.try_different_search') : t('dashboard.courses.structure.course_structure.add_module_hint')}
                   </p>
                 </div>
               )}

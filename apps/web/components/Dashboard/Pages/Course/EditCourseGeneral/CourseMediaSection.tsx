@@ -21,13 +21,13 @@ const MAX_FILE_SIZE = 8_000_000
 const VALID_IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png'] as const
 type ValidImageMimeType = (typeof VALID_IMAGE_MIME_TYPES)[number]
 
-const validateFile = (file: File): boolean => {
+const validateFile = (file: File, t: any): boolean => {
   if (file.size > MAX_FILE_SIZE) {
-    toast.error('File size must be less than 8MB', { duration: 3000, position: 'top-center' })
+    toast.error(t('dashboard.courses.general.media.file_too_large'), { duration: 3000, position: 'top-center' })
     return false
   }
   if (!VALID_IMAGE_MIME_TYPES.includes(file.type as ValidImageMimeType)) {
-    toast.error('File must be a JPEG or PNG image', { duration: 3000, position: 'top-center' })
+    toast.error(t('dashboard.courses.general.media.invalid_file_type'), { duration: 3000, position: 'top-center' })
     return false
   }
   return true
@@ -61,7 +61,7 @@ const CourseMediaSection: React.FC = () => {
   const handleCoverFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
-    if (!validateFile(file)) {
+    if (!validateFile(file, t)) {
       event.target.value = ''
       return
     }
@@ -86,12 +86,12 @@ const CourseMediaSection: React.FC = () => {
         if (res.data && courseDispatch) {
           courseDispatch({ type: 'updateField', payload: { field: 'thumbnail_image', value: res.data.thumbnail_image } })
         }
-        toast.success('Saved', { duration: 3000, position: 'top-center' })
+        toast.success(t('dashboard.courses.save.saved'), { duration: 3000, position: 'top-center' })
         router.refresh()
       }
     } catch (err) {
       console.error('[CourseMediaSection] Cover upload failed:', err)
-      showError('Failed to update cover image')
+      showError(t('dashboard.courses.general.media.cover_update_failed'))
     } finally {
       setIsCoverLoading(false)
     }
@@ -113,12 +113,12 @@ const CourseMediaSection: React.FC = () => {
         if (res.data && courseDispatch) {
           courseDispatch({ type: 'updateField', payload: { field: 'thumbnail_image', value: '' } })
         }
-        toast.success('Removed', { duration: 3000, position: 'top-center' })
+        toast.success(t('dashboard.courses.general.media.removed'), { duration: 3000, position: 'top-center' })
         router.refresh()
       }
     } catch (err) {
       console.error('[CourseMediaSection] Cover delete failed:', err)
-      showError('Failed to remove cover image')
+      showError(t('dashboard.courses.general.media.cover_remove_failed'))
     } finally {
       setIsCoverLoading(false)
     }
@@ -129,7 +129,7 @@ const CourseMediaSection: React.FC = () => {
   const handleBannerFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
-    if (!validateFile(file)) {
+    if (!validateFile(file, t)) {
       event.target.value = ''
       return
     }
@@ -151,12 +151,12 @@ const CourseMediaSection: React.FC = () => {
         if (res.data && courseDispatch) {
           courseDispatch({ type: 'updateField', payload: { field: 'banner_image', value: res.data.banner_image } })
         }
-        toast.success('Saved', { duration: 3000, position: 'top-center' })
+        toast.success(t('dashboard.courses.save.saved'), { duration: 3000, position: 'top-center' })
         router.refresh()
       }
     } catch (err) {
       console.error('[CourseMediaSection] Banner upload failed:', err)
-      showError('Failed to update banner image')
+      showError(t('dashboard.courses.general.media.banner_update_failed'))
     } finally {
       setIsBannerLoading(false)
     }
@@ -175,12 +175,12 @@ const CourseMediaSection: React.FC = () => {
         if (res.data && courseDispatch) {
           courseDispatch({ type: 'updateField', payload: { field: 'banner_image', value: '' } })
         }
-        toast.success('Removed', { duration: 3000, position: 'top-center' })
+        toast.success(t('dashboard.courses.general.media.removed'), { duration: 3000, position: 'top-center' })
         router.refresh()
       }
     } catch (err) {
       console.error('[CourseMediaSection] Banner delete failed:', err)
-      showError('Failed to remove banner image')
+      showError(t('dashboard.courses.general.media.banner_remove_failed'))
     } finally {
       setIsBannerLoading(false)
     }
@@ -202,7 +202,7 @@ const CourseMediaSection: React.FC = () => {
           </div>
 
           <div className="flex-1">
-            <p className="text-sm font-medium text-gray-700">Course Card Cover</p>
+            <p className="text-sm font-medium text-gray-700">{t('dashboard.courses.general.media.cover_title')}</p>
           </div>
 
           {isCoverLoading ? (
@@ -221,7 +221,7 @@ const CourseMediaSection: React.FC = () => {
                   type="button"
                   onClick={handleDeleteCover}
                   className="flex items-center justify-center text-red-400 hover:text-red-600 transition-colors cursor-pointer"
-                  title="Remove cover image"
+                  title={t('dashboard.courses.general.media.remove_cover')}
                 >
                   <Trash2 size={18} />
                 </button>
@@ -230,7 +230,7 @@ const CourseMediaSection: React.FC = () => {
                   type="button"
                   onClick={() => coverInputRef.current?.click()}
                   className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
-                  title="Upload cover image"
+                  title={t('dashboard.courses.general.media.upload_cover')}
                 >
                   <UploadCloud size={18} />
                 </button>
@@ -246,7 +246,7 @@ const CourseMediaSection: React.FC = () => {
           </div>
 
           <div className="flex-1">
-            <p className="text-sm font-medium text-gray-700">Course Banner Image</p>
+            <p className="text-sm font-medium text-gray-700">{t('dashboard.courses.general.media.banner_title')}</p>
           </div>
 
           {isBannerLoading ? (
@@ -265,7 +265,7 @@ const CourseMediaSection: React.FC = () => {
                   type="button"
                   onClick={handleDeleteBanner}
                   className="flex items-center justify-center text-red-400 hover:text-red-600 transition-colors cursor-pointer"
-                  title="Remove banner image"
+                  title={t('dashboard.courses.general.media.remove_banner')}
                 >
                   <Trash2 size={18} />
                 </button>
@@ -274,7 +274,7 @@ const CourseMediaSection: React.FC = () => {
                   type="button"
                   onClick={() => bannerInputRef.current?.click()}
                   className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
-                  title="Upload banner image"
+                  title={t('dashboard.courses.general.media.upload_banner')}
                 >
                   <UploadCloud size={18} />
                 </button>

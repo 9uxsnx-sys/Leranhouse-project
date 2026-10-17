@@ -1504,6 +1504,7 @@
                                                                    "learnings_min_items":  "Au moins un élément d\u0027apprentissage est requis",
                                                                    "learnings_empty_text":  "Tous les éléments d\u0027apprentissage doivent avoir du texte",
                                                                    "learnings_invalid_json":  "Format JSON invalide",
+                                                                   "requirements_label":  "Prérequis",
                                                                    "tags_label":  "Tags",
                                                                    "tags_placeholder":  "Entrer pour ajouter...",
                                                                    "thumbnail_type_label":  "Type de miniature",
@@ -1526,6 +1527,107 @@
                                                                                                   "video":  "Formats supportés : MP4, WebM (max 100 Mo)"
                                                                                               }
                                                                     },
+                                                      "details":  {
+                                                                       "difficulty_label":  "Difficulté",
+                                                                       "difficulty_placeholder":  "Sélectionner la difficulté",
+                                                                       "difficulty_beginner":  "Débutant",
+                                                                       "difficulty_intermediate":  "Intermédiaire",
+                                                                       "difficulty_advanced":  "Avancé",
+                                                                       "duration_label":  "Durée (ex. « 6 heures »)",
+                                                                       "video_hours_label":  "Heures de vidéo",
+                                                                       "resources_count_label":  "Nombre de ressources",
+                                                                       "offers_certificate_label":  "Propose un certificat",
+                                                                       "offers_certificate_description":  "Ce cours propose un certificat de réussite",
+                                                                       "instructor_name_label":  "Nom du formateur",
+                                                                       "instructor_title_label":  "Titre du formateur",
+                                                                       "instructor_bio_label":  "Biographie du formateur",
+                                                                       "requirements_empty_text":  "Tous les éléments de prérequis doivent contenir du texte"
+                                                                   },
+                                                      "learnings":  {
+                                                                        "empty_title":  "Aucun objectif d\u0027apprentissage pour le moment",
+                                                                        "empty_description":  "Cliquez sur « Ajouter » ci-dessous pour créer le premier.",
+                                                                        "drag_to_reorder":  "Glisser pour réorganiser",
+                                                                        "placeholder":  "Que vont apprendre les apprenants ?",
+                                                                        "remove":  "Supprimer",
+                                                                        "add_button":  "Ajouter un objectif d\u0027apprentissage"
+                                                                    },
+                                                      "resources":  {
+                                                                        "empty_title":  "Aucune ressource pour le moment",
+                                                                        "empty_description":  "Cliquez sur « Ajouter » ci-dessous pour créer la première ressource.",
+                                                                        "drag_to_reorder":  "Glisser pour réorganiser",
+                                                                        "name_placeholder":  "Nom de la ressource",
+                                                                        "url_placeholder":  "Coller l\u0027URL",
+                                                                        "add_link":  "Ajouter un lien",
+                                                                        "upload_file":  "Téléverser un fichier",
+                                                                        "remove":  "Supprimer",
+                                                                        "add_button":  "Ajouter une ressource"
+                                                                    },
+                                                      "takeaways":  {
+                                                                        "empty_title":  "Aucun point clé pour le moment",
+                                                                        "empty_description":  "Cliquez sur « Ajouter » ci-dessous pour créer le premier point principal.",
+                                                                        "drag_to_reorder":  "Glisser pour réorganiser",
+                                                                        "main_placeholder":  "Point clé principal",
+                                                                        "remove":  "Supprimer",
+                                                                        "sub_placeholder":  "Sous-point",
+                                                                        "remove_sub":  "Supprimer le sous-point",
+                                                                        "add_sub_button":  "+ Ajouter un sous-point",
+                                                                        "add_button":  "Ajouter un point principal"
+                                                                    },
+                                                      "knowledge_checks":  {
+                                                                               "empty_title":  "Aucune vérification des connaissances pour le moment",
+                                                                               "empty_description":  "Cliquez sur « Ajouter » ci-dessous pour créer la première.",
+                                                                               "drag_to_reorder":  "Glisser pour réorganiser",
+                                                                               "question_placeholder":  "Question",
+                                                                               "remove":  "Supprimer",
+                                                                               "answer_placeholder":  "Réponse",
+                                                                               "add_button":  "Ajouter une vérification des connaissances"
+                                                                           },
+                                                      "media":  {
+                                                                    "file_too_large":  "La taille du fichier doit être inférieure à 8 Mo",
+                                                                    "invalid_file_type":  "Le fichier doit être une image JPEG ou PNG",
+                                                                    "cover_title":  "Couverture de la carte du cours",
+                                                                    "cover_update_failed":  "Échec de la mise à jour de l\u0027image de couverture",
+                                                                    "cover_remove_failed":  "Échec de la suppression de l\u0027image de couverture",
+                                                                    "remove_cover":  "Supprimer l\u0027image de couverture",
+                                                                    "upload_cover":  "Téléverser une image de couverture",
+                                                                    "banner_title":  "Image de bannière du cours",
+                                                                    "banner_update_failed":  "Échec de la mise à jour de l\u0027image de bannière",
+                                                                    "banner_remove_failed":  "Échec de la suppression de l\u0027image de bannière",
+                                                                    "remove_banner":  "Supprimer l\u0027image de bannière",
+                                                                    "upload_banner":  "Téléverser une image de bannière",
+                                                                    "removed":  "Supprimé"
+                                                                },
+                                                      "unsplash":  {
+                                                                       "dialog_title":  "Choisir une image sur Unsplash",
+                                                                       "load_failed":  "Échec du chargement des images depuis Unsplash",
+                                                                       "track_failed":  "Échec du suivi du téléchargement de l\u0027image",
+                                                                       "photo_by":  "Photo de",
+                                                                       "on":  "sur",
+                                                                       "load_more":  "Charger plus",
+                                                                       "photos_from":  "Photos de",
+                                                                       "categories":  {
+                                                                                          "nature":  "Nature",
+                                                                                          "technology":  "Technologie",
+                                                                                          "business":  "Entreprise",
+                                                                                          "education":  "Éducation",
+                                                                                          "health":  "Santé",
+                                                                                          "art":  "Art",
+                                                                                          "science":  "Science",
+                                                                                          "travel":  "Voyage",
+                                                                                          "food":  "Cuisine",
+                                                                                          "sports":  "Sport",
+                                                                                          "music":  "Musique",
+                                                                                          "fashion":  "Mode",
+                                                                                          "history":  "Histoire",
+                                                                                          "architecture":  "Architecture",
+                                                                                          "fitness":  "Fitness",
+                                                                                          "photography":  "Photographie",
+                                                                                          "biology":  "Biologie",
+                                                                                          "finance":  "Finance",
+                                                                                          "lifestyle":  "Style de vie",
+                                                                                          "gaming":  "Jeux vidéo"
+                                                                                      }
+                                                                   },
                                                       "errors":  {
                                                                      "save_failed":  "Échec de l\u0027enregistrement de la structure du cours."
                                                                  }
@@ -1533,6 +1635,7 @@
                                       "access":  {
                                                      "title":  "Accès au cours",
                                                      "subtitle":  "Choisissez si vous voulez que votre cours soit publiquement disponible sur Internet ou uniquement accessible aux utilisateurs connectés",
+                                                     "active":  "Actif",
                                                      "public":  {
                                                                     "title":  "Public",
                                                                     "description":  "Le cours est publiquement disponible sur Internet, il est indexé par les moteurs de recherche et peut être consulté par n\u0027importe qui",
@@ -1552,6 +1655,8 @@
                                                      "usergroups":  {
                                                                         "title":  "Groupes d\u0027utilisateurs",
                                                                         "subtitle":  "Vous pouvez choisir de donner accès à ce cours à des groupes d\u0027utilisateurs spécifiques uniquement en le liant à un groupe d\u0027utilisateurs",
+                                                                        "group_count_one":  "{{count}} groupe",
+                                                                        "group_count_other":  "{{count}} groupes",
                                                                         "table":  {
                                                                                       "name":  "Nom",
                                                                                       "actions":  "Actions"
@@ -1616,7 +1721,8 @@
                                                                          "creator":  "CRÉATEUR",
                                                                          "contributor":  "CONTRIBUTEUR",
                                                                          "maintainer":  "MAINTENEUR",
-                                                                         "reporter":  "RAPPORTEUR"
+                                                                         "reporter":  "RAPPORTEUR",
+                                                                         "user":  "Utilisateur"
                                                                      },
                                                            "statuses":  {
                                                                             "active":  "ACTIF",
@@ -1631,11 +1737,14 @@
                                                                            "selected_contributors":  "{{count}} contributeur sélectionné",
                                                                            "selected_contributors_plural":  "{{count}} contributeurs sélectionnés",
                                                                            "remove_selected":  "Supprimer la sélection",
+                                                                           "remove_count":  "Supprimer {{count}}",
                                                                            "already_contributor":  "Déjà contributeur"
                                                                        },
                                                            "toasts":  {
                                                                           "add_success":  "{{count}} contributeur(s) ajouté(s) avec succès",
+                                                                          "add_user_success":  "{{username}} ajouté en tant que {{role}}",
                                                                           "add_error":  "Échec de l\u0027ajout de {{username}} : {{reason}}",
+                                                                          "add_user_error":  "Échec de l\u0027ajout de {{username}} en tant que contributeur",
                                                                           "add_failed":  "Échec de l\u0027ajout des contributeurs",
                                                                           "update_success":  "Contributeur mis à jour avec succès",
                                                                           "update_error":  "Erreur : {{detail}}",
@@ -1643,7 +1752,14 @@
                                                                           "remove_success":  "{{count}} contributeur(s) supprimé(s) avec succès",
                                                                           "remove_failed":  "Échec de la suppression des contributeurs",
                                                                           "cannot_modify_creator":  "Impossible de modifier le rôle ou le statut d\u0027un créateur"
-                                                                      }
+                                                                      },
+                                                           "sort":  {
+                                                                        "aria_label":  "Trier les contributeurs",
+                                                                        "name_asc":  "Nom A-Z",
+                                                                        "name_desc":  "Nom Z-A",
+                                                                        "newest":  "Plus récents d\u0027abord",
+                                                                        "oldest":  "Plus anciens d\u0027abord"
+                                                                    }
                                                        },
                                       "certification":  {
                                                             "title":  "Certification du cours",
@@ -1660,7 +1776,8 @@
                                                                          "certification_description_placeholder":  "Décrivez ce que représente cette certification et sa valeur...",
                                                                          "certificate_pattern_label":  "Motif du certificat",
                                                                          "certificate_instructor_label":  "Nom de l\u0027instructeur (optionnel)",
-                                                                         "certificate_instructor_placeholder":  "ex. : Dr. Jane Smith"
+                                                                         "certificate_instructor_placeholder":  "ex. : Dr. Jane Smith",
+                                                                         "select_placeholder":  "Sélectionner..."
                                                                      },
                                                             "types":  {
                                                                           "completion":  "Achèvement du cours",
@@ -1729,6 +1846,16 @@
                                                                                              "subtitle":  "Aperçu en direct de votre certificat"
                                                                                          }
                                                                          },
+                                                            "preview":  {
+                                                                            "id_label":  "ID :",
+                                                                            "certificate_heading":  "Certificat",
+                                                                            "name_placeholder":  "Nom de la certification",
+                                                                            "description_placeholder":  "La description de la certification apparaîtra ici...",
+                                                                            "instructor_label":  "Formateur",
+                                                                            "awarded_label":  "Décerné",
+                                                                            "qr_code_alt":  "Code QR du certificat",
+                                                                            "organization_logo_alt":  "Logo de l\u0027organisation"
+                                                                        },
                                                             "states":  {
                                                                            "disabled":  {
                                                                                             "title":  "Aucune certification configurée",
@@ -2122,7 +2249,56 @@
                                                                          "descriptions":  {
                                                                                               "scorm":  "Module d\u0027apprentissage conforme à SCORM"
                                                                                           }
-                                                                     }
+                                                                     },
+                                                        "toasts":  {
+                                                                       "module_created":  "Module créé",
+                                                                       "module_create_error":  "Échec de la création du module",
+                                                                       "module_delete_error":  "Échec de la suppression du module",
+                                                                       "modules_reordered":  "Modules réorganisés",
+                                                                       "modules_reorder_error":  "Échec de la réorganisation des modules",
+                                                                       "lesson_created":  "Leçon créée",
+                                                                       "lesson_create_error":  "Échec de la création de la leçon",
+                                                                       "lesson_deleted":  "Leçon supprimée",
+                                                                       "lesson_delete_error":  "Échec de la suppression de la leçon",
+                                                                       "lessons_reordered":  "Leçons réorganisées",
+                                                                       "lessons_reorder_error":  "Échec de la réorganisation des leçons"
+                                                                   },
+                                                        "course_structure":  {
+                                                                                 "search_modules_placeholder":  "Rechercher des modules...",
+                                                                                 "module_count_one":  "{{count}} module",
+                                                                                 "module_count_other":  "{{count}} modules",
+                                                                                 "new_button":  "Nouveau",
+                                                                                 "select_button":  "Sélectionner",
+                                                                                 "sort_modules":  "Trier les modules",
+                                                                                 "untitled_module":  "Module sans titre",
+                                                                                 "duplicate_soon":  "Fonction de duplication bientôt disponible",
+                                                                                 "duplicate":  "Dupliquer",
+                                                                                 "no_modules_match":  "Aucun module ne correspond à votre recherche",
+                                                                                 "no_modules":  "Aucun module pour le moment",
+                                                                                 "try_different_search":  "Essayez un autre terme de recherche",
+                                                                                 "add_module_hint":  "Cliquez sur « Ajouter un module » pour commencer"
+                                                                             },
+                                                        "module_form":  {
+                                                                            "search_lessons_placeholder":  "Rechercher des leçons...",
+                                                                            "lesson_count_one":  "{{count}} leçon",
+                                                                            "lesson_count_other":  "{{count}} leçons",
+                                                                            "new_button":  "Nouvelle",
+                                                                            "select_button":  "Sélectionner",
+                                                                            "sort_lessons":  "Trier les leçons",
+                                                                            "untitled_lesson":  "Leçon sans titre",
+                                                                            "duplicate_soon":  "Fonction de duplication bientôt disponible",
+                                                                            "duplicate":  "Dupliquer",
+                                                                            "no_lessons_match":  "Aucune leçon ne correspond à votre recherche",
+                                                                            "no_lessons":  "Aucune leçon dans ce module pour le moment",
+                                                                            "try_different_search":  "Essayez un autre terme de recherche",
+                                                                            "new_lesson_hint":  "Cliquez sur « Nouvelle » pour ajouter votre première leçon"
+                                                                        },
+                                                        "lesson_detail":  {
+                                                                              "name_label":  "Nom de la leçon",
+                                                                              "description_label":  "Description",
+                                                                              "description_placeholder":  "Brève description du contenu de cette leçon",
+                                                                              "save_error":  "Échec de l\u0027enregistrement de la leçon"
+                                                                          }
                                                     },
                                       "limit_reached":  "Limite de cours atteinte ({{limit}})",
                                       "seo":  {
@@ -2160,6 +2336,7 @@
                                                                "twitter_card_summary_large":  "Résumé avec grande image",
                                                                "twitter_description_label":  "Description Twitter",
                                                                "twitter_description_placeholder":  "Description personnalisée pour le partage sur Twitter",
+                                                               "select_placeholder":  "Sélectionner...",
                                                                "twitter_title_label":  "Titre Twitter",
                                                                "twitter_title_placeholder":  "Titre personnalisé pour le partage sur Twitter"
                                                            },

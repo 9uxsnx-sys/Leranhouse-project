@@ -1,5 +1,6 @@
 import React, { useState, useRef, memo, useCallback, useMemo } from 'react';
 import { Plus, X, GripVertical } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface LearningItem {
   id: string;
@@ -28,6 +29,7 @@ const parseItems = (value: string): LearningItem[] => {
 const newId = () => `l_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
 
 const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) => {
+  const { t } = useTranslation();
   // Fully controlled: items are always derived from `value`.
   // Tab switches and remounts stay in sync without a local shadow copy.
   const items = useMemo(() => parseItems(value), [value]);
@@ -83,8 +85,8 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
       <div className="rounded-xl border border-gray-200 bg-ui-bg-field">
         {isEmpty && (
           <div className="px-4 py-8 text-center">
-            <div className="text-sm text-gray-400 mb-1">No learning objectives yet</div>
-            <div className="text-xs text-gray-300">Click &ldquo;Add&rdquo; below to create the first one.</div>
+            <div className="text-sm text-gray-400 mb-1">{t('dashboard.courses.general.learnings.empty_title')}</div>
+            <div className="text-xs text-gray-300">{t('dashboard.courses.general.learnings.empty_description')}</div>
           </div>
         )}
 
@@ -104,7 +106,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
                   onDragStart={onDragStart(item.id)}
                   onDragEnd={() => setDragId(null)}
                   className="shrink-0 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing p-0.5"
-                  title="Drag to reorder"
+                  title={t('dashboard.courses.general.learnings.drag_to_reorder')}
                 >
                   <GripVertical size={14} />
                 </div>
@@ -115,7 +117,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
                   type="text"
                   value={item.text}
                   onChange={(e) => updateText(item.id, e.target.value)}
-                  placeholder="What will learners achieve?"
+                  placeholder={t('dashboard.courses.general.learnings.placeholder')}
                   className="flex-1 min-w-0 text-sm text-gray-700 bg-transparent border-none outline-none placeholder:text-gray-300 py-1"
                 />
 
@@ -125,7 +127,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
                     type="button"
                     onClick={() => removeItem(item.id)}
                     className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                    title="Remove"
+                    title={t('dashboard.courses.general.learnings.remove')}
                   >
                     <X size={13} />
                   </button>
@@ -141,7 +143,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
           className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors rounded-b-xl"
         >
           <Plus size={13} className="text-blue-500 shrink-0" />
-          Add learning objective
+          {t('dashboard.courses.general.learnings.add_button')}
         </button>
       </div>
 
