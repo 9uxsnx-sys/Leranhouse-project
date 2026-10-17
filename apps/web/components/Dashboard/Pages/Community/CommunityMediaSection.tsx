@@ -41,11 +41,11 @@ const CommunityMediaSection: React.FC = () => {
 
   const validateFile = (file: File): boolean => {
     if (!VALID_IMAGE_MIME_TYPES.includes(file.type as ValidImageMimeType)) {
-      showError('Invalid file type. Please upload a JPG or PNG image.')
+      showError(t('dashboard.courses.communities.media.invalid_file_type'))
       return false
     }
     if (file.size > MAX_FILE_SIZE) {
-      showError('File is too large. Maximum size is 8MB.')
+      showError(t('dashboard.courses.communities.media.file_too_large'))
       return false
     }
     return true
@@ -79,12 +79,12 @@ const CommunityMediaSection: React.FC = () => {
         if (res.data && communityDispatch) {
           communityDispatch({ type: 'setCommunity', payload: res.data })
         }
-        toast.success('Saved', { duration: 3000, position: 'top-center' })
+        toast.success(t('dashboard.courses.communities.media.saved'), { duration: 3000, position: 'top-center' })
         router.refresh()
       }
     } catch (err) {
       console.error('[CommunityMediaSection] Upload failed:', err)
-      showError('Failed to update cover image')
+      showError(t('dashboard.courses.communities.media.cover_upload_error'))
     } finally {
       setIsCoverLoading(false)
     }
@@ -106,12 +106,12 @@ const CommunityMediaSection: React.FC = () => {
         if (res.data && communityDispatch) {
           communityDispatch({ type: 'setCommunity', payload: res.data })
         }
-        toast.success('Removed', { duration: 3000, position: 'top-center' })
+        toast.success(t('dashboard.courses.communities.media.removed'), { duration: 3000, position: 'top-center' })
         router.refresh()
       }
     } catch (err) {
       console.error('[CommunityMediaSection] Delete failed:', err)
-      showError('Failed to remove cover image')
+      showError(t('dashboard.courses.communities.media.cover_delete_error'))
     } finally {
       setIsCoverLoading(false)
     }
@@ -145,12 +145,12 @@ const CommunityMediaSection: React.FC = () => {
         if (res.data && communityDispatch) {
           communityDispatch({ type: 'setCommunity', payload: res.data })
         }
-        toast.success('Saved', { duration: 3000, position: 'top-center' })
+        toast.success(t('dashboard.courses.communities.media.saved'), { duration: 3000, position: 'top-center' })
         router.refresh()
       }
     } catch (err) {
       console.error('[CommunityMediaSection] Banner upload failed:', err)
-      showError('Failed to update banner image')
+      showError(t('dashboard.courses.communities.media.banner_upload_error'))
     } finally {
       setIsBannerLoading(false)
     }
@@ -172,12 +172,12 @@ const CommunityMediaSection: React.FC = () => {
         if (res.data && communityDispatch) {
           communityDispatch({ type: 'setCommunity', payload: res.data })
         }
-        toast.success('Removed', { duration: 3000, position: 'top-center' })
+        toast.success(t('dashboard.courses.communities.media.removed'), { duration: 3000, position: 'top-center' })
         router.refresh()
       }
     } catch (err) {
       console.error('[CommunityMediaSection] Banner delete failed:', err)
-      showError('Failed to remove banner image')
+      showError(t('dashboard.courses.communities.media.banner_delete_error'))
     } finally {
       setIsBannerLoading(false)
     }
@@ -196,7 +196,7 @@ const CommunityMediaSection: React.FC = () => {
         </div>
 
         <div className="flex-1">
-          <p className="text-sm font-medium text-gray-700">Community Cover Image</p>
+          <p className="text-sm font-medium text-gray-700">{t('dashboard.courses.communities.media.cover_image')}</p>
         </div>
 
         {isCoverLoading ? (
@@ -215,7 +215,7 @@ const CommunityMediaSection: React.FC = () => {
                 type="button"
                 onClick={handleDeleteThumbnail}
                 className="flex items-center justify-center text-red-400 hover:text-red-600 transition-colors cursor-pointer"
-                title="Remove cover image"
+                title={t('dashboard.courses.communities.media.remove_cover')}
               >
                 <Trash2 size={18} />
               </button>
@@ -224,7 +224,7 @@ const CommunityMediaSection: React.FC = () => {
                 type="button"
                 onClick={() => imageInputRef.current?.click()}
                 className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
-                title="Upload cover image"
+                title={t('dashboard.courses.communities.media.upload_cover')}
               >
                 <UploadCloud size={18} />
               </button>
@@ -240,7 +240,7 @@ const CommunityMediaSection: React.FC = () => {
         </div>
 
         <div className="flex-1">
-          <p className="text-sm font-medium text-gray-700">Community Banner Image</p>
+          <p className="text-sm font-medium text-gray-700">{t('dashboard.courses.communities.media.banner_image')}</p>
         </div>
 
         {isBannerLoading ? (
@@ -259,7 +259,7 @@ const CommunityMediaSection: React.FC = () => {
                 type="button"
                 onClick={handleDeleteBanner}
                 className="flex items-center justify-center text-red-400 hover:text-red-600 transition-colors cursor-pointer"
-                title="Remove banner image"
+                title={t('dashboard.courses.communities.media.remove_banner')}
               >
                 <Trash2 size={18} />
               </button>
@@ -268,7 +268,7 @@ const CommunityMediaSection: React.FC = () => {
                 type="button"
                 onClick={() => bannerInputRef.current?.click()}
                 className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
-                title="Upload banner image"
+                title={t('dashboard.courses.communities.media.upload_banner')}
               >
                 <UploadCloud size={18} />
               </button>

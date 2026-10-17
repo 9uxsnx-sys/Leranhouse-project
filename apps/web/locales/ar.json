@@ -211,6 +211,7 @@
                    "optional":  "اختياري",
                    "analytics":  "التحليلات",
                    "add":  "إضافة",
+                   "preview":  "معاينة",
                    "choose_an_organization_to_continue":  "اختر منظمة للمتابعة",
                    "for":  "لـ",
                    "powered_by":  "مدعوم بواسطة",
@@ -850,7 +851,36 @@
                                                         "update_error":  "فشل تحديث الحلقة",
                                                         "updated":  "تم تحديث الحلقة",
                                                         "updating":  "جاري تحديث الحلقة...",
-                                                        "upload_audio":  "رفع ملف صوتي"
+                                                        "upload_audio":  "رفع ملف صوتي",
+                                                        "reordered":  "تمت إعادة ترتيب الحلقات",
+                                                        "reorder_error":  "فشل إعادة ترتيب الحلقات",
+                                                        "untitled":  "حلقة بدون عنوان",
+                                                        "search_placeholder":  "البحث عن حلقات...",
+                                                        "episode_count_one":  "{{count}} حلقة",
+                                                        "episode_count_other":  "{{count}} حلقات",
+                                                        "new":  "جديد",
+                                                        "select":  "تحديد",
+                                                        "status_published":  "منشور",
+                                                        "status_draft":  "مسودة",
+                                                        "sort_aria":  "ترتيب الحلقات",
+                                                        "duplicate":  "تكرار",
+                                                        "duplicate_soon":  "ميزة التكرار قريباً",
+                                                        "no_search_match":  "لا توجد حلقات تطابق بحثك",
+                                                        "no_episodes_yet":  "لا توجد حلقات بعد",
+                                                        "try_different_search":  "جرّب مصطلح بحث مختلف",
+                                                        "click_new_to_add":  "انقر على \"جديد\" لإضافة أول حلقة",
+                                                        "episode_audio":  "صوت الحلقة",
+                                                        "replace_audio_title":  "استبدال الصوت",
+                                                        "upload_audio_title":  "رفع الصوت",
+                                                        "uploading_audio":  "جاري رفع الصوت...",
+                                                        "audio_uploaded":  "تم رفع الصوت",
+                                                        "audio_upload_error":  "فشل رفع الصوت",
+                                                        "publishing":  "جاري النشر...",
+                                                        "unpublishing":  "جاري إلغاء النشر...",
+                                                        "published_toast":  "تم نشر الحلقة",
+                                                        "unpublished_toast":  "تم إلغاء نشر الحلقة",
+                                                        "publish_error":  "فشل تحديث الحلقة",
+                                                        "saved":  "تم الحفظ"
                                                     },
                                        "form":  {
                                                     "about":  "حول",
@@ -873,7 +903,96 @@
                                                     "episodes":  "الحلقات",
                                                     "general":  "عام"
                                                 },
-                                       "view_podcast":  "عرض البودكاست"
+                                       "view_podcast":  "عرض البودكاست",
+                                       "general":  {
+                                                       "saved":  "تم الحفظ",
+                                                       "publishing":  "جاري النشر...",
+                                                       "unpublishing":  "جاري إلغاء النشر...",
+                                                       "publish_success":  "تم نشر البودكاست بنجاح",
+                                                       "unpublish_success":  "تم إلغاء نشر البودكاست بنجاح",
+                                                       "publish_error":  "فشل تحديث حالة النشر",
+                                                       "total_duration_label":  "المدة الإجمالية (بالدقائق)",
+                                                       "total_duration_placeholder":  "مثال: 45",
+                                                       "hosts_label":  "المقدمون",
+                                                       "host_label":  "المقدم {{number}}",
+                                                       "name_label":  "الاسم",
+                                                       "title_label":  "المسمى الوظيفي",
+                                                       "name_placeholder":  "مثال: أحمد علي",
+                                                       "title_placeholder":  "مثال: مقدم ومنتج",
+                                                       "photo_label":  "الصورة",
+                                                       "photo_uploaded":  "تم رفع الصورة",
+                                                       "click_to_upload_photo":  "انقر لرفع صورة",
+                                                       "remove_photo":  "إزالة الصورة",
+                                                       "host_avatar_alt":  "صورة المقدم",
+                                                       "add_host":  "إضافة مقدم"
+                                                   },
+                                       "media":  {
+                                                     "podcast_card_cover":  "غلاف بطاقة البودكاست",
+                                                     "podcast_banner_image":  "صورة بانر البودكاست",
+                                                     "remove_cover":  "إزالة صورة الغلاف",
+                                                     "upload_cover":  "رفع صورة الغلاف",
+                                                     "remove_banner":  "إزالة صورة البانر",
+                                                     "upload_banner":  "رفع صورة البانر",
+                                                     "saved":  "تم الحفظ",
+                                                     "removed":  "تمت الإزالة",
+                                                     "file_too_large":  "يجب أن يكون حجم الملف أقل من 8 ميغابايت",
+                                                     "invalid_file_type":  "يجب أن يكون الملف صورة JPEG أو PNG",
+                                                     "cover_upload_error":  "فشل تحديث صورة الغلاف",
+                                                     "cover_delete_error":  "فشل إزالة صورة الغلاف",
+                                                     "banner_upload_error":  "فشل تحديث صورة البانر",
+                                                     "banner_delete_error":  "فشل إزالة صورة البانر"
+                                                 },
+                                       "distribution":  {
+                                                            "copied":  "تم النسخ إلى الحافظة",
+                                                            "rss_description":  "يتم إنشاء خلاصة RSS للبودكاست تلقائياً. استخدم هذا الرابط لإرسال البودكاست إلى الدلائل.",
+                                                            "copy":  "نسخ",
+                                                            "unpublished_warning":  "البودكاست غير منشور حالياً. انشره أولاً قبل إرساله إلى الدلائل.",
+                                                            "guide_description":  "اتبع هذه الخطوات لإدراج بودكاست على المنصات الرئيسية. تتطلب كل منصة إرسال رابط خلاصة RSS الخاص بك.",
+                                                            "apple":  {
+                                                                          "also_on_apple_music":  "يتم توزيعه أيضاً على Apple Music",
+                                                                          "step1_before":  "انتقل إلى",
+                                                                          "step1_after":  "وسجّل الدخول باستخدام حساب Apple الخاص بك",
+                                                                          "step2_before":  "انقر على زر",
+                                                                          "step2_after":  "ثم اختر \"عرض جديد\"",
+                                                                          "step3":  "اختر \"إضافة عرض مع خلاصة RSS\" والصق رابط خلاصة RSS الخاص بك",
+                                                                          "step4":  "ستتحقق Apple من خلاصتك — تستغرق المراجعة عادةً من 1 إلى 5 أيام عمل"
+                                                                      },
+                                                            "spotify":  {
+                                                                            "largest_platform":  "أكبر منصة للاستماع إلى البودكاست",
+                                                                            "step1_before":  "انتقل إلى",
+                                                                            "step1_after":  "وسجّل الدخول أو أنشئ حساباً",
+                                                                            "step2":  "انقر على \"ابدأ\" ثم اختر \"لدي بودكاست لدى مزود استضافة\"",
+                                                                            "step3":  "الصق رابط خلاصة RSS وانقر على \"التالي\"",
+                                                                            "step4":  "تحقق من الملكية واملأ التفاصيل ثم أرسل — عادةً ما يظهر خلال ساعات"
+                                                                        },
+                                                            "youtube":  {
+                                                                            "migrated_note":  "انتقل Google Podcasts إلى YouTube Music",
+                                                                            "step1":  "انتقل إلى",
+                                                                            "step2":  "سجّل الدخول بحساب Google وانقر على \"إضافة بودكاست\"",
+                                                                            "step3":  "الصق رابط خلاصة RSS وتحقق من الملكية عبر البريد الإلكتروني",
+                                                                            "step4":  "سيظهر بودكاست على YouTube Music ونتائج بحث Google"
+                                                                        },
+                                                            "amazon":  {
+                                                                           "also_on_alexa":  "متاح أيضاً على أجهزة Alexa",
+                                                                           "step1_before":  "انتقل إلى",
+                                                                           "step1_after":  "وسجّل الدخول بحساب Amazon الخاص بك",
+                                                                           "step2":  "انقر على \"إضافة بودكاست\" والصق رابط خلاصة RSS",
+                                                                           "step3":  "راجع تفاصيل بودكاست وأرسله للمراجعة"
+                                                                       },
+                                                            "tips":  {
+                                                                         "thumbnail_before":  "تأكد من أن بودكاست يحتوي على",
+                                                                         "thumbnail_strong":  "صورة مصغرة",
+                                                                         "thumbnail_after":  "(1400x1400 كحد أدنى لـ Apple Podcasts)",
+                                                                         "episode_before":  "لديك على الأقل",
+                                                                         "episode_strong":  "حلقة منشورة واحدة",
+                                                                         "episode_after":  "قبل الإرسال",
+                                                                         "description_before":  "أضف",
+                                                                         "description_strong":  "وصفاً للبودكاست",
+                                                                         "description_after":  "واضحاً — يساعد ذلك في سهولة الاكتشاف",
+                                                                         "auto_publish":  "ستظهر الحلقات الجديدة تلقائياً على جميع المنصات بمجرد إرسال خلاصتك",
+                                                                         "propagation":  "قد تستغرق التحديثات بضع ساعات للانتشار عبر المنصات"
+                                                                     }
+                                                        }
                                    },
                      "failed_to_create_podcast":  "فشل إنشاء البودكاست",
                      "form":  {
@@ -1942,6 +2061,8 @@
                                                                          "link_button":  "ربط دورة",
                                                                          "search_placeholder":  "البحث عن دورات...",
                                                                          "no_courses":  "لم يتم العثور على دورات",
+                                                                         "no_course_linked":  "لا توجد دورة مرتبطة",
+                                                                         "sort_aria":  "ترتيب الدورات",
                                                                          "course_linked_id":  "الدورة مرتبطة (المعرف: {{id}})",
                                                                          "course_not_found":  "قد لا تكون الدورة المرتبطة موجودة بعد الآن أو ليس لديك حق الوصول إليها",
                                                                          "toasts":  {
@@ -2067,6 +2188,32 @@
                                                                          "delete_success":  "تم حذف المجتمع بنجاح",
                                                                          "delete_error":  "فشل حذف المجتمع"
                                                                      },
+                                                          "media":  {
+                                                                        "cover_image":  "صورة غلاف المجتمع",
+                                                                        "banner_image":  "صورة بانر المجتمع",
+                                                                        "remove_cover":  "إزالة صورة الغلاف",
+                                                                        "upload_cover":  "رفع صورة الغلاف",
+                                                                        "remove_banner":  "إزالة صورة البانر",
+                                                                        "upload_banner":  "رفع صورة البانر",
+                                                                        "saved":  "تم الحفظ",
+                                                                        "removed":  "تمت الإزالة",
+                                                                        "invalid_file_type":  "نوع الملف غير صالح. يرجى رفع صورة JPG أو PNG.",
+                                                                        "file_too_large":  "الملف كبير جداً. الحد الأقصى للحجم هو 8 ميغابايت.",
+                                                                        "cover_upload_error":  "فشل تحديث صورة الغلاف",
+                                                                        "cover_delete_error":  "فشل إزالة صورة الغلاف",
+                                                                        "banner_upload_error":  "فشل تحديث صورة البانر",
+                                                                        "banner_delete_error":  "فشل إزالة صورة البانر"
+                                                                    },
+                                                          "table":  {
+                                                                        "name":  "الاسم",
+                                                                        "description":  "الوصف"
+                                                                    },
+                                                          "sort_options":  {
+                                                                               "name_asc":  "الاسم من أ إلى ي",
+                                                                               "name_desc":  "الاسم من ي إلى أ",
+                                                                               "newest":  "الأحدث أولاً",
+                                                                               "oldest":  "الأقدم أولاً"
+                                                                           },
                                                           "access":  {
                                                                          "public":  {
                                                                                         "active":  "نشط",
@@ -2085,10 +2232,25 @@
                                                                                             "title":  "مقيد"
                                                                                         },
                                                                          "subtitle":  "اختر ما إذا كنت تريد أن يكون مجتمعك متاحاً للجميع أو فقط لمجموعات مستخدمين محددة",
+                                                                         "search_placeholder":  "البحث عن مجموعات المستخدمين...",
+                                                                         "sort_aria":  "ترتيب مجموعات المستخدمين",
+                                                                         "public_badge":  "عام",
+                                                                         "restricted_badge":  "مقيّد",
+                                                                         "no_groups_linked":  "لا توجد مجموعات مستخدمين مرتبطة",
+                                                                         "no_groups_found":  "لم يتم العثور على مجموعات مستخدمين",
+                                                                         "public_no_restrictions":  "المجتمع عام — لا توجد قيود على الوصول",
+                                                                         "add_count":  "إضافة {{count}}",
+                                                                         "delete_count":  "حذف {{count}}",
                                                                          "title":  "إعدادات الوصول",
                                                                          "toasts":  {
                                                                                         "update_error":  "فشل تحديث إعدادات الوصول",
-                                                                                        "update_success":  "تم تحديث إعدادات الوصول بنجاح"
+                                                                                        "update_success":  "تم تحديث إعدادات الوصول بنجاح",
+                                                                                        "bulk_add_success":  "تمت إضافة {{count}} من مجموعات المستخدمين",
+                                                                                        "bulk_add_partial":  "تعذر إضافة بعض المجموعات",
+                                                                                        "bulk_add_error":  "فشل إضافة مجموعات المستخدمين",
+                                                                                        "bulk_remove_success":  "تمت إزالة {{count}} من مجموعات المستخدمين",
+                                                                                        "bulk_remove_partial":  "تعذرت إزالة بعض المجموعات",
+                                                                                        "bulk_remove_error":  "فشل إزالة مجموعات المستخدمين"
                                                                                     },
                                                                          "usergroups":  {
                                                                                             "actions":  {
@@ -2117,7 +2279,9 @@
                                                                                                            "link_error":  "خطأ {{status}}: {{detail}}",
                                                                                                            "link_success":  "تم ربط مجموعة المستخدمين بنجاح",
                                                                                                            "unlink_error":  "حدث خطأ أثناء إزالة وصول مجموعة المستخدمين",
-                                                                                                           "unlink_success":  "تم إزالة وصول مجموعة المستخدمين بنجاح"
+                                                                                                           "unlink_success":  "تم إزالة وصول مجموعة المستخدمين بنجاح",
+                                                                                                           "link_failed":  "فشل الربط",
+                                                                                                           "unlink_failed":  "فشل إلغاء الربط"
                                                                                                        }
                                                                                         }
                                                                      }

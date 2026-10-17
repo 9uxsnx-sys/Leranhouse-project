@@ -95,7 +95,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
     setIsPublishing(true)
 
     const newPublishedStatus = !isPublished
-    const toastMessage = newPublishedStatus ? 'Publishing...' : 'Unpublishing...'
+    const toastMessage = newPublishedStatus ? t('podcasts.dashboard.general.publishing') : t('podcasts.dashboard.general.unpublishing')
     const toastId = toast.loading(toastMessage)
 
     try {
@@ -110,12 +110,12 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
 
       toast.dismiss(toastId)
       toast.success(
-        newPublishedStatus ? 'Podcast published successfully' : 'Podcast unpublished successfully'
+        newPublishedStatus ? t('podcasts.dashboard.general.publish_success') : t('podcasts.dashboard.general.unpublish_success')
       )
     } catch (error) {
       console.error('Failed to toggle publish status:', error)
       toast.dismiss(toastId)
-      toast.error('Failed to update publish status')
+      toast.error(t('podcasts.dashboard.general.publish_error'))
     } finally {
       setIsPublishing(false)
     }
@@ -139,7 +139,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                 className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
               >
                 <Eye size={14} />
-                <span>Preview</span>
+                <span>{t('common.preview')}</span>
               </Link>
 
               <div className="flex items-center gap-2">
@@ -164,10 +164,10 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                   )}
                   <span>
                     {isSaving
-                      ? 'Saving...'
+                      ? t('common.saving')
                       : !dirty
-                        ? 'Saved'
-                        : 'Save'}
+                        ? t('podcasts.dashboard.general.saved')
+                        : t('common.save')}
                   </span>
                 </button>
                 <button
@@ -185,10 +185,10 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                   )}
                   <span>
                     {isPublishing
-                      ? 'Processing...'
+                      ? t('common.processing')
                       : isPublished
-                        ? 'Published'
-                        : 'Unpublished'}
+                        ? t('podcasts.published')
+                        : t('podcasts.unpublished')}
                   </span>
                 </button>
               </div>
@@ -268,7 +268,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                 {/* Total Duration */}
                 <div className="grid mb-2.5">
                   <label className="font-medium leading-[35px] text-black grow text-sm">
-                    Total Duration (minutes)
+                    {t('podcasts.dashboard.general.total_duration_label')}
                   </label>
                   <Input
                     id="meta_total_duration"
@@ -277,7 +277,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                     min="0"
                     value={values.meta_total_duration}
                     onChange={handleChange}
-                    placeholder="e.g. 45"
+                    placeholder={t('podcasts.dashboard.general.total_duration_placeholder')}
                     className={fieldClassName}
                   />
                 </div>
@@ -285,7 +285,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                 {/* Hosts */}
                 <div>
                   <label className="font-medium leading-[35px] text-black grow text-sm block">
-                    Hosts
+                    {t('podcasts.dashboard.general.hosts_label')}
                   </label>
                   <div className="space-y-3">
                     {values.meta_hosts.map((host: any, index: number) => {
@@ -302,7 +302,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                             className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-100/50 transition-colors"
                           >
                             <div className="flex items-center gap-2.5">
-                              <span className="text-sm font-semibold text-gray-800">Host {index + 1}</span>
+                              <span className="text-sm font-semibold text-gray-800">{t('podcasts.dashboard.general.host_label', { number: index + 1 })}</span>
                               {!isOpen && host.name && (
                                 <span className="text-xs text-gray-400 truncate max-w-[120px]">{host.name}</span>
                               )}
@@ -339,7 +339,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                               <div className="px-4 pb-4 space-y-3">
                                 {/* Name */}
                                 <div>
-                                  <label className="text-xs font-medium text-gray-500 mb-1 block">Name</label>
+                                  <label className="text-xs font-medium text-gray-500 mb-1 block">{t('podcasts.dashboard.general.name_label')}</label>
                                   <Input
                                     name={`meta_hosts.${index}.name`}
                                     value={host.name}
@@ -348,13 +348,13 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                                       updated[index] = { ...updated[index], name: e.target.value }
                                       setFieldValue('meta_hosts', updated)
                                     }}
-                                    placeholder="e.g. John Doe"
+                                    placeholder={t('podcasts.dashboard.general.name_placeholder')}
                                     className={`${fieldClassName} bg-white`}
                                   />
                                 </div>
                                 {/* Title */}
                                 <div>
-                                  <label className="text-xs font-medium text-gray-500 mb-1 block">Title</label>
+                                  <label className="text-xs font-medium text-gray-500 mb-1 block">{t('podcasts.dashboard.general.title_label')}</label>
                                   <Input
                                     name={`meta_hosts.${index}.title`}
                                     value={host.title}
@@ -363,20 +363,20 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                                       updated[index] = { ...updated[index], title: e.target.value }
                                       setFieldValue('meta_hosts', updated)
                                     }}
-                                    placeholder="e.g. Host &amp; Producer"
+                                    placeholder={t('podcasts.dashboard.general.title_placeholder')}
                                     className={`${fieldClassName} bg-white`}
                                   />
                                 </div>
                                 {/* Photo - media section style row */}
                                 <div>
-                                  <label className="text-xs font-medium text-gray-500 mb-1 block">Photo</label>
+                                  <label className="text-xs font-medium text-gray-500 mb-1 block">{t('podcasts.dashboard.general.photo_label')}</label>
                                   {host.avatar ? (
                                     <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-white">
                                       <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden border border-gray-200">
-                                        <img src={host.avatar} alt={host.name || 'Host avatar'} className="w-full h-full object-cover" />
+                                        <img src={host.avatar} alt={host.name || t('podcasts.dashboard.general.host_avatar_alt')} className="w-full h-full object-cover" />
                                       </div>
                                       <div className="flex-1">
-                                        <p className="text-sm font-medium text-gray-700">Photo uploaded</p>
+                                        <p className="text-sm font-medium text-gray-700">{t('podcasts.dashboard.general.photo_uploaded')}</p>
                                       </div>
                                       <button
                                         type="button"
@@ -386,7 +386,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                                           setFieldValue('meta_hosts', updated)
                                         }}
                                         className="text-red-400 hover:text-red-600 transition-colors cursor-pointer"
-                                        title="Remove photo"
+                                        title={t('podcasts.dashboard.general.remove_photo')}
                                       >
                                         <Trash2 size={18} />
                                       </button>
@@ -416,7 +416,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                                         <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
                                       </div>
                                       <div className="flex-1">
-                                        <p className="text-sm font-medium text-gray-700">Click to upload photo</p>
+                                        <p className="text-sm font-medium text-gray-700">{t('podcasts.dashboard.general.click_to_upload_photo')}</p>
                                       </div>
                                       <UploadCloud size={18} className="text-gray-400" />
                                     </div>
@@ -437,7 +437,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                       className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl border-2 border-dashed border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
                     >
                       <Plus size={16} />
-                      Add Host
+                      {t('podcasts.dashboard.general.add_host')}
                     </button>
                   </div>
                 </div>

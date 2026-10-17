@@ -150,9 +150,9 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
         newOrder.map((uuid, index) => ({ episode_uuid: uuid, order: index })),
         accessToken
       )
-      toast.success('Episodes reordered')
+      toast.success(t('podcasts.dashboard.episodes.reordered'))
     } catch {
-      toast.error('Failed to reorder episodes')
+      toast.error(t('podcasts.dashboard.episodes.reorder_error'))
       setEpisodeOrder(null) // Revert on error
     } finally {
       setIsReordering(false)
@@ -194,9 +194,9 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
       if (!res.success) throw new Error('Failed to create episode')
       await revalidateTags(['podcasts'], orgslug)
       await refreshPodcast()
-      toast.success('Episode created')
+      toast.success(t('podcasts.dashboard.episodes.created'))
     } catch (e) {
-      toast.error('Failed to create episode')
+      toast.error(t('podcasts.dashboard.episodes.create_error'))
     } finally {
       setIsCreatingEpisode(false)
     }
@@ -233,14 +233,14 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search episodes..."
+                placeholder={t('podcasts.dashboard.episodes.search_placeholder')}
                 className="w-full h-7 pl-8 pr-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
               />
             </div>
 
             {/* Episode count */}
             <span className="text-xs text-gray-400 whitespace-nowrap">
-              {displayEpisodes.length} {displayEpisodes.length === 1 ? 'episode' : 'episodes'}
+              {t('podcasts.dashboard.episodes.episode_count', { count: displayEpisodes.length })}
             </span>
 
             {/* Spacer */}
@@ -258,7 +258,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
               ) : (
                 '+'
               )}
-              &nbsp;&nbsp;New
+              &nbsp;&nbsp;{t('podcasts.dashboard.episodes.new')}
             </Button>
 
             {/* Select Mode Button */}
@@ -269,7 +269,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
               className="gap-1.5"
             >
               <CheckSquare size={14} strokeWidth={2.5} />
-              <span className="font-semibold">{isSelectMode ? 'Cancel' : 'Select'}</span>
+              <span className="font-semibold">{isSelectMode ? t('common.cancel') : t('podcasts.dashboard.episodes.select')}</span>
             </Button>
 
             {/* Sort toggle button */}
@@ -278,7 +278,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
               variant="transparent"
               className="bg-white hover:bg-gray-50 shadow-borders-base"
               onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-              aria-label="Sort episodes"
+              aria-label={t('podcasts.dashboard.episodes.sort_aria')}
             >
               <ArrowUpDown size={15} />
             </IconButton>
@@ -368,15 +368,15 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
                               )}
                               <Music size={18} className="text-gray-400 flex-shrink-0" />
                               <p className="text-sm font-medium text-gray-900 truncate">
-                                {episode.title || 'Untitled Episode'}
+                                {episode.title || t('podcasts.dashboard.episodes.untitled')}
                               </p>
                               {episode.published ? (
                                 <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide bg-green-100 text-green-700 rounded flex-shrink-0">
-                                  Published
+                                  {t('podcasts.dashboard.episodes.status_published')}
                                 </span>
                               ) : (
                                 <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide bg-yellow-100 text-yellow-700 rounded flex-shrink-0">
-                                  Draft
+                                  {t('podcasts.dashboard.episodes.status_draft')}
                                 </span>
                               )}
                             </div>
@@ -393,12 +393,12 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
                                 <DropdownMenuItem
                                   onClick={(e) => {
                                     e.stopPropagation()
-                                    toast.success('Duplicate feature coming soon')
+                                    toast.success(t('podcasts.dashboard.episodes.duplicate_soon'))
                                   }}
                                   className="gap-2"
                                 >
                                   <Copy size={14} />
-                                  Duplicate
+                                  {t('podcasts.dashboard.episodes.duplicate')}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={(e) => {
@@ -409,7 +409,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
                                   className="text-red-600 gap-2"
                                 >
                                   <Trash2 size={14} />
-                                  Delete
+                                  {t('podcasts.dashboard.episodes.delete')}
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
@@ -424,10 +424,10 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
                     <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-100">
                       <Music size={40} className="mx-auto mb-3 text-gray-300" />
                       <p className="text-sm text-gray-400">
-                        {searchQuery ? 'No episodes match your search' : 'No episodes yet'}
+                        {searchQuery ? t('podcasts.dashboard.episodes.no_search_match') : t('podcasts.dashboard.episodes.no_episodes_yet')}
                       </p>
                       <p className="text-xs text-gray-300 mt-1">
-                        {searchQuery ? 'Try a different search term' : 'Click "New" to add your first episode'}
+                        {searchQuery ? t('podcasts.dashboard.episodes.try_different_search') : t('podcasts.dashboard.episodes.click_new_to_add')}
                       </p>
                     </div>
                   )}
@@ -514,17 +514,17 @@ function EpisodeDetailForm({
   const togglePublishStatus = async () => {
     if (isPublishing) return
     setIsPublishing(true)
-    const toastId = toast.loading(isPublished ? 'Unpublishing...' : 'Publishing...')
+    const toastId = toast.loading(isPublished ? t('podcasts.dashboard.episodes.unpublishing') : t('podcasts.dashboard.episodes.publishing'))
     try {
       await updateEpisode(episode.episode_uuid, { published: !isPublished }, accessToken)
       await revalidateTags(['podcasts'], orgslug)
       await onSuccess()
       toast.dismiss(toastId)
-      toast.success(isPublished ? 'Episode unpublished' : 'Episode published')
+      toast.success(isPublished ? t('podcasts.dashboard.episodes.unpublished_toast') : t('podcasts.dashboard.episodes.published_toast'))
     } catch (error) {
       console.error('Failed to update episode publish status:', error)
       toast.dismiss(toastId)
-      toast.error('Failed to update episode')
+      toast.error(t('podcasts.dashboard.episodes.publish_error'))
     } finally {
       setIsPublishing(false)
     }
@@ -535,17 +535,17 @@ function EpisodeDetailForm({
     if (!file) return
 
     setIsAudioUploading(true)
-    const toastId = toast.loading('Uploading audio...')
+    const toastId = toast.loading(t('podcasts.dashboard.episodes.uploading_audio'))
     try {
       const formData = new FormData()
       formData.append('audio', file)
       await uploadEpisodeAudio(episode.episode_uuid, formData, accessToken)
       await revalidateTags(['podcasts'], orgslug)
       await onSuccess()
-      toast.success('Audio uploaded', { id: toastId })
+      toast.success(t('podcasts.dashboard.episodes.audio_uploaded'), { id: toastId })
     } catch (error) {
       console.error('Failed to upload audio:', error)
-      toast.error('Failed to upload audio', { id: toastId })
+      toast.error(t('podcasts.dashboard.episodes.audio_upload_error'), { id: toastId })
     } finally {
       setIsAudioUploading(false)
       if (e.target) e.target.value = ''
@@ -566,7 +566,7 @@ function EpisodeDetailForm({
           className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
         >
           <Eye size={14} />
-          <span>Preview</span>
+          <span>{t('common.preview')}</span>
         </Link>
 
         <div className="flex items-center gap-2">
@@ -590,7 +590,7 @@ function EpisodeDetailForm({
               <SaveAllIcon size={14} />
             )}
             <span>
-              {isSaving ? 'Saving...' : !dirty ? 'Saved' : 'Save'}
+              {isSaving ? t('common.saving') : !dirty ? t('podcasts.dashboard.episodes.saved') : t('common.save')}
             </span>
           </button>
           <button
@@ -607,7 +607,7 @@ function EpisodeDetailForm({
               <GlobeLock size={14} />
             )}
             <span>
-              {isPublishing ? 'Processing...' : isPublished ? 'Published' : 'Unpublished'}
+              {isPublishing ? t('common.processing') : isPublished ? t('podcasts.published') : t('podcasts.unpublished')}
             </span>
           </button>
         </div>
@@ -656,7 +656,7 @@ function EpisodeDetailForm({
             <Music size={24} className="text-gray-400" strokeWidth={1.5} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-700">Episode Audio</p>
+            <p className="text-sm font-medium text-gray-700">{t('podcasts.dashboard.episodes.episode_audio')}</p>
             {currentAudioUrl && (
               <p className="text-xs text-gray-400 truncate mt-0.5">
                 {episode.audio_file} &middot; {formatDuration(episode.duration_seconds)}
@@ -677,7 +677,7 @@ function EpisodeDetailForm({
               <label
                 htmlFor={`audio-upload-${episode.episode_uuid}`}
                 className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
-                title={currentAudioUrl ? 'Replace audio' : 'Upload audio'}
+                title={currentAudioUrl ? t('podcasts.dashboard.episodes.replace_audio_title') : t('podcasts.dashboard.episodes.upload_audio_title')}
               >
                 <UploadCloud size={18} />
               </label>

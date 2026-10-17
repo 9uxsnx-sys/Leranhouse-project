@@ -211,6 +211,7 @@
                    "optional":  "optional",
                    "close":  "Close",
                    "add":  "Add",
+                   "preview":  "Preview",
                    "for":  "for",
                    "results":  "result",
                    "powered_by":  "Powered by",
@@ -1168,8 +1169,126 @@
                                                         "audio_label":  "Audio File",
                                                         "upload_audio":  "Upload Audio File",
                                                         "replace_audio":  "Replace Audio File",
-                                                        "audio_hint":  "MP3, WAV, or M4A files supported"
-                                                    }
+                                                        "audio_hint":  "MP3, WAV, or M4A files supported",
+                                                        "reordered":  "Episodes reordered",
+                                                        "reorder_error":  "Failed to reorder episodes",
+                                                        "untitled":  "Untitled Episode",
+                                                        "search_placeholder":  "Search episodes...",
+                                                        "episode_count_one":  "{{count}} episode",
+                                                        "episode_count_other":  "{{count}} episodes",
+                                                        "new":  "New",
+                                                        "select":  "Select",
+                                                        "status_published":  "Published",
+                                                        "status_draft":  "Draft",
+                                                        "sort_aria":  "Sort episodes",
+                                                        "duplicate":  "Duplicate",
+                                                        "duplicate_soon":  "Duplicate feature coming soon",
+                                                        "no_search_match":  "No episodes match your search",
+                                                        "no_episodes_yet":  "No episodes yet",
+                                                        "try_different_search":  "Try a different search term",
+                                                        "click_new_to_add":  "Click \"New\" to add your first episode",
+                                                        "episode_audio":  "Episode Audio",
+                                                        "replace_audio_title":  "Replace audio",
+                                                        "upload_audio_title":  "Upload audio",
+                                                        "uploading_audio":  "Uploading audio...",
+                                                        "audio_uploaded":  "Audio uploaded",
+                                                        "audio_upload_error":  "Failed to upload audio",
+                                                        "publishing":  "Publishing...",
+                                                        "unpublishing":  "Unpublishing...",
+                                                        "published_toast":  "Episode published",
+                                                        "unpublished_toast":  "Episode unpublished",
+                                                        "publish_error":  "Failed to update episode",
+                                                        "saved":  "Saved"
+                                                    },
+                                       "general":  {
+                                                       "saved":  "Saved",
+                                                       "publishing":  "Publishing...",
+                                                       "unpublishing":  "Unpublishing...",
+                                                       "publish_success":  "Podcast published successfully",
+                                                       "unpublish_success":  "Podcast unpublished successfully",
+                                                       "publish_error":  "Failed to update publish status",
+                                                       "total_duration_label":  "Total Duration (minutes)",
+                                                       "total_duration_placeholder":  "e.g. 45",
+                                                       "hosts_label":  "Hosts",
+                                                       "host_label":  "Host {{number}}",
+                                                       "name_label":  "Name",
+                                                       "title_label":  "Title",
+                                                       "name_placeholder":  "e.g. John Doe",
+                                                       "title_placeholder":  "e.g. Host & Producer",
+                                                       "photo_label":  "Photo",
+                                                       "photo_uploaded":  "Photo uploaded",
+                                                       "click_to_upload_photo":  "Click to upload photo",
+                                                       "remove_photo":  "Remove photo",
+                                                       "host_avatar_alt":  "Host avatar",
+                                                       "add_host":  "Add Host"
+                                                   },
+                                       "media":  {
+                                                     "podcast_card_cover":  "Podcast Card Cover",
+                                                     "podcast_banner_image":  "Podcast Banner Image",
+                                                     "remove_cover":  "Remove cover image",
+                                                     "upload_cover":  "Upload cover image",
+                                                     "remove_banner":  "Remove banner image",
+                                                     "upload_banner":  "Upload banner image",
+                                                     "saved":  "Saved",
+                                                     "removed":  "Removed",
+                                                     "file_too_large":  "File size must be less than 8MB",
+                                                     "invalid_file_type":  "File must be a JPEG or PNG image",
+                                                     "cover_upload_error":  "Failed to update cover image",
+                                                     "cover_delete_error":  "Failed to remove cover image",
+                                                     "banner_upload_error":  "Failed to update banner image",
+                                                     "banner_delete_error":  "Failed to remove banner image"
+                                                 },
+                                       "distribution":  {
+                                                            "copied":  "Copied to clipboard",
+                                                            "rss_description":  "Your podcast RSS feed is automatically generated. Use this URL to submit your podcast to directories.",
+                                                            "copy":  "Copy",
+                                                            "unpublished_warning":  "Your podcast is currently unpublished. Publish it first before submitting to directories.",
+                                                            "guide_description":  "Follow these steps to get your podcast listed on major platforms. Each platform requires you to submit your RSS feed URL.",
+                                                            "apple":  {
+                                                                          "also_on_apple_music":  "Also distributes to Apple Music",
+                                                                          "step1_before":  "Go to",
+                                                                          "step1_after":  "and sign in with your Apple ID",
+                                                                          "step2_before":  "Click the",
+                                                                          "step2_after":  "button and select \"New Show\"",
+                                                                          "step3":  "Select \"Add a show with an RSS feed\" and paste your RSS feed URL",
+                                                                          "step4":  "Apple will validate your feed — review typically takes 1-5 business days"
+                                                                      },
+                                                            "spotify":  {
+                                                                            "largest_platform":  "Largest podcast listening platform",
+                                                                            "step1_before":  "Go to",
+                                                                            "step1_after":  "and sign in or create an account",
+                                                                            "step2":  "Click \"Get started\" then select \"I have a podcast with a hosting provider\"",
+                                                                            "step3":  "Paste your RSS feed URL and click \"Next\"",
+                                                                            "step4":  "Verify ownership, fill in details, and submit — usually live within hours"
+                                                                        },
+                                                            "youtube":  {
+                                                                            "migrated_note":  "Google Podcasts migrated to YouTube Music",
+                                                                            "step1":  "Go to",
+                                                                            "step2":  "Sign in with your Google account and click \"Add a podcast\"",
+                                                                            "step3":  "Paste your RSS feed URL and verify ownership via email",
+                                                                            "step4":  "Your podcast will appear on YouTube Music and Google search results"
+                                                                        },
+                                                            "amazon":  {
+                                                                           "also_on_alexa":  "Also available on Alexa devices",
+                                                                           "step1_before":  "Go to",
+                                                                           "step1_after":  "and sign in with your Amazon account",
+                                                                           "step2":  "Click \"Add your podcast\" and paste your RSS feed URL",
+                                                                           "step3":  "Review your podcast details and submit for review"
+                                                                       },
+                                                            "tips":  {
+                                                                         "thumbnail_before":  "Make sure your podcast has a",
+                                                                         "thumbnail_strong":  "thumbnail image",
+                                                                         "thumbnail_after":  "(1400x1400 minimum for Apple Podcasts)",
+                                                                         "episode_before":  "Have at least",
+                                                                         "episode_strong":  "one published episode",
+                                                                         "episode_after":  "before submitting",
+                                                                         "description_before":  "Fill in a descriptive",
+                                                                         "description_strong":  "podcast description",
+                                                                         "description_after":  "— this helps with discoverability",
+                                                                         "auto_publish":  "New episodes will appear automatically on all platforms once your feed is submitted",
+                                                                         "propagation":  "Updates may take a few hours to propagate across platforms"
+                                                                     }
+                                                        }
                                    }
                  },
     "collections":  {
@@ -2299,6 +2418,8 @@
                                                                          "link_button":  "Link Course",
                                                                          "search_placeholder":  "Search courses...",
                                                                          "no_courses":  "No courses found",
+                                                                         "no_course_linked":  "No course linked",
+                                                                         "sort_aria":  "Sort courses",
                                                                          "course_linked_id":  "Course linked (ID: {{id}})",
                                                                          "course_not_found":  "The linked course may no longer exist or you don\u0027t have access to it",
                                                                          "toasts":  {
@@ -2395,6 +2516,15 @@
                                                           "access":  {
                                                                          "title":  "Access Settings",
                                                                          "subtitle":  "Choose if you want your community to be publicly available or only accessible to specific user groups",
+                                                                         "search_placeholder":  "Search user groups...",
+                                                                         "sort_aria":  "Sort user groups",
+                                                                         "public_badge":  "Public",
+                                                                         "restricted_badge":  "Restricted",
+                                                                         "no_groups_linked":  "No user groups linked",
+                                                                         "no_groups_found":  "No user groups found",
+                                                                         "public_no_restrictions":  "Community is public — no access restrictions",
+                                                                         "add_count":  "Add {{count}}",
+                                                                         "delete_count":  "Delete {{count}}",
                                                                          "public":  {
                                                                                         "title":  "Public",
                                                                                         "description":  "The community is publicly available. Anyone can view and participate in discussions.",
@@ -2438,12 +2568,20 @@
                                                                                                            "link_success":  "Successfully linked User Group",
                                                                                                            "link_error":  "Error {{status}}: {{detail}}",
                                                                                                            "unlink_success":  "Successfully removed User Group access",
-                                                                                                           "unlink_error":  "An error occurred while removing User Group access"
+                                                                                                           "unlink_error":  "An error occurred while removing User Group access",
+                                                                                                           "link_failed":  "Failed to link",
+                                                                                                           "unlink_failed":  "Failed to unlink"
                                                                                                        }
                                                                                         },
                                                                          "toasts":  {
                                                                                         "update_success":  "Access settings updated successfully",
-                                                                                        "update_error":  "Failed to update access settings"
+                                                                                        "update_error":  "Failed to update access settings",
+                                                                                        "bulk_add_success":  "Added {{count}} user group(s)",
+                                                                                        "bulk_add_partial":  "Some groups could not be added",
+                                                                                        "bulk_add_error":  "Failed to add user groups",
+                                                                                        "bulk_remove_success":  "Removed {{count}} user group(s)",
+                                                                                        "bulk_remove_partial":  "Some groups could not be removed",
+                                                                                        "bulk_remove_error":  "Failed to remove user groups"
                                                                                     }
                                                                      },
                                                           "modals":  {
@@ -2477,7 +2615,33 @@
                                                                          "deleting":  "Deleting community...",
                                                                          "delete_success":  "Community deleted successfully",
                                                                          "delete_error":  "Failed to delete community"
-                                                                     }
+                                                                     },
+                                                          "media":  {
+                                                                        "cover_image":  "Community Cover Image",
+                                                                        "banner_image":  "Community Banner Image",
+                                                                        "remove_cover":  "Remove cover image",
+                                                                        "upload_cover":  "Upload cover image",
+                                                                        "remove_banner":  "Remove banner image",
+                                                                        "upload_banner":  "Upload banner image",
+                                                                        "saved":  "Saved",
+                                                                        "removed":  "Removed",
+                                                                        "invalid_file_type":  "Invalid file type. Please upload a JPG or PNG image.",
+                                                                        "file_too_large":  "File is too large. Maximum size is 8MB.",
+                                                                        "cover_upload_error":  "Failed to update cover image",
+                                                                        "cover_delete_error":  "Failed to remove cover image",
+                                                                        "banner_upload_error":  "Failed to update banner image",
+                                                                        "banner_delete_error":  "Failed to remove banner image"
+                                                                    },
+                                                          "table":  {
+                                                                        "name":  "Name",
+                                                                        "description":  "Description"
+                                                                    },
+                                                          "sort_options":  {
+                                                                               "name_asc":  "Name A-Z",
+                                                                               "name_desc":  "Name Z-A",
+                                                                               "newest":  "Newest first",
+                                                                               "oldest":  "Oldest first"
+                                                                           }
                                                       },
                                       "structure":  {
                                                         "loading":  "Loading...",

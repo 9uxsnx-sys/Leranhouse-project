@@ -109,12 +109,12 @@ const CommunityEditCourse: React.FC = () => {
       await linkCommunityToCourse(community.community_uuid, selectedCourses[0], accessToken)
       await revalidateTags(['communities'], org.slug)
       mutate(`${getAPIUrl()}communities/${community.community_uuid}`)
-      toast.success('Course linked successfully')
+      toast.success(t('dashboard.courses.communities.course.toasts.link_success'))
       setSelectedCourses([])
       setSearchQuery('')
       router.refresh()
     } catch {
-      toast.error('Failed to link course')
+      toast.error(t('dashboard.courses.communities.course.toasts.link_error'))
     } finally {
       setIsSubmitting(false)
     }
@@ -127,11 +127,11 @@ const CommunityEditCourse: React.FC = () => {
       await unlinkCommunityFromCourse(community.community_uuid, accessToken)
       await revalidateTags(['communities'], org.slug)
       mutate(`${getAPIUrl()}communities/${community.community_uuid}`)
-      toast.success('Course unlinked successfully')
+      toast.success(t('dashboard.courses.communities.course.toasts.unlink_success'))
       setSelectedCourses([])
       router.refresh()
     } catch {
-      toast.error('Failed to unlink course')
+      toast.error(t('dashboard.courses.communities.course.toasts.unlink_error'))
     } finally {
       setIsSubmitting(false)
     }
@@ -155,7 +155,7 @@ const CommunityEditCourse: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search courses..."
+            placeholder={t('dashboard.courses.communities.course.search_placeholder')}
             className="w-full h-7 pl-8 pr-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
           />
         </div>
@@ -169,7 +169,7 @@ const CommunityEditCourse: React.FC = () => {
             }`}
           >
             {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : null}
-            {showSearchResults ? 'Add' : 'Delete'}
+            {showSearchResults ? t('common.add') : t('common.delete')}
           </button>
         )}
         <DropdownMenu modal={false}>
@@ -178,7 +178,7 @@ const CommunityEditCourse: React.FC = () => {
               size="small"
               variant="transparent"
               className="bg-white hover:bg-gray-50 shadow-borders-base"
-              aria-label="Sort courses"
+              aria-label={t('dashboard.courses.communities.course.sort_aria')}
             >
               <ArrowUpDown size={15} />
             </IconButton>
@@ -189,10 +189,10 @@ const CommunityEditCourse: React.FC = () => {
             sideOffset={6}
           >
             {([
-              { value: 'name-asc', label: 'Name A-Z' },
-              { value: 'name-desc', label: 'Name Z-A' },
-              { value: 'newest', label: 'Newest first' },
-              { value: 'oldest', label: 'Oldest first' },
+              { value: 'name-asc', label: t('dashboard.courses.communities.sort_options.name_asc') },
+              { value: 'name-desc', label: t('dashboard.courses.communities.sort_options.name_desc') },
+              { value: 'newest', label: t('dashboard.courses.communities.sort_options.newest') },
+              { value: 'oldest', label: t('dashboard.courses.communities.sort_options.oldest') },
             ] as const).map((option) => (
               <DropdownMenuItem
                 key={option.value}
@@ -234,10 +234,10 @@ const CommunityEditCourse: React.FC = () => {
                   )}
                 </TableHead>
                 <TableHead className="w-[200px] pl-2">
-                  <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">Name</span>
+                  <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.courses.communities.table.name')}</span>
                 </TableHead>
                 <TableHead>
-                  <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">Description</span>
+                  <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.courses.communities.table.description')}</span>
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -251,13 +251,13 @@ const CommunityEditCourse: React.FC = () => {
               ) : !showSearchResults && tableCourses.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={3} className="text-center text-sm text-gray-500 py-8">
-                    No course linked
+                    {t('dashboard.courses.communities.course.no_course_linked')}
                   </TableCell>
                 </TableRow>
               ) : showSearchResults && tableCourses.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={3} className="text-center text-sm text-gray-500 py-8">
-                    No courses found
+                    {t('dashboard.courses.communities.course.no_courses')}
                   </TableCell>
                 </TableRow>
               ) : (

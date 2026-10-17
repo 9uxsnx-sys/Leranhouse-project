@@ -211,6 +211,7 @@
                    "optional":  "optionnel",
                    "analytics":  "Analytique",
                    "add":  "Ajouter",
+                   "preview":  "Aperçu",
                    "choose_an_organization_to_continue":  "Choisissez une organisation pour continuer",
                    "for":  "pour",
                    "powered_by":  "Propulsé par",
@@ -840,7 +841,36 @@
                                                         "update_error":  "Échec de la mise à jour de l\u0027épisode",
                                                         "updated":  "Épisode mis à jour",
                                                         "updating":  "Mise à jour de l\u0027épisode...",
-                                                        "upload_audio":  "Télécharger le fichier audio"
+                                                        "upload_audio":  "Télécharger le fichier audio",
+                                                        "reordered":  "Épisodes réordonnés",
+                                                        "reorder_error":  "Échec de la réorganisation des épisodes",
+                                                        "untitled":  "Épisode sans titre",
+                                                        "search_placeholder":  "Rechercher des épisodes...",
+                                                        "episode_count_one":  "{{count}} épisode",
+                                                        "episode_count_other":  "{{count}} épisodes",
+                                                        "new":  "Nouveau",
+                                                        "select":  "Sélectionner",
+                                                        "status_published":  "Publié",
+                                                        "status_draft":  "Brouillon",
+                                                        "sort_aria":  "Trier les épisodes",
+                                                        "duplicate":  "Dupliquer",
+                                                        "duplicate_soon":  "Fonction de duplication bientôt disponible",
+                                                        "no_search_match":  "Aucun épisode ne correspond à votre recherche",
+                                                        "no_episodes_yet":  "Pas encore d\u0027épisodes",
+                                                        "try_different_search":  "Essayez un autre terme de recherche",
+                                                        "click_new_to_add":  "Cliquez sur « Nouveau » pour ajouter votre premier épisode",
+                                                        "episode_audio":  "Audio de l\u0027épisode",
+                                                        "replace_audio_title":  "Remplacer l\u0027audio",
+                                                        "upload_audio_title":  "Télécharger l\u0027audio",
+                                                        "uploading_audio":  "Téléchargement de l\u0027audio...",
+                                                        "audio_uploaded":  "Audio téléchargé",
+                                                        "audio_upload_error":  "Échec du téléchargement de l\u0027audio",
+                                                        "publishing":  "Publication...",
+                                                        "unpublishing":  "Dépublication...",
+                                                        "published_toast":  "Épisode publié",
+                                                        "unpublished_toast":  "Épisode dépublié",
+                                                        "publish_error":  "Échec de la mise à jour de l\u0027épisode",
+                                                        "saved":  "Enregistré"
                                                     },
                                        "form":  {
                                                     "about":  "À propos",
@@ -863,7 +893,96 @@
                                                     "episodes":  "Épisodes",
                                                     "general":  "Général"
                                                 },
-                                       "view_podcast":  "Voir le podcast"
+                                       "view_podcast":  "Voir le podcast",
+                                       "general":  {
+                                                       "saved":  "Enregistré",
+                                                       "publishing":  "Publication...",
+                                                       "unpublishing":  "Dépublication...",
+                                                       "publish_success":  "Podcast publié avec succès",
+                                                       "unpublish_success":  "Podcast dépublié avec succès",
+                                                       "publish_error":  "Échec de la mise à jour du statut de publication",
+                                                       "total_duration_label":  "Durée totale (minutes)",
+                                                       "total_duration_placeholder":  "ex. 45",
+                                                       "hosts_label":  "Animateurs",
+                                                       "host_label":  "Animateur {{number}}",
+                                                       "name_label":  "Nom",
+                                                       "title_label":  "Titre",
+                                                       "name_placeholder":  "ex. Jean Dupont",
+                                                       "title_placeholder":  "ex. Animateur et producteur",
+                                                       "photo_label":  "Photo",
+                                                       "photo_uploaded":  "Photo téléchargée",
+                                                       "click_to_upload_photo":  "Cliquez pour télécharger une photo",
+                                                       "remove_photo":  "Supprimer la photo",
+                                                       "host_avatar_alt":  "Avatar de l\u0027animateur",
+                                                       "add_host":  "Ajouter un animateur"
+                                                   },
+                                       "media":  {
+                                                     "podcast_card_cover":  "Couverture de la carte du podcast",
+                                                     "podcast_banner_image":  "Image de bannière du podcast",
+                                                     "remove_cover":  "Supprimer l\u0027image de couverture",
+                                                     "upload_cover":  "Télécharger l\u0027image de couverture",
+                                                     "remove_banner":  "Supprimer l\u0027image de bannière",
+                                                     "upload_banner":  "Télécharger l\u0027image de bannière",
+                                                     "saved":  "Enregistré",
+                                                     "removed":  "Supprimé",
+                                                     "file_too_large":  "La taille du fichier doit être inférieure à 8 Mo",
+                                                     "invalid_file_type":  "Le fichier doit être une image JPEG ou PNG",
+                                                     "cover_upload_error":  "Échec de la mise à jour de l\u0027image de couverture",
+                                                     "cover_delete_error":  "Échec de la suppression de l\u0027image de couverture",
+                                                     "banner_upload_error":  "Échec de la mise à jour de l\u0027image de bannière",
+                                                     "banner_delete_error":  "Échec de la suppression de l\u0027image de bannière"
+                                                 },
+                                       "distribution":  {
+                                                            "copied":  "Copié dans le presse-papiers",
+                                                            "rss_description":  "Le flux RSS de votre podcast est généré automatiquement. Utilisez cette URL pour soumettre votre podcast aux annuaires.",
+                                                            "copy":  "Copier",
+                                                            "unpublished_warning":  "Votre podcast n\u0027est actuellement pas publié. Publiez-le avant de le soumettre aux annuaires.",
+                                                            "guide_description":  "Suivez ces étapes pour référencer votre podcast sur les principales plateformes. Chaque plateforme vous demande de soumettre l\u0027URL de votre flux RSS.",
+                                                            "apple":  {
+                                                                          "also_on_apple_music":  "Diffusé également sur Apple Music",
+                                                                          "step1_before":  "Rendez-vous sur",
+                                                                          "step1_after":  "et connectez-vous avec votre identifiant Apple",
+                                                                          "step2_before":  "Cliquez sur le bouton",
+                                                                          "step2_after":  "puis sélectionnez « Nouvelle émission »",
+                                                                          "step3":  "Sélectionnez « Ajouter une émission avec un flux RSS » et collez l\u0027URL de votre flux RSS",
+                                                                          "step4":  "Apple validera votre flux — l\u0027examen prend généralement 1 à 5 jours ouvrés"
+                                                                      },
+                                                            "spotify":  {
+                                                                            "largest_platform":  "La plus grande plateforme d\u0027écoute de podcasts",
+                                                                            "step1_before":  "Rendez-vous sur",
+                                                                            "step1_after":  "et connectez-vous ou créez un compte",
+                                                                            "step2":  "Cliquez sur « Commencer » puis sélectionnez « J\u0027ai un podcast hébergé chez un fournisseur »",
+                                                                            "step3":  "Collez l\u0027URL de votre flux RSS et cliquez sur « Suivant »",
+                                                                            "step4":  "Vérifiez la propriété, renseignez les informations et soumettez — la mise en ligne prend généralement quelques heures"
+                                                                        },
+                                                            "youtube":  {
+                                                                            "migrated_note":  "Google Podcasts a migré vers YouTube Music",
+                                                                            "step1":  "Rendez-vous sur",
+                                                                            "step2":  "Connectez-vous avec votre compte Google et cliquez sur « Ajouter un podcast »",
+                                                                            "step3":  "Collez l\u0027URL de votre flux RSS et vérifiez la propriété par e-mail",
+                                                                            "step4":  "Votre podcast apparaîtra sur YouTube Music et dans les résultats de recherche Google"
+                                                                        },
+                                                            "amazon":  {
+                                                                           "also_on_alexa":  "Également disponible sur les appareils Alexa",
+                                                                           "step1_before":  "Rendez-vous sur",
+                                                                           "step1_after":  "et connectez-vous avec votre compte Amazon",
+                                                                           "step2":  "Cliquez sur « Ajouter votre podcast » et collez l\u0027URL de votre flux RSS",
+                                                                           "step3":  "Vérifiez les informations de votre podcast et soumettez-le pour examen"
+                                                                       },
+                                                            "tips":  {
+                                                                         "thumbnail_before":  "Assurez-vous que votre podcast dispose d\u0027une",
+                                                                         "thumbnail_strong":  "image miniature",
+                                                                         "thumbnail_after":  "(1400x1400 minimum pour Apple Podcasts)",
+                                                                         "episode_before":  "Ayez au moins",
+                                                                         "episode_strong":  "un épisode publié",
+                                                                         "episode_after":  "avant de soumettre",
+                                                                         "description_before":  "Rédigez une",
+                                                                         "description_strong":  "description de podcast",
+                                                                         "description_after":  "détaillée — cela améliore la découvrabilité",
+                                                                         "auto_publish":  "Les nouveaux épisodes apparaîtront automatiquement sur toutes les plateformes une fois votre flux soumis",
+                                                                         "propagation":  "La propagation des mises à jour sur les plateformes peut prendre quelques heures"
+                                                                     }
+                                                        }
                                    },
                      "failed_to_create_podcast":  "Échec de la création du podcast",
                      "form":  {
@@ -1928,6 +2047,8 @@
                                                                          "link_button":  "Lier un cours",
                                                                          "search_placeholder":  "Rechercher des cours...",
                                                                          "no_courses":  "Aucun cours trouvé",
+                                                                         "no_course_linked":  "Aucun cours lié",
+                                                                         "sort_aria":  "Trier les cours",
                                                                          "course_linked_id":  "Cours lié (ID: {{id}})",
                                                                          "course_not_found":  "Le cours lié n\u0027existe peut-être plus ou vous n\u0027y avez pas accès",
                                                                          "toasts":  {
@@ -2053,6 +2174,32 @@
                                                                          "delete_success":  "Communauté supprimée avec succès",
                                                                          "delete_error":  "Échec de la suppression de la communauté"
                                                                      },
+                                                          "media":  {
+                                                                        "cover_image":  "Image de couverture de la communauté",
+                                                                        "banner_image":  "Image de bannière de la communauté",
+                                                                        "remove_cover":  "Supprimer l\u0027image de couverture",
+                                                                        "upload_cover":  "Télécharger l\u0027image de couverture",
+                                                                        "remove_banner":  "Supprimer l\u0027image de bannière",
+                                                                        "upload_banner":  "Télécharger l\u0027image de bannière",
+                                                                        "saved":  "Enregistré",
+                                                                        "removed":  "Supprimé",
+                                                                        "invalid_file_type":  "Type de fichier invalide. Veuillez télécharger une image JPG ou PNG.",
+                                                                        "file_too_large":  "Le fichier est trop volumineux. La taille maximale est de 8 Mo.",
+                                                                        "cover_upload_error":  "Échec de la mise à jour de l\u0027image de couverture",
+                                                                        "cover_delete_error":  "Échec de la suppression de l\u0027image de couverture",
+                                                                        "banner_upload_error":  "Échec de la mise à jour de l\u0027image de bannière",
+                                                                        "banner_delete_error":  "Échec de la suppression de l\u0027image de bannière"
+                                                                    },
+                                                          "table":  {
+                                                                        "name":  "Nom",
+                                                                        "description":  "Description"
+                                                                    },
+                                                          "sort_options":  {
+                                                                               "name_asc":  "Nom A-Z",
+                                                                               "name_desc":  "Nom Z-A",
+                                                                               "newest":  "Plus récents d\u0027abord",
+                                                                               "oldest":  "Plus anciens d\u0027abord"
+                                                                           },
                                                           "access":  {
                                                                          "public":  {
                                                                                         "active":  "Actif",
@@ -2071,10 +2218,25 @@
                                                                                             "title":  "Restreint"
                                                                                         },
                                                                          "subtitle":  "Choisissez si votre communauté doit être publique ou accessible uniquement à des groupes d\u0027utilisateurs spécifiques",
+                                                                         "search_placeholder":  "Rechercher des groupes d\u0027utilisateurs...",
+                                                                         "sort_aria":  "Trier les groupes d\u0027utilisateurs",
+                                                                         "public_badge":  "Public",
+                                                                         "restricted_badge":  "Restreint",
+                                                                         "no_groups_linked":  "Aucun groupe d\u0027utilisateurs lié",
+                                                                         "no_groups_found":  "Aucun groupe d\u0027utilisateurs trouvé",
+                                                                         "public_no_restrictions":  "La communauté est publique — aucune restriction d\u0027accès",
+                                                                         "add_count":  "Ajouter {{count}}",
+                                                                         "delete_count":  "Supprimer {{count}}",
                                                                          "title":  "Paramètres d\u0027accès",
                                                                          "toasts":  {
                                                                                         "update_error":  "Échec de la mise à jour des paramètres d\u0027accès",
-                                                                                        "update_success":  "Paramètres d\u0027accès mis à jour avec succès"
+                                                                                        "update_success":  "Paramètres d\u0027accès mis à jour avec succès",
+                                                                                        "bulk_add_success":  "{{count}} groupe(s) d\u0027utilisateurs ajouté(s)",
+                                                                                        "bulk_add_partial":  "Certains groupes n\u0027ont pas pu être ajoutés",
+                                                                                        "bulk_add_error":  "Échec de l\u0027ajout des groupes d\u0027utilisateurs",
+                                                                                        "bulk_remove_success":  "{{count}} groupe(s) d\u0027utilisateurs supprimé(s)",
+                                                                                        "bulk_remove_partial":  "Certains groupes n\u0027ont pas pu être supprimés",
+                                                                                        "bulk_remove_error":  "Échec de la suppression des groupes d\u0027utilisateurs"
                                                                                     },
                                                                          "usergroups":  {
                                                                                             "actions":  {
@@ -2103,7 +2265,9 @@
                                                                                                            "link_error":  "Erreur {{status}} : {{detail}}",
                                                                                                            "link_success":  "Groupe d\u0027utilisateurs lié avec succès",
                                                                                                            "unlink_error":  "Une erreur s\u0027est produite lors de la suppression de l\u0027accès du groupe",
-                                                                                                           "unlink_success":  "Accès du groupe supprimé avec succès"
+                                                                                                           "unlink_success":  "Accès du groupe supprimé avec succès",
+                                                                                                           "link_failed":  "Échec de la liaison",
+                                                                                                           "unlink_failed":  "Échec de la dissociation"
                                                                                                        }
                                                                                         }
                                                                      }
