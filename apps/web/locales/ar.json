@@ -901,7 +901,8 @@
                                        "saving":  "جاري الحفظ...",
                                        "tabs":  {
                                                     "episodes":  "الحلقات",
-                                                    "general":  "عام"
+                                                    "general":  "عام",
+                                                    "distribution":  "التوزيع"
                                                 },
                                        "view_podcast":  "عرض البودكاست",
                                        "general":  {
@@ -5788,6 +5789,14 @@
                    "no_search_results":  "لم يتم العثور على لوحات"
                },
     "onboarding":  {
+                       "activity_types":  {
+                                                  "page":  "صفحة",
+                                                  "video":  "فيديو",
+                                                  "document":  "مستند",
+                                                  "assignment":  "واجب",
+                                                  "markdown":  "Markdown",
+                                                  "embed":  "تضمين"
+                                              },
                        "getting_started":  "البدء",
                        "all_done":  "تم الانتهاء!",
                        "all_set":  "أنت جاهز!",

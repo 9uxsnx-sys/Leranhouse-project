@@ -153,11 +153,11 @@ function DashLeftMenu() {
 
   // User sub-tab items for the Users tab
   const userSubNavItems: SubNavItem[] = [
-    { label: 'Users', href: '/dash/users/settings/users' },
-    { label: 'UserGroups', href: '/dash/users/settings/usergroups' },
-    { label: 'Roles', href: '/dash/users/settings/roles' },
-    { label: 'Invite Codes', href: '/dash/users/settings/signups' },
-    { label: 'Audit Logs', href: '/dash/users/settings/audit-logs' },
+    { label: t('dashboard.users.settings.tabs.users'), href: '/dash/users/settings/users' },
+    { label: t('dashboard.users.settings.tabs.usergroups'), href: '/dash/users/settings/usergroups' },
+    { label: t('dashboard.users.settings.tabs.roles'), href: '/dash/users/settings/roles' },
+    { label: t('dashboard.users.settings.tabs.signups'), href: '/dash/users/settings/signups' },
+    { label: t('dashboard.users.settings.tabs.audit_logs'), href: '/dash/users/settings/audit-logs' },
   ]
 
   return (

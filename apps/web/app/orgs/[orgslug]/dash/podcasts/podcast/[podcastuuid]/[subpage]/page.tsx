@@ -50,7 +50,7 @@ function PodcastOverviewPage(props: { params: Promise<PodcastOverviewParams> }) 
     },
     {
       key: 'distribution',
-      label: 'Distribution',
+      label: t('podcasts.dashboard.tabs.distribution'),
       icon: SectionIcon.distribution,
       href: `/dash/podcasts/podcast/${params.podcastuuid}/distribution`,
     },

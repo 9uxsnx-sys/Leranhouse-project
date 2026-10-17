@@ -891,7 +891,8 @@
                                        "saving":  "Enregistrement...",
                                        "tabs":  {
                                                     "episodes":  "Épisodes",
-                                                    "general":  "Général"
+                                                    "general":  "Général",
+                                                    "distribution":  "Distribution"
                                                 },
                                        "view_podcast":  "Voir le podcast",
                                        "general":  {
@@ -5732,6 +5733,14 @@
                    "no_search_results":  "Aucun tableau trouvé"
                },
     "onboarding":  {
+                       "activity_types":  {
+                                                  "page":  "Page",
+                                                  "video":  "Vidéo",
+                                                  "document":  "Document",
+                                                  "assignment":  "Devoir",
+                                                  "markdown":  "Markdown",
+                                                  "embed":  "Intégration"
+                                              },
                        "getting_started":  "Prise en main",
                        "all_done":  "Terminé !",
                        "all_set":  "Vous êtes prêt !",

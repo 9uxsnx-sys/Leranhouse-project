@@ -35,7 +35,7 @@ const getSettingTabs = (t: any): TabItem[] => [
   { id: 'branding', label: t('dashboard.organization.settings.tabs.branding'), icon: SectionIcon.branding },
   { id: 'seo', label: 'SEO', icon: SectionIcon.seo },
   { id: 'domains', label: t('dashboard.organization.settings.tabs.domains') || 'Domains', icon: SectionIcon.domains, requiredPlan: 'standard' },
-  { id: 'automations', label: 'Automations', icon: SectionIcon.automations, requiredPlan: 'pro' },
+  { id: 'automations', label: t('dashboard.organization.settings.tabs.automations'), icon: SectionIcon.automations, requiredPlan: 'pro' },
   { id: 'api', label: t('dashboard.organization.settings.tabs.api') || 'API Access', icon: SectionIcon.api, requiredPlan: 'pro' },
 ]
 

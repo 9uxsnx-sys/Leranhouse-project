@@ -288,7 +288,7 @@ function AdminBreadcrumbNav() {
   // ── Build crumb trail ───────────────────────────────────────────────────
   const crumbs: Crumb[] = [
     { label: t('common.home'), href: getUriWithOrg(orgslug, '/') },
-    { label: 'Dashboard', href: getUriWithOrg(orgslug, '/dash') },
+    { label: t('common.dashboard'), href: getUriWithOrg(orgslug, '/dash') },
   ]
 
   if (section) {

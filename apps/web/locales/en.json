@@ -1117,7 +1117,8 @@
                      "dashboard":  {
                                        "tabs":  {
                                                     "general":  "General",
-                                                    "episodes":  "Episodes"
+                                                    "episodes":  "Episodes",
+                                                    "distribution":  "Distribution"
                                                 },
                                        "view_podcast":  "View Podcast",
                                        "saving":  "Saving...",
@@ -5756,6 +5757,14 @@
                       "step_complete":  "Complete"
                   },
     "onboarding":  {
+                       "activity_types":  {
+                                                  "page":  "Page",
+                                                  "video":  "Video",
+                                                  "document":  "Document",
+                                                  "assignment":  "Assignment",
+                                                  "markdown":  "Markdown",
+                                                  "embed":  "Embed"
+                                              },
                        "getting_started":  "Getting Started",
                        "all_done":  "All done!",
                        "all_set":  "You\u0027re all set!",

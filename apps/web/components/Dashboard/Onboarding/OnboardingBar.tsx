@@ -43,12 +43,12 @@ import WelcomeGlobe from './WelcomeGlobe'
 import { useTranslation } from 'react-i18next'
 
 const ACTIVITY_TYPES = [
-  { icon: AppWindow, color: 'text-blue-400', label: 'Page' },
-  { icon: CirclePlay, color: 'text-violet-400', label: 'Video' },
-  { icon: FileText, color: 'text-emerald-400', label: 'Document' },
-  { icon: Backpack, color: 'text-amber-400', label: 'Assignment' },
-  { icon: MarkdownLogo, color: 'text-rose-400', label: 'Markdown' },
-  { icon: Globe, color: 'text-cyan-400', label: 'Embed' },
+  { icon: AppWindow, color: 'text-blue-400', labelKey: 'onboarding.activity_types.page' },
+  { icon: CirclePlay, color: 'text-violet-400', labelKey: 'onboarding.activity_types.video' },
+  { icon: FileText, color: 'text-emerald-400', labelKey: 'onboarding.activity_types.document' },
+  { icon: Backpack, color: 'text-amber-400', labelKey: 'onboarding.activity_types.assignment' },
+  { icon: MarkdownLogo, color: 'text-rose-400', labelKey: 'onboarding.activity_types.markdown' },
+  { icon: Globe, color: 'text-cyan-400', labelKey: 'onboarding.activity_types.embed' },
 ]
 
 const STEP_CONFIG: Record<
@@ -509,7 +509,7 @@ export default function OnboardingBar() {
                                         <div className="flex gap-2">
                                           {ACTIVITY_TYPES.map((activity) => (
                                             <div
-                                              key={activity.label}
+                                              key={activity.labelKey}
                                               className="flex flex-col items-center gap-1.5 flex-1 py-2 rounded-lg bg-white nice-shadow"
                                             >
                                               <activity.icon
@@ -517,7 +517,7 @@ export default function OnboardingBar() {
                                                 className={activity.color}
                                               />
                                               <span className="text-[10px] font-medium text-gray-500">
-                                                {activity.label}
+                                                {t(activity.labelKey)}
                                               </span>
                                             </div>
                                           ))}
