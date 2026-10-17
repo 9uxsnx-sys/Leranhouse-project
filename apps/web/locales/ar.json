@@ -1203,6 +1203,7 @@
                                                    "logout_warning":  "سيتم تسجيل خروجك بعد تغيير كلمة المرور"
                                                },
                                   "profile_builder":  {
+                                                          "section_name":  "قسم {{name}}",
                                                           "title":  "منشئ الملف الشخصي",
                                                           "subtitle":  "قم بتخصيص ملفك الشخصي المهني",
                                                           "sections":  "الأقسام",

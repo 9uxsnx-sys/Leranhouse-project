@@ -1193,6 +1193,7 @@
                                                    "logout_warning":  "Vous serez déconnecté après avoir changé votre mot de passe"
                                                },
                                   "profile_builder":  {
+                                                          "section_name":  "Section {{name}}",
                                                           "title":  "Constructeur de profil",
                                                           "subtitle":  "Personnalisez votre profil professionnel",
                                                           "sections":  "Sections",

@@ -1487,6 +1487,7 @@
                                                    "logout_warning":  "You will be logged out after changing your password"
                                                },
                                   "profile_builder":  {
+                                                          "section_name":  "{{name}} section",
                                                           "title":  "Profile Builder",
                                                           "subtitle":  "Customize your professional profile",
                                                           "sections":  "Sections",

@@ -218,7 +218,7 @@ const UserProfileBuilder = () => {
     const baseSection = {
       id: `section-${Date.now()}`,
       type,
-      title: `${t(SECTION_TYPES[type].labelKey)} Section`
+      title: t('user.settings.profile_builder.section_name', { name: t(SECTION_TYPES[type].labelKey) })
     }
 
     switch (type) {
