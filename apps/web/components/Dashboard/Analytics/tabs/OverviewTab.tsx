@@ -4,6 +4,7 @@ import { SectionCard } from '@components/Analytics/Card'
 import { EmptyState } from '@components/Analytics/Feedback'
 import { TabCard } from '@components/Analytics/TabCard'
 import { useAnalyticsTab } from '@services/analytics/tabs'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Overview — "is the platform healthy right now?" Chart-only (no KPI cards).
@@ -12,6 +13,7 @@ import { useAnalyticsTab } from '@services/analytics/tabs'
  * the grid layout: a full-width hero, then two 2-up rows.
  */
 export function OverviewTab({ range = '30d' }: { range?: string }) {
+  const { t } = useTranslation()
   const { data, isLoading, error } = useAnalyticsTab('overview', range)
   const cards = data?.cards
 
@@ -19,8 +21,8 @@ export function OverviewTab({ range = '30d' }: { range?: string }) {
     return (
       <SectionCard>
         <EmptyState
-          title="Couldn't load analytics"
-          description="Please try again in a moment."
+          title={t('analytics.common.error_title')}
+          description={t('analytics.common.error_description')}
         />
       </SectionCard>
     )

@@ -84,7 +84,7 @@ export default function CourseAnalyticsTab({ courseUUID }: { courseUUID: string 
         if (uuid) {
           const cleanUuid = uuid.replace('activity_', '')
           map[uuid] = {
-            name: activity.name || 'Untitled',
+            name: activity.name || t('analytics.course_analytics.common.untitled'),
             type: activity.activity_type || '',
             chapterName: chapter.name || '',
             activityUuid: cleanUuid,
@@ -93,7 +93,7 @@ export default function CourseAnalyticsTab({ courseUUID }: { courseUUID: string 
       }
     }
     return map
-  }, [courseContext?.courseStructure])
+  }, [courseContext?.courseStructure, t])
 
   if (!isCourseAnalyticsAvailable) {
     return (

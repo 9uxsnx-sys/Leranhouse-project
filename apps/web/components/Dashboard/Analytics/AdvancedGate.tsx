@@ -38,7 +38,7 @@ export function AdvancedGate({
               rel="noopener noreferrer"
               className="mt-3 text-xs font-semibold text-gray-600 bg-white px-4 py-2 rounded-lg nice-shadow hover:bg-gray-50 transition-colors"
             >
-              {t('common.plans.upgrade_to')} Enterprise
+              {t('common.plans.upgrade_to')} {t('common.enterprise')}
             </a>
           )}
         </div>

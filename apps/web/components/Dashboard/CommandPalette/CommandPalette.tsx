@@ -139,7 +139,7 @@ export default function CommandPalette() {
             <span className="truncate text-[12px] text-ui-fg-muted">{description}</span>
           ) : null}
         </span>
-        <span className="hidden text-ui-fg-muted/40 group-aria-selected/item:inline text-[11px] font-medium">Open</span>
+        <span className="hidden text-ui-fg-muted/40 group-aria-selected/item:inline text-[11px] font-medium">{t('dashboard.command_palette.open')}</span>
       </Command.Item>
     )
   }
@@ -165,7 +165,7 @@ export default function CommandPalette() {
             <span className="truncate text-[12px] text-ui-fg-muted">{r.subtitle}</span>
           ) : null}
         </span>
-        <span className="hidden text-ui-fg-muted/40 group-aria-selected/item:inline text-[11px] font-medium">Open</span>
+        <span className="hidden text-ui-fg-muted/40 group-aria-selected/item:inline text-[11px] font-medium">{t('dashboard.command_palette.open')}</span>
       </Command.Item>
     )
   }
@@ -262,16 +262,16 @@ export default function CommandPalette() {
             {/* Footer — minimal, no border */}
             <div className="flex items-center gap-4 px-4 py-2.5 text-[11px] text-ui-fg-muted/40">
               <span className="inline-flex items-center gap-1">
-                <span>Navigate</span>
+                <span>{t('dashboard.command_palette.navigate')}</span>
                 <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">↑</kbd>
                 <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">↓</kbd>
               </span>
               <span className="inline-flex items-center gap-1">
-                <span>Open</span>
+                <span>{t('dashboard.command_palette.open')}</span>
                 <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">↵</kbd>
               </span>
               <span className="inline-flex items-center gap-1">
-                <span>New tab</span>
+                <span>{t('dashboard.command_palette.new_tab')}</span>
                 <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">⌘</kbd>
                 <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">↵</kbd>
               </span>

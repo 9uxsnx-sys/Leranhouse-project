@@ -16,17 +16,18 @@ import { CommunityTab, COMMUNITY_TABLES } from '@components/Dashboard/Analytics/
 import { useOrgCommunities, useOrgCourses, useOrgPodcasts } from '@services/analytics/tabs'
 import { PageTabs } from '@components/ui/page-tabs'
 import { SectionIcon } from '@components/ui/icons'
+import { useTranslation } from 'react-i18next'
 
 type TabId = 'overview' | 'learning' | 'audience' | 'learners' | 'courses' | 'podcasts' | 'community'
 
-const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
-  { id: 'overview', label: 'Overview', icon: SectionIcon.overview },
-  { id: 'learning', label: 'Learning', icon: SectionIcon.learning },
-  { id: 'audience', label: 'Audience', icon: SectionIcon.audience },
-  { id: 'learners', label: 'Learners', icon: SectionIcon.learners },
-  { id: 'courses', label: 'Courses', icon: SectionIcon.courses },
-  { id: 'podcasts', label: 'Podcasts', icon: SectionIcon.podcasts },
-  { id: 'community', label: 'Community', icon: SectionIcon.community },
+const TABS: { id: TabId; labelKey: string; icon: React.ElementType }[] = [
+  { id: 'overview', labelKey: 'analytics.tabs.overview', icon: SectionIcon.overview },
+  { id: 'learning', labelKey: 'analytics.tabs.learning', icon: SectionIcon.learning },
+  { id: 'audience', labelKey: 'analytics.tabs.audience', icon: SectionIcon.audience },
+  { id: 'learners', labelKey: 'analytics.tabs.learners', icon: SectionIcon.learners },
+  { id: 'courses', labelKey: 'analytics.tabs.courses', icon: SectionIcon.courses },
+  { id: 'podcasts', labelKey: 'analytics.tabs.podcasts', icon: SectionIcon.podcasts },
+  { id: 'community', labelKey: 'analytics.tabs.community', icon: SectionIcon.community },
 ]
 
 /**
@@ -35,6 +36,7 @@ const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
  * analytics components.
  */
 export default function AnalyticsTabs() {
+  const { t } = useTranslation()
   const [tab, setTab] = useState<TabId>('overview')
   const [range, setRange] = useState('30d')
   const [query, setQuery] = useState('')
@@ -67,7 +69,7 @@ export default function AnalyticsTabs() {
     <div className="min-h-screen w-full bg-[#f8f8f8]">
       {/* Row 1: Page title */}
       <div className="max-w-7xl mx-auto w-full pt-8 px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl md:text-4xl font-semibold text-ui-fg-base leading-tight">Analytics</h1>
+        <h1 className="text-3xl md:text-4xl font-semibold text-ui-fg-base leading-tight">{t('analytics.title')}</h1>
       </div>
 
       {/* Row 2: Pill-style tab bar */}
@@ -77,7 +79,7 @@ export default function AnalyticsTabs() {
           indicatorId="analytics-tabs"
           active={tab}
           onSelect={(id) => setTab(id as TabId)}
-          tabs={TABS.map((t) => ({ id: t.id, label: t.label, icon: t.icon }))}
+          tabs={TABS.map((item) => ({ id: item.id, label: t(item.labelKey), icon: item.icon }))}
         />
       </div>
 
@@ -86,7 +88,7 @@ export default function AnalyticsTabs() {
         <div className="mb-6">
           <AnalyticsToolbar range={range} onRangeChange={setRange}>
             {tab === 'learners' && (
-              <SearchInput value={query} onChange={setQuery} placeholder="Search learners…" />
+              <SearchInput value={query} onChange={setQuery} placeholder={t('analytics.learners_tab.search_placeholder')} />
             )}
             {tab === 'courses' && (
               <FilterSelect value={course} onChange={setCourse} options={courseOptions} />
@@ -100,11 +102,11 @@ export default function AnalyticsTabs() {
                 <button
                   type="button"
                   onClick={() => setCommunityTable((i) => (i + 1) % COMMUNITY_TABLES.length)}
-                  title="Switch table"
+                  title={t('analytics.learners_tab.switch_table')}
                   className="inline-flex items-center gap-1.5 h-7 px-3 text-sm text-gray-700 bg-white shadow-borders-base rounded-md hover:bg-gray-50 focus:outline-none transition-colors"
                 >
                   <Repeat2 size={14} className="text-gray-400" />
-                  {COMMUNITY_TABLES[communityTable].label}
+                  {t(COMMUNITY_TABLES[communityTable].labelKey)}
                 </button>
               </>
             )}

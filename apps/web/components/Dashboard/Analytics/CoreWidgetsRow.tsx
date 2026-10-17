@@ -34,11 +34,12 @@ const kFormatter = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}K` : Str
 const COLORS = ['#6b8de3', '#818cf8', '#a78bfa', '#c4b5fd']
 
 function ExpandButton({ onClick }: { onClick: () => void }) {
+  const { t } = useTranslation()
   return (
     <button
       onClick={onClick}
       className="p-1 rounded-md hover:bg-gray-100 transition-colors text-gray-300 hover:text-gray-500"
-      title="Expand"
+      title={t('analytics.common.expand')}
     >
       <Maximize2 size={14} />
     </button>
@@ -201,7 +202,7 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
       <AnalyticsDetailModal
         open={funnelOpen}
         onClose={() => setFunnelOpen(false)}
-        title="{t('analytics.overview.enrollment_funnel')}"
+        title={t('analytics.overview.enrollment_funnel')}
         icon={<Funnel size={20} className="text-indigo-400" />}
       >
         {chartData.length === 0 ? (
@@ -290,7 +291,7 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
       <AnalyticsDetailModal
         open={coursesOpen}
         onClose={() => setCoursesOpen(false)}
-        title="Top Courses"
+        title={t('analytics.overview.top_courses')}
         icon={<Trophy size={20} className="text-amber-400" />}
       >
         {courseRows.length === 0 ? (
@@ -348,7 +349,7 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
                       )}
                     </div>
                     <span className="text-sm text-gray-700 truncate group-hover:text-gray-900 font-medium">
-                      {row.course_name || `Course ${row.course_uuid}`}
+                      {row.course_name || t('analytics.common.course_fallback', { id: row.course_uuid })}
                     </span>
                   </div>
                   <span className="text-sm text-gray-600 text-right tabular-nums">
@@ -376,7 +377,7 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
       <AnalyticsDetailModal
         open={activityOpen}
         onClose={() => setActivityOpen(false)}
-        title="{t('analytics.overview.activity_engagement')}"
+        title={t('analytics.overview.activity_engagement')}
         icon={
           <Zap size={20} className="text-green-400" />
         }
@@ -456,6 +457,7 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
 /* ---- Shared row components ---- */
 
 function CourseRow({ row, org }: { row: any; org: any }) {
+  const { t } = useTranslation()
   const thumbnail =
     row.thumbnail_image && row.course_uuid
       ? getCourseThumbnailMediaDirectory(
@@ -484,7 +486,7 @@ function CourseRow({ row, org }: { row: any; org: any }) {
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-gray-700 truncate group-hover:text-gray-900">
-          {row.course_name || `Course ${row.course_uuid}`}
+          {row.course_name || t('analytics.common.course_fallback', { id: row.course_uuid })}
         </p>
         <div className="flex items-center gap-3 text-[11px] text-gray-400">
           <span className="flex items-center gap-0.5">

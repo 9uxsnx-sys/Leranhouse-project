@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, MoreHorizontal, X } from 'lucide-react'
 import { SectionCard } from '@components/Analytics/Card'
 import { TabCard } from '@components/Analytics/TabCard'
 import { useAnalyticsTab, useLearnerDetail } from '@services/analytics/tabs'
+import { useTranslation } from 'react-i18next'
 
 function initials(name: string) {
   return String(name || '')
@@ -34,6 +35,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 
 /** The details dialog — loads its own payload so the table stays a single request. */
 function LearnerDetailDialog({ userId, onClose }: { userId: number; onClose: () => void }) {
+  const { t } = useTranslation()
   const { data, isLoading } = useLearnerDetail(userId)
   const user = data?.user
   const courses = data?.courses ?? []
@@ -68,23 +70,23 @@ function LearnerDetailDialog({ userId, onClose }: { userId: number; onClose: () 
 
           {/* Info rows */}
           <div className="px-6 pb-4 space-y-3">
-            <Row label="Role">{user?.role ?? '—'}</Row>
-            <Row label="Status">
+            <Row label={t('analytics.learners_tab.role')}>{user?.role ?? '—'}</Row>
+            <Row label={t('analytics.learners_tab.status')}>
               <span className="inline-flex items-center gap-1.5">
                 <span className={`w-2 h-2 rounded-full ${user?.verified ? 'bg-green-500' : 'bg-amber-500'}`} />
-                {user?.verified ? 'Verified' : 'Unverified'}
+                {user?.verified ? t('analytics.learners_tab.verified') : t('analytics.learners_tab.unverified')}
               </span>
             </Row>
-            <Row label="Joined">{formatDate(user?.joined ?? null)}</Row>
-            <Row label="Last active">{formatDate(user?.last_active ?? null)}</Row>
+            <Row label={t('analytics.learners_tab.joined')}>{formatDate(user?.joined ?? null)}</Row>
+            <Row label={t('analytics.learners_tab.last_active')}>{formatDate(user?.last_active ?? null)}</Row>
           </div>
 
           {/* Course completion per course */}
           <div className="px-6 pb-6 space-y-2.5">
-            <span className="text-xs text-gray-400 block">Courses</span>
-            {isLoading && <span className="text-sm text-gray-400">Loading…</span>}
+            <span className="text-xs text-gray-400 block">{t('analytics.learners_tab.courses')}</span>
+            {isLoading && <span className="text-sm text-gray-400">{t('analytics.common.loading')}</span>}
             {!isLoading && courses.length === 0 && (
-              <span className="text-sm text-gray-400">No course enrollments yet.</span>
+              <span className="text-sm text-gray-400">{t('analytics.learners_tab.no_course_enrollments')}</span>
             )}
             {courses.map((course) => (
               <div key={course.name} className="flex justify-between items-center gap-4">
@@ -106,6 +108,7 @@ function LearnerDetailDialog({ userId, onClose }: { userId: number; onClose: () 
  * the same pattern as the Users tab window.
  */
 export function LearnersTab({ range = '30d', query = '' }: { range?: string; query?: string }) {
+  const { t } = useTranslation()
   const [page, setPage] = useState(1)
   const [detailUserId, setDetailUserId] = useState<number | null>(null)
 
@@ -123,7 +126,7 @@ export function LearnersTab({ range = '30d', query = '' }: { range?: string; que
     <div className="space-y-4">
       {!isLoading && rows.length === 0 ? (
         <SectionCard bleed>
-          <p className="py-10 text-center text-sm text-gray-400">No learners match your search.</p>
+          <p className="py-10 text-center text-sm text-gray-400">{t('analytics.learners_tab.no_results')}</p>
         </SectionCard>
       ) : (
         <TabCard
@@ -135,7 +138,7 @@ export function LearnersTab({ range = '30d', query = '' }: { range?: string; que
               type="button"
               onClick={() => setDetailUserId(row.id)}
               className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
-              title="View learner details"
+              title={t('analytics.learners_tab.view_details')}
             >
               <MoreHorizontal size={16} />
             </button>
@@ -147,7 +150,11 @@ export function LearnersTab({ range = '30d', query = '' }: { range?: string; que
       {total > pageSize && (
         <div className="flex items-center justify-between px-6 py-4 border border-gray-200 rounded-xl bg-gray-50/50">
           <div className="text-xs text-gray-500 font-medium">
-            Showing {(page - 1) * pageSize + 1}-{Math.min(page * pageSize, total)} of {total}
+            {t('analytics.learners_tab.showing', {
+              from: (page - 1) * pageSize + 1,
+              to: Math.min(page * pageSize, total),
+              total,
+            })}
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -158,7 +165,7 @@ export function LearnersTab({ range = '30d', query = '' }: { range?: string; que
               <ChevronLeft className="w-4 h-4 text-gray-600" />
             </button>
             <span className="text-sm text-gray-600 font-medium min-w-[80px] text-center bg-white px-3 py-2 rounded-lg border border-gray-200">
-              Page {page} of {lastPage}
+              {t('analytics.learners_tab.page_of', { page, total: lastPage })}
             </span>
             <button
               onClick={() => setPage((p) => Math.min(lastPage, p + 1))}

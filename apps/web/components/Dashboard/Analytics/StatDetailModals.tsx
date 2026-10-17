@@ -49,22 +49,22 @@ function UserAvatar({ user }: { user?: any }) {
   )
 }
 
-function userName(user?: any): string {
-  if (!user) return 'Unknown'
+function userName(user: any, t: (key: string) => string): string {
+  if (!user) return t('analytics.common.unknown')
   if (user.first_name || user.last_name) return `${user.first_name || ''} ${user.last_name || ''}`.trim()
-  return user.username || 'Unknown'
+  return user.username || t('analytics.common.unknown')
 }
 
-function relativeTime(ts: string): string {
+function relativeTime(ts: string, t: (key: string, options?: any) => string): string {
   const diff = Date.now() - new Date(ts).getTime()
   const secs = Math.floor(diff / 1000)
-  if (secs < 60) return `${secs}s ago`
+  if (secs < 60) return t('analytics.common.seconds_ago', { count: secs })
   const mins = Math.floor(secs / 60)
-  if (mins < 60) return `${mins}m ago`
+  if (mins < 60) return t('analytics.common.minutes_ago', { count: mins })
   const hours = Math.floor(mins / 60)
-  if (hours < 24) return `${hours}h ago`
+  if (hours < 24) return t('analytics.common.hours_ago', { count: hours })
   const days = Math.floor(hours / 24)
-  return `${days}d ago`
+  return t('analytics.common.days_ago', { count: days })
 }
 
 function formatDate(ts: string): string {
@@ -170,7 +170,7 @@ export function LiveUsersDetail({ days }: { days: string }) {
                 >
                   <UserAvatar user={user} />
                   <span className="text-gray-700 font-medium truncate max-w-[140px]">
-                    {userName(user)}
+                    {userName(user, t)}
                   </span>
                 </a>
               </td>
@@ -199,7 +199,7 @@ export function LiveUsersDetail({ days }: { days: string }) {
                 )}
               </td>
               <td className="py-2.5 text-right text-gray-400 text-xs">
-                {relativeTime(row.last_seen)}
+                {relativeTime(row.last_seen, t)}
               </td>
             </tr>
           )
@@ -244,7 +244,7 @@ export function SignupsDetail({ days }: { days: string }) {
                 >
                   <UserAvatar user={user} />
                   <span className="text-gray-700 font-medium truncate max-w-[140px]">
-                    {userName(user)}
+                    {userName(user, t)}
                   </span>
                 </a>
               </td>
@@ -308,7 +308,7 @@ export function EnrollmentsDetail({ days }: { days: string }) {
                 >
                   <UserAvatar user={user} />
                   <span className="text-gray-700 font-medium truncate max-w-[140px]">
-                    {userName(user)}
+                    {userName(user, t)}
                   </span>
                 </a>
               </td>
@@ -369,7 +369,7 @@ export function CompletionsDetail({ days }: { days: string }) {
                 >
                   <UserAvatar user={user} />
                   <span className="text-gray-700 font-medium truncate max-w-[140px]">
-                    {userName(user)}
+                    {userName(user, t)}
                   </span>
                 </a>
               </td>

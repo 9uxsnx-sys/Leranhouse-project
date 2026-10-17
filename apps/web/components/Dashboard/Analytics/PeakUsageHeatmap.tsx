@@ -1,11 +1,21 @@
 'use client'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAnalyticsPipe } from './useAnalyticsDashboard'
 
-const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const HOURS = Array.from({ length: 24 }, (_, i) => i)
 
 export default function PeakUsageHeatmap({ days = '30' }: { days?: string }) {
+  const { t } = useTranslation()
+  const DAYS = [
+    t('analytics.advanced_widgets.peak_usage.days.mon'),
+    t('analytics.advanced_widgets.peak_usage.days.tue'),
+    t('analytics.advanced_widgets.peak_usage.days.wed'),
+    t('analytics.advanced_widgets.peak_usage.days.thu'),
+    t('analytics.advanced_widgets.peak_usage.days.fri'),
+    t('analytics.advanced_widgets.peak_usage.days.sat'),
+    t('analytics.advanced_widgets.peak_usage.days.sun'),
+  ]
   const { data, isLoading } = useAnalyticsPipe('peak_usage_hours', { days })
   const rows: any[] = data?.data ?? []
 
@@ -28,10 +38,10 @@ export default function PeakUsageHeatmap({ days = '30' }: { days?: string }) {
 
   return (
     <div className="bg-white rounded-xl nice-shadow p-5 min-h-[300px] overflow-hidden min-w-0">
-      <h3 className="text-sm font-semibold text-gray-700 mb-1">Peak Usage Hours</h3>
-      <p className="text-xs text-gray-400 mb-4">Event volume by day and hour</p>
+      <h3 className="text-sm font-semibold text-gray-700 mb-1">{t('analytics.advanced_widgets.peak_usage.title')}</h3>
+      <p className="text-xs text-gray-400 mb-4">{t('analytics.advanced_widgets.peak_usage.description')}</p>
       {isLoading ? (
-        <div className="h-48 flex items-center justify-center text-gray-300">Loading...</div>
+        <div className="h-48 flex items-center justify-center text-gray-300">{t('analytics.common.loading')}</div>
       ) : (
         <div className="overflow-x-auto">
           <div className="inline-grid gap-0.5" style={{ gridTemplateColumns: `60px repeat(24, 20px)` }}>
@@ -48,7 +58,7 @@ export default function PeakUsageHeatmap({ days = '30' }: { days?: string }) {
                     <div
                       key={h}
                       className={`w-5 h-5 rounded-sm ${intensity(count)} text-[8px] flex items-center justify-center`}
-                      title={`${day} ${h}:00 — ${count} events`}
+                      title={t('analytics.advanced_widgets.peak_usage.tooltip', { day, hour: h, count })}
                     />
                   )
                 })}

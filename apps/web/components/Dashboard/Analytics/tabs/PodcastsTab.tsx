@@ -4,6 +4,7 @@ import { SectionCard } from '@components/Analytics/Card'
 import { EmptyState } from '@components/Analytics/Feedback'
 import { TabCard } from '@components/Analytics/TabCard'
 import { useAnalyticsTab } from '@services/analytics/tabs'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Podcasts — "is anyone listening?" Chart-first, entity-scoped by the podcast
@@ -11,6 +12,7 @@ import { useAnalyticsTab } from '@services/analytics/tabs'
  * Hero trend, two 2-up rows, then the episodes table.
  */
 export function PodcastsTab({ range = '30d', podcast = 'all' }: { range?: string; podcast?: string }) {
+  const { t } = useTranslation()
   const { data, isLoading, error } = useAnalyticsTab('podcasts', range, podcast)
   const cards = data?.cards
 
@@ -18,8 +20,8 @@ export function PodcastsTab({ range = '30d', podcast = 'all' }: { range?: string
     return (
       <SectionCard>
         <EmptyState
-          title="Couldn't load analytics"
-          description="Please try again in a moment."
+          title={t('analytics.common.error_title')}
+          description={t('analytics.common.error_description')}
         />
       </SectionCard>
     )

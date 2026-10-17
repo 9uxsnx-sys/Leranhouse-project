@@ -4,12 +4,13 @@ import { SectionCard } from '@components/Analytics/Card'
 import { EmptyState } from '@components/Analytics/Feedback'
 import { TabCard } from '@components/Analytics/TabCard'
 import { useAnalyticsTab } from '@services/analytics/tabs'
+import { useTranslation } from 'react-i18next'
 
 /** The detail-table views the action-row cycle button steps through. */
-export const COMMUNITY_TABLES: { id: string; label: string }[] = [
-  { id: 'contributors', label: 'Contributors' },
-  { id: 'discussions', label: 'Top discussions' },
-  { id: 'questions', label: 'Unanswered' },
+export const COMMUNITY_TABLES: { id: string; labelKey: string }[] = [
+  { id: 'contributors', labelKey: 'analytics.community_tables.contributors' },
+  { id: 'discussions', labelKey: 'analytics.community_tables.top_discussions' },
+  { id: 'questions', labelKey: 'analytics.community_tables.unanswered' },
 ]
 
 /**
@@ -26,6 +27,7 @@ export function CommunityTab({
   community?: string
   table?: string
 }) {
+  const { t } = useTranslation()
   const { data, isLoading, error } = useAnalyticsTab('community', range, community, { view: table })
   const cards = data?.cards
 
@@ -33,8 +35,8 @@ export function CommunityTab({
     return (
       <SectionCard>
         <EmptyState
-          title="Couldn't load analytics"
-          description="Please try again in a moment."
+          title={t('analytics.common.error_title')}
+          description={t('analytics.common.error_description')}
         />
       </SectionCard>
     )

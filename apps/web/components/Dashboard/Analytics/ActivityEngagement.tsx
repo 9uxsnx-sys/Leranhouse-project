@@ -1,23 +1,17 @@
 'use client'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAnalyticsPipe } from './useAnalyticsDashboard'
 import Link from 'next/link'
 
-function getTypeLabel(type: string): string {
+function getTypeLabel(type: string, t: (key: string) => string): string {
   const key = type.replace(/^TYPE_/, '').toLowerCase()
-  const labels: Record<string, string> = {
-    video: 'Video',
-    document: 'Document',
-    quiz: 'Quiz',
-    assignment: 'Assignment',
-    dynamic: 'Dynamic',
-    custom: 'Custom',
-    scorm: 'SCORM',
-  }
-  return labels[key] || key.charAt(0).toUpperCase() + key.slice(1)
+  const label = t('analytics.course_analytics.type_labels.' + key)
+  return label.startsWith('analytics.') ? key.charAt(0).toUpperCase() + key.slice(1) : label
 }
 
 export default function ActivityEngagement({ days = '30' }: { days?: string }) {
+  const { t } = useTranslation()
   const { data, isLoading } = useAnalyticsPipe('activity_engagement', { days })
   const rawRows = data?.data ?? []
   const merged = new Map<string, any>()
@@ -42,21 +36,21 @@ export default function ActivityEngagement({ days = '30' }: { days?: string }) {
 
   return (
     <div className="bg-white rounded-xl nice-shadow p-5 min-h-[300px] overflow-hidden min-w-0">
-      <h3 className="text-sm font-semibold text-gray-700 mb-4">Activity Engagement</h3>
+      <h3 className="text-sm font-semibold text-gray-700 mb-4">{t('analytics.overview.activity_engagement')}</h3>
       {isLoading ? (
-        <div className="h-48 flex items-center justify-center text-gray-300">Loading...</div>
+        <div className="h-48 flex items-center justify-center text-gray-300">{t('analytics.common.loading')}</div>
       ) : rows.length === 0 ? (
-        <div className="h-48 flex items-center justify-center text-gray-300">No data yet</div>
+        <div className="h-48 flex items-center justify-center text-gray-300">{t('analytics.common.no_data')}</div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-gray-400 text-xs uppercase tracking-wider border-b border-gray-100">
-                <th className="pb-2">Activity</th>
-                <th className="pb-2">Type</th>
-                <th className="pb-2 text-right">Views</th>
-                <th className="pb-2 text-right">Completions</th>
-                <th className="pb-2 text-right">Avg Time</th>
+                <th className="pb-2">{t('analytics.overview.activity')}</th>
+                <th className="pb-2">{t('analytics.common.type')}</th>
+                <th className="pb-2 text-right">{t('analytics.common.views')}</th>
+                <th className="pb-2 text-right">{t('analytics.common.completions')}</th>
+                <th className="pb-2 text-right">{t('analytics.overview.avg_time')}</th>
               </tr>
             </thead>
             <tbody>
@@ -78,7 +72,7 @@ export default function ActivityEngagement({ days = '30' }: { days?: string }) {
                         name
                       )}
                     </td>
-                    <td className="py-2 text-gray-400 text-xs">{getTypeLabel(row.activity_type)}</td>
+                    <td className="py-2 text-gray-400 text-xs">{getTypeLabel(row.activity_type, t)}</td>
                     <td className="py-2 text-right text-gray-500">{row.views}</td>
                     <td className="py-2 text-right text-gray-500">{row.completions}</td>
                     <td className="py-2 text-right text-gray-500">

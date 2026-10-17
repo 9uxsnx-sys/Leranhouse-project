@@ -1,5 +1,6 @@
 'use client'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAnalyticsDetail } from './useAnalyticsDashboard'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 
@@ -31,10 +32,10 @@ function UserAvatarSmall({ user }: { user?: any }) {
   )
 }
 
-function userName(user?: any): string {
-  if (!user) return 'Unknown'
+function userName(user: any, t: (key: string) => string): string {
+  if (!user) return t('analytics.common.unknown')
   if (user.first_name || user.last_name) return `${user.first_name || ''} ${user.last_name || ''}`.trim()
-  return user.username || 'Unknown'
+  return user.username || t('analytics.common.unknown')
 }
 
 function formatTime(seconds: number): string {
@@ -47,29 +48,30 @@ function formatTime(seconds: number): string {
 }
 
 export default function LearnerEngagementScore({ days = '30' }: { days?: string }) {
+  const { t } = useTranslation()
   const { data, isLoading } = useAnalyticsDetail('learner_engagement_score', { days })
   const rows = data?.data ?? []
   const users: Record<number, any> = data?.users ?? {}
 
   return (
     <div className="bg-white rounded-xl nice-shadow p-5 min-h-[300px] overflow-hidden min-w-0">
-      <h3 className="text-sm font-semibold text-gray-700 mb-1">Learner Engagement Score</h3>
-      <p className="text-xs text-gray-400 mb-4">Top learners by composite engagement</p>
+      <h3 className="text-sm font-semibold text-gray-700 mb-1">{t('analytics.advanced_widgets.learner_engagement_score.title')}</h3>
+      <p className="text-xs text-gray-400 mb-4">{t('analytics.advanced_widgets.learner_engagement_score.description')}</p>
       {isLoading ? (
-        <div className="h-48 flex items-center justify-center text-gray-300">Loading...</div>
+        <div className="h-48 flex items-center justify-center text-gray-300">{t('analytics.common.loading')}</div>
       ) : rows.length === 0 ? (
-        <div className="h-48 flex items-center justify-center text-gray-300">No data yet</div>
+        <div className="h-48 flex items-center justify-center text-gray-300">{t('analytics.common.no_data')}</div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-gray-400 text-xs uppercase tracking-wider border-b border-gray-100">
-                <th className="pb-2">Learner</th>
-                <th className="pb-2 text-right">Score</th>
-                <th className="pb-2 text-right">Pages</th>
-                <th className="pb-2 text-right">Activities</th>
-                <th className="pb-2 text-right">Courses</th>
-                <th className="pb-2 text-right">Time</th>
+                <th className="pb-2">{t('analytics.advanced_widgets.learner_engagement_score.learner')}</th>
+                <th className="pb-2 text-right">{t('analytics.common.score')}</th>
+                <th className="pb-2 text-right">{t('analytics.advanced_widgets.learner_engagement_score.pages')}</th>
+                <th className="pb-2 text-right">{t('analytics.overview.activities')}</th>
+                <th className="pb-2 text-right">{t('analytics.overview.courses')}</th>
+                <th className="pb-2 text-right">{t('analytics.advanced_widgets.learner_engagement_score.time')}</th>
               </tr>
             </thead>
             <tbody>
@@ -84,7 +86,7 @@ export default function LearnerEngagementScore({ days = '30' }: { days?: string 
                       >
                         <UserAvatarSmall user={user} />
                         <span className="text-gray-700 font-medium truncate max-w-[140px]">
-                          {userName(user)}
+                          {userName(user, t)}
                         </span>
                       </a>
                     </td>

@@ -4432,6 +4432,11 @@
                                                                     }
                                                      }
                                       },
+                      "command_palette":  {
+                                              "open":  "Open",
+                                              "navigate":  "Navigate",
+                                              "new_tab":  "New tab"
+                                          },
                       "search":  {
                                      "trigger":  "Search",
                                      "placeholder":  "Search pages and content…",
@@ -4878,8 +4883,35 @@
                       "subtitle":  "Insights about your learners and content",
                       "tabs":  {
                                    "overview":  "Overview",
-                                   "advanced":  "Advanced"
+                                   "advanced":  "Advanced",
+                                   "learning":  "Learning",
+                                   "audience":  "Audience",
+                                   "learners":  "Learners",
+                                   "courses":  "Courses",
+                                   "podcasts":  "Podcasts",
+                                   "community":  "Community"
                                },
+                      "learners_tab":  {
+                                           "no_results":  "No learners match your search.",
+                                           "view_details":  "View learner details",
+                                           "showing":  "Showing {{from}}-{{to}} of {{total}}",
+                                           "page_of":  "Page {{page}} of {{total}}",
+                                           "role":  "Role",
+                                           "status":  "Status",
+                                           "verified":  "Verified",
+                                           "unverified":  "Unverified",
+                                           "joined":  "Joined",
+                                           "last_active":  "Last active",
+                                           "courses":  "Courses",
+                                           "no_course_enrollments":  "No course enrollments yet.",
+                                           "search_placeholder":  "Search learners…",
+                                           "switch_table":  "Switch table"
+                                       },
+                      "community_tables":  {
+                                               "contributors":  "Contributors",
+                                               "top_discussions":  "Top discussions",
+                                               "unanswered":  "Unanswered"
+                                           },
                       "not_configured":  {
                                              "title":  "Analytics not configured",
                                              "description":  "Analytics requires a Tinybird connection. Set the \u003ccode\u003eLEARNHOUSE_TINYBIRD_INGEST_TOKEN\u003c/code\u003e and \u003ccode\u003eLEARNHOUSE_TINYBIRD_READ_TOKEN\u003c/code\u003e environment variables to enable it."
@@ -4902,7 +4934,16 @@
                                      "expand":  "Expand",
                                      "days":  "Days",
                                      "score":  "Score",
-                                     "unique_users":  "unique users"
+                                     "unique_users":  "unique users",
+                                     "unknown":  "Unknown",
+                                     "count":  "Count",
+                                     "course_fallback":  "Course {{id}}",
+                                     "error_title":  "Couldn't load analytics",
+                                     "error_description":  "Please try again in a moment.",
+                                     "seconds_ago":  "{{count}}s ago",
+                                     "minutes_ago":  "{{count}}m ago",
+                                     "hours_ago":  "{{count}}h ago",
+                                     "days_ago":  "{{count}}d ago"
                                  },
                       "export":  {
                                      "button":  "Export",
@@ -4976,13 +5017,19 @@
                                                                     },
                                                "new_vs_returning":  {
                                                                         "title":  "New vs Returning Users",
-                                                                        "description":  "Growth vs retention health"
+                                                                        "description":  "Growth vs retention health",
+                                                                        "new":  "New",
+                                                                        "returning":  "Returning"
                                                                     },
                                                "cohort_retention":  {
                                                                         "title":  "Cohort Retention",
                                                                         "description":  "% users active after signup week",
                                                                         "cohort":  "Cohort",
-                                                                        "size":  "Size"
+                                                                        "size":  "Size",
+                                                                        "week_1":  "W1",
+                                                                        "week_2":  "W2",
+                                                                        "week_4":  "W4",
+                                                                        "week_8":  "W8"
                                                                     },
                                                "peak_usage":  {
                                                                   "title":  "Peak Usage Hours",
@@ -4996,19 +5043,24 @@
                                                                                "sat":  "Sat",
                                                                                "sun":  "Sun"
                                                                            },
-                                                                  "events":  "events"
+                                                                  "events":  "events",
+                                                                  "tooltip":  "{{day}} {{hour}}:00 — {{count}} events"
                                                               },
                                                "course_dropoff":  {
                                                                       "title":  "Course Dropoff",
-                                                                      "description":  "Where users stop per course"
+                                                                      "description":  "Where users stop per course",
+                                                                      "dropoff_count":  "Dropoff Count"
                                                                   },
                                                "time_to_completion":  {
                                                                           "title":  "Time to Completion",
-                                                                          "description":  "Median days to complete each course"
+                                                                          "description":  "Median days to complete each course",
+                                                                          "median_days":  "Median Days"
                                                                       },
                                                "completion_velocity":  {
                                                                            "title":  "Completion Velocity",
-                                                                           "description":  "Avg days between activity completions"
+                                                                           "description":  "Avg days between activity completions",
+                                                                           "avg_between":  "avg {{unit}} between completions",
+                                                                           "based_on":  "Based on {{count}} activity transitions"
                                                                        },
                                                "content_type_effectiveness":  {
                                                                                   "title":  "Content Type Effectiveness",
@@ -5016,7 +5068,9 @@
                                                                               },
                                                "course_effectiveness_matrix":  {
                                                                                    "title":  "Course Effectiveness Matrix",
-                                                                                   "description":  "Activity count vs completion rate (sized by enrollments)"
+                                                                                   "description":  "Activity count vs completion rate (sized by enrollments)",
+                                                                                   "completion":  "Completion",
+                                                                                   "completion_pct":  "Completion %"
                                                                                },
                                                "community_correlation":  {
                                                                              "title":  "Community Correlation",
@@ -5027,7 +5081,10 @@
                                                "learner_engagement_score":  {
                                                                                 "title":  "Learner Engagement Score",
                                                                                 "description":  "Top learners by composite engagement",
-                                                                                "user_id":  "User ID"
+                                                                                "user_id":  "User ID",
+                                                                                "pages":  "Pages",
+                                                                                "learner":  "Learner",
+                                                                                "time":  "Time"
                                                                             },
                                                "user_progress_snapshot":  {
                                                                               "title":  "User Progress Snapshot",
@@ -5046,7 +5103,8 @@
                                                                         },
                                                "certification_rate":  {
                                                                           "title":  "Certification Rate",
-                                                                          "description":  "% of completers who claim certificates"
+                                                                          "description":  "% of completers who claim certificates",
+                                                                          "claim_rate":  "Claim Rate"
                                                                       }
                                            },
                       "course_analytics":  {
@@ -5084,7 +5142,8 @@
                                                               "low_conversion":  "low conversion",
                                                               "avg_completion":  "avg completion",
                                                               "avg_prefix":  "avg {{value}}",
-                                                              "unknown_activity":  "Unknown activity"
+                                                              "unknown_activity":  "Unknown activity",
+                                                              "untitled":  "Untitled"
                                                           },
                                                "units":  {
                                                              "done":  "done",
@@ -5126,7 +5185,9 @@
                                                                    "document":  "Document",
                                                                    "quiz":  "Quiz",
                                                                    "assignment":  "Assignment",
-                                                                   "dynamic":  "Dynamic"
+                                                                   "dynamic":  "Dynamic",
+                                                                   "custom":  "Custom",
+                                                                   "scorm":  "SCORM"
                                                                },
                                                "overview_stats":  {
                                                                       "views":  "Views",
