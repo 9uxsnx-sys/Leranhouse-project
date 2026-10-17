@@ -2559,6 +2559,73 @@
                                               },
                                       "limit_reached":  "تم الوصول إلى حد الدورات ({{limit}})"
                                   },
+                      "breadcrumb":  {
+                                         "sections":  {
+                                                          "courses":  "الدورات",
+                                                          "assignments":  "الواجبات",
+                                                          "communities":  "المجتمعات",
+                                                          "boards":  "اللوحات",
+                                                          "podcasts":  "البودكاست",
+                                                          "playgrounds":  "Playgrounds",
+                                                          "analytics":  "التحليلات",
+                                                          "payments":  "المدفوعات",
+                                                          "org":  "المؤسسة",
+                                                          "users":  "المستخدمون"
+                                                      },
+                                         "subpages":  {
+                                                          "courses":  {
+                                                                          "general":  "عام",
+                                                                          "content":  "المحتوى",
+                                                                          "access":  "الوصول",
+                                                                          "contributors":  "المساهمون",
+                                                                          "seo":  "SEO",
+                                                                          "certification":  "الشهادة",
+                                                                          "analytics":  "التحليلات",
+                                                                          "migrate":  "الترحيل"
+                                                                      },
+                                                          "boards":  {
+                                                                         "general":  "عام",
+                                                                         "thumbnail":  "الصورة المصغرة",
+                                                                         "access":  "الوصول",
+                                                                         "members":  "الأعضاء"
+                                                                     },
+                                                          "communities":  {
+                                                                              "general":  "عام",
+                                                                              "access":  "الوصول",
+                                                                              "course":  "الدورة",
+                                                                              "moderation":  "الإشراف"
+                                                                          },
+                                                          "podcasts":  {
+                                                                           "general":  "عام",
+                                                                           "content":  "الحلقات",
+                                                                           "distribution":  "التوزيع"
+                                                                       },
+                                                          "org":  {
+                                                                      "general":  "عام",
+                                                                      "branding":  "العلامة التجارية",
+                                                                      "seo":  "SEO",
+                                                                      "domains":  "النطاقات",
+                                                                      "automations":  "الأتمتة",
+                                                                      "api":  "الوصول إلى API"
+                                                                  },
+                                                          "users":  {
+                                                                        "users":  "المستخدمون",
+                                                                        "signups":  "التسجيلات",
+                                                                        "usergroups":  "مجموعات المستخدمين",
+                                                                        "roles":  "الأدوار",
+                                                                        "audit-logs":  "سجلات التدقيق"
+                                                                    },
+                                                          "payments":  {
+                                                                           "overview":  "نظرة عامة",
+                                                                           "customers":  "العملاء",
+                                                                           "transactions":  "المعاملات",
+                                                                           "subscriptions":  "الاشتراكات",
+                                                                           "offers":  "العروض",
+                                                                           "groups":  "مجموعات الدفع",
+                                                                           "configuration":  "الإعدادات"
+                                                                       }
+                                                      }
+                                     },
                       "organization":  {
                                            "settings":  {
                                                             "title":  "إعدادات المنظمة",

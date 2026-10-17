@@ -46,64 +46,13 @@ function isUuid(str: string): boolean {
   return UUID_PATTERN.test(str)
 }
 
-// ─── Subpage label map ────────────────────────────────────────────────────────
-const SUBPAGE_LABELS: Record<string, Record<string, string>> = {
-  courses: {
-    general: 'General',
-    content: 'Content',
-    access: 'Access',
-    contributors: 'Contributors',
-    seo: 'SEO',
-    certification: 'Certification',
-    analytics: 'Analytics',
-    migrate: 'Migrate',
-  },
-  boards: {
-    general: 'General',
-    thumbnail: 'Thumbnail',
-    access: 'Access',
-    members: 'Members',
-  },
-  communities: {
-    general: 'General',
-    access: 'Access',
-    course: 'Course',
-    moderation: 'Moderation',
-  },
-  podcasts: {
-    general: 'General',
-    content: 'Episodes',
-    distribution: 'Distribution',
-  },
-  org: {
-    general: 'General',
-    branding: 'Branding',
-    seo: 'SEO',
-    domains: 'Domains',
-    automations: 'Automations',
-    api: 'API Access',
-  },
-  users: {
-    users: 'Users',
-    signups: 'Sign Ups',
-    usergroups: 'User Groups',
-    roles: 'Roles',
-    'audit-logs': 'Audit Logs',
-  },
-  payments: {
-    overview: 'Overview',
-    customers: 'Customers',
-    transactions: 'Transactions',
-    subscriptions: 'Subscriptions',
-    offers: 'Offers',
-    groups: 'Payment Groups',
-    configuration: 'Configuration',
-  },
-}
-
-function getSubpageLabel(section: string, subpage: string): string {
-  return SUBPAGE_LABELS[section]?.[subpage]
-    ?? subpage.charAt(0).toUpperCase() + subpage.slice(1).replace(/-/g, ' ')
+// ─── Subpage label resolution ─────────────────────────────────────────────────
+function getSubpageLabel(section: string, subpage: string, t: (key: string) => string): string {
+  const key = `dashboard.breadcrumb.subpages.${section}.${subpage}`
+  const translated = t(key)
+  return translated !== key
+    ? translated
+    : subpage.charAt(0).toUpperCase() + subpage.slice(1).replace(/-/g, ' ')
 }
 
 // ─── Entity API helpers ───────────────────────────────────────────────────────
@@ -184,19 +133,6 @@ function NotificationsBell() {
 interface Crumb {
   label: string
   href?: string
-}
-
-const SECTION_LABELS: Record<string, string> = {
-  courses: 'Courses',
-  assignments: 'Assignments',
-  communities: 'Communities',
-  boards: 'Boards',
-  podcasts: 'Podcasts',
-  playgrounds: 'Playgrounds',
-  analytics: 'Analytics',
-  payments: 'Payments',
-  org: 'Organization',
-  users: 'Users',
 }
 
 function AdminBreadcrumbNav() {
@@ -292,19 +228,21 @@ function AdminBreadcrumbNav() {
   ]
 
   if (section) {
-    const sectionLabel = SECTION_LABELS[section] ?? section.charAt(0).toUpperCase() + section.slice(1)
+    const sectionKey = `dashboard.breadcrumb.sections.${section}`
+    const translatedSection = t(sectionKey)
+    const sectionLabel = translatedSection !== sectionKey ? translatedSection : section.charAt(0).toUpperCase() + section.slice(1)
 
     if (entityType) {
       // Entity detail page: section is a clickable link back to listing
       crumbs.push({ label: sectionLabel, href: getUriWithOrg(orgslug, `/dash/${section}`) })
       crumbs.push({ label: entityName || '...' })
       if (subpage) {
-        crumbs.push({ label: getSubpageLabel(section, subpage) })
+        crumbs.push({ label: getSubpageLabel(section, subpage, t) })
       }
     } else if (subpage) {
       // Section with subpage (settings, payments): section is a clickable link
       crumbs.push({ label: sectionLabel, href: getUriWithOrg(orgslug, `/dash/${section}`) })
-      crumbs.push({ label: getSubpageLabel(section, subpage) })
+      crumbs.push({ label: getSubpageLabel(section, subpage, t) })
     } else {
       // Plain section page (analytics, playgrounds, courses listing)
       crumbs.push({ label: sectionLabel })

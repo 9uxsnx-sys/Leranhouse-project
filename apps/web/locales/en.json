@@ -2838,6 +2838,73 @@
                                                                           }
                                                     }
                                   },
+                      "breadcrumb":  {
+                                         "sections":  {
+                                                          "courses":  "Courses",
+                                                          "assignments":  "Assignments",
+                                                          "communities":  "Communities",
+                                                          "boards":  "Boards",
+                                                          "podcasts":  "Podcasts",
+                                                          "playgrounds":  "Playgrounds",
+                                                          "analytics":  "Analytics",
+                                                          "payments":  "Payments",
+                                                          "org":  "Organization",
+                                                          "users":  "Users"
+                                                      },
+                                         "subpages":  {
+                                                          "courses":  {
+                                                                          "general":  "General",
+                                                                          "content":  "Content",
+                                                                          "access":  "Access",
+                                                                          "contributors":  "Contributors",
+                                                                          "seo":  "SEO",
+                                                                          "certification":  "Certification",
+                                                                          "analytics":  "Analytics",
+                                                                          "migrate":  "Migrate"
+                                                                      },
+                                                          "boards":  {
+                                                                         "general":  "General",
+                                                                         "thumbnail":  "Thumbnail",
+                                                                         "access":  "Access",
+                                                                         "members":  "Members"
+                                                                     },
+                                                          "communities":  {
+                                                                              "general":  "General",
+                                                                              "access":  "Access",
+                                                                              "course":  "Course",
+                                                                              "moderation":  "Moderation"
+                                                                          },
+                                                          "podcasts":  {
+                                                                           "general":  "General",
+                                                                           "content":  "Episodes",
+                                                                           "distribution":  "Distribution"
+                                                                       },
+                                                          "org":  {
+                                                                      "general":  "General",
+                                                                      "branding":  "Branding",
+                                                                      "seo":  "SEO",
+                                                                      "domains":  "Domains",
+                                                                      "automations":  "Automations",
+                                                                      "api":  "API Access"
+                                                                  },
+                                                          "users":  {
+                                                                        "users":  "Users",
+                                                                        "signups":  "Sign Ups",
+                                                                        "usergroups":  "User Groups",
+                                                                        "roles":  "Roles",
+                                                                        "audit-logs":  "Audit Logs"
+                                                                    },
+                                                          "payments":  {
+                                                                           "overview":  "Overview",
+                                                                           "customers":  "Customers",
+                                                                           "transactions":  "Transactions",
+                                                                           "subscriptions":  "Subscriptions",
+                                                                           "offers":  "Offers",
+                                                                           "groups":  "Payment Groups",
+                                                                           "configuration":  "Configuration"
+                                                                       }
+                                                      }
+                                     },
                       "organization":  {
                                            "settings":  {
                                                             "title":  "Organization Settings",
