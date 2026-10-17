@@ -221,7 +221,7 @@ The frontend relies on the following major packages (see `apps/web/package.json`
 | `yup` | ^1.7.1 | Form validation schemas |
 | `i18next` / `react-i18next` | latest | Internationalization |
 | `framer-motion` / `motion` | latest | Declarative animations |
-| `@phosphor-icons/react` / `lucide-react` | latest | Icon libraries |
+| `lucide-react` / `@phosphor-icons/react` | latest | Icons — lucide is the dashboard standard (`ConceptIcon` / `SectionIcon`); phosphor remains only for the `MarkdownLogo` brand mark |
 | `react-hot-toast` | ^2.6.0 | Toast notifications |
 | `dayjs` | ^1.11.19 | Date formatting |
 | `@hello-pangea/dnd` | ^18.0.1 | Drag and drop |

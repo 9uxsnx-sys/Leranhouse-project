@@ -43,6 +43,56 @@ The Medusa design system components live under `apps/web/components/ui/`. Each c
 | `FileUpload` | `ui/file-upload.tsx` | Custom | File upload zone |
 | `Alert` | `ui/alert.tsx` | Custom | Alert banners |
 
+> For dashboard tab bars use **`PageTabs`** (below), not the raw `Tabs` primitive.
+
+---
+
+## Dashboard Primitives
+
+These are the shared building blocks every dashboard area uses. Prefer them over bespoke markup.
+
+| Primitive | File | Purpose |
+|---|---|---|
+| `ActionRow` | `ui/action-row.tsx` | List-page toolbar: search + actions, with an inline-end action cluster. |
+| `ActionRowSearch` | `ui/action-row.tsx` | Search input with leading icon; logical padding so it mirrors under RTL. |
+| `ActionRowSpacer` / `ActionRowActions` | `ui/action-row.tsx` | Spacer + right-hand button cluster (identical gaps everywhere). |
+| `PageTabs` | `ui/page-tabs.tsx` | The single tab bar. `variant="pill" \| "underline"`, `active`, `tabs`, optional `onSelect`, optional rich `tooltip` for disabled tabs. |
+| `ConceptIcon` | `ui/icons.tsx` | One icon per **action**: `add`, `edit`, `delete`, `save`, `upload`, `search`, `filter`, `settings`, `back`, `previous`, `expand`, `duplicate`, `download`, `check`, `close`. |
+| `SectionIcon` | `ui/icons.tsx` | One icon per dashboard **section** (general, content, access, contributors, seo, certification, analytics, domains, branding, automations, api, moderation, linkedCourse, episodes, distribution, users, userGroups, roles, signups, auditLogs, overview, learning, audience, learners, courses, podcasts, community). |
+
+### Example
+
+```tsx
+import { ActionRow, ActionRowSearch, ActionRowSpacer, ActionRowActions } from '@components/ui/action-row'
+import { PageTabs } from '@components/ui/page-tabs'
+import { ConceptIcon, SectionIcon } from '@components/ui/icons'
+
+<ActionRow>
+  <ActionRowSearch value={q} onValueChange={setQ} placeholder={t('courses.search_courses')} />
+  <ActionRowSpacer />
+  <ActionRowActions>
+    <Button variant="primary" size="small">
+      <ConceptIcon.add size={14} />
+      {t('courses.new_course')}
+    </Button>
+  </ActionRowActions>
+</ActionRow>
+
+<PageTabs
+  variant="pill"
+  indicatorId="course-settings-tabs"
+  active={subpage}
+  tabs={tabs.map((tab) => ({ ...tab, icon: SectionIcon[tab.id] }))}
+/>
+```
+
+### Filters and selects
+
+- **Filter control** — always an icon-only `<IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base">` containing `<ConceptIcon.filter size={14} />`. Put `<ConceptIcon.check size={12} />` on the active menu item.
+- **Value picker** — the shared `Select` (`@components/ui/select`, Radix-based). Keep backend enum values raw; translate only the visible label.
+- **Action picker** (the control performs an action instead of selecting a value) — `DropdownMenu`.
+- **Never** use a native `<select>` in the dashboard.
+
 ---
 
 ## Key Component Examples
@@ -276,22 +326,25 @@ const fieldClassName =
 
 ## Icon Usage
 
-Icons come from two sources:
+The dashboard is **lucide-only**:
 
-### Lucide React (recommended for most icons)
+- **`ConceptIcon`** for actions — one glyph per meaning (add / edit / delete / save / upload / search / filter / settings / back / expand / duplicate / download / check / close).
+- **`SectionIcon`** for section and tab icons — one glyph per dashboard section.
+- Plain lucide imports are fine for one-off status glyphs (e.g. `CheckCircle2`, `BarChart3`, `Funnel`), but route any recurring action through `ConceptIcon`.
 
 ```tsx
-import { Settings, Users, BookOpen, Globe, Lock, Search, BarChart3, Plus, X, GripVertical } from 'lucide-react'
+import { ConceptIcon, SectionIcon } from '@components/ui/icons'
 
-<Settings size={16} />
-<Plus size={13} className="text-blue-500" />
+<ConceptIcon.filter size={14} />
+<SectionIcon.settings size={16} />
 ```
+
+> Phosphor (`@phosphor-icons/react`) has been removed from the dashboard. The only remaining use is the `MarkdownLogo` brand mark in onboarding/activity elements. Boards and mobile navigation are out of scope.
 
 ### Custom Icons (`@components/Objects/Icons`)
 
+Used for brand-specific marks that aren't in the Lucide set:
+
 ```tsx
 import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
-import { MedusaIcons } from '@components/Objects/Icons/MedusaIcons'
 ```
-
-Used for brand-specific icons that aren't in the Lucide set.

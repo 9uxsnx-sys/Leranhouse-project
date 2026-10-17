@@ -59,13 +59,13 @@ The documents in this section describe cross-cutting feature areas that touch mu
 
 | Document | Description |
 |----------|-------------|
-| [Consistency Plan](./dashboard-polish/consistency-plan.md) | English-first audit + plan to unify dashboard buttons, action rows, tabs, icons and section naming, and make every string translation-ready (prerequisite for the Arabic pass) |
+| [Consistency Plan](./dashboard-polish/consistency-plan.md) | Delivered dashboard consistency sweep: shared `ActionRow` / `PageTabs` / `ConceptIcon` / `SectionIcon` primitives, unified filters and selects, and translation-ready strings across en / fr / ar (Phase 5 guardrails pending) |
 
 ### Internationalization & RTL
 
 | Document | Description |
 |----------|-------------|
-| [RTL Plan](./i18n-rtl/rtl-plan.md) | English / French / Arabic with accurate bidirectional layout: research on how RTL is done properly, the affected layout surface, ranked risks, and a phased plan |
+| [RTL Plan](./i18n-rtl/rtl-plan.md) | English / French / Arabic with accurate bidirectional layout: direction plumbing shipped (SSR `lang`/`dir`, `DirectionProvider`, Arabic font); logical-property refactor and QA pending |
 
 ### Planned (Future)
 

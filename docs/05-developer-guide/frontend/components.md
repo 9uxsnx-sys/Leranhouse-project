@@ -236,17 +236,17 @@ A typical dashboard page composes components in layers:
 CourseOverviewPage (page.tsx — Server Component)
 └── CourseProvider (context wrapper)
     ├── CoursePageTitle (reads name from CourseContext)
-    ├── TabBar (pill-style navigation with permission checks)
+    ├── PageTabs (shared tab bar; permission checks + tooltips)
     └── Content Area
         ├── EditCourseGeneral (form page)
         │   ├── FormLayout (from StyledElements/Form)
         │   ├── FormField / FormLabelAndMessage
         │   ├── Input (from ui/input)
         │   ├── Textarea (from ui/textarea)
-        │   ├── LearningItemsList
-        │   ├── ThumbnailUpdate
-        │   └── CustomSelect
-        └── CourseEditSidebar (context-aware sidebar)
+        │   ├── Select (shared value picker)
+        │   ├── LearningItemsList / ResourceItemsList / TakeawayItemsList / KnowledgeCheckItemsList
+        │   └── CourseMediaSection (card cover + banner)
+        └── EditCourseStructure / EditCourseAccess / EditCourseContributors / EditCourseSEO / EditCourseCertification
 ```
 
 This layered approach keeps each component focused on a single responsibility while sharing state through contexts and props.

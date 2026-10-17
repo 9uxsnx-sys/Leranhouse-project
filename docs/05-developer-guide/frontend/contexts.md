@@ -315,6 +315,13 @@ Provides internationalization support via `react-i18next`.
 
 It listens for `languageChanged` events from i18next and forces a re-render of the entire tree when the language changes. Non-English locale bundles load lazily with `useSuspense: false`.
 
+It also owns **text direction**:
+
+- Wraps the tree in Radix `DirectionProvider`, so overlays (`Select`, `DropdownMenu`, `Popover`, `Tooltip`) get correct side/align placement and arrow-key handling under Arabic.
+- Mirrors the active language onto `<html lang>` / `<html dir>` at runtime. The **first paint** is correct because `app/layout.tsx` reads the `i18next` cookie server-side and renders `lang` / `dir` from `lib/direction.ts`; the effect only covers in-app language switches without a reload.
+
+Use `useDirection()` (Radix) instead of comparing `language === 'ar'`, and `isRTL()` / `getDirection()` from `lib/direction.ts` on the server.
+
 ### Usage
 
 ```tsx

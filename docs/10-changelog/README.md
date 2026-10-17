@@ -82,6 +82,15 @@ Each release provides a summary of changes organized by category:
 - **Course thumbnail delete endpoint** — Added `DELETE /courses/{uuid}/thumbnail` endpoint (previously missing), enabling removal of card cover images from the course media section.
 - **Scrollbar hidden globally** — Scrollbars are now hidden entirely across the platform to prevent layout shifts when dropdowns or menus open (the disappearing scrollbar was causing content to jump right). Scrolling still works via mouse wheel, keyboard, and touch. Previous custom scrollbar styling (`scrollbar-gutter: stable`, WebKit styling, Firefox `scrollbar-width: thin`) replaced with `scrollbar-width: none` and `::-webkit-scrollbar { display: none }`.
 - **Searchbar consistency** — The API Documentation searchbar (Org Edit API Access tab) was updated to use the same raw `<input>` styling as the modules/lessons listing searchbar, replacing the previous `<Input>` component for visual consistency.
+- **Dashboard consistency sweep (desktop)** — unified the UI primitives across every desktop-reachable dashboard area:
+  - All 6 settings tab bars plus Payments and Analytics now use the shared `PageTabs` (`pill` / `underline`); zero bespoke `layoutId="tab-indicator"` bars remain.
+  - One icon per meaning: `SectionIcon` for sections/tabs and `ConceptIcon` for actions. Phosphor is removed from the dashboard (the `MarkdownLogo` brand mark is the only exception).
+  - All filter triggers are the same icon-only `IconButton` with `ConceptIcon.filter` and a check marker on the active option.
+  - Native `<select>`s and bespoke dropdowns replaced by the shared `Select` (`DropdownMenu` for action pickers).
+  - Section headings renamed to fit their content (`Basic Information` → `Overview`, `Course Details` / `Podcast Details` → `Details`) and keyed via `common.sections.*`.
+- **Translation-ready dashboard (en / fr / ar)** — every visible string in the desktop dashboard (Org, Users, Course, Account, Analytics, Podcast, Community, Payments, navigation and onboarding) now goes through `t()`, with ~850 new keys added to **all three** shipped locales. Backend data, enum values and brand names stay untranslated by design.
+- **Breadcrumb language fix** — dashboard breadcrumbs now resolve through `dashboard.breadcrumb.*` instead of hardcoded English `SECTION_LABELS` / `SUBPAGE_LABELS` maps, so labels such as "Distribution" correctly become "التوزيع" in Arabic.
+- **Repository cleanup** — removed the untracked, gitignored `medusa/` reference folder (~238 MB) and its stale mention in the project-structure docs; synced `apps/web/bun.lock` with the already-declared `react-easy-crop` dependency.
 
 ---
 

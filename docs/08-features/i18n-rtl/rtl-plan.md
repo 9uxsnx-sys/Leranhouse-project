@@ -1,6 +1,6 @@
 # i18n & RTL — Research & Plan
 
-> **Status:** Research complete, plan proposed — nothing built.
+> **Status:** Direction plumbing shipped (`<html lang/dir>` + `DirectionProvider` + Arabic font). Logical-property refactor, RTL exceptions, JS coordinate fixes and QA pending.
 > **Goal:** Ship **three** languages — English (exists), French (exists), Arabic (exists) — with **accurate RTL** for Arabic, done the *professional* way (real bidirectional layout, not a global CSS flip).
 > **Scope:** the Next.js web app at `apps/web`.
 > **Companion docs:** [design-tokens.md](../../07-ui-reference/design-tokens.md), [patterns.md](../../07-ui-reference/patterns.md), [frontend/overview.md](../../05-developer-guide/frontend/overview.md).
@@ -9,13 +9,15 @@
 
 ## 0. TL;DR
 
-**The translations are already done. The direction is not.**
+**The translations are done. The direction plumbing is in place. The layout refactor is not.**
 
-There are 19 locale files including a **complete 503 KB Arabic file**, and i18n is fully wired (lazy loading, language switcher, org-default-language sync). But the app is **hard-locked LTR**: `<html lang="en">` is hardcoded, there is not a single `dir` attribute, no Radix `DirectionProvider`, and only **two** `rtl:` utilities in the entire codebase.
+Three locales ship (`en`, `fr`, `ar`) and i18n is fully wired (lazy loading, language switcher, org-default-language sync). Direction plumbing now exists too:
 
-So switching to Arabic today produces **Arabic words in a left-to-right layout** — the exact "just flip it" failure mode we want to avoid.
+- `<html lang>` and `<html dir>` are **SSR-rendered before paint** from the `i18next` cookie (`app/layout.tsx` → `lib/direction.ts`), so there is no flash of LTR.
+- Radix **`DirectionProvider`** wraps the app in `I18nContext.tsx`; `useDirection()` is consumed where overlays need it (`hover-menu.tsx`).
+- **Noto Sans Arabic** is loaded next to Inter.
 
-The real work is therefore **~100% layout/direction**, which is the hard part. This document is the plan for doing it properly.
+What remains is the hard part: **~900 physical directional utilities**, RTL exceptions (charts, media controls, code blocks), JS coordinate math, `dir="auto"` for user content, `cmdk`/DnD direction props, and the lint guard. Until those are converted, the page shell is correctly RTL but individual components can still be pinned LTR.
 
 ---
 
@@ -26,13 +28,13 @@ The real work is therefore **~100% layout/direction**, which is the hard part. T
 | i18n engine | `i18next@26`, `react-i18next@17`, `i18next-browser-languagedetector@8` | Solid, no change needed |
 | Config | `apps/web/lib/i18n.ts` — English bundled, the other 18 lazy-loaded via `LOCALE_LOADERS` | Good pattern already |
 | Detection | `localStorage → cookie → querystring → navigator → path → subdomain`, cached in localStorage + cookie | Works |
-| Locales on disk | 19 files in `apps/web/locales/` (en 451 KB, **ar 503 KB**, fr 477 KB, …) | Arabic is **real and complete** |
-| Language list | `apps/web/lib/languages.ts` → `AVAILABLE_LANGUAGES` has **19** entries | Must be cut to 3 |
+| Locales on disk | 19 files in `apps/web/locales/`, but only **en / fr / ar** are shipped (`supportedLngs`) | The other 16 are unreachable until re-added |
+| Language list | `apps/web/lib/languages.ts` → `AVAILABLE_LANGUAGES` has **3** entries (en, fr, ar) | Matches `supportedLngs` |
 | Switchers | `LanguageSwitcher.tsx`, `DashLeftMenu`, `UserLeftMenu`, `home.tsx` | Reusable |
 | Org default | `components/Contexts/OrgLanguageSync.tsx` (respects a `i18nextLng_userPicked` override) | Reusable |
-| Provider tree | `Providers.tsx`: Session → LHSession → `I18nProvider` | The insertion point for a direction provider |
-| **Direction** | **`<html lang="en">` hardcoded; 0 `dir=`; 0 `[dir=rtl]`; no `DirectionProvider`; 2 `rtl:` utilities; 5 logical-property usages** | **This is the whole job** |
-| Fonts | `app/layout.tsx` loads **Inter (latin subset) only** | Arabic renders in a system fallback — looks wrong |
+| Provider tree | `Providers.tsx`: Session → LHSession → `I18nProvider` | `I18nContext` now provides `DirectionProvider` |
+| **Direction** | **`<html lang>` + `<html dir>` SSR-driven from `lib/direction.ts` (cookie); Radix `DirectionProvider`; `useDirection()` in overlays** | **Plumbing done; component-level logical properties still to do** |
+| Fonts | `app/layout.tsx` loads **Inter (latin)** + **Noto Sans Arabic** | Arabic glyphs covered |
 
 **Consequence:** we are not choosing a translation vendor or plumbing locale files. We are retrofitting bidirectional layout into an LTR-only UI. Budget accordingly.
 
@@ -129,7 +131,7 @@ These compute positions in JS and will not be fixed by CSS:
 - **Video / audio click-to-seek** — `(clientX - rect.left) / rect.width` in 4 files. (Flip the *bar*, keep the *controls* LTR.)
 - **Nav highlight pills** — `DashLeftMenu`, `UserLeftMenu`, `ui/sub-nav.tsx` measure with `getBoundingClientRect().left`.
 - **Board canvas** — dozens of `e.clientX - rect.left` for create/marquee/pan/drop.
-- **Popover/context positioning** — `hover-menu.tsx`, admin lists, `SimpleDropdown.tsx`.
+- **Popover/context positioning** — `hover-menu.tsx`, admin lists, bespoke dropdowns.
 - **AI bubble clamping** — `AICanvaToolkit.tsx` (`window.innerWidth - bubbleWidth`).
 
 ---
@@ -177,14 +179,16 @@ Physical directional utility usage across `apps/web` source (line-level counts, 
 
 ## 7. Recommended approach (phased)
 
-**Phase 0 — Lock scope.** Choose the 3 languages (en/fr/ar) and decide the fate of the other 16 locale files and `AVAILABLE_LANGUAGES`. Confirm the numeral convention (recommend Western).
+**Phase 0 — Lock scope. ✅** en/fr/ar chosen; `AVAILABLE_LANGUAGES` reduced to 3; the other 16 locale files remain on disk but are unreachable.
 
-**Phase 1 — Direction plumbing (the enabler).**
-- Set `dir` + `lang` on `<html>`, **before paint** (SSR or blocking script), driven by the active language.
-- Add Radix `DirectionProvider` in `Providers.tsx`; pass `dir` to `cmdk` and set `direction="rtl"` on `@hello-pangea/dnd` contexts.
-- Add an **Arabic font** and switch the font/typography tokens for `ar`.
-- Route number/currency/date formatting through `Intl` with the active locale.
-- Add a `dir="auto"` convention for user-generated content.
+**Phase 1 — Direction plumbing (the enabler). 🟡 Partial**
+- ✅ `dir` + `lang` on `<html>`, **before paint** (SSR from the `i18next` cookie in `app/layout.tsx`, via `lib/direction.ts`).
+- ✅ Radix `DirectionProvider` in `I18nContext.tsx`; `useDirection()` used in `hover-menu.tsx`.
+- ✅ Arabic font (**Noto Sans Arabic**) loaded alongside Inter.
+- ⬜ Pass `dir` to `cmdk` (Command Palette).
+- ⬜ Set `direction="rtl"` on `@hello-pangea/dnd` contexts.
+- ⬜ Route number/currency/date formatting through `Intl` with the active locale.
+- ⬜ Adopt a `dir="auto"` convention for user-generated content.
 
 **Phase 2 — Logical-property refactor.** Convert the ~900 directional usages, precedence order: **shell/nav → tables → cards/lists → forms → analytics**. Do **not** touch centering transforms or media controls. Verify the `space-x-*` question here.
 
@@ -207,14 +211,16 @@ Physical directional utility usage across `apps/web` source (line-level counts, 
 
 ---
 
-## 9. Decisions needed
+## 9. Decisions
 
-1. **Which 3 languages**, and what to do with the other 16 locale files / `AVAILABLE_LANGUAGES` entries.
-2. **Numeral convention** — recommend Western (must match the Algerian market; avoid mixing).
-3. **Chart strategy (R1)** — LTR-wrapped numeric charts vs mirrored/reversed axes. Affects 29 files.
-4. **Arabic font** — which typeface, and do we self-host/subset it.
-5. **Direction source of truth** — org default language vs user preference vs both (the existing `OrgLanguageSync` already models this; confirm we keep it).
-6. **Do we add the lint guard in this effort** — recommend yes.
+| # | Decision | State |
+|---|---|---|
+| 1 | **Which 3 languages** — en / fr / ar; the other 16 locale files stay on disk but are unreachable (`AVAILABLE_LANGUAGES` + `supportedLngs` both list 3). | ✅ Decided |
+| 2 | **Numeral convention** — Western digits (`123`), matching the Algerian market; never mix both forms. Formatting still needs to move to `Intl` (Phase 1). | ✅ Decided |
+| 3 | **Chart strategy (R1)** — LTR-wrapped numeric charts vs mirrored/reversed axes. Affects 29 recharts files. | ⬜ Open |
+| 4 | **Arabic font** — **Noto Sans Arabic**, loaded in `app/layout.tsx` (`--font-arabic`). Self-hosting/subsetting still open. | ✅ Decided / 🟡 partially done |
+| 5 | **Direction source of truth** — `lib/direction.ts` (`getDirection` / `isRTL` / `localeCode`); `OrgLanguageSync` respects a user override (`i18nextLng_userPicked`). | ✅ Decided |
+| 6 | **Lint guard** — add a rule failing on physical directional utilities in dashboard JSX. | ⬜ Open (Phase 6 of the polish plan has the same guardrail) |
 
 ---
 
