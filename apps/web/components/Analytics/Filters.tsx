@@ -88,7 +88,7 @@ export function FilterSelect({
           <ConceptIcon.filter size={14} />
         </IconButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="min-w-[200px] rounded-lg border border-gray-200 bg-white p-1 shadow-md">
+      <DropdownMenuContent align="end" className="min-w-[200px] rounded-lg border border-gray-200 bg-white p-1 shadow-md">
         {options.map((o) => (
           <DropdownMenuItem
             key={o.value}

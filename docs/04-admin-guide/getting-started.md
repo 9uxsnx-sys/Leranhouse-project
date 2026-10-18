@@ -84,7 +84,7 @@ Once a course is created, clicking on it opens the course editor with six tabs:
 |---|-----|---------|
 | 1 | **General** | Name, description, difficulty, thumbnail, certificate toggle |
 | 2 | **Content** | Build the module and lesson structure |
-| 3 | **Access** | Control who can view the course (Public, Users Only, Paid) |
+| 3 | **Access** | Control who can view the course (Free, Restricted, Paid) |
 | 4 | **Certification** | Design certificates and set passing criteria |
 | 5 | **Contributors** | Add co-authors and instructors |
 | 6 | **SEO** | Configure SEO metadata and social previews |

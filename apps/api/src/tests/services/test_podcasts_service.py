@@ -9,6 +9,7 @@ from fastapi import HTTPException, UploadFile
 
 from src.db.podcasts.episodes import PodcastEpisode, PodcastEpisodeCreate, PodcastEpisodeUpdate
 from src.db.podcasts.podcasts import Podcast, PodcastCreate, PodcastUpdate
+from src.db.payments.enums import AccessTypeEnum
 from src.db.organization_config import OrganizationConfig
 from src.db.resource_authors import (
     ResourceAuthor,
@@ -46,6 +47,7 @@ from src.services.podcasts.podcasts import (
 
 
 def _make_podcast(db, org, **overrides):
+    public = overrides.pop("public", True)
     podcast = Podcast(
         id=overrides.pop("id", None),
         org_id=org.id,
@@ -54,8 +56,13 @@ def _make_podcast(db, org, **overrides):
         about=overrides.pop("about", "About"),
         tags=overrides.pop("tags", "tag"),
         thumbnail_image=overrides.pop("thumbnail_image", ""),
-        public=overrides.pop("public", True),
+        public=public,
         published=overrides.pop("published", True),
+        access_type=overrides.pop(
+            "access_type",
+            AccessTypeEnum.PUBLIC if public else AccessTypeEnum.USERS_ONLY,
+        ),
+        price_amount=overrides.pop("price_amount", None),
         podcast_uuid=overrides.pop("podcast_uuid", "podcast_test"),
         creation_date=overrides.pop("creation_date", "2024-01-01"),
         update_date=overrides.pop("update_date", "2024-01-01"),
@@ -558,14 +565,20 @@ class TestPodcastsService:
         admin_uuids = {podcast.podcast_uuid for podcast in admin_results}
         anon_uuids = {podcast.podcast_uuid for podcast in anonymous_results}
 
+        # `published_private` is Restricted (`users_only`) with no linked
+        # UserGroup, so the strict whitelist hides it from regular users.
         assert regular_uuids == {
+            public_podcast.podcast_uuid,
+            grouped_podcast.podcast_uuid,
+            author_podcast.podcast_uuid,
+        }
+        assert admin_uuids == {
             public_podcast.podcast_uuid,
             published_private.podcast_uuid,
             grouped_podcast.podcast_uuid,
             author_podcast.podcast_uuid,
         }
-        assert admin_uuids == regular_uuids
-        assert {podcast.podcast_uuid for podcast in superadmin_results} == regular_uuids
+        assert {podcast.podcast_uuid for podcast in superadmin_results} == admin_uuids
         assert anon_uuids == {public_podcast.podcast_uuid}
 
         assert await get_podcasts_count_orgslug(
@@ -579,7 +592,7 @@ class TestPodcastsService:
 
         assert await get_podcasts_count_orgslug(
             mock_request, regular_user, org.slug, db
-        ) == 4
+        ) == 3
 
     @pytest.mark.asyncio
     async def test_thumbnail_update_sensitive_update_and_delete_errors(

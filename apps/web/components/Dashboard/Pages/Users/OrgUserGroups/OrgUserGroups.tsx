@@ -22,14 +22,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@components/ui/dropdown-menu'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { TableCard } from '@components/Analytics/Card'
+import { Column, DataTable } from '@components/Analytics/DataTable'
+import { EmptyState } from '@components/Analytics/Feedback'
 import { IconButton } from '@/components/ui/icon-button'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -174,28 +169,8 @@ function OrgUserGroups() {
     const hasSelectedMembers = selectedMemberIds.size > 0
     const isMembersSearchActive = membersSearch.trim().length > 0
 
-    const visibleMemberIds: number[] = paginatedMembers.map((u: any) => u.id)
-    const allMembersSelected = visibleMemberIds.length > 0 && visibleMemberIds.every((id: number) => selectedMemberIds.has(id))
-
-    const toggleSelectAllMembers = useCallback(() => {
-        setSelectedMemberIds((prev) => {
-            const next = new Set(prev)
-            if (allMembersSelected) {
-                visibleMemberIds.forEach((id: number) => next.delete(id))
-            } else {
-                visibleMemberIds.forEach((id: number) => next.add(id))
-            }
-            return next
-        })
-    }, [allMembersSelected, visibleMemberIds])
-
-    const toggleSelectMember = useCallback((userId: number) => {
-        setSelectedMemberIds((prev) => {
-            const next = new Set(prev)
-            if (next.has(userId)) next.delete(userId)
-            else next.add(userId)
-            return next
-        })
+    const handleMembersSelectionChange = useCallback((next: Set<string | number>) => {
+        setSelectedMemberIds(new Set(Array.from(next).map(Number)))
     }, [])
 
     const handleMembersPageChange = (newPage: number) => {
@@ -319,6 +294,114 @@ function OrgUserGroups() {
         }
     }
 
+    const memberColumns: Column<any>[] = [
+        {
+            key: 'name',
+            header: t('dashboard.users.usergroups.table.name'),
+            sortable: true,
+            value: (u) => `${u.first_name} ${u.last_name}`,
+            render: (u) => (
+                <div className="flex items-center gap-2.5 min-w-0">
+                    <UserAvatar
+                        width={30}
+                        border='border-2'
+                        avatar_url={u.avatar_image ? getUserAvatarMediaDirectory(u.user_uuid, u.avatar_image) : ''}
+                        rounded="rounded-full"
+                        predefined_avatar={u.avatar_image === '' ? 'empty' : undefined}
+                    />
+                    <span className="font-medium text-gray-900 truncate">
+                        {u.first_name} {u.last_name}
+                    </span>
+                </div>
+            ),
+        },
+        {
+            key: 'username',
+            header: t('dashboard.users.usergroups.table.username'),
+            width: '170px',
+            render: (u) => <span className="text-gray-500">@{u.username}</span>,
+        },
+        {
+            key: 'email',
+            header: t('dashboard.users.usergroups.table.email'),
+            width: '240px',
+            render: (u) => <span className="text-gray-500 truncate">{u.email}</span>,
+        },
+        {
+            key: 'status',
+            header: t('dashboard.users.usergroups.table.status'),
+            width: '140px',
+            render: (u) => (
+                <span className="inline-flex items-center gap-1.5 text-sm">
+                    <span className={`w-2.5 h-2.5 rounded ${u.email_verified ? 'bg-green-500' : 'bg-red-500'}`} />
+                    {u.email_verified
+                        ? t('dashboard.users.usergroups.members.status.verified')
+                        : t('dashboard.users.usergroups.members.status.unverified')}
+                </span>
+            ),
+        },
+        {
+            key: 'joined',
+            header: t('dashboard.users.usergroups.table.joined'),
+            width: '150px',
+            align: 'right',
+            sortable: true,
+            value: (u) => u.creation_date || '',
+            render: (u) => (
+                <span className="text-[13px] text-gray-400 whitespace-nowrap">{formatDate(u.creation_date)}</span>
+            ),
+        },
+        {
+            key: 'actions',
+            header: '',
+            width: '60px',
+            align: 'right',
+            render: (u) => (
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation()
+                        setDetailUser(u)
+                    }}
+                    className="p-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
+                    title={t('common.view_details')}
+                >
+                    <MoreHorizontal size={16} />
+                </button>
+            ),
+        },
+    ]
+
+    const membersPagination = (
+        <div className="flex items-center justify-between">
+            <span className="text-xs text-gray-500">
+                {t('dashboard.users.usergroups.members.pagination.showing', {
+                    start: (membersPage - 1) * ITEMS_PER_PAGE + 1,
+                    end: Math.min(membersPage * ITEMS_PER_PAGE, totalMembers),
+                    total: totalMembers,
+                })}
+            </span>
+            <div className="flex items-center gap-2">
+                <button
+                    onClick={() => handleMembersPageChange(membersPage - 1)}
+                    disabled={membersPage === 1}
+                    className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                >
+                    <ChevronLeft className="w-4 h-4 text-gray-600" />
+                </button>
+                <span className="text-xs text-gray-600 font-medium min-w-[64px] text-center">
+                    {t('dashboard.users.usergroups.members.pagination.page', { current: membersPage, total: totalMembersPages })}
+                </span>
+                <button
+                    onClick={() => handleMembersPageChange(membersPage + 1)}
+                    disabled={membersPage * ITEMS_PER_PAGE >= totalMembers}
+                    className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                >
+                    <ChevronRight className="w-4 h-4 text-gray-600" />
+                </button>
+            </div>
+        </div>
+    )
+
     // ── State 3: Members Table ──
     if (membersGroupId) {
         return (
@@ -407,185 +490,44 @@ function OrgUserGroups() {
                         </DropdownMenu>
                     </div>
 
-                    {/* ── TABLE (always rendered, even when empty) ── */}
-                    <div className="relative">
-                        {isMembersLoading && (
-                            <div className="py-20 flex justify-center rounded-xl border border-gray-200">
+                    {/* ── TABLE ── */}
+                    {isMembersLoading ? (
+                        <TableCard>
+                            <div className="py-16 flex justify-center">
                                 <LearnHouseSpinner size={36} />
                             </div>
-                        )}
-
-                        {!isMembersLoading && (
-                            <>
+                        </TableCard>
+                    ) : paginatedMembers.length === 0 ? (
+                        <TableCard>
+                            <EmptyState
+                                icon={Users}
+                                title={
+                                    membersSearch
+                                        ? t('dashboard.users.usergroups.members.no_results')
+                                        : t('dashboard.users.usergroups.members.no_users')
+                                }
+                            />
+                        </TableCard>
+                    ) : (
+                        <TableCard footer={totalMembers > ITEMS_PER_PAGE ? membersPagination : undefined}>
+                            <div className="relative">
                                 {/* Loading overlay for page transitions */}
                                 {isMembersPageTransitioning && (
-                                    <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center rounded-xl">
+                                    <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center">
                                         <LearnHouseSpinner size={28} />
                                     </div>
                                 )}
 
-                                <div className="rounded-xl border border-gray-200 overflow-hidden">
-                                    <Table className="table-fixed">
-                                        <TableHeader>
-                                            <TableRow className="bg-gray-50">
-                                                <TableHead className="w-[30px]">
-                                                    <label className="flex items-center justify-center cursor-pointer w-4 h-4">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={allMembersSelected}
-                                                            onChange={toggleSelectAllMembers}
-                                                            className="sr-only peer"
-                                                        />
-                                                        <div className="w-full h-full rounded border border-gray-300 bg-white peer-checked:bg-gray-600 peer-checked:border-gray-600 flex items-center justify-center transition-colors">
-                                                            <Check size={12} className="text-white hidden peer-checked:block" strokeWidth={3} />
-                                                        </div>
-                                                    </label>
-                                                </TableHead>
-                                                <TableHead className="w-[160px]">
-                                                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.users.usergroups.table.name')}</span>
-                                                </TableHead>
-                                                <TableHead className="w-[130px]">
-                                                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.users.usergroups.table.username')}</span>
-                                                </TableHead>
-                                                <TableHead className="w-[180px]">
-                                                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.users.usergroups.table.email')}</span>
-                                                </TableHead>
-                                                <TableHead className="w-[120px]">
-                                                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.users.usergroups.table.status')}</span>
-                                                </TableHead>
-                                                <TableHead className="w-[140px]">
-                                                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.users.usergroups.table.joined')}</span>
-                                                </TableHead>
-                                                <TableHead className="w-[50px]"></TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {paginatedMembers.length === 0 ? (
-                                                <TableRow>
-                                                    <TableCell colSpan={7} className="text-center py-12">
-                                                        <div className="flex flex-col items-center gap-2">
-                                                            <Users size={32} className="text-gray-300" />
-                                                            <span className="text-sm text-gray-400 font-medium">
-                                                                {membersSearch
-                                                                    ? t('dashboard.users.usergroups.members.no_results')
-                                                                    : t('dashboard.users.usergroups.members.no_users')
-                                                                }
-                                                            </span>
-                                                        </div>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ) : (
-                                                paginatedMembers.map((user: any) => (
-                                                    <TableRow
-                                                        key={user.id}
-                                                        className={`${selectedMemberIds.has(user.id) ? 'bg-gray-50' : ''} cursor-pointer hover:bg-gray-50`}
-                                                        onClick={(e) => {
-                                                            if (
-                                                                e.target instanceof HTMLElement &&
-                                                                (e.target.closest('button') ||
-                                                                 e.target.closest('input[type="checkbox"]') ||
-                                                                 e.target.closest('[role="menuitem"]') ||
-                                                                 e.target.closest('[role="menu"]'))
-                                                            ) {
-                                                                return
-                                                            }
-                                                            toggleSelectMember(user.id)
-                                                        }}
-                                                    >
-                                                        <TableCell onClick={(e) => e.stopPropagation()}>
-                                                            <label className="flex items-center justify-center cursor-pointer w-4 h-4">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={selectedMemberIds.has(user.id)}
-                                                                    onChange={() => toggleSelectMember(user.id)}
-                                                                    className="sr-only peer"
-                                                                />
-                                                                <div className="w-full h-full rounded border border-gray-300 bg-white peer-checked:bg-gray-600 peer-checked:border-gray-600 flex items-center justify-center transition-colors">
-                                                                    <Check size={12} className="text-white hidden peer-checked:block" strokeWidth={3} />
-                                                                </div>
-                                                            </label>
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <div className="flex items-center gap-2 overflow-hidden">
-                                                                <UserAvatar
-                                                                    width={30}
-                                                                    border='border-2'
-                                                                    avatar_url={user.avatar_image ? getUserAvatarMediaDirectory(user.user_uuid, user.avatar_image) : ''}
-                                                                    rounded="rounded-full"
-                                                                    predefined_avatar={user.avatar_image === '' ? 'empty' : undefined}
-                                                                />
-                                                                <span className="font-medium truncate text-sm">
-                                                                    {user.first_name} {user.last_name}
-                                                                </span>
-                                                            </div>
-                                                        </TableCell>
-                                                        <TableCell className="text-gray-500 text-sm">
-                                                            @{user.username}
-                                                        </TableCell>
-                                                        <TableCell className="text-gray-500 text-sm truncate">
-                                                            {user.email}
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <span className="inline-flex items-center gap-1.5 text-sm">
-                                                                <span className={`w-2.5 h-2.5 rounded ${user.email_verified ? 'bg-green-500' : 'bg-red-500'}`} />
-                                                                {user.email_verified ? t('dashboard.users.usergroups.members.status.verified') : t('dashboard.users.usergroups.members.status.unverified')}
-                                                            </span>
-                                                        </TableCell>
-                                                        <TableCell className="text-gray-500 text-sm">
-                                                            {formatDate(user.creation_date)}
-                                                        </TableCell>
-                                                        <TableCell className="text-right">
-                                                            <button
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation()
-                                                                    setDetailUser(user)
-                                                                }}
-                                                                className="p-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
-                                                                title={t('common.view_details')}
-                                                            >
-                                                                <MoreHorizontal size={16} />
-                                                            </button>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))
-                                            )}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                            </>
-                        )}
-                    </div>
-
-                    {/* Pagination */}
-                    {totalMembers > ITEMS_PER_PAGE && (
-                        <div className="flex items-center justify-between px-6 py-4 mt-4 border border-gray-200 rounded-xl bg-gray-50/50">
-                            <div className="text-xs text-gray-500 font-medium">
-                                {t('dashboard.users.usergroups.members.pagination.showing', {
-                                    start: (membersPage - 1) * ITEMS_PER_PAGE + 1,
-                                    end: Math.min(membersPage * ITEMS_PER_PAGE, totalMembers),
-                                    total: totalMembers,
-                                })}
+                                <DataTable
+                                    columns={memberColumns}
+                                    rows={paginatedMembers}
+                                    selectable
+                                    getRowId={(u) => u.id}
+                                    selectedIds={selectedMemberIds as Set<string | number>}
+                                    onSelectionChange={handleMembersSelectionChange}
+                                />
                             </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => handleMembersPageChange(membersPage - 1)}
-                                    disabled={membersPage === 1}
-                                    className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                                >
-                                    <ChevronLeft className="w-4 h-4 text-gray-600" />
-                                </button>
-                                <span className="text-sm text-gray-600 font-medium min-w-[80px] text-center bg-white px-3 py-2 rounded-lg border border-gray-200">
-                                    {t('dashboard.users.usergroups.members.pagination.page', { current: membersPage, total: totalMembersPages })}
-                                </span>
-                                <button
-                                    onClick={() => handleMembersPageChange(membersPage + 1)}
-                                    disabled={membersPage * ITEMS_PER_PAGE >= totalMembers}
-                                    className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                                >
-                                    <ChevronRight className="w-4 h-4 text-gray-600" />
-                                </button>
-                            </div>
-                        </div>
+                        </TableCard>
                     )}
 
                     {/* Detail panel — floating card */}

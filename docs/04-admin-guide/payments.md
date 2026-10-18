@@ -2,6 +2,8 @@
 
 > Configure Chargily Pay v2 to accept Algerian Dinar payments via EDAHABIA (Algérie Poste) and CIB cards on the Koodook platform.
 
+> **Implementation status:** pricing (Payments → Offers) and access management (Access tab, all three modes) are **live**. Chargily checkout creation, the webhook receiver, and the Configuration tab are **not built yet**. Until they land, no real payment can be taken and the Transactions/Overview/Payouts tabs show sample data. See [Payments — Progress & Roadmap](../08-features/payments/progress.md).
+
 ## Overview of Chargily Pay v2 Integration
 
 Koodook uses **Chargily Pay v2** as its payment gateway for all transactions. Chargily Pay is a payment service provider that supports Algerian payment methods, including:
@@ -28,32 +30,37 @@ Before accepting payments, you need to connect Koodook to your Chargily Pay acco
    - **Secret Key** — Used by the backend to verify payment signatures and process webhooks.
 
 ### Step 3: Configure in Koodook
-1. Go to **Admin Dashboard → Settings → Payments → Chargily**.
+1. Go to **Admin Dashboard → Payments → Configuration**.
 2. Paste the **API Key** and **Secret Key** into the corresponding fields.
-3. Set the **Mode** toggle:
-   - **Sandbox** (toggle ON) — Use test credentials for development and testing.
-   - **Production** (toggle OFF) — Use live credentials for real payments.
+3. Set the **Mode**:
+   - **Test** — use test credentials for development and testing.
+   - **Live** — use live credentials for real payments.
 4. Click **Save Configuration**.
+
+Credentials are stored **per organization** in `paymentconfig`; secret keys are encrypted at rest and never returned by the API.
+
+> **Note:** the Configuration tab is currently UI-only — the `GET`/`PUT /payments/{org_id}/config` endpoints still need to be added. See the [Progress & Roadmap](../08-features/payments/progress.md).
 
 > **Security warning:** Never share your Secret Key. It is used for server-to-server communication only. Store it securely and rotate it periodically from the Chargily dashboard.
 
 ## Configuring Product Pricing (DZD)
 
-Prices are set at the course level:
+Prices are set **per resource**, in one place: **Admin Dashboard → Payments → Offers**.
 
-1. Go to **Admin Dashboard → Courses** and open the course you want to price.
-2. Navigate to the **Pricing** tab.
-3. Enter the **Price** in Algerian Dinars (DZD). Example values:
-   - Single course: 1,500 DZD
-   - Bundle: 5,000 DZD
-   - Premium course: 15,000 DZD
-4. Optionally set a **Sale Price** and a **Sale End Date** to run promotions.
-5. Click **Save**.
+1. Open **Payments → Offers**.
+2. Find the course or podcast in the table (search, or the **Needs price** filter).
+3. Type the amount in the **Price (DZD)** column — the field is borderless, currency is fixed to DZD.
+4. Repeat for as many rows as you need, then press **Save** once in the toolbar.
 
-**Price display rules:**
-- If a sale price is active, the original price is shown with a strikethrough and the sale price is highlighted.
-- If the sale end date passes, the price reverts to the original.
-- Group discounts (configured in User Groups) stack on top of the sale price if applicable.
+Semantics:
+
+| Value | Meaning |
+|---|---|
+| empty | not priced — Paid mode refuses to activate |
+| `0` | explicitly **Free** |
+| `> 0` | price in DZD |
+
+Clearing the field and saving removes the price. There is no sale price, no sale end date and no group discount in this build — the listed price is the price.
 
 ## Payment Methods: EDAHABIA and CIB
 
@@ -73,30 +80,32 @@ Both methods are enabled by default. You can disable one method from **Admin Das
 
 ## Webhook Configuration
 
-Webhooks allow Chargily to notify Koodook about payment events (success, failure, refund) in real time.
+Webhooks allow Chargily to notify Koodook about payment events in real time.
 
 ### Setting up the webhook URL
 
 **In production:**
 1. Go to your Chargily merchant dashboard → **Settings → Webhooks**.
-2. Add a new webhook endpoint pointing to: `https://your-domain.com/api/payments/chargily/webhook`
-3. Select the events to listen for: `payment.success`, `payment.failed`, `payment.refunded`.
+2. Add a new webhook endpoint pointing to: `https://your-domain.com/api/v1/payments/webhook/chargily/{org_uuid}`
+3. Select the events to listen for: `checkout.paid`, `checkout.failed`, `checkout.canceled`.
 4. Save the webhook.
 
+> The webhook receiver is not implemented yet — this section documents the target contract. See the [Progress & Roadmap](../08-features/payments/progress.md).
+
 **For local development (using ngrok):**
-1. Start ngrok: `ngrok http 3000` (or your app's port).
+1. Start ngrok against the API port: `ngrok http 1338`.
 2. Copy the ngrok HTTPS URL (e.g., `https://abc123.ngrok.io`).
-3. In the Chargily dashboard, set the webhook URL to: `https://abc123.ngrok.io/api/payments/chargily/webhook`
-4. Ensure the Koodook app is running locally on the same port.
+3. Set the webhook URL to: `https://abc123.ngrok.io/api/v1/payments/webhook/chargily/{org_uuid}` — either in the dashboard or per checkout via `webhook_endpoint`.
+4. Ensure the Koodook API is running locally on the same port.
 
 ### Verifying webhook signatures
-Koodook automatically verifies incoming webhooks using the **Secret Key**. If signature verification fails, the webhook is rejected with a `401 Unauthorized` response. Check the **Admin Dashboard → Settings → Payments → Webhook Logs** for delivery history and any failures.
+Every delivery carries a `signature` header: the hex HMAC-SHA256 of the **raw request body**, keyed with the organization's Secret Key. Koodook compares it in constant time before parsing anything. A missing header returns `400`, a mismatch returns `403`.
 
 ## Testing Payments (Sandbox Mode)
 
 ### Enabling sandbox mode
-1. Go to **Admin Dashboard → Settings → Payments → Chargily**.
-2. Toggle **Sandbox Mode** ON.
+1. Go to **Admin Dashboard → Payments → Configuration**.
+2. Set the mode to **Test**.
 3. Use the test API keys from your Chargily dashboard (under **Settings → API Keys → Test Mode**).
 
 ### Test card numbers
@@ -134,13 +143,11 @@ Use the following test credentials in sandbox mode:
 3. Click any transaction to view full details, including the Chargily payment link.
 
 ### Processing a refund
-1. Open the transaction detail page.
-2. Click **Refund**.
-3. Enter the **refund amount** (partial refunds are supported).
-4. Optionally enter a **reason** (visible to the admin only).
-5. Click **Process Refund**.
+1. Open the transaction in **Chargily merchant dashboard** and issue the refund there (Chargily Pay v2 has **no refund endpoint**).
+2. Back in Koodook, open **Payments → Transactions** and mark the order as refunded.
+3. Enter the **refund amount** (full or partial) and an optional **reason** (admin-only).
 
-The refund is sent to Chargily, which processes it according to the original payment method's rules. The transaction status updates to "Refunded" (or "Partially Refunded"). The user's course enrollment is **not** automatically removed — you can unenroll the user manually if needed.
+The order status updates to "Refunded" or "Partially Refunded". A **full** refund revokes the entitlement, so the learner loses access; a **partial** refund keeps it. Nothing is deleted — the order and the entitlement row stay for audit.
 
 ## Payout Settings
 

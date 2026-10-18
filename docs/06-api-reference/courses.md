@@ -612,9 +612,10 @@ GET /api/v1/courses/{course_uuid}/updates
 | `org_id` | integer | Foreign key to organization |
 | `name` | string | Course name |
 | `description` | text | Short description |
-| `public` | boolean | Visibility flag |
-| `access` | enum | `public`, `users_only`, or `paid` |
-| `price` | decimal | Course price in DZD (null if free) |
+| `public` | boolean | Derived from `access_type` — `true` only for Free; kept for catalog indexes |
+| `access_type` | enum | `public` (Free), `users_only` (Restricted), or `paid` |
+| `price_amount` | integer | Price in DZD (null unless `paid`) |
+| `price_currency` | string | Always `DZD` |
 | `learnings` | text | Learning objectives |
 | `about` | text | Detailed description |
 | `tags` | array | Categorization tags |

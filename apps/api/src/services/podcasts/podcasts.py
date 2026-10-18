@@ -24,6 +24,7 @@ from src.db.podcasts.podcasts import (
     AuthorWithRole,
 )
 from src.db.podcasts.episodes import PodcastEpisode
+from src.db.payments.enums import AccessTypeEnum
 from src.security.rbac.rbac import (
     authorization_verify_based_on_org_admin_status,
 )
@@ -310,18 +311,23 @@ async def get_podcasts_orgslug(
     )
 
     if isinstance(current_user, AnonymousUser):
-        # For anonymous users, only show public AND published podcasts
-        query = query.where(Podcast.public == True, Podcast.published == True)
+        # Anonymous visitors only see published, free or purchasable podcasts.
+        query = query.where(
+            Podcast.published == True,
+            Podcast.access_type.in_([AccessTypeEnum.PUBLIC, AccessTypeEnum.PAID]),
+        )
     else:
         # For authenticated users with admin access viewing dashboard, show all podcasts
         if can_view_unpublished:
             pass
         else:
             # For regular users, show:
-            # 1. Published AND public podcasts
-            # 2. Published podcasts not in any UserGroup
-            # 3. Podcasts (including unpublished) in UserGroups where the user is a member
-            # 4. Podcasts (including unpublished) where the user is a resource author
+            # 1. Published free or paid podcasts (paid still lists, with its price)
+            # 2. Podcasts (including unpublished) in UserGroups where the user is a member
+            # 3. Podcasts (including unpublished) where the user is a resource author
+            #
+            # Restricted (`users_only`) podcasts are never listed unless the viewer
+            # is a member of a linked UserGroup — the whitelist is strict.
             query = (
                 query
                 .outerjoin(UserGroupResource, UserGroupResource.resource_uuid == Podcast.podcast_uuid)
@@ -331,8 +337,10 @@ async def get_podcasts_orgslug(
                 ))
                 .outerjoin(ResourceAuthor, ResourceAuthor.resource_uuid == Podcast.podcast_uuid)
                 .where(or_(
-                    and_(Podcast.published == True, Podcast.public == True),  # Published public podcasts
-                    and_(Podcast.published == True, UserGroupResource.resource_uuid.is_(None)),  # Published podcasts not in any UserGroup
+                    and_(
+                        Podcast.published == True,
+                        Podcast.access_type.in_([AccessTypeEnum.PUBLIC, AccessTypeEnum.PAID]),
+                    ),
                     UserGroupUser.user_id == acting_user_id,  # Podcasts in UserGroups where user is a member (including unpublished)
                     ResourceAuthor.user_id == acting_user_id  # Podcasts where user is a resource author (including unpublished)
                 ))
@@ -404,6 +412,9 @@ async def get_podcasts_orgslug(
             "thumbnail_image": podcast.thumbnail_image or "",
             "public": podcast.public,
             "published": podcast.published,
+            "access_type": podcast.access_type,
+            "price_amount": podcast.price_amount,
+            "price_currency": podcast.price_currency,
             "podcast_uuid": podcast.podcast_uuid,
             "creation_date": podcast.creation_date,
             "update_date": podcast.update_date,
@@ -432,17 +443,19 @@ async def get_podcasts_count_orgslug(
     )
 
     if isinstance(current_user, AnonymousUser):
-        # For anonymous users, only count public AND published podcasts
-        query = query.where(Podcast.public == True, Podcast.published == True)
+        # Anonymous visitors only count published, free or purchasable podcasts.
+        query = query.where(
+            Podcast.published == True,
+            Podcast.access_type.in_([AccessTypeEnum.PUBLIC, AccessTypeEnum.PAID]),
+        )
     elif not isinstance(current_user, AnonymousUser) and is_user_superadmin(count_acting_user_id, db_session):
         # Superadmins see all podcasts (no additional filter)
         pass
     else:
         # For authenticated users, count:
-        # 1. Published AND public podcasts
-        # 2. Published podcasts not in any UserGroup
-        # 3. Podcasts (including unpublished) in UserGroups where the user is a member
-        # 4. Podcasts (including unpublished) where the user is a resource author
+        # 1. Published free or paid podcasts
+        # 2. Podcasts (including unpublished) in UserGroups where the user is a member
+        # 3. Podcasts (including unpublished) where the user is a resource author
         query = (
             query
             .outerjoin(UserGroupResource, UserGroupResource.resource_uuid == Podcast.podcast_uuid)
@@ -452,8 +465,10 @@ async def get_podcasts_count_orgslug(
             ))
             .outerjoin(ResourceAuthor, ResourceAuthor.resource_uuid == Podcast.podcast_uuid)
             .where(or_(
-                and_(Podcast.published == True, Podcast.public == True),  # Published public podcasts
-                and_(Podcast.published == True, UserGroupResource.resource_uuid.is_(None)),  # Published podcasts not in any UserGroup
+                and_(
+                    Podcast.published == True,
+                    Podcast.access_type.in_([AccessTypeEnum.PUBLIC, AccessTypeEnum.PAID]),
+                ),
                 UserGroupUser.user_id == count_acting_user_id,  # Podcasts in UserGroups where user is a member (including unpublished)
                 ResourceAuthor.user_id == count_acting_user_id  # Podcasts where user is a resource author (including unpublished)
             ))
@@ -473,6 +488,21 @@ async def create_podcast(
 ):
     """Create a new podcast"""
     podcast = Podcast.model_validate(podcast_object)
+
+    # Access model: derive from the legacy `public` flag when the client did not
+    # send `access_type` explicitly, then keep both fields in sync.
+    if "access_type" not in podcast_object.model_fields_set:
+        podcast.access_type = (
+            AccessTypeEnum.PUBLIC if podcast_object.public else AccessTypeEnum.USERS_ONLY
+        )
+    else:
+        podcast.public = podcast.access_type == AccessTypeEnum.PUBLIC
+
+    if podcast.access_type == AccessTypeEnum.PAID and (podcast.price_amount or 0) <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="A paid podcast requires a positive price",
+        )
 
     # SECURITY: Check if user has permission to create podcasts
     await check_resource_access(request, db_session, current_user, "podcast_x", AccessAction.CREATE)
@@ -844,6 +874,12 @@ async def update_podcast(
     if podcast_object.public is not None:
         sensitive_fields_updated.append("public")
 
+    if podcast_object.access_type is not None:
+        sensitive_fields_updated.append("access_type")
+
+    if "price_amount" in podcast_object.model_fields_set:
+        sensitive_fields_updated.append("price_amount")
+
     if sensitive_fields_updated:
         # Resolve to the token's creator for API-token callers so ownership /
         # admin checks run against a real user_id (tokens have id=0).
@@ -876,6 +912,24 @@ async def update_podcast(
     for var, value in vars(podcast_object).items():
         if value is not None:
             setattr(podcast, var, value)
+
+    # An explicit null clears the price; null otherwise means "not provided".
+    if "price_amount" in podcast_object.model_fields_set and podcast_object.price_amount is None:
+        podcast.price_amount = None
+
+    # Keep the legacy `public` flag and `access_type` consistent.
+    if podcast_object.access_type is not None:
+        podcast.public = podcast_object.access_type == AccessTypeEnum.PUBLIC
+    elif podcast_object.public is not None:
+        podcast.access_type = (
+            AccessTypeEnum.PUBLIC if podcast_object.public else AccessTypeEnum.USERS_ONLY
+        )
+
+    if podcast.access_type == AccessTypeEnum.PAID and (podcast.price_amount or 0) <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="A paid podcast requires a positive price",
+        )
 
     # Complete the podcast object
     podcast.update_date = str(datetime.now())

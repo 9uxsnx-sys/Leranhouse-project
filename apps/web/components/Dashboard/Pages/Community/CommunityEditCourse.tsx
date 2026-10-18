@@ -10,25 +10,13 @@ import { getOrgCourses } from '@services/courses/courses'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { mutate } from 'swr'
 import { getAPIUrl } from '@services/config/config'
-import { Check, Search, ArrowUpDown, Loader2 } from 'lucide-react'
+import { BookOpen, Search, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { searchMatches } from '@/lib/search/normalize'
 import { useDebounce } from '@/hooks/useDebounce'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { IconButton } from '@/components/ui/icon-button'
+import { TableCard } from '@components/Analytics/Card'
+import { Column, DataTable } from '@components/Analytics/DataTable'
+import { EmptyState } from '@components/Analytics/Feedback'
 
 interface Course {
   id: number
@@ -52,7 +40,6 @@ const CommunityEditCourse: React.FC = () => {
   const [isLoadingCourses, setIsLoadingCourses] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const debouncedSearch = useDebounce(searchQuery, 300)
-  const [sortBy, setSortBy] = useState<'name-asc' | 'name-desc' | 'newest' | 'oldest'>('newest')
   const [selectedCourses, setSelectedCourses] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -78,29 +65,11 @@ const CommunityEditCourse: React.FC = () => {
 
   // Determine which courses to show in the table
   const showSearchResults = searchQuery.trim().length > 0
-  let tableCourses: Course[] = []
-  if (showSearchResults) {
-    tableCourses = courses.filter((c) =>
-      searchMatches(c.name, debouncedSearch) || (c.description && searchMatches(c.description, debouncedSearch))
-    )
-    const sorted = [...tableCourses].sort((a, b) => {
-      switch (sortBy) {
-        case 'name-asc':
-          return (a.name || '').localeCompare(b.name || '')
-        case 'name-desc':
-          return (b.name || '').localeCompare(a.name || '')
-        case 'newest':
-          return new Date(b.creation_date || 0).getTime() - new Date(a.creation_date || 0).getTime()
-        case 'oldest':
-          return new Date(a.creation_date || 0).getTime() - new Date(b.creation_date || 0).getTime()
-        default:
-          return 0
-      }
-    })
-    tableCourses = sorted
-  } else {
-    tableCourses = linkedCourse ? [linkedCourse] : []
-  }
+  const tableCourses: Course[] = showSearchResults
+    ? courses.filter((c) =>
+        searchMatches(c.name, debouncedSearch) || (c.description && searchMatches(c.description, debouncedSearch))
+      )
+    : linkedCourse ? [linkedCourse] : []
 
   const handleLink = async () => {
     if (selectedCourses.length === 0 || !community) return
@@ -146,6 +115,64 @@ const CommunityEditCourse: React.FC = () => {
     })
   }
 
+  const columns: Column<Course>[] = [
+    {
+      key: 'state',
+      header: '',
+      width: '56px',
+      render: (course) => (
+        <span
+          className="flex items-center justify-center w-4 h-4"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <label className="flex items-center justify-center cursor-pointer w-4 h-4">
+            <input
+              type="checkbox"
+              checked={selectedCourses.includes(course.course_uuid)}
+              onChange={() => handleCourseSelect(course.course_uuid)}
+              className="sr-only peer"
+            />
+            <div className="w-full h-full rounded border border-gray-300 bg-white peer-checked:bg-gray-600 peer-checked:border-gray-600 flex items-center justify-center transition-colors">
+              <svg
+                viewBox="0 0 12 12"
+                className="w-3 h-3 text-white hidden peer-checked:block"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M2 6l3 3 5-6" />
+              </svg>
+            </div>
+          </label>
+        </span>
+      ),
+    },
+    {
+      key: 'name',
+      header: t('dashboard.courses.communities.table.name'),
+      width: '280px',
+      sortable: true,
+      value: (course) => course.name || '',
+      render: (course) => (
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="w-[30px] h-[30px] shrink-0 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center">
+            <BookOpen size={15} />
+          </span>
+          <span className="font-medium text-gray-900 truncate">{course.name}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'description',
+      header: t('dashboard.courses.communities.table.description'),
+      render: (course) => (
+        <span className="text-gray-500 truncate">{course.description || '—'}</span>
+      ),
+    },
+  ]
+
   return (
     <div>
       <div className="flex items-center gap-3 mb-5">
@@ -172,136 +199,37 @@ const CommunityEditCourse: React.FC = () => {
             {showSearchResults ? t('common.add') : t('common.delete')}
           </button>
         )}
-        <DropdownMenu modal={false}>
-          <DropdownMenuTrigger asChild>
-            <IconButton
-              size="small"
-              variant="transparent"
-              className="bg-white hover:bg-gray-50 shadow-borders-base"
-              aria-label={t('dashboard.courses.communities.course.sort_aria')}
-            >
-              <ArrowUpDown size={15} />
-            </IconButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="min-w-[140px] rounded-lg border border-gray-200 bg-white p-1 shadow-md"
-            sideOffset={6}
-          >
-            {([
-              { value: 'name-asc', label: t('dashboard.courses.communities.sort_options.name_asc') },
-              { value: 'name-desc', label: t('dashboard.courses.communities.sort_options.name_desc') },
-              { value: 'newest', label: t('dashboard.courses.communities.sort_options.newest') },
-              { value: 'oldest', label: t('dashboard.courses.communities.sort_options.oldest') },
-            ] as const).map((option) => (
-              <DropdownMenuItem
-                key={option.value}
-                onClick={() => setSortBy(option.value)}
-                className="justify-between text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
-              >
-                <span className="text-gray-700 text-xs">{option.label}</span>
-                {sortBy === option.value && <Check size={12} className="text-gray-500" />}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
 
-      <div className="space-y-4">
-        <div className="rounded-xl border border-gray-200 overflow-hidden">
-          <Table className="table-fixed">
-            <TableHeader>
-              <TableRow className="bg-gray-50">
-                <TableHead className="w-[30px]">
-                  {!showSearchResults && tableCourses.length > 0 && (
-                    <label className="flex items-center justify-center cursor-pointer w-4 h-4">
-                      <input
-                        type="checkbox"
-                        checked={selectedCourses.length === tableCourses.length && tableCourses.length > 0}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedCourses(tableCourses.map((c) => c.course_uuid))
-                          } else {
-                            setSelectedCourses([])
-                          }
-                        }}
-                        className="sr-only peer"
-                      />
-                      <div className="w-full h-full rounded border border-gray-300 bg-white peer-checked:bg-gray-600 peer-checked:border-gray-600 flex items-center justify-center transition-colors">
-                        <Check size={12} className="text-white hidden peer-checked:block" strokeWidth={3} />
-                      </div>
-                    </label>
-                  )}
-                </TableHead>
-                <TableHead className="w-[200px] pl-2">
-                  <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.courses.communities.table.name')}</span>
-                </TableHead>
-                <TableHead>
-                  <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.courses.communities.table.description')}</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoadingCourses ? (
-                <TableRow>
-                  <TableCell colSpan={3} className="text-center py-8">
-                    <Loader2 size={18} className="animate-spin text-gray-400 mx-auto" />
-                  </TableCell>
-                </TableRow>
-              ) : !showSearchResults && tableCourses.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={3} className="text-center text-sm text-gray-500 py-8">
-                    {t('dashboard.courses.communities.course.no_course_linked')}
-                  </TableCell>
-                </TableRow>
-              ) : showSearchResults && tableCourses.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={3} className="text-center text-sm text-gray-500 py-8">
-                    {t('dashboard.courses.communities.course.no_courses')}
-                  </TableCell>
-                </TableRow>
-              ) : (
-                tableCourses.map((course) => (
-                  <TableRow
-                    key={course.course_uuid}
-                    className={`${selectedCourses.includes(course.course_uuid) ? 'bg-gray-50' : ''} cursor-pointer hover:bg-gray-50`}
-                    onClick={(e) => {
-                      if (
-                        e.target instanceof HTMLElement &&
-                        (e.target.closest('button') ||
-                          e.target.closest('input[type="checkbox"]') ||
-                          e.target.closest('[role="menuitem"]') ||
-                          e.target.closest('[role="menu"]'))
-                      ) {
-                        return
-                      }
-                      handleCourseSelect(course.course_uuid)
-                    }}
-                  >
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <label className="flex items-center justify-center cursor-pointer w-4 h-4">
-                        <input
-                          type="checkbox"
-                          checked={selectedCourses.includes(course.course_uuid)}
-                          onChange={() => handleCourseSelect(course.course_uuid)}
-                          className="sr-only peer"
-                        />
-                        <div className="w-full h-full rounded border border-gray-300 bg-white peer-checked:bg-gray-600 peer-checked:border-gray-600 flex items-center justify-center transition-colors">
-                          <Check size={12} className="text-white hidden peer-checked:block" strokeWidth={3} />
-                        </div>
-                      </label>
-                    </TableCell>
-                    <TableCell className="font-medium text-gray-900 pl-2 truncate">{course.name}</TableCell>
-                    <TableCell className="text-gray-500 text-sm truncate">
-                      {course.description || '-'}
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
+      {isLoadingCourses ? (
+        <TableCard>
+          <div className="py-16 flex justify-center">
+            <Loader2 size={20} className="animate-spin text-gray-400" />
+          </div>
+        </TableCard>
+      ) : tableCourses.length === 0 ? (
+        <TableCard>
+          <EmptyState
+            icon={BookOpen}
+            title={
+              showSearchResults
+                ? t('dashboard.courses.communities.course.no_courses')
+                : t('dashboard.courses.communities.course.no_course_linked')
+            }
+          />
+        </TableCard>
+      ) : (
+        <TableCard>
+          <DataTable
+            columns={columns}
+            rows={tableCourses}
+            onRowClick={(course) => handleCourseSelect(course.course_uuid)}
+            rowClassName={(course) =>
+              selectedCourses.includes(course.course_uuid) ? 'bg-gray-50' : ''
+            }
+          />
+        </TableCard>
+      )}
     </div>
   )
 }

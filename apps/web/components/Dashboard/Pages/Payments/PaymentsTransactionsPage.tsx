@@ -151,7 +151,7 @@ export default function PaymentsTransactionsPage() {
         />
       </div>
 
-      <SectionCard title={t('dashboard.payments.transactions.title')} bleed>
+      <SectionCard bleed>
         {rows.length ? (
           <DataTable columns={columns} rows={rows} />
         ) : (

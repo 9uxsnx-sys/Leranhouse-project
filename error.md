@@ -1,19 +1,19 @@
 ## Error Type
-Console ReferenceError
+Console TypeError
 
 ## Error Message
-org is not defined
+offers.data.map is not a function
 
 
-    at PodcastClient (app\orgs\[orgslug]\(withmenu)\podcast\[podcastuuid]\podcast.tsx:179:51)
+    at PaymentsOffersPage (components\Dashboard\Pages\Payments\PaymentsOffersPage.tsx:100:24)
 
 ## Code Frame
-  177 |           {podcast.banner_image ? (
-  178 |             <img
-> 179 |               src={getPodcastBannerMediaDirectory(org?.org_uuid, podcast?.podcast_uuid, podcast?.banner_image)}
-      |                                                   ^
-  180 |               alt={podcast.name}
-  181 |               className="w-full h-full object-cover"
-  182 |             />
+   98 |
+   99 |         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+> 100 |           {offers.data.map((offer: any) => (
+      |                        ^
+  101 |             <div key={offer.id} className="bg-white p-4 rounded-xl border border-gray-100...
+  102 |               {editingOfferId === String(offer.id) ? (
+  103 |                 <EditOfferForm
 
-Next.js version: 16.3.5 (Webpack)
+Next.js version: 16.2.6 (Webpack)

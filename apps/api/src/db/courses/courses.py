@@ -8,6 +8,7 @@ from src.db.users import UserRead
 from src.db.trails import TrailRead
 from src.db.courses.chapters import ChapterRead
 from src.db.resource_authors import ResourceAuthorshipEnum, ResourceAuthorshipStatusEnum
+from src.db.payments.enums import AccessTypeEnum
 
 
 class CourseSEO(BaseModel):
@@ -58,6 +59,10 @@ class CourseBase(SQLModel):
     public: bool
     published: bool = Field(default=False)
     open_to_contributors: bool
+    # Access model — `public` is kept in sync for legacy listing queries.
+    access_type: AccessTypeEnum = Field(default=AccessTypeEnum.PUBLIC)
+    price_amount: Optional[int] = None
+    price_currency: str = Field(default="DZD")
 
 
 class Course(CourseBase, table=True):
@@ -99,6 +104,9 @@ class CourseUpdate(SQLModel):
     public: Optional[bool] = None
     published: Optional[bool] = None
     open_to_contributors: Optional[bool] = None
+    access_type: Optional[AccessTypeEnum] = None
+    price_amount: Optional[int] = None
+    price_currency: Optional[str] = None
     seo: Optional[dict] = None
     extra_metadata: Optional[dict] = None
 

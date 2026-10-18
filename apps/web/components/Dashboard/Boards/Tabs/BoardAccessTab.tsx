@@ -11,6 +11,8 @@ import { updateBoard } from '@services/boards/boards'
 import { linkResourcesToUserGroup, unLinkResourcesToUserGroup } from '@services/usergroups/usergroups'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
+import { SectionCard } from '@components/Analytics/Card'
+import { Column, DataTable } from '@components/Analytics/DataTable'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
@@ -74,6 +76,42 @@ function BoardAccessTab({ board, boardUuid, orgId, boardKey }: BoardAccessTabPro
     }
   }
 
+  const groupColumns: Column<any>[] = [
+    {
+      key: 'name',
+      header: t('boards.name'),
+      sortable: true,
+      value: (usergroup) => usergroup.name || '',
+      render: (usergroup) => (
+        <div className="flex items-center gap-2.5 min-w-0">
+          <Users size={16} className="shrink-0 text-gray-400" />
+          <span className="font-medium text-gray-900 truncate">{usergroup.name}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'actions',
+      header: '',
+      width: '120px',
+      align: 'right',
+      render: (usergroup) => (
+        <ConfirmationModal
+          confirmationButtonText={t('boards.access.unlink')}
+          confirmationMessage={t('boards.access.unlink_confirm')}
+          dialogTitle={t('boards.access.unlink_user_group')}
+          dialogTrigger={
+            <button className="inline-flex items-center gap-1.5 h-8 px-3 bg-white text-gray-600 hover:bg-rose-50 hover:text-rose-600 rounded-md text-xs font-medium nice-shadow transition-all">
+              <X className="w-3.5 h-3.5" />
+              <span>{t('boards.access.unlink')}</span>
+            </button>
+          }
+          functionToExecute={() => removeUserGroupLink(usergroup.id)}
+          status="warning"
+        />
+      ),
+    },
+  ]
+
   return (
     <div>
       <div className="h-6"></div>
@@ -133,53 +171,9 @@ function BoardAccessTab({ board, boardUuid, orgId, boardKey }: BoardAccessTabPro
 
         {/* UserGroups Section (shown when private) */}
         {!isPublic && (
-          <>
-            <div className="flex flex-col bg-gray-50 -space-y-1 px-3 sm:px-5 py-3 rounded-md mb-3">
-              <h1 className="font-bold text-lg sm:text-xl text-gray-800">{t('boards.access.user_groups')}</h1>
-              <h2 className="text-gray-500 text-xs sm:text-sm">
-                {t('boards.access.user_groups_description')}
-              </h2>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="table-auto w-full text-left whitespace-nowrap rounded-md overflow-hidden">
-                <thead className="bg-gray-100 text-gray-500 rounded-xl uppercase">
-                  <tr className="font-bolder text-sm">
-                    <th className="py-3 px-4">{t('boards.name')}</th>
-                    <th className="py-3 px-4">{t('boards.access.actions')}</th>
-                  </tr>
-                </thead>
-                <tbody className="mt-5 bg-white rounded-md">
-                  {usergroups?.map((usergroup: any) => (
-                    <tr key={usergroup.id} className="border-b border-gray-100 text-sm">
-                      <td className="py-3 px-4">{usergroup.name}</td>
-                      <td className="py-3 px-4">
-                        <ConfirmationModal
-                          confirmationButtonText={t('boards.access.unlink')}
-                          confirmationMessage={t('boards.access.unlink_confirm')}
-                          dialogTitle={t('boards.access.unlink_user_group')}
-                          dialogTrigger={
-                            <button className="mr-2 flex space-x-2 hover:cursor-pointer p-1 px-3 bg-rose-700 rounded-md font-bold items-center text-sm text-rose-100">
-                              <X className="w-4 h-4" />
-                              <span>{t('boards.access.unlink')}</span>
-                            </button>
-                          }
-                          functionToExecute={() => removeUserGroupLink(usergroup.id)}
-                          status="warning"
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                  {(!usergroups || usergroups.length === 0) && (
-                    <tr>
-                      <td colSpan={2} className="py-6 px-4 text-center text-gray-400 text-sm">
-                        {t('boards.access.no_user_groups')}
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-            <div className="flex flex-row-reverse mt-3 mr-2">
+          <SectionCard
+            title={t('boards.access.user_groups')}
+            right={
               <Modal
                 isDialogOpen={userGroupModal}
                 onOpenChange={() => setUserGroupModal(!userGroupModal)}
@@ -196,14 +190,27 @@ function BoardAccessTab({ board, boardUuid, orgId, boardKey }: BoardAccessTabPro
                 dialogTitle={t('boards.access.link_to_user_group')}
                 dialogDescription={t('boards.access.link_to_user_group_description')}
                 dialogTrigger={
-                  <button className="flex space-x-2 hover:cursor-pointer p-1 px-3 bg-green-700 rounded-md font-bold items-center text-xs sm:text-sm text-green-100">
-                    <SquareUserRound className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <button className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors">
+                    <SquareUserRound className="w-4 h-4" />
                     <span>{t('boards.access.link_to_usergroup_btn')}</span>
                   </button>
                 }
               />
-            </div>
-          </>
+            }
+            bleed
+          >
+            <p className="px-6 -mt-2 mb-4 text-xs text-gray-500">
+              {t('boards.access.user_groups_description')}
+            </p>
+
+            {(!usergroups || usergroups.length === 0) ? (
+              <div className="py-10 text-center text-sm text-gray-400">
+                {t('boards.access.no_user_groups')}
+              </div>
+            ) : (
+              <DataTable columns={groupColumns} rows={usergroups} />
+            )}
+          </SectionCard>
         )}
       </div>
     </div>

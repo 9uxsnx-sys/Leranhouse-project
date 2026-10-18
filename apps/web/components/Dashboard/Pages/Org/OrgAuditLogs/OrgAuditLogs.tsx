@@ -22,6 +22,8 @@ import { useTranslation } from 'react-i18next'
 import PlanRestrictedFeature from '@components/Dashboard/Shared/PlanRestricted/PlanRestrictedFeature'
 import { PlanLevel } from '@services/plans/plans'
 import { usePlan } from '@components/Hooks/usePlan'
+import { Column, DataTable } from '@components/Analytics/DataTable'
+import { EmptyState } from '@components/Analytics/Feedback'
 
 const ITEMS_PER_PAGE = 20
 
@@ -161,12 +163,141 @@ const OrgAuditLogs = () => {
     setOffset(newOffset)
   }
 
-  const getStatusColor = (code: number) => {
-    if (code >= 200 && code < 300) return 'bg-green-100 text-green-700'
-    if (code >= 400 && code < 500) return 'bg-orange-100 text-orange-700'
-    if (code >= 500) return 'bg-red-100 text-red-700'
-    return 'bg-gray-100 text-gray-700'
-  }
+  const auditColumns: Column<any>[] = [
+    {
+      key: 'timestamp',
+      header: t('dashboard.organization.audit_logs.table.timestamp'),
+      width: '160px',
+      sortable: true,
+      value: (log) => log.created_at || '',
+      render: (log) => (
+        <div className="flex flex-col">
+          <span className="text-sm font-medium text-gray-900">{dayjs(log.created_at).format('MMM DD, YYYY')}</span>
+          <span className="text-[11px] text-gray-400">{dayjs(log.created_at).format('HH:mm:ss')}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'user',
+      header: t('dashboard.organization.audit_logs.table.user'),
+      width: '180px',
+      sortable: true,
+      value: (log) => log.username || '',
+      render: (log) => (
+        <div className="flex items-center gap-2.5 min-w-0">
+          <UserAvatar
+            width={30}
+            userId={log.user_id?.toString()}
+            rounded="rounded-full"
+            showProfilePopup={true}
+          />
+          <div className="flex flex-col min-w-0">
+            <span className="text-sm font-medium text-gray-900 truncate">
+              @{log.username || t('dashboard.organization.audit_logs.system_user')}
+            </span>
+            {log.user_id && (
+              <span className="text-[11px] text-gray-400 font-mono">{t('dashboard.organization.audit_logs.user_id', { id: log.user_id })}</span>
+            )}
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: 'resource',
+      header: t('dashboard.organization.audit_logs.table.resource'),
+      width: '170px',
+      render: (log) => (
+        <div className="flex items-center gap-1.5 text-gray-600 min-w-0">
+          <Activity className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+          <span className="text-sm capitalize truncate">{log.resource}</span>
+          {log.resource_id && (
+            <span className="text-[10px] bg-gray-50 border border-gray-200 px-1 rounded text-gray-400 font-mono truncate">
+              {log.resource_id}
+            </span>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'path',
+      header: t('dashboard.organization.audit_logs.table.path_method'),
+      render: (log) => (
+        <div className="flex flex-col gap-1 min-w-0">
+          <div className="flex items-center gap-1.5 text-[11px] text-gray-500 font-mono truncate max-w-[260px]">
+            <Terminal className="w-3 h-3 shrink-0" />
+            <span className="truncate">{log.path}</span>
+          </div>
+          <span className={`w-fit text-[10px] font-semibold ${
+            log.method === 'GET' ? 'text-blue-600' :
+            log.method === 'POST' ? 'text-green-600' :
+            log.method === 'PUT' ? 'text-amber-600' :
+            'text-red-600'
+          }`}>
+            {log.method}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: 'ip_address',
+      header: t('dashboard.organization.audit_logs.table.ip_address'),
+      width: '140px',
+      render: (log) => (
+        <div className="flex items-center gap-1.5 text-xs text-gray-400 font-mono">
+          <Globe className="w-3 h-3" />
+          {log.ip_address || '—'}
+        </div>
+      ),
+    },
+    {
+      key: 'status',
+      header: t('dashboard.organization.audit_logs.table.status'),
+      width: '100px',
+      align: 'right',
+      sortable: true,
+      value: (log) => log.status_code || 0,
+      render: (log) => (
+        <span className="inline-flex items-center gap-1.5 text-sm tabular-nums">
+          <span className={`w-2.5 h-2.5 rounded ${
+            log.status_code >= 200 && log.status_code < 300 ? 'bg-green-500' :
+            log.status_code >= 400 && log.status_code < 500 ? 'bg-orange-500' :
+            log.status_code >= 500 ? 'bg-red-500' : 'bg-gray-400'
+          }`} />
+          {log.status_code}
+        </span>
+      ),
+    },
+    {
+      key: 'payload',
+      header: t('dashboard.organization.audit_logs.table.payload'),
+      width: '80px',
+      align: 'right',
+      render: (log) =>
+        log.payload && Object.keys(log.payload).length > 0 ? (
+          <Modal
+            dialogTitle={t('dashboard.organization.audit_logs.modals.payload.title')}
+            dialogDescription={t('dashboard.organization.audit_logs.modals.payload.description', { action: log.action })}
+            minHeight="no-min"
+            isDialogOpen={openModalId === log.id}
+            onOpenChange={(open) => setOpenModalId(open ? log.id : null)}
+            dialogContent={
+              <div className="bg-gray-900 rounded-lg p-4 mt-2 overflow-auto max-h-[400px]">
+                <pre className="text-xs text-green-400 font-mono">
+                  {JSON.stringify(log.payload, null, 2)}
+                </pre>
+              </div>
+            }
+            dialogTrigger={
+              <button className="p-1.5 hover:bg-gray-100 rounded-md transition-colors group">
+                <Eye className="w-4 h-4 text-gray-400 group-hover:text-indigo-600" />
+              </button>
+            }
+          />
+        ) : (
+          <span className="text-gray-300 text-xs">—</span>
+        ),
+    },
+  ]
 
   return (
     <PlanRestrictedFeature
@@ -323,129 +454,21 @@ const OrgAuditLogs = () => {
           </div>
         </div>
 
-        <table className="table-auto w-full text-left whitespace-nowrap rounded-md overflow-hidden">
-          <thead>
-            <tr className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              <th className="px-6 py-3">{t('dashboard.organization.audit_logs.table.timestamp')}</th>
-              <th className="px-6 py-3">{t('dashboard.organization.audit_logs.table.user')}</th>
-              <th className="px-6 py-3">{t('dashboard.organization.audit_logs.table.resource')}</th>
-              <th className="px-6 py-3">{t('dashboard.organization.audit_logs.table.path_method')}</th>
-              <th className="px-6 py-3">{t('dashboard.organization.audit_logs.table.ip_address')}</th>
-              <th className="px-6 py-3 text-right">{t('dashboard.organization.audit_logs.table.status')}</th>
-              <th className="px-6 py-3 text-right">{t('dashboard.organization.audit_logs.table.payload')}</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white relative">
-            {isLoading && !data ? (
-              <tr>
-                <td colSpan={7} className="py-20 text-center text-gray-400">
-                  <div className="flex flex-col items-center gap-2">
-                      <RefreshCw className="w-8 h-8 text-indigo-600 animate-spin opacity-20" />
-                      <span className="text-sm font-medium">{t('dashboard.organization.audit_logs.loading')}</span>
-                  </div>
-                </td>
-              </tr>
-            ) : logs.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="py-10 text-center text-gray-400">
-                  {t('dashboard.organization.audit_logs.no_logs')}
-                </td>
-              </tr>
-            ) : (
-              logs.map((log: any) => (
-                <tr key={log.id} className="border-b border-gray-200 border-dashed hover:bg-gray-50/50 transition-colors">
-                  <td className="py-3 px-4">
-                    <div className="flex flex-col text-sm">
-                      <span className="font-semibold text-gray-700">{dayjs(log.created_at).format('MMM DD, YYYY')}</span>
-                      <span className="text-[10px] text-gray-400">{dayjs(log.created_at).format('HH:mm:ss')}</span>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-2">
-                        <UserAvatar 
-                            width={28} 
-                            userId={log.user_id?.toString()} 
-                            rounded="rounded-full"
-                            showProfilePopup={true}
-                        />
-                        <div className="flex flex-col">
-                            <span className="text-sm font-medium text-gray-800">
-                                @{log.username || t('dashboard.organization.audit_logs.system_user')}
-                            </span>
-                            {log.user_id && (
-                                <span className="text-[10px] text-gray-400 font-mono tracking-tighter">{t('dashboard.organization.audit_logs.user_id', { id: log.user_id })}</span>
-                            )}
-                        </div>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-1.5 text-gray-600">
-                      <Activity className="w-3.5 h-3.5 text-gray-400" />
-                      <span className="text-sm capitalize">{log.resource}</span>
-                      {log.resource_id && (
-                        <span className="text-[10px] bg-gray-50 border border-gray-200 px-1 rounded text-gray-400 font-mono">
-                          {log.resource_id}
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-1 text-[11px] text-gray-500 font-mono truncate max-w-[200px]">
-                        <Terminal className="w-3 h-3" />
-                        {log.path}
-                      </div>
-                      <span className={`w-fit text-[9px] font-bold px-1.5 py-0.5 rounded ${
-                        log.method === 'GET' ? 'text-blue-600 bg-blue-50' :
-                        log.method === 'POST' ? 'text-green-600 bg-green-50' :
-                        log.method === 'PUT' ? 'text-amber-600 bg-amber-50' :
-                        'text-red-600 bg-red-50'
-                      }`}>
-                        {log.method}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-1 text-xs text-gray-400 font-mono">
-                      <Globe className="w-3 h-3" />
-                      {log.ip_address || '—'}
-                    </div>
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${getStatusColor(log.status_code)}`}>
-                      {log.status_code}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                      {log.payload && Object.keys(log.payload).length > 0 ? (
-                      <Modal
-                        dialogTitle={t('dashboard.organization.audit_logs.modals.payload.title')}
-                        dialogDescription={t('dashboard.organization.audit_logs.modals.payload.description', { action: log.action })}
-                        minHeight="no-min"
-                        isDialogOpen={openModalId === log.id}
-                        onOpenChange={(open) => setOpenModalId(open ? log.id : null)}
-                        dialogContent={
-                          <div className="bg-gray-900 rounded-lg p-4 mt-2 overflow-auto max-h-[400px]">
-                            <pre className="text-xs text-green-400 font-mono">
-                              {JSON.stringify(log.payload, null, 2)}
-                            </pre>
-                          </div>
-                        }
-                        dialogTrigger={
-                          <button className="p-1.5 hover:bg-gray-100 rounded-md transition-colors group">
-                            <Eye className="w-4 h-4 text-gray-400 group-hover:text-indigo-600" />
-                          </button>
-                        }
-                      />
-                    ) : (
-                      <span className="text-gray-300 text-xs">—</span>
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+        <div className="pt-4">
+          {isLoading && !data ? (
+            <div className="py-16 flex flex-col items-center gap-2">
+              <RefreshCw className="w-6 h-6 text-gray-400 animate-spin" />
+              <span className="text-sm text-gray-500">{t('dashboard.organization.audit_logs.loading')}</span>
+            </div>
+          ) : logs.length === 0 ? (
+            <EmptyState
+              icon={ShieldCheck}
+              title={t('dashboard.organization.audit_logs.no_logs')}
+            />
+          ) : (
+            <DataTable columns={auditColumns} rows={logs} />
+          )}
+        </div>
 
         {/* Pagination Controls */}
         {total > ITEMS_PER_PAGE && (

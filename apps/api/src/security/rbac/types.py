@@ -36,6 +36,7 @@ class AccessDecision(BaseModel):
     via_role: bool = False
     via_admin: bool = False
     via_public: bool = False
+    via_entitlement: bool = False
     resource_uuid: Optional[str] = None
     user_id: Optional[int] = None
     action: Optional[str] = None
@@ -54,6 +55,9 @@ class ResourceConfig(BaseModel):
     has_published_field: bool
     supports_usergroups: bool
     supports_authorship: bool
+    # When true the resource uses the three-mode access model
+    # (public / users_only / paid) and `published` overrides all of them.
+    supports_access_types: bool = False
 
     # Table/model info for lookups
     model_name: Optional[str] = None

@@ -3,7 +3,7 @@ import logging
 from typing import Literal
 from uuid import uuid4
 from fastapi import HTTPException, Request
-from sqlmodel import Session, select
+from sqlmodel import Session, func, select
 from src.security.features_utils.usage import (
     check_limits_with_usage,
     increase_feature_usage,
@@ -227,6 +227,18 @@ async def get_users_linked_to_usergroup(
     return [UserRead.model_validate(user) for user in users]
 
 
+def _member_counts(db_session: Session, usergroup_ids: list[int]) -> dict[int, int]:
+    """Return {usergroup_id: member_count} in a single grouped query."""
+    if not usergroup_ids:
+        return {}
+    rows = db_session.exec(
+        select(UserGroupUser.usergroup_id, func.count(UserGroupUser.id))
+        .where(UserGroupUser.usergroup_id.in_(usergroup_ids))  # type: ignore
+        .group_by(UserGroupUser.usergroup_id)
+    ).all()
+    return {usergroup_id: count for usergroup_id, count in rows}
+
+
 async def read_usergroups_by_org_id(
     request: Request,
     db_session: Session,
@@ -246,9 +258,14 @@ async def read_usergroups_by_org_id(
         db_session=db_session,
     )
 
-    usergroups = [UserGroupRead.model_validate(usergroup) for usergroup in usergroups]
+    counts = _member_counts(db_session, [ug.id for ug in usergroups if ug.id is not None])
 
-    return usergroups
+    return [
+        UserGroupRead.model_validate(usergroup).model_copy(
+            update={"members_count": counts.get(usergroup.id, 0)}
+        )
+        for usergroup in usergroups
+    ]
 
 
 async def get_usergroups_by_resource(
@@ -280,7 +297,18 @@ async def get_usergroups_by_resource(
     statement = select(UserGroup).where(UserGroup.id.in_(usergroup_ids))  # type: ignore
     usergroups = db_session.exec(statement).all()
 
-    return [UserGroupRead.model_validate(ug) for ug in usergroups]
+    counts = _member_counts(db_session, usergroup_ids)
+    linked_at = {ugr.usergroup_id: ugr.creation_date for ugr in usergroup_resources}
+
+    return [
+        UserGroupRead.model_validate(usergroup).model_copy(
+            update={
+                "members_count": counts.get(usergroup.id, 0),
+                "linked_at": linked_at.get(usergroup.id),
+            }
+        )
+        for usergroup in usergroups
+    ]
 
 
 async def get_resources_by_usergroup(

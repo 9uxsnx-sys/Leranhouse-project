@@ -21,6 +21,7 @@ from src.db.courses.courses import (
     ThumbnailType,
 )
 from src.db.courses.activities import Activity, ActivityTypeEnum, ActivitySubTypeEnum
+from src.db.payments.enums import AccessTypeEnum
 from src.db.courses.blocks import Block, BlockTypeEnum
 from src.db.courses.chapters import Chapter
 from src.db.courses.chapter_activities import ChapterActivity
@@ -58,6 +59,7 @@ def _make_course(db, org, *, id, name="Extra Course", course_uuid=None,
         description=f"Description for {name}",
         public=public,
         published=published,
+        access_type=AccessTypeEnum.PUBLIC if public else AccessTypeEnum.USERS_ONLY,
         open_to_contributors=False,
         org_id=org.id,
         course_uuid=course_uuid or f"course_{id}",

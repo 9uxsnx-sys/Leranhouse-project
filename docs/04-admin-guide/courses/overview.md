@@ -19,7 +19,7 @@ The course editor has 7 tabs:
 |-----|---------|
 | **General** | Name, description, difficulty, thumbnail, certificate toggle |
 | **Content** | Module and lesson structure |
-| **Access** | Who can access the course (Public, Users Only, Paid) |
+| **Access** | Who can access the course (Free, Restricted, Paid) |
 | **Certification** | Certificate design and passing criteria |
 | **Contributors** | Adding co-authors and instructors |
 | **SEO** | SEO metadata and social preview |

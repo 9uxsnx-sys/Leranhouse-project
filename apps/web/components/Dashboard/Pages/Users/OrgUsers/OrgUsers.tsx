@@ -15,14 +15,6 @@ import toast from 'react-hot-toast'
 import useSWR, { mutate } from 'swr'
 import { useTranslation } from 'react-i18next'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -30,6 +22,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { IconButton } from '@/components/ui/icon-button'
+import { TableCard } from '@components/Analytics/Card'
+import { Column, DataTable } from '@components/Analytics/DataTable'
+import { EmptyState } from '@components/Analytics/Feedback'
 
 const ITEMS_PER_PAGE = 10
 
@@ -103,31 +98,8 @@ function OrgUsers() {
   const isInitialLoading = !data && isValidating
   const isPageTransitioning = !!data && isValidating
 
-  const visibleUserIds: number[] = orgUsers.map((u: any) => u.user.id)
-  const allVisibleSelected = visibleUserIds.length > 0 && visibleUserIds.every((id: number) => selectedUserIds.has(id))
-
-  const toggleSelectAll = useCallback(() => {
-    setSelectedUserIds((prev) => {
-      const next = new Set(prev)
-      if (allVisibleSelected) {
-        visibleUserIds.forEach((id: number) => next.delete(id))
-      } else {
-        visibleUserIds.forEach((id: number) => next.add(id))
-      }
-      return next
-    })
-  }, [allVisibleSelected, visibleUserIds])
-
-  const toggleSelectUser = useCallback((userId: number) => {
-    setSelectedUserIds((prev) => {
-      const next = new Set(prev)
-      if (next.has(userId)) {
-        next.delete(userId)
-      } else {
-        next.add(userId)
-      }
-      return next
-    })
+  const handleSelectionChange = useCallback((next: Set<string | number>) => {
+    setSelectedUserIds(new Set(Array.from(next).map(Number)))
   }, [])
 
   const handleRemoveUser = async (user_id: any) => {
@@ -263,6 +235,121 @@ function OrgUsers() {
     )
   }
 
+  const columns: Column<any>[] = [
+    {
+      key: 'name',
+      header: t('dashboard.users.users.table.name'),
+      sortable: true,
+      value: (u) => `${u.user.first_name} ${u.user.last_name}`,
+      render: (u) => (
+        <div className="flex items-center gap-2.5 min-w-0">
+          <UserAvatar
+            width={30}
+            border='border-2'
+            avatar_url={u.user.avatar_image ? getUserAvatarMediaDirectory(u.user.user_uuid, u.user.avatar_image) : ''}
+            rounded="rounded-full"
+            predefined_avatar={u.user.avatar_image === '' ? 'empty' : undefined}
+          />
+          <span className="font-medium text-gray-900 truncate">
+            {u.user.first_name} {u.user.last_name}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: 'username',
+      header: t('dashboard.users.users.table.username'),
+      width: '170px',
+      render: (u) => <span className="text-gray-500">@{u.user.username}</span>,
+    },
+    {
+      key: 'email',
+      header: t('dashboard.users.users.table.email'),
+      width: '240px',
+      render: (u) => <span className="text-gray-500 truncate">{u.user.email}</span>,
+    },
+    {
+      key: 'role',
+      header: t('dashboard.users.active_users.table.role'),
+      width: '150px',
+      render: (u) => (
+        <span onClick={(e) => e.stopPropagation()}>
+          <RoleDropdown user={u} />
+        </span>
+      ),
+    },
+    {
+      key: 'status',
+      header: t('common.status'),
+      width: '140px',
+      render: (u) => (
+        <span onClick={(e) => e.stopPropagation()}>
+          <StatusIndicator user={u} />
+        </span>
+      ),
+    },
+    {
+      key: 'joined',
+      header: t('dashboard.users.users.table.joined'),
+      width: '150px',
+      align: 'right',
+      sortable: true,
+      value: (u) => u.joined_at || '',
+      render: (u) => (
+        <span className="text-[13px] text-gray-400 whitespace-nowrap">{formatDate(u.joined_at)}</span>
+      ),
+    },
+    {
+      key: 'actions',
+      header: '',
+      width: '60px',
+      align: 'right',
+      render: (u) => (
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            setDetailUser(u)
+          }}
+          className="p-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
+          title={t('common.view_details')}
+        >
+          <MoreHorizontal size={16} />
+        </button>
+      ),
+    },
+  ]
+
+  const pagination = (
+    <div className="flex items-center justify-between">
+      <span className="text-xs text-gray-500">
+        {t('dashboard.users.active_users.pagination.showing', {
+          start: (page - 1) * ITEMS_PER_PAGE + 1,
+          end: Math.min(page * ITEMS_PER_PAGE, total),
+          total
+        })}
+      </span>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => handlePageChange(page - 1)}
+          disabled={page === 1}
+          className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+        >
+          <ChevronLeft className="w-4 h-4 text-gray-600" />
+        </button>
+        <span className="text-xs text-gray-600 font-medium min-w-[64px] text-center">
+          {t('dashboard.users.active_users.pagination.page', { current: page, total: Math.ceil(total / ITEMS_PER_PAGE) })}
+        </span>
+        <button
+          onClick={() => handlePageChange(page + 1)}
+          disabled={page * ITEMS_PER_PAGE >= total}
+          className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+        >
+          <ChevronRight className="w-4 h-4 text-gray-600" />
+        </button>
+      </div>
+    </div>
+  )
+
   return (
     <div>
       <Toast></Toast>
@@ -378,178 +465,42 @@ function OrgUsers() {
 
       {/* Content */}
       {isInitialLoading ? (
-        <div className="py-20 flex justify-center rounded-xl border border-gray-200">
-          <LearnHouseSpinner size={36} />
-        </div>
+        <TableCard>
+          <div className="py-16 flex justify-center">
+            <LearnHouseSpinner size={36} />
+          </div>
+        </TableCard>
       ) : orgUsers.length === 0 ? (
-        <div className="py-16 text-center rounded-xl border border-gray-200">
-          <div className="flex flex-col items-center gap-3">
-            <p className="text-gray-400 text-sm font-medium">
-              {searchValue
+        <TableCard>
+          <EmptyState
+            icon={Search}
+            title={
+              searchValue
                 ? t('dashboard.users.active_users.no_results')
                 : t('dashboard.users.active_users.no_users')
-              }
-            </p>
-          </div>
-        </div>
+            }
+          />
+        </TableCard>
       ) : (
-        <div className="relative">
-          {/* Loading overlay for page transitions */}
-          {isPageTransitioning && (
-            <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center rounded-xl">
-              <LearnHouseSpinner size={28} />
-            </div>
-          )}
+        <TableCard footer={total > ITEMS_PER_PAGE ? pagination : undefined}>
+          <div className="relative">
+            {/* Loading overlay for page transitions */}
+            {isPageTransitioning && (
+              <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center">
+                <LearnHouseSpinner size={28} />
+              </div>
+            )}
 
-          {/* Table — matching contributors exactly */}
-          <div className="rounded-xl border border-gray-200 overflow-hidden">
-            <Table className="table-fixed">
-              <TableHeader>
-                <TableRow className="bg-gray-50">
-                  <TableHead className="w-[30px]">
-                    <label className="flex items-center justify-center cursor-pointer w-4 h-4">
-                      <input
-                        type="checkbox"
-                        checked={allVisibleSelected}
-                        onChange={toggleSelectAll}
-                        className="sr-only peer"
-                      />
-                      <div className="w-full h-full rounded border border-gray-300 bg-white peer-checked:bg-gray-600 peer-checked:border-gray-600 flex items-center justify-center transition-colors">
-                        <Check size={12} className="text-white hidden peer-checked:block" strokeWidth={3} />
-                      </div>
-                    </label>
-                  </TableHead>
-                  <TableHead className="w-[160px]">
-                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.users.users.table.name')}</span>
-                  </TableHead>
-                  <TableHead className="w-[130px]">
-                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.users.users.table.username')}</span>
-                  </TableHead>
-                  <TableHead className="w-[180px]">
-                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.users.users.table.email')}</span>
-                  </TableHead>
-                  <TableHead className="w-[130px]">
-                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.users.active_users.table.role')}</span>
-                  </TableHead>
-                  <TableHead className="w-[120px]">
-                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('common.status')}</span>
-                  </TableHead>
-                  <TableHead className="w-[140px]">
-                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.users.users.table.joined')}</span>
-                  </TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sortUsers(filteredUsers).map((user: any) => (
-                  <TableRow
-                    key={user.user.id}
-                    className={`${selectedUserIds.has(user.user.id) ? 'bg-gray-50' : ''} cursor-pointer hover:bg-gray-50`}
-                    onClick={(e) => {
-                      if (
-                        e.target instanceof HTMLElement &&
-                        (e.target.closest('button') ||
-                          e.target.closest('input[type="checkbox"]') ||
-                          e.target.closest('[role="menuitem"]') ||
-                          e.target.closest('[role="menu"]'))
-                      ) {
-                        return
-                      }
-                      toggleSelectUser(user.user.id)
-                    }}
-                  >
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <label className="flex items-center justify-center cursor-pointer w-4 h-4">
-                        <input
-                          type="checkbox"
-                          checked={selectedUserIds.has(user.user.id)}
-                          onChange={() => toggleSelectUser(user.user.id)}
-                          className="sr-only peer"
-                        />
-                        <div className="w-full h-full rounded border border-gray-300 bg-white peer-checked:bg-gray-600 peer-checked:border-gray-600 flex items-center justify-center transition-colors">
-                          <Check size={12} className="text-white hidden peer-checked:block" strokeWidth={3} />
-                        </div>
-                      </label>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2 overflow-hidden">
-                        <UserAvatar
-                          width={30}
-                          border='border-2'
-                          avatar_url={user.user.avatar_image ? getUserAvatarMediaDirectory(user.user.user_uuid, user.user.avatar_image) : ''}
-                          rounded="rounded-full"
-                          predefined_avatar={user.user.avatar_image === '' ? 'empty' : undefined}
-                        />
-                        <span className="font-medium truncate text-sm">
-                          {user.user.first_name} {user.user.last_name}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-gray-500 text-sm">
-                      @{user.user.username}
-                    </TableCell>
-                    <TableCell className="text-gray-500 text-sm truncate">
-                      {user.user.email}
-                    </TableCell>
-                    <TableCell onClick={(e) => e.stopPropagation()}>
-                      <RoleDropdown user={user} />
-                    </TableCell>
-                    <TableCell>
-                      <StatusIndicator user={user} />
-                    </TableCell>
-                    <TableCell className="text-gray-500 text-sm">
-                      {formatDate(user.joined_at)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setDetailUser(user)
-                        }}
-                        className="p-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
-                        title={t('common.view_details')}
-                      >
-                        <MoreHorizontal size={16} />
-                      </button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <DataTable
+              columns={columns}
+              rows={sortUsers(filteredUsers)}
+              selectable
+              getRowId={(u) => u.user.id}
+              selectedIds={selectedUserIds as Set<string | number>}
+              onSelectionChange={handleSelectionChange}
+            />
           </div>
-        </div>
-      )}
-
-      {/* Pagination Controls */}
-      {total > ITEMS_PER_PAGE && (
-        <div className="flex items-center justify-between px-6 py-4 mt-4 border border-gray-200 rounded-xl bg-gray-50/50">
-          <div className="text-xs text-gray-500 font-medium">
-            {t('dashboard.users.active_users.pagination.showing', {
-              start: (page - 1) * ITEMS_PER_PAGE + 1,
-              end: Math.min(page * ITEMS_PER_PAGE, total),
-              total
-            })}
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handlePageChange(page - 1)}
-              disabled={page === 1}
-              className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-            >
-              <ChevronLeft className="w-4 h-4 text-gray-600" />
-            </button>
-            <span className="text-sm text-gray-600 font-medium min-w-[80px] text-center bg-white px-3 py-2 rounded-lg border border-gray-200">
-              {t('dashboard.users.active_users.pagination.page', { current: page, total: Math.ceil(total / ITEMS_PER_PAGE) })}
-            </span>
-            <button
-              onClick={() => handlePageChange(page + 1)}
-              disabled={page * ITEMS_PER_PAGE >= total}
-              className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-            >
-              <ChevronRight className="w-4 h-4 text-gray-600" />
-            </button>
-          </div>
-        </div>
+        </TableCard>
       )}
 
       {/* Detail panel — floating card */}

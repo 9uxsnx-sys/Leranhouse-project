@@ -45,15 +45,15 @@ Pulled from the metrics catalog ([Analytics §2.3 / §2.5 / §2.7 / §2.9](../an
 ### Overview
 | Feature | Source | Tier |
 |---------|--------|------|
-| Revenue over time (DZD) | `payment_orders` | A |
-| Sales over time (order count) | `payment_orders` | A |
+| Revenue over time (DZD) | `paymentorder` | A |
+| Sales over time (order count) | `paymentorder` | A |
 | AOV · Refunds · Conversion | derived | A / B |
 
 ### By course
 | Feature | Source | Tier |
 |---------|--------|------|
-| Revenue per course | `payment_orders` ⋈ `course` | A |
-| Sales per course | `course_purchases` | A |
+| Revenue per course | `paymentorder` ⋈ `course` | A |
+| Sales per course | `paymentorder` (status = paid, `resource_uuid`) | A |
 | View → purchase conversion per course | events ⋈ payments | B |
 
 ### By teacher
@@ -72,14 +72,14 @@ Pulled from the metrics catalog ([Analytics §2.3 / §2.5 / §2.7 / §2.9](../an
 ### Payments
 | Feature | Source | Tier |
 |---------|--------|------|
-| Failed payments (recent) | `payment_orders.status = failed` | A |
+| Failed payments (recent) | `paymentorder.status = failed` | A |
 | Failure reasons | `analytics_events.properties.error` | B |
-| Refunds | `payment_orders.status = refunded` | A |
-| Gateway fees | payment records | A |
+| Refunds | `paymentorder.status = refunded` | A |
+| Gateway fees | `paymentorder.fees_on_merchant` | A |
 
 ## 4. Data sources
 
-- **Tier A** — `payment_orders`, `course_purchases`, `resource_authors`, users (all existing Postgres tables).
+- **Tier A** — `paymentorder`, `resourceentitlement`, `resource_authors`, users (all existing Postgres tables).
 - **Tier B** — `analytics_events` (`checkout_started`, `properties.error`), needed only for **checkout conversion** and **failure reasons**. Everything else is Tier A. `checkout_started` is the one event here that is **not wired yet** — it is absent from the ingest whitelist (`apps/api/src/services/analytics/events.py`); add it when the checkout is instrumented. The table itself already exists — see [Analytics — implementation plan §3](../analytics/implementation-plan.md).
 
 ## 5. UI approach

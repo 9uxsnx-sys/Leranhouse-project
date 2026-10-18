@@ -5,6 +5,7 @@ from sqlmodel import Field, SQLModel
 from pydantic import BaseModel
 from src.db.users import UserRead
 from src.db.resource_authors import ResourceAuthorshipEnum, ResourceAuthorshipStatusEnum
+from src.db.payments.enums import AccessTypeEnum
 
 
 class PodcastSEO(BaseModel):
@@ -45,6 +46,10 @@ class PodcastBase(SQLModel):
     banner_image: Optional[str] = Field(default="")
     public: bool
     published: bool = Field(default=False)
+    # Access model — `public` is kept in sync for legacy listing queries.
+    access_type: AccessTypeEnum = Field(default=AccessTypeEnum.PUBLIC)
+    price_amount: Optional[int] = None
+    price_currency: str = Field(default="DZD")
     extra_metadata: Optional[dict] = None
 
 
@@ -75,6 +80,9 @@ class PodcastUpdate(SQLModel):
     banner_image: Optional[str] = Field(default="")
     public: Optional[bool] = None
     published: Optional[bool] = None
+    access_type: Optional[AccessTypeEnum] = None
+    price_amount: Optional[int] = None
+    price_currency: Optional[str] = None
     seo: Optional[dict] = None
     extra_metadata: Optional[dict] = None
 

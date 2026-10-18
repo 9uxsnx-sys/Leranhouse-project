@@ -458,15 +458,22 @@ In the Access tab (when course is set to "paid"), add:
 
 ## 5. Access System Redesign
 
+> **Corrected 2026-10-17:** the original table below was wrong about *Users Only*.
+> It is a **user-group whitelist**, not "any authenticated user". The platform is
+> login-only, so there is no anonymous tier. `published = false` (draft) overrides
+> every access type: only author / admin / maintainer can open it.
+> The canonical reference is [Admin Guide — Course Access](../../04-admin-guide/courses/access.md).
+
 ### 5.1 New Access Type: `paid`
 
-The Access tab will offer **three** options instead of two:
+The Access tab offers **three** options:
 
-| Option | Icon | Behavior |
-|--------|------|----------|
-| **Public** | `Globe` | Free for everyone, no sign-in required |
-| **Users Only** | `Users` | Requires authentication, no purchase needed |
-| **Paid** | `ShoppingCart` or `CreditCard` | Requires authentication + purchase |
+| Option | `access_type` | Icon | Behavior |
+|--------|---------------|------|----------|
+| **Free** | `public` | `Globe` | Every logged-in user. No group, no payment. |
+| **Restricted** | `users_only` | `Users` | Only members of the linked user groups. Nobody else — not even other logged-in users. Not "any authenticated user". |
+| **Paid** | `paid` | `ShoppingCart` / `CreditCard` | Only buyers with an active entitlement. |
+| _any_ | _any_ | — | **Draft** (`published = false`): author / admin / maintainer only. |
 
 ### 5.2 Access Tab UI Redesign
 
@@ -517,13 +524,20 @@ When `access_type = 'paid'`, user groups still work as **supplementary access**:
 
 ### 6.1 Chargily Webhook Details
 
-- Chargily sends webhooks to your registered endpoint URL
-- Signature header: `signature` (HMAC-SHA256 of raw body with your secret key)
+> **Corrected 2026-10-17 (verified against the official v2 docs):**
+> - Event names are `checkout.*`, not `payment.*`.
+> - There is no `checkout.refunded` and no `checkout.expired` event.
+> - There is **no refund endpoint in v2** — refunds are issued from the Chargily dashboard.
+> - A checkout expires automatically after **30 minutes** while `pending`; `POST /checkouts/{id}/expire` cancels it early.
+> - Signature verification failures return `403` (missing header `400`), not `401`.
+> - The payload `data` is the full Checkout object (including `fees_on_merchant`).
+
+- Chargily sends webhooks to your registered endpoint URL (or the per-checkout `webhook_endpoint`)
+- Signature header: `signature` (HMAC-SHA256 hex of the raw body with the org's API secret key)
 - Event types relevant to us:
   - `checkout.paid` — payment succeeded
   - `checkout.failed` — payment failed
-  - `checkout.expired` — user didn't complete payment in time
-  - `checkout.refunded` — payment was refunded
+  - `checkout.canceled` — customer canceled
 
 ### 6.2 Idempotency Strategy
 
@@ -531,7 +545,7 @@ When `access_type = 'paid'`, user groups still work as **supplementary access**:
 async def handle_webhook_event(raw_body, signature):
     # 1. Verify signature
     if not chargily_client.verify_webhook_signature(raw_body, signature):
-        return HTTPException(401, "Invalid signature")
+        return HTTPException(403, "Invalid signature")
 
     # 2. Parse event
     event = json.loads(raw_body)

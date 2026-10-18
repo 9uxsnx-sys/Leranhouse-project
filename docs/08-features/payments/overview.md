@@ -24,12 +24,12 @@ User Browser               Koodook API                Chargily Pay
      │     EDAHABIA / CIB       │                         │
      │                          │                         │
      │                          │  6. Webhook:            │
-     │                          │     payment.success     │
+     │                          │     checkout.paid       │
      │                          │◄────────────────────────│
      │                          │                         │
      │                          │  7. Verify signature    │
-     │                          │     Update DB           │
-     │                          │     Grant access        │
+     │                          │     Update paymentorder │
+     │                          │     Grant entitlement   │
      │                          │                         │
      │  8. Redirect to          │                         │
      │     success page ◄───────│                         │
@@ -37,13 +37,15 @@ User Browser               Koodook API                Chargily Pay
 ```
 
 1. User clicks **Purchase** on a course page.
-2. Frontend calls `POST /api/payments/checkout/:courseUuid` with the selected payment method.
-3. Backend creates a Chargily invoice via the Chargily Pay v2 API and returns a checkout URL.
+2. Frontend calls `POST /api/v1/payments/{org_id}/checkout` with the resource and payment method.
+3. Backend creates a Chargily checkout via the Chargily Pay v2 API and returns `checkout_url`.
 4. User is redirected to the Chargily-hosted payment page.
 5. User completes payment via **EDAHABIA** (Algérie Poste e-wallet) or **CIB** (interbank card).
-6. Chargily sends a `payment.success` (or `payment.failed`) webhook to the Koodook webhook endpoint.
-7. Webhook handler verifies the HMAC-SHA256 signature, updates the `payment_orders` table, and creates a `course_purchases` record to grant access.
+6. Chargily sends a `checkout.paid` (or `checkout.failed` / `checkout.canceled`) webhook.
+7. The webhook handler verifies the hex HMAC-SHA256 `signature` over the raw body, moves the `paymentorder` row to `paid`, and creates a `resourceentitlement` row (`source=purchase`).
 8. User is redirected back to Koodook (success or failure page) and sees the course unlocked.
+
+> **Implementation status:** step 2 onward is **not built yet**. The data model (`paymentorder`, `resourceentitlement`, `payment_webhook_event`, `paymentconfig`) and the admin-facing entitlement/order endpoints exist; the Chargily checkout creation and the webhook receiver do not. See [Progress & Roadmap](./progress.md).
 
 ## Payment Provider: Chargily Pay v2
 
@@ -78,79 +80,122 @@ All pricing is configured in **Algerian Dinar (DZD)**. Koodook is a single-curre
 
 ## Key Components
 
-### Checkout Creation Endpoint
+### Implemented today
 
-**`POST /api/payments/checkout/:courseUuid`**
+All routes are mounted under `/api/v1/payments` and require an authenticated user; the service layer additionally requires an organization administrator.
 
-- Accepts: `{ payment_method: "edahabia" | "cib" }`
-- Creates a `payment_orders` record with status `pending`.
-- Calls Chargily `POST /checkouts` to create an invoice.
-- Returns `{ checkout_url: string }` for frontend redirect.
-- Sets `success_url` and `failure_url` for post-payment redirects.
+| Route | Purpose |
+|---|---|
+| `GET /payments/{org_id}/entitlements?resource_uuid=…` | Active access roster for a course/podcast (Paid mode table) |
+| `GET /payments/{org_id}/entitlements/candidates?resource_uuid=…` | Org members **without** access (the search picker) |
+| `POST /payments/{org_id}/entitlements?resource_uuid=…&user_ids=1,2` | Manual grant (`source=manual`, `granted_by` = acting admin) |
+| `DELETE /payments/{org_id}/entitlements?resource_uuid=…&user_ids=1,2&reason=…` | Revoke — flips `status` to `revoked`, keeps the row for audit |
+| `GET /payments/{org_id}/orders?search=…&status=…&page=…&limit=…` | Paginated order list, newest first |
 
-### Payment Webhook Handler
+Supporting services:
 
-**`POST /api/payments/chargily/webhook`**
+- [`services/payments/entitlements.py`](../../../apps/api/src/services/payments/entitlements.py) — resolve resource (`course_…` / `podcast_…`), authorize org admin, grant/revoke/list.
+- [`services/payments/orders.py`](../../../apps/api/src/services/payments/orders.py) — org-scoped order list with user join, multi-field search and status filter (unknown status → `422`).
+- [`routers/payments.py`](../../../apps/api/src/routers/payments.py) — thin HTTP layer over the two services above.
 
-- Listens for `payment.success`, `payment.failed`, `payment.refunded` events.
-- Verifies the HMAC-SHA256 webhook signature before processing.
-- Uses idempotency keys to prevent duplicate processing.
-- On `payment.success`: updates `payment_orders` status to `paid`, creates `course_purchases` record.
-- On `payment.failed`: updates status to `failed`, no access granted.
-- On `payment.refunded`: updates status to `refunded`, access remains (manual revocation).
+### Not built yet
+
+#### Checkout Creation Endpoint (planned)
+
+**`POST /api/v1/payments/{org_id}/checkout`**
+
+- Accepts: `{ resource_uuid, resource_type, payment_method }`.
+- Creates a `paymentorder` row with status `pending` and a snapshotted amount.
+- Calls Chargily `POST /checkouts` (integer `amount`, lowercase `currency: "dzd"`).
+- Returns `{ checkout_url }` for the frontend redirect.
+- Sets `success_url`, `failure_url`, `webhook_endpoint` and `metadata` (`order_uuid`, `user_id`, `org_id`).
+
+#### Payment Webhook Handler (planned)
+
+**`POST /api/v1/payments/webhook/chargily/{org_uuid}`**
+
+- Receives `checkout.paid`, `checkout.failed`, `checkout.canceled`.
+- Verifies the `signature` header (hex HMAC-SHA256 of the **raw body**, keyed with the org's secret key) using a constant-time compare. Missing header → `400`, mismatch → `403`.
+- Is idempotent via `payment_webhook_event.event_id` (unique) — a duplicate delivery returns `200` and is skipped.
+- `checkout.paid` → order `paid` + `resourceentitlement(source=purchase, status=active)`.
+- `checkout.failed` / `checkout.canceled` → order `failed` / `canceled`, no entitlement.
 
 ### Access Gating Logic
 
 Access is enforced at three levels:
 
-1. **Database flags** — The `course_purchases` table records which users have purchased which courses. The `course` table has an `access` field (`public`, `users_only`, `paid`).
-2. **Backend middleware** — API endpoints for course content check whether the current user has purchased the course (or belongs to a group with access) before returning lesson data.
-3. **Frontend UI gating** — The course page checks purchase status via `GET /api/payments/purchases/:courseUuid/status` and conditionally renders lesson content or a purchase prompt.
+1. **Database** — `access_type` and `published` on the resource; `resourceentitlement` records who holds paid access.
+2. **Backend** — `check_resource_access()` runs on every read: draft → author/admin/maintainer, then access type (paid → active entitlement, restricted → linked user group, public → allow). Denials return `403`.
+3. **Frontend** — inaccessible resources are hidden from catalogs; Paid resources render a price/lock banner instead of lesson content.
+
+There is no anonymous browsing: the platform is login-only, so every check starts from a valid session.
 
 ## Course Access Model
 
-Each course has one of three access levels:
+LearnHouse is a **login-only platform** — no route is reachable without a session. Each course then has one of three access types:
 
-| Access Level | Description | Payment Required |
-|---|---|---|
-| **Public** | Anyone can view all content without authentication or payment | No |
-| **Users Only** | Any authenticated (logged-in) user can access content | No |
-| **Paid** | Users must purchase the course to access content | Yes |
+| Access Type | `access_type` | Description | Payment Required |
+|---|---|---|---|
+| **Free** | `public` | Every logged-in user can view all content | No |
+| **Restricted** | `users_only` | Only members of the user groups linked to the course. A whitelist — other logged-in users get `403` and the course is absent from their catalog | No |
+| **Paid** | `paid` | Only users with an active purchase entitlement | Yes |
 
-The access level is configured in the course editor under the **Access** tab.
+`published = false` (draft) overrides all three: only the author, admin or maintainer can open the course, including via a direct checkout call.
+
+The access type is configured in the course editor under the **Access** tab. See [Course Access Control](../../04-admin-guide/courses/access.md) for the full rule table.
 
 ## Purchase History and Transaction Records
 
-### Payment Orders Table
+### `paymentorder`
 
-The `payment_orders` table stores the lifecycle of each Chargily checkout session:
-
-| Field | Description |
-|---|---|
-| `id` | UUID primary key |
-| `chargily_checkout_id` | Chargily checkout session identifier |
-| `chargily_payment_intent_id` | Chargily payment intent identifier |
-| `amount` | Transaction amount in DZD |
-| `currency` | Always `DZD` |
-| `status` | `pending`, `paid`, `failed`, `expired`, `refunded`, `partially_refunded` |
-| `metadata` | JSONB — stores course UUID, user ID, payment method |
-| `paid_at` | Timestamp of successful payment |
-
-### Course Purchases Table
-
-The `course_purchases` table records that a specific user purchased access to a specific course:
+One row per Chargily checkout and its lifecycle. Append-only: rows move through the status machine and are never deleted.
 
 | Field | Description |
 |---|---|
-| `id` | UUID primary key |
-| `user_id` | Foreign key to the user |
-| `course_id` | Foreign key to the course |
-| `payment_order_id` | Foreign key to the payment order |
-| `purchased_at` | Timestamp of purchase |
+| `id` | Integer primary key |
+| `order_uuid` | Public order identifier (unique, indexed) |
+| `org_id` / `user_id` | Owning organization and buyer |
+| `resource_uuid` / `resource_type` / `resource_name` | What is being sold (`course_…` / `podcast_…`) |
+| `amount` / `currency` | Integer DZD, snapshotted at order creation (`currency` defaults to `DZD`) |
+| `price_snapshot` | JSONB — the resource price at checkout time |
+| `payment_method` | `edahabia`, `cib` or `chargily_app` |
+| `status` | `pending`, `processing`, `paid`, `failed`, `canceled`, `expired`, `refunded`, `partially_refunded` |
+| `chargily_checkout_id` | Chargily checkout id (unique) — the webhook lookup key |
+| `chargily_payment_id` / `checkout_url` | Chargily identifiers and the redirect URL |
+| `idempotency_key` | Unique — blocks double-submit from the checkout page |
+| `customer_name` / `customer_email` / `customer_phone` | Receipt data (identity always comes from `user_id`) |
+| `fees` / `fees_on_merchant` | Read from Chargily, never computed locally |
+| `failure_code` / `failure_message` / `provider_payload` | Failure detail and the raw provider payload |
+| `expires_at` / `paid_at` | Checkout expiry (30 min) and payment timestamp |
+
+### `resourceentitlement`
+
+Grants a user access to one paid resource. Created by the webhook on `checkout.paid`, by an admin manual grant, or by a user-group sync. A revoked row is kept for audit — it is never deleted.
+
+| Field | Description |
+|---|---|
+| `org_id` / `user_id` | Organization and grantee |
+| `resource_uuid` / `resource_type` | The course or podcast |
+| `source` | `purchase`, `manual`, `usergroup`, `free` |
+| `order_id` | FK to `paymentorder` (nullable, `SET NULL` on delete) |
+| `status` | `active`, `revoked` |
+| `valid_from` / `valid_until` | `NULL` = lifetime |
+| `granted_by` / `granted_at` | Acting admin (manual grants) and grant timestamp |
+| `revoked_at` / `revoke_reason` | Set when the row is revoked |
+
+An active entitlement is unique per `(user_id, resource_uuid)` — enforced by a partial unique index in the migration.
+
+### `payment_webhook_event`
+
+Idempotency log for Chargily deliveries: `event_id` (unique), `event_type`, `status` (`received` / `processing` / `processed` / `failed`), `attempts`, `raw_payload` (JSONB), `error_message`, `received_at`, `processed_at`.
+
+### `paymentconfig`
+
+Per-organization provider credentials — `provider` (`chargily`), `mode` (`test` / `live`), `public_key`, encrypted secret keys, `active`. One row per `(org_id, provider)`.
 
 ### Admin Transaction View
 
-Admins can view all transactions in **Admin Dashboard → Payments → Transactions**, which displays: transaction ID, course name, customer name and email, amount (DZD), payment method, status, and date. Each transaction can be expanded for full details.
+Admins can view all transactions in **Admin Dashboard → Payments → Transactions**, which displays: transaction id, resource name, customer name and email, amount (DZD), payment method, status, and date. The endpoint backing it (`GET /payments/{org_id}/orders`) exists; the tab itself still renders sample rows.
 
 ## Admin Dashboard UI (v1 — implemented, UI-only)
 
@@ -167,7 +212,7 @@ The `/dash/payments/{subpage}` section uses the same shell as **Organization Set
 |---|---|---|
 | **Overview** | `/dash/payments/overview` | Date-range action row + *Preview shop*, full-width revenue area chart, recent payments table (10 rows) |
 | **Transactions** | `/dash/payments/transactions` | Search + status filter, table: learner, course, method (EDAHABIA/CIB), amount, status, date |
-| **Offers** | `/dash/payments/offers` | Offer cards, create/edit modals, archived offers, resources panel |
+| **Offers** | `/dash/payments/offers` | Single table of every course and podcast: resource, type, access, inline **Price (DZD)** input, added date. Toolbar = search + filter + one Save for all edited rows. **This is the only place prices are set.** |
 | **Payment Groups** | `/dash/payments/groups` | Bundles of courses for subscriptions / multi-course offers, UserGroup syncs |
 | **Payouts** | `/dash/payments/payouts` | Month picker, editable monthly costs, live 40/60 profit split, pro-rata teacher payout table |
 | **Configuration** | `/dash/payments/configuration` | Chargily connection, sandbox/live keys, webhook status |
@@ -176,10 +221,19 @@ Removed in this pass: the old `overview | offers | groups | configuration` under
 
 ### Status
 
-- **UI-only.** The `payment_orders` / `course_purchases` tables and the `/payments/*` router do not exist in this build, so Overview, Transactions and Payouts render labelled sample data.
-- The dashboard is display-only until the Chargily backend lands. Wiring points are marked in code comments (`GET /payments/org/{org_id}/orders`, `/offers`, `/groups`, `/config`).
-- Local design preview: `OSS_GATE = false` in `apps/web/app/orgs/[orgslug]/dash/payments/[subpage]/page.tsx`. **Set it back to `true` before shipping** — payments is EE-only.
-- Configuration currently shows "Error loading payment configuration" because `GET /payments/{org_id}/config` returns 404 in this build.
+| Area | State |
+|---|---|
+| Entitlements (list / candidates / grant / revoke) | **Done** — service + router + tests, wired to the Access tab's Paid mode |
+| Orders list | **Done** — service + router + tests |
+| Offers tab (prices for courses & podcasts) | **Done** — reads `price_amount`, writes via the existing update endpoints |
+| Chargily checkout creation | **Not started** |
+| Chargily webhook receiver | **Not started** |
+| Transactions / Overview / Payouts tabs | **UI only** — still render sample rows; Overview and Payouts are not wired |
+| Payments Configuration | **UI only** — `GET /payments/{org_id}/config` does not exist yet |
+| Learner checkout ("Get access") | **Not started** |
+
+- `OSS_GATE = false` in [page.tsx](../../../apps/web/app/orgs/[orgslug]/dash/payments/[subpage]/page.tsx) is a **local design preview only**. Set it back to `true` before shipping — payments is EE-only.
+- The ordered remaining work is tracked in [Progress & Roadmap](./progress.md).
 
 ### Frontend files
 
@@ -187,24 +241,28 @@ Removed in this pass: the old `overview | offers | groups | configuration` under
 |---|---|
 | `app/orgs/[orgslug]/dash/payments/[subpage]/page.tsx` | Shell, tab set, plan/feature gates |
 | `components/Dashboard/Pages/Payments/PaymentsOverviewPage.tsx` | Overview tab |
-| `components/Dashboard/Pages/Payments/PaymentsTransactionsPage.tsx` | Transactions tab |
+| `components/Dashboard/Pages/Payments/PaymentsTransactionsPage.tsx` | Transactions tab (sample rows) |
+| `components/Dashboard/Pages/Payments/PaymentsOffersPage.tsx` | Offers tab — courses + podcasts, inline prices, filter, toolbar Save |
 | `components/Dashboard/Pages/Payments/PaymentsPayoutsPage.tsx` | Payouts tab |
+| `components/Dashboard/Pages/Course/EditCourseAccess/EditCourseAccess.tsx` | Access tab — Public / Private / Paid tables |
+| `services/payments/entitlements.ts` | Grant / revoke entitlement calls |
+| `services/courses/access.ts` | Link / unlink users for Public mode |
 | `components/Dashboard/Pages/Payments/PaymentStatus.tsx` | Shared status square (paid / failed / pending / refunded) |
 | `components/Dashboard/Home/PaymentsTable.tsx` | Recent payments table, reused by Overview |
 
 ## Refund Flow
 
-1. Admin navigates to **Admin Dashboard → Payments → Transactions** and opens a completed transaction.
-2. Admin clicks **Refund**, enters the refund amount (partial refunds supported), optionally enters a reason.
-3. The backend calls Chargily's refund API (or handles it via the webhook).
-4. The `payment_orders` status updates to `refunded` or `partially_refunded`.
-5. The user's course enrollment is **not** automatically removed — manual revocation is required if needed.
+1. Admin opens the order in **Admin Dashboard → Payments → Transactions**.
+2. Admin issues the refund in the **Chargily merchant dashboard** (Chargily Pay v2 has no refund endpoint).
+3. Admin clicks **Mark refunded** in Koodook, entering the amount (full or partial) and an optional reason.
+4. The `paymentorder` status becomes `refunded` or `partially_refunded`.
+5. A full refund revokes the entitlement; a partial refund keeps it. Revocation is explicit — nothing is deleted.
 
 ## Development Setup
 
 ### Sandbox Mode
 
-- Toggle **Sandbox Mode** ON in **Admin Dashboard → Settings → Payments → Chargily**.
+- Credentials are **per organization** in `paymentconfig` (`mode = test` / `live`).
 - Use test API keys from the Chargily merchant dashboard (Settings → API Keys → Test Mode).
 - Test card numbers are available for EDAHABIA and CIB simulations.
 
@@ -212,18 +270,19 @@ Removed in this pass: the old `overview | offers | groups | configuration` under
 
 Since Chargily webhooks require a publicly accessible HTTPS URL during development:
 
-1. Start ngrok: `ngrok http 3000`
+1. Start ngrok against the API port: `ngrok http 1338`
 2. Copy the ngrok URL (e.g., `https://abc123.ngrok.io`).
-3. Configure the webhook URL in the Chargily merchant dashboard: `https://abc123.ngrok.io/api/payments/chargily/webhook`
-4. Keep the ngrok tunnel running alongside the local development server.
+3. Set `webhook_endpoint` on the checkout (or in the Chargily dashboard) to: `https://abc123.ngrok.io/api/v1/payments/webhook/chargily/{org_uuid}`
+4. Keep the ngrok tunnel running alongside the dev servers.
 
 ### Environment Variables
 
-| Variable | Description |
+Chargily credentials are **not global env vars** — they live per organization in `paymentconfig` with the secret keys encrypted at rest. The only global setting is the API base URL selection, derived from the org's `mode`:
+
+| Value | Base URL |
 |---|---|
-| `CHARGILY_API_KEY` | Chargily API key (public key) |
-| `CHARGILY_SECRET_KEY` | Chargily secret key (used for webhook verification) |
-| `CHARGILY_TEST_MODE` | Boolean — `true` for sandbox, `false` for production |
+| `test` | `https://pay.chargily.net/test/api/v2` |
+| `live` | `https://pay.chargily.net/api/v2` |
 
 ## Future Payment Provider Extensibility
 

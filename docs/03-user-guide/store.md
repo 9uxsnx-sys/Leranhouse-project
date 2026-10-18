@@ -2,6 +2,8 @@
 
 > Purchasing courses on Koodook.
 
+> **Implementation status:** the Store/checkout flow is **not live yet**. Course pages, prices and the "Get access" entry point exist; the Chargily checkout and webhook that would complete a purchase are still to be built. See [Payments — Progress & Roadmap](../08-features/payments/progress.md).
+
 ---
 
 The **Store** page shows courses available for purchase.
@@ -34,9 +36,10 @@ The **Store** page shows courses available for purchase.
 
 ## Pricing
 
-- Course prices are set by the course creator
+- Prices are set by the organization admin in **Payments → Offers**
 - Prices are displayed in DZD (Algerian Dinar)
-- Some courses may be free (Public access)
+- A price of `0` means the course is explicitly **Free**
+- A course with no price cannot be switched to Paid access
 
 ## After Purchase
 

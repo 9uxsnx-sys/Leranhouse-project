@@ -172,6 +172,10 @@ def engine():
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
+    # Test modules import additional model modules during collection, after the
+    # import-time rewrite above has already run. Re-apply before create_all so
+    # late-registered tables (e.g. payments) are SQLite-compatible too.
+    _make_schema_sqlite_compatible()
     SQLModel.metadata.create_all(eng)
     yield eng
     eng.dispose()

@@ -6,6 +6,7 @@ from src.routers import code_submissions
 from src.routers import health
 from src.routers import instance
 from src.routers import plans
+from src.routers import payments as payments_router_module
 from src.routers import usergroups
 from src.routers import dev, trail, users, auth, orgs, roles, search
 from src.routers import stream
@@ -18,6 +19,7 @@ from src.routers.orgs import ai_credits
 from src.routers.orgs import custom_domains
 from src.routers.orgs import packs
 from src.routers.courses import chapters, collections, courses, assignments, certifications
+from src.routers.courses import access as course_access_router_module
 from src.routers.courses import migration as migration_router_module
 from src.routers.communities import communities as communities_router_module
 from src.routers.communities import discussions as discussions_router_module
@@ -154,6 +156,11 @@ v1_router.include_router(
 )
 v1_router.include_router(courses.router, prefix="/courses", tags=["courses"])
 v1_router.include_router(
+    course_access_router_module.router,
+    prefix="/courses",
+    tags=["courses"],
+)
+v1_router.include_router(
     migration_router_module.router,
     prefix="/courses",
     tags=["migration"],
@@ -213,6 +220,12 @@ v1_router.include_router(
     trail.router,
     prefix="/trail",
     tags=["trail"],
+    dependencies=[Depends(require_authenticated_user)]
+)
+v1_router.include_router(
+    payments_router_module.router,
+    prefix="/payments",
+    tags=["payments"],
     dependencies=[Depends(require_authenticated_user)]
 )
 v1_router.include_router(

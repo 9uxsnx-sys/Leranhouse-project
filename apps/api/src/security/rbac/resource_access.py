@@ -7,24 +7,27 @@ communities_security.py (~1,200 lines) with a single configurable implementation
 
 Access Rules:
 - Dashboard View: Admins/Authors always see all resources
-- Public View:
-    - Public + Published: Everyone can see
-    - Public + Unpublished: Nobody (except dashboard)
-    - UserGroup-linked + Published + User in Group: UserGroup members only
-    - Not Public + Not in UserGroup: Authenticated users only
-    - Author of resource: Always accessible to author
-- Communities: Don't have a published field, only use public flag
+- Courses & podcasts (three-mode model):
+    - Draft (`published = false`): author / admin / maintainer only
+    - Free (`public`): every logged-in user
+    - Restricted (`users_only`): only members of the linked UserGroups
+    - Paid (`paid`): active purchase entitlement, or a linked UserGroup (bypass)
+- Other resources (communities, boards, collections): legacy public/usergroup rules
+- Author of resource: always accessible to author
 """
 
 import logging
+from datetime import datetime
 from typing import Union, Optional
 from fastapi import HTTPException, Request, status
+from sqlalchemy import or_
 from sqlmodel import Session, select
 
 from src.db.users import AnonymousUser, PublicUser, APITokenUser
 from src.db.resource_authors import ResourceAuthor, ResourceAuthorshipEnum, ResourceAuthorshipStatusEnum
 from src.db.usergroup_resources import UserGroupResource
 from src.db.usergroup_user import UserGroupUser
+from src.db.payments.enums import AccessTypeEnum, EntitlementStatusEnum
 from src.security.rbac.types import AccessAction, AccessContext, AccessDecision, ResourceConfig
 from src.security.rbac.config import get_resource_config, RESOURCE_CONFIGS
 from src.security.rbac.rbac import (
@@ -68,6 +71,8 @@ class ResourceAccessChecker:
         self._admin_cache: dict[str, bool] = {}
         self._public_published_cache: dict[str, tuple[bool, bool]] = {}
         self._usergroup_cache: dict[tuple[str, bool], bool] = {}
+        self._access_type_cache: dict[str, Optional[AccessTypeEnum]] = {}
+        self._entitlement_cache: dict[str, bool] = {}
         self._parent_uuid_cache: dict[str, Optional[str]] = {}
 
     async def check_access(
@@ -248,18 +253,30 @@ class ResourceAccessChecker:
         resource_uuid: str,
         config: ResourceConfig,
     ) -> AccessDecision:
-        """Check public view read access with full rule chain."""
+        """Check public view read access with the three-mode access model.
+
+        Order:
+          1. Free + published → allow
+          2. Author → allow
+          3. Admin / maintainer → allow
+          4. Courses & podcasts: draft blocks everyone, then access_type decides
+          5. Other resources: legacy role / UserGroup rules
+        """
         user_id = self._get_user_id()
         is_public, is_published = await self._is_public_and_published(resource_uuid, config)
+        access_type = await self._get_access_type(resource_uuid, config)
 
-        logger.info(f"[ACCESS_CHECK] resource_uuid={resource_uuid}, user_id={user_id}, is_public={is_public}, is_published={is_published}")
+        logger.info(
+            f"[ACCESS_CHECK] resource_uuid={resource_uuid}, user_id={user_id}, "
+            f"is_public={is_public}, is_published={is_published}, access_type={access_type}"
+        )
 
-        # Rule 1: Public + published = OK for everyone
+        # Rule 1: Free + published = OK for everyone
         if config.has_published_field:
             if is_public and is_published:
                 return AccessDecision(
                     allowed=True,
-                    reason="Resource is public and published",
+                    reason="Resource is free and published",
                     via_public=True,
                     resource_uuid=resource_uuid,
                     user_id=user_id,
@@ -303,8 +320,84 @@ class ResourceAccessChecker:
                 action="read",
             )
 
-        # Rule 4: Check role-based permissions (only for public resources)
-        # Non-public resources should only be accessible via authorship, admin, or usergroup membership
+        # Rule 4: three-mode resources (courses, podcasts)
+        if config.supports_access_types and access_type is not None:
+            # Draft overrides every access type.
+            if config.has_published_field and not is_published:
+                return AccessDecision(
+                    allowed=False,
+                    reason="Resource is not published",
+                    resource_uuid=resource_uuid,
+                    user_id=user_id,
+                    action="read",
+                )
+
+            if access_type == AccessTypeEnum.PUBLIC:
+                return AccessDecision(
+                    allowed=True,
+                    reason="Resource is free",
+                    via_public=True,
+                    resource_uuid=resource_uuid,
+                    user_id=user_id,
+                    action="read",
+                )
+
+            if access_type == AccessTypeEnum.USERS_ONLY:
+                # Whitelist: only members of the linked UserGroups.
+                if await self._is_usergroup_member_strict(resource_uuid):
+                    return AccessDecision(
+                        allowed=True,
+                        reason="User is member of a linked UserGroup",
+                        via_usergroup=True,
+                        resource_uuid=resource_uuid,
+                        user_id=user_id,
+                        action="read",
+                    )
+                return AccessDecision(
+                    allowed=False,
+                    reason="User is not in a linked UserGroup",
+                    resource_uuid=resource_uuid,
+                    user_id=user_id,
+                    action="read",
+                )
+
+            if access_type == AccessTypeEnum.PAID:
+                if await self._has_active_entitlement(resource_uuid):
+                    return AccessDecision(
+                        allowed=True,
+                        reason="User has an active purchase",
+                        via_entitlement=True,
+                        resource_uuid=resource_uuid,
+                        user_id=user_id,
+                        action="read",
+                    )
+                # Linked UserGroups bypass the paywall (beta testers, comped accounts).
+                if await self._is_usergroup_member_strict(resource_uuid):
+                    return AccessDecision(
+                        allowed=True,
+                        reason="User is member of a linked UserGroup",
+                        via_usergroup=True,
+                        resource_uuid=resource_uuid,
+                        user_id=user_id,
+                        action="read",
+                    )
+                return AccessDecision(
+                    allowed=False,
+                    reason="Payment required to access this resource",
+                    resource_uuid=resource_uuid,
+                    user_id=user_id,
+                    action="read",
+                )
+
+            return AccessDecision(
+                allowed=False,
+                reason=f"Unknown access type: {access_type}",
+                resource_uuid=resource_uuid,
+                user_id=user_id,
+                action="read",
+            )
+
+        # Rule 5: Legacy role-based permissions (only for public resources)
         if is_public:
             has_role_permission = await authorization_verify_based_on_roles(
                 self.request, user_id, "read", resource_uuid, self.db_session
@@ -319,12 +412,11 @@ class ResourceAccessChecker:
                     action="read",
                 )
 
-        # Rule 5: Check UserGroup membership (if supported)
+        # Rule 6: Legacy UserGroup membership for non-access-type resources
         if config.supports_usergroups:
             has_usergroup_access = await self._check_usergroup_membership(resource_uuid, is_public)
-            logger.info(f"[ACCESS_CHECK] Rule 5 - has_usergroup_access={has_usergroup_access}, is_published={is_published}")
+            logger.info(f"[ACCESS_CHECK] Rule 6 - has_usergroup_access={has_usergroup_access}, is_published={is_published}")
 
-            # For resources with published field, UserGroup access requires published=True
             if config.has_published_field:
                 if has_usergroup_access and is_published:
                     return AccessDecision(
@@ -336,7 +428,6 @@ class ResourceAccessChecker:
                         action="read",
                     )
             else:
-                # No published field - UserGroup access is sufficient
                 if has_usergroup_access:
                     return AccessDecision(
                         allowed=True,
@@ -716,6 +807,92 @@ class ResourceAccessChecker:
             result = (is_public, is_published)
 
         self._public_published_cache[resource_uuid] = result
+        return result
+
+    async def _get_access_type(
+        self,
+        resource_uuid: str,
+        config: ResourceConfig,
+    ) -> Optional[AccessTypeEnum]:
+        """Return the resource's access type, or None for legacy resource types."""
+        if not config.supports_access_types:
+            return None
+
+        if resource_uuid in self._access_type_cache:
+            return self._access_type_cache[resource_uuid]
+
+        resource = await self._get_resource(resource_uuid, config)
+        if not resource:
+            return None
+
+        value = getattr(resource, "access_type", None)
+        if isinstance(value, str):
+            try:
+                value = AccessTypeEnum(value)
+            except ValueError:
+                value = None
+
+        self._access_type_cache[resource_uuid] = value
+        return value
+
+    async def _has_active_entitlement(self, resource_uuid: str) -> bool:
+        """True when the current user holds an active, non-expired entitlement."""
+        user_id = self._get_user_id()
+        if user_id == 0:
+            return False
+
+        if resource_uuid in self._entitlement_cache:
+            return self._entitlement_cache[resource_uuid]
+
+        from src.db.payments.resource_entitlements import ResourceEntitlement
+
+        now = datetime.now()
+        statement = select(ResourceEntitlement).where(
+            ResourceEntitlement.user_id == user_id,
+            ResourceEntitlement.resource_uuid == resource_uuid,
+            ResourceEntitlement.status == EntitlementStatusEnum.ACTIVE,
+            or_(
+                ResourceEntitlement.valid_until.is_(None),
+                ResourceEntitlement.valid_until > now,
+            ),
+        )
+        result = self.db_session.exec(statement).first() is not None
+        self._entitlement_cache[resource_uuid] = result
+        return result
+
+    async def _is_usergroup_member_strict(self, resource_uuid: str) -> bool:
+        """Strict UserGroup check: False when the resource has no linked groups.
+
+        Used by the `users_only` and `paid` rules, where a resource with no
+        linked group grants access to nobody (unlike the legacy fallback).
+        """
+        user_id = self._get_user_id()
+        if user_id == 0:
+            return False
+
+        cache_key = (resource_uuid, True)
+        if cache_key in self._usergroup_cache:
+            return self._usergroup_cache[cache_key]
+
+        links = self.db_session.exec(
+            select(UserGroupResource).where(
+                UserGroupResource.resource_uuid == resource_uuid
+            )
+        ).all()
+        if not links:
+            self._usergroup_cache[cache_key] = False
+            return False
+
+        group_ids = [link.usergroup_id for link in links]
+        membership = self.db_session.exec(
+            select(UserGroupUser).where(
+                UserGroupUser.usergroup_id.in_(group_ids),
+                UserGroupUser.user_id == user_id,
+            )
+        ).first()
+
+        result = membership is not None
+        self._usergroup_cache[cache_key] = result
         return result
 
     async def _is_resource_author(self, resource_uuid: str) -> bool:

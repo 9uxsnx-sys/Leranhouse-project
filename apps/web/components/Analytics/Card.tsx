@@ -53,6 +53,28 @@ export function SectionCard({
 }
 
 /**
+ * Card shell for a standalone table (no section title).
+ * Adds the small top gutter the borderless table needs, and lets the caller
+ * render a footer (pagination, totals) inside the same white card.
+ */
+export function TableCard({
+  children,
+  footer,
+  className,
+}: {
+  children: React.ReactNode
+  footer?: React.ReactNode
+  className?: string
+}) {
+  return (
+    <div className={cn(CARD_SHELL, 'overflow-hidden pt-4', className)}>
+      {children}
+      {footer && <div className="border-t border-gray-100 px-6 py-3">{footer}</div>}
+    </div>
+  )
+}
+
+/**
  * A section card whose body is a single chart of a fixed height.
  */
 export function ChartCard({

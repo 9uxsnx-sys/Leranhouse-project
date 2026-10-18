@@ -1,381 +1,638 @@
-'use client';
-import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import useSWR, { mutate } from 'swr';
-import { getOffers, updateOffer, archiveOffer } from '@services/payments/offers';
-import { Plus, Pencil, Info, RefreshCcw, SquareCheck, ChevronDown, ChevronUp, Archive, Users, Layers } from 'lucide-react';
-import currencyCodes from 'currency-codes';
-import Modal from '@components/Objects/StyledElements/Modal/Modal';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import toast from 'react-hot-toast';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { Button } from '@components/ui/button';
-import { Input } from '@components/ui/input';
-import { Textarea } from '@components/ui/textarea';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import * as Yup from 'yup';
-import { Label } from '@components/ui/label';
-import { Badge } from '@components/ui/badge';
-import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
-import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
-import CreateOfferForm from './SubComponents/CreateOfferForm';
-import OfferResourcesPanel from './SubComponents/OfferResourcesPanel';
+'use client'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import useSWR from 'swr'
+import toast from 'react-hot-toast'
+import {
+    BookOpen,
+    Check,
+    ChevronLeft,
+    ChevronRight,
+    Headphones,
+    Loader2,
+    Search,
+} from 'lucide-react'
+import { useOrg } from '@components/Contexts/OrgContext'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { TableCard } from '@components/Analytics/Card'
+import { Column, DataTable } from '@components/Analytics/DataTable'
+import { EmptyState } from '@components/Analytics/Feedback'
+import { ConceptIcon } from '@components/ui/icons'
+import { IconButton } from '@/components/ui/icon-button'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { getAPIUrl } from '@services/config/config'
+import { updateCourse } from '@services/courses/courses'
+import { updatePodcast } from '@services/podcasts/podcasts'
+import { swrFetcher } from '@services/utils/ts/requests'
 
-const getEditValidationSchema = (t: any) => Yup.object().shape({
-  name: Yup.string().required(t('dashboard.payments.offers.validation_name_required')),
-  description: Yup.string().required(t('dashboard.payments.offers.validation_description_required')),
-  amount: Yup.number().min(0, t('dashboard.payments.offers.validation_amount_positive')).required(t('dashboard.payments.offers.validation_amount_required')),
-  benefits: Yup.string(),
-  currency: Yup.string().required(t('dashboard.payments.offers.validation_currency_required')),
-  offer_type: Yup.string().oneOf(['one_time', 'subscription']).required(t('dashboard.payments.offers.validation_offer_type_required')),
-  price_type: Yup.string().oneOf(['fixed_price', 'customer_choice']).required(t('dashboard.payments.offers.validation_price_type_required')),
-});
+const ITEMS_PER_PAGE = 10
 
-function PaymentsOffersPage() {
-  const { t } = useTranslation();
-  const org = useOrg() as any;
-  const session = useLHSession() as any;
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [editingOfferId, setEditingOfferId] = useState<string | null>(null);
-  const [expandedOffers, setExpandedOffers] = useState<{ [key: string]: boolean }>({});
-  const [resourcesPanelOffer, setResourcesPanelOffer] = useState<any>(null);
-  const { isEnabled, isLoading } = usePaymentsEnabled();
+type ResourceKind = 'course' | 'podcast'
+type AccessMode = 'public' | 'users_only' | 'paid'
 
-  const { data: offers, error } = useSWR(
-    () => org && session ? [`/payments/${org.id}/offers`, session.data?.tokens?.access_token] : null,
-    ([, token]) => getOffers(org.id, token),
-    { revalidateOnFocus: false }
-  );
-
-  const handleArchiveOffer = async (offerId: string) => {
-    const res = await archiveOffer(org.id, offerId, session.data?.tokens?.access_token);
-    mutate([`/payments/${org.id}/offers`, session.data?.tokens?.access_token]);
-    if (res.status === 200) {
-      toast.success(t('dashboard.payments.offers.archived'));
-    } else {
-      toast.error(res.data?.detail || t('dashboard.payments.offers.failed_archive'));
-    }
-  };
-
-  const toggleExpansion = (offerId: string) => {
-    setExpandedOffers((prev) => ({ ...prev, [offerId]: !prev[offerId] }));
-  };
-
-  if (!isEnabled && !isLoading) {
-    return <UnconfiguredPaymentsDisclaimer />;
-  }
-
-  if (error) return <div>{t('dashboard.payments.offers.error_loading')}</div>;
-  if (!offers) return <div>{t('common.loading')}</div>;
-
-  return (
-    <div className="w-full">
-      <div className="w-full">
-        <Modal
-          isDialogOpen={isCreateModalOpen}
-          onOpenChange={setIsCreateModalOpen}
-          dialogTitle={t('dashboard.payments.offers.create_title')}
-          dialogDescription={t('dashboard.payments.offers.create_description')}
-          dialogContent={<CreateOfferForm onSuccess={() => setIsCreateModalOpen(false)} />}
-        />
-
-        {resourcesPanelOffer && (
-          <Modal
-            isDialogOpen={!!resourcesPanelOffer}
-            onOpenChange={(open) => { if (!open) setResourcesPanelOffer(null); }}
-            dialogTitle={t('dashboard.payments.offers.resources_dialog_title', { name: resourcesPanelOffer.name })}
-            dialogDescription={t('dashboard.payments.offers.resources_dialog_description')}
-            dialogContent={
-              <OfferResourcesPanel
-                offerId={resourcesPanelOffer.id}
-                offerName={resourcesPanelOffer.name}
-              />
-            }
-          />
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {offers.data.map((offer: any) => (
-            <div key={offer.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col h-full">
-              {editingOfferId === String(offer.id) ? (
-                <EditOfferForm
-                  offer={offer}
-                  onSuccess={() => setEditingOfferId(null)}
-                  onCancel={() => setEditingOfferId(null)}
-                />
-              ) : (
-                <div className="flex flex-col h-full">
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex flex-col space-y-1 items-start">
-                      <Badge className="w-fit flex items-center space-x-2" variant="outline">
-                        {offer.offer_type === 'subscription' ? <RefreshCcw size={12} /> : <SquareCheck size={12} />}
-                        <span className="text-sm">
-                          {offer.offer_type === 'subscription' ? t('dashboard.payments.offers.offer_type_subscription') : t('dashboard.payments.offers.offer_type_one_time')}
-                        </span>
-                      </Badge>
-                      <h3 className="font-bold text-lg">{offer.name}</h3>
-                    </div>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => setEditingOfferId(String(offer.id))}
-                        className="text-blue-500 hover:text-blue-700"
-                      >
-                        <Pencil size={16} />
-                      </button>
-                      <ConfirmationModal
-                        confirmationButtonText={t('dashboard.payments.offers.archive_offer')}
-                        confirmationMessage={t('dashboard.payments.offers.archive_confirm_message')}
-                        dialogTitle={t('dashboard.payments.offers.archive_dialog_title', { name: offer.name })}
-                        dialogTrigger={
-                          <button className="text-red-500 hover:text-red-700">
-                            <Archive size={16} />
-                          </button>
-                        }
-                        functionToExecute={() => handleArchiveOffer(offer.id)}
-                        status="warning"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grow overflow-hidden">
-                    <div
-                      className={`transition-all duration-300 ease-in-out ${
-                        expandedOffers[offer.id] ? 'max-h-[1000px]' : 'max-h-24'
-                      } overflow-hidden`}
-                    >
-                      <p className="text-gray-600">{offer.description}</p>
-                      {offer.benefits && (
-                        <div className="mt-2">
-                          <h4 className="font-semibold text-sm">{t('dashboard.payments.offers.benefits')}</h4>
-                          <p className="text-sm text-gray-600">{offer.benefits}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mt-2">
-                    <button
-                      onClick={() => toggleExpansion(String(offer.id))}
-                      className="text-slate-500 hover:text-slate-700 text-sm flex items-center"
-                    >
-                      {expandedOffers[offer.id] ? (
-                        <><ChevronUp size={16} /><span>{t('dashboard.payments.offers.show_less')}</span></>
-                      ) : (
-                        <><ChevronDown size={16} /><span>{t('dashboard.payments.offers.show_more')}</span></>
-                      )}
-                    </button>
-                  </div>
-
-                  {offer.payments_group_id && (
-                    <div className="mt-1.5 flex items-center gap-1.5 text-xs text-violet-600">
-                      <Layers size={12} />
-                      <span>{t('dashboard.payments.offers.payment_group_number', { id: offer.payments_group_id })}</span>
-                    </div>
-                  )}
-
-                  <div className="mt-2">
-                    <button
-                      onClick={() => setResourcesPanelOffer(offer)}
-                      className="text-sm flex items-center space-x-1 text-indigo-600 hover:text-indigo-800"
-                    >
-                      <Users size={14} />
-                      <span>{t('dashboard.payments.offers.manage_resources')}</span>
-                    </button>
-                  </div>
-
-                  <div className="mt-2 flex items-center justify-between bg-gray-100 rounded-md p-2">
-                    <span className="text-sm text-gray-600">{t('dashboard.payments.offers.price')}</span>
-                    <span className="font-semibold text-lg">
-                      {new Intl.NumberFormat('en-US', {
-                        style: 'currency',
-                        currency: offer.currency,
-                      }).format(offer.amount)}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {offers.data.length === 0 && (
-          <div className="flex mx-auto space-x-2 font-semibold mt-3 text-gray-600 items-center">
-            <Info size={20} />
-            <p>{t('dashboard.payments.offers.empty')}</p>
-          </div>
-        )}
-
-        <div className="flex justify-center items-center py-10">
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="mb-4 flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-linear-to-bl text-white font-medium from-gray-700 to-gray-900 border border-gray-600 shadow-gray-900/20 nice-shadow transition duration-300 hover:from-gray-600 hover:to-gray-800"
-          >
-            <Plus size={18} />
-            <span className="text-sm font-bold">{t('dashboard.payments.offers.create_title')}</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+const ACCESS_DOT: Record<AccessMode, string> = {
+    public: 'bg-emerald-500',
+    users_only: 'bg-amber-500',
+    paid: 'bg-indigo-500',
 }
 
-const EditOfferForm = ({
-  offer,
-  onSuccess,
-  onCancel,
-}: {
-  offer: any;
-  onSuccess: () => void;
-  onCancel: () => void;
-}) => {
-  const { t } = useTranslation();
-  const org = useOrg() as any;
-  const session = useLHSession() as any;
-  const [currencies, setCurrencies] = useState<{ code: string; name: string }[]>([]);
+type SortBy = 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc' | 'newest'
 
-  useEffect(() => {
-    const allCurrencies = currencyCodes.data.map((c) => ({
-      code: c.code,
-      name: `${c.code} - ${c.currency}`,
-    }));
-    setCurrencies(allCurrencies);
-  }, []);
+interface OfferRow {
+    key: string
+    kind: ResourceKind
+    uuid: string
+    name: string
+    description: string
+    price_amount: number | null
+    access_type: AccessMode
+    published: boolean
+    creation_date: string
+}
 
-  const initialValues = {
-    name: offer.name,
-    description: offer.description,
-    amount: offer.amount,
-    benefits: offer.benefits || '',
-    currency: offer.currency || 'USD',
-    offer_type: offer.offer_type as 'one_time' | 'subscription',
-    price_type: (offer.price_type || 'fixed_price') as 'fixed_price' | 'customer_choice',
-  };
-
-  const handleSubmit = async (
-    values: typeof initialValues,
-    { setSubmitting }: { setSubmitting: (b: boolean) => void }
-  ) => {
+function formatDate(dateStr: string | null | undefined): string {
+    if (!dateStr) return '—'
     try {
-      await updateOffer(org.id, offer.id, values, session.data?.tokens?.access_token);
-      mutate([`/payments/${org.id}/offers`, session.data?.tokens?.access_token]);
-      onSuccess();
-      toast.success(t('dashboard.payments.offers.updated'));
+        const date = new Date(dateStr)
+        if (isNaN(date.getTime())) return '—'
+        return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+        })
     } catch {
-      toast.error(t('dashboard.payments.offers.failed_update'));
-    } finally {
-      setSubmitting(false);
+        return '—'
     }
-  };
+}
 
-  return (
-    <Formik initialValues={initialValues} validationSchema={getEditValidationSchema(t)} onSubmit={handleSubmit}>
-      {({ isSubmitting, values, setFieldValue }) => (
-        <Form className="space-y-4">
-          <div className="px-1.5 py-2 flex-col space-y-3">
-            <div>
-              <Label htmlFor="name">{t('dashboard.payments.offers.field_offer_name')}</Label>
-              <Field name="name" as={Input} placeholder={t('dashboard.payments.offers.field_offer_name')} />
-              <ErrorMessage name="name" component="div" className="text-red-500 text-sm mt-1" />
-            </div>
+function toList(value: any): any[] {
+    return Array.isArray(value) ? value : value?.data || []
+}
 
-            <div>
-              <Label htmlFor="description">{t('dashboard.payments.offers.field_description')}</Label>
-              <Field name="description" as={Textarea} placeholder={t('dashboard.payments.offers.placeholder_offer_description')} />
-              <ErrorMessage name="description" component="div" className="text-red-500 text-sm mt-1" />
-            </div>
+export default function PaymentsOffersPage() {
+    const { t } = useTranslation()
+    const org = useOrg() as any
+    const session = useLHSession() as any
+    const access_token = session?.data?.tokens?.access_token
 
-            <div>
-              <Label htmlFor="offer_type">{t('dashboard.payments.offers.field_offer_type')}</Label>
-              <Select
-                value={values.offer_type}
-                onValueChange={(value) => {
-                  setFieldValue('offer_type', value);
-                  // subscriptions can't have customer_choice pricing
-                  if (value === 'subscription') setFieldValue('price_type', 'fixed_price');
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('dashboard.payments.offers.field_offer_type')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="one_time">{t('dashboard.payments.offers.option_one_time')}</SelectItem>
-                  <SelectItem value="subscription">{t('dashboard.payments.offers.option_subscription')}</SelectItem>
-                </SelectContent>
-              </Select>
-              <ErrorMessage name="offer_type" component="div" className="text-red-500 text-sm mt-1" />
-            </div>
+    const [search, setSearch] = useState('')
+    const [page, setPage] = useState(1)
+    const [drafts, setDrafts] = useState<Record<string, string>>({})
+    const [saving, setSaving] = useState(false)
+    const [justSaved, setJustSaved] = useState(false)
 
-            <div>
-              <Label htmlFor="price_type">{t('dashboard.payments.offers.field_price_type')}</Label>
-              <Select
-                value={values.price_type}
-                onValueChange={(value) => setFieldValue('price_type', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('dashboard.payments.offers.field_price_type')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="fixed_price">{t('dashboard.payments.offers.option_fixed_price')}</SelectItem>
-                  {values.offer_type !== 'subscription' && (
-                    <SelectItem value="customer_choice">{t('dashboard.payments.offers.option_customer_choice')}</SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-              <ErrorMessage name="price_type" component="div" className="text-red-500 text-sm mt-1" />
-            </div>
+    const [kindFilter, setKindFilter] = useState<'' | ResourceKind>('')
+    const [accessFilter, setAccessFilter] = useState<'' | AccessMode>('')
+    const [priceFilter, setPriceFilter] = useState<'' | 'none' | 'set' | 'free'>('')
+    const [statusFilter, setStatusFilter] = useState<'' | 'published' | 'draft'>('')
+    const [sortBy, setSortBy] = useState<SortBy>('name-asc')
 
-            <div className="flex space-x-2">
-              <div className="grow">
-                <Label htmlFor="amount">
-                  {values.price_type === 'fixed_price' ? t('dashboard.payments.offers.field_price') : t('dashboard.payments.offers.field_minimum_amount')}
-                </Label>
-                <Field
-                  name="amount"
-                  as={Input}
-                  type="number"
-                  placeholder={values.price_type === 'fixed_price' ? t('dashboard.payments.offers.field_price') : t('dashboard.payments.offers.field_minimum_amount')}
-                />
-                <ErrorMessage name="amount" component="div" className="text-red-500 text-sm mt-1" />
-              </div>
-              <div className="w-1/3">
-                <Label htmlFor="currency">{t('dashboard.payments.offers.field_currency')}</Label>
-                <Select
-                  value={values.currency}
-                  onValueChange={(value) => setFieldValue('currency', value)}
+    const coursesKey =
+        org?.slug && access_token
+            ? `${getAPIUrl()}courses/org_slug/${org.slug}/page/1/limit/500?include_unpublished=true`
+            : null
+    const podcastsKey =
+        org?.slug && access_token
+            ? `${getAPIUrl()}podcasts/org_slug/${org.slug}/page/1/limit/100?include_unpublished=true`
+            : null
+
+    const {
+        data: coursesData,
+        error: coursesError,
+        isValidating: coursesValidating,
+        mutate: mutateCourses,
+    } = useSWR(coursesKey, (url: string) => swrFetcher(url, access_token), {
+        revalidateOnFocus: false,
+    })
+    const {
+        data: podcastsData,
+        error: podcastsError,
+        isValidating: podcastsValidating,
+        mutate: mutatePodcasts,
+    } = useSWR(podcastsKey, (url: string) => swrFetcher(url, access_token), {
+        revalidateOnFocus: false,
+    })
+
+    const resources = useMemo<OfferRow[]>(() => {
+        const courses: OfferRow[] = toList(coursesData).map((course: any) => ({
+            key: `course:${course.course_uuid}`,
+            kind: 'course',
+            uuid: course.course_uuid,
+            name: course.name || '—',
+            description: course.description || '',
+            price_amount: typeof course.price_amount === 'number' ? course.price_amount : null,
+            access_type: (course.access_type ||
+                (course.public ? 'public' : 'users_only')) as AccessMode,
+            published: Boolean(course.published),
+            creation_date: course.creation_date || '',
+        }))
+
+        const podcasts: OfferRow[] = toList(podcastsData).map((podcast: any) => ({
+            key: `podcast:${podcast.podcast_uuid}`,
+            kind: 'podcast',
+            uuid: podcast.podcast_uuid,
+            name: podcast.name || '—',
+            description: podcast.description || '',
+            price_amount: typeof podcast.price_amount === 'number' ? podcast.price_amount : null,
+            access_type: (podcast.access_type ||
+                (podcast.public ? 'public' : 'users_only')) as AccessMode,
+            published: Boolean(podcast.published),
+            creation_date: podcast.creation_date || '',
+        }))
+
+        return [...courses, ...podcasts]
+    }, [coursesData, podcastsData])
+
+    const filtered = useMemo(() => {
+        const query = search.trim().toLowerCase()
+        const result = resources.filter((row) => {
+            if (query && !`${row.name} ${row.description}`.toLowerCase().includes(query)) {
+                return false
+            }
+            if (kindFilter && row.kind !== kindFilter) return false
+            if (accessFilter && row.access_type !== accessFilter) return false
+            if (statusFilter === 'published' && !row.published) return false
+            if (statusFilter === 'draft' && row.published) return false
+            if (priceFilter === 'none' && row.price_amount !== null) return false
+            if (priceFilter === 'free' && row.price_amount !== 0) return false
+            if (priceFilter === 'set' && row.price_amount === null) return false
+            if (priceFilter === 'set' && row.price_amount === 0) return false
+            return true
+        })
+
+        result.sort((a, b) => {
+            switch (sortBy) {
+                case 'name-desc':
+                    return b.name.localeCompare(a.name)
+                case 'price-asc':
+                    return (a.price_amount ?? -1) - (b.price_amount ?? -1)
+                case 'price-desc':
+                    return (b.price_amount ?? -1) - (a.price_amount ?? -1)
+                case 'newest':
+                    return (
+                        new Date(b.creation_date).getTime() -
+                        new Date(a.creation_date).getTime()
+                    )
+                case 'name-asc':
+                default:
+                    return a.name.localeCompare(b.name)
+            }
+        })
+
+        return result
+    }, [resources, search, kindFilter, accessFilter, statusFilter, priceFilter, sortBy])
+
+    const total = filtered.length
+    const totalPages = Math.max(1, Math.ceil(total / ITEMS_PER_PAGE))
+    const currentPage = Math.min(page, totalPages)
+    const paged = filtered.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    )
+
+    const isInitialLoading =
+        (!coursesData && coursesValidating) || (!podcastsData && podcastsValidating)
+    const loadError = coursesError || podcastsError
+
+    useEffect(() => {
+        setPage(1)
+    }, [search, kindFilter, accessFilter, priceFilter, statusFilter, sortBy])
+
+    const priceValue = useCallback(
+        (row: OfferRow) => {
+            const draft = drafts[row.key]
+            if (draft !== undefined) return draft
+            return row.price_amount === null ? '' : String(row.price_amount)
+        },
+        [drafts]
+    )
+
+    const handlePriceChange = useCallback((key: string, raw: string) => {
+        const digits = raw.replace(/[^\d]/g, '').slice(0, 9)
+        setDrafts((prev) => ({ ...prev, [key]: digits }))
+        setJustSaved(false)
+    }, [])
+
+    const dirtyRows = useMemo(
+        () =>
+            resources.filter((row) => {
+                const draft = drafts[row.key]
+                if (draft === undefined) return false
+                const next = draft === '' ? null : Number(draft)
+                return next !== row.price_amount
+            }),
+        [resources, drafts]
+    )
+
+    const savePrices = useCallback(async () => {
+        if (!dirtyRows.length || saving || !access_token) return
+        setSaving(true)
+        setJustSaved(false)
+
+        let failed = 0
+        for (const row of dirtyRows) {
+            const draft = drafts[row.key]
+            const amount = draft === '' ? null : Number(draft)
+            try {
+                if (row.kind === 'course') {
+                    await updateCourse(row.uuid, { price_amount: amount }, access_token)
+                } else {
+                    await updatePodcast(row.uuid, { price_amount: amount }, access_token)
+                }
+            } catch {
+                failed += 1
+            }
+        }
+
+        setDrafts({})
+        await Promise.all([mutateCourses(), mutatePodcasts()])
+        setSaving(false)
+
+        if (failed === 0) {
+            setJustSaved(true)
+            window.setTimeout(() => setJustSaved(false), 2000)
+            toast.success(
+                t('dashboard.payments.offers.saved_toast', { count: dirtyRows.length })
+            )
+        } else {
+            toast.error(t('dashboard.payments.offers.save_partial'))
+        }
+    }, [
+        dirtyRows,
+        drafts,
+        saving,
+        access_token,
+        mutateCourses,
+        mutatePodcasts,
+        t,
+    ])
+
+    const hasActiveFilters = Boolean(
+        kindFilter || accessFilter || priceFilter || statusFilter
+    )
+
+    const clearFilters = () => {
+        setKindFilter('')
+        setAccessFilter('')
+        setPriceFilter('')
+        setStatusFilter('')
+    }
+
+    const accessLabel = (row: OfferRow) =>
+        t(
+            row.access_type === 'public'
+                ? 'dashboard.payments.offers.access_public'
+                : row.access_type === 'paid'
+                  ? 'dashboard.payments.offers.access_paid'
+                  : 'dashboard.payments.offers.access_users_only'
+        )
+
+    const columns: Column<OfferRow>[] = [
+        {
+            key: 'name',
+            header: t('dashboard.payments.offers.table.resource'),
+            render: (row) => (
+                <div className="flex items-center gap-2.5 min-w-0">
+                    {row.kind === 'course' ? (
+                        <BookOpen size={16} className="shrink-0 text-gray-400" />
+                    ) : (
+                        <Headphones size={16} className="shrink-0 text-gray-400" />
+                    )}
+                    <span className="font-medium text-gray-900 truncate">{row.name}</span>
+                    {!row.published && (
+                        <span className="text-[11px] text-gray-400 shrink-0">
+                            {t('dashboard.payments.offers.draft')}
+                        </span>
+                    )}
+                </div>
+            ),
+        },
+        {
+            key: 'type',
+            header: t('dashboard.payments.offers.table.type'),
+            width: '130px',
+            render: (row) => (
+                <span className="inline-flex items-center gap-1.5 text-gray-600">
+                    <span className="w-2.5 h-2.5 rounded bg-gray-300" />
+                    {row.kind === 'course'
+                        ? t('dashboard.payments.offers.type_course')
+                        : t('dashboard.payments.offers.type_podcast')}
+                </span>
+            ),
+        },
+        {
+            key: 'access',
+            header: t('dashboard.payments.offers.table.access'),
+            width: '130px',
+            render: (row) => (
+                <span className="inline-flex items-center gap-1.5 text-gray-600">
+                    <span className={`w-2.5 h-2.5 rounded ${ACCESS_DOT[row.access_type]}`} />
+                    {accessLabel(row)}
+                </span>
+            ),
+        },
+        {
+            key: 'price',
+            header: t('dashboard.payments.offers.table.price'),
+            width: '180px',
+            align: 'right',
+            render: (row) => (
+                <div className="flex items-center justify-end gap-1.5">
+                    <input
+                        value={priceValue(row)}
+                        onChange={(e) => handlePriceChange(row.key, e.target.value)}
+                        placeholder="—"
+                        inputMode="numeric"
+                        aria-label={t('dashboard.payments.offers.table.price')}
+                        className="w-24 bg-transparent text-end text-sm text-gray-900 placeholder:text-gray-300 outline-none rounded-md px-1.5 py-0.5 tabular-nums transition-colors hover:bg-gray-50 focus:bg-white focus:ring-1 focus:ring-gray-200"
+                    />
+                    <span className="text-[11px] font-medium text-gray-400">DZD</span>
+                </div>
+            ),
+        },
+        {
+            key: 'added',
+            header: t('dashboard.payments.offers.table.added'),
+            width: '140px',
+            align: 'right',
+            render: (row) => (
+                <span className="text-[13px] text-gray-400 whitespace-nowrap">
+                    {formatDate(row.creation_date)}
+                </span>
+            ),
+        },
+    ]
+
+    const pagination = (
+        <div className="flex items-center justify-between">
+            <span className="text-xs text-gray-500">
+                {t('dashboard.users.active_users.pagination.showing', {
+                    start: (currentPage - 1) * ITEMS_PER_PAGE + 1,
+                    end: Math.min(currentPage * ITEMS_PER_PAGE, total),
+                    total,
+                })}
+            </span>
+            <div className="flex items-center gap-2">
+                <button
+                    onClick={() => setPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('dashboard.payments.offers.field_currency')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {currencies.map((c) => (
-                      <SelectItem key={c.code} value={c.code}>
-                        {c.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <ErrorMessage name="currency" component="div" className="text-red-500 text-sm mt-1" />
-              </div>
+                    <ChevronLeft className="w-4 h-4 text-gray-600" />
+                </button>
+                <span className="text-xs text-gray-600 font-medium min-w-[64px] text-center">
+                    {t('dashboard.users.active_users.pagination.page', {
+                        current: currentPage,
+                        total: totalPages,
+                    })}
+                </span>
+                <button
+                    onClick={() => setPage(currentPage + 1)}
+                    disabled={currentPage >= totalPages}
+                    className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                >
+                    <ChevronRight className="w-4 h-4 text-gray-600" />
+                </button>
+            </div>
+        </div>
+    )
+
+    return (
+        <div>
+            {/* ── TOOLBAR ── */}
+            <div className="flex items-center gap-3 mb-5">
+                <div className="relative w-80">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                    <input
+                        type="text"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder={t('dashboard.payments.offers.search_placeholder')}
+                        className="w-full h-7 pl-8 pr-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
+                    />
+                </div>
+
+                <div className="flex-1" />
+
+                <button
+                    onClick={savePrices}
+                    disabled={dirtyRows.length === 0 || saving}
+                    className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed ${
+                        justSaved ? 'text-emerald-600' : 'text-gray-600'
+                    }`}
+                >
+                    {saving ? (
+                        <Loader2 size={14} className="animate-spin" />
+                    ) : justSaved ? (
+                        <Check size={14} />
+                    ) : null}
+                    {saving
+                        ? t('dashboard.payments.offers.saving')
+                        : justSaved
+                          ? t('dashboard.payments.offers.saved')
+                          : t('dashboard.payments.offers.save')}
+                </button>
+
+                <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger asChild>
+                        <IconButton
+                            size="small"
+                            variant="transparent"
+                            className="bg-white hover:bg-gray-50 shadow-borders-base relative"
+                            aria-label={t('dashboard.payments.offers.filter')}
+                        >
+                            <ConceptIcon.filter size={14} />
+                            {hasActiveFilters && (
+                                <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                            )}
+                        </IconButton>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                        align="end"
+                        className="min-w-[190px] rounded-lg border border-gray-200 bg-white p-1 shadow-md"
+                        sideOffset={6}
+                    >
+                        {/* Type */}
+                        <MenuSectionLabel
+                            label={t('dashboard.payments.offers.filters.type')}
+                        />
+                        {[
+                            { value: '', label: t('dashboard.payments.offers.filters.all_types') },
+                            { value: 'course', label: t('dashboard.payments.offers.type_course') },
+                            { value: 'podcast', label: t('dashboard.payments.offers.type_podcast') },
+                        ].map((option) => (
+                            <FilterItem
+                                key={`type-${option.value}`}
+                                label={option.label}
+                                active={kindFilter === option.value}
+                                onClick={() => setKindFilter(option.value as any)}
+                            />
+                        ))}
+
+                        <DropdownMenuSeparator />
+
+                        {/* Access */}
+                        <MenuSectionLabel
+                            label={t('dashboard.payments.offers.filters.access')}
+                        />
+                        {[
+                            { value: '', label: t('dashboard.payments.offers.filters.all_access') },
+                            { value: 'public', label: t('dashboard.payments.offers.access_public') },
+                            { value: 'users_only', label: t('dashboard.payments.offers.access_users_only') },
+                            { value: 'paid', label: t('dashboard.payments.offers.access_paid') },
+                        ].map((option) => (
+                            <FilterItem
+                                key={`access-${option.value}`}
+                                label={option.label}
+                                active={accessFilter === option.value}
+                                onClick={() => setAccessFilter(option.value as any)}
+                            />
+                        ))}
+
+                        <DropdownMenuSeparator />
+
+                        {/* Price */}
+                        <MenuSectionLabel
+                            label={t('dashboard.payments.offers.filters.price')}
+                        />
+                        {[
+                            { value: '', label: t('dashboard.payments.offers.filters.any_price') },
+                            { value: 'none', label: t('dashboard.payments.offers.filters.needs_price') },
+                            { value: 'set', label: t('dashboard.payments.offers.filters.has_price') },
+                            { value: 'free', label: t('dashboard.payments.offers.filters.free') },
+                        ].map((option) => (
+                            <FilterItem
+                                key={`price-${option.value}`}
+                                label={option.label}
+                                active={priceFilter === option.value}
+                                onClick={() => setPriceFilter(option.value as any)}
+                            />
+                        ))}
+
+                        <DropdownMenuSeparator />
+
+                        {/* Status */}
+                        <MenuSectionLabel
+                            label={t('dashboard.payments.offers.filters.status')}
+                        />
+                        {[
+                            { value: '', label: t('dashboard.payments.offers.filters.all_statuses') },
+                            { value: 'published', label: t('dashboard.payments.offers.filters.published') },
+                            { value: 'draft', label: t('dashboard.payments.offers.filters.draft') },
+                        ].map((option) => (
+                            <FilterItem
+                                key={`status-${option.value}`}
+                                label={option.label}
+                                active={statusFilter === option.value}
+                                onClick={() => setStatusFilter(option.value as any)}
+                            />
+                        ))}
+
+                        <DropdownMenuSeparator />
+
+                        {/* Sort */}
+                        <MenuSectionLabel
+                            label={t('dashboard.payments.offers.filters.sort')}
+                        />
+                        {[
+                            { value: 'name-asc', label: t('dashboard.payments.offers.filters.sort_name_asc') },
+                            { value: 'name-desc', label: t('dashboard.payments.offers.filters.sort_name_desc') },
+                            { value: 'price-asc', label: t('dashboard.payments.offers.filters.sort_price_asc') },
+                            { value: 'price-desc', label: t('dashboard.payments.offers.filters.sort_price_desc') },
+                            { value: 'newest', label: t('dashboard.payments.offers.filters.sort_newest') },
+                        ].map((option) => (
+                            <FilterItem
+                                key={`sort-${option.value}`}
+                                label={option.label}
+                                active={sortBy === option.value}
+                                onClick={() => setSortBy(option.value as SortBy)}
+                            />
+                        ))}
+
+                        {hasActiveFilters && (
+                            <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                    onClick={clearFilters}
+                                    className="text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
+                                >
+                                    <span className="text-xs font-medium text-red-600">
+                                        {t('dashboard.payments.offers.filters.clear')}
+                                    </span>
+                                </DropdownMenuItem>
+                            </>
+                        )}
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
 
-            <div>
-              <Label htmlFor="benefits">{t('dashboard.payments.offers.field_benefits')}</Label>
-              <Field name="benefits" as={Textarea} placeholder={t('dashboard.payments.offers.placeholder_benefits')} />
-            </div>
-          </div>
+            {/* ── TABLE ── */}
+            {loadError ? (
+                <TableCard>
+                    <EmptyState
+                        icon={BookOpen}
+                        title={t('dashboard.payments.offers.load_error')}
+                    />
+                </TableCard>
+            ) : isInitialLoading ? (
+                <TableCard>
+                    <div className="py-16 flex justify-center">
+                        <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+                    </div>
+                </TableCard>
+            ) : resources.length === 0 ? (
+                <TableCard>
+                    <EmptyState
+                        icon={BookOpen}
+                        title={t('dashboard.payments.offers.no_resources')}
+                    />
+                </TableCard>
+            ) : filtered.length === 0 ? (
+                <TableCard>
+                    <EmptyState
+                        icon={Search}
+                        title={t('dashboard.payments.offers.no_results')}
+                    />
+                </TableCard>
+            ) : (
+                <TableCard footer={total > ITEMS_PER_PAGE ? pagination : undefined}>
+                    <DataTable columns={columns} rows={paged} />
+                </TableCard>
+            )}
+        </div>
+    )
+}
 
-          <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={onCancel}>{t('common.cancel')}</Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? t('common.saving') : t('common.save')}
-            </Button>
-          </div>
-        </Form>
-      )}
-    </Formik>
-  );
-};
+function MenuSectionLabel({ label }: { label: string }) {
+    return (
+        <div className="px-2.5 pt-1.5 pb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+            {label}
+        </div>
+    )
+}
 
-export default PaymentsOffersPage;
+function FilterItem({
+    label,
+    active,
+    onClick,
+}: {
+    label: string
+    active: boolean
+    onClick: () => void
+}) {
+    return (
+        <DropdownMenuItem
+            onClick={onClick}
+            className="justify-between text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
+        >
+            <span className="text-gray-700 text-xs">{label}</span>
+            {active && <Check size={12} className="text-gray-500" />}
+        </DropdownMenuItem>
+    )
+}

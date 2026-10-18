@@ -21,11 +21,13 @@ Chargily Pay v2 is a payment service provider that specializes in Algerian payme
 
 | Endpoint | Method | Purpose |
 |---|---|---|
-| `/checkouts` | POST | Create a new checkout session (invoice) |
-| `/checkouts/{id}` | GET | Retrieve checkout details |
-| `/checkouts/{id}/expire` | POST | Expire an unpaid checkout |
-| `/payments/{id}` | GET | Retrieve payment details |
-| `/payments/{id}/refund` | POST | Refund a payment |
+| `/checkouts` | POST | Create a checkout session |
+| `/checkouts/{id}` | GET | Retrieve a checkout (reconciliation) |
+| `/checkouts` | GET | List checkouts (reconciliation) |
+| `/checkouts/{id}/expire` | POST | Expire a pending checkout |
+| `/customers` | POST | Create a Chargily customer (optional) |
+
+> **No refund endpoint exists in Chargily Pay v2.** The API reference covers checkouts, customers, products, prices, payment links and balance only. Refunds are issued from the Chargily merchant dashboard; our admin UI marks the order as refunded afterwards.
 
 ## Setup Requirements
 
@@ -46,13 +48,18 @@ From the Chargily merchant dashboard, navigate to **Settings → API Keys**:
 
 > **Security:** The Secret Key must never be exposed client-side, logged, or committed to version control. Store it in environment variables or a secrets manager.
 
-### Environment Variables
+### Credentials Storage
 
-```bash
-CHARGILY_API_KEY="your_api_key_here"
-CHARGILY_SECRET_KEY="your_secret_key_here"
-CHARGILY_TEST_MODE=true   # Set to false in production
-```
+Credentials are **per organization**, not global env vars. Each org has one `paymentconfig` row holding `provider = chargily`, `mode = test | live`, the public key, and the secret / webhook secrets **encrypted at rest**. The API never returns the secrets in clear text.
+
+There is one global setting only — the API base URL, derived from the org's `mode`:
+
+| Mode | Base URL |
+|---|---|
+| `test` | `https://pay.chargily.net/test/api/v2` |
+| `live` | `https://pay.chargily.net/api/v2` |
+
+> **Security:** The Secret Key must never be exposed client-side, logged, or committed to version control. Read it from `paymentconfig` at request time and keep it in memory only for the duration of the call.
 
 ### ChargilyClient Service
 
@@ -60,12 +67,13 @@ The `ChargilyClient` class wraps Chargily API interactions:
 
 ```python
 class ChargilyClient:
-    def __init__(self):
-        self.test_mode = settings.CHARGILY_TEST_MODE
-        self.secret_key = settings.CHARGILY_SECRET_KEY
+    def __init__(self, config: PaymentConfig):
+        # Credentials come from the org's paymentconfig row.
+        self.mode = config.mode                     # PaymentModeEnum.TEST | LIVE
+        self.secret_key = decrypt(config.secret_key_encrypted)
         self.base_url = (
             "https://pay.chargily.net/test/api/v2"
-            if self.test_mode
+            if self.mode is PaymentModeEnum.TEST
             else "https://pay.chargily.net/api/v2"
         )
 
@@ -95,24 +103,58 @@ class ChargilyClient:
 
 ## Product Creation Model
 
-Each course on Koodook maps to a product in Chargily. The product is created implicitly when a checkout is generated — Chargily treats each checkout as a unique invoice line item.
+We **do not sync products or prices to Chargily**. A course is not a Chargily Product — each purchase is a one-off checkout created with `amount` + `currency` + `description`, and the course is identified in `metadata`. This keeps the price in one place (our DB) and avoids a second source of truth.
+
+Chargily's Products/Prices API remains available if we ever want per-course reporting inside the Chargily dashboard, but it is not part of v1.
 
 The checkout request includes:
 
 ```json
 {
   "amount": 1500,
-  "currency": "DZD",
-  "success_url": "https://koodook.com/courses/{uuid}/payment/success",
-  "failure_url": "https://koodook.com/courses/{uuid}/payment/failure",
+  "currency": "dzd",
+  "description": "Algebra Basics — course access",
+  "locale": "ar",
+  "success_url": "https://koodook.com/course/{uuid}/payment/success",
+  "failure_url": "https://koodook.com/course/{uuid}/payment/failure",
+  "webhook_endpoint": "https://koodook.com/api/v1/payments/webhook/chargily/{org_uuid}",
+  "chargily_pay_fees_allocation": "merchant",
   "payment_method": "edahabia",
   "metadata": {
+    "order_uuid": "order_abc-123",
     "course_uuid": "abc-123",
     "user_id": "user-456",
     "org_id": "org-789"
   }
 }
 ```
+
+Notes:
+
+- `currency` must be **lowercase** (`dzd`), and `amount` is an **integer**.
+- `locale` accepts `ar`, `en` or `fr` — pass the learner's current language.
+- `webhook_endpoint` can be set per checkout, so multi-tenant routing and local ngrok work without touching the dashboard.
+- `chargily_pay_fees_allocation` is `customer`, `merchant` or `split`. We use `merchant`, so the learner pays exactly the listed price and the fee becomes a cost line.
+- `metadata` is documented as a dictionary but the create sample shows an array — verify the shape in sandbox before relying on it.
+- `payment_method` accepts `edahabia`, `cib` and `chargily_app` (QR). The customer can change it on the hosted page, so always read the final method from the webhook.
+
+## Fees, Locale and Refunds
+
+### Fees
+
+- Fees are **plan-based** (0% for the first month, then the chosen plan including a free one). There is no fixed percentage to hardcode.
+- Read `fees`, `fees_on_merchant` and `fees_on_customer` from the checkout object and **store them on the order** — the 40/60 payout math uses the real number.
+- `chargily_pay_fees_allocation` decides who pays: `merchant` (us), `customer` (added on top of the price) or `split`. We use `merchant` so the learner pays exactly the listed price.
+
+### Locale
+
+`locale` accepts `ar`, `en` or `fr`. Pass the learner's current UI language so the hosted payment page matches the platform.
+
+### Refunds
+
+- **There is no refund endpoint in Chargily Pay v2.** Refunds are issued from the Chargily merchant dashboard.
+- Our admin flow: refund in Chargily → click **Mark refunded** in Payments → Transactions. That writes `status = refunded` on the order and revokes the entitlement (full refund) or keeps it (partial refund).
+- If Chargily ever exposes a refund webhook, the handler already treats unknown event types as no-ops, so nothing breaks.
 
 ## Checkout Flow (Detailed)
 
@@ -122,9 +164,13 @@ On the course page, the user sees a **Purchase** button with payment method opti
 
 ```typescript
 const handlePurchase = async (method: 'edahabia' | 'cib') => {
-  const res = await fetch(`/api/payments/checkout/${courseUuid}`, {
+  const res = await fetch(`/api/v1/payments/checkout`, {
     method: 'POST',
-    body: JSON.stringify({ payment_method: method })
+    body: JSON.stringify({
+      resource_uuid: courseUuid,
+      resource_type: 'course',
+      payment_method: method,
+    })
   });
   const { checkout_url } = await res.json();
   window.location.href = checkout_url;  // Redirect to Chargily
@@ -133,20 +179,16 @@ const handlePurchase = async (method: 'edahabia' | 'cib') => {
 
 ### Step 2: Backend Creates Checkout Session
 
-The backend endpoint `POST /api/payments/checkout/:courseUuid`:
+The backend endpoint `POST /api/v1/payments/{org_id}/checkout`:
 
 1. Validates the user is authenticated and the course exists and is priced.
-2. Creates a `payment_orders` record with status `pending`.
+2. Creates a `paymentorder` row with status `pending` and a snapped `amount`.
 3. Calls `ChargilyClient.create_checkout()` with the course amount, success/failure URLs, and metadata.
 4. Returns `{ checkout_url }` to the frontend.
 
 ### Step 3: User Redirected to Chargily
 
-The user's browser is redirected to the Chargily-hosted payment page. The URL is of the form:
-
-```
-https://pay.chargily.net/checkout/{checkout_id}
-```
+The user's browser is redirected to the **`checkout_url` returned by `POST /checkouts`** — for example `https://pay.chargily.dz/test/checkouts/{id}/pay`. The domain and path are owned by Chargily; we never construct it ourselves.
 
 ### Step 4: User Pays
 
@@ -176,47 +218,62 @@ After payment, Chargily redirects the user to either the `success_url` or `failu
 ### Webhook Endpoint
 
 ```
-POST /api/payments/chargily/webhook
+POST /api/v1/payments/webhook/chargily/{org_uuid}
 ```
 
 ### Webhook Events
 
 | Event | Description |
 |---|---|
-| `payment.success` | Payment completed successfully |
-| `payment.failed` | Payment failed (insufficient funds, card declined, etc.) |
-| `payment.refunded` | Payment was refunded |
+| `checkout.paid` | Payment completed successfully |
+| `checkout.failed` | Payment failed (insufficient funds, card declined, etc.) |
+| `checkout.canceled` | Customer canceled the payment |
+
+> Event names in Chargily Pay v2 are `checkout.*`, **not** `payment.*`. There is no `checkout.refunded` event — refunds happen in the dashboard.
 
 ### Payload Format
 
 ```json
 {
-  "type": "payment.success",
+  "id": "01hjjjzf7wbc454te45mwx35fe",
+  "entity": "event",
+  "livemode": false,
+  "type": "checkout.paid",
   "data": {
-    "id": "pi_abc123",
-    "checkout_id": "ch_xyz789",
-    "amount": 1500,
-    "currency": "DZD",
+    "id": "01hjjj9aymmrwe664nbzrv84sg",
+    "entity": "checkout",
+    "amount": 50000,
+    "currency": "dzd",
+    "fees": 1250,
+    "fees_on_merchant": 1250,
+    "fees_on_customer": 0,
+    "chargily_pay_fees_allocation": "merchant",
     "status": "paid",
+    "locale": "ar",
     "payment_method": "edahabia",
+    "customer_id": "01hjjjzf07chnbkcjax2vs58fv",
     "metadata": {
+      "order_uuid": "order_abc-123",
       "course_uuid": "abc-123",
       "user_id": "user-456",
       "org_id": "org-789"
     },
-    "paid_at": "2026-09-23T12:00:00Z",
-    "customer": {
-      "id": "cus_123",
-      "email": "user@example.com",
-      "name": "User Name"
-    }
-  }
+    "success_url": "https://koodook.com/course/abc-123/payment/success",
+    "failure_url": "https://koodook.com/course/abc-123/payment/failure",
+    "url": "https://pay.chargily.dz/test/checkouts/01hjjj9aymmrwe664nbzrv84sg/pay",
+    "created_at": 1703577693,
+    "updated_at": 1703578418
+  },
+  "created_at": 1703578418,
+  "updated_at": 1703578418
 }
 ```
 
+`data` is the **full Checkout object** — there is no separate payment object. Use `data.id` (the checkout id) to find the order, `data.metadata.order_uuid` as a cross-check, and `data.fees_on_merchant` for the accounting snapshot.
+
 ### Signature Verification
 
-Every webhook request includes a signature header. The handler verifies the signature using the Secret Key:
+Every webhook request includes a header named **`signature`**: an HMAC-SHA256 hex digest of the **raw request body**, keyed with the org's **API secret key**. Verify it before parsing anything. Missing header → `400`; mismatch → `403`.
 
 ```python
 def verify_webhook_signature(self, raw_body: bytes, signature_header: str) -> bool:
@@ -236,20 +293,20 @@ def verify_webhook_signature(self, raw_body: bytes, signature_header: str) -> bo
     return hmac.compare_digest(expected_signature, signature_header)
 ```
 
-If signature verification fails, the webhook is rejected with `401 Unauthorized`.
+If signature verification fails, the webhook is rejected with `403 Forbidden` (a missing header is `400`).
 
 ### Webhook Processing Logic
 
 ```
 receive_webhook()
-  ├─ verify HMAC-SHA256 signature
-  │    └─ fail → 401 Unauthorized
-  ├─ check idempotency (already processed?)
+  ├─ verify HMAC-SHA256 over the raw body using the org's API secret key
+  │    └─ missing header → 400 · mismatch → 403
+  ├─ check idempotency (event id already processed?)
   │    └─ yes → 200 OK (no-op)
   ├─ event type:
-  │    ├─ payment.success → update payment_orders → create course_purchases
-  │    ├─ payment.failed  → update payment_orders status to failed
-  │    └─ payment.refunded → update payment_orders status to refunded
+  │    ├─ checkout.paid     → order paid → entitlement → enroll + community
+  │    ├─ checkout.failed   → order failed
+  │    └─ checkout.canceled → order canceled
   └─ return 200 OK
 ```
 
@@ -257,38 +314,41 @@ receive_webhook()
 
 ### Failed Payments
 
-- Chargily sends a `payment.failed` webhook with a failure reason (insufficient funds, card declined, expired card, etc.).
-- The backend updates the `payment_orders` status to `failed`.
+- Chargily sends a `checkout.failed` webhook with the checkout object.
+- The backend updates the `paymentorder` status to `failed`.
 - The user is redirected to the failure page with an appropriate message.
 - No access is granted.
 
-### Expired Sessions
+### Expired / Canceled Sessions
 
-- Unpaid checkout sessions expire after a Chargily-defined period.
-- The backend can proactively expire sessions via `POST /checkouts/{id}/expire`.
-- Expired sessions are handled gracefully — if a webhook arrives after expiry, it is processed if the signature is valid and the order is still in `pending` status.
+- A checkout **expires automatically after 30 minutes** while still `pending`.
+- The backend can cancel it earlier with `POST /checkouts/{id}/expire`.
+- Chargily reports a canceled payment as `checkout.canceled`. There is **no `expired` status in the API** — if reconciliation finds a pending order past its 30-minute window, we mark it `expired` locally and stop reusing its checkout URL.
 
 ### Network Failures
 
 - Webhook delivery is retried by Chargily with exponential backoff.
-- The handler should be idempotent — processing the same webhook twice should not duplicate access grants.
-- Idempotency is achieved by checking `payment_orders.chargily_checkout_id` before processing.
+- The handler is idempotent — processing the same webhook twice does not duplicate access grants.
+- Idempotency is achieved by recording every delivery in `payment_webhook_event` before doing any work.
 
 ### Idempotency
 
-Chargily may deliver the same webhook event multiple times (at-least-once delivery). The webhook handler ensures idempotency by:
+Chargily may deliver the same webhook event multiple times (at-least-once delivery). The handler guarantees idempotency by:
 
-1. Checking if a `payment_orders` record with the given `chargily_checkout_id` already has a non-`pending` status.
-2. If already processed, returning `200 OK` without side effects.
-3. Using database transactions to atomically update payment status and create purchase records.
+1. Inserting `payment_webhook_event` with `event_id` = the payload's top-level `id`. The column is **unique**.
+2. If the insert conflicts, the event was already received → return `200 OK` immediately, no side effects.
+3. Otherwise process inside a single transaction: resolve the order by `chargily_checkout_id`, move the status, upsert `resourceentitlement`, then mark the event `processed`.
+4. On failure, mark the event `failed`, store `error_message`, and return `500` so Chargily retries.
+
+Never key idempotency off the order status alone — a retried delivery for an already-`paid` order must still be acknowledged without touching the entitlement.
 
 ## Testing with Sandbox Environment
 
 ### Enabling Sandbox
 
-1. Set `CHARGILY_TEST_MODE=true` in environment variables.
+1. Set the org's `paymentconfig.mode` to `test`.
 2. Use test API keys from the Chargily merchant dashboard (Settings → API Keys → Test Mode).
-3. Toggle **Sandbox Mode** ON in Admin Dashboard → Settings → Payments → Chargily.
+3. Set the same values in **Admin Dashboard → Payments → Configuration** (once that tab is wired; today it is UI-only).
 
 ### Test Credentials
 
@@ -303,8 +363,8 @@ Chargily may deliver the same webhook event multiple times (at-least-once delive
 - [ ] Create a checkout and verify redirect to Chargily sandbox page.
 - [ ] Complete payment with EDAHABIA test credentials — verify webhook received and access granted.
 - [ ] Complete payment with CIB test card — verify webhook received and access granted.
-- [ ] Test failed payment scenario — verify `payment.failed` webhook and no access granted.
-- [ ] Verify webhook signature verification — send a tampered payload and expect 401.
+- [ ] Test failed payment scenario — verify `checkout.failed` webhook and no access granted.
+- [ ] Verify webhook signature verification — send a tampered payload and expect `403`.
 - [ ] Verify idempotency — simulate duplicate webhook delivery and confirm no duplicate access grants.
 - [ ] Verify success/failure redirect URLs work correctly.
 
@@ -315,8 +375,8 @@ Since Chargily webhooks require a public HTTPS URL:
 1. Start the Koodook development server: `bun run dev` (or equivalent).
 2. Start ngrok on the same port: `ngrok http 3000`.
 3. Copy the ngrok URL (e.g., `https://abc123.ngrok.io`).
-4. In the Chargily merchant dashboard (Settings → Webhooks), set the webhook URL to: `https://abc123.ngrok.io/api/payments/chargily/webhook`
-5. Register for the following events: `payment.success`, `payment.failed`, `payment.refunded`.
+4. In the Chargily merchant dashboard (Settings → Webhooks), set the webhook URL to: `https://abc123.ngrok.io/api/v1/payments/webhook/chargily/{org_uuid}`
+5. Register for the following events: `checkout.paid`, `checkout.failed`, `checkout.canceled`.
 6. Keep ngrok running — each restart generates a new URL, requiring a dashboard update.
 
 > **Tip:** Consider upgrading to a paid ngrok plan for fixed subdomains to avoid reconfiguring webhooks on every restart.
@@ -327,7 +387,7 @@ Since Chargily webhooks require a public HTTPS URL:
 
 - Every webhook request must be verified using HMAC-SHA256 before processing.
 - The signature is computed over the raw request body using the Secret Key.
-- Failed verification must return `401 Unauthorized` immediately.
+- Failed verification must return `403 Forbidden` immediately (missing header → `400`).
 - Never process a webhook without verifying its signature.
 
 ### Secret Key Protection

@@ -30,4 +30,6 @@ class UserGroupRead(UserGroupBase):
     usergroup_uuid: str
     creation_date: str
     update_date: str
+    members_count: int = 0
+    linked_at: Optional[str] = None
     pass

@@ -79,6 +79,7 @@ def _install_stub_modules(monkeypatch: pytest.MonkeyPatch) -> None:
         "health",
         "instance",
         "plans",
+        "payments",
         "usergroups",
         "dev",
         "trail",
@@ -162,6 +163,7 @@ def _install_stub_modules(monkeypatch: pytest.MonkeyPatch) -> None:
         "src.routers.courses.certifications", "src.routers.courses.certifications"
     )
     install_router_module("src.routers.courses.migration", "src.routers.courses.migration")
+    install_router_module("src.routers.courses.access", "src.routers.courses.access")
     install_router_module(
         "src.routers.courses.activities.activities",
         "src.routers.courses.activities.activities",
@@ -185,6 +187,9 @@ def _install_stub_modules(monkeypatch: pytest.MonkeyPatch) -> None:
     ]
     sys.modules["src.routers.courses"].migration = sys.modules[
         "src.routers.courses.migration"
+    ]
+    sys.modules["src.routers.courses"].access = sys.modules[
+        "src.routers.courses.access"
     ]
     sys.modules["src.routers.courses.activities"].activities = sys.modules[
         "src.routers.courses.activities.activities"

@@ -22,6 +22,7 @@ from src.security.rbac.resource_access import (
     _get_request_checker,
 )
 from src.db.users import AnonymousUser, PublicUser, APITokenUser
+from src.db.payments.enums import AccessTypeEnum
 
 
 class TestResourceConfig:
@@ -450,6 +451,18 @@ class TestDashboardContext:
         checker._check_usergroup_membership = AsyncMock(
             return_value=overrides.get("usergroup", False)
         )
+        checker._is_usergroup_member_strict = AsyncMock(
+            return_value=overrides.get("usergroup", False)
+        )
+        # Three-mode model: derive a sensible access type from the mocked
+        # public/published pair unless the test overrides it explicitly.
+        is_public = overrides.get("public_published", (False, False))[0]
+        checker._get_access_type = AsyncMock(
+            return_value=overrides.get(
+                "access_type",
+                AccessTypeEnum.PUBLIC if is_public else AccessTypeEnum.USERS_ONLY,
+            )
+        )
         return checker
 
     @pytest.mark.asyncio
@@ -539,11 +552,12 @@ class TestDashboardContext:
     async def test_usergroup_member_on_published_nonpublic_course_is_allowed(
         self, mock_request, mock_db_session, mock_public_user
     ):
-        """Published + non-public + usergroup member: allowed via public_view rule 5."""
+        """Published + Restricted (`users_only`) + usergroup member: allowed."""
         checker = self._make_checker(
             mock_request, mock_db_session, mock_public_user,
             public_published=(False, True),
             usergroup=True,
+            access_type=AccessTypeEnum.USERS_ONLY,
         )
         with patch(
             "src.security.rbac.resource_access.authorization_verify_based_on_roles",

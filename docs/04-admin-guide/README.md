@@ -11,7 +11,7 @@
 | [Overview](./courses/overview.md) | Course management overview |
 | [General Settings](./courses/general.md) | Name, description, difficulty, thumbnail |
 | [Content Structure](./courses/content-structure.md) | Modules & lessons |
-| [Access Control](./courses/access.md) | Public, Users Only, Paid |
+| [Access Control](./courses/access.md) | Free, Restricted, Paid |
 | [Certification](./courses/certification.md) | Certificate design |
 | [Contributors](./courses/contributors.md) | Adding co-authors |
 | [SEO](./courses/seo.md) | SEO metadata |

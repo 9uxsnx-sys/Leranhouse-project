@@ -11,7 +11,10 @@ export function usePaymentsEnabled() {
 
   const { data: paymentConfigs, error, isLoading } = useSWR(
     org && access_token ? [`/payments/${org.id}/config`, access_token] : null,
-    ([url, token]) => getPaymentConfigs(org.id, token)
+    ([url, token]) => getPaymentConfigs(org.id, token),
+    // The config endpoint does not exist in this build; stop SWR from retrying
+    // the 404 forever, which made the payments tabs flash between states.
+    { revalidateOnFocus: false, shouldRetryOnError: false }
   );
 
   // True if any payment provider is active — not tied to a specific provider

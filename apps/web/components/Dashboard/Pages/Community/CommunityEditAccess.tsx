@@ -10,25 +10,13 @@ import { revalidateTags, swrFetcher } from '@services/utils/ts/requests'
 import { mutate } from 'swr'
 import useSWR from 'swr'
 import { getAPIUrl } from '@services/config/config'
-import { Check, Search, ArrowUpDown, Loader2 } from 'lucide-react'
+import { Search, Users } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { searchMatches } from '@/lib/search/normalize'
 import { useDebounce } from '@/hooks/useDebounce'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { IconButton } from '@/components/ui/icon-button'
+import { TableCard } from '@components/Analytics/Card'
+import { Column, DataTable } from '@components/Analytics/DataTable'
+import { EmptyState } from '@components/Analytics/Feedback'
 
 const CommunityEditAccess: React.FC = () => {
   const { t } = useTranslation()
@@ -60,10 +48,7 @@ const CommunityEditAccess: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const debouncedSearch = useDebounce(searchQuery, 300)
-  const [isLinking, setIsLinking] = useState<number | null>(null)
-  const [sortBy, setSortBy] = useState<'name-asc' | 'name-desc' | 'newest' | 'oldest'>('newest')
   const [selectedGroups, setSelectedGroups] = useState<number[]>([])
-  const [masterCheckboxChecked, setMasterCheckboxChecked] = useState(false)
 
   useEffect(() => {
     if (community?.public !== undefined && !hasInitializedRef.current) {
@@ -72,13 +57,6 @@ const CommunityEditAccess: React.FC = () => {
       hasInitializedRef.current = true
     }
   }, [community?.public])
-
-  useEffect(() => {
-    const linked = linkedGroups || []
-    setMasterCheckboxChecked(
-      linked.length > 0 && selectedGroups.length === linked.length
-    )
-  }, [linkedGroups, selectedGroups])
 
   const handleSetPublic = useCallback(
     async (value: boolean) => {
@@ -106,51 +84,6 @@ const CommunityEditAccess: React.FC = () => {
     },
     [community, accessToken, org?.slug, dispatch, isSaving, t]
   )
-
-  const handleLink = async (groupId: number) => {
-    if (!community) return
-    setIsLinking(groupId)
-    try {
-      const res = await linkResourcesToUserGroup(groupId, community.community_uuid, org.id, accessToken)
-      if (res.status === 200) {
-        toast.success(t('dashboard.courses.communities.access.usergroups.toasts.link_success'))
-        mutateLinkedGroups()
-      } else {
-        toast.error(res.data?.detail || t('dashboard.courses.communities.access.usergroups.toasts.link_failed'))
-      }
-    } catch {
-      toast.error(t('dashboard.courses.communities.access.usergroups.toasts.link_error'))
-    } finally {
-      setIsLinking(null)
-    }
-  }
-
-  const handleUnlink = async (groupId: number) => {
-    if (!community) return
-    setIsLinking(groupId)
-    try {
-      const res = await unLinkResourcesToUserGroup(groupId, community.community_uuid, org.id, accessToken)
-      if (res.status === 200) {
-        toast.success(t('dashboard.courses.communities.access.usergroups.toasts.unlink_success'))
-        mutateLinkedGroups()
-      } else {
-        toast.error(res.data?.detail || t('dashboard.courses.communities.access.usergroups.toasts.unlink_failed'))
-      }
-    } catch {
-      toast.error(t('dashboard.courses.communities.access.usergroups.toasts.unlink_error'))
-    } finally {
-      setIsLinking(null)
-    }
-  }
-
-  const handleGroupSelect = (groupId: number) => {
-    setSelectedGroups(prev => {
-      if (prev.includes(groupId)) {
-        return prev.filter(id => id !== groupId)
-      }
-      return [...prev, groupId]
-    })
-  }
 
   const handleBulkUnlink = async () => {
     if (selectedGroups.length === 0 || !community) return
@@ -203,29 +136,36 @@ const CommunityEditAccess: React.FC = () => {
 
   // Determine which groups to show in the table
   const showSearchResults = searchQuery.trim().length > 0
-  let tableGroups: any[] = []
-  if (showSearchResults) {
-    tableGroups = (allGroups || []).filter((g: any) =>
-      searchMatches(g.name, debouncedSearch) || searchMatches(g.description, debouncedSearch)
-    )
-  } else {
-    const groups = linkedGroups || []
-    const sorted = [...groups].sort((a: any, b: any) => {
-      switch (sortBy) {
-        case 'name-asc':
-          return (a.name || '').localeCompare(b.name || '')
-        case 'name-desc':
-          return (b.name || '').localeCompare(a.name || '')
-        case 'newest':
-          return new Date(b.creation_date || 0).getTime() - new Date(a.creation_date || 0).getTime()
-        case 'oldest':
-          return new Date(a.creation_date || 0).getTime() - new Date(b.creation_date || 0).getTime()
-        default:
-          return 0
-      }
-    })
-    tableGroups = sorted
+  const tableGroups: any[] = showSearchResults
+    ? (allGroups || []).filter((g: any) =>
+        searchMatches(g.name, debouncedSearch) || searchMatches(g.description, debouncedSearch)
+      )
+    : linkedGroups || []
+
+  const handleGroupSelectionChange = (next: Set<string | number>) => {
+    setSelectedGroups(Array.from(next).map(Number))
   }
+
+  const columns: Column<any>[] = [
+    {
+      key: 'name',
+      header: t('dashboard.courses.communities.table.name'),
+      width: '260px',
+      sortable: true,
+      value: (group) => group.name || '',
+      render: (group) => (
+        <div className="flex items-center gap-2.5 min-w-0">
+          <Users size={16} className="shrink-0 text-gray-400" />
+          <span className="font-medium text-gray-900 truncate">{group.name}</span>
+        </div>
+      ),
+    },
+    {
+      key: 'description',
+      header: t('dashboard.courses.communities.table.description'),
+      render: (group) => <span className="text-gray-500 truncate">{group.description || '—'}</span>,
+    },
+  ]
 
   return (
     <div>
@@ -259,135 +199,39 @@ const CommunityEditAccess: React.FC = () => {
             {showSearchResults ? t('dashboard.courses.communities.access.add_count', { count: selectedGroups.length }) : t('dashboard.courses.communities.access.delete_count', { count: selectedGroups.length })}
           </button>
         )}
-        <DropdownMenu modal={false}>
-          <DropdownMenuTrigger asChild>
-            <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label={t('dashboard.courses.communities.access.sort_aria')}>
-              <ArrowUpDown size={15} />
-            </IconButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="min-w-[140px] rounded-lg border border-gray-200 bg-white p-1 shadow-md"
-            sideOffset={6}
-          >
-            {([
-              { value: 'name-asc', label: t('dashboard.courses.communities.sort_options.name_asc') },
-              { value: 'name-desc', label: t('dashboard.courses.communities.sort_options.name_desc') },
-              { value: 'newest', label: t('dashboard.courses.communities.sort_options.newest') },
-              { value: 'oldest', label: t('dashboard.courses.communities.sort_options.oldest') },
-            ] as const).map((option) => (
-              <DropdownMenuItem
-                key={option.value}
-                onClick={() => setSortBy(option.value)}
-                className="justify-between text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
-              >
-                <span className="text-gray-700 text-xs">{option.label}</span>
-                {sortBy === option.value && <Check size={12} className="text-gray-500" />}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
 
-      <div className="space-y-4">
-        <div className="rounded-xl border border-gray-200 overflow-hidden">
-          <Table className="table-fixed">
-            <TableHeader>
-              <TableRow className="bg-gray-50">
-                <TableHead className="w-[30px]">
-                  {!showSearchResults && (
-                    <label className="flex items-center justify-center cursor-pointer w-4 h-4">
-                      <input
-                        type="checkbox"
-                        checked={masterCheckboxChecked}
-                        onChange={(e) => {
-                          setMasterCheckboxChecked(e.target.checked)
-                          if (e.target.checked) {
-                            setSelectedGroups((linkedGroups || []).map((g: any) => g.id))
-                          } else {
-                            setSelectedGroups([])
-                          }
-                        }}
-                        className="sr-only peer"
-                      />
-                      <div className="w-full h-full rounded border border-gray-300 bg-white peer-checked:bg-gray-600 peer-checked:border-gray-600 flex items-center justify-center transition-colors">
-                        <Check size={12} className="text-white hidden peer-checked:block" strokeWidth={3} />
-                      </div>
-                    </label>
-                  )}
-                </TableHead>
-                <TableHead className="w-[200px] pl-2">
-                  <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.courses.communities.table.name')}</span>
-                </TableHead>
-                <TableHead>
-                  <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.courses.communities.table.description')}</span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {!isClientPublic && tableGroups.length === 0 && !showSearchResults ? (
-                <TableRow>
-                  <TableCell colSpan={3} className="text-center text-sm text-gray-500 py-8">
-                    {t('dashboard.courses.communities.access.no_groups_linked')}
-                  </TableCell>
-                </TableRow>
-              ) : showSearchResults && tableGroups.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={3} className="text-center text-sm text-gray-500 py-8">
-                    {t('dashboard.courses.communities.access.no_groups_found')}
-                  </TableCell>
-                </TableRow>
-              ) : !isClientPublic || showSearchResults ? (
-                tableGroups.map((group: any) => {
-                  const isLinked = linkedIds.has(group.id)
-                  return (
-                    <TableRow
-                      key={group.id}
-                      className={`${selectedGroups.includes(group.id) ? 'bg-gray-50' : ''} cursor-pointer hover:bg-gray-50`}
-                      onClick={(e) => {
-                        if (
-                          e.target instanceof HTMLElement &&
-                          (e.target.closest('button') ||
-                            e.target.closest('input[type="checkbox"]') ||
-                            e.target.closest('[role="menuitem"]') ||
-                            e.target.closest('[role="menu"]'))
-                        ) {
-                          return
-                        }
-                        handleGroupSelect(group.id)
-                      }}
-                    >
-                      <TableCell onClick={(e) => e.stopPropagation()}>
-                        <label className="flex items-center justify-center cursor-pointer w-4 h-4">
-                          <input
-                            type="checkbox"
-                            checked={selectedGroups.includes(group.id)}
-                            onChange={() => handleGroupSelect(group.id)}
-                            className="sr-only peer"
-                          />
-                          <div className="w-full h-full rounded border border-gray-300 bg-white peer-checked:bg-gray-600 peer-checked:border-gray-600 flex items-center justify-center transition-colors">
-                            <Check size={12} className="text-white hidden peer-checked:block" strokeWidth={3} />
-                          </div>
-                        </label>
-                      </TableCell>
-                      <TableCell className="font-medium text-gray-900 pl-2 truncate">{group.name}</TableCell>
-                      <TableCell className="text-gray-500 text-sm truncate">
-                        {group.description || '-'}
-                      </TableCell>
-                    </TableRow>
-                  )
-                })
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={3} className="text-center text-sm text-gray-500 py-8">
-                    {t('dashboard.courses.communities.access.public_no_restrictions')}
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
+      {isClientPublic && !showSearchResults ? (
+        <TableCard>
+          <EmptyState
+            icon={Users}
+            title={t('dashboard.courses.communities.access.public_no_restrictions')}
+          />
+        </TableCard>
+      ) : tableGroups.length === 0 ? (
+        <TableCard>
+          <EmptyState
+            icon={Users}
+            title={
+              showSearchResults
+                ? t('dashboard.courses.communities.access.no_groups_found')
+                : t('dashboard.courses.communities.access.no_groups_linked')
+            }
+          />
+        </TableCard>
+      ) : (
+        <TableCard>
+          <DataTable
+            columns={columns}
+            rows={tableGroups}
+            selectable
+            getRowId={(group) => group.id}
+            selectedIds={new Set<string | number>(selectedGroups)}
+            onSelectionChange={handleGroupSelectionChange}
+            rowClassName={(group) => (linkedIds.has(group.id) ? 'bg-gray-50/60' : '')}
+          />
+        </TableCard>
+      )}
     </div>
   )
 }

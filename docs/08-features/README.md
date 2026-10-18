@@ -15,6 +15,7 @@ The documents in this section describe cross-cutting feature areas that touch mu
 | Document | Description |
 |----------|-------------|
 | [Overview](./payments/overview.md) | Payment system architecture: Chargily Pay v2 integration, course purchase flow, access gating, transaction records, refunds |
+| [Progress & Roadmap](./payments/progress.md) | What is shipped, what stopped where, and the ordered list of remaining payments work |
 | [Chargily Integration](./payments/chargily-integration.md) | Chargily Pay v2 API integration plan: checkout creation, webhook handling, signature verification, sandbox testing |
 | [Teacher Payout Plan](./payments/teacher-payout-plan.md) | Teacher revenue share system: 40/60 pro-rata distribution, earnings ledger, monthly payout calculation, admin/teacher dashboards |
 
@@ -100,14 +101,15 @@ User Browser ──► Koodook API ──► Chargily Pay v2
                     │
                     ▼
               PostgreSQL
-         (payment_orders,
-          course_purchases)
+         (paymentorder,
+          resourceentitlement,
+          payment_webhook_event)
 ```
 
 - The frontend initiates checkout via Koodook API endpoints (never talks directly to Chargily).
-- The backend creates Chargily invoices, handles webhook callbacks, and manages the payment lifecycle.
-- Database tables (`payment_orders`, `course_purchases`) record every transaction and access grant.
-- Access is enforced through database flags, backend middleware, and frontend UI gating.
+- The backend creates Chargily checkouts, handles webhook callbacks, and manages the payment lifecycle.
+- `paymentorder` records every checkout, `resourceentitlement` records every access grant, `payment_webhook_event` guarantees idempotent webhook processing.
+- Access is enforced through resource flags, backend checks, and frontend UI gating.
 
 ### AI System Architecture
 

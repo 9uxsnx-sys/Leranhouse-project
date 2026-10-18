@@ -62,11 +62,11 @@ Each Teacher's Share = (Teacher's Gross Revenue / Total Gross Revenue) × Teache
 Student pays via Chargily (Edahabia/CIB)
         │
         ▼
-Chargily sends webhook: checkout.completed
+Chargily sends webhook: checkout.paid
         │
         ▼
 Backend verifies signature
-  → Creates course_purchases record (student gets access)
+  → Creates resourceentitlement record (student gets access)
   → Creates earnings_ledger row (records the sale for teacher payout)
   → Sends event to PostHog (analytics)
         │
@@ -247,7 +247,7 @@ CREATE TABLE earnings_ledger (
   course_id INTEGER NOT NULL REFERENCES course(id),
   teacher_id INTEGER NOT NULL REFERENCES users(id),
   student_id INTEGER NOT NULL REFERENCES users(id),
-  payment_order_id UUID REFERENCES payment_orders(id),
+  payment_order_id INTEGER REFERENCES paymentorder(id),
   chargily_checkout_id TEXT,
   gross_amount DECIMAL(10,2) NOT NULL,
   chargily_fee DECIMAL(10,2) DEFAULT 0,
@@ -470,8 +470,8 @@ Each teacher sees their own earnings dashboard.
 - **Course Contributors** — The contributors tab in the course edit page (CREATOR, MAINTAINER, CONTRIBUTOR, REPORTER roles)
 - **Org Roles** — Custom role creation with fine-grained permissions
 - **User Management** — Search, filter, assign roles to users
-- **Payment System** — Chargily integration, `payment_orders`, `course_purchases` tables
-- **Course Access Model** — Public / Users Only / Paid access levels
+- **Payment System** — Chargily integration, `paymentorder`, `resourceentitlement` tables
+- **Course Access Model** — Free / Restricted / Paid access types
 
 ### What Needs to Be Built
 
@@ -492,7 +492,7 @@ When a payment succeeds, the existing webhook handler needs to also create an `e
 ```python
 # In chargily_webhook handler (existing)
 def handle_checkout_completed(checkout_data):
-    # Existing: create course_purchases record
+    # Existing: create resourceentitlement record
     # Existing: grant access to student
 
     # New: create earnings_ledger row

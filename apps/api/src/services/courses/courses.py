@@ -13,6 +13,7 @@ from src.security.features_utils.usage import (
     increase_feature_usage,
 )
 from src.db.resource_authors import ResourceAuthor, ResourceAuthorshipEnum, ResourceAuthorshipStatusEnum
+from src.db.payments.enums import AccessTypeEnum
 from src.db.users import PublicUser, AnonymousUser, User, UserRead, APITokenUser
 from src.db.courses.courses import (
     Course,
@@ -299,8 +300,11 @@ async def get_courses_orgslug(
     )
 
     if isinstance(current_user, AnonymousUser):
-        # For anonymous users, only show public AND published courses
-        query = query.where(Course.public == True, Course.published == True)
+        # Anonymous visitors only see published, free or purchasable courses.
+        query = query.where(
+            Course.published == True,
+            Course.access_type.in_([AccessTypeEnum.PUBLIC, AccessTypeEnum.PAID]),
+        )
     else:
         # For authenticated users with admin access viewing dashboard, show all courses
         if can_view_unpublished:
@@ -308,13 +312,12 @@ async def get_courses_orgslug(
             pass
         else:
             # For regular users, show:
-            # 1. Published AND public courses
-            # 2. Published courses not in any UserGroup
-            # 3. Courses (including unpublished) in UserGroups where the user is a member
-            # 4. Courses (including unpublished) where the user is a resource author
+            # 1. Published free or paid courses (paid still lists, with its price)
+            # 2. Courses (including unpublished) in UserGroups where the user is a member
+            # 3. Courses (including unpublished) where the user is a resource author
             #
-            # This allows UserGroup members and course authors to see unpublished courses
-            # they have access to, while other users only see published courses.
+            # Restricted (`users_only`) courses are never listed unless the viewer
+            # is a member of a linked UserGroup — the whitelist is strict.
             needs_distinct = True
             query = (
                 query
@@ -329,8 +332,10 @@ async def get_courses_orgslug(
                     ResourceAuthor.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE
                 ))  # type: ignore
                 .where(or_(
-                    and_(Course.published == True, Course.public == True),  # Published public courses
-                    and_(Course.published == True, UserGroupResource.resource_uuid.is_(None)),  # Published courses not in any UserGroup
+                    and_(
+                        Course.published == True,
+                        Course.access_type.in_([AccessTypeEnum.PUBLIC, AccessTypeEnum.PAID]),
+                    ),
                     UserGroupUser.user_id == acting_user_id,  # Courses in UserGroups where user is a member (including unpublished)
                     ResourceAuthor.user_id.isnot(None)  # Courses where user is an ACTIVE resource author
                 ))
@@ -443,17 +448,19 @@ async def get_courses_count_orgslug(
             )
 
     if isinstance(current_user, AnonymousUser):
-        # For anonymous users, only count public AND published courses
-        query = query.where(Course.public == True, Course.published == True)
+        # Anonymous visitors only count published, free or purchasable courses.
+        query = query.where(
+            Course.published == True,
+            Course.access_type.in_([AccessTypeEnum.PUBLIC, AccessTypeEnum.PAID]),
+        )
     elif can_view_unpublished:
         # Admins see every course in the organization (no additional filter)
         pass
     else:
         # For authenticated users, count:
-        # 1. Published AND public courses
-        # 2. Published courses not in any UserGroup
-        # 3. Courses (including unpublished) in UserGroups where the user is a member
-        # 4. Courses (including unpublished) where the user is a resource author
+        # 1. Published free or paid courses
+        # 2. Courses (including unpublished) in UserGroups where the user is a member
+        # 3. Courses (including unpublished) where the user is a resource author
         query = (
             query
             .outerjoin(UserGroupResource, UserGroupResource.resource_uuid == Course.course_uuid)  # type: ignore
@@ -467,8 +474,10 @@ async def get_courses_count_orgslug(
                 ResourceAuthor.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE
             ))  # type: ignore
             .where(or_(
-                and_(Course.published == True, Course.public == True),  # Published public courses
-                and_(Course.published == True, UserGroupResource.resource_uuid.is_(None)),  # Published courses not in any UserGroup
+                and_(
+                    Course.published == True,
+                    Course.access_type.in_([AccessTypeEnum.PUBLIC, AccessTypeEnum.PAID]),
+                ),
                 UserGroupUser.user_id == acting_user_id,  # Courses in UserGroups where user is a member (including unpublished)
                 ResourceAuthor.user_id.isnot(None)  # Courses where user is an ACTIVE resource author
             ))
@@ -521,17 +530,19 @@ async def search_courses(
     search_acting_user_id = resolve_acting_user_id(current_user)
 
     if isinstance(current_user, AnonymousUser):
-        # For anonymous users, only show public AND published courses
-        query = query.where(Course.public == True, Course.published == True)
+        # Anonymous visitors only see published, free or purchasable courses.
+        query = query.where(
+            Course.published == True,
+            Course.access_type.in_([AccessTypeEnum.PUBLIC, AccessTypeEnum.PAID]),
+        )
     elif is_user_superadmin(search_acting_user_id, db_session):
         # Superadmins see all courses (no additional filter)
         pass
     else:
         # For authenticated users, show:
-        # 1. Published AND public courses
-        # 2. Published courses not in any UserGroup
-        # 3. Courses (including unpublished) in UserGroups where the user is a member
-        # 4. Courses (including unpublished) where the user is a resource author
+        # 1. Published free or paid courses
+        # 2. Courses (including unpublished) in UserGroups where the user is a member
+        # 3. Courses (including unpublished) where the user is a resource author
         needs_distinct = True
         query = (
             query
@@ -546,8 +557,10 @@ async def search_courses(
                 ResourceAuthor.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE
             ))  # type: ignore
             .where(or_(
-                and_(Course.published == True, Course.public == True),  # Published public courses
-                and_(Course.published == True, UserGroupResource.resource_uuid.is_(None)),  # Published courses not in any UserGroup
+                and_(
+                    Course.published == True,
+                    Course.access_type.in_([AccessTypeEnum.PUBLIC, AccessTypeEnum.PAID]),
+                ),
                 UserGroupUser.user_id == search_acting_user_id,  # Courses in UserGroups where user is a member (including unpublished)
                 ResourceAuthor.user_id.isnot(None)  # Courses where user is an ACTIVE resource author
             ))
@@ -617,6 +630,21 @@ async def create_course(
     - Course creation is subject to organization limits and permissions
     """
     course = Course.model_validate(course_object)
+
+    # Access model: derive from the legacy `public` flag when the client did not
+    # send `access_type` explicitly, then keep both fields in sync.
+    if "access_type" not in course_object.model_fields_set:
+        course.access_type = (
+            AccessTypeEnum.PUBLIC if course_object.public else AccessTypeEnum.USERS_ONLY
+        )
+    else:
+        course.public = course.access_type == AccessTypeEnum.PUBLIC
+
+    if course.access_type == AccessTypeEnum.PAID and (course.price_amount or 0) <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="A paid course requires a positive price",
+        )
 
     # SECURITY: Check if user has permission to create courses in this organization
     # Since this is a new course, we need to check organization-level permissions
@@ -1023,6 +1051,10 @@ async def update_course(
     # Check if sensitive fields are being updated
     if course_object.public is not None:
         sensitive_fields_updated.append("public")
+    if course_object.access_type is not None:
+        sensitive_fields_updated.append("access_type")
+    if "price_amount" in course_object.model_fields_set:
+        sensitive_fields_updated.append("price_amount")
     if course_object.open_to_contributors is not None:
         sensitive_fields_updated.append("open_to_contributors")
     
@@ -1068,6 +1100,24 @@ async def update_course(
     for var, value in vars(course_object).items():
         if value is not None:
             setattr(course, var, value)
+
+    # An explicit null clears the price; null otherwise means "not provided".
+    if "price_amount" in course_object.model_fields_set and course_object.price_amount is None:
+        course.price_amount = None
+
+    # Keep the legacy `public` flag and `access_type` consistent.
+    if course_object.access_type is not None:
+        course.public = course_object.access_type == AccessTypeEnum.PUBLIC
+    elif course_object.public is not None:
+        course.access_type = (
+            AccessTypeEnum.PUBLIC if course_object.public else AccessTypeEnum.USERS_ONLY
+        )
+
+    if course.access_type == AccessTypeEnum.PAID and (course.price_amount or 0) <= 0:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="A paid course requires a positive price",
+        )
 
     # Complete the course object
     course.update_date = str(datetime.now())

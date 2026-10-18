@@ -56,9 +56,11 @@ The platform uses JWT (JSON Web Tokens) for API authentication:
 
 | Type | Who Can Access | When to Use |
 |------|---------------|-------------|
-| **Public** | Anyone (free) | Free courses, marketing content |
-| **Users Only** | Logged-in users in linked groups | Private courses, internal training |
-| **Paid** | Users who purchased | Paid courses (future Chargily integration) |
+| **Free** (`public`) | Every logged-in user | Free courses, open catalog |
+| **Restricted** (`users_only`) | Only members of the linked user groups | Private courses, internal training, cohorts |
+| **Paid** (`paid`) | Users with an active purchase entitlement | Paid courses (Chargily) |
+
+`published = false` (draft) overrides every type: author / admin / maintainer only. The platform is login-only, so there is no anonymous browsing tier.
 
 ### User Groups
 

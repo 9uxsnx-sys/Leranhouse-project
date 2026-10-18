@@ -84,7 +84,7 @@ These use different components, different layouts, and different design language
 Koodook is a paid learning platform:
 - Users see course details but must **purchase** to access lesson content
 - Payment integration planned via **Chargily Pay v2** (EDAHABIA/CIB)
-- Courses can be Public (free), Users Only (group-restricted), or Paid (purchase required)
+- Courses can be Free (every logged-in user), Restricted (only members of linked user groups), or Paid (purchase required)
 
 ### Multi-Tenancy
 

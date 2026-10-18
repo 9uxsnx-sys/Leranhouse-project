@@ -5,7 +5,7 @@ import { getAPIUrl } from '@services/config/config'
 import { bulkAddContributors, bulkRemoveContributors, editContributor } from '@services/courses/courses'
 import { searchOrgContent } from '@services/search/search'
 import { swrFetcher } from '@services/utils/ts/requests'
-import { Check, Search, ArrowUpDown } from 'lucide-react'
+import { Check, Search } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import useSWR, { mutate } from 'swr'
@@ -16,18 +16,12 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table"
+import { TableCard } from '@components/Analytics/Card'
+import { Column, DataTable } from '@components/Analytics/DataTable'
+import { EmptyState } from '@components/Analytics/Feedback'
 import { useDebounce } from '@/hooks/useDebounce'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import UserAvatar from '@components/Objects/UserAvatar'
-import { IconButton } from '@/components/ui/icon-button'
 
 type EditCourseContributorsProps = {
     orgslug: string
@@ -96,8 +90,6 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
     const [isSearching, setIsSearching] = useState(false);
     const debouncedSearch = useDebounce(searchQuery, 300);
     const [selectedContributors, setSelectedContributors] = useState<string[]>([]);
-    const [masterCheckboxChecked, setMasterCheckboxChecked] = useState(false);
-    const [sortBy, setSortBy] = useState<'name-asc' | 'name-desc' | 'newest' | 'oldest'>('newest');
 
     useEffect(() => {
         if (!isLoading && courseStructure?.open_to_contributors !== undefined) {
@@ -157,16 +149,6 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
             searchUsers();
         }
     }, [debouncedSearch, org?.slug, access_token]);
-
-    useEffect(() => {
-        if (contributors) {
-            const nonCreatorContributors = contributors.filter(c => c.authorship !== 'CREATOR');
-            setMasterCheckboxChecked(
-                nonCreatorContributors.length > 0 && 
-                selectedContributors.length === nonCreatorContributors.length
-            );
-        }
-    }, [contributors, selectedContributors]);
 
     const addSearchUserAsContributor = async (username: string, userUuid: string, role: ContributorRole) => {
         try {
@@ -301,40 +283,17 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
         );
     };
 
-    const sortContributors = (contributors: Contributor[] | undefined) => {
-        if (!contributors) return [];
-        
-        // Find the creator and other contributors
-        const creator = contributors.find(c => c.authorship === 'CREATOR');
-        const otherContributors = contributors.filter(c => c.authorship !== 'CREATOR');
-        
-        // Sort the non-creator contributors based on the selected sort option
-        const sortedOthers = [...otherContributors].sort((a, b) => {
-            switch (sortBy) {
-                case 'name-asc':
-                    return `${a.user.first_name} ${a.user.last_name}`.localeCompare(`${b.user.first_name} ${b.user.last_name}`);
-                case 'name-desc':
-                    return `${b.user.first_name} ${b.user.last_name}`.localeCompare(`${a.user.first_name} ${a.user.last_name}`);
-                case 'newest':
-                    return new Date(b.creation_date).getTime() - new Date(a.creation_date).getTime();
-                case 'oldest':
-                    return new Date(a.creation_date).getTime() - new Date(b.creation_date).getTime();
-                default:
-                    return 0;
-            }
-        });
-        
-        // Return array with creator at the top, followed by sorted contributors
-        return creator ? [creator, ...sortedOthers] : sortedOthers;
+    // Creator is always pinned first; the rest keep the server order (oldest first).
+    const orderContributors = (list: Contributor[] | undefined) => {
+        if (!list) return [];
+        const creator = list.find(c => c.authorship === 'CREATOR');
+        const others = list.filter(c => c.authorship !== 'CREATOR');
+        return creator ? [creator, ...others] : others;
     };
 
-    const handleContributorSelect = (userId: string) => {
-        setSelectedContributors(prev => {
-            if (prev.includes(userId)) {
-                return prev.filter(id => id !== userId);
-            }
-            return [...prev, userId];
-        });
+    const selectedSet = new Set<string | number>(selectedContributors);
+    const handleSelectionChange = (next: Set<string | number>) => {
+        setSelectedContributors(Array.from(next).map(String));
     };
 
     const handleBulkRemove = async () => {
@@ -364,6 +323,149 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
             toast.error(t('dashboard.courses.contributors.toasts.remove_failed'));
         }
     };
+
+    const searching = searchQuery.trim().length > 0;
+
+    const contributorColumns: Column<Contributor>[] = [
+        {
+            key: 'name',
+            header: t('dashboard.courses.contributors.table.name'),
+            sortable: true,
+            value: (c) => `${c.user.first_name} ${c.user.last_name}`,
+            render: (c) => (
+                <div className="flex items-center gap-2.5 min-w-0">
+                    <UserAvatar
+                        width={30}
+                        border='border-2'
+                        avatar_url={c.user.avatar_image ? getUserAvatarMediaDirectory(c.user.user_uuid, c.user.avatar_image) : ''}
+                        rounded="rounded-full"
+                        predefined_avatar={c.user.avatar_image === '' ? 'empty' : undefined}
+                    />
+                    <span className="font-medium text-gray-900 truncate">{c.user.first_name} {c.user.last_name}</span>
+                </div>
+            ),
+        },
+        {
+            key: 'username',
+            header: t('dashboard.courses.contributors.table.username'),
+            width: '170px',
+            render: (c) => <span className="text-gray-500">@{c.user.username}</span>,
+        },
+        {
+            key: 'email',
+            header: t('dashboard.courses.contributors.table.email'),
+            width: '240px',
+            render: (c) => <span className="text-gray-500 truncate">{c.user.email}</span>,
+        },
+        {
+            key: 'role',
+            header: t('dashboard.courses.contributors.table.role'),
+            width: '160px',
+            render: (c) => (
+                <span onClick={(e) => e.stopPropagation()}>
+                    <RoleDropdown contributor={c} />
+                </span>
+            ),
+        },
+        {
+            key: 'status',
+            header: t('dashboard.courses.contributors.table.status'),
+            width: '140px',
+            render: (c) => (
+                <span onClick={(e) => e.stopPropagation()}>
+                    <StatusToggle contributor={c} />
+                </span>
+            ),
+        },
+        {
+            key: 'added',
+            header: t('dashboard.courses.contributors.table.added_on'),
+            width: '150px',
+            align: 'right',
+            sortable: true,
+            value: (c) => c.creation_date,
+            render: (c) => (
+                <span className="text-[13px] text-gray-400 whitespace-nowrap">{formatDate(c.creation_date)}</span>
+            ),
+        },
+    ];
+
+    const searchColumns: Column<SearchUser>[] = [
+        {
+            key: 'name',
+            header: t('dashboard.courses.contributors.table.name'),
+            sortable: true,
+            value: (u) => `${u.first_name} ${u.last_name}`,
+            render: (u) => (
+                <div className="flex items-center gap-2.5 min-w-0">
+                    <UserAvatar
+                        width={30}
+                        border='border-2'
+                        avatar_url={u.avatar_url || ''}
+                        rounded="rounded-full"
+                        predefined_avatar={u.avatar_image ? undefined : 'empty'}
+                    />
+                    <span className="font-medium text-gray-900 truncate">{u.first_name} {u.last_name}</span>
+                </div>
+            ),
+        },
+        {
+            key: 'username',
+            header: t('dashboard.courses.contributors.table.username'),
+            width: '170px',
+            render: (u) => <span className="text-gray-500">@{u.username}</span>,
+        },
+        {
+            key: 'email',
+            header: t('dashboard.courses.contributors.table.email'),
+            width: '240px',
+            render: (u) => <span className="text-gray-500 truncate">{u.email}</span>,
+        },
+        {
+            key: 'role',
+            header: t('dashboard.courses.contributors.table.role'),
+            width: '160px',
+            render: (u) => {
+                const existing = contributors?.find(c => c.user.username === u.username);
+                return (
+                    <span onClick={(e) => e.stopPropagation()}>
+                        {existing ? <RoleDropdown contributor={existing} /> : <SearchUserRoleDropdown user={u} />}
+                    </span>
+                );
+            },
+        },
+        {
+            key: 'status',
+            header: t('dashboard.courses.contributors.table.status'),
+            width: '140px',
+            render: (u) => {
+                const existing = contributors?.find(c => c.user.username === u.username);
+                return (
+                    <span onClick={(e) => e.stopPropagation()}>
+                        {existing ? (
+                            <StatusToggle contributor={existing} />
+                        ) : (
+                            <span className="inline-flex items-center gap-1.5 text-sm text-gray-400">
+                                <span className="w-2.5 h-2.5 rounded bg-red-500" />
+                                {t('dashboard.courses.contributors.statuses.inactive')}
+                            </span>
+                        )}
+                    </span>
+                );
+            },
+        },
+        {
+            key: 'added',
+            header: t('dashboard.courses.contributors.table.added_on'),
+            width: '150px',
+            align: 'right',
+            render: (u) => (
+                <span className="text-[13px] text-gray-400 whitespace-nowrap">
+                    {u.creation_date ? formatDate(u.creation_date) : '—'}
+                </span>
+            ),
+        },
+    ];
 
     return (
         <div>
@@ -398,215 +500,39 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                                 {t('dashboard.courses.contributors.actions.remove_count', { count: selectedContributors.length })}
                             </button>
                         )}
-                        <DropdownMenu modal={false}>
-                            <DropdownMenuTrigger asChild>
-                                <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label={t('dashboard.courses.contributors.sort.aria_label')}>
-                                    <ArrowUpDown size={15} />
-                                </IconButton>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                                align="end"
-                                className="min-w-[140px] rounded-lg border border-gray-200 bg-white p-1 shadow-md"
-                                sideOffset={6}
-                            >
-                                {([
-                                    { value: 'name-asc', label: t('dashboard.courses.contributors.sort.name_asc') },
-                                    { value: 'name-desc', label: t('dashboard.courses.contributors.sort.name_desc') },
-                                    { value: 'newest', label: t('dashboard.courses.contributors.sort.newest') },
-                                    { value: 'oldest', label: t('dashboard.courses.contributors.sort.oldest') },
-                                ] as const).map((option) => (
-                                    <DropdownMenuItem
-                                        key={option.value}
-                                        onClick={() => setSortBy(option.value)}
-                                        className="justify-between text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
-                                    >
-                                        <span className="text-gray-700 text-xs">{option.label}</span>
-                                        {sortBy === option.value && <Check size={12} className="text-gray-500" />}
-                                    </DropdownMenuItem>
-                                ))}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
                     </div>
-                    <div className="space-y-4">
-                        <div className="rounded-xl border border-gray-200 overflow-hidden">
-                            <div>
-                                <Table className="table-fixed">
-                                    <TableHeader>
-                                        <TableRow className="bg-gray-50">
-                                            <TableHead className="w-[30px]">
-                                                {!searchQuery.trim() && (
-                                                    <label className="flex items-center justify-center cursor-pointer w-4 h-4">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={masterCheckboxChecked}
-                                                            onChange={(e) => {
-                                                                setMasterCheckboxChecked(e.target.checked);
-                                                                if (contributors) {
-                                                                    if (e.target.checked) {
-                                                                        const nonCreatorContributors = contributors
-                                                                            .filter(c => c.authorship !== 'CREATOR')
-                                                                            .map(c => c.user_id);
-                                                                        setSelectedContributors(nonCreatorContributors);
-                                                                    } else {
-                                                                        setSelectedContributors([]);
-                                                                    }
-                                                                }
-                                                            }}
-                                                            className="sr-only peer"
-                                                        />
-                                                        <div className="w-full h-full rounded border border-gray-300 bg-white peer-checked:bg-gray-600 peer-checked:border-gray-600 flex items-center justify-center transition-colors">
-                                                            <Check size={12} className="text-white hidden peer-checked:block" strokeWidth={3} />
-                                                        </div>
-                                                    </label>
-                                                )}
-                                            </TableHead>
-                                            <TableHead className="w-[160px]"><span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.courses.contributors.table.name')}</span></TableHead>
-                                            <TableHead className="w-[130px]"><span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.courses.contributors.table.username')}</span></TableHead>
-                                            <TableHead className="w-[180px]"><span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.courses.contributors.table.email')}</span></TableHead>
-                                            <TableHead className="w-[130px]"><span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.courses.contributors.table.role')}</span></TableHead>
-                                            <TableHead className="w-[120px]"><span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.courses.contributors.table.status')}</span></TableHead>
-                                            <TableHead className="w-[140px]"><span className="text-sm font-semibold tracking-wide uppercase text-gray-500">{t('dashboard.courses.contributors.table.added_on')}</span></TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {searchQuery.trim() ? (
-                                            isSearching ? (
-                                                <TableRow>
-                                                    <TableCell colSpan={7} className="text-center text-sm text-gray-500 py-4">
-                                                        {t('dashboard.courses.contributors.search.searching')}
-                                                    </TableCell>
-                                                </TableRow>
-                                            ) : searchResults.length > 0 ? (
-                                                searchResults.map((user) => {
-                                                    const existingContributor = contributors?.find(
-                                                        c => c.user.username === user.username
-                                                    );
-                                                    return (
-                                                        <TableRow key={user.username}>
-                                                            <TableCell>
-                                                                <div className="w-4 h-4" />
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <div className="flex items-center gap-2 overflow-hidden">
-                                                                    <UserAvatar
-                                                                        width={30}
-                                                                        border='border-2'
-                                                                        avatar_url={user.avatar_url || ''}
-                                                                        rounded="rounded-full"
-                                                                        predefined_avatar={user.avatar_image ? undefined : 'empty'}
-                                                                    />
-                                                                    <span className="font-medium truncate">{user.first_name} {user.last_name}</span>
-                                                                </div>
-                                                            </TableCell>
-                                                            <TableCell className="text-gray-500">
-                                                                @{user.username}
-                                                            </TableCell>
-                                                            <TableCell className="text-gray-500">
-                                                                {user.email}
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                {existingContributor ? (
-                                                                    <RoleDropdown contributor={existingContributor} />
-                                                                ) : (
-                                                                    <SearchUserRoleDropdown user={user} />
-                                                                )}
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                {existingContributor ? (
-                                                                    <StatusToggle contributor={existingContributor} />
-                                                                ) : (
-                                                                    <span className="inline-flex items-center gap-1.5 text-sm text-gray-400">
-                                                                        <span className="w-2.5 h-2.5 rounded bg-red-500" />
-                                                                        {t('dashboard.courses.contributors.statuses.inactive')}
-                                                                    </span>
-                                                                )}
-                                                            </TableCell>
-                                                            <TableCell className="text-gray-500 text-sm">
-                                                                {existingContributor
-                                                                    ? formatDate(existingContributor.creation_date)
-                                                                    : user.creation_date
-                                                                        ? formatDate(user.creation_date)
-                                                                        : <span className="text-gray-400">-</span>}
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    );
-                                                })
-                                            ) : (
-                                                <TableRow>
-                                                    <TableCell colSpan={7} className="text-center text-sm text-gray-500 py-4">
-                                                        {t('dashboard.courses.contributors.search.no_results')}
-                                                    </TableCell>
-                                                </TableRow>
-                                            )
-                                        ) : (
-                                            sortContributors(contributors)?.map((contributor) => (
-                                                <TableRow 
-                                                    key={`${contributor.user_id}-${contributor.id}`}
-                                                    className={`${selectedContributors.includes(contributor.user_id) ? 'bg-gray-50' : ''} ${contributor.authorship !== 'CREATOR' ? 'cursor-pointer hover:bg-gray-50' : ''}`}
-                                                    onClick={(e) => {
-                                                        if (
-                                                            e.target instanceof HTMLElement && 
-                                                            (e.target.closest('button') || 
-                                                             e.target.closest('input[type="checkbox"]') ||
-                                                             e.target.closest('[role="menuitem"]') ||
-                                                             e.target.closest('[role="menu"]'))
-                                                        ) {
-                                                            return;
-                                                        }
-                                                        if (contributor.authorship !== 'CREATOR') {
-                                                            handleContributorSelect(contributor.user_id);
-                                                        }
-                                                    }}
-                                                >
-                                                    <TableCell onClick={(e) => e.stopPropagation()}>
-                                                        <label className="flex items-center justify-center cursor-pointer w-4 h-4">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={selectedContributors.includes(contributor.user_id)}
-                                                                onChange={() => handleContributorSelect(contributor.user_id)}
-                                                                disabled={contributor.authorship === 'CREATOR'}
-                                                                className="sr-only peer disabled:opacity-50"
-                                                            />
-                                                            <div className="w-full h-full rounded border border-gray-300 bg-white peer-checked:bg-gray-600 peer-checked:border-gray-600 flex items-center justify-center transition-colors peer-disabled:opacity-50">
-                                                                <Check size={12} className="text-white hidden peer-checked:block" strokeWidth={3} />
-                                                            </div>
-                                                        </label>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <div className="flex items-center gap-2 overflow-hidden">
-                                                            <UserAvatar
-                                                                width={30}
-                                                                border='border-2'
-                                                                avatar_url={contributor.user.avatar_image ? getUserAvatarMediaDirectory(contributor.user.user_uuid, contributor.user.avatar_image) : ''}
-                                                                rounded="rounded-full"
-                                                                predefined_avatar={contributor.user.avatar_image === '' ? 'empty' : undefined}
-                                                            />
-                                                            <span className="font-medium truncate">{contributor.user.first_name} {contributor.user.last_name}</span>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell className="text-gray-500">
-                                                        @{contributor.user.username}
-                                                    </TableCell>
-                                                    <TableCell className="text-gray-500">
-                                                        {contributor.user.email}
-                                                    </TableCell>
-                                                    <TableCell onClick={(e) => e.stopPropagation()}>
-                                                        <RoleDropdown contributor={contributor} />
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <StatusToggle contributor={contributor} />
-                                                    </TableCell>
-                                                    <TableCell className="text-gray-500 text-sm">
-                                                        {formatDate(contributor.creation_date)}
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        </div>
-                    </div>
+
+                    <TableCard>
+                        {searching ? (
+                            isSearching ? (
+                                <div className="py-16 text-center text-sm text-gray-500">
+                                    {t('dashboard.courses.contributors.search.searching')}
+                                </div>
+                            ) : searchResults.length === 0 ? (
+                                <EmptyState
+                                    icon={Search}
+                                    title={t('dashboard.courses.contributors.search.no_results')}
+                                />
+                            ) : (
+                                <DataTable columns={searchColumns} rows={searchResults} />
+                            )
+                        ) : (contributors?.length ?? 0) === 0 ? (
+                            <EmptyState
+                                icon={Search}
+                                title={t('dashboard.courses.contributors.empty')}
+                            />
+                        ) : (
+                            <DataTable
+                                columns={contributorColumns}
+                                rows={orderContributors(contributors)}
+                                selectable
+                                getRowId={(c) => c.user_id}
+                                selectedIds={selectedSet}
+                                onSelectionChange={handleSelectionChange}
+                                isRowSelectable={(c) => c.authorship !== 'CREATOR'}
+                            />
+                        )}
+                    </TableCard>
                 </div>
             )}
         </div>
