@@ -21,6 +21,7 @@
 | 9 | Wire Overview tab to real order data | ✅ Done |
 | 9b | Wire Payouts tab (40/60 net split) | ⬜ Not started |
 | 10 | Learner "Get access" → checkout → Progress tab | ✅ Done — paid unlocks via the webhook; free enrolls directly |
+| 10b | Collection bundles — checkout, member snapshot, per-course fan-out | ✅ Done |
 | 11 | Podcast Access tab parity | ⬜ Not started |
 | 12 | Payments Configuration (per-org Chargily keys) | ✅ Done |
 | 13 | Flip `OSS_GATE` back to `true` and ship | ⬜ Not started |
@@ -45,7 +46,7 @@ Files: [`services/payments/entitlements.py`](../../../apps/api/src/services/paym
 
 | Route | Behaviour |
 |---|---|
-| `GET /payments/{org_id}/entitlements` | Active roster for `resource_uuid` (`course_…` / `podcast_…`), search + pagination |
+| `GET /payments/{org_id}/entitlements` | Active roster for `resource_uuid` (`course_…` / `podcast_…` / `collection_…`), search + pagination |
 | `GET /payments/{org_id}/entitlements/candidates` | Org members **without** an active entitlement |
 | `POST /payments/{org_id}/entitlements?user_ids=…` | Manual grant, `source=manual`, `granted_by` = acting admin |
 | `DELETE /payments/{org_id}/entitlements?user_ids=…` | Revoke → `status=revoked`, keeps the row |
@@ -92,9 +93,9 @@ File: [`components/Dashboard/Pages/Payments/PaymentsOffersPage.tsx`](../../../ap
 
 Files: [`services/payments/chargily.py`](../../../apps/api/src/services/payments/chargily.py), [`services/payments/checkout.py`](../../../apps/api/src/services/payments/checkout.py), [`routers/payments.py`](../../../apps/api/src/routers/payments.py), [`web/services/payments/checkout.ts`](../../../apps/web/services/payments/checkout.ts)
 
-- `POST /api/v1/payments/{org_id}/checkout` — body `{ resource_uuid, resource_type, payment_method, locale }`.
-- Validates org membership, published resource, `access_type = paid`, `price_amount > 0`, no existing active entitlement, and an active `paymentconfig` with a stored secret.
-- Creates a `paymentorder(status=pending, amount=price, price_snapshot=…)`, then calls Chargily `POST /checkouts` (integer amount, lowercase `dzd`, per-checkout `webhook_endpoint`).
+- `POST /api/v1/payments/{org_id}/checkout` — body `{ resource_uuid, resource_type, payment_method, locale }`. `resource_type` is `course`, `podcast`, or `collection`.
+- Validates org membership, published resource, `access_type = paid`, `price_amount > 0`, no existing active entitlement, and an active `paymentconfig` with a stored secret. Collections additionally require at least one member.
+- Creates a `paymentorder(status=pending, amount=price, price_snapshot=…)`, then calls Chargily `POST /checkouts` (integer amount, lowercase `dzd`, per-checkout `webhook_endpoint`). For collections, `price_snapshot.courses` records the member course UUIDs at checkout time.
 - Persists `chargily_checkout_id`, `checkout_url`, `fees`, `fees_on_merchant`, `provider_payload`; returns `{ order_uuid, checkout_url, amount, currency, status }`.
 - Provider failure marks the order `failed` and returns `502`.
 - Course page "Get Access" now shows the price and redirects to `checkout_url`; non-paid courses enroll the learner via `POST /trail/add_course/{uuid}` (creating the trail when missing) so the course lands in the Progress tab.
@@ -118,6 +119,7 @@ Files: [`services/payments/webhooks.py`](../../../apps/api/src/services/payments
 - Secret selection: `webhook_secret` when set, otherwise the API secret key.
 - Idempotency via `payment_webhook_event.event_id` (unique). A `processed` duplicate returns `200 {duplicate: true}` and does nothing; failed deliveries may be retried.
 - `checkout.paid` → order `paid` (`paid_at`, `fees`, `fees_on_merchant`, `payment_method`, `provider_payload`) + active `resourceentitlement(source=purchase)` + `TrailRun` so the course appears in the Progress tab.
+  - For `collection_` orders, the handler grants one entitlement per course in `price_snapshot.courses` (skipping courses the learner already owns) plus one `TrailRun` each, and keeps the bundle entitlement as the purchase record.
 - `checkout.failed` / `checkout.canceled` → order `failed` / `canceled`; no entitlement.
 - Unknown order or unknown event type → acknowledged with `200` and recorded, no side effects.
 - Processing errors mark the event `failed`, store `error_message`, and return `500` so Chargily retries.

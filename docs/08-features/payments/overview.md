@@ -45,7 +45,7 @@ User Browser               Koodook API                Chargily Pay
 7. The webhook handler verifies the hex HMAC-SHA256 `signature` over the raw body, moves the `paymentorder` row to `paid`, and creates a `resourceentitlement` row (`source=purchase`).
 8. User is redirected back to Koodook (success or failure page) and sees the course unlocked.
 
-> **Implementation status:** the whole server-side purchase loop is built — checkout creation, signature-verified webhook, order lifecycle, entitlement grant, and course enrollment. The post-payment result pages, the Transactions tab and the Overview tab are live. What remains is wiring Payouts to real orders, podcast Access parity, and lifting the OSS gate. See [Progress & Roadmap](./progress.md).
+> **Implementation status:** the whole server-side purchase loop is built — checkout creation, signature-verified webhook, order lifecycle, entitlement grant, and course enrollment. Collections are purchasable bundles: the order snapshots their members and the webhook grants one entitlement plus one `TrailRun` per member course. The post-payment result pages, the Transactions tab and the Overview tab are live. What remains is wiring Payouts to real orders, podcast Access parity, and lifting the OSS gate. See [Progress & Roadmap](./progress.md).
 
 ## Payment Provider: Chargily Pay v2
 
@@ -86,7 +86,7 @@ All routes are mounted under `/api/v1/payments` and require an authenticated use
 
 | Route | Purpose |
 |---|---|
-| `GET /payments/{org_id}/entitlements?resource_uuid=…` | Active access roster for a course/podcast (Paid mode table) |
+| `GET /payments/{org_id}/entitlements?resource_uuid=…` | Active access roster for a course/podcast/collection (Paid mode table) |
 | `GET /payments/{org_id}/entitlements/candidates?resource_uuid=…` | Org members **without** access (the search picker) |
 | `POST /payments/{org_id}/entitlements?resource_uuid=…&user_ids=1,2` | Manual grant (`source=manual`, `granted_by` = acting admin) |
 | `DELETE /payments/{org_id}/entitlements?resource_uuid=…&user_ids=1,2&reason=…` | Revoke — flips `status` to `revoked`, keeps the row for audit |
@@ -156,7 +156,7 @@ One row per Chargily checkout and its lifecycle. Append-only: rows move through 
 | `id` | Integer primary key |
 | `order_uuid` | Public order identifier (unique, indexed) |
 | `org_id` / `user_id` | Owning organization and buyer |
-| `resource_uuid` / `resource_type` / `resource_name` | What is being sold (`course_…` / `podcast_…`) |
+| `resource_uuid` / `resource_type` / `resource_name` | What is being sold (`course_…` / `podcast_…` / `collection_…`) |
 | `amount` / `currency` | Integer DZD, snapshotted at order creation (`currency` defaults to `DZD`) |
 | `price_snapshot` | JSONB — the resource price at checkout time |
 | `payment_method` | `edahabia`, `cib` or `chargily_app` |
@@ -176,7 +176,7 @@ Grants a user access to one paid resource. Created by the webhook on `checkout.p
 | Field | Description |
 |---|---|
 | `org_id` / `user_id` | Organization and grantee |
-| `resource_uuid` / `resource_type` | The course or podcast |
+| `resource_uuid` / `resource_type` | The course, podcast, or collection |
 | `source` | `purchase`, `manual`, `usergroup`, `free` |
 | `order_id` | FK to `paymentorder` (nullable, `SET NULL` on delete) |
 | `status` | `active`, `revoked` |

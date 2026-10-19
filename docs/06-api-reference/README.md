@@ -189,6 +189,7 @@ For example:
 |----------|-------------|
 | [Authentication](./authentication.md) | Login, register, token refresh, OAuth/SSO |
 | [Courses](./courses.md) | Course CRUD, listing, search, import/export |
+| [Collections](./collections.md) | Course bundles: CRUD, membership, media, access rules, purchase fan-out |
 | [Chapters](./chapters.md) | Chapter/module CRUD, reordering, user group access |
 | [Activities](./activities.md) | Activity/lesson CRUD, versioning, types |
 | [Users](./users.md) | User management, profiles, password reset |

@@ -32,8 +32,8 @@ Every route in the project belongs to one of two layouts:
 | `/orgs/[orgslug]/course/[uuid]` | Course Detail | In progress |
 | `/orgs/[orgslug]/course/[uuid]/lesson-preview` | Lesson Preview | In progress |
 | `/orgs/[orgslug]/course/[uuid]/activity/[activityid]` | Activity / Lesson | To do |
-| `/orgs/[orgslug]/collections` | Collections | To do |
-| `/orgs/[orgslug]/collection/[id]` | Collection Detail | To do |
+| `/orgs/[orgslug]/collections` | Collections | Done |
+| `/orgs/[orgslug]/collection/[id]` | Collection Detail | Done |
 | `/orgs/[orgslug]/communities` | Communities | To do |
 | `/orgs/[orgslug]/community/[uuid]` | Community Detail | To do |
 | `/orgs/[orgslug]/playgrounds` | Playgrounds | To do |
@@ -63,6 +63,8 @@ Every route in the project belongs to one of two layouts:
 | `/orgs/[orgslug]/dash/communities` | Communities Admin | Keep original |
 | `/orgs/[orgslug]/dash/playgrounds` | Playgrounds Admin | Keep original |
 | `/orgs/[orgslug]/dash/podcasts` | Podcasts Admin | Keep original |
+| `/orgs/[orgslug]/dash/collections` | Collections Admin | Keep original |
+| `/orgs/[orgslug]/dash/collections/collection/[uuid]/[subpage]` | Collection Editor (General / Content / Access) | Keep original |
 | `/orgs/[orgslug]/dash/payments` | Payments Admin | Keep original |
 | `/orgs/[orgslug]/dash/org/settings` | Org Settings | Keep original |
 | `/orgs/[orgslug]/dash/users/settings` | User Settings | Keep original |

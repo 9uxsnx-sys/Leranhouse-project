@@ -293,7 +293,7 @@ Add a `collection_` branch:
 - `DashLeftMenu`: **Collections** entry, gated on `resolved_features.collections.enabled`.
 - `UserLeftMenu`: **Collections** entry, same gate.
 - Desktop only — no `DashMobileMenu` entry.
-- Delete the legacy learner-facing `/collections/new` form once the dashboard listing ships.
+- Retired the legacy learner-facing `/collections/new` form when the dashboard listing shipped; creation now lives only in the dashboard.
 
 ---
 
@@ -407,5 +407,5 @@ Minor: `/trail` sorts by `creation_date`; six runs share one timestamp. Add a na
 | Question | Recommendation |
 |---|---|
 | Cover **video** support in v1 | Include the column and upload path; render image-only until needed |
-| Retire `/collections/new` | Yes — delete it when the dashboard listing lands so there is one creation flow |
+| Retire `/collections/new` | Done — the learner route was deleted; the dashboard is the only creation flow |
 | Success-page activation | Flip when **all** snapshot runs exist (accurate) rather than the first one (faster) |

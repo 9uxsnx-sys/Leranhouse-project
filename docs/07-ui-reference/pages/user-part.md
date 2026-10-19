@@ -239,8 +239,20 @@ Defined in `apps/web/components/Objects/Modals/SearchModal.tsx`. A command-palet
 
 **Route**: `/orgs/[orgslug]/collections` — File: `apps/web/app/orgs/[orgslug]/(withmenu)/collections/CollectionsClient.tsx`
 
-- **Collection grid**: Shows all collections with thumbnails.
-- **Collection detail**: `/orgs/[orgslug]/collection/[collectionid]` — Shows courses within a collection.
+- **Toolbar**: `ActionRow` + `ActionRowSearch` filtering by name and description (accent-insensitive), with a live result count.
+- **Collection grid**: 1–4 responsive columns of `CollectionCard`; the card prefers the collection's own cover and falls back to the first member course's cover. Paginated client-side at 8 per page.
+- **Empty states**: separate copy for "no collections yet" and "no search results".
+- **Collection detail**: `/orgs/[orgslug]/collection/[collectionid]` — course-page parity layout with hero banner (collection banner → cover → placeholder), title, stats badges (`N courses`, `M lessons`, owned badge), `CourseShare`, learnings, about, and a **What is included** grid of `CourseCard`s. The sidebar shows the bundle price and **Get access**, which starts a collection checkout; owned bundles link back to Progress instead.
+
+### Dashboard Collections
+
+**Routes**: `/orgs/[orgslug]/dash/collections` and `/orgs/[orgslug]/dash/collections/collection/[uuid]/{general|content|access}` — Files: `apps/web/app/orgs/[orgslug]/dash/collections/client.tsx` and `.../[subpage]/page.tsx`
+
+- **Listing**: `ActionRow` search, **New collection** modal, card grid, per-card menu (Edit / Delete with confirmation), paginated at 8 per page, separate empty states.
+- **Editor shell**: `PageTabs variant="pill"` for General / Content / Access, loaded through SWR.
+- **General**: action row (Preview / Save / Publish), overview card, learnings list, `CollectionMediaSection` (cover + banner), tags card; saves only changed fields.
+- **Content**: `DataTable` of member courses with a search toolbar, **Add course** picker (excludes `users_only`, already-added, and drafts for published bundles) and per-row remove.
+- **Access**: segmented Public / Private / Paid control, publish toggle, price card with entitlement roster (paid) or UserGroup linking (private). Selecting Paid before a price exists reveals the price card locally and persists mode + price atomically on save.
 
 ### User Profile
 

@@ -122,8 +122,7 @@ Checking the learner UI changed several assumptions. These are the facts the tra
 |---|---|---|---|
 | `/` | Home **[T]** | Sidebar, search | Yes |
 | `/courses` | Home **[L]** > Courses **[T]** | Sidebar, search, landing | Yes |
-| `/collections` | Home **[L]** > Collections **[T]** | **Nothing** (orphaned) | Only if surfaced; otherwise skip |
-| `/collections/new` | Home **[L]** > Collections **[L]** > New Collection **[T]** | Only from `/collections` | Only with the parent above |
+| `/collections` | Home **[L]** > Collections **[T]** | Sidebar, search, landing | Yes |
 | `/podcasts` | Home **[L]** > Podcasts **[T]** | Sidebar, search | Yes |
 | `/communities` | Home **[L]** > Communities **[T]** | Sidebar, search | Yes |
 | `/playgrounds` | Home **[L]** > Playgrounds **[T]** | **Nothing** (orphaned) | Only if surfaced; otherwise skip |
@@ -144,7 +143,7 @@ Checking the learner UI changed several assumptions. These are the facts the tra
 | `/course/[courseuuid]/activity/[activityId]` | Home **[L]** > Courses **[L]** > {Course name} **[L]** > {Lesson name} **[T]** | "Start course", curriculum, trail, next/previous |
 | — with module context (recommended) | Home **[L]** > Courses **[L]** > {Course name} **[L]** > {Module name} *(module)* > {Lesson name} **[T]** | same; module hidden below `lg` |
 | `/course/[courseuuid]/activity/end` | Home **[L]** > Courses **[L]** > {Course name} **[L]** > Course Complete **[T]** | "Mark complete" on the last lesson |
-| `/collection/[collectionid]` | Home **[L]** > **{Collection name}** **[T]** — *until a Collections listing exists* | Search results, direct URL |
+| `/collection/[collectionid]` | Home **[L]** > Collections **[L]** > {Collection name} **[T]** | Collections list, search, landing |
 | `/podcast/[podcastuuid]` | Home **[L]** > Podcasts **[L]** > {Podcast name} **[T]** | Podcasts list, search |
 | `/community/[communityuuid]` | Home **[L]** > Communities **[L]** > {Community name} **[T]** | Communities list, search, course community section |
 | `/community/[communityuuid]/discussion/[discussionId]` | Home **[L]** > Communities **[L]** > {Community name} **[L]** > {Discussion title} **[T]** | Search results, course community section — **not** the community feed |

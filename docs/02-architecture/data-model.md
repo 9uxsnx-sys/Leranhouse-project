@@ -104,9 +104,11 @@ Organization
 
 ### Collection
 
-- **Represents**: A bundle of courses
-- **Key fields**: name, description
-- **Relationships**: belongs to Organization, has many Courses
+- **Represents**: A sellable bundle of courses, with the same editorial surface as a course
+- **Key fields**: name, description, about, learnings, tags, `thumbnail_type`, `thumbnail_image`, `thumbnail_video`, `banner_image`, `public`, `published`, `access_type` (`public` / `users_only` / `paid`), `price_amount`, `price_currency`, `collection_uuid`
+- **Relationships**: belongs to Organization, has many Courses (through `collectioncourse`, cascade on delete)
+- **Constraints**: no `users_only` member courses; published bundles only contain published courses; paid bundles require a positive price and at least one member
+- **Purchase**: checkout snapshots member UUIDs in `price_snapshot.courses`; the Chargily webhook grants one entitlement per member course and one `TrailRun` each
 
 ---
 

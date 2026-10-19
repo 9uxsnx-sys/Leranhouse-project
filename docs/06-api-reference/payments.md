@@ -34,7 +34,7 @@ All routes are mounted under `/api/v1/payments`, require an authenticated user, 
 GET /api/v1/payments/{org_id}/entitlements?resource_uuid=course_…&search=&page=1&limit=10
 ```
 
-Returns the **active** access roster for a course or podcast: `{ items, total, page, limit, pages }`, each item carrying `user`, `role`, `joined_at`, `enrolled_at` (grant timestamp), `status`, `source`, `valid_until`.
+Returns the **active** access roster for a course, podcast, or collection: `{ items, total, page, limit, pages }`, each item carrying `user`, `role`, `joined_at`, `enrolled_at` (grant timestamp), `status`, `source`, `valid_until`.
 
 ### List entitlement candidates
 
@@ -130,7 +130,7 @@ No auth dependency. See [Chargily Webhook](#chargily-webhook).
 
 > Implemented. Requires an authenticated organization member.
 
-Initiate a payment for a course or podcast. Creates a `paymentorder` record and returns a Chargily-hosted checkout URL for user redirect.
+Initiate a payment for a course, podcast, or collection. Creates a `paymentorder` record and returns a Chargily-hosted checkout URL for user redirect.
 
 ```
 POST /api/v1/payments/{org_id}/checkout
@@ -140,8 +140,8 @@ POST /api/v1/payments/{org_id}/checkout
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `resource_uuid` | string | Yes | `course_…` or `podcast_…` |
-| `resource_type` | string | Yes | `course` or `podcast` |
+| `resource_uuid` | string | Yes | `course_…`, `podcast_…`, or `collection_…` |
+| `resource_type` | string | Yes | `course`, `podcast`, or `collection` |
 | `payment_method` | string | No | `edahabia`, `cib` or `chargily_app` (the customer can change it on the hosted page) |
 
 ### Example Request
@@ -380,7 +380,7 @@ is_valid = hmac.compare_digest(expected, signature_header)
 |-------|------|-------------|
 | `id` | integer | Primary key |
 | `org_id` / `user_id` | integer | Organization and grantee |
-| `resource_uuid` / `resource_type` | string | Course or podcast |
+| `resource_uuid` / `resource_type` | string | Course, podcast, or collection |
 | `source` | enum | `purchase`, `manual`, `usergroup`, `free` |
 | `order_id` | integer | FK to `paymentorder` (`SET NULL`) |
 | `status` | enum | `active`, `revoked` |
