@@ -1,6 +1,7 @@
 from typing import Optional
 
 from sqlalchemy import BigInteger, Column, ForeignKey
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
 from src.db.courses.courses import ThumbnailType
@@ -31,6 +32,7 @@ class CollectionBase(SQLModel):
     access_type: AccessTypeEnum = Field(default=AccessTypeEnum.PUBLIC)
     price_amount: Optional[int] = None
     price_currency: str = Field(default="DZD")
+    seo: Optional[dict] = Field(default=None, sa_column=Column(JSONB, nullable=True))
 
 
 class Collection(CollectionBase, table=True):
@@ -65,6 +67,7 @@ class CollectionUpdate(SQLModel):
     access_type: Optional[AccessTypeEnum] = None
     price_amount: Optional[int] = None
     price_currency: Optional[str] = None
+    seo: Optional[dict] = None
     courses: Optional[list[int]] = None
 
 
@@ -77,10 +80,12 @@ class CollectionRead(CollectionBase):
 
 
 class CollectionCourseRead(SQLModel):
-    """Lean course row for the dashboard Content table."""
+    """Lean member row for the dashboard Content table and learner page."""
 
     id: int
-    course_uuid: str
+    resource_type: str = "course"
+    resource_uuid: str = ""
+    course_uuid: Optional[str] = None
     name: str
     description: Optional[str] = None
     thumbnail_image: Optional[str] = None

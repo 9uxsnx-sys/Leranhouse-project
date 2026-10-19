@@ -9,6 +9,7 @@ import {
     ChevronLeft,
     ChevronRight,
     Headphones,
+    Layers,
     Loader2,
     Search,
 } from 'lucide-react'
@@ -28,12 +29,13 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { getAPIUrl } from '@services/config/config'
 import { updateCourse } from '@services/courses/courses'
+import { updateCollection } from '@services/courses/collections'
 import { updatePodcast } from '@services/podcasts/podcasts'
 import { swrFetcher } from '@services/utils/ts/requests'
 
 const ITEMS_PER_PAGE = 10
 
-type ResourceKind = 'course' | 'podcast'
+type ResourceKind = 'course' | 'podcast' | 'collection'
 type AccessMode = 'public' | 'users_only' | 'paid'
 
 const ACCESS_DOT: Record<AccessMode, string> = {
@@ -101,6 +103,10 @@ export default function PaymentsOffersPage() {
         org?.slug && access_token
             ? `${getAPIUrl()}podcasts/org_slug/${org.slug}/page/1/limit/100?include_unpublished=true`
             : null
+    const collectionsKey =
+        org?.id && access_token
+            ? `${getAPIUrl()}collections/org/${org.id}/page/1/limit/100`
+            : null
 
     const {
         data: coursesData,
@@ -116,6 +122,14 @@ export default function PaymentsOffersPage() {
         isValidating: podcastsValidating,
         mutate: mutatePodcasts,
     } = useSWR(podcastsKey, (url: string) => swrFetcher(url, access_token), {
+        revalidateOnFocus: false,
+    })
+    const {
+        data: collectionsData,
+        error: collectionsError,
+        isValidating: collectionsValidating,
+        mutate: mutateCollections,
+    } = useSWR(collectionsKey, (url: string) => swrFetcher(url, access_token), {
         revalidateOnFocus: false,
     })
 
@@ -146,8 +160,22 @@ export default function PaymentsOffersPage() {
             creation_date: podcast.creation_date || '',
         }))
 
-        return [...courses, ...podcasts]
-    }, [coursesData, podcastsData])
+        const collections: OfferRow[] = toList(collectionsData).map((collection: any) => ({
+            key: `collection:${collection.collection_uuid}`,
+            kind: 'collection',
+            uuid: collection.collection_uuid,
+            name: collection.name || '—',
+            description: collection.description || '',
+            price_amount:
+                typeof collection.price_amount === 'number' ? collection.price_amount : null,
+            access_type: (collection.access_type ||
+                (collection.public ? 'public' : 'users_only')) as AccessMode,
+            published: Boolean(collection.published),
+            creation_date: collection.creation_date || '',
+        }))
+
+        return [...courses, ...podcasts, ...collections]
+    }, [coursesData, podcastsData, collectionsData])
 
     const filtered = useMemo(() => {
         const query = search.trim().toLowerCase()
@@ -197,8 +225,10 @@ export default function PaymentsOffersPage() {
     )
 
     const isInitialLoading =
-        (!coursesData && coursesValidating) || (!podcastsData && podcastsValidating)
-    const loadError = coursesError || podcastsError
+        (!coursesData && coursesValidating) ||
+        (!podcastsData && podcastsValidating) ||
+        (!collectionsData && collectionsValidating)
+    const loadError = coursesError || podcastsError || collectionsError
 
     useEffect(() => {
         setPage(1)
@@ -242,6 +272,8 @@ export default function PaymentsOffersPage() {
             try {
                 if (row.kind === 'course') {
                     await updateCourse(row.uuid, { price_amount: amount }, access_token)
+                } else if (row.kind === 'collection') {
+                    await updateCollection(row.uuid, { price_amount: amount }, access_token)
                 } else {
                     await updatePodcast(row.uuid, { price_amount: amount }, access_token)
                 }
@@ -251,7 +283,7 @@ export default function PaymentsOffersPage() {
         }
 
         setDrafts({})
-        await Promise.all([mutateCourses(), mutatePodcasts()])
+        await Promise.all([mutateCourses(), mutatePodcasts(), mutateCollections()])
         setSaving(false)
 
         if (failed === 0) {
@@ -270,6 +302,7 @@ export default function PaymentsOffersPage() {
         access_token,
         mutateCourses,
         mutatePodcasts,
+        mutateCollections,
         t,
     ])
 
@@ -301,6 +334,8 @@ export default function PaymentsOffersPage() {
                 <div className="flex items-center gap-2.5 min-w-0">
                     {row.kind === 'course' ? (
                         <BookOpen size={16} className="shrink-0 text-gray-400" />
+                    ) : row.kind === 'collection' ? (
+                        <Layers size={16} className="shrink-0 text-gray-400" />
                     ) : (
                         <Headphones size={16} className="shrink-0 text-gray-400" />
                     )}
@@ -322,7 +357,9 @@ export default function PaymentsOffersPage() {
                     <span className="w-2.5 h-2.5 rounded bg-gray-300" />
                     {row.kind === 'course'
                         ? t('dashboard.payments.offers.type_course')
-                        : t('dashboard.payments.offers.type_podcast')}
+                        : row.kind === 'collection'
+                          ? t('dashboard.payments.offers.type_collection')
+                          : t('dashboard.payments.offers.type_podcast')}
                 </span>
             ),
         },
@@ -466,6 +503,7 @@ export default function PaymentsOffersPage() {
                             { value: '', label: t('dashboard.payments.offers.filters.all_types') },
                             { value: 'course', label: t('dashboard.payments.offers.type_course') },
                             { value: 'podcast', label: t('dashboard.payments.offers.type_podcast') },
+                            { value: 'collection', label: t('dashboard.payments.offers.type_collection') },
                         ].map((option) => (
                             <FilterItem
                                 key={`type-${option.value}`}

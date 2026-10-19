@@ -10,8 +10,10 @@ export interface CourseCardProps {
   duration: string
   difficulty: string
   href?: string
+  /** Noun for the count shown in the meta row (defaults to "lessons"). */
+  lessonsLabel?: string
 }
-export function CourseCard({ id, title, description, image, lessons, duration, difficulty, href }: CourseCardProps) {
+export function CourseCard({ id, title, description, image, lessons, duration, difficulty, href, lessonsLabel = 'lessons' }: CourseCardProps) {
   return (
     <Link
       href={href || `/course/${id}`}
@@ -45,7 +47,7 @@ export function CourseCard({ id, title, description, image, lessons, duration, d
         </div>
         {/* Metadata: directly below description */}
         <p className="text-[12px] text-gray-400 mt-1.5">
-          {lessons} lessons &middot; {duration} &middot; {difficulty}
+          {lessons} {lessonsLabel} &middot; {duration} &middot; {difficulty}
         </p>
       </div>
     </Link>

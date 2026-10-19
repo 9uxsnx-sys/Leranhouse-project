@@ -7,7 +7,7 @@ import useSWR, { mutate } from 'swr';
 import toast from 'react-hot-toast';
 import { BookOpen, Mic, Puzzle, X, Plus, Loader2 } from 'lucide-react';
 import { getOrgCourses } from '@services/courses/courses';
-import { getOfferResources, addOfferResource, removeOfferResource } from '@services/payments/groups';
+import { getOfferResources, addOfferResource, removeOfferResource } from '@services/payments/offers';
 
 interface OfferResourcesPanelProps {
   offerId: number;

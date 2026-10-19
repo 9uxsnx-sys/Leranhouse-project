@@ -1,15 +1,18 @@
 'use client'
 import React, { use } from 'react'
 import useSWR from 'swr'
-import { Lock, Loader2 } from 'lucide-react'
+import { Lock, Loader2, Search } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
+import { usePlan } from '@components/Hooks/usePlan'
+import PlanRestrictedFeature from '@components/Dashboard/Shared/PlanRestricted/PlanRestrictedFeature'
 import EditCollectionGeneral from '@components/Dashboard/Pages/Collection/EditCollectionGeneral/EditCollectionGeneral'
 import EditCollectionContent from '@components/Dashboard/Pages/Collection/EditCollectionContent/EditCollectionContent'
 import EditCollectionAccess from '@components/Dashboard/Pages/Collection/EditCollectionAccess/EditCollectionAccess'
+import EditCollectionSEO from '@components/Dashboard/Pages/Collection/EditCollectionSEO/EditCollectionSEO'
 import { PageTabs } from '@components/ui/page-tabs'
 import { SectionIcon } from '@components/ui/icons'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
@@ -27,6 +30,7 @@ function CollectionEditorPage(props: { params: Promise<CollectionEditorParams> }
   const session = useLHSession() as any
   const org = useOrg() as any
   const { isAdmin, loading: adminLoading } = useAdminStatus()
+  const currentPlan = usePlan()
   const accessToken = session?.data?.tokens?.access_token
 
   const collectionUuid = `collection_${params.collectionuuid}`
@@ -59,6 +63,12 @@ function CollectionEditorPage(props: { params: Promise<CollectionEditorParams> }
       label: t('collections.dashboard.tabs.access'),
       icon: SectionIcon.access,
       href: `/dash/collections/collection/${params.collectionuuid}/access`,
+    },
+    {
+      key: 'seo',
+      label: t('collections.dashboard.tabs.seo'),
+      icon: SectionIcon.seo,
+      href: `/dash/collections/collection/${params.collectionuuid}/seo`,
     },
   ]
 
@@ -140,6 +150,21 @@ function CollectionEditorPage(props: { params: Promise<CollectionEditorParams> }
                   orgslug={params.orgslug}
                   onUpdated={() => mutate()}
                 />
+              )}
+              {params.subpage === 'seo' && (
+                <PlanRestrictedFeature
+                  currentPlan={currentPlan}
+                  requiredPlan="standard"
+                  icon={Search}
+                  titleKey="common.plans.feature_restricted.seo.title"
+                  descriptionKey="common.plans.feature_restricted.seo.description"
+                >
+                  <EditCollectionSEO
+                    collection={collection}
+                    orgslug={params.orgslug}
+                    onUpdated={() => mutate()}
+                  />
+                </PlanRestrictedFeature>
               )}
             </>
           )}

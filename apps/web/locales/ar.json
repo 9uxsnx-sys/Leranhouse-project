@@ -920,8 +920,15 @@
                                        "tabs":  {
                                                     "episodes":  "الحلقات",
                                                     "general":  "عام",
+                                                    "access":  "الوصول",
                                                     "distribution":  "التوزيع"
                                                 },
+                                       "access":  {
+                                                      "public_title":  "الجميع يمكنهم الوصول",
+                                                      "public_description":  "هذا البودكاست عام — يمكن لأي متعلم مسجّل الاستماع إلى جميع الحلقات. بدّل إلى خاص لقصره على مجموعات المستخدمين، أو إلى مدفوع لطلب الشراء.",
+                                                      "no_linked_description":  "اربط مجموعة مستخدمين لمنح أعضائها الوصول إلى هذا البودكاست.",
+                                                      "granted":  "تم منحه"
+                                                  },
                                        "view_podcast":  "عرض البودكاست",
                                        "general":  {
                                                        "saved":  "تم الحفظ",
@@ -2697,6 +2704,7 @@
                                                           "podcasts":  {
                                                                            "general":  "عام",
                                                                            "content":  "الحلقات",
+                                                                           "access":  "الوصول",
                                                                            "distribution":  "التوزيع"
                                                                        },
                                                           "org":  {
@@ -2720,7 +2728,6 @@
                                                                            "transactions":  "المعاملات",
                                                                            "subscriptions":  "الاشتراكات",
                                                                            "offers":  "العروض",
-                                                                           "groups":  "مجموعات الدفع",
                                                                            "configuration":  "الإعدادات"
                                                                        }
                                                       }
@@ -4740,7 +4747,6 @@
                      "tabs":  {
                                    "overview":  "نظرة عامة",
                                    "offers":  "العروض",
-                                   "groups":  "مجموعات الدفع",
                                    "configuration":  "الإعدادات"
                                },
                      "stripe_dashboard":  "لوحة تحكم Stripe",
@@ -4817,52 +4823,6 @@
                                        "status_trialing":  "تجريبي",
                                        "status_past_due":  "متأخر"
                                    },
-                     "groups":  {
-                                    "title":  "مجموعات الدفع",
-                                    "subtitle":  "اجمع الدورات معًا للاشتراكات أو العروض متعددة الدورات.",
-                                    "new_group":  "مجموعة جديدة",
-                                    "create_title":  "إنشاء مجموعة دفع",
-                                    "create_description":  "اجمع الدورات معًا للاشتراكات أو الحزم",
-                                    "edit_title":  "تعديل مجموعة الدفع",
-                                    "edit_description":  "تحديث اسم المجموعة ووصفها",
-                                    "created":  "تم إنشاء المجموعة",
-                                    "updated":  "تم تحديث المجموعة",
-                                    "deleted":  "تم حذف المجموعة",
-                                    "failed_create":  "فشل إنشاء المجموعة",
-                                    "failed_update":  "فشل تحديث المجموعة",
-                                    "failed_delete":  "فشل حذف المجموعة",
-                                    "error_loading":  "فشل تحميل المجموعات.",
-                                    "empty_title":  "لا توجد مجموعات بعد",
-                                    "empty_description":  "تتيح لك المجموعات ربط عدة دورات بعرض واحد — مثالية للاشتراكات أو الحزم.",
-                                    "create_first":  "أنشئ مجموعتك الأولى",
-                                    "delete_group":  "حذف المجموعة",
-                                    "delete_confirm_message":  "ستتم إزالة جميع الموارد والمزامنات. ستفقد العروض النشطة المرتبطة بهذه المجموعة مجموعتها.",
-                                    "delete_dialog_title":  "حذف \"{{name}}\"؟",
-                                    "edit":  "تعديل",
-                                    "delete":  "حذف",
-                                    "remove":  "إزالة",
-                                    "courses":  "الدورات",
-                                    "access_groups":  "مجموعات الوصول",
-                                    "course_added":  "تمت إضافة الدورة إلى المجموعة",
-                                    "course_removed":  "تمت إزالة الدورة",
-                                    "no_courses_hint":  "لا توجد دورات بعد — أضف واحدة أدناه.",
-                                    "add_course":  "إضافة دورة",
-                                    "select_course_to_add":  "اختر دورة لإضافتها",
-                                    "all_courses_in_group":  "جميع الدورات موجودة بالفعل في هذه المجموعة.",
-                                    "usergroup_synced":  "تمت مزامنة مجموعة المستخدمين — ستُضاف المستخدمون المسجلون تلقائيًا",
-                                    "sync_removed":  "تمت إزالة المزامنة",
-                                    "sync_helper":  "عند تسجيل مستخدم، يُضاف تلقائيًا إلى هذه المجموعات. وعند الإلغاء، تتم إزالته.",
-                                    "remove_sync":  "إزالة المزامنة",
-                                    "group_number":  "مجموعة رقم {{id}}",
-                                    "link_usergroup":  "+ ربط مجموعة مستخدمين…",
-                                    "no_usergroups":  "لا توجد مجموعات مستخدمين متاحة للربط.",
-                                    "group_name":  "اسم المجموعة",
-                                    "group_name_placeholder":  "مثال: حزمة الوصول الكامل، اشتراك مميز",
-                                    "description":  "الوصف",
-                                    "description_placeholder":  "ما الموارد المضمنة في هذه المجموعة؟",
-                                    "name_required":  "الاسم مطلوب",
-                                    "create_group":  "إنشاء مجموعة"
-                                },
                      "offers":  {
                                     "error_loading":  "فشل تحميل العروض",
                                     "archived":  "تمت أرشفة العرض بنجاح",
@@ -4926,16 +4886,9 @@
                                           "field_benefits":  "المزايا",
                                           "placeholder_benefits":  "المزايا مفصولة بفواصل",
                                           "access_title":  "الوصول",
-                                          "access_description":  "أضف دورات فردية مباشرة، أو اربط مجموعة دفع لمنح الوصول إلى حزمة من الموارد. يمكنك استخدام كليهما في الوقت نفسه.",
-                                          "courses_direct":  "الدورات (مباشرة)",
+                                          "access_description":  "أضف الدورات التي يمنح هذا العرض الوصول إليها.",
+                                          "courses_direct":  "الدورات",
                                           "add_course":  "إضافة دورة…",
-                                          "payment_group":  "مجموعة الدفع",
-                                          "payment_group_optional":  "(اختياري — للحزم/الاشتراكات)",
-                                          "link_payment_group":  "الربط بمجموعة دفع…",
-                                          "none":  "لا شيء",
-                                          "payment_group_help_prefix":  "ستكون جميع الموارد في مجموعة الدفع المحددة متاحة للمستخدمين المسجلين. أدر موارد المجموعة من علامة التبويب",
-                                          "payment_groups_tab":  "مجموعات الدفع",
-                                          "payment_group_help_suffix":  ".",
                                           "creating":  "جارٍ الإنشاء...",
                                           "submit":  "إنشاء العرض",
                                           "validation_name_required":  "الاسم مطلوب",
@@ -4962,7 +4915,8 @@
                                        "no_courses":  "لا توجد دورات في هذه المؤسسة.",
                                        "all_courses_linked":  "جميع الدورات مرتبطة بالفعل.",
                                        "type_course":  "دورة",
-                                       "type_podcast":  "بودكاست"
+                                       "type_podcast":  "بودكاست",
+                                       "type_collection":  "مجموعة"
                                    }
                  }
                   },

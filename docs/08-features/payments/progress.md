@@ -19,12 +19,12 @@
 | 7 | Chargily webhook receiver | ✅ Done |
 | 8 | Wire Transactions tab to `GET /payments/{org_id}/orders` | ✅ Done |
 | 9 | Wire Overview tab to real order data | ✅ Done |
-| 9b | Wire Payouts tab (40/60 net split) | ⬜ Not started |
+| 9b | Wire Payouts tab (40/60 net split) | ✅ Done |
 | 10 | Learner "Get access" → checkout → Progress tab | ✅ Done — paid unlocks via the webhook; free enrolls directly |
 | 10b | Collection bundles — checkout, member snapshot, per-course fan-out | ✅ Done |
-| 11 | Podcast Access tab parity | ⬜ Not started |
+| 11 | Podcast Access tab parity | ✅ Done |
 | 12 | Payments Configuration (per-org Chargily keys) | ✅ Done |
-| 13 | Flip `OSS_GATE` back to `true` and ship | ⬜ Not started |
+| 13 | Flip `OSS_GATE` back to `true` and ship | ✅ Done |
 
 ---
 
@@ -158,14 +158,22 @@ Files: [`services/payments/overview.py`](../../../apps/api/src/services/payments
 - `PaymentsTable` (also used on the dashboard home) now fetches live orders instead of `SAMPLE_ROWS`.
 - Tests: [`test_payments_overview_service.py`](../../../apps/api/src/tests/services/test_payments_overview_service.py)
 
+### 9b. Payouts tab
+
+Files: [`services/payments/payouts.py`](../../../apps/api/src/services/payments/payouts.py), [`routers/payments.py`](../../../apps/api/src/routers/payments.py), [`db/payments/payout_costs.py`](../../../apps/api/src/db/payments/payout_costs.py), [`PaymentsPayoutsPage.tsx`](../../../apps/web/components/Dashboard/Pages/Payments/PaymentsPayoutsPage.tsx), [`web/services/payments/payouts.ts`](../../../apps/web/services/payments/payouts.ts)
+
+- `GET /payments/{org_id}/payouts?month=YYYY-MM` — computes a monthly report from `paid` orders whose `paid_at` falls inside the month.
+- `gross_revenue` = order amounts; `gateway_fees` = `fees_on_merchant` (fallback `fees`); `manual_costs` = hosting + marketing + other from `payoutcost`.
+- `net_profit = max(0, gross − total_costs)`; `teacher_pool = round(net × 40%)`, `platform_pool` = the rest.
+- Attribution: course orders → the course; collection orders → split evenly across `price_snapshot["courses"]` with the rounding remainder going to the first teacher. Each course's revenue goes to its active MAINTAINERs, else CREATORs. Revenue with no active author is reported as `unattributed_revenue` and stays with the platform.
+- Per-teacher `share = teacher_revenue / attributed_revenue`, `payout = round(teacher_pool × share)`.
+- `PUT /payments/{org_id}/payouts/costs` with `{ month, hosting, marketing, other }` upserts the month's costs and returns the recalculated report. Negative values or a malformed month → `422`.
+- The tab has a 12-month picker, editable hosting/marketing/other (Save only when dirty), read-only gateway fees, the profit-split card, the unattributed row and the teacher table.
+- Tests: [`test_payments_payouts_service.py`](../../../apps/api/src/tests/services/test_payments_payouts_service.py)
+
 ---
 
 ## What remains — in order
-
-### 9b. Wire Payouts
-
-- Feed the 40/60 net-profit split from paid orders + `fees_on_merchant` + the manually entered operating costs; keep the pro-rata rule (see [Teacher Payout Plan](./teacher-payout-plan.md)).
-- The tab currently reads a non-existent `earnings_ledger`, so it still renders sample data.
 
 ### 10. Learner checkout and Progress tab
 
@@ -174,21 +182,23 @@ Files: [`services/payments/overview.py`](../../../apps/api/src/services/payments
 
 ### 11. Podcast Access tab parity
 
-- Mirror the three modes and the 3-dot menus in the podcast editor.
-- Entitlements already accept `podcast_…` uuids — the work is frontend only.
-- Decide whether the podcast needs the Public (`TrailRun`) equivalent or only Private/Paid.
+- **Done:** the podcast editor has an **Access** tab (shown only with `manage_access`), mirroring the course tab: Public / Private / Paid cycling, publish toggle, paid entitlement roster with grant/revoke, group linking for Private, and the 3-dot row menus.
+- Files: [`EditPodcastAccess.tsx`](../../../apps/web/components/Dashboard/Pages/Podcast/EditPodcastAccess/EditPodcastAccess.tsx), [`usePodcastRights.tsx`](../../../apps/web/components/Hooks/usePodcastRights.tsx).
+- Podcasts use the same `access_type` / `price_amount` fields and the generic `podcast_…` entitlement + UserGroup endpoints — no backend changes were needed.
 
 ### 12. Collections as a sellable bundle
 
-- The **Payment Groups** tab is superseded for bundles by the existing Collections resource. Once Collections ships, remove the Groups tab rather than building its missing backend.
-- Collections gain course-grade fields (media, access modes, price), a dashboard editor, and a purchase flow that fans out to per-course entitlements + `TrailRun`s.
+- **Done (Phase 7 complete):** the **Payment Groups** tab has been removed — Collections superseded it as the bundle resource. `/dash/payments/groups` redirects to the overview.
+- Collections have course-grade fields (media, access modes, price, SEO), a four-tab dashboard editor (General / Content / Access / SEO), and a purchase flow that fans out to per-resource entitlements + `TrailRun`s for course members.
+- Members are polymorphic (`course` / `podcast`) through `collectioncourse.resource_type` + `resource_uuid`; `POST/DELETE /collections/{uuid}/resources` manages both, and collections now appear as rows in Payments → Offers.
 - Full plan: [Collections — Implementation Plan](../collections/implementation-plan.md).
 
 ### 13. Ship gate
 
-- Set `OSS_GATE = true` in [`app/orgs/[orgslug]/dash/payments/[subpage]/page.tsx`](../../../apps/web/app/orgs/[orgslug]/dash/payments/[subpage]/page.tsx).
-- Confirm the plan gate (`standard`) is the intended requirement for cloud users.
-- Run the full backend suite and the frontend typecheck (see below).
+- `OSS_GATE = true` is restored in [`app/orgs/[orgslug]/dash/payments/[subpage]/page.tsx`](../../../apps/web/app/orgs/[orgslug]/dash/payments/[subpage]/page.tsx).
+- Gate 1: OSS deployments get the enterprise restriction screen; verified live (`LH_mode=oss`).
+- Gate 2: cloud orgs need the **standard** plan (unchanged) and the org's `payments` feature flag.
+- Verified: backend suite `2440 passed, 2 skipped, 8 failed` (the 8 are the pre-existing Windows path-separator failures in `content/transfer`); frontend typecheck holds at the 25-line pre-existing baseline.
 
 ---
 

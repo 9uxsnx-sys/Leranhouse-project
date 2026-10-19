@@ -64,7 +64,7 @@ Every route in the project belongs to one of two layouts:
 | `/orgs/[orgslug]/dash/playgrounds` | Playgrounds Admin | Keep original |
 | `/orgs/[orgslug]/dash/podcasts` | Podcasts Admin | Keep original |
 | `/orgs/[orgslug]/dash/collections` | Collections Admin | Keep original |
-| `/orgs/[orgslug]/dash/collections/collection/[uuid]/[subpage]` | Collection Editor (General / Content / Access) | Keep original |
+| `/orgs/[orgslug]/dash/collections/collection/[uuid]/[subpage]` | Collection Editor (General / Content / Access / SEO) | Keep original |
 | `/orgs/[orgslug]/dash/payments` | Payments Admin | Keep original |
 | `/orgs/[orgslug]/dash/org/settings` | Org Settings | Keep original |
 | `/orgs/[orgslug]/dash/users/settings` | User Settings | Keep original |

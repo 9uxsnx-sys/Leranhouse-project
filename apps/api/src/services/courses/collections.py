@@ -20,6 +20,8 @@ from src.db.courses.chapters import Chapter
 from src.db.courses.courses import Course
 from src.db.organizations import Organization
 from src.db.payments.enums import AccessTypeEnum
+from src.db.podcasts.episodes import PodcastEpisode
+from src.db.podcasts.podcasts import Podcast
 from src.db.roles import Role
 from src.db.usergroup_resources import UserGroupResource
 from src.db.usergroup_user import UserGroupUser
@@ -122,23 +124,47 @@ def _validate_publishable(db_session: Session, collection: Collection) -> None:
         if member_count == 0:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="A paid collection requires at least one course",
+                detail="A paid collection requires at least one item",
             )
 
     if collection.published:
-        draft_names = db_session.exec(
-            select(Course.name)
-            .join(CollectionCourse, CollectionCourse.course_id == Course.id)
-            .where(
-                CollectionCourse.collection_id == collection.id,
-                Course.published == False,  # noqa: E712
+        members = db_session.exec(
+            select(CollectionCourse).where(
+                CollectionCourse.collection_id == collection.id
             )
         ).all()
+        course_ids = [
+            member.course_id
+            for member in members
+            if member.resource_type == "course" and member.course_id is not None
+        ]
+        podcast_uuids = [
+            member.resource_uuid
+            for member in members
+            if member.resource_type == "podcast" and member.resource_uuid
+        ]
+
+        draft_names: list[str] = []
+        if course_ids:
+            draft_names += db_session.exec(
+                select(Course.name).where(
+                    Course.id.in_(course_ids),  # type: ignore[attr-defined]
+                    Course.published == False,  # noqa: E712
+                )
+            ).all()
+        if podcast_uuids:
+            draft_names += db_session.exec(
+                select(Podcast.name).where(
+                    Podcast.podcast_uuid.in_(podcast_uuids),  # type: ignore[attr-defined]
+                    Podcast.published == False,  # noqa: E712
+                )
+            ).all()
+
         if draft_names:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=(
-                    "All courses in a published collection must be published: "
+                    "All items in a published collection must be published: "
                     + ", ".join(sorted(draft_names))
                 ),
             )
@@ -267,6 +293,8 @@ async def create_collection(
             CollectionCourse(
                 collection_id=int(collection.id),  # type: ignore[arg-type]
                 course_id=int(course.id),  # type: ignore[arg-type]
+                resource_type="course",
+                resource_uuid=course.course_uuid,
                 org_id=org_id,
                 creation_date=str(datetime.now()),
                 update_date=str(datetime.now()),
@@ -355,6 +383,8 @@ async def update_collection(
                 CollectionCourse(
                     collection_id=int(collection.id),  # type: ignore[arg-type]
                     course_id=int(course.id),  # type: ignore[arg-type]
+                    resource_type="course",
+                    resource_uuid=course.course_uuid,
                     org_id=int(collection.org_id),
                     creation_date=str(datetime.now()),
                     update_date=str(datetime.now()),
@@ -425,35 +455,42 @@ async def get_collection_courses(
         db_session, int(collection.org_id), acting_user_id
     )
 
-    statement = (
-        select(Course)
-        .join(CollectionCourse, CollectionCourse.course_id == Course.id)
-        .where(
+    members = db_session.exec(
+        select(CollectionCourse).where(
             CollectionCourse.collection_id == collection.id,
             CollectionCourse.org_id == collection.org_id,
         )
-    )
-    if not include_unpublished:
-        statement = statement.where(
-            Course.published == True,  # noqa: E712
-            Course.access_type.in_(
-                [AccessTypeEnum.PUBLIC, AccessTypeEnum.PAID]
-            ),
-        )
-    if search:
-        statement = statement.where(Course.name.ilike(f"%{search}%"))
-
-    statement = (
-        statement.order_by(Course.creation_date.desc())  # type: ignore[attr-defined]
-        .offset((page - 1) * limit)
-        .limit(limit)
-    )
-    courses = list(db_session.exec(statement).all())
-
-    if not courses:
+    ).all()
+    if not members:
         return []
 
-    course_ids = [course.id for course in courses]
+    course_ids = [
+        member.course_id
+        for member in members
+        if member.resource_type == "course" and member.course_id is not None
+    ]
+    podcast_uuids = [
+        member.resource_uuid
+        for member in members
+        if member.resource_type == "podcast" and member.resource_uuid
+    ]
+
+    courses_by_id: dict[int, Course] = {}
+    if course_ids:
+        for course in db_session.exec(
+            select(Course).where(Course.id.in_(course_ids))  # type: ignore[attr-defined]
+        ).all():
+            courses_by_id[int(course.id)] = course  # type: ignore[arg-type]
+
+    podcasts_by_uuid: dict[str, Podcast] = {}
+    if podcast_uuids:
+        for podcast in db_session.exec(
+            select(Podcast).where(
+                Podcast.podcast_uuid.in_(podcast_uuids)  # type: ignore[attr-defined]
+            )
+        ).all():
+            podcasts_by_uuid[podcast.podcast_uuid] = podcast
+
     lesson_counts = dict(
         db_session.exec(
             select(Chapter.course_id, func.count(Activity.id))
@@ -462,41 +499,126 @@ async def get_collection_courses(
             .where(Chapter.course_id.in_(course_ids))  # type: ignore[attr-defined]
             .group_by(Chapter.course_id)
         ).all()
-    )
+    ) if course_ids else {}
 
-    return [
-        CollectionCourseRead(
-            id=int(course.id),  # type: ignore[arg-type]
-            course_uuid=course.course_uuid,
-            name=course.name,
-            description=course.description,
-            thumbnail_image=course.thumbnail_image,
-            access_type=course.access_type,
-            published=course.published,
-            price_amount=course.price_amount,
-            price_currency=course.price_currency,
-            lessons=int(lesson_counts.get(course.id, 0)),
-            creation_date=course.creation_date,
+    podcast_ids = [int(podcast.id) for podcast in podcasts_by_uuid.values()]  # type: ignore[arg-type]
+    episode_counts = dict(
+        db_session.exec(
+            select(PodcastEpisode.podcast_id, func.count(PodcastEpisode.id))
+            .where(PodcastEpisode.podcast_id.in_(podcast_ids))  # type: ignore[attr-defined]
+            .group_by(PodcastEpisode.podcast_id)
+        ).all()
+    ) if podcast_ids else {}
+
+    query = search.strip().lower()
+    result: list[CollectionCourseRead] = []
+
+    for member in members:
+        if member.resource_type == "podcast":
+            podcast = podcasts_by_uuid.get(member.resource_uuid)
+            if not podcast:
+                continue
+            if not include_unpublished and (
+                not podcast.published
+                or podcast.access_type
+                not in (AccessTypeEnum.PUBLIC, AccessTypeEnum.PAID)
+            ):
+                continue
+            if query and query not in (podcast.name or "").lower():
+                continue
+            result.append(
+                CollectionCourseRead(
+                    id=int(podcast.id),  # type: ignore[arg-type]
+                    resource_type="podcast",
+                    resource_uuid=podcast.podcast_uuid,
+                    course_uuid=None,
+                    name=podcast.name,
+                    description=podcast.description,
+                    thumbnail_image=podcast.thumbnail_image,
+                    access_type=podcast.access_type,
+                    published=podcast.published,
+                    price_amount=podcast.price_amount,
+                    price_currency=podcast.price_currency,
+                    lessons=int(episode_counts.get(podcast.id, 0)),
+                    creation_date=podcast.creation_date,
+                )
+            )
+            continue
+
+        course = courses_by_id.get(int(member.course_id)) if member.course_id else None
+        if not course:
+            continue
+        if not include_unpublished and (
+            not course.published
+            or course.access_type not in (AccessTypeEnum.PUBLIC, AccessTypeEnum.PAID)
+        ):
+            continue
+        if query and query not in (course.name or "").lower():
+            continue
+        result.append(
+            CollectionCourseRead(
+                id=int(course.id),  # type: ignore[arg-type]
+                resource_type="course",
+                resource_uuid=course.course_uuid,
+                course_uuid=course.course_uuid,
+                name=course.name,
+                description=course.description,
+                thumbnail_image=course.thumbnail_image,
+                access_type=course.access_type,
+                published=course.published,
+                price_amount=course.price_amount,
+                price_currency=course.price_currency,
+                lessons=int(lesson_counts.get(course.id, 0)),
+                creation_date=course.creation_date,
+            )
         )
-        for course in courses
-    ]
+
+    result.sort(key=lambda item: item.creation_date or "", reverse=True)
+    start = (page - 1) * limit
+    return result[start : start + limit]
 
 
-async def add_course_to_collection(
+def _resource_type_from_uuid(resource_uuid: str) -> str:
+    return "podcast" if resource_uuid.startswith("podcast_") else "course"
+
+
+async def _resolve_member_resource(
     request: Request,
-    collection_uuid: str,
-    course_uuid: str,
-    current_user: PublicUser,
     db_session: Session,
-) -> CollectionRead:
-    collection = _get_collection_or_404(db_session, collection_uuid)
+    current_user: PublicUser,
+    collection: Collection,
+    resource_uuid: str,
+) -> tuple[str, int]:
+    """Validate that a course/podcast can join the collection.
 
-    await check_resource_access(
-        request, db_session, current_user, collection.collection_uuid, AccessAction.UPDATE
-    )
+    Returns ``(resource_type, database_id)``.
+    """
+    resource_type = _resource_type_from_uuid(resource_uuid)
+
+    if resource_type == "podcast":
+        podcast = db_session.exec(
+            select(Podcast).where(Podcast.podcast_uuid == resource_uuid)
+        ).first()
+        if not podcast or int(podcast.org_id) != int(collection.org_id):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Podcast not found in this organization",
+            )
+
+        await check_resource_access(
+            request, db_session, current_user, podcast.podcast_uuid, AccessAction.READ
+        )
+
+        if podcast.access_type == AccessTypeEnum.USERS_ONLY:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Private podcasts cannot be added to a collection",
+            )
+
+        return "podcast", int(podcast.id)  # type: ignore[arg-type]
 
     course = db_session.exec(
-        select(Course).where(Course.course_uuid == course_uuid)
+        select(Course).where(Course.course_uuid == resource_uuid)
     ).first()
     if not course or int(course.org_id) != int(collection.org_id):
         raise HTTPException(
@@ -514,22 +636,44 @@ async def add_course_to_collection(
             detail="Private courses cannot be added to a collection",
         )
 
+    return "course", int(course.id)  # type: ignore[arg-type]
+
+
+async def add_resource_to_collection(
+    request: Request,
+    collection_uuid: str,
+    resource_uuid: str,
+    current_user: PublicUser,
+    db_session: Session,
+) -> CollectionRead:
+    collection = _get_collection_or_404(db_session, collection_uuid)
+
+    await check_resource_access(
+        request, db_session, current_user, collection.collection_uuid, AccessAction.UPDATE
+    )
+
+    resource_type, resource_id = await _resolve_member_resource(
+        request, db_session, current_user, collection, resource_uuid
+    )
+
     already_member = db_session.exec(
         select(CollectionCourse).where(
             CollectionCourse.collection_id == collection.id,
-            CollectionCourse.course_id == course.id,
+            CollectionCourse.resource_uuid == resource_uuid,
         )
     ).first()
     if already_member:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Course is already part of this collection",
+            detail="This item is already part of the collection",
         )
 
     db_session.add(
         CollectionCourse(
             collection_id=int(collection.id),  # type: ignore[arg-type]
-            course_id=int(course.id),  # type: ignore[arg-type]
+            course_id=resource_id if resource_type == "course" else None,
+            resource_type=resource_type,
+            resource_uuid=resource_uuid,
             org_id=int(collection.org_id),
             creation_date=str(datetime.now()),
             update_date=str(datetime.now()),
@@ -538,7 +682,7 @@ async def add_course_to_collection(
     try:
         db_session.flush()
         # Publish rules apply immediately: a published bundle must not accept a
-        # draft course just because the course was added after publishing.
+        # draft item just because it was added after publishing.
         _validate_publishable(db_session, collection)
     except HTTPException:
         db_session.rollback()
@@ -552,10 +696,10 @@ async def add_course_to_collection(
     return _build_read(db_session, collection, include_unpublished=True)
 
 
-async def remove_course_from_collection(
+async def remove_resource_from_collection(
     request: Request,
     collection_uuid: str,
-    course_uuid: str,
+    resource_uuid: str,
     current_user: PublicUser,
     db_session: Session,
 ) -> CollectionRead:
@@ -565,24 +709,16 @@ async def remove_course_from_collection(
         request, db_session, current_user, collection.collection_uuid, AccessAction.UPDATE
     )
 
-    course = db_session.exec(
-        select(Course).where(Course.course_uuid == course_uuid)
-    ).first()
-    if not course:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Course not found"
-        )
-
     link = db_session.exec(
         select(CollectionCourse).where(
             CollectionCourse.collection_id == collection.id,
-            CollectionCourse.course_id == course.id,
+            CollectionCourse.resource_uuid == resource_uuid,
         )
     ).first()
     if not link:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Course is not part of this collection",
+            detail="This item is not part of this collection",
         )
 
     if (
@@ -591,7 +727,7 @@ async def remove_course_from_collection(
     ):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="A paid collection must keep at least one course",
+            detail="A paid collection must keep at least one item",
         )
 
     db_session.delete(link)
@@ -601,6 +737,30 @@ async def remove_course_from_collection(
     db_session.refresh(collection)
 
     return _build_read(db_session, collection, include_unpublished=True)
+
+
+async def add_course_to_collection(
+    request: Request,
+    collection_uuid: str,
+    course_uuid: str,
+    current_user: PublicUser,
+    db_session: Session,
+) -> CollectionRead:
+    return await add_resource_to_collection(
+        request, collection_uuid, course_uuid, current_user, db_session
+    )
+
+
+async def remove_course_from_collection(
+    request: Request,
+    collection_uuid: str,
+    course_uuid: str,
+    current_user: PublicUser,
+    db_session: Session,
+) -> CollectionRead:
+    return await remove_resource_from_collection(
+        request, collection_uuid, course_uuid, current_user, db_session
+    )
 
 
 ####################################################

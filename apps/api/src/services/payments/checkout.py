@@ -51,7 +51,7 @@ def _load_resources(
     """Return (resource_type, name, access_type, price_amount, published, members).
 
     ``members`` is only populated for collections and contains the member
-    course UUIDs that will be snapshotted into the order.
+    course and podcast UUIDs that will be snapshotted into the order.
     """
     if resource_uuid.startswith("collection_"):
         collection = db_session.exec(
@@ -63,15 +63,12 @@ def _load_resources(
         if not collection:
             raise HTTPException(status_code=404, detail="Collection not found")
 
-        members = [
-            course.course_uuid
-            for course in db_session.exec(
-                select(Course)
-                .join(CollectionCourse, CollectionCourse.course_id == Course.id)
-                .where(CollectionCourse.collection_id == collection.id)
-                .order_by(Course.creation_date)  # type: ignore[attr-defined]
-            ).all()
-        ]
+        member_rows = db_session.exec(
+            select(CollectionCourse)
+            .where(CollectionCourse.collection_id == collection.id)
+            .order_by(CollectionCourse.creation_date)
+        ).all()
+        members = [row.resource_uuid for row in member_rows if row.resource_uuid]
         return (
             "collection",
             collection.name,
@@ -156,7 +153,7 @@ async def create_resource_checkout(
     if price_amount is None or price_amount <= 0:
         raise HTTPException(status_code=400, detail="Resource has no price configured")
     if resource_type == "collection" and not members:
-        raise HTTPException(status_code=400, detail="Collection has no courses")
+        raise HTTPException(status_code=400, detail="Collection has no items")
 
     existing = db_session.exec(
         select(ResourceEntitlement).where(
@@ -196,8 +193,11 @@ async def create_resource_checkout(
     }
     if members is not None:
         # Snapshot membership so later bundle edits never grant content the
-        # learner did not pay for.
-        price_snapshot["courses"] = members
+        # learner did not pay for. `courses` stays for older fan-out code.
+        price_snapshot["courses"] = [
+            member for member in members if not member.startswith("podcast_")
+        ]
+        price_snapshot["resources"] = members
 
     order = PaymentOrder(
         order_uuid=f"order_{uuid4()}",

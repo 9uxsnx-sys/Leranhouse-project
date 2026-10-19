@@ -99,17 +99,49 @@ def _ensure_course_enrollment(
 
 
 def _fan_out_collection(order: PaymentOrder, db_session: Session, now: datetime) -> None:
-    """Grant every course in the purchase snapshot, like buying each one.
+    """Grant every item in the purchase snapshot, like buying each one.
 
-    Membership is read from ``price_snapshot["courses"]`` so later bundle edits
-    can never retroactively grant or remove content.
+    Membership is read from ``price_snapshot["resources"]`` (falling back to the
+    legacy ``courses`` key) so later bundle edits can never retroactively grant
+    or remove content.
     """
     snapshot = order.price_snapshot or {}
-    member_uuids = snapshot.get("courses") or []
+    member_uuids = snapshot.get("resources") or snapshot.get("courses") or []
 
-    for course_uuid in member_uuids:
+    for member_uuid in member_uuids:
+        if member_uuid.startswith("podcast_"):
+            podcast = db_session.exec(
+                select(Podcast).where(Podcast.podcast_uuid == member_uuid)
+            ).first()
+            if not podcast:
+                continue
+
+            existing = db_session.exec(
+                select(ResourceEntitlement).where(
+                    ResourceEntitlement.org_id == order.org_id,
+                    ResourceEntitlement.user_id == order.user_id,
+                    ResourceEntitlement.resource_uuid == member_uuid,
+                    ResourceEntitlement.status == EntitlementStatusEnum.ACTIVE,
+                )
+            ).first()
+            if not existing:
+                db_session.add(
+                    ResourceEntitlement(
+                        org_id=order.org_id,
+                        user_id=order.user_id,
+                        resource_uuid=member_uuid,
+                        resource_type="podcast",
+                        source=EntitlementSourceEnum.PURCHASE,
+                        order_id=order.id,
+                        status=EntitlementStatusEnum.ACTIVE,
+                        valid_from=now,
+                        granted_at=now,
+                    )
+                )
+            continue
+
         course = db_session.exec(
-            select(Course).where(Course.course_uuid == course_uuid)
+            select(Course).where(Course.course_uuid == member_uuid)
         ).first()
         if not course:
             continue
@@ -118,7 +150,7 @@ def _fan_out_collection(order: PaymentOrder, db_session: Session, now: datetime)
             select(ResourceEntitlement).where(
                 ResourceEntitlement.org_id == order.org_id,
                 ResourceEntitlement.user_id == order.user_id,
-                ResourceEntitlement.resource_uuid == course_uuid,
+                ResourceEntitlement.resource_uuid == member_uuid,
                 ResourceEntitlement.status == EntitlementStatusEnum.ACTIVE,
             )
         ).first()
@@ -127,7 +159,7 @@ def _fan_out_collection(order: PaymentOrder, db_session: Session, now: datetime)
                 ResourceEntitlement(
                     org_id=order.org_id,
                     user_id=order.user_id,
-                    resource_uuid=course_uuid,
+                    resource_uuid=member_uuid,
                     resource_type="course",
                     source=EntitlementSourceEnum.PURCHASE,
                     order_id=order.id,

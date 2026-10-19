@@ -17,6 +17,7 @@ from src.services.payments.entitlements import (
 )
 from src.services.payments.orders import list_org_orders
 from src.services.payments.overview import get_payments_overview
+from src.services.payments.payouts import get_payout_report, update_payout_costs
 
 router = APIRouter()
 
@@ -35,6 +36,13 @@ class CheckoutCreate(BaseModel):
     resource_type: Optional[str] = None
     payment_method: Optional[str] = None
     locale: Optional[str] = None
+
+
+class PayoutCostsUpdate(BaseModel):
+    month: str
+    hosting: int = 0
+    marketing: int = 0
+    other: int = 0
 
 
 def _parse_user_ids(user_ids: str) -> list[int]:
@@ -179,6 +187,56 @@ async def api_payments_overview(
         org_id,
         db_session,
         range_token=range,
+    )
+
+
+@router.get(
+    "/{org_id}/payouts",
+    summary="Monthly payout report",
+    description=(
+        "Returns gross revenue from paid orders, gateway fees, manually entered "
+        "costs, the 40/60 net-profit split and the pro-rata teacher payouts for "
+        "the selected month (`YYYY-MM`)."
+    ),
+)
+async def api_payout_report(
+    request: Request,
+    org_id: int,
+    month: str = "",
+    current_user: PublicUser = Depends(get_current_user),
+    db_session: Session = Depends(get_db_session),
+):
+    return await get_payout_report(
+        request,
+        current_user,
+        org_id,
+        db_session,
+        month=month or None,
+    )
+
+
+@router.put(
+    "/{org_id}/payouts/costs",
+    summary="Update monthly operating costs",
+    description=(
+        "Upserts the hosting, marketing and other operating costs for a month "
+        "and returns the recalculated payout report."
+    ),
+)
+async def api_update_payout_costs(
+    request: Request,
+    org_id: int,
+    payload: PayoutCostsUpdate,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session: Session = Depends(get_db_session),
+):
+    return await update_payout_costs(
+        request,
+        current_user,
+        org_id,
+        payload.month,
+        payload.model_dump(exclude={"month"}),
+        db_session,
     )
 
 

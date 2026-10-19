@@ -4,7 +4,9 @@ import { PodcastProvider, usePodcast } from '@components/Contexts/PodcastContext
 import { motion } from 'motion/react'
 import EditPodcastGeneral from '@components/Dashboard/Pages/Podcast/EditPodcastGeneral/EditPodcastGeneral'
 import EditPodcastEpisodes from '@components/Dashboard/Pages/Podcast/EditPodcastEpisodes/EditPodcastEpisodes'
+import EditPodcastAccess from '@components/Dashboard/Pages/Podcast/EditPodcastAccess/EditPodcastAccess'
 import PodcastDistribution from '@components/Dashboard/Pages/Podcast/PodcastDistribution/PodcastDistribution'
+import { usePodcastRights } from '@components/Hooks/usePodcastRights'
 import { getUriWithOrg } from '@services/config/config'
 import { useTranslation } from 'react-i18next'
 import { PageTabs } from '@components/ui/page-tabs'
@@ -34,6 +36,8 @@ function PodcastOverviewPage(props: { params: Promise<PodcastOverviewParams> }) 
   }
 
   const podcastuuid = getEntirePodcastUUID(params.podcastuuid)
+  const { hasPermission } = usePodcastRights(podcastuuid)
+  const canManageAccess = hasPermission('manage_access')
 
   const tabs = [
     {
@@ -48,6 +52,16 @@ function PodcastOverviewPage(props: { params: Promise<PodcastOverviewParams> }) 
       icon: SectionIcon.episodes,
       href: `/dash/podcasts/podcast/${params.podcastuuid}/content`,
     },
+    ...(canManageAccess
+      ? [
+          {
+            key: 'access',
+            label: t('podcasts.dashboard.tabs.access'),
+            icon: SectionIcon.access,
+            href: `/dash/podcasts/podcast/${params.podcastuuid}/access`,
+          },
+        ]
+      : []),
     {
       key: 'distribution',
       label: t('podcasts.dashboard.tabs.distribution'),
@@ -94,6 +108,9 @@ function PodcastOverviewPage(props: { params: Promise<PodcastOverviewParams> }) 
               )}
               {params.subpage === 'content' && (
                 <EditPodcastEpisodes orgslug={params.orgslug} podcastuuid={podcastuuid} />
+              )}
+              {params.subpage === 'access' && canManageAccess && (
+                <EditPodcastAccess orgslug={params.orgslug} />
               )}
               {params.subpage === 'distribution' && (
                 <PodcastDistribution orgslug={params.orgslug} podcastuuid={podcastuuid} />

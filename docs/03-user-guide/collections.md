@@ -4,7 +4,7 @@
 
 ---
 
-Collections group multiple courses together into a bundle that can be free, private, or sold as a single purchase. This is useful for:
+Collections group multiple courses and podcasts together into a bundle that can be free, private, or sold as a single purchase. This is useful for:
 
 - Learning paths (e.g., "Web Development Fundamentals")
 - Course series (e.g., "Python 101, 102, 103")
@@ -19,9 +19,9 @@ The **Collections** page lists every bundle the learner can see, with search and
 Selecting a card opens the collection page:
 
 - Banner, title, description, and tags
-- `N courses · M lessons` plus an ownership badge when the learner owns the bundle
+- `N items · M lessons · K episodes` plus an ownership badge when the learner owns the bundle
 - **What you'll learn** and **About this collection**
-- **What is included**: every member course as a standard course card
+- **What is included**: every member course and podcast as a standard card (podcasts show their episode count)
 - Sidebar with the bundle price and a **Get access** button
 
 ## Buying a Bundle
@@ -29,9 +29,10 @@ Selecting a card opens the collection page:
 For a paid bundle, **Get access** starts a normal Chargily checkout for the collection. After payment is confirmed:
 
 - Every course in the bundle is added to the learner's **Progress** page, exactly as if each course had been bought individually.
-- The bundle records a single order; content is owned per course.
+- Every podcast in the bundle is unlocked in place; podcasts do not appear on the Progress page.
+- The bundle records a single order; content is owned per resource.
 - Courses that were already owned are not duplicated.
-- Courses added to the bundle later are **not** granted retroactively; courses removed later remain owned.
+- Courses and podcasts added to the bundle later are **not** granted retroactively; members removed later remain owned.
 
 There are no refunds on the platform; access is revoked manually from the dashboard when needed.
 
@@ -39,7 +40,7 @@ There are no refunds on the platform; access is revoked manually from the dashbo
 
 Open **Dashboard → Collections**. The listing supports search, creation, editing and deletion.
 
-Selecting a collection opens an editor with three tabs.
+Selecting a collection opens an editor with four tabs.
 
 ### General
 
@@ -47,13 +48,13 @@ Name, description, about, "what you'll learn" items, cover image, banner, and ta
 
 ### Content
 
-A table of the courses in the bundle with access, price, lesson count and date added. Use **Add course** to open the picker and the row menu to remove a course.
+A table of the items in the bundle with access, price, lesson or episode count and date added. Use **Add item** to open the picker (courses and podcasts) and the row menu to remove an item.
 
 Rules enforced here:
 
-- Private (`users_only`) courses can never be added to a bundle.
-- A **published** bundle only accepts published courses.
-- A paid bundle must keep at least one course.
+- Private (`users_only`) courses and podcasts can never be added to a bundle.
+- A **published** bundle only accepts published items.
+- A paid bundle must keep at least one item.
 
 ### Access
 
@@ -68,5 +69,9 @@ Choose the same three modes as a course:
 For **Paid**, set a positive DZD price and grant or revoke access per user in the roster below the price card. For **Private**, link and unlink UserGroups. The publish toggle in the toolbar hides the bundle from learners while keeping it editable.
 
 Unpublishing a course that belongs to a published bundle is blocked, and a member course cannot be switched to private, so a live bundle always matches what it advertises.
+
+### SEO
+
+The same fields as a course: meta title, description and keywords, Open Graph, Twitter Card, robots directives, and structured data. Validation mirrors the course SEO tab, and the action row only enables **Save** when something changed.
 
 Deleting a bundle removes its uploaded media. Learners who already bought it keep access to the courses they were granted.

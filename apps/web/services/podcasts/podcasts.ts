@@ -33,6 +33,9 @@ export interface Podcast {
   banner_image: string
   public: boolean
   published: boolean
+  access_type?: 'public' | 'users_only' | 'paid'
+  price_amount?: number | null
+  price_currency?: string
   creation_date: string
   update_date: string
   authors: PodcastAuthor[]

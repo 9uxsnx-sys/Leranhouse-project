@@ -1,11 +1,11 @@
 'use client'
-import React, { use } from 'react';
+import React, { use, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react'
 import { isOSSMode } from '@services/config/config'
 import { getUriWithOrg } from '@services/config/config'
-import { BadgeDollarSign, Gem, Layers, LineChart, ScrollText, Settings, Users } from 'lucide-react'
+import { BadgeDollarSign, Gem, LineChart, ScrollText, Settings, Users } from 'lucide-react'
 import PaymentsConfigurationPage from '@components/Dashboard/Pages/Payments/PaymentsConfigurationPage'
-import PaymentsGroupsPage from '@components/Dashboard/Pages/Payments/PaymentsGroupsPage'
 import PaymentsOffersPage from '@components/Dashboard/Pages/Payments/PaymentsOffersPage'
 import PaymentsOverviewPage from '@components/Dashboard/Pages/Payments/PaymentsOverviewPage'
 import PaymentsPayoutsPage from '@components/Dashboard/Pages/Payments/PaymentsPayoutsPage'
@@ -22,15 +22,15 @@ export type PaymentsParams = {
 }
 
 /**
- * TODO(design-preview): payments is EE-only, but this build ships without the
- * payments backend. The OSS gate is kept for production and bypassed locally so
- * the new tab UI can be reviewed. Restore it when the Chargily backend lands.
+ * Payments is EE-only. OSS deployments see the enterprise restriction instead
+ * of the dashboard; cloud orgs need the `standard` plan (Gate 2 below).
  */
-const OSS_GATE = false
+const OSS_GATE = true
 
 function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
   const { t } = useTranslation()
   const params = use(props.params);
+  const router = useRouter()
   const subpage = params.subpage || 'overview'
   const currentPlan = usePlan()
 
@@ -38,10 +38,16 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
     { id: 'overview', label: t('dashboard.payments.tabs.overview'), icon: LineChart },
     { id: 'transactions', label: t('dashboard.payments.tabs.transactions'), icon: ScrollText },
     { id: 'offers', label: t('dashboard.payments.tabs.offers'), icon: Gem },
-    { id: 'groups', label: t('dashboard.payments.tabs.groups'), icon: Layers },
     { id: 'payouts', label: t('dashboard.payments.tabs.payouts'), icon: Users },
     { id: 'configuration', label: t('dashboard.payments.tabs.configuration'), icon: Settings },
   ]
+
+  // Retired tabs (Payment Groups) and unknown paths land on the overview.
+  useEffect(() => {
+    if (!tabs.some((tab) => tab.id === subpage)) {
+      router.replace(getUriWithOrg(params.orgslug, '/dash/payments/overview'))
+    }
+  }, [subpage, params.orgslug, router])
 
   // Gate 1: OSS deployment → payments is EE-only, blocked entirely
   if (OSS_GATE && isOSSMode()) {
@@ -96,7 +102,6 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
             {subpage === 'overview' && <PaymentsOverviewPage />}
             {subpage === 'transactions' && <PaymentsTransactionsPage />}
             {subpage === 'offers' && <PaymentsOffersPage />}
-            {subpage === 'groups' && <PaymentsGroupsPage />}
             {subpage === 'payouts' && <PaymentsPayoutsPage />}
             {subpage === 'configuration' && <PaymentsConfigurationPage />}
           </motion.div>

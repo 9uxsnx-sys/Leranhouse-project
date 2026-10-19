@@ -98,3 +98,27 @@ export async function getUserEnrollments(orgId: number, access_token: string) {
   if (!metadata.success) throw new Error(metadata.HTTPmessage || 'Failed to fetch enrollments')
   return metadata;
 }
+
+export async function getOfferResources(orgId: number, offerId: number, access_token: string) {
+  const result = await secureFetch(
+    `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/offers/${encodeURIComponent(String(offerId))}/resources`,
+    RequestBodyWithAuthHeader('GET', null, null, access_token)
+  );
+  return getResponseMetadata(result);
+}
+
+export async function addOfferResource(orgId: number, offerId: number, resourceUuid: string, access_token: string) {
+  const result = await secureFetch(
+    `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/offers/${encodeURIComponent(String(offerId))}/resources?resource_uuid=${encodeURIComponent(resourceUuid)}`,
+    RequestBodyWithAuthHeader('POST', null, null, access_token)
+  );
+  return getResponseMetadata(result);
+}
+
+export async function removeOfferResource(orgId: number, offerId: number, resourceUuid: string, access_token: string) {
+  const result = await secureFetch(
+    `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/offers/${encodeURIComponent(String(offerId))}/resources?resource_uuid=${encodeURIComponent(resourceUuid)}`,
+    RequestBodyWithAuthHeader('DELETE', null, null, access_token)
+  );
+  return getResponseMetadata(result);
+}

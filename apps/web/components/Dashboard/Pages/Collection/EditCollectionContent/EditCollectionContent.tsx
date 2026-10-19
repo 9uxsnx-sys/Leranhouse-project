@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
+  Mic,
   MoreHorizontal,
   Plus,
   Search,
@@ -29,12 +30,15 @@ import { useDebounce } from '@/hooks/useDebounce'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import {
-  addCourseToCollection,
+  addResourceToCollection,
   getCollectionCourses,
-  removeCourseFromCollection,
+  removeResourceFromCollection,
 } from '@services/courses/collections'
 import { getAPIUrl } from '@services/config/config'
-import { getCourseThumbnailMediaDirectory } from '@services/media/media'
+import {
+  getCourseThumbnailMediaDirectory,
+  getPodcastThumbnailMediaDirectory,
+} from '@services/media/media'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { searchMatchesAny } from '@/lib/search/normalize'
 
@@ -109,36 +113,69 @@ function EditCollectionContent({ collection, orgslug, onUpdated }: EditCollectio
     { revalidateOnFocus: false }
   )
 
-  const memberUuids = useMemo(
-    () => new Set((collection?.courses || []).map((course: any) => course.course_uuid)),
-    [collection?.courses]
+  const orgPodcastsKey =
+    isPickerOpen && org?.slug
+      ? `${getAPIUrl()}podcasts/org_slug/${orgslug}/page/1/limit/100?include_unpublished=true`
+      : null
+
+  const { data: orgPodcasts } = useSWR(
+    orgPodcastsKey,
+    (url: string) => swrFetcher(url, accessToken),
+    { revalidateOnFocus: false }
   )
 
-  const availableCourses = useMemo(() => {
-    const list: any[] = orgCourses || []
-    const candidates = list.filter(
-      (course: any) =>
-        course.access_type !== 'users_only' &&
-        !memberUuids.has(course.course_uuid) &&
-        // Published bundles may only contain published courses.
-        (!collection?.published || course.published)
+  const memberUuids = useMemo(() => {
+    const ids = new Set<string>()
+    ;(collection?.courses || []).forEach((item: any) =>
+      ids.add(item.resource_uuid || item.course_uuid)
+    )
+    ;(courses || []).forEach((item: any) => ids.add(item.resource_uuid || item.course_uuid))
+    return ids
+  }, [collection?.courses, courses])
+
+  const availableResources = useMemo(() => {
+    const courseItems = (orgCourses || []).map((course: any) => ({
+      kind: 'course' as const,
+      uuid: course.course_uuid,
+      name: course.name,
+      description: course.description,
+      thumbnail_image: course.thumbnail_image,
+      access_type: course.access_type,
+      published: course.published,
+    }))
+    const podcastItems = (orgPodcasts || []).map((podcast: any) => ({
+      kind: 'podcast' as const,
+      uuid: podcast.podcast_uuid,
+      name: podcast.name,
+      description: podcast.description,
+      thumbnail_image: podcast.thumbnail_image,
+      access_type: podcast.access_type,
+      published: podcast.published,
+    }))
+
+    const candidates = [...courseItems, ...podcastItems].filter(
+      (item: any) =>
+        item.access_type !== 'users_only' &&
+        !memberUuids.has(item.uuid) &&
+        // Published bundles may only contain published items.
+        (!collection?.published || item.published)
     )
     if (!pickerSearch.trim()) return candidates
-    return candidates.filter((course: any) =>
-      searchMatchesAny([course.name, course.description], pickerSearch)
+    return candidates.filter((item: any) =>
+      searchMatchesAny([item.name, item.description], pickerSearch)
     )
-  }, [orgCourses, memberUuids, pickerSearch])
+  }, [orgCourses, orgPodcasts, memberUuids, pickerSearch, collection?.published])
 
   const refresh = async () => {
     await mutate()
     await onUpdated()
   }
 
-  const handleAdd = async (course: any) => {
+  const handleAdd = async (resource: any) => {
     if (!collectionUuid || busyUuid) return
-    setBusyUuid(course.course_uuid)
+    setBusyUuid(resource.uuid)
     try {
-      const res = await addCourseToCollection(collectionUuid, course.course_uuid, accessToken)
+      const res = await addResourceToCollection(collectionUuid, resource.uuid, accessToken)
       if (res.success === false) {
         toast.error(res.data?.detail || t('collections.dashboard.content.add_error'))
         return
@@ -152,13 +189,14 @@ function EditCollectionContent({ collection, orgslug, onUpdated }: EditCollectio
     }
   }
 
-  const handleRemove = async (course: any) => {
+  const handleRemove = async (row: any) => {
     if (!collectionUuid || busyUuid) return
-    setBusyUuid(course.course_uuid)
+    const resourceUuid = row.resource_uuid || row.course_uuid
+    setBusyUuid(resourceUuid)
     try {
-      const res = await removeCourseFromCollection(
+      const res = await removeResourceFromCollection(
         collectionUuid,
-        course.course_uuid,
+        resourceUuid,
         accessToken
       )
       if (res.success === false) {
@@ -177,40 +215,56 @@ function EditCollectionContent({ collection, orgslug, onUpdated }: EditCollectio
   const columns: Column<any>[] = [
     {
       key: 'name',
-      header: t('collections.dashboard.content.course'),
+      header: t('collections.dashboard.content.item'),
       sortable: true,
       value: (row) => row.name || '',
-      render: (row) => (
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-12 h-8 rounded-md bg-gray-100 overflow-hidden shrink-0">
-            {row.thumbnail_image ? (
-              <img
-                src={getCourseThumbnailMediaDirectory(
-                  org?.org_uuid,
-                  row.course_uuid,
-                  row.thumbnail_image
-                )}
-                alt={row.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <BookCopy size={14} className="text-gray-300" />
-              </div>
-            )}
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span className="font-medium text-gray-900 truncate">{row.name}</span>
-              {!row.published && (
-                <span className="text-[10px] font-semibold uppercase tracking-wide text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">
-                  {t('collections.dashboard.content.draft')}
-                </span>
+      render: (row) => {
+        const resourceUuid = row.resource_uuid || row.course_uuid
+        const isPodcast = row.resource_type === 'podcast'
+        return (
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-12 h-8 rounded-md bg-gray-100 overflow-hidden shrink-0">
+              {row.thumbnail_image ? (
+                <img
+                  src={
+                    isPodcast
+                      ? getPodcastThumbnailMediaDirectory(
+                          org?.org_uuid,
+                          resourceUuid,
+                          row.thumbnail_image
+                        )
+                      : getCourseThumbnailMediaDirectory(
+                          org?.org_uuid,
+                          resourceUuid,
+                          row.thumbnail_image
+                        )
+                  }
+                  alt={row.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  {isPodcast ? (
+                    <Mic size={14} className="text-gray-300" />
+                  ) : (
+                    <BookCopy size={14} className="text-gray-300" />
+                  )}
+                </div>
               )}
             </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="font-medium text-gray-900 truncate">{row.name}</span>
+                {!row.published && (
+                  <span className="text-[10px] font-semibold uppercase tracking-wide text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">
+                    {t('collections.dashboard.content.draft')}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      ),
+        )
+      },
     },
     {
       key: 'access',
@@ -240,7 +294,16 @@ function EditCollectionContent({ collection, orgslug, onUpdated }: EditCollectio
       align: 'right',
       sortable: true,
       value: (row) => row.lessons ?? 0,
-      render: (row) => <span className="text-[13px] text-gray-600">{row.lessons ?? 0}</span>,
+      render: (row) => (
+        <span className="text-[13px] text-gray-600">
+          {row.lessons ?? 0}
+          {row.resource_type === 'podcast' && (
+            <span className="text-[11px] text-gray-400 ml-1">
+              {t('collections.dashboard.content.episodes')}
+            </span>
+          )}
+        </span>
+      ),
     },
     {
       key: 'added',
@@ -266,7 +329,7 @@ function EditCollectionContent({ collection, orgslug, onUpdated }: EditCollectio
                 className="p-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
                 aria-label={t('collections.dashboard.actions')}
               >
-                {busyUuid === row.course_uuid ? (
+                {busyUuid === (row.resource_uuid || row.course_uuid) ? (
                   <Loader2 size={16} className="animate-spin" />
                 ) : (
                   <MoreHorizontal size={16} />
@@ -326,7 +389,7 @@ function EditCollectionContent({ collection, orgslug, onUpdated }: EditCollectio
           }}
         >
           <Plus size={14} />
-          {t('collections.dashboard.content.add_course')}
+          {t('collections.dashboard.content.add_item')}
         </Button>
       </div>
 
@@ -360,7 +423,7 @@ function EditCollectionContent({ collection, orgslug, onUpdated }: EditCollectio
                   }}
                 >
                   <Plus size={14} />
-                  {t('collections.dashboard.content.add_course')}
+                  {t('collections.dashboard.content.add_item')}
                 </Button>
               ) : undefined
             }
@@ -371,7 +434,7 @@ function EditCollectionContent({ collection, orgslug, onUpdated }: EditCollectio
           footer={
             <div className="flex items-center justify-between">
               <span className="text-xs text-gray-500">
-                {t('collections.dashboard.content.course_count', { count: courses.length })}
+                {t('collections.dashboard.content.item_count', { count: courses.length })}
               </span>
               {totalPages > 1 && (
                 <div className="flex items-center gap-2">
@@ -413,7 +476,7 @@ function EditCollectionContent({ collection, orgslug, onUpdated }: EditCollectio
         isDialogOpen={isPickerOpen}
         onOpenChange={setIsPickerOpen}
         minHeight="no-min"
-        dialogTitle={t('collections.dashboard.content.add_course')}
+        dialogTitle={t('collections.dashboard.content.add_item')}
         dialogDescription={t('collections.dashboard.content.picker_description')}
         dialogContent={
           <div className="space-y-3">
@@ -429,46 +492,58 @@ function EditCollectionContent({ collection, orgslug, onUpdated }: EditCollectio
             </div>
 
             <div className="max-h-[380px] overflow-y-auto divide-y divide-gray-100 border border-gray-200 rounded-lg">
-              {availableCourses.length === 0 ? (
+              {availableResources.length === 0 ? (
                 <p className="text-sm text-gray-500 p-4 text-center">
                   {t('collections.dashboard.content.no_available')}
                 </p>
               ) : (
-                availableCourses.map((course: any) => (
-                  <div key={course.course_uuid} className="flex items-center gap-3 p-3">
+                availableResources.map((resource: any) => (
+                  <div key={resource.uuid} className="flex items-center gap-3 p-3">
                     <div className="w-12 h-8 rounded-md bg-gray-100 overflow-hidden shrink-0">
-                      {course.thumbnail_image ? (
+                      {resource.thumbnail_image ? (
                         <img
-                          src={getCourseThumbnailMediaDirectory(
-                            org?.org_uuid,
-                            course.course_uuid,
-                            course.thumbnail_image
-                          )}
-                          alt={course.name}
+                          src={
+                            resource.kind === 'podcast'
+                              ? getPodcastThumbnailMediaDirectory(
+                                  org?.org_uuid,
+                                  resource.uuid,
+                                  resource.thumbnail_image
+                                )
+                              : getCourseThumbnailMediaDirectory(
+                                  org?.org_uuid,
+                                  resource.uuid,
+                                  resource.thumbnail_image
+                                )
+                          }
+                          alt={resource.name}
                           className="w-full h-full object-cover"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <BookCopy size={14} className="text-gray-300" />
+                          {resource.kind === 'podcast' ? (
+                            <Mic size={14} className="text-gray-300" />
+                          ) : (
+                            <BookCopy size={14} className="text-gray-300" />
+                          )}
                         </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 truncate">
-                        {course.name}
+                        {resource.name}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {accessLabel(course.access_type, t)}
-                        {!course.published && ` · ${t('collections.dashboard.content.draft')}`}
+                        {accessLabel(resource.access_type, t)}
+                        {!resource.published && ` · ${t('collections.dashboard.content.draft')}`}
                       </p>
                     </div>
                     <Button
                       variant="secondary"
                       size="small"
-                      onClick={() => handleAdd(course)}
-                      disabled={busyUuid === course.course_uuid}
+                      onClick={() => handleAdd(resource)}
+                      disabled={busyUuid === resource.uuid}
                     >
-                      {busyUuid === course.course_uuid ? (
+                      {busyUuid === resource.uuid ? (
                         <Loader2 size={14} className="animate-spin" />
                       ) : (
                         <Plus size={14} />

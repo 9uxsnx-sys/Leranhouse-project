@@ -76,6 +76,49 @@ GET /api/v1/payments/{org_id}/overview?range=30d
 
 `range` is one of `7d` / `30d` / `90d` / `12m` (unknown values fall back to `30d`). Returns `{ range, currency, revenue, series }` where only `paid` orders inside the window are summed. `series` is zero-filled: one daily bucket per day for 7d/30d/90d, and the last 12 calendar months for 12m. Each point is `{ label, revenue }`.
 
+### Payout report
+
+```
+GET /api/v1/payments/{org_id}/payouts?month=2026-10
+```
+
+`month` is `YYYY-MM`; malformed values → `422`. Only `paid` orders with `paid_at` inside the month are counted.
+
+```json
+{
+  "month": "2026-10",
+  "currency": "DZD",
+  "gross_revenue": 15000,
+  "gateway_fees": 375,
+  "manual_costs": 3500,
+  "total_costs": 3875,
+  "net_profit": 11125,
+  "teacher_share_percent": 40,
+  "teacher_pool": 4450,
+  "platform_pool": 6675,
+  "attributed_revenue": 15000,
+  "unattributed_revenue": 0,
+  "order_count": 2,
+  "teachers": [
+    { "user_id": 1, "name": "Admin", "revenue": 15000, "share_percent": 100, "payout": 4450 }
+  ]
+}
+```
+
+`gateway_fees` comes from `fees_on_merchant` (falling back to `fees`). `manual_costs` is the sum of the month's `hosting` + `marketing` + `other`. `net_profit = max(0, gross − total_costs)`, `teacher_pool = round(net × 40%)`, `platform_pool = net − teacher_pool`.
+
+Attribution: course orders belong to their course; collection orders are split evenly across `price_snapshot["courses"]` (rounding remainder to the first teacher). Each course's revenue goes to its active **MAINTAINERs**, else its active **CREATORs**. Revenue without an active author is reported in `unattributed_revenue` and stays with the platform.
+
+### Update payout costs
+
+```
+PUT /api/v1/payments/{org_id}/payouts/costs
+```
+
+Body: `{ "month": "2026-10", "hosting": 2000, "marketing": 1000, "other": 500 }`.
+
+Upserts one row per `(org_id, month)` and returns the recalculated report in the same shape as the GET. Negative values or a malformed month → `422`. Omitting a field leaves that cost at `0`.
+
 ### Get payment configuration
 
 ```

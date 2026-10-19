@@ -463,6 +463,8 @@ def collection(db, org, course):
     link = CollectionCourse(
         collection_id=c.id,
         course_id=course.id,
+        resource_type="course",
+        resource_uuid=course.course_uuid,
         org_id=org.id,
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),

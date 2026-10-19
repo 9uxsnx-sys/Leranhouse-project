@@ -262,7 +262,7 @@ class TestCollectionCheckoutCreation:
             )
 
         assert exc.value.status_code == 400
-        assert "no courses" in exc.value.detail
+        assert "no items" in exc.value.detail
 
     async def test_draft_collection_is_rejected(
         self, db, org, paid_collection, payment_config, regular_user, mock_request

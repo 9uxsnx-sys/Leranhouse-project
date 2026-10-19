@@ -16,14 +16,18 @@ from src.db.collections import Collection, CollectionCreate, CollectionRead, Col
 from src.db.collections_courses import CollectionCourse
 from src.db.courses.courses import Course
 from src.db.payments.enums import AccessTypeEnum
+from src.db.podcasts.episodes import PodcastEpisode
+from src.db.podcasts.podcasts import Podcast
 from src.services.courses.collections import (
     add_course_to_collection,
+    add_resource_to_collection,
     create_collection,
     delete_collection,
     get_collection,
     get_collection_courses,
     get_collections,
     remove_course_from_collection,
+    remove_resource_from_collection,
     update_collection,
 )
 
@@ -75,11 +79,53 @@ def _make_collection(db, org, *, id, name="Extra Collection",
     return c
 
 
+def _make_podcast(
+    db, org, *, id=71, name="Podcast Member", podcast_uuid="podcast_member",
+    public=True, published=True, episodes=2,
+):
+    """Helper to insert an additional podcast with episodes."""
+    podcast = Podcast(
+        id=id,
+        name=name,
+        description=f"Description for {name}",
+        public=public,
+        published=published,
+        access_type=(
+            AccessTypeEnum.PUBLIC if public else AccessTypeEnum.USERS_ONLY
+        ),
+        org_id=org.id,
+        podcast_uuid=podcast_uuid,
+        creation_date=str(datetime.now()),
+        update_date=str(datetime.now()),
+    )
+    db.add(podcast)
+    db.commit()
+    db.refresh(podcast)
+
+    for index in range(episodes):
+        db.add(
+            PodcastEpisode(
+                podcast_id=podcast.id,
+                org_id=org.id,
+                title=f"Episode {index + 1}",
+                episode_uuid=f"episode_{podcast.podcast_uuid}_{index + 1}",
+                published=published,
+                order=index,
+                creation_date=str(datetime.now()),
+                update_date=str(datetime.now()),
+            )
+        )
+    db.commit()
+    return podcast
+
+
 def _link_course_to_collection(db, collection, course, org):
     """Helper to create a CollectionCourse join row."""
     link = CollectionCourse(
         collection_id=collection.id,
         course_id=course.id,
+        resource_type="course",
+        resource_uuid=course.course_uuid,
         org_id=org.id,
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
@@ -534,6 +580,76 @@ class TestCollectionMembership:
 
         assert rows == []
 
+    @pytest.mark.asyncio
+    async def test_add_podcast_and_list_it_as_member(
+        self, db, org, course, collection, admin_user, mock_request, bypass_rbac
+    ):
+        podcast = _make_podcast(db, org)
+
+        await add_resource_to_collection(
+            mock_request, "collection_test", podcast.podcast_uuid, admin_user, db
+        )
+        rows = await get_collection_courses(
+            mock_request, "collection_test", admin_user, db
+        )
+
+        podcast_rows = [row for row in rows if row.resource_type == "podcast"]
+        assert len(podcast_rows) == 1
+        assert podcast_rows[0].resource_uuid == podcast.podcast_uuid
+        assert podcast_rows[0].course_uuid is None
+        assert podcast_rows[0].lessons == 2
+        # The course member is still listed.
+        assert any(row.course_uuid == course.course_uuid for row in rows)
+
+    @pytest.mark.asyncio
+    async def test_add_private_podcast_is_rejected(
+        self, db, org, collection, admin_user, mock_request, bypass_rbac
+    ):
+        private = _make_podcast(
+            db, org, id=72, podcast_uuid="podcast_private", public=False
+        )
+
+        with pytest.raises(HTTPException) as exc_info:
+            await add_resource_to_collection(
+                mock_request, "collection_test", private.podcast_uuid, admin_user, db
+            )
+
+        assert exc_info.value.status_code == 422
+
+    @pytest.mark.asyncio
+    async def test_add_draft_podcast_to_published_collection_is_rejected(
+        self, db, org, collection, admin_user, mock_request, bypass_rbac
+    ):
+        draft = _make_podcast(
+            db, org, id=73, podcast_uuid="podcast_draft", published=False, episodes=0
+        )
+
+        with pytest.raises(HTTPException) as exc_info:
+            await add_resource_to_collection(
+                mock_request, "collection_test", draft.podcast_uuid, admin_user, db
+            )
+
+        assert exc_info.value.status_code == 422
+        assert "published" in str(exc_info.value.detail).lower()
+
+    @pytest.mark.asyncio
+    async def test_remove_podcast(
+        self, db, org, collection, admin_user, mock_request, bypass_rbac
+    ):
+        podcast = _make_podcast(db, org, id=74, podcast_uuid="podcast_remove")
+        await add_resource_to_collection(
+            mock_request, "collection_test", podcast.podcast_uuid, admin_user, db
+        )
+
+        await remove_resource_from_collection(
+            mock_request, "collection_test", podcast.podcast_uuid, admin_user, db
+        )
+
+        rows = await get_collection_courses(
+            mock_request, "collection_test", admin_user, db
+        )
+        assert all(row.resource_uuid != podcast.podcast_uuid for row in rows)
+
 
 class TestCollectionValidation:
     """Publish/price rules."""
@@ -573,7 +689,7 @@ class TestCollectionValidation:
             )
 
         assert exc_info.value.status_code == 422
-        assert "at least one course" in exc_info.value.detail
+        assert "at least one item" in exc_info.value.detail
 
     @pytest.mark.asyncio
     async def test_publish_rejects_draft_members(

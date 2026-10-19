@@ -910,8 +910,15 @@
                                        "tabs":  {
                                                     "episodes":  "Épisodes",
                                                     "general":  "Général",
+                                                    "access":  "Accès",
                                                     "distribution":  "Distribution"
                                                 },
+                                       "access":  {
+                                                      "public_title":  "Tout le monde peut y accéder",
+                                                      "public_description":  "Ce podcast est public — tout apprenant connecté peut écouter chaque épisode. Passez en Privé pour le limiter aux groupes d'utilisateurs, ou en Payant pour exiger un achat.",
+                                                      "no_linked_description":  "Liez un groupe d'utilisateurs pour accorder à ses membres l'accès à ce podcast.",
+                                                      "granted":  "Accordé"
+                                                  },
                                        "view_podcast":  "Voir le podcast",
                                        "general":  {
                                                        "saved":  "Enregistré",
@@ -2675,6 +2682,7 @@
                                                           "podcasts":  {
                                                                            "general":  "Général",
                                                                            "content":  "Épisodes",
+                                                                           "access":  "Accès",
                                                                            "distribution":  "Distribution"
                                                                        },
                                                           "org":  {
@@ -2698,7 +2706,6 @@
                                                                            "transactions":  "Transactions",
                                                                            "subscriptions":  "Abonnements",
                                                                            "offers":  "Offres",
-                                                                           "groups":  "Groupes de paiement",
                                                                            "configuration":  "Configuration"
                                                                        }
                                                       }
@@ -4648,11 +4655,6 @@
                                                                        "description":  "Autres paramètres de l\u0027organisation",
                                                                        "keywords":  "divers, avancé, personnalisé, supplémentaire"
                                                                    },
-                                                     "payments_groups":  {
-                                                                             "description":  "Groupes et bundles de paiement",
-                                                                             "keywords":  "groupes, bundles, ensembles",
-                                                                             "title":  "Groupes de paiement"
-                                                                         },
                                                      "payments_configuration":  {
                                                                                     "description":  "Configuration Stripe et paiements",
                                                                                     "keywords":  "configuration, paramètres, stripe, installation, connect",
@@ -4690,7 +4692,6 @@
                      "tabs":  {
                                    "overview":  "Aperçu",
                                    "offers":  "Offres",
-                                   "groups":  "Groupes de paiement",
                                    "configuration":  "Configuration"
                                },
                      "stripe_dashboard":  "Tableau de bord Stripe",
@@ -4767,52 +4768,6 @@
                                        "status_trialing":  "En essai",
                                        "status_past_due":  "En retard"
                                    },
-                     "groups":  {
-                                    "title":  "Groupes de paiement",
-                                    "subtitle":  "Regroupez des cours pour des abonnements ou des offres multi-cours.",
-                                    "new_group":  "Nouveau groupe",
-                                    "create_title":  "Créer un groupe de paiement",
-                                    "create_description":  "Regroupez des cours pour des abonnements ou des forfaits",
-                                    "edit_title":  "Modifier le groupe de paiement",
-                                    "edit_description":  "Mettez à jour le nom et la description du groupe",
-                                    "created":  "Groupe créé",
-                                    "updated":  "Groupe mis à jour",
-                                    "deleted":  "Groupe supprimé",
-                                    "failed_create":  "Échec de la création du groupe",
-                                    "failed_update":  "Échec de la mise à jour du groupe",
-                                    "failed_delete":  "Échec de la suppression du groupe",
-                                    "error_loading":  "Échec du chargement des groupes.",
-                                    "empty_title":  "Aucun groupe pour le moment",
-                                    "empty_description":  "Les groupes vous permettent d'associer plusieurs cours à une même offre — parfait pour les abonnements ou les forfaits.",
-                                    "create_first":  "Créez votre premier groupe",
-                                    "delete_group":  "Supprimer le groupe",
-                                    "delete_confirm_message":  "Toutes les ressources et synchronisations seront supprimées. Les offres actives liées à ce groupe perdront leur groupe.",
-                                    "delete_dialog_title":  "Supprimer « {{name}} » ?",
-                                    "edit":  "Modifier",
-                                    "delete":  "Supprimer",
-                                    "remove":  "Retirer",
-                                    "courses":  "Cours",
-                                    "access_groups":  "Groupes d'accès",
-                                    "course_added":  "Cours ajouté au groupe",
-                                    "course_removed":  "Cours retiré",
-                                    "no_courses_hint":  "Aucun cours pour le moment — ajoutez-en un ci-dessous.",
-                                    "add_course":  "Ajouter un cours",
-                                    "select_course_to_add":  "Sélectionnez un cours à ajouter",
-                                    "all_courses_in_group":  "Tous les cours sont déjà dans ce groupe.",
-                                    "usergroup_synced":  "Groupe d'utilisateurs synchronisé — les utilisateurs inscrits seront ajoutés automatiquement",
-                                    "sync_removed":  "Synchronisation supprimée",
-                                    "sync_helper":  "Lorsqu'un utilisateur s'inscrit, il est automatiquement ajouté à ces groupes. En cas d'annulation, il en est retiré.",
-                                    "remove_sync":  "Retirer la synchronisation",
-                                    "group_number":  "Groupe n° {{id}}",
-                                    "link_usergroup":  "+ Lier un groupe d'utilisateurs…",
-                                    "no_usergroups":  "Aucun groupe d'utilisateurs disponible à lier.",
-                                    "group_name":  "Nom du groupe",
-                                    "group_name_placeholder":  "ex. Forfait accès complet, Abonnement Premium",
-                                    "description":  "Description",
-                                    "description_placeholder":  "Quelles ressources sont incluses dans ce groupe ?",
-                                    "name_required":  "Le nom est requis",
-                                    "create_group":  "Créer le groupe"
-                                },
                      "offers":  {
                                     "error_loading":  "Échec du chargement des offres",
                                     "archived":  "Offre archivée avec succès",
@@ -4876,16 +4831,9 @@
                                           "field_benefits":  "Avantages",
                                           "placeholder_benefits":  "Avantages séparés par des virgules",
                                           "access_title":  "Accès",
-                                          "access_description":  "Ajoutez des cours individuellement ou liez un groupe de paiement pour donner accès à un ensemble de ressources. Vous pouvez utiliser les deux en même temps.",
-                                          "courses_direct":  "Cours (direct)",
+                                          "access_description":  "Ajoutez les cours auxquels cette offre donne accès.",
+                                          "courses_direct":  "Cours",
                                           "add_course":  "Ajouter un cours…",
-                                          "payment_group":  "Groupe de paiement",
-                                          "payment_group_optional":  "(facultatif — pour les forfaits/abonnements)",
-                                          "link_payment_group":  "Lier à un groupe de paiement…",
-                                          "none":  "Aucun",
-                                          "payment_group_help_prefix":  "Toutes les ressources du groupe de paiement sélectionné seront accessibles aux utilisateurs inscrits. Gérez les ressources du groupe depuis l'onglet",
-                                          "payment_groups_tab":  "Groupes de paiement",
-                                          "payment_group_help_suffix":  ".",
                                           "creating":  "Création...",
                                           "submit":  "Créer l'offre",
                                           "validation_name_required":  "Le nom est requis",
@@ -4912,7 +4860,8 @@
                                        "no_courses":  "Aucun cours dans cette organisation.",
                                        "all_courses_linked":  "Tous les cours sont déjà liés.",
                                        "type_course":  "Cours",
-                                       "type_podcast":  "Podcast"
+                                       "type_podcast":  "Podcast",
+                                       "type_collection":  "Collection"
                                    }
                  }
                   },

@@ -160,3 +160,31 @@ export async function removeCourseFromCollection(
   )
   return await getResponseMetadata(result)
 }
+
+export async function addResourceToCollection(
+  collection_uuid: string,
+  resource_uuid: string,
+  access_token: any
+) {
+  const result: any = await fetch(
+    `${getAPIUrl()}collections/${collection_uuid}/resources?resource_uuid=${encodeURIComponent(
+      resource_uuid
+    )}`,
+    RequestBodyWithAuthHeader('POST', null, null, access_token)
+  )
+  return await getResponseMetadata(result)
+}
+
+export async function removeResourceFromCollection(
+  collection_uuid: string,
+  resource_uuid: string,
+  access_token: any
+) {
+  const result: any = await fetch(
+    `${getAPIUrl()}collections/${collection_uuid}/resources?resource_uuid=${encodeURIComponent(
+      resource_uuid
+    )}`,
+    RequestBodyWithAuthHeader('DELETE', null, null, access_token)
+  )
+  return await getResponseMetadata(result)
+}

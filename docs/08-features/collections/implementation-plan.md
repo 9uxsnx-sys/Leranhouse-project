@@ -2,7 +2,7 @@
 
 > Turn the existing (but dormant) **Collections** resource into a first-class, course-grade product: full media, three access modes, a dashboard editor, and a purchase flow that mirrors buying each course individually.
 
-**Status:** in progress — Phase 0 ✅ (paid lock verified), Phase 1 ✅ (schema, migration, RBAC), Phase 2 ✅ (CRUD, membership, validation), Phase 3 ✅ (media), Phase 4 ✅ (checkout, snapshot, fan-out), Phase 5 ✅ (dashboard listing + editor), Phase 6 ✅ (learner listing, detail, success branch, nav; buy → all courses in Progress). Phase 7 deferred.
+**Status:** complete — Phase 0 ✅ (paid lock verified), Phase 1 ✅ (schema, migration, RBAC), Phase 2 ✅ (CRUD, membership, validation), Phase 3 ✅ (media), Phase 4 ✅ (checkout, snapshot, fan-out), Phase 5 ✅ (dashboard listing + editor), Phase 6 ✅ (learner listing, detail, success branch, nav; buy → all courses in Progress), Phase 7 ✅ (SEO tab, Offers row type, podcast members, Payment Groups removal).
 **Last updated:** 2026-10-19
 **Scope:** desktop/web only. No mobile action bar. No refunds.
 
@@ -27,7 +27,7 @@ Collections cannot contain private (`users_only`) courses. This is a hard rule, 
 | Piece | Location | State |
 |---|---|---|
 | `collection` table | [`db/collections.py`](../../../apps/api/src/db/collections.py) | name, description, `public`, org, uuid |
-| `collectioncourse` join | [`db/collections_courses.py`](../../../apps/api/src/db/collections_courses.py) | collection ↔ course |
+| `collectioncourse` join | [`db/collections_courses.py`](../../../apps/api/src/db/collections_courses.py) | polymorphic collection ↔ resource (`course` / `podcast`) |
 | CRUD API | [`routers/courses/collections.py`](../../../apps/api/src/routers/courses/collections.py) | create / read / update / delete / list |
 | Service | [`services/courses/collections.py`](../../../apps/api/src/services/courses/collections.py) | CRUD |
 | RBAC entry | [`security/rbac/config.py`](../../../apps/api/src/security/rbac/config.py) | `collection_` prefix, no access types |
@@ -49,13 +49,14 @@ Two existing defects must be fixed as part of this work:
 |---|---|
 | Platform | Desktop/web only |
 | Refunds | Out of scope; entitlement revocation stays manual |
-| Dashboard shape | Listing → General / Content / Access |
-| Content tab | Add/remove course table (not a module builder) |
+| Dashboard shape | Listing → General / Content / Access / SEO |
+| Content tab | Add/remove item table (courses and podcasts; not a module builder) |
 | Access model | Same three modes as courses |
-| Private courses | Rejected from every collection |
-| Purchase effect | Fan-out to per-course entitlements + `TrailRun`s |
+| Private resources | Rejected from every collection |
+| Purchase effect | Fan-out to per-resource entitlements + `TrailRun`s for course members |
 | Media | Full parity: cover image, optional cover video, hero banner |
-| Payment Groups tab | Superseded by Collections for bundles; leave untouched until Collections ships, then remove |
+| SEO | Course-parity SEO tab (Phase 7) |
+| Payment Groups tab | Removed — Collections is the bundle resource |
 
 ---
 
@@ -79,7 +80,7 @@ Two existing defects must be fixed as part of this work:
 | `access_type` | ✅ | `public` / `users_only` / `paid` |
 | `price_amount` | ✅ | integer DZD |
 | `price_currency` | ✅ | default `DZD` |
-| `seo` (JSONB) | ⏳ | deferred (Phase 7) |
+| `seo` (JSONB) | ✅ | Phase 7 — course-parity SEO tab |
 | `extra_metadata` | ❌ | collection stats are computed from members |
 
 Deliberately excluded: contributors, certifications, analytics, `open_to_contributors`.
@@ -210,7 +211,12 @@ Checkout is created with:
 resource_uuid = "collection_abc"
 resource_type = "collection"
 amount        = collection.price_amount
-price_snapshot = { amount, currency, courses: [member uuids at purchase time] }
+price_snapshot = {
+    amount,
+    currency,
+    resources: [member uuids at purchase time],  # courses + podcasts
+    courses:   [course uuids at purchase time],  # backward compatibility
+}
 ```
 
 Membership is **snapshotted** so later edits never retroactively grant or remove content.
@@ -371,8 +377,12 @@ Minor: `/trail` sorts by `creation_date`; six runs share one timestamp. Add a na
 - Verified: a signed `checkout.paid` for a 2-course bundle produced 3 active entitlements (bundle + 2 courses) and both courses on the Progress page; the Access tab Public → Paid → price → Save round-trip persists `access_type=PAID`.
 - Post-audit fixes: paid bundle pages are browsable by non-buyers so the Get access CTA is reachable; adding a draft member to a published bundle is rejected; unpublishing a member of a published bundle is rejected; deleting a bundle removes its uploaded media; sitemap and breadcrumb links point at `/collection/:uuid` and `/collections`.
 
-### Phase 7 — Deferred
-- SEO tab, Offers row type, podcasts as members (polymorphic join table), removal of the Payment Groups tab.
+### Phase 7 — Delivered
+- **SEO tab**: `collection.seo` JSONB (migration `t3e4f5a6b7c8`), `EditCollectionSEO` with the same validation as the course tab, fourth editor tab gated to `standard`.
+- **Offers row type**: collections appear in Payments → Offers with their own `Layers` icon, `Collection` type label, editable price and filter option; `savePrices` routes collection rows through `updateCollection`.
+- **Podcasts as members**: `collectioncourse` gained `resource_type` + `resource_uuid` (migration `u4f5a6b7c8d9`); `POST/DELETE /collections/{uuid}/resources` add/remove courses or podcasts; the Content tab picker bundles both; the learner page renders podcast cards with an episode count.
+- **Purchase fan-out**: `price_snapshot.resources` snapshots every member; webhooks grant per-resource entitlements and only course members get a `TrailRun`.
+- **Payment Groups removed**: tab, page, service and locale keys deleted; offers use Collections instead.
 
 ---
 

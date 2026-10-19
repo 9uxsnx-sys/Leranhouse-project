@@ -21,6 +21,7 @@ from src.db.payments.payment_configs import PaymentConfig
 from src.db.payments.payment_orders import PaymentOrder
 from src.db.payments.payment_webhook_events import PaymentWebhookEvent
 from src.db.payments.resource_entitlements import ResourceEntitlement
+from src.db.podcasts.podcasts import Podcast
 from src.db.trail_runs import TrailRun
 from src.db.trails import Trail
 from src.services.payments.webhooks import (
@@ -284,6 +285,8 @@ def collection_order(db, org, collection, course, regular_user):
         CollectionCourse(
             collection_id=collection.id,
             course_id=second.id,
+            resource_type="course",
+            resource_uuid=second.course_uuid,
             org_id=org.id,
             creation_date="2026-01-02 00:00:00",
             update_date="2026-01-02 00:00:00",
@@ -339,6 +342,50 @@ class TestCollectionFanOut:
         trail = db.exec(select(Trail).where(Trail.user_id == regular_user.id)).one()
         runs = db.exec(select(TrailRun).where(TrailRun.trail_id == trail.id)).all()
         assert {run.course_id for run in runs} == {first.id, second.id}
+
+    async def test_purchase_grants_podcast_members(
+        self, db, org, payment_config, collection_order, regular_user
+    ):
+        podcast = Podcast(
+            id=81,
+            org_id=org.id,
+            name="Bundle Podcast",
+            public=True,
+            published=True,
+            podcast_uuid="podcast_bundle",
+            creation_date="2026-01-03 00:00:00",
+            update_date="2026-01-03 00:00:00",
+        )
+        db.add(podcast)
+        db.commit()
+
+        order, first, _second = collection_order
+        order.price_snapshot = {
+            **(order.price_snapshot or {}),
+            "resources": [first.course_uuid, podcast.podcast_uuid],
+        }
+        db.add(order)
+        db.commit()
+
+        body = json.dumps(_payload()).encode()
+        result = await handle_chargily_webhook(
+            _request(body, _sign(body)), ORG_UUID, db
+        )
+        assert result["status"] == "ok"
+
+        entitlements = db.exec(
+            select(ResourceEntitlement).where(
+                ResourceEntitlement.user_id == regular_user.id
+            )
+        ).all()
+        podcast_entitlement = next(
+            e for e in entitlements if e.resource_uuid == podcast.podcast_uuid
+        )
+        assert podcast_entitlement.resource_type == "podcast"
+
+        trail = db.exec(select(Trail).where(Trail.user_id == regular_user.id)).one()
+        runs = db.exec(select(TrailRun).where(TrailRun.trail_id == trail.id)).all()
+        assert {run.course_id for run in runs} == {first.id}
 
     async def test_already_owned_course_is_not_granted_twice(
         self, db, org, payment_config, collection_order, regular_user

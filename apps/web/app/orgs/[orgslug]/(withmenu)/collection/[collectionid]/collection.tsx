@@ -13,6 +13,7 @@ import {
   Download,
   Layers,
   Loader2,
+  Mic,
   RefreshCw,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -36,10 +37,14 @@ import {
   getCollectionBannerMediaDirectory,
   getCollectionThumbnailMediaDirectory,
   getCourseThumbnailMediaDirectory,
+  getPodcastThumbnailMediaDirectory,
 } from '@services/media/media'
 import { swrFetcher } from '@services/utils/ts/requests'
 
 const removeCoursePrefix = (uuid: string) => uuid.replace('course_', '')
+const removePodcastPrefix = (uuid: string) => uuid.replace('podcast_', '')
+const memberUuid = (member: any) => member?.resource_uuid || member?.course_uuid || ''
+const isPodcastMember = (member: any) => member?.resource_type === 'podcast'
 
 const CollectionClient = ({
   orgslug,
@@ -104,9 +109,18 @@ const CollectionClient = ({
 
   const totalLessons = useMemo(
     () =>
-      members.reduce(
+      members.filter((member: any) => !isPodcastMember(member)).reduce(
         (sum: number, course: any) =>
           sum + Number(course.lessons ?? course.chapters?.length ?? 0),
+        0
+      ),
+    [members]
+  )
+
+  const totalEpisodes = useMemo(
+    () =>
+      members.filter(isPodcastMember).reduce(
+        (sum: number, podcast: any) => sum + Number(podcast.lessons ?? 0),
         0
       ),
     [members]
@@ -119,11 +133,22 @@ const CollectionClient = ({
         .map((run: any) => run.course?.course_uuid)
         .filter(Boolean)
     )
-    return members.filter((course: any) => runCourseUuids.has(course.course_uuid))
-      .length
+    // Podcasts are unlocked by an entitlement, not a TrailRun; completion is
+    // tracked on the course members only.
+    return members.filter(
+      (course: any) =>
+        !isPodcastMember(course) &&
+        course.course_uuid &&
+        runCourseUuids.has(course.course_uuid)
+    ).length
   }, [trailData, members])
 
-  const isOwned = members.length > 0 && completedRuns === members.length
+  const courseMemberCount = useMemo(
+    () => members.filter((member: any) => !isPodcastMember(member)).length,
+    [members]
+  )
+
+  const isOwned = courseMemberCount > 0 && completedRuns === courseMemberCount
 
   const isPaid = collection?.access_type === 'paid'
   const price =
@@ -175,7 +200,7 @@ const CollectionClient = ({
     }
 
     if (!accessToken) {
-      router.push('/auth/login')
+      router.push(getUriWithOrg(orgslug, '/login'))
       return
     }
 
@@ -241,14 +266,22 @@ const CollectionClient = ({
               <div className="flex flex-wrap items-center gap-2 mt-4">
                 <Badge variant="grey" className="flex items-center gap-1">
                   <Layers size={12} />
-                  {t('collections.dashboard.content.course_count', {
+                  {t('collections.dashboard.content.item_count', {
                     count: members.length,
                   })}
                 </Badge>
-                <Badge variant="grey" className="flex items-center gap-1">
-                  <BookOpen size={12} />
-                  {totalLessons} {t('collections.dashboard.content.lessons')}
-                </Badge>
+                {totalLessons > 0 && (
+                  <Badge variant="grey" className="flex items-center gap-1">
+                    <BookOpen size={12} />
+                    {totalLessons} {t('collections.lessons')}
+                  </Badge>
+                )}
+                {totalEpisodes > 0 && (
+                  <Badge variant="grey" className="flex items-center gap-1">
+                    <Mic size={12} />
+                    {totalEpisodes} {t('collections.episodes')}
+                  </Badge>
+                )}
                 {isOwned && (
                   <Badge variant="grey" className="flex items-center gap-1">
                     <Check size={12} />
@@ -305,26 +338,39 @@ const CollectionClient = ({
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   {members.map((course: any) => {
+                    const uuid = memberUuid(course)
+                    const podcast = isPodcastMember(course)
                     const imageUrl = course.thumbnail_image
-                      ? getCourseThumbnailMediaDirectory(
-                          org?.org_uuid,
-                          course.course_uuid,
-                          course.thumbnail_image
-                        )
+                      ? podcast
+                        ? getPodcastThumbnailMediaDirectory(
+                            org?.org_uuid,
+                            uuid,
+                            course.thumbnail_image
+                          )
+                        : getCourseThumbnailMediaDirectory(
+                            org?.org_uuid,
+                            uuid,
+                            course.thumbnail_image
+                          )
                       : ''
                     return (
                       <CourseCard
-                        key={course.course_uuid}
-                        id={removeCoursePrefix(course.course_uuid)}
+                        key={uuid}
+                        id={podcast ? removePodcastPrefix(uuid) : removeCoursePrefix(uuid)}
                         title={course.name}
                         description={course.description || ''}
                         image={imageUrl}
                         lessons={course.lessons ?? 0}
+                        lessonsLabel={
+                          podcast ? t('collections.episodes') : t('collections.lessons')
+                        }
                         duration={t('collections.self_paced')}
                         difficulty={t('collections.all_levels')}
                         href={getUriWithOrg(
                           orgslug,
-                          `/course/${removeCoursePrefix(course.course_uuid)}`
+                          podcast
+                            ? `/podcast/${removePodcastPrefix(uuid)}`
+                            : `/course/${removeCoursePrefix(uuid)}`
                         )}
                       />
                     )
@@ -398,17 +444,27 @@ const CollectionClient = ({
                   <div className="flex items-center gap-3">
                     <Layers size={16} className="text-gray-400 shrink-0" />
                     <span className="text-sm text-gray-600">
-                      {t('collections.dashboard.content.course_count', {
+                      {t('collections.dashboard.content.item_count', {
                         count: members.length,
                       })}
                     </span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <BookOpen size={16} className="text-gray-400 shrink-0" />
-                    <span className="text-sm text-gray-600">
-                      {totalLessons} {t('collections.dashboard.content.lessons')}
-                    </span>
-                  </div>
+                  {totalLessons > 0 && (
+                    <div className="flex items-center gap-3">
+                      <BookOpen size={16} className="text-gray-400 shrink-0" />
+                      <span className="text-sm text-gray-600">
+                        {totalLessons} {t('collections.lessons')}
+                      </span>
+                    </div>
+                  )}
+                  {totalEpisodes > 0 && (
+                    <div className="flex items-center gap-3">
+                      <Mic size={16} className="text-gray-400 shrink-0" />
+                      <span className="text-sm text-gray-600">
+                        {totalEpisodes} {t('collections.episodes')}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-3">
                     <Download size={16} className="text-gray-400 shrink-0" />
                     <span className="text-sm text-gray-600">

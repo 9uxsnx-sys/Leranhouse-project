@@ -18,11 +18,13 @@ from src.services.courses.collection_media import (
 )
 from src.services.courses.collections import (
     add_course_to_collection,
+    add_resource_to_collection,
     create_collection,
     get_collection,
     get_collection_courses,
     get_collections,
     remove_course_from_collection,
+    remove_resource_from_collection,
     update_collection,
     delete_collection,
 )
@@ -105,8 +107,11 @@ async def api_get_collections_by(
 @router.get(
     "/{collection_uuid}/courses",
     response_model=List[CollectionCourseRead],
-    summary="List collection courses",
-    description="List the courses that belong to a collection, with lesson counts.",
+    summary="List collection members",
+    description=(
+        "List the members of a collection (courses and podcasts), with lesson "
+        "or episode counts. The path keeps its historical name."
+    ),
     responses={
         200: {"description": "Courses in the collection."},
         404: {"description": "Collection not found"},
@@ -176,6 +181,56 @@ async def api_remove_collection_course(
 ) -> CollectionRead:
     return await remove_course_from_collection(
         request, collection_uuid, course_uuid, current_user, db_session
+    )
+
+
+@router.post(
+    "/{collection_uuid}/resources",
+    response_model=CollectionRead,
+    summary="Add a resource to a collection",
+    description=(
+        "Add a course (`course_…`) or a podcast (`podcast_…`) to a collection. "
+        "Private (`users_only`) resources are rejected."
+    ),
+    responses={
+        200: {"description": "Resource added.", "model": CollectionRead},
+        404: {"description": "Collection or resource not found"},
+        409: {"description": "Resource is already part of the collection"},
+        422: {"description": "Resource is private or the bundle would be invalid"},
+    },
+)
+async def api_add_collection_resource(
+    request: Request,
+    collection_uuid: str,
+    resource_uuid: str,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+) -> CollectionRead:
+    return await add_resource_to_collection(
+        request, collection_uuid, resource_uuid, current_user, db_session
+    )
+
+
+@router.delete(
+    "/{collection_uuid}/resources",
+    response_model=CollectionRead,
+    summary="Remove a resource from a collection",
+    description="Remove a course or podcast from a collection.",
+    responses={
+        200: {"description": "Resource removed.", "model": CollectionRead},
+        404: {"description": "Collection or membership not found"},
+        422: {"description": "A paid collection must keep at least one item"},
+    },
+)
+async def api_remove_collection_resource(
+    request: Request,
+    collection_uuid: str,
+    resource_uuid: str,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+) -> CollectionRead:
+    return await remove_resource_from_collection(
+        request, collection_uuid, resource_uuid, current_user, db_session
     )
 
 

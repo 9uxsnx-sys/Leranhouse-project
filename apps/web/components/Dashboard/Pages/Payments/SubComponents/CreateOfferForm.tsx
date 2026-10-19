@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { createOffer } from '@services/payments/offers';
-import { getPaymentsGroups } from '@services/payments/groups';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import toast from 'react-hot-toast';
@@ -16,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@components/ui/label';
 import currencyCodes from 'currency-codes';
 import useSWR from 'swr';
-import { BookOpen, X, Plus, Layers } from 'lucide-react';
+import { BookOpen, X, Plus } from 'lucide-react';
 import { getOrgCourses } from '@services/courses/courses';
 
 const getValidationSchema = (t: any) => Yup.object().shape({
@@ -37,7 +36,6 @@ interface OfferFormValues {
   benefits: string;
   amount: number;
   currency: string;
-  payments_group_id: number | '';
   resource_uuids: string[];
 }
 
@@ -56,14 +54,6 @@ const CreateOfferForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
     setCurrencies(allCurrencies);
   }, []);
 
-  // Payment Groups for the optional group picker
-  const { data: groupsResult } = useSWR(
-    org && token ? [`/payments/${org.id}/groups`, token] : null,
-    ([, t]: any) => getPaymentsGroups(org.id, t),
-    { revalidateOnFocus: false }
-  );
-  const groups: any[] = Array.isArray(groupsResult?.data) ? groupsResult.data : Array.isArray(groupsResult) ? groupsResult : [];
-
   // Courses for the direct course picker
   const { data: courses } = useSWR(
     org && token ? [`/courses/org`, org.slug, token] : null,
@@ -79,17 +69,12 @@ const CreateOfferForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
     benefits: '',
     amount: 1,
     currency: 'USD',
-    payments_group_id: '',
     resource_uuids: [],
   };
 
   const handleSubmit = async (values: OfferFormValues, { setSubmitting, resetForm }: any) => {
     try {
-      const payload = {
-        ...values,
-        payments_group_id: values.payments_group_id !== '' ? values.payments_group_id : undefined,
-      };
-      const res = await createOffer(org.id, payload, token);
+      const res = await createOffer(org.id, values, token);
       if (res.success) {
         toast.success(t('dashboard.payments.create_offer.created'));
         mutate([`/payments/${org.id}/offers`, token]);
@@ -272,38 +257,6 @@ const CreateOfferForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => 
                 </Select>
               </div>
 
-              {/* Payment Group picker */}
-              <div>
-                <Label className="text-xs">
-                  {t('dashboard.payments.create_offer.payment_group')} <span className="text-gray-400 font-normal">{t('dashboard.payments.create_offer.payment_group_optional')}</span>
-                </Label>
-                <Select
-                  value={String(values.payments_group_id)}
-                  onValueChange={(value) =>
-                    setFieldValue('payments_group_id', value === 'none' ? '' : Number(value))
-                  }
-                >
-                  <SelectTrigger className="text-xs">
-                    <SelectValue placeholder={t('dashboard.payments.create_offer.link_payment_group')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">{t('dashboard.payments.create_offer.none')}</SelectItem>
-                    {groups.map((g: any) => (
-                      <SelectItem key={g.id} value={String(g.id)}>
-                        <div className="flex items-center gap-1.5">
-                          <Layers size={11} className="text-indigo-500" />
-                          {g.name}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-gray-400 mt-1">
-                  {t('dashboard.payments.create_offer.payment_group_help_prefix')}{' '}
-                  <strong>{t('dashboard.payments.create_offer.payment_groups_tab')}</strong>{' '}
-                  {t('dashboard.payments.create_offer.payment_group_help_suffix')}
-                </p>
-              </div>
             </div>
           </div>
 
