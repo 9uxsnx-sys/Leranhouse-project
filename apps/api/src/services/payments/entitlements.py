@@ -3,6 +3,7 @@ from datetime import datetime
 from fastapi import HTTPException, Request
 from sqlmodel import Session, func, or_, select
 
+from src.db.collections import Collection
 from src.db.courses.courses import Course
 from src.db.organizations import Organization
 from src.db.payments.enums import (
@@ -19,7 +20,18 @@ from src.services.search.normalization import LIKE_ESCAPE_CHAR, build_like_patte
 
 
 def _resolve_resource(org_id: int, resource_uuid: str, db_session: Session) -> tuple[str, str]:
-    """Return (resource_type, name) for a course or podcast owned by the org."""
+    """Return (resource_type, name) for a course, podcast or collection."""
+    if resource_uuid.startswith("collection_"):
+        collection = db_session.exec(
+            select(Collection).where(
+                Collection.collection_uuid == resource_uuid,
+                Collection.org_id == org_id,
+            )
+        ).first()
+        if not collection:
+            raise HTTPException(status_code=404, detail="Collection not found")
+        return "collection", collection.name
+
     if resource_uuid.startswith("podcast_"):
         podcast = db_session.exec(
             select(Podcast).where(

@@ -7,6 +7,8 @@ from fastapi import HTTPException, Request
 from sqlmodel import Session, select
 
 from config.config import get_learnhouse_config
+from src.db.collections import Collection
+from src.db.collections_courses import CollectionCourse
 from src.db.courses.courses import Course
 from src.db.organizations import Organization
 from src.db.payments.enums import (
@@ -45,8 +47,40 @@ def _api_base_url(request: Request) -> Optional[str]:
 
 def _load_resources(
     org_id: int, resource_uuid: str, db_session: Session
-) -> tuple[str, str, AccessTypeEnum, Optional[int], bool]:
-    """Return (resource_type, name, access_type, price_amount, published)."""
+) -> tuple[str, str, AccessTypeEnum, Optional[int], bool, Optional[list[str]]]:
+    """Return (resource_type, name, access_type, price_amount, published, members).
+
+    ``members`` is only populated for collections and contains the member
+    course UUIDs that will be snapshotted into the order.
+    """
+    if resource_uuid.startswith("collection_"):
+        collection = db_session.exec(
+            select(Collection).where(
+                Collection.collection_uuid == resource_uuid,
+                Collection.org_id == org_id,
+            )
+        ).first()
+        if not collection:
+            raise HTTPException(status_code=404, detail="Collection not found")
+
+        members = [
+            course.course_uuid
+            for course in db_session.exec(
+                select(Course)
+                .join(CollectionCourse, CollectionCourse.course_id == Course.id)
+                .where(CollectionCourse.collection_id == collection.id)
+                .order_by(Course.creation_date)  # type: ignore[attr-defined]
+            ).all()
+        ]
+        return (
+            "collection",
+            collection.name,
+            collection.access_type,
+            collection.price_amount,
+            collection.published,
+            members,
+        )
+
     if resource_uuid.startswith("podcast_"):
         podcast = db_session.exec(
             select(Podcast).where(
@@ -62,6 +96,7 @@ def _load_resources(
             podcast.access_type,
             podcast.price_amount,
             podcast.published,
+            None,
         )
 
     course = db_session.exec(
@@ -78,6 +113,7 @@ def _load_resources(
         course.access_type,
         course.price_amount,
         course.published,
+        None,
     )
 
 
@@ -109,7 +145,7 @@ async def create_resource_checkout(
             status_code=403, detail="You are not a member of this organization"
         )
 
-    resource_type, resource_name, access_type, price_amount, published = _load_resources(
+    resource_type, resource_name, access_type, price_amount, published, members = _load_resources(
         org.id, resource_uuid, db_session
     )
 
@@ -119,6 +155,8 @@ async def create_resource_checkout(
         raise HTTPException(status_code=400, detail="Resource is not a paid resource")
     if price_amount is None or price_amount <= 0:
         raise HTTPException(status_code=400, detail="Resource has no price configured")
+    if resource_type == "collection" and not members:
+        raise HTTPException(status_code=400, detail="Collection has no courses")
 
     existing = db_session.exec(
         select(ResourceEntitlement).where(
@@ -152,6 +190,15 @@ async def create_resource_checkout(
     locale_value = locale if locale in SUPPORTED_LOCALES else "en"
 
     now = datetime.now()
+    price_snapshot: dict[str, Any] = {
+        "amount": int(price_amount),
+        "currency": "DZD",
+    }
+    if members is not None:
+        # Snapshot membership so later bundle edits never grant content the
+        # learner did not pay for.
+        price_snapshot["courses"] = members
+
     order = PaymentOrder(
         order_uuid=f"order_{uuid4()}",
         org_id=org.id,
@@ -161,7 +208,7 @@ async def create_resource_checkout(
         resource_name=resource_name,
         amount=int(price_amount),
         currency="DZD",
-        price_snapshot={"amount": int(price_amount), "currency": "DZD"},
+        price_snapshot=price_snapshot,
         payment_method=method_enum,
         status=PaymentOrderStatusEnum.PENDING,
         creation_date=now.isoformat(),

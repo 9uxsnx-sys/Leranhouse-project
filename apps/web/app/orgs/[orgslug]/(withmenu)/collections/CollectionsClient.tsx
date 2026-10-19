@@ -1,18 +1,11 @@
 'use client'
 import React, { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, BookCopy, ChevronLeft, ChevronRight, FolderOpen } from 'lucide-react'
+import { BookCopy, ChevronLeft, ChevronRight, FolderOpen } from 'lucide-react'
 import { CollectionCard } from '@components/Objects/Thumbnails/CollectionCard'
+import { ActionRow, ActionRowSearch, ActionRowSpacer } from '@components/ui/action-row'
 import { searchMatchesAny } from '@/lib/search/normalize'
 
-// Medusa components
-import { IconButton } from '@/components/ui/icon-button'
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 
 interface CollectionsClientProps {
@@ -101,48 +94,24 @@ function CollectionsClient(props: CollectionsClientProps) {
         {t('collections.collections') || 'Collections'}
       </h1>
 
-      {/* Search + Filter toolbar (only if collections exist) */}
+      {/* Search toolbar (only if collections exist) */}
       {allCollections.length > 0 && (
-        <div className="flex items-center gap-3 mb-8">
-          {/* Search + results count group (left side) */}
-          <div className="flex items-center gap-3">
-            <div className="relative w-80">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t('collections.search_collections') || 'Search collections...'}
-                className="w-full h-7 pl-8 pr-2 text-sm bg-white shadow-borders-base rounded-md placeholder:text-gray-400 focus:outline-none"
-              />
-            </div>
-
-            {searchQuery && (
-              <span className="txt-compact-xsmall text-ui-fg-muted whitespace-nowrap">
-                {filteredCollections.length} result{filteredCollections.length !== 1 ? 's' : ''} for &ldquo;{searchQuery}&rdquo;
-              </span>
-            )}
-          </div>
-
-          {/* Spacer pushes filter to the right */}
-          <div className="flex-1" />
-
-          {/* Filter — Medusa IconButton + DropdownMenu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label="Filter collections">
-                <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M2.5 4.5h10M4.5 7.5h6M6.5 10.5h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </IconButton>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white min-w-0 w-28">
-              <DropdownMenuItem>All Collections</DropdownMenuItem>
-              <DropdownMenuItem>Public</DropdownMenuItem>
-              <DropdownMenuItem>Private</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        <ActionRow>
+          <ActionRowSearch
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+            placeholder={t('collections.dashboard.search_placeholder')}
+            summary={
+              searchQuery
+                ? t('collections.dashboard.search_results', {
+                    count: filteredCollections.length,
+                    query: searchQuery,
+                  })
+                : undefined
+            }
+          />
+          <ActionRowSpacer />
+        </ActionRow>
       )}
 
       {/* Grid area */}
@@ -156,6 +125,8 @@ function CollectionsClient(props: CollectionsClientProps) {
               description={collection.description || ''}
               courses={collection.courses || []}
               org_uuid={org_uuid}
+              thumbnail_image={collection.thumbnail_image}
+              collection_uuid={collection.collection_uuid}
               public={collection.public || false}
               creation_date={collection.creation_date || collection.created_at || ''}
               href={`/orgs/${orgslug}/collection/${collection.collection_uuid.replace('collection_', '')}`}

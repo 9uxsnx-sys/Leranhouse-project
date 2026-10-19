@@ -57,17 +57,10 @@ def _resolve_secret(config: PaymentConfig) -> Optional[str]:
     return decrypt_secret(encrypted)
 
 
-def _ensure_course_enrollment(order: PaymentOrder, db_session: Session, now: datetime) -> None:
+def _ensure_course_enrollment(
+    course: Course, order: PaymentOrder, db_session: Session, now: datetime
+) -> None:
     """Create the TrailRun so the purchased course lands in the Progress tab."""
-    if order.resource_type != "course":
-        return
-
-    course = db_session.exec(
-        select(Course).where(Course.course_uuid == order.resource_uuid)
-    ).first()
-    if not course:
-        return
-
     trail = db_session.exec(
         select(Trail).where(
             Trail.org_id == order.org_id,
@@ -103,6 +96,62 @@ def _ensure_course_enrollment(order: PaymentOrder, db_session: Session, now: dat
                 update_date=now.isoformat(),
             )
         )
+
+
+def _fan_out_collection(order: PaymentOrder, db_session: Session, now: datetime) -> None:
+    """Grant every course in the purchase snapshot, like buying each one.
+
+    Membership is read from ``price_snapshot["courses"]`` so later bundle edits
+    can never retroactively grant or remove content.
+    """
+    snapshot = order.price_snapshot or {}
+    member_uuids = snapshot.get("courses") or []
+
+    for course_uuid in member_uuids:
+        course = db_session.exec(
+            select(Course).where(Course.course_uuid == course_uuid)
+        ).first()
+        if not course:
+            continue
+
+        existing = db_session.exec(
+            select(ResourceEntitlement).where(
+                ResourceEntitlement.org_id == order.org_id,
+                ResourceEntitlement.user_id == order.user_id,
+                ResourceEntitlement.resource_uuid == course_uuid,
+                ResourceEntitlement.status == EntitlementStatusEnum.ACTIVE,
+            )
+        ).first()
+        if not existing:
+            db_session.add(
+                ResourceEntitlement(
+                    org_id=order.org_id,
+                    user_id=order.user_id,
+                    resource_uuid=course_uuid,
+                    resource_type="course",
+                    source=EntitlementSourceEnum.PURCHASE,
+                    order_id=order.id,
+                    status=EntitlementStatusEnum.ACTIVE,
+                    valid_from=now,
+                    granted_at=now,
+                )
+            )
+
+        _ensure_course_enrollment(course, order, db_session, now)
+
+
+def _ensure_course_enrollment_for_order(
+    order: PaymentOrder, db_session: Session, now: datetime
+) -> None:
+    """Enroll the learner in the content a paid order unlocked."""
+    if order.resource_type == "course":
+        course = db_session.exec(
+            select(Course).where(Course.course_uuid == order.resource_uuid)
+        ).first()
+        if course:
+            _ensure_course_enrollment(course, order, db_session, now)
+    elif order.resource_type == "collection":
+        _fan_out_collection(order, db_session, now)
 
 
 def _mark_paid(order: PaymentOrder, checkout: dict[str, Any], now: datetime) -> None:
@@ -167,7 +216,7 @@ def _handle_event(
                 )
             )
 
-        _ensure_course_enrollment(order, db_session, now)
+        _ensure_course_enrollment_for_order(order, db_session, now)
 
     elif event_type == "checkout.failed":
         order.status = PaymentOrderStatusEnum.FAILED

@@ -1,0 +1,378 @@
+'use client'
+import { BookCopy, ChevronLeft, ChevronRight, Loader2, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import React, { useEffect, useMemo, useState } from 'react'
+import useSWR from 'swr'
+import toast from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
+
+import { useOrg } from '@components/Contexts/OrgContext'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { CollectionCard } from '@components/Objects/Thumbnails/CollectionCard'
+import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
+import Modal from '@components/Objects/StyledElements/Modal/Modal'
+import { ActionRow, ActionRowActions, ActionRowSearch, ActionRowSpacer } from '@components/ui/action-row'
+import { Button } from '@components/ui/button'
+import { ConceptIcon } from '@components/ui/icons'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@components/ui/dropdown-menu'
+import { getAPIUrl, getUriWithOrg } from '@services/config/config'
+import { createCollection, deleteCollection } from '@services/courses/collections'
+import { revalidateTags, swrFetcher } from '@services/utils/ts/requests'
+import { searchMatchesAny } from '@/lib/search/normalize'
+
+type CollectionsHomeProps = {
+  orgslug: string
+  org_id: string | number
+}
+
+const ITEMS_PER_PAGE = 8
+
+const removeCollectionPrefix = (uuid: string) => uuid.replace('collection_', '')
+
+function CollectionsHome(params: CollectionsHomeProps) {
+  const { t } = useTranslation()
+  const router = useRouter()
+  const org = useOrg() as any
+  const session = useLHSession() as any
+  const access_token = session?.data?.tokens?.access_token
+
+  const collectionsKey =
+    access_token && params.org_id
+      ? `${getAPIUrl()}collections/org/${params.org_id}/page/1/limit/500`
+      : null
+
+  const { data, isLoading, mutate } = useSWR(
+    collectionsKey,
+    (url: string) => swrFetcher(url, access_token),
+    { revalidateOnFocus: false, dedupingInterval: 30000 }
+  )
+
+  const collections: any[] = useMemo(() => data || [], [data])
+
+  const [searchQuery, setSearchQuery] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [isCreating, setIsCreating] = useState(false)
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [newName, setNewName] = useState('')
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery])
+
+  const filtered = useMemo(() => {
+    if (!searchQuery.trim()) return collections
+    return collections.filter((collection: any) =>
+      searchMatchesAny([collection.name, collection.description], searchQuery)
+    )
+  }, [collections, searchQuery])
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
+  const paginated = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE
+    return filtered.slice(start, start + ITEMS_PER_PAGE)
+  }, [filtered, currentPage])
+
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= totalPages) setCurrentPage(page)
+  }
+
+  const openCreate = () => {
+    setNewName('')
+    setIsCreateModalOpen(true)
+  }
+
+  const handleCreate = async () => {
+    const name = newName.trim()
+    if (!name) {
+      toast.error(t('collections.enter_collection_name'))
+      return
+    }
+    setIsCreating(true)
+    try {
+      const created = await createCollection(
+        params.org_id,
+        { name, description: '', public: true, published: false },
+        access_token
+      )
+      const createdUuid =
+        created?.collection_uuid || created?.data?.collection_uuid
+      if (!createdUuid) {
+        throw new Error('missing collection uuid')
+      }
+      setIsCreateModalOpen(false)
+      await mutate()
+      await revalidateTags(['collections'], params.orgslug)
+      router.push(
+        getUriWithOrg(
+          params.orgslug,
+          `/dash/collections/collection/${removeCollectionPrefix(createdUuid)}/general`
+        )
+      )
+    } catch {
+      toast.error(t('collections.failed_to_create_collection'))
+    } finally {
+      setIsCreating(false)
+    }
+  }
+
+  const handleDelete = async (collection: any) => {
+    const toastId = toast.loading(t('collections.dashboard.delete_loading'))
+    try {
+      await deleteCollection(collection.collection_uuid, access_token)
+      await mutate()
+      await revalidateTags(['collections'], params.orgslug)
+      toast.success(t('collections.dashboard.deleted_success'), { id: toastId })
+    } catch {
+      toast.error(t('collections.dashboard.delete_error'), { id: toastId })
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="pt-8 px-6 flex justify-center py-24">
+        <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className="pt-8 px-6 pb-0"
+      style={{
+        display: 'grid',
+        gridTemplateRows: 'auto auto 1fr auto',
+        minHeight: '100dvh',
+      }}
+    >
+      <h1 className="text-[28px] font-semibold text-ui-fg-base mb-6">
+        {t('collections.collections')}
+      </h1>
+
+      {collections.length > 0 && (
+        <ActionRow>
+          <ActionRowSearch
+            value={searchQuery}
+            onValueChange={setSearchQuery}
+            placeholder={t('collections.dashboard.search_placeholder')}
+            summary={
+              searchQuery
+                ? t('collections.dashboard.search_results', {
+                    count: filtered.length,
+                    query: searchQuery,
+                  })
+                : undefined
+            }
+          />
+
+          <ActionRowSpacer />
+
+          <ActionRowActions>
+            <Button
+              variant="primary"
+              size="small"
+              className="gap-x-1.5"
+              onClick={openCreate}
+            >
+              <ConceptIcon.add size={14} />
+              {t('collections.dashboard.new_collection')}
+            </Button>
+          </ActionRowActions>
+        </ActionRow>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {paginated.map((collection: any) => (
+          <div key={collection.collection_uuid} className="relative group">
+            <CollectionCard
+              id={removeCollectionPrefix(collection.collection_uuid)}
+              collection_uuid={collection.collection_uuid}
+              title={collection.name}
+              description={collection.description || ''}
+              courses={collection.courses || []}
+              org_uuid={org?.org_uuid}
+              thumbnail_image={collection.thumbnail_image}
+              public={collection.public}
+              creation_date={collection.creation_date}
+              href={getUriWithOrg(
+                params.orgslug,
+                `/dash/collections/collection/${removeCollectionPrefix(
+                  collection.collection_uuid
+                )}/general`
+              )}
+            />
+
+            <div className="absolute top-2 right-2 z-20">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    aria-label={t('collections.dashboard.actions')}
+                    className="p-1.5 rounded-md bg-white/90 backdrop-blur-sm text-gray-500 hover:text-gray-700 shadow-borders-base transition-colors"
+                  >
+                    <MoreHorizontal size={16} />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-44 bg-white">
+                  <DropdownMenuItem
+                    onClick={() =>
+                      router.push(
+                        getUriWithOrg(
+                          params.orgslug,
+                          `/dash/collections/collection/${removeCollectionPrefix(
+                            collection.collection_uuid
+                          )}/general`
+                        )
+                      )
+                    }
+                    className="gap-2 cursor-pointer"
+                  >
+                    <Pencil size={14} className="text-gray-400" />
+                    {t('collections.dashboard.edit')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <ConfirmationModal
+                      confirmationMessage={t('collections.delete_collection_confirm')}
+                      confirmationButtonText={t('collections.delete_collection')}
+                      dialogTitle={t('collections.delete_collection_title', {
+                        name: collection.name,
+                      })}
+                      dialogTrigger={
+                        <button className="w-full text-left flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] font-medium text-red-600 hover:bg-red-50 transition-colors">
+                          <Trash2 size={14} />
+                          {t('collections.delete_collection')}
+                        </button>
+                      }
+                      functionToExecute={() => handleDelete(collection)}
+                      status="warning"
+                    />
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        ))}
+
+        {filtered.length === 0 && searchQuery && (
+          <div className="col-span-full flex flex-col justify-center items-center py-16 px-4">
+            <div className="p-4 bg-ui-bg-base rounded-full shadow-borders-base mb-4">
+              <BookCopy className="w-8 h-8 text-ui-fg-muted" strokeWidth={1.5} />
+            </div>
+            <h2 className="text-xl font-semibold text-ui-fg-base mb-2">
+              {t('collections.dashboard.no_search_results')}
+            </h2>
+            <p className="txt-compact-small text-ui-fg-muted">
+              {t('collections.dashboard.try_different_search')}
+            </p>
+          </div>
+        )}
+
+        {collections.length === 0 && (
+          <div className="col-span-full flex flex-col justify-center items-center py-16 px-4">
+            <div className="p-4 bg-ui-bg-base rounded-full shadow-borders-base mb-4">
+              <BookCopy className="w-8 h-8 text-ui-fg-muted" strokeWidth={1.5} />
+            </div>
+            <h1 className="text-xl font-semibold text-ui-fg-base mb-2">
+              {t('collections.no_collections')}
+            </h1>
+            <p className="txt-compact-small text-ui-fg-muted mb-6 text-center max-w-xs">
+              {t('collections.create_collections_placeholder')}
+            </p>
+            <Button variant="primary" size="small" className="gap-x-1.5" onClick={openCreate}>
+              <ConceptIcon.add size={14} />
+              {t('collections.dashboard.new_collection')}
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-1 pt-6 pb-8">
+          <Button
+            variant="transparent"
+            size="small"
+            onClick={() => goToPage(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span className="hidden sm:inline ml-1">{t('pagination.previous')}</span>
+          </Button>
+
+          <div className="flex items-center gap-1 mx-2">
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => goToPage(page)}
+                className={`w-7 h-7 txt-compact-small-plus rounded-md transition-colors ${
+                  currentPage === page
+                    ? 'bg-ui-bg-base shadow-borders-base text-ui-fg-base'
+                    : 'text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-base-hover'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+
+          <Button
+            variant="transparent"
+            size="small"
+            onClick={() => goToPage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            <span className="hidden sm:inline mr-1">{t('pagination.next')}</span>
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
+
+      <Modal
+        isDialogOpen={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+        minHeight="no-min"
+        dialogTitle={t('collections.dashboard.new_collection')}
+        dialogDescription={t('collections.create_collection_desc')}
+        dialogContent={
+          <div className="space-y-4">
+            <label className="block">
+              <span className="text-sm font-medium text-gray-700">
+                {t('collections.collection_name')}
+              </span>
+              <input
+                autoFocus
+                type="text"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleCreate()
+                }}
+                placeholder={t('collections.enter_collection_name_placeholder')}
+                maxLength={100}
+                className="mt-1 block w-full h-9 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
+              />
+            </label>
+            <div className="flex items-center justify-end gap-2">
+              <Button
+                variant="secondary"
+                size="small"
+                onClick={() => setIsCreateModalOpen(false)}
+                disabled={isCreating}
+              >
+                {t('common.cancel')}
+              </Button>
+              <Button size="small" onClick={handleCreate} disabled={isCreating}>
+                {isCreating && <Loader2 size={14} className="animate-spin" />}
+                {t('collections.create_collection_btn')}
+              </Button>
+            </div>
+          </div>
+        }
+      />
+    </div>
+  )
+}
+
+export default CollectionsHome

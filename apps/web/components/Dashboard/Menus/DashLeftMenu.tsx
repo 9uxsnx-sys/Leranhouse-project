@@ -17,6 +17,7 @@ import {
   Headphones,
   BarChart3,
   Search,
+  Library,
 } from 'lucide-react'
 import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
 import Link from 'next/link'
@@ -109,6 +110,7 @@ function DashLeftMenu() {
   const showCommunities = isEnabled('communities')
   const showPodcasts = isEnabled('podcasts')
   const showPayments = isEnabled('payments')
+  const showCollections = rf?.collections?.enabled !== false
 
   // Floating indicator: measure active nav item position
   const navContainerRef = useRef<HTMLDivElement>(null)
@@ -251,6 +253,19 @@ function DashLeftMenu() {
                   active={isActivePath('/dash/courses')}
                 />
               </div>
+
+              {/* Collections */}
+              {showCollections && (
+                <div data-nav-item>
+                  <MenuLink
+                    href="/dash/collections"
+                    icon={<Library className="w-[18px] h-[18px]" />}
+                    label={t('collections.collections')}
+                    isCollapsed={isCollapsed}
+                    active={isActivePath('/dash/collections')}
+                  />
+                </div>
+              )}
 
 
               {showCommunities && (

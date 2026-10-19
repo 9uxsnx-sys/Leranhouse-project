@@ -195,3 +195,90 @@ class TestCheckoutCreation:
         order = db.exec(select(PaymentOrder)).one()
         assert order.status == PaymentOrderStatusEnum.FAILED
         assert order.failure_message
+
+
+@pytest.fixture
+def paid_collection(db, org, collection, course):
+    """A published paid collection with one member course."""
+    collection.access_type = AccessTypeEnum.PAID
+    collection.price_amount = 2500
+    collection.public = False
+    collection.published = True
+    db.add(collection)
+    db.commit()
+    db.refresh(collection)
+    return collection
+
+
+class TestCollectionCheckoutCreation:
+    async def test_creates_order_with_membership_snapshot(
+        self, db, org, paid_collection, payment_config, regular_user, mock_request
+    ):
+        with patch(
+            "src.services.payments.checkout.ChargilyClient", FakeChargilyClient
+        ):
+            result = await create_resource_checkout(
+                mock_request,
+                regular_user,
+                org.id,
+                paid_collection.collection_uuid,
+                db,
+            )
+
+        order = db.exec(
+            select(PaymentOrder).where(PaymentOrder.order_uuid == result["order_uuid"])
+        ).one()
+        assert order.resource_type == "collection"
+        assert order.amount == 2500
+        assert order.price_snapshot["courses"] == ["course_test"]
+
+    async def test_empty_paid_collection_is_rejected(
+        self, db, org, collection, payment_config, regular_user, mock_request
+    ):
+        collection.access_type = AccessTypeEnum.PAID
+        collection.price_amount = 2500
+        collection.public = False
+        collection.published = True
+        db.add(collection)
+        db.commit()
+
+        from src.db.collections_courses import CollectionCourse
+
+        for link in db.exec(
+            select(CollectionCourse).where(
+                CollectionCourse.collection_id == collection.id
+            )
+        ).all():
+            db.delete(link)
+        db.commit()
+
+        with pytest.raises(HTTPException) as exc:
+            await create_resource_checkout(
+                mock_request,
+                regular_user,
+                org.id,
+                collection.collection_uuid,
+                db,
+            )
+
+        assert exc.value.status_code == 400
+        assert "no courses" in exc.value.detail
+
+    async def test_draft_collection_is_rejected(
+        self, db, org, paid_collection, payment_config, regular_user, mock_request
+    ):
+        paid_collection.published = False
+        db.add(paid_collection)
+        db.commit()
+
+        with pytest.raises(HTTPException) as exc:
+            await create_resource_checkout(
+                mock_request,
+                regular_user,
+                org.id,
+                paid_collection.collection_uuid,
+                db,
+            )
+
+        assert exc.value.status_code == 400
+        assert "not published" in exc.value.detail

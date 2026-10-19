@@ -5,6 +5,8 @@ from sqlmodel import Session, select, or_, and_, func
 from src.db.usergroup_resources import UserGroupResource
 from src.db.usergroup_user import UserGroupUser
 from src.db.organizations import Organization
+from src.db.collections import Collection
+from src.db.collections_courses import CollectionCourse
 from src.db.roles import Role
 from src.db.user_organizations import UserOrganization
 from src.security.features_utils.usage import (
@@ -1118,6 +1120,32 @@ async def update_course(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="A paid course requires a positive price",
         )
+
+    # Bundles must stay sellable: a course that belongs to a collection cannot
+    # be switched to the restricted (users_only) mode.
+    if (
+        course.access_type == AccessTypeEnum.USERS_ONLY
+        and (
+            "access_type" in course_object.model_fields_set
+            or "public" in course_object.model_fields_set
+        )
+    ):
+        collection_names = db_session.exec(
+            select(Collection.name)
+            .join(
+                CollectionCourse,
+                CollectionCourse.collection_id == Collection.id,
+            )
+            .where(CollectionCourse.course_id == course.id)
+        ).all()
+        if collection_names:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    "This course is part of the following collections and cannot "
+                    "be made private: " + ", ".join(sorted(collection_names))
+                ),
+            )
 
     # Complete the course object
     course.update_date = str(datetime.now())

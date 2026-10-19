@@ -7,12 +7,12 @@ communities_security.py (~1,200 lines) with a single configurable implementation
 
 Access Rules:
 - Dashboard View: Admins/Authors always see all resources
-- Courses & podcasts (three-mode model):
+- Courses, podcasts & collections (three-mode model):
     - Draft (`published = false`): author / admin / maintainer only
     - Free (`public`): every logged-in user
     - Restricted (`users_only`): only members of the linked UserGroups
     - Paid (`paid`): active purchase entitlement, or a linked UserGroup (bypass)
-- Other resources (communities, boards, collections): legacy public/usergroup rules
+- Other resources (communities, boards): legacy public/usergroup rules
 - Author of resource: always accessible to author
 """
 
@@ -171,9 +171,19 @@ class ResourceAccessChecker:
         """Check if anonymous user can read the resource."""
         is_public, is_published = await self._is_public_and_published(resource_uuid, config)
 
-        # For resources with published field, both must be true
+        # For resources with published field, both must be true. Anonymous
+        # visitors also need a Free access type: the legacy `public` flag alone
+        # must not expose restricted or paid resources.
         if config.has_published_field:
-            if is_public and is_published:
+            access_type = await self._get_access_type(resource_uuid, config)
+            if (
+                is_public
+                and is_published
+                and (
+                    not config.supports_access_types
+                    or access_type in (None, AccessTypeEnum.PUBLIC)
+                )
+            ):
                 return AccessDecision(
                     allowed=True,
                     reason="Resource is public and published",
@@ -271,9 +281,18 @@ class ResourceAccessChecker:
             f"is_public={is_public}, is_published={is_published}, access_type={access_type}"
         )
 
-        # Rule 1: Free + published = OK for everyone
+        # Rule 1: Free + published = OK for everyone. The access type must be
+        # Free too: a paid resource that still carries the legacy `public` flag
+        # must not bypass the paywall.
         if config.has_published_field:
-            if is_public and is_published:
+            if (
+                is_public
+                and is_published
+                and (
+                    not config.supports_access_types
+                    or access_type in (None, AccessTypeEnum.PUBLIC)
+                )
+            ):
                 return AccessDecision(
                     allowed=True,
                     reason="Resource is free and published",
@@ -826,11 +845,17 @@ class ResourceAccessChecker:
             return None
 
         value = getattr(resource, "access_type", None)
-        if isinstance(value, str):
+        if isinstance(value, AccessTypeEnum):
+            pass
+        elif isinstance(value, str):
             try:
                 value = AccessTypeEnum(value)
             except ValueError:
                 value = None
+        else:
+            # Resources without an access model (or incomplete stubs) have no
+            # access type; the caller falls back to the legacy rules.
+            value = None
 
         self._access_type_cache[resource_uuid] = value
         return value

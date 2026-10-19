@@ -1,13 +1,28 @@
 from typing import List
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, File, Form, Query, Request, UploadFile
 from src.core.events.database import get_db_session
-from src.db.collections import CollectionCreate, CollectionRead, CollectionUpdate
+from src.db.collections import (
+    CollectionCourseRead,
+    CollectionCreate,
+    CollectionRead,
+    CollectionUpdate,
+)
+from src.db.courses.courses import ThumbnailType
 from src.security.auth import get_current_user
 from src.services.users.users import PublicUser
+from src.services.courses.collection_media import (
+    delete_collection_banner,
+    delete_collection_thumbnail,
+    update_collection_banner,
+    update_collection_thumbnail,
+)
 from src.services.courses.collections import (
+    add_course_to_collection,
     create_collection,
     get_collection,
+    get_collection_courses,
     get_collections,
+    remove_course_from_collection,
     update_collection,
     delete_collection,
 )
@@ -24,18 +39,22 @@ router = APIRouter()
     responses={
         200: {"description": "Collection created.", "model": CollectionRead},
         403: {"description": "Caller lacks permission to create collections in this org"},
+        422: {"description": "Invalid collection payload"},
     },
 )
 async def api_create_collection(
     request: Request,
     collection_object: CollectionCreate,
+    org_id: int,
     current_user: PublicUser = Depends(get_current_user),
     db_session=Depends(get_db_session),
 ) -> CollectionRead:
     """
     Create new Collection
     """
-    return await create_collection(request, collection_object, current_user, db_session)
+    return await create_collection(
+        request, collection_object, current_user, db_session, org_id=org_id
+    )
 
 
 @router.get(
@@ -83,15 +102,182 @@ async def api_get_collections_by(
     return await get_collections(request, org_id, current_user, db_session, page, limit)
 
 
+@router.get(
+    "/{collection_uuid}/courses",
+    response_model=List[CollectionCourseRead],
+    summary="List collection courses",
+    description="List the courses that belong to a collection, with lesson counts.",
+    responses={
+        200: {"description": "Courses in the collection."},
+        404: {"description": "Collection not found"},
+    },
+)
+async def api_get_collection_courses(
+    request: Request,
+    collection_uuid: str,
+    search: str = "",
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=20, ge=1, le=100),
+    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+) -> List[CollectionCourseRead]:
+    return await get_collection_courses(
+        request,
+        collection_uuid,
+        current_user,
+        db_session,
+        search=search,
+        page=page,
+        limit=limit,
+    )
+
+
+@router.post(
+    "/{collection_uuid}/courses",
+    response_model=CollectionRead,
+    summary="Add course to collection",
+    description="Add a course to a collection. Private (`users_only`) courses are rejected.",
+    responses={
+        200: {"description": "Course added.", "model": CollectionRead},
+        404: {"description": "Collection or course not found"},
+        409: {"description": "Course is already part of the collection"},
+        422: {"description": "Course is private"},
+    },
+)
+async def api_add_collection_course(
+    request: Request,
+    collection_uuid: str,
+    course_uuid: str,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+) -> CollectionRead:
+    return await add_course_to_collection(
+        request, collection_uuid, course_uuid, current_user, db_session
+    )
+
+
+@router.delete(
+    "/{collection_uuid}/courses",
+    response_model=CollectionRead,
+    summary="Remove course from collection",
+    description="Remove a course from a collection.",
+    responses={
+        200: {"description": "Course removed.", "model": CollectionRead},
+        404: {"description": "Collection, course or membership not found"},
+        422: {"description": "A paid collection must keep at least one course"},
+    },
+)
+async def api_remove_collection_course(
+    request: Request,
+    collection_uuid: str,
+    course_uuid: str,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+) -> CollectionRead:
+    return await remove_course_from_collection(
+        request, collection_uuid, course_uuid, current_user, db_session
+    )
+
+
+@router.put(
+    "/{collection_uuid}/thumbnail",
+    response_model=CollectionRead,
+    summary="Update collection thumbnail",
+    description="Upload or replace a collection cover image or video.",
+    responses={
+        200: {"description": "Thumbnail updated.", "model": CollectionRead},
+        404: {"description": "Collection not found"},
+        422: {"description": "Invalid thumbnail file"},
+    },
+)
+async def api_update_collection_thumbnail(
+    request: Request,
+    collection_uuid: str,
+    thumbnail_type: ThumbnailType = Form(default=ThumbnailType.IMAGE),
+    thumbnail: UploadFile | None = File(default=None),
+    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+) -> CollectionRead:
+    return await update_collection_thumbnail(
+        request, collection_uuid, current_user, db_session, thumbnail, thumbnail_type
+    )
+
+
+@router.delete(
+    "/{collection_uuid}/thumbnail",
+    response_model=CollectionRead,
+    summary="Delete collection thumbnail",
+    description="Remove the cover image and video from a collection.",
+    responses={
+        200: {"description": "Thumbnail deleted.", "model": CollectionRead},
+        404: {"description": "Collection not found"},
+    },
+)
+async def api_delete_collection_thumbnail(
+    request: Request,
+    collection_uuid: str,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+) -> CollectionRead:
+    return await delete_collection_thumbnail(
+        request, collection_uuid, current_user, db_session
+    )
+
+
+@router.put(
+    "/{collection_uuid}/banner",
+    response_model=CollectionRead,
+    summary="Update collection banner",
+    description="Upload or replace a collection banner image.",
+    responses={
+        200: {"description": "Banner updated.", "model": CollectionRead},
+        404: {"description": "Collection not found"},
+        422: {"description": "Invalid banner file"},
+    },
+)
+async def api_update_collection_banner(
+    request: Request,
+    collection_uuid: str,
+    banner: UploadFile | None = File(default=None),
+    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+) -> CollectionRead:
+    return await update_collection_banner(
+        request, collection_uuid, current_user, db_session, banner
+    )
+
+
+@router.delete(
+    "/{collection_uuid}/banner",
+    response_model=CollectionRead,
+    summary="Delete collection banner",
+    description="Remove the banner image from a collection.",
+    responses={
+        200: {"description": "Banner deleted.", "model": CollectionRead},
+        404: {"description": "Collection not found"},
+    },
+)
+async def api_delete_collection_banner(
+    request: Request,
+    collection_uuid: str,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+) -> CollectionRead:
+    return await delete_collection_banner(
+        request, collection_uuid, current_user, db_session
+    )
+
+
 @router.put(
     "/{collection_uuid}",
     response_model=CollectionRead,
     summary="Update collection",
-    description="Update a collection by its UUID.",
+    description="Update a collection by its UUID. Omitted fields are left untouched.",
     responses={
         200: {"description": "Collection updated.", "model": CollectionRead},
         403: {"description": "Caller lacks permission to update this collection"},
         404: {"description": "Collection not found"},
+        422: {"description": "Invalid access configuration"},
     },
 )
 async def api_update_collection(

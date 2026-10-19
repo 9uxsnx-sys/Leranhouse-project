@@ -15,6 +15,7 @@ import {
   Book,
   MessageCircleMore,
   Headphones,
+  Library,
 } from 'lucide-react'
 import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
 import Link from 'next/link'
@@ -86,6 +87,7 @@ function UserLeftMenu() {
   const showCommunities = isEnabled('communities')
   const showPodcasts = isEnabled('podcasts')
   const showPayments = isEnabled('payments')
+  const showCollections = rf?.collections?.enabled !== false
 
   // Floating indicator: measure active nav item position
   const navContainerRef = useRef<HTMLDivElement>(null)
@@ -214,6 +216,19 @@ function UserLeftMenu() {
                 active={isActivePath('/courses')}
               />
             </div>
+
+            {/* Collections */}
+            {showCollections && (
+              <div data-nav-item>
+                <MenuLink
+                  href={getUriWithOrg(orgslug, '/collections')}
+                  icon={<Library className="w-[18px] h-[18px]" />}
+                  label={t('collections.collections')}
+                  isCollapsed={isCollapsed}
+                  active={isActivePath('/collections')}
+                />
+              </div>
+            )}
 
             {showCommunities && (
               <div data-nav-item>

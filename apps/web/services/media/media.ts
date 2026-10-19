@@ -73,6 +73,24 @@ export function getCourseBannerMediaDirectory(
   return uri
 }
 
+export function getCollectionThumbnailMediaDirectory(
+  orgUUID: string,
+  collectionUUID: string,
+  fileId: string
+) {
+  let uri = `${getMediaUrl()}content/orgs/${orgUUID}/collections/${collectionUUID}/thumbnails/${fileId}`
+  return uri
+}
+
+export function getCollectionBannerMediaDirectory(
+  orgUUID: string,
+  collectionUUID: string,
+  fileId: string
+) {
+  let uri = `${getMediaUrl()}content/orgs/${orgUUID}/collections/${collectionUUID}/banners/${fileId}`
+  return uri
+}
+
 export function getBoardThumbnailMediaDirectory(
   orgUUID: string,
   boardUUID: string,

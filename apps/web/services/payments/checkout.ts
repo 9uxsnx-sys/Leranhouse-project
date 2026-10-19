@@ -7,7 +7,7 @@ export async function createResourceCheckout(
   orgId: number,
   data: {
     resource_uuid: string
-    resource_type?: 'course' | 'podcast'
+    resource_type?: 'course' | 'podcast' | 'collection'
     payment_method?: 'edahabia' | 'cib' | 'chargily_app'
     locale?: string
   },

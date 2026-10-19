@@ -2,7 +2,7 @@
 
 > Turn the existing (but dormant) **Collections** resource into a first-class, course-grade product: full media, three access modes, a dashboard editor, and a purchase flow that mirrors buying each course individually.
 
-**Status:** planned — no implementation started.
+**Status:** in progress — Phase 0 ✅ (paid lock verified), Phase 1 ✅ (schema, migration, RBAC), Phase 2 ✅ (CRUD, membership, validation), Phase 3 ✅ (media), Phase 4 ✅ (checkout, snapshot, fan-out), Phase 5 ✅ (dashboard listing + editor), Phase 6 ✅ (learner listing, detail, success branch, nav; buy → all courses in Progress). Phase 7 deferred.
 **Last updated:** 2026-10-19
 **Scope:** desktop/web only. No mobile action bar. No refunds.
 
@@ -364,6 +364,7 @@ Minor: `/trail` sorts by `creation_date`; six runs share one timestamp. Add a na
 ### Phase 6 — Learner UI & navigation
 - Listing, detail, success-page branch, nav entries, retire the legacy create form.
 - Exit: buy from the collection page → all courses in `/trail`.
+- Verified: a signed `checkout.paid` for a 2-course bundle produced 3 active entitlements (bundle + 2 courses) and both courses on the Progress page; the Access tab Public → Paid → price → Save round-trip persists `access_type=PAID`.
 
 ### Phase 7 — Deferred
 - SEO tab, Offers row type, podcasts as members (polymorphic join table), removal of the Payment Groups tab.

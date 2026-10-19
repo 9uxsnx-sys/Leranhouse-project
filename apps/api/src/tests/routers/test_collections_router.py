@@ -50,7 +50,7 @@ class TestGetCollection:
     ):
         response = await client.get("/api/v1/collections/fake")
 
-        assert response.status_code == 409
+        assert response.status_code == 404
 
 
 class TestGetCollectionsByOrg:
@@ -77,10 +77,9 @@ class TestCreateCollection:
             "name": "New",
             "public": True,
             "courses": [1],
-            "org_id": 1,
         }
 
-        response = await client.post("/api/v1/collections/", json=payload)
+        response = await client.post("/api/v1/collections/?org_id=1", json=payload)
 
         assert response.status_code == 200
         body = response.json()

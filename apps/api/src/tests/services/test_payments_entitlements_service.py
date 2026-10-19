@@ -108,6 +108,48 @@ class TestResourceEntitlements:
             ).all()
         ) == 1
 
+
+class TestCollectionEntitlements:
+    async def test_grant_and_list_for_collection(
+        self, db, org, collection, admin_user, regular_user, authorized, mock_request
+    ):
+        granted = await bulk_grant_entitlements(
+            mock_request,
+            admin_user,
+            org.id,
+            collection.collection_uuid,
+            [regular_user.id],
+            db,
+        )
+        assert granted == {"granted": [regular_user.id], "already": [], "skipped": []}
+
+        listed = await list_resource_entitlements(
+            mock_request, admin_user, org.id, collection.collection_uuid, db
+        )
+        assert listed["total"] == 1
+
+        entitlement = db.exec(
+            select(ResourceEntitlement).where(
+                ResourceEntitlement.user_id == regular_user.id
+            )
+        ).one()
+        assert entitlement.resource_type == "collection"
+
+    async def test_unknown_collection_is_rejected(
+        self, db, org, admin_user, regular_user, authorized, mock_request
+    ):
+        with pytest.raises(HTTPException) as exc:
+            await bulk_grant_entitlements(
+                mock_request,
+                admin_user,
+                org.id,
+                "collection_missing",
+                [regular_user.id],
+                db,
+            )
+
+        assert exc.value.status_code == 404
+
     async def test_grant_skips_non_members(
         self, db, org, course, admin_user, authorized, mock_request
     ):

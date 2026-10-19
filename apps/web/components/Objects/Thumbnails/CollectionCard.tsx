@@ -1,7 +1,10 @@
 'use client'
 import { useMemo } from 'react'
 import Link from 'next/link'
-import { getCourseThumbnailMediaDirectory } from '@services/media/media'
+import {
+  getCollectionThumbnailMediaDirectory,
+  getCourseThumbnailMediaDirectory,
+} from '@services/media/media'
 
 export interface CollectionCardProps {
   id: string
@@ -12,6 +15,9 @@ export interface CollectionCardProps {
   href?: string
   public: boolean
   creation_date: string
+  /** Collection's own cover. Falls back to the first member course's cover. */
+  thumbnail_image?: string
+  collection_uuid?: string
 }
 
 function formatDate(dateStr: string) {
@@ -30,11 +36,13 @@ function formatDate(dateStr: string) {
   }
 }
 
-export function CollectionCard({ id, title, description, courses, org_uuid, href, ...props }: CollectionCardProps) {
+export function CollectionCard({ id, title, description, courses, org_uuid, href, thumbnail_image, collection_uuid, ...props }: CollectionCardProps) {
   const firstCourse = courses?.[0]
-  const imageUrl = firstCourse?.thumbnail_image && org_uuid
-    ? getCourseThumbnailMediaDirectory(org_uuid, firstCourse.course_uuid, firstCourse.thumbnail_image)
-    : ''
+  const imageUrl = thumbnail_image && collection_uuid && org_uuid
+    ? getCollectionThumbnailMediaDirectory(org_uuid, collection_uuid, thumbnail_image)
+    : firstCourse?.thumbnail_image && org_uuid
+      ? getCourseThumbnailMediaDirectory(org_uuid, firstCourse.course_uuid, firstCourse.thumbnail_image)
+      : ''
 
   // Derive difficulty from courses
   const difficulty = useMemo(() => {

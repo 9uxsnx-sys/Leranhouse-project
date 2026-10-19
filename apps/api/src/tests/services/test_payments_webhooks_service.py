@@ -258,3 +258,138 @@ class TestChargilyWebhook:
                 _request(body, _sign(body)), "org_missing", db
             )
         assert exc.value.status_code == 404
+
+
+@pytest.fixture
+def collection_order(db, org, collection, course, regular_user):
+    """A pending collection order whose snapshot holds two courses."""
+    from src.db.collections_courses import CollectionCourse
+
+    second = Course(
+        id=51,
+        name="Second Course",
+        description="Second",
+        public=True,
+        published=True,
+        open_to_contributors=False,
+        org_id=org.id,
+        course_uuid="course_second",
+        creation_date="2026-01-02 00:00:00",
+        update_date="2026-01-02 00:00:00",
+    )
+    db.add(second)
+    db.commit()
+    db.refresh(second)
+    db.add(
+        CollectionCourse(
+            collection_id=collection.id,
+            course_id=second.id,
+            org_id=org.id,
+            creation_date="2026-01-02 00:00:00",
+            update_date="2026-01-02 00:00:00",
+        )
+    )
+    db.commit()
+
+    order = PaymentOrder(
+        order_uuid="order_collection",
+        org_id=org.id,
+        user_id=regular_user.id,
+        resource_uuid=collection.collection_uuid,
+        resource_type="collection",
+        resource_name=collection.name,
+        amount=2500,
+        currency="DZD",
+        price_snapshot={
+            "amount": 2500,
+            "currency": "DZD",
+            "courses": [course.course_uuid, second.course_uuid],
+        },
+        status=PaymentOrderStatusEnum.PENDING,
+        chargily_checkout_id=CHECKOUT_ID,
+    )
+    db.add(order)
+    db.commit()
+    db.refresh(order)
+    return order, course, second
+
+
+class TestCollectionFanOut:
+    async def test_purchase_grants_every_member_course(
+        self, db, org, payment_config, collection_order, regular_user
+    ):
+        order, first, second = collection_order
+        body = json.dumps(_payload()).encode()
+
+        result = await handle_chargily_webhook(
+            _request(body, _sign(body)), ORG_UUID, db
+        )
+        assert result["status"] == "ok"
+
+        entitlements = db.exec(
+            select(ResourceEntitlement).where(
+                ResourceEntitlement.user_id == regular_user.id
+            )
+        ).all()
+        granted_uuids = {e.resource_uuid for e in entitlements}
+        assert order.resource_uuid in granted_uuids
+        assert first.course_uuid in granted_uuids
+        assert second.course_uuid in granted_uuids
+
+        trail = db.exec(select(Trail).where(Trail.user_id == regular_user.id)).one()
+        runs = db.exec(select(TrailRun).where(TrailRun.trail_id == trail.id)).all()
+        assert {run.course_id for run in runs} == {first.id, second.id}
+
+    async def test_already_owned_course_is_not_granted_twice(
+        self, db, org, payment_config, collection_order, regular_user
+    ):
+        order, first, second = collection_order
+        db.add(
+            ResourceEntitlement(
+                org_id=org.id,
+                user_id=regular_user.id,
+                resource_uuid=first.course_uuid,
+                resource_type="course",
+                status=EntitlementStatusEnum.ACTIVE,
+            )
+        )
+        db.commit()
+
+        body = json.dumps(_payload()).encode()
+        await handle_chargily_webhook(_request(body, _sign(body)), ORG_UUID, db)
+
+        first_grants = db.exec(
+            select(ResourceEntitlement).where(
+                ResourceEntitlement.user_id == regular_user.id,
+                ResourceEntitlement.resource_uuid == first.course_uuid,
+            )
+        ).all()
+        assert len(first_grants) == 1
+
+        second_grants = db.exec(
+            select(ResourceEntitlement).where(
+                ResourceEntitlement.user_id == regular_user.id,
+                ResourceEntitlement.resource_uuid == second.course_uuid,
+            )
+        ).all()
+        assert len(second_grants) == 1
+
+    async def test_duplicate_collection_event_does_not_duplicate_grants(
+        self, db, org, payment_config, collection_order, regular_user
+    ):
+        body = json.dumps(_payload()).encode()
+        signature = _sign(body)
+
+        await handle_chargily_webhook(_request(body, signature), ORG_UUID, db)
+        second = await handle_chargily_webhook(_request(body, signature), ORG_UUID, db)
+
+        assert second == {"status": "ok", "duplicate": True}
+        entitlements = db.exec(
+            select(ResourceEntitlement).where(
+                ResourceEntitlement.user_id == regular_user.id
+            )
+        ).all()
+        assert len(entitlements) == 3
+
+        trail = db.exec(select(Trail).where(Trail.user_id == regular_user.id)).one()
+        assert len(db.exec(select(TrailRun).where(TrailRun.trail_id == trail.id)).all()) == 2

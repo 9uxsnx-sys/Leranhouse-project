@@ -44,9 +44,10 @@ RESOURCE_CONFIGS: dict[str, ResourceConfig] = {
     "collections": ResourceConfig(
         resource_type="collections",
         uuid_prefix="collection_",
-        has_published_field=False,  # Collections use only public flag
-        supports_usergroups=False,
-        supports_authorship=False,
+        has_published_field=True,
+        supports_usergroups=True,
+        supports_authorship=False,  # Collections don't have authors
+        supports_access_types=True,
         model_name="Collection",
         uuid_field="collection_uuid",
     ),

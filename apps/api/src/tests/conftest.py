@@ -451,6 +451,7 @@ def collection(db, org, course):
         name="Test Collection",
         description="A test collection",
         public=True,
+        published=True,
         org_id=org.id,
         collection_uuid="collection_test",
         creation_date=str(datetime.now()),

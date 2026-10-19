@@ -40,8 +40,10 @@ export default function PaymentResultPage({
   const [activated, setActivated] = useState(false)
   const [timedOut, setTimedOut] = useState(false)
 
-  // Poll the learner's trail: the webhook creates the TrailRun when the
-  // payment is confirmed, so its presence is our "access is active" signal.
+  const isCollection = !!resource?.startsWith('collection_')
+
+  // Poll the learner's trail: the webhook creates the TrailRun(s) when the
+  // payment is confirmed, so their presence is our "access is active" signal.
   const { data: trailData } = useSWR(
     isSuccess && access_token && org?.id
       ? `${getAPIUrl()}trail/org/${org.id}/trail`
@@ -53,17 +55,44 @@ export default function PaymentResultPage({
     }
   )
 
+  // Bundles fan out to every member course, so we wait for all of them.
+  const { data: collectionMembers } = useSWR(
+    isSuccess && isCollection && resource && access_token
+      ? `${getAPIUrl()}collections/${resource}/courses?limit=100`
+      : null,
+    (url) => swrFetcher(url, access_token),
+    { revalidateOnFocus: false }
+  )
+
+  const { data: collectionMeta } = useSWR(
+    isSuccess && isCollection && resource && access_token
+      ? `${getAPIUrl()}collections/${resource}`
+      : null,
+    (url) => swrFetcher(url, access_token),
+    { revalidateOnFocus: false }
+  )
+
   const activeRun = useMemo(() => {
-    if (!trailData?.runs || !resource) return null
+    if (!trailData?.runs || !resource || isCollection) return null
     return (
       trailData.runs.find((run: any) => run.course?.course_uuid === resource) ||
       null
     )
-  }, [trailData, resource])
+  }, [trailData, resource, isCollection])
+
+  const collectionActivated = useMemo(() => {
+    if (!isCollection || !trailData?.runs || !collectionMembers?.length) return false
+    const runCourseUuids = new Set(
+      trailData.runs.map((run: any) => run.course?.course_uuid).filter(Boolean)
+    )
+    return collectionMembers.every((course: any) =>
+      runCourseUuids.has(course.course_uuid)
+    )
+  }, [isCollection, trailData, collectionMembers])
 
   useEffect(() => {
-    if (activeRun) setActivated(true)
-  }, [activeRun])
+    if (isCollection ? collectionActivated : activeRun) setActivated(true)
+  }, [isCollection, collectionActivated, activeRun])
 
   useEffect(() => {
     if (!isSuccess || activated) return
@@ -81,13 +110,18 @@ export default function PaymentResultPage({
   const podcastUuid = resource?.startsWith('podcast_')
     ? resource.replace('podcast_', '')
     : null
+  const collectionUuid = isCollection ? resource!.replace('collection_', '') : null
   const backHref = courseUuid
     ? getUriWithOrg(orgslug, `/course/${courseUuid}`)
     : podcastUuid
       ? getUriWithOrg(orgslug, `/podcast/${podcastUuid}`)
-      : getUriWithOrg(orgslug, '/courses')
+      : collectionUuid
+        ? getUriWithOrg(orgslug, `/collection/${collectionUuid}`)
+        : getUriWithOrg(orgslug, '/courses')
 
-  const courseName = activeRun?.course?.name || null
+  const purchasedName = isCollection
+    ? collectionMeta?.name || null
+    : activeRun?.course?.name || null
 
   let variant: PaymentResultVariant = 'failure'
   let title = t('payment.failure.title', 'Payment failed')
@@ -100,10 +134,10 @@ export default function PaymentResultPage({
     if (activated) {
       variant = 'active'
       title = t('payment.success.active_title', "You're all set")
-      description = courseName
+      description = purchasedName
         ? t('payment.success.active_description_named', {
             defaultValue: 'You now have access to {{course}}.',
-            course: courseName,
+            course: purchasedName,
           })
         : t(
             'payment.success.active_description',
