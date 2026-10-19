@@ -2,7 +2,7 @@
 
 > Payment endpoints handle Chargily Pay v2 integration for Algerian Dinar (DZD) transactions — create checkout sessions, process webhooks, check purchase status, and manage payment history with full idempotency and signature verification.
 
-> **Status:** only the **admin entitlement** and **order list** endpoints are implemented. Checkout creation, the webhook receiver, and the learner purchase-status/history endpoints are documented here as the **target contract** and are not live yet. See [Payments — Progress & Roadmap](../08-features/payments/progress.md).
+> **Status:** **entitlements**, **orders**, **overview aggregates**, **payment configuration**, **checkout creation** and the **Chargily webhook** are implemented. The learner purchase-status/history endpoints are documented here as the **target contract** and are not live yet. See [Payments — Progress & Roadmap](../08-features/payments/progress.md).
 
 ---
 
@@ -14,8 +14,9 @@ The payment system consists of:
 
 - **Entitlements** ✅ — who currently holds access to a paid resource (list / candidates / grant / revoke)
 - **Orders** ✅ — the organization's checkout history
-- **Checkout creation** ⬜ — initiates a payment session and returns a redirect URL to Chargily's hosted page
-- **Webhook handler** ⬜ — receives asynchronous payment notifications from Chargily (signature-verified)
+- **Configuration** ✅ — per-org Chargily credentials (secrets write-only)
+- **Checkout creation** ✅ — initiates a payment session and returns a redirect URL to Chargily's hosted page
+- **Webhook handler** ✅ — receives asynchronous payment notifications from Chargily (signature-verified)
 - **Purchase status** ⬜ — whether the current user holds an active entitlement
 - **Payment history** ⬜ — the current user's own transactions
 
@@ -67,6 +68,51 @@ GET /api/v1/payments/{org_id}/orders?search=&status=&page=1&limit=20
 
 Newest first, joins the buyer. Search covers name, username, email, resource name and order uuid. Unknown `status` → `422`.
 
+### Payments overview
+
+```
+GET /api/v1/payments/{org_id}/overview?range=30d
+```
+
+`range` is one of `7d` / `30d` / `90d` / `12m` (unknown values fall back to `30d`). Returns `{ range, currency, revenue, series }` where only `paid` orders inside the window are summed. `series` is zero-filled: one daily bucket per day for 7d/30d/90d, and the last 12 calendar months for 12m. Each point is `{ label, revenue }`.
+
+### Get payment configuration
+
+```
+GET /api/v1/payments/{org_id}/config
+```
+
+Returns `{ configured, provider, mode, public_key, active, has_secret_key, has_webhook_secret }`. **Secret keys are never returned** — only flags saying whether they are stored. An unconfigured org answers `configured: false` with `mode: "test"`.
+
+### Update payment configuration
+
+```
+PUT /api/v1/payments/{org_id}/config
+```
+
+Body: `{ provider?, mode, public_key?, secret_key?, webhook_secret?, active? }`.
+
+- `mode` accepts `test` or `live`; anything else → `422`.
+- `secret_key` / `webhook_secret` are **write-only**: send a non-empty value to replace, omit or send an empty string to keep the stored one. They are stored Fernet-encrypted.
+- Setting `active: true` requires both a public key and a stored secret key, otherwise `400`.
+- Upserts a single row per `(org_id, provider)`.
+
+### Create a checkout
+
+```
+POST /api/v1/payments/{org_id}/checkout
+```
+
+See [Create Checkout Session](#create-checkout-session).
+
+### Chargily webhook
+
+```
+POST /api/v1/payments/webhook/chargily/{org_uuid}
+```
+
+No auth dependency. See [Chargily Webhook](#chargily-webhook).
+
 ---
 
 ## Chargily Pay v2 API
@@ -80,9 +126,9 @@ Newest first, joins the buyer. Search covers name, username, email, resource nam
 
 ---
 
-## Create Checkout Session (planned)
+## Create Checkout Session
 
-> Not implemented yet. This is the target contract.
+> Implemented. Requires an authenticated organization member.
 
 Initiate a payment for a course or podcast. Creates a `paymentorder` record and returns a Chargily-hosted checkout URL for user redirect.
 
@@ -205,11 +251,11 @@ GET /api/v1/payments/history?page=1&limit=20
 
 ---
 
-## Chargily Webhook (planned)
+## Chargily Webhook
 
-> Not implemented yet. This is the target contract.
+> Implemented. Called by Chargily — **no auth dependency**.
 
-Receives asynchronous payment notifications from Chargily. This endpoint is called by Chargily, not by frontend clients — it has **no auth dependency**.
+Receives asynchronous payment notifications from Chargily. This endpoint is called by Chargily, not by frontend clients.
 
 ```
 POST /api/v1/payments/webhook/chargily/{org_uuid}

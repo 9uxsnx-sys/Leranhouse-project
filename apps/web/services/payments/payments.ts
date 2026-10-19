@@ -13,24 +13,21 @@ export async function getPaymentConfigs(orgId: number, access_token: string) {
   return res;
 }
 
-export async function initializePaymentConfig(
+export async function updatePaymentConfig(
   orgId: number,
-  data: any,
-  provider: string,
+  data: {
+    provider?: string;
+    mode: 'test' | 'live';
+    public_key?: string | null;
+    secret_key?: string;
+    webhook_secret?: string;
+    active?: boolean;
+  },
   access_token: string
 ) {
   const result = await secureFetch(
-    `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/config?provider=${encodeURIComponent(provider)}`,
-    RequestBodyWithAuthHeader('POST', data, null, access_token)
-  );
-  const res = await errorHandling(result);
-  return res;
-}
-
-export async function deletePaymentConfig(orgId: number, id: string, access_token: string) {
-  const result = await secureFetch(
-    `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/config?id=${encodeURIComponent(id)}`,
-    RequestBodyWithAuthHeader('DELETE', null, null, access_token)
+    `${getAPIUrl()}payments/${encodeURIComponent(String(orgId))}/config`,
+    RequestBodyWithAuthHeader('PUT', data, null, access_token)
   );
   const res = await errorHandling(result);
   return res;

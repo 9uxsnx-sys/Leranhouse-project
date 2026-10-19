@@ -1,54 +1,45 @@
 'use client'
 import React, { useState } from 'react'
 import Link from 'next/link'
+import useSWR from 'swr'
 import { ExternalLink, ShoppingBag } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useOrg } from '@components/Contexts/OrgContext'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getUriWithOrg } from '@services/config/config'
 import { DateRangeFilter } from '@components/Analytics/Filters'
 import { TabCard } from '@components/Analytics/TabCard'
+import { ChartCard } from '@components/Analytics/Card'
+import { EmptyState } from '@components/Analytics/Feedback'
 import PaymentsTable from '@components/Dashboard/Home/PaymentsTable'
+import { getPaymentsOverview } from '@services/payments/overview'
 import type { AnalyticsCard } from '@services/analytics/tabs'
 
-/**
- * UI-only revenue series. The payments backend does not exist in this build.
- * When it lands, replace `REVENUE_CARD.data` with the `payment_orders` buckets.
- */
-const REVENUE_DATA = [
-  { label: 'Oct 01', revenue: 4200 },
-  { label: 'Oct 02', revenue: 6800 },
-  { label: 'Oct 03', revenue: 5100 },
-  { label: 'Oct 04', revenue: 9200 },
-  { label: 'Oct 05', revenue: 7400 },
-  { label: 'Oct 06', revenue: 11200 },
-  { label: 'Oct 07', revenue: 8600 },
-  { label: 'Oct 08', revenue: 12900 },
-  { label: 'Oct 09', revenue: 10100 },
-  { label: 'Oct 10', revenue: 14600 },
-  { label: 'Oct 11', revenue: 11800 },
-  { label: 'Oct 12', revenue: 15200 },
-]
-
-const REVENUE_CARD: AnalyticsCard = {
-  title: 'Revenue',
-  kind: 'trend',
-  format: 'number',
-  heading: '128,500 DZD',
-  xKey: 'label',
-  series: [{ key: 'revenue', name: 'Revenue' }],
-  data: REVENUE_DATA,
-}
-
 export default function PaymentsOverviewPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const locale = i18n.language || 'en'
   const org = useOrg() as any
+  const session = useLHSession() as any
+  const access_token = session?.data?.tokens?.access_token
   const [range, setRange] = useState('30d')
 
-  const card: AnalyticsCard = {
-    ...REVENUE_CARD,
-    title: t('dashboard.payments.overview.revenue_title'),
-    series: [{ key: 'revenue', name: t('dashboard.payments.overview.revenue_series') }],
-  }
+  const { data } = useSWR(
+    org?.id && access_token ? ['/payments/overview', org.id, access_token, range] : null,
+    () => getPaymentsOverview(org.id, range, access_token),
+    { revalidateOnFocus: false, keepPreviousData: true }
+  )
+
+  const card: AnalyticsCard | undefined = data
+    ? {
+        title: t('dashboard.payments.overview.revenue_title'),
+        kind: 'trend',
+        format: 'number',
+        heading: `${Number(data.revenue || 0).toLocaleString(locale)} ${data.currency || 'DZD'}`,
+        xKey: 'label',
+        series: [{ key: 'revenue', name: t('dashboard.payments.overview.revenue_series') }],
+        data: data.series || [],
+      }
+    : undefined
 
   return (
     <div className="space-y-6">
@@ -76,13 +67,29 @@ export default function PaymentsOverviewPage() {
       </div>
 
       {/* Revenue hero */}
-      <TabCard card={card} chartHeight={300} />
+      {data && Number(data.revenue) === 0 ? (
+        <ChartCard
+          title={t('dashboard.payments.overview.revenue_title')}
+          height={300}
+        >
+          <EmptyState
+            className="h-full"
+            title={t(
+              'dashboard.payments.overview.no_revenue_title',
+              'No revenue yet'
+            )}
+            description={t(
+              'dashboard.payments.overview.no_revenue_description',
+              'Paid orders in the selected range will appear here.'
+            )}
+          />
+        </ChartCard>
+      ) : (
+        <TabCard card={card} chartHeight={300} />
+      )}
 
       {/* Recent payments */}
-      <PaymentsTable
-        title={t('dashboard.payments.overview.recent_payments')}
-        limit={10}
-      />
+      <PaymentsTable title={t('dashboard.payments.overview.recent_payments')} limit={10} />
     </div>
   )
 }

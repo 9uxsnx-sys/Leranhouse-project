@@ -7,6 +7,7 @@ from src.routers import health
 from src.routers import instance
 from src.routers import plans
 from src.routers import payments as payments_router_module
+from src.routers import payments_webhooks as payments_webhooks_router_module
 from src.routers import usergroups
 from src.routers import dev, trail, users, auth, orgs, roles, search
 from src.routers import stream
@@ -221,6 +222,14 @@ v1_router.include_router(
     prefix="/trail",
     tags=["trail"],
     dependencies=[Depends(require_authenticated_user)]
+)
+# Chargily webhooks are called by the provider, so this router must stay
+# outside the authenticated payments router. It is included first so
+# `/payments/webhook/...` is matched before the `/{org_id}` routes.
+v1_router.include_router(
+    payments_webhooks_router_module.router,
+    prefix="/payments",
+    tags=["payments"],
 )
 v1_router.include_router(
     payments_router_module.router,

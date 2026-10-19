@@ -80,6 +80,7 @@ def _install_stub_modules(monkeypatch: pytest.MonkeyPatch) -> None:
         "instance",
         "plans",
         "payments",
+        "payments_webhooks",
         "usergroups",
         "dev",
         "trail",

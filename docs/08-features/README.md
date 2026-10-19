@@ -19,6 +19,12 @@ The documents in this section describe cross-cutting feature areas that touch mu
 | [Chargily Integration](./payments/chargily-integration.md) | Chargily Pay v2 API integration plan: checkout creation, webhook handling, signature verification, sandbox testing |
 | [Teacher Payout Plan](./payments/teacher-payout-plan.md) | Teacher revenue share system: 40/60 pro-rata distribution, earnings ledger, monthly payout calculation, admin/teacher dashboards |
 
+### Collections
+
+| Document | Description |
+|----------|-------------|
+| [Implementation Plan](./collections/implementation-plan.md) | Course-grade collections: full media parity, add/remove course table, three access modes, purchase fan-out to per-course entitlements, and the phased delivery plan |
+
 ### AI
 
 | Document | Description |

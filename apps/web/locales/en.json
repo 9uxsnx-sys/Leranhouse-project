@@ -1906,7 +1906,7 @@
                                                     "status":  "Status",
                                                     "date":  "Date",
                                                     "empty_title":  "No payments yet",
-                                                    "empty_description":  "Transactions will appear here once payments are enabled."
+                                                    "empty_description":  "Paid transactions will appear here as they come in."
                                                 },
                                    "charts":  {
                                                   "enrollment_trend":  {

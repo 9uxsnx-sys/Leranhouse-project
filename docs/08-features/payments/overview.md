@@ -45,7 +45,7 @@ User Browser               Koodook API                Chargily Pay
 7. The webhook handler verifies the hex HMAC-SHA256 `signature` over the raw body, moves the `paymentorder` row to `paid`, and creates a `resourceentitlement` row (`source=purchase`).
 8. User is redirected back to Koodook (success or failure page) and sees the course unlocked.
 
-> **Implementation status:** step 2 onward is **not built yet**. The data model (`paymentorder`, `resourceentitlement`, `payment_webhook_event`, `paymentconfig`) and the admin-facing entitlement/order endpoints exist; the Chargily checkout creation and the webhook receiver do not. See [Progress & Roadmap](./progress.md).
+> **Implementation status:** the whole server-side purchase loop is built — checkout creation, signature-verified webhook, order lifecycle, entitlement grant, and course enrollment. The post-payment result pages, the Transactions tab and the Overview tab are live. What remains is wiring Payouts to real orders, podcast Access parity, and lifting the OSS gate. See [Progress & Roadmap](./progress.md).
 
 ## Payment Provider: Chargily Pay v2
 
@@ -91,34 +91,35 @@ All routes are mounted under `/api/v1/payments` and require an authenticated use
 | `POST /payments/{org_id}/entitlements?resource_uuid=…&user_ids=1,2` | Manual grant (`source=manual`, `granted_by` = acting admin) |
 | `DELETE /payments/{org_id}/entitlements?resource_uuid=…&user_ids=1,2&reason=…` | Revoke — flips `status` to `revoked`, keeps the row for audit |
 | `GET /payments/{org_id}/orders?search=…&status=…&page=…&limit=…` | Paginated order list, newest first |
+| `GET /payments/{org_id}/config` | Chargily settings (secrets never returned) |
+| `PUT /payments/{org_id}/config` | Upsert settings; secrets write-only, encrypted at rest |
+| `POST /payments/{org_id}/checkout` | Create a pending order + Chargily checkout, return `checkout_url` |
+| `POST /payments/webhook/chargily/{org_uuid}` | Chargily webhook (no auth; HMAC-verified, idempotent) |
 
 Supporting services:
 
 - [`services/payments/entitlements.py`](../../../apps/api/src/services/payments/entitlements.py) — resolve resource (`course_…` / `podcast_…`), authorize org admin, grant/revoke/list.
 - [`services/payments/orders.py`](../../../apps/api/src/services/payments/orders.py) — org-scoped order list with user join, multi-field search and status filter (unknown status → `422`).
-- [`routers/payments.py`](../../../apps/api/src/routers/payments.py) — thin HTTP layer over the two services above.
+- [`services/payments/config.py`](../../../apps/api/src/services/payments/config.py) — per-org Chargily credentials; Fernet-encrypted secrets, write-only.
+- [`services/payments/chargily.py`](../../../apps/api/src/services/payments/chargily.py) — `ChargilyClient` wrapper (`POST /checkouts`).
+- [`services/payments/checkout.py`](../../../apps/api/src/services/payments/checkout.py) — validation, order creation, Chargily call, redirect URLs.
+- [`services/payments/webhooks.py`](../../../apps/api/src/services/payments/webhooks.py) — signature verification, idempotency, order/entitlement/enrollment updates.
+- [`routers/payments.py`](../../../apps/api/src/routers/payments.py) / [`routers/payments_webhooks.py`](../../../apps/api/src/routers/payments_webhooks.py) — HTTP layers.
+
+### Webhook Handler
+
+**`POST /api/v1/payments/webhook/chargily/{org_uuid}`** — no auth dependency (Chargily calls it); included before the authenticated payments router.
+
+- Receives `checkout.paid`, `checkout.failed`, `checkout.canceled`.
+- Verifies the `signature` header (hex HMAC-SHA256 of the **raw body**) with the webhook secret, falling back to the API secret key. Missing header → `400`, mismatch → `403`.
+- Idempotent via `payment_webhook_event.event_id` (unique) — a processed duplicate returns `200` and is skipped.
+- `checkout.paid` → order `paid` + `resourceentitlement(source=purchase, status=active)` + `TrailRun` (Progress tab).
+- `checkout.failed` / `checkout.canceled` → order `failed` / `canceled`, no entitlement.
+- Unknown orders are acknowledged with `200`; processing errors return `500` so Chargily retries.
 
 ### Not built yet
 
-#### Checkout Creation Endpoint (planned)
-
-**`POST /api/v1/payments/{org_id}/checkout`**
-
-- Accepts: `{ resource_uuid, resource_type, payment_method }`.
-- Creates a `paymentorder` row with status `pending` and a snapshotted amount.
-- Calls Chargily `POST /checkouts` (integer `amount`, lowercase `currency: "dzd"`).
-- Returns `{ checkout_url }` for the frontend redirect.
-- Sets `success_url`, `failure_url`, `webhook_endpoint` and `metadata` (`order_uuid`, `user_id`, `org_id`).
-
-#### Payment Webhook Handler (planned)
-
-**`POST /api/v1/payments/webhook/chargily/{org_uuid}`**
-
-- Receives `checkout.paid`, `checkout.failed`, `checkout.canceled`.
-- Verifies the `signature` header (hex HMAC-SHA256 of the **raw body**, keyed with the org's secret key) using a constant-time compare. Missing header → `400`, mismatch → `403`.
-- Is idempotent via `payment_webhook_event.event_id` (unique) — a duplicate delivery returns `200` and is skipped.
-- `checkout.paid` → order `paid` + `resourceentitlement(source=purchase, status=active)`.
-- `checkout.failed` / `checkout.canceled` → order `failed` / `canceled`, no entitlement.
+- Learner-facing access-status and own purchase-history endpoints.
 
 ### Access Gating Logic
 
@@ -195,9 +196,9 @@ Per-organization provider credentials — `provider` (`chargily`), `mode` (`test
 
 ### Admin Transaction View
 
-Admins can view all transactions in **Admin Dashboard → Payments → Transactions**, which displays: transaction id, resource name, customer name and email, amount (DZD), payment method, status, and date. The endpoint backing it (`GET /payments/{org_id}/orders`) exists; the tab itself still renders sample rows.
+Admins can view all transactions in **Admin Dashboard → Payments → Transactions**, which displays: learner name and email, resource name, amount (DZD), payment method, status, and date. Backed by `GET /payments/{org_id}/orders` with server-side search, status filter and pagination.
 
-## Admin Dashboard UI (v1 — implemented, UI-only)
+## Admin Dashboard UI (v1 — implemented)
 
 The `/dash/payments/{subpage}` section uses the same shell as **Organization Settings** and **Users Settings**:
 
@@ -226,11 +227,12 @@ Removed in this pass: the old `overview | offers | groups | configuration` under
 | Entitlements (list / candidates / grant / revoke) | **Done** — service + router + tests, wired to the Access tab's Paid mode |
 | Orders list | **Done** — service + router + tests |
 | Offers tab (prices for courses & podcasts) | **Done** — reads `price_amount`, writes via the existing update endpoints |
-| Chargily checkout creation | **Not started** |
-| Chargily webhook receiver | **Not started** |
-| Transactions / Overview / Payouts tabs | **UI only** — still render sample rows; Overview and Payouts are not wired |
-| Payments Configuration | **UI only** — `GET /payments/{org_id}/config` does not exist yet |
-| Learner checkout ("Get access") | **Not started** |
+| Chargily checkout creation | **Done** — `POST /payments/{org_id}/checkout` + course page redirect |
+| Chargily webhook receiver | **Done** — HMAC-verified, idempotent, grants entitlement + enrolls |
+| Transactions / Overview / Payouts tabs | **Transactions + Overview done** — live orders and revenue from `GET /payments/{org_id}/orders` and `/overview`; Payouts still renders sample data |
+| Payments Configuration | **Done** — `GET` / `PUT /payments/{org_id}/config` + Chargily form |
+| Learner checkout ("Get access") | **Done** — paid redirects to Chargily and unlocks via the webhook; free enrolls immediately |
+| Post-payment success/failure page | **Done** — `/orgs/{slug}/payment/{success,failure}`, polls until the entitlement lands |
 
 - `OSS_GATE = false` in [page.tsx](../../../apps/web/app/orgs/[orgslug]/dash/payments/[subpage]/page.tsx) is a **local design preview only**. Set it back to `true` before shipping — payments is EE-only.
 - The ordered remaining work is tracked in [Progress & Roadmap](./progress.md).
@@ -240,12 +242,16 @@ Removed in this pass: the old `overview | offers | groups | configuration` under
 | File | Purpose |
 |---|---|
 | `app/orgs/[orgslug]/dash/payments/[subpage]/page.tsx` | Shell, tab set, plan/feature gates |
-| `components/Dashboard/Pages/Payments/PaymentsOverviewPage.tsx` | Overview tab |
-| `components/Dashboard/Pages/Payments/PaymentsTransactionsPage.tsx` | Transactions tab (sample rows) |
+| `components/Dashboard/Pages/Payments/PaymentsOverviewPage.tsx` | Overview tab — live revenue chart + recent payments |
+| `components/Dashboard/Pages/Payments/PaymentsTransactionsPage.tsx` | Transactions tab — live orders (search, status filter, pagination) |
+| `components/Dashboard/Home/PaymentsTable.tsx` | Recent payments table — fetches the newest orders |
 | `components/Dashboard/Pages/Payments/PaymentsOffersPage.tsx` | Offers tab — courses + podcasts, inline prices, filter, toolbar Save |
+| `components/Dashboard/Pages/Payments/PaymentsConfigurationPage.tsx` | Configuration tab — Chargily mode/keys/enable |
 | `components/Dashboard/Pages/Payments/PaymentsPayoutsPage.tsx` | Payouts tab |
 | `components/Dashboard/Pages/Course/EditCourseAccess/EditCourseAccess.tsx` | Access tab — Public / Private / Paid tables |
+| `app/orgs/[orgslug]/(withmenu)/payment/[status]/page.tsx` | Post-payment success/failure result page |
 | `services/payments/entitlements.ts` | Grant / revoke entitlement calls |
+| `services/payments/checkout.ts` | Create a Chargily checkout for a resource |
 | `services/courses/access.ts` | Link / unlink users for Public mode |
 | `components/Dashboard/Pages/Payments/PaymentStatus.tsx` | Shared status square (paid / failed / pending / refunded) |
 | `components/Dashboard/Home/PaymentsTable.tsx` | Recent payments table, reused by Overview |

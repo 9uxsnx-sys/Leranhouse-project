@@ -2,7 +2,7 @@
 
 > Where the payments work stopped, what is already shipped, and the ordered list of what remains. Update this file whenever a step lands.
 
-**Last updated:** 2026-10-18
+**Last updated:** 2026-10-19
 
 ---
 
@@ -15,13 +15,14 @@
 | 3 | Orders API (org-scoped, search + status filter) | ✅ Done |
 | 4 | Access tab — Public / Private / Paid tables | ✅ Done |
 | 5 | Offers tab — inline prices for courses + podcasts | ✅ Done |
-| 6 | Chargily checkout creation | ⬜ Not started |
-| 7 | Chargily webhook receiver | ⬜ Not started |
-| 8 | Wire Transactions tab to `GET /payments/{org_id}/orders` | ⬜ Not started |
-| 9 | Wire Overview + Payouts tabs to real order data | ⬜ Not started |
-| 10 | Learner "Get access" → checkout → Progress tab | ⬜ Not started |
+| 6 | Chargily checkout creation | ✅ Done |
+| 7 | Chargily webhook receiver | ✅ Done |
+| 8 | Wire Transactions tab to `GET /payments/{org_id}/orders` | ✅ Done |
+| 9 | Wire Overview tab to real order data | ✅ Done |
+| 9b | Wire Payouts tab (40/60 net split) | ⬜ Not started |
+| 10 | Learner "Get access" → checkout → Progress tab | ✅ Done — paid unlocks via the webhook; free enrolls directly |
 | 11 | Podcast Access tab parity | ⬜ Not started |
-| 12 | Payments Configuration (per-org Chargily keys) | ⬜ Not started |
+| 12 | Payments Configuration (per-org Chargily keys) | ✅ Done |
 | 13 | Flip `OSS_GATE` back to `true` and ship | ⬜ Not started |
 
 ---
@@ -87,61 +88,87 @@ File: [`components/Dashboard/Pages/Payments/PaymentsOffersPage.tsx`](../../../ap
 - Saving calls the existing course/podcast update endpoints with `price_amount`; explicit `null` clears the price (backend distinguishes "not provided" via `model_fields_set`).
 - Status squares match the dashboard home tables.
 
+### 6. Chargily checkout creation
+
+Files: [`services/payments/chargily.py`](../../../apps/api/src/services/payments/chargily.py), [`services/payments/checkout.py`](../../../apps/api/src/services/payments/checkout.py), [`routers/payments.py`](../../../apps/api/src/routers/payments.py), [`web/services/payments/checkout.ts`](../../../apps/web/services/payments/checkout.ts)
+
+- `POST /api/v1/payments/{org_id}/checkout` — body `{ resource_uuid, resource_type, payment_method, locale }`.
+- Validates org membership, published resource, `access_type = paid`, `price_amount > 0`, no existing active entitlement, and an active `paymentconfig` with a stored secret.
+- Creates a `paymentorder(status=pending, amount=price, price_snapshot=…)`, then calls Chargily `POST /checkouts` (integer amount, lowercase `dzd`, per-checkout `webhook_endpoint`).
+- Persists `chargily_checkout_id`, `checkout_url`, `fees`, `fees_on_merchant`, `provider_payload`; returns `{ order_uuid, checkout_url, amount, currency, status }`.
+- Provider failure marks the order `failed` and returns `502`.
+- Course page "Get Access" now shows the price and redirects to `checkout_url`; non-paid courses enroll the learner via `POST /trail/add_course/{uuid}` (creating the trail when missing) so the course lands in the Progress tab.
+- Tests: [`test_payments_checkout_service.py`](../../../apps/api/src/tests/services/test_payments_checkout_service.py)
+
+### 12. Payments Configuration
+
+Files: [`services/payments/config.py`](../../../apps/api/src/services/payments/config.py), [`routers/payments.py`](../../../apps/api/src/routers/payments.py), [`PaymentsConfigurationPage.tsx`](../../../apps/web/components/Dashboard/Pages/Payments/PaymentsConfigurationPage.tsx)
+
+- `GET /payments/{org_id}/config` — provider, mode, public key, `active`, and `has_secret_key` / `has_webhook_secret` flags. Secrets are **never** returned.
+- `PUT /payments/{org_id}/config` — upsert; secrets encrypted with Fernet, write-only; activating requires both a public and a secret key.
+- Configuration tab rebuilt as a Chargily form: Test/Live mode, public key, secret key, webhook secret, enable toggle, and the shared Save / Saved / Saving action row.
+- Tests: [`test_payments_config_service.py`](../../../apps/api/src/tests/services/test_payments_config_service.py)
+
+### 7. Chargily webhook receiver
+
+Files: [`services/payments/webhooks.py`](../../../apps/api/src/services/payments/webhooks.py), [`routers/payments_webhooks.py`](../../../apps/api/src/routers/payments_webhooks.py)
+
+- `POST /api/v1/payments/webhook/chargily/{org_uuid}` — **no auth dependency**; registered before the authenticated payments router so `webhook/chargily/...` never hits the `/{org_id}` routes.
+- Verifies the `signature` header (hex HMAC-SHA256 of the **raw body**) with `hmac.compare_digest`. Missing header → `400`, mismatch → `403`, unknown org → `404`.
+- Secret selection: `webhook_secret` when set, otherwise the API secret key.
+- Idempotency via `payment_webhook_event.event_id` (unique). A `processed` duplicate returns `200 {duplicate: true}` and does nothing; failed deliveries may be retried.
+- `checkout.paid` → order `paid` (`paid_at`, `fees`, `fees_on_merchant`, `payment_method`, `provider_payload`) + active `resourceentitlement(source=purchase)` + `TrailRun` so the course appears in the Progress tab.
+- `checkout.failed` / `checkout.canceled` → order `failed` / `canceled`; no entitlement.
+- Unknown order or unknown event type → acknowledged with `200` and recorded, no side effects.
+- Processing errors mark the event `failed`, store `error_message`, and return `500` so Chargily retries.
+- Tests: [`test_payments_webhooks_service.py`](../../../apps/api/src/tests/services/test_payments_webhooks_service.py)
+
+### Post-payment result pages
+
+File: [`app/orgs/[orgslug]/(withmenu)/payment/[status]/page.tsx`](../../../apps/web/app/orgs/[orgslug]/(withmenu)/payment/[status]/page.tsx)
+
+- `GET /orgs/{org_slug}/payment/success?resource=…&order=…` and `/payment/failure?resource=…&order=…`.
+- Checkout now sends these as `success_url` / `failure_url` instead of returning to the course page.
+- Success polls the learner trail every 2s (the webhook creates the `TrailRun`), then flips from "activating" to "You're all set"; after 20s it shows a "still confirming" state.
+- Failure states that no charge was made and offers a retry path.
+- Both pages use the same centered card and a **Back to course** button that returns to the resource they came from (course, podcast, or `/courses` as fallback).
+- The old `?payment=success|failure` toast on the course page was removed.
+
+### 8. Transactions tab
+
+Files: [`components/Dashboard/Pages/Payments/PaymentsTransactionsPage.tsx`](../../../apps/web/components/Dashboard/Pages/Payments/PaymentsTransactionsPage.tsx), [`web/services/payments/orders.ts`](../../../apps/web/services/payments/orders.ts)
+
+- `GET /payments/{org_id}/orders` replaces the old `SAMPLE_ROWS`.
+- Columns: Learner (name + email), Resource, Method (`EDAHABIA` / `CIB` / `Chargily` / `—`), Amount (right-aligned, tabular DZD), Status, Date.
+- Backend statuses map onto the shared four-colour square: `canceled` / `expired` → failed, `partially_refunded` → refunded, `processing` → pending.
+- Toolbar: 300 ms debounced search + status filter menu; both reset the page to 1.
+- Server-side pagination (20/page) rendered in the card footer: "Showing X–Y of Z" + prev/next with "Page N of M".
+- Loading spinner, error card and empty state included; `keepPreviousData` keeps the table stable while paging.
+
+### 9. Overview tab
+
+Files: [`services/payments/overview.py`](../../../apps/api/src/services/payments/overview.py), [`routers/payments.py`](../../../apps/api/src/routers/payments.py), [`PaymentsOverviewPage.tsx`](../../../apps/web/components/Dashboard/Pages/Payments/PaymentsOverviewPage.tsx), [`web/services/payments/overview.ts`](../../../apps/web/services/payments/overview.ts)
+
+- `GET /payments/{org_id}/overview?range=7d|30d|90d|12m` — returns `{ range, currency, revenue, series }`.
+- Only `paid` orders count; the sum is taken over `paid_at` inside the selected window.
+- Daily buckets for 7d/30d/90d (zero-filled, including today); the 12m range returns the last 12 calendar months so axis labels stay unique.
+- The revenue card heading shows the range total (`29,990 DZD`); the area chart plots the buckets.
+- `PaymentsTable` (also used on the dashboard home) now fetches live orders instead of `SAMPLE_ROWS`.
+- Tests: [`test_payments_overview_service.py`](../../../apps/api/src/tests/services/test_payments_overview_service.py)
+
 ---
 
 ## What remains — in order
 
-### 6. Chargily checkout creation
+### 9b. Wire Payouts
 
-**Goal:** a learner can start a payment and land on the Chargily page.
-
-- New `services/payments/chargily.py` with `ChargilyClient`:
-  - `create_checkout(amount: int, currency: str = "dzd", success_url, failure_url, webhook_endpoint, description, locale, metadata)`.
-  - Base URL from `paymentconfig.mode`; `Authorization: Bearer <secret_key>`.
-  - Read `id`, `checkout_url`, `fees`, `fees_on_merchant` from the response.
-- New route `POST /api/v1/payments/{org_id}/checkout`:
-  - Body: `{ resource_uuid, resource_type, payment_method }`.
-  - Validate: resource exists, `access_type == paid`, `price_amount` set and `> 0`.
-  - Reject if the user already holds an active entitlement (return the existing access instead).
-  - Create `paymentorder(status=pending, amount=price, price_snapshot=…)`, then call Chargily, then persist `chargily_checkout_id` + `checkout_url`.
-  - `success_url` / `failure_url` point at the web app; `webhook_endpoint` = `{API_URL}/api/v1/payments/webhook/chargily/{org_uuid}`.
-  - Return `{ order_uuid, checkout_url }`.
-- Frontend: `services/payments/checkout.ts` + wire the course page "Get access" button to redirect to `checkout_url`.
-
-**Reference:** [Chargily Integration — Product Creation Model](./chargily-integration.md#product-creation-model).
-
-### 7. Chargily webhook receiver
-
-**Goal:** paid checkouts grant access automatically.
-
-- New route `POST /api/v1/payments/webhook/chargily/{org_uuid}` — **no auth dependency** (Chargily calls it), `Request` body read raw.
-- Verify header `signature` = hex HMAC-SHA256 of the **raw body** with the org's secret key, `hmac.compare_digest`. Missing header → `400`, mismatch → `403`.
-- Idempotency: insert `payment_webhook_event(event_id=<payload.id>)`; unique conflict → `200` no-op.
-- `checkout.paid` → order `paid` (`paid_at`, `fees`, `fees_on_merchant`, `provider_payload`, final `payment_method`) → create `resourceentitlement(source=purchase, status=active, order_id=…)`.
-- `checkout.failed` → order `failed` (+ `failure_code` / `failure_message`).
-- `checkout.canceled` → order `canceled`.
-- Always `200` on success. Never trust `metadata` for identity beyond cross-checking `order_uuid`.
-- Tests: signature valid / missing / tampered, duplicate event, each event type.
-
-### 8. Wire the Transactions tab
-
-- Replace `SAMPLE_ROWS` in [`PaymentsTransactionsPage.tsx`](../../../apps/web/components/Dashboard/Pages/Payments/PaymentsTransactionsPage.tsx) with `GET /payments/{org_id}/orders`.
-- Map the response to the existing columns (learner, course, method, amount, status, date).
-- Server-side search + status filter; keep the table's pagination in the card footer.
-- Add a shared `services/payments/orders.ts` client.
-
-### 9. Wire Overview and Payouts
-
-- **Overview:** derive revenue and the recent-payments table from orders (`status=paid`), not sample data.
-- **Payouts:** feed the 40/60 net-profit split from paid orders + `fees_on_merchant` + the manually entered operating costs; keep the pro-rata rule (see [Teacher Payout Plan](./teacher-payout-plan.md)).
-- Both tabs stay display-only until real paid orders exist.
+- Feed the 40/60 net-profit split from paid orders + `fees_on_merchant` + the manually entered operating costs; keep the pro-rata rule (see [Teacher Payout Plan](./teacher-payout-plan.md)).
+- The tab currently reads a non-existent `earnings_ledger`, so it still renders sample data.
 
 ### 10. Learner checkout and Progress tab
 
-- Course page "Get access" → `POST /payments/{org_id}/checkout` → redirect.
-- Success page confirms access; the course must appear in the Progress tab right after the webhook lands.
-- Failure page offers "Try again" and creates no entitlement.
-- Locked state for `paid` without entitlement: show price + purchase prompt, hide lesson content.
+- **Done:** the "Get Access" button shows the price for paid courses and redirects to Chargily; after `checkout.paid` the webhook grants the entitlement and creates the `TrailRun`, so the course appears in the Progress tab. Non-paid courses enroll immediately. Chargily returns to the dedicated `payment/success` / `payment/failure` pages.
+- **Remaining:** verify the locked state for `paid` without an entitlement on every lesson/activity page (price + purchase prompt, no content leak).
 
 ### 11. Podcast Access tab parity
 
@@ -149,11 +176,11 @@ File: [`components/Dashboard/Pages/Payments/PaymentsOffersPage.tsx`](../../../ap
 - Entitlements already accept `podcast_…` uuids — the work is frontend only.
 - Decide whether the podcast needs the Public (`TrailRun`) equivalent or only Private/Paid.
 
-### 12. Payments Configuration
+### 12. Collections as a sellable bundle
 
-- Add `GET` / `PUT /payments/{org_id}/config` over `paymentconfig` (secrets write-only, never returned).
-- Wire [`PaymentsConfigurationPage.tsx`](../../../apps/web/components/Dashboard/Pages/Payments/PaymentsConfigurationPage.tsx): provider, mode, public key, secret key, webhook status.
-- Remove the Stripe leftovers from that page — Chargily is the only provider.
+- The **Payment Groups** tab is superseded for bundles by the existing Collections resource. Once Collections ships, remove the Groups tab rather than building its missing backend.
+- Collections gain course-grade fields (media, access modes, price), a dashboard editor, and a purchase flow that fans out to per-course entitlements + `TrailRun`s.
+- Full plan: [Collections — Implementation Plan](../collections/implementation-plan.md).
 
 ### 13. Ship gate
 
@@ -190,13 +217,13 @@ Single file / single test:
 .\.venv\Scripts\python.exe -m pytest src/tests/services/test_payments_entitlements_service.py -q
 ```
 
-Baseline at the time of writing: **2353 passed, 2 skipped, 8 failed** — all 8 are pre-existing Windows/environment failures (path separators, SVG heuristic, community config, chapters tuple unpack, communities list). They are not caused by payments work.
+Baseline at the time of writing: **2382 passed, 2 skipped, 8 failed** — all 8 are pre-existing Windows/environment failures (path separators, SVG heuristic, community config, chapters tuple unpack, communities list). They are not caused by payments work.
 
 ### Frontend typecheck
 
 ```bash
 cd apps/web
-..\..\node_modules\.bin\tsc.cmd --noEmit --ignoreDeprecations 6.0
+.\node_modules\.bin\tsc.cmd --noEmit --ignoreDeprecations 6.0
 ```
 
 Baseline: **25 output lines**. Compare against that number, not against zero.
@@ -227,4 +254,5 @@ Admin: `admin@school.dev` / `admin123456`, user id `1`, org slug `default`, org 
 - **Chargily `currency` must be lowercase `dzd`** and `amount` must be an **integer**.
 - **Fees are plan-based.** Never hardcode a percentage — read `fees` and `fees_on_merchant` from Chargily and store them on the order.
 - **`webhook_endpoint` is per checkout**, so multi-tenant routing and ngrok work without dashboard changes.
+- **Signature is computed over the raw request body.** Read `await request.body()` before any JSON parsing; never re-serialize the payload before verifying.
 - **Payments are EE-only.** `OSS_GATE` must be `true` before shipping.

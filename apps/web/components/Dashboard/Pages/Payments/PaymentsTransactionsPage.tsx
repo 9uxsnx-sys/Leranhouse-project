@@ -1,45 +1,30 @@
 'use client'
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import useSWR from 'swr'
+import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 import { SectionCard } from '@components/Analytics/Card'
 import { DataTable, Column } from '@components/Analytics/DataTable'
 import { EmptyState } from '@components/Analytics/Feedback'
 import { SearchInput, FilterSelect } from '@components/Analytics/Filters'
-import { PaymentStatusDot, type PaymentStatus } from './PaymentStatus'
+import { PaymentStatusDot, mapOrderStatus, type PaymentStatus } from './PaymentStatus'
+import { useOrg } from '@components/Contexts/OrgContext'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { getOrgOrders } from '@services/payments/orders'
 
-type PaymentMethod = 'EDAHABIA' | 'CIB'
+const PAGE_SIZE = 20
 
 interface TransactionRow {
   id: string
   user: { name: string; email: string }
-  course: string
-  method: PaymentMethod
+  resource: string
+  method: string
   amount: number
   currency: string
   status: PaymentStatus
+  statusLabel: string
   date: string
 }
-
-/**
- * UI-only sample rows — the payments backend does not exist in this build.
- * When it lands, feed this table from `GET /payments/org/{org_id}/orders`.
- */
-const SAMPLE_ROWS: TransactionRow[] = [
-  { id: 'ORD-1042', user: { name: 'Yacine Belkacem', email: 'yacine.b@example.dz' }, course: 'Algebra Basics', method: 'CIB', amount: 1500, currency: 'DZD', status: 'paid', date: '2026-10-12T10:42:00Z' },
-  { id: 'ORD-1041', user: { name: 'Sara Mansouri', email: 'sara.m@example.dz' }, course: 'Design 101', method: 'EDAHABIA', amount: 2000, currency: 'DZD', status: 'failed', date: '2026-10-12T09:18:00Z' },
-  { id: 'ORD-1040', user: { name: 'Amine Khelifi', email: 'amine.k@example.dz' }, course: 'Algebra Basics', method: 'CIB', amount: 1500, currency: 'DZD', status: 'paid', date: '2026-10-11T18:05:00Z' },
-  { id: 'ORD-1039', user: { name: 'Nadia Bouzid', email: 'nadia.b@example.dz' }, course: 'Python for Beginners', method: 'EDAHABIA', amount: 2500, currency: 'DZD', status: 'pending', date: '2026-10-11T16:30:00Z' },
-  { id: 'ORD-1038', user: { name: 'Karim Haddad', email: 'karim.h@example.dz' }, course: 'Design 101', method: 'CIB', amount: 2000, currency: 'DZD', status: 'paid', date: '2026-10-11T14:12:00Z' },
-  { id: 'ORD-1037', user: { name: 'Lina Ait Ali', email: 'lina.a@example.dz' }, course: 'Marketing Fundamentals', method: 'EDAHABIA', amount: 1800, currency: 'DZD', status: 'failed', date: '2026-10-10T20:44:00Z' },
-  { id: 'ORD-1036', user: { name: 'Omar Cherif', email: 'omar.c@example.dz' }, course: 'Python for Beginners', method: 'CIB', amount: 2500, currency: 'DZD', status: 'paid', date: '2026-10-10T11:02:00Z' },
-  { id: 'ORD-1035', user: { name: 'Meriem Saadi', email: 'meriem.s@example.dz' }, course: 'Algebra Basics', method: 'EDAHABIA', amount: 1500, currency: 'DZD', status: 'refunded', date: '2026-10-09T17:26:00Z' },
-  { id: 'ORD-1034', user: { name: 'Bilal Zerrouki', email: 'bilal.z@example.dz' }, course: 'Marketing Fundamentals', method: 'CIB', amount: 1800, currency: 'DZD', status: 'paid', date: '2026-10-09T09:50:00Z' },
-  { id: 'ORD-1033', user: { name: 'Imane Rahmani', email: 'imane.r@example.dz' }, course: 'Design 101', method: 'EDAHABIA', amount: 2000, currency: 'DZD', status: 'pending', date: '2026-10-08T15:33:00Z' },
-  { id: 'ORD-1032', user: { name: 'Sofiane Benaissa', email: 'sofiane.b@example.dz' }, course: 'Python for Beginners', method: 'CIB', amount: 2500, currency: 'DZD', status: 'paid', date: '2026-10-08T11:15:00Z' },
-  { id: 'ORD-1031', user: { name: 'Amina Larbi', email: 'amina.l@example.dz' }, course: 'Algebra Basics', method: 'EDAHABIA', amount: 1500, currency: 'DZD', status: 'failed', date: '2026-10-07T19:41:00Z' },
-  { id: 'ORD-1030', user: { name: 'Riad Meziane', email: 'riad.m@example.dz' }, course: 'Design 101', method: 'CIB', amount: 2000, currency: 'DZD', status: 'paid', date: '2026-10-07T13:07:00Z' },
-  { id: 'ORD-1029', user: { name: 'Hiba Cherifi', email: 'hiba.c@example.dz' }, course: 'Marketing Fundamentals', method: 'EDAHABIA', amount: 1800, currency: 'DZD', status: 'refunded', date: '2026-10-06T10:24:00Z' },
-]
 
 function formatDate(value: string, locale: string) {
   const date = new Date(value)
@@ -47,25 +32,102 @@ function formatDate(value: string, locale: string) {
   return date.toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
+function methodLabel(method: string | null | undefined) {
+  if (method === 'edahabia') return 'EDAHABIA'
+  if (method === 'cib') return 'CIB'
+  if (method === 'chargily_app') return 'Chargily'
+  return '—'
+}
+
+/** Maps backend order statuses onto the shared four-colour status square. */
+function statusMeta(raw: string, t: any): { status: PaymentStatus; label: string } {
+  const status = mapOrderStatus(raw)
+  switch (raw) {
+    case 'paid':
+      return { status, label: t('dashboard.payments.transactions.paid') }
+    case 'failed':
+      return { status, label: t('dashboard.payments.transactions.failed') }
+    case 'canceled':
+      return { status, label: t('dashboard.payments.transactions.canceled', 'Canceled') }
+    case 'expired':
+      return { status, label: t('dashboard.payments.transactions.expired', 'Expired') }
+    case 'refunded':
+    case 'partially_refunded':
+      return { status, label: t('dashboard.payments.transactions.refunded') }
+    case 'processing':
+      return { status, label: t('dashboard.payments.transactions.processing', 'Processing') }
+    default:
+      return { status, label: t('dashboard.payments.transactions.pending') }
+  }
+}
+
 export default function PaymentsTransactionsPage() {
   const { t, i18n } = useTranslation()
   const locale = i18n.language || 'en'
-  const [query, setQuery] = useState('')
-  const [status, setStatus] = useState('all')
+  const org = useOrg() as any
+  const session = useLHSession() as any
+  const access_token = session?.data?.tokens?.access_token
 
-  const rows = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    return SAMPLE_ROWS.filter((row) => {
-      const matchesStatus = status === 'all' || row.status === status
-      const matchesQuery =
-        !q ||
-        row.user.name.toLowerCase().includes(q) ||
-        row.user.email.toLowerCase().includes(q) ||
-        row.course.toLowerCase().includes(q) ||
-        row.id.toLowerCase().includes(q)
-      return matchesStatus && matchesQuery
+  const [query, setQuery] = useState('')
+  const [debouncedQuery, setDebouncedQuery] = useState('')
+  const [status, setStatus] = useState('all')
+  const [page, setPage] = useState(1)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(query.trim()), 300)
+    return () => clearTimeout(timer)
+  }, [query])
+
+  useEffect(() => {
+    setPage(1)
+  }, [debouncedQuery, status])
+
+  const swrKey =
+    org?.id && access_token
+      ? ['/payments/orders', org.id, access_token, debouncedQuery, status, page]
+      : null
+
+  const { data, error, isLoading } = useSWR(
+    swrKey,
+    () =>
+      getOrgOrders(
+        org.id,
+        {
+          search: debouncedQuery,
+          status: status === 'all' ? '' : status,
+          page,
+          limit: PAGE_SIZE,
+        },
+        access_token
+      ),
+    { revalidateOnFocus: false, keepPreviousData: true }
+  )
+
+  const rows: TransactionRow[] = useMemo(() => {
+    return (data?.items || []).map((order: any) => {
+      const name =
+        [order.user?.first_name, order.user?.last_name].filter(Boolean).join(' ') ||
+        order.user?.username ||
+        order.customer_name ||
+        '—'
+      const meta = statusMeta(order.status, t)
+
+      return {
+        id: order.order_uuid,
+        user: { name, email: order.user?.email || order.customer_email || '' },
+        resource: order.resource_name || order.resource_uuid || '—',
+        method: methodLabel(order.payment_method),
+        amount: Number(order.amount) || 0,
+        currency: order.currency || 'DZD',
+        status: meta.status,
+        statusLabel: meta.label,
+        date: order.paid_at || order.creation_date || '',
+      }
     })
-  }, [query, status])
+  }, [data, t])
+
+  const total: number = data?.total || 0
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   const columns: Column<TransactionRow>[] = [
     {
@@ -79,9 +141,9 @@ export default function PaymentsTransactionsPage() {
       ),
     },
     {
-      key: 'course',
-      header: t('dashboard.payments.transactions.course'),
-      render: (row) => <span className="text-gray-700 truncate">{row.course}</span>,
+      key: 'resource',
+      header: t('dashboard.payments.transactions.resource', 'Resource'),
+      render: (row) => <span className="text-gray-700 truncate">{row.resource}</span>,
     },
     {
       key: 'method',
@@ -94,8 +156,6 @@ export default function PaymentsTransactionsPage() {
       header: t('dashboard.payments.transactions.amount'),
       align: 'right',
       width: '140px',
-      sortable: true,
-      value: (row) => row.amount,
       render: (row) => (
         <span className="tabular-nums text-gray-900">
           {row.amount.toLocaleString(locale)}{' '}
@@ -107,27 +167,57 @@ export default function PaymentsTransactionsPage() {
       key: 'status',
       header: t('dashboard.payments.transactions.status'),
       width: '120px',
-      render: (row) => (
-        <PaymentStatusDot
-          status={row.status}
-          label={t(`dashboard.payments.transactions.${row.status}`)}
-        />
-      ),
+      render: (row) => <PaymentStatusDot status={row.status} label={row.statusLabel} />,
     },
     {
       key: 'date',
       header: t('dashboard.payments.transactions.date'),
       align: 'right',
       width: '140px',
-      sortable: true,
-      value: (row) => row.date,
       render: (row) => (
         <span className="text-[13px] text-gray-400 whitespace-nowrap">
-          {formatDate(row.date, locale)}
+          {row.date ? formatDate(row.date, locale) : '—'}
         </span>
       ),
     },
   ]
+
+  const pagination =
+    total > PAGE_SIZE ? (
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-gray-500">
+          {t('dashboard.payments.transactions.pagination.showing', {
+            defaultValue: 'Showing {{start}}–{{end}} of {{total}}',
+            start: (page - 1) * PAGE_SIZE + 1,
+            end: Math.min(page * PAGE_SIZE, total),
+            total,
+          })}
+        </span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          >
+            <ChevronLeft className="w-4 h-4 text-gray-600" />
+          </button>
+          <span className="text-xs text-gray-600 font-medium min-w-[64px] text-center">
+            {t('dashboard.payments.transactions.pagination.page', {
+              defaultValue: 'Page {{current}} of {{total}}',
+              current: page,
+              total: pages,
+            })}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(pages, p + 1))}
+            disabled={page >= pages}
+            className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          >
+            <ChevronRight className="w-4 h-4 text-gray-600" />
+          </button>
+        </div>
+      </div>
+    ) : undefined
 
   return (
     <div className="space-y-6">
@@ -145,23 +235,38 @@ export default function PaymentsTransactionsPage() {
             { value: 'all', label: t('dashboard.payments.transactions.all_statuses') },
             { value: 'paid', label: t('dashboard.payments.transactions.paid') },
             { value: 'pending', label: t('dashboard.payments.transactions.pending') },
+            { value: 'processing', label: t('dashboard.payments.transactions.processing', 'Processing') },
             { value: 'failed', label: t('dashboard.payments.transactions.failed') },
+            { value: 'canceled', label: t('dashboard.payments.transactions.canceled', 'Canceled') },
             { value: 'refunded', label: t('dashboard.payments.transactions.refunded') },
           ]}
         />
       </div>
 
-      <SectionCard bleed>
-        {rows.length ? (
-          <DataTable columns={columns} rows={rows} />
-        ) : (
-          <EmptyState
-            title={t('dashboard.payments.transactions.empty_title')}
-            description={t('dashboard.payments.transactions.empty_description')}
-            className="pb-10"
-          />
-        )}
-      </SectionCard>
+      {error ? (
+        <SectionCard>
+          <p className="text-sm text-red-600">
+            {t('dashboard.payments.transactions.error_loading', 'Could not load transactions.')}
+          </p>
+        </SectionCard>
+      ) : (
+        <SectionCard bleed>
+          {isLoading && !data ? (
+            <div className="flex items-center justify-center gap-2 py-16 text-sm text-gray-500">
+              <Loader2 size={16} className="animate-spin" />
+              {t('common.loading')}
+            </div>
+          ) : rows.length ? (
+            <DataTable columns={columns} rows={rows} footer={pagination} />
+          ) : (
+            <EmptyState
+              title={t('dashboard.payments.transactions.empty_title')}
+              description={t('dashboard.payments.transactions.empty_description')}
+              className="pb-10"
+            />
+          )}
+        </SectionCard>
+      )}
     </div>
   )
 }

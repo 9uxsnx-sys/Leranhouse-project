@@ -1,306 +1,295 @@
-'use client';
-import React, { useState, useEffect } from 'react';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { useLHSession } from '@components/Contexts/LHSessionContext';
-import {
-  getPaymentConfigs,
-  initializePaymentConfig,
-  deletePaymentConfig,
-} from '@services/payments/payments';
-import { getStripeOnboardingLink } from '@services/payments/providers/stripe';
-import {
-  CheckCircle2,
-  ExternalLink,
-  Info,
-  Loader2,
-  Trash2,
-  UnplugIcon,
-  XCircle,
-  AlertTriangle,
-} from 'lucide-react';
-import toast from 'react-hot-toast';
-import { useTranslation } from 'react-i18next';
-import useSWR, { mutate } from 'swr';
-import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal';
-import { Button } from '@components/ui/button';
-import { getMainDomainUri } from '@services/config/config';
-import { SiStripe } from '@icons-pack/react-simple-icons';
+'use client'
 
-// ---------------------------------------------------------------------------
-// Provider registry
-// ---------------------------------------------------------------------------
-interface PaymentProviderDef {
-  id: string;
-  name: string;
-  Icon: React.ComponentType<{ size?: number; className?: string }>;
-  tagline: string;
-  docsUrl: string;
-  callbackPath: string;
-  getConnectUrl: (orgId: number, accessToken: string, redirectUri: string) => Promise<string>;
+import React, { useEffect, useState } from 'react'
+import { useOrg } from '@components/Contexts/OrgContext'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { getPaymentConfigs, updatePaymentConfig } from '@services/payments/payments'
+import { Input } from '@components/ui/input'
+import { Label } from '@components/ui/label'
+import { Switch } from '@components/ui/switch'
+import { Check, CreditCard, Loader2, SaveAll, ShieldCheck } from 'lucide-react'
+import toast from 'react-hot-toast'
+import useSWR, { mutate } from 'swr'
+
+type PaymentMode = 'test' | 'live'
+
+interface ConfigForm {
+  mode: PaymentMode
+  public_key: string
+  secret_key: string
+  webhook_secret: string
+  active: boolean
 }
 
-const PAYMENT_PROVIDERS: PaymentProviderDef[] = [
-  {
-    id: 'stripe',
-    name: 'Stripe',
-    Icon: SiStripe,
-    tagline: 'dashboard.payments.configuration.stripe_tagline',
-    docsUrl: 'https://stripe.com/docs',
-    callbackPath: '/payments/stripe/connect/oauth',
-    async getConnectUrl(orgId, accessToken, redirectUri) {
-      const { connect_url } = await getStripeOnboardingLink(orgId, accessToken, redirectUri);
-      return connect_url;
-    },
-  },
-];
+const EMPTY_FORM: ConfigForm = {
+  mode: 'test',
+  public_key: '',
+  secret_key: '',
+  webhook_secret: '',
+  active: false,
+}
 
-// ---------------------------------------------------------------------------
-// Page
-// ---------------------------------------------------------------------------
 const PaymentsConfigurationPage: React.FC = () => {
-  const org = useOrg() as any;
-  const session = useLHSession() as any;
-  const { t } = useTranslation();
-  const access_token = session?.data?.tokens?.access_token;
+  const org = useOrg() as any
+  const session = useLHSession() as any
+  const access_token = session?.data?.tokens?.access_token
 
-  const { data: paymentConfigs, error, isLoading } = useSWR(
-    () => (org && access_token ? [`/payments/${org.id}/config`, access_token] : null),
+  const swrKey =
+    org && access_token ? [`/payments/${org.id}/config`, access_token] : null
+
+  const { data: config, error, isLoading } = useSWR(
+    swrKey,
     ([, token]) => getPaymentConfigs(org.id, token),
-    { revalidateOnFocus: false }
-  );
+    { revalidateOnFocus: false, shouldRetryOnError: false }
+  )
+
+  const [form, setForm] = useState<ConfigForm>(EMPTY_FORM)
+  const [baseline, setBaseline] = useState<ConfigForm>(EMPTY_FORM)
+  const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'payment_provider_connected') {
-        mutate([`/payments/${org?.id}/config`, access_token]);
-      }
-    };
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [org?.id, access_token]);
-
-  if (isLoading) return <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 text-sm text-gray-500">{t('common.loading')}</div>;
-  if (error) return <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 text-sm text-red-500">{t('dashboard.payments.configuration.error_loading')}</div>;
-
-  const configs: any[] = Array.isArray(paymentConfigs) ? paymentConfigs : [];
-
-  return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-      <div className="flex flex-col bg-gray-50 -space-y-1 px-5 py-3 rounded-md mb-4">
-        <h2 className="text-gray-500 text-sm">
-          {t('dashboard.payments.configuration.subtitle')}
-        </h2>
-      </div>
-
-      <div className="space-y-3">
-        {PAYMENT_PROVIDERS.map((provider) => {
-          const config = configs.find((c: any) => c.provider === provider.id);
-          return (
-            <ProviderCard
-              key={provider.id}
-              provider={provider}
-              config={config}
-              orgId={org.id}
-              accessToken={access_token}
-            />
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-// ---------------------------------------------------------------------------
-// ProviderCard
-// ---------------------------------------------------------------------------
-interface ProviderCardProps {
-  provider: PaymentProviderDef;
-  config: any | undefined;
-  orgId: number;
-  accessToken: string;
-}
-
-const ProviderCard: React.FC<ProviderCardProps> = ({ provider, config, orgId, accessToken }) => {
-  const { t } = useTranslation();
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [disconnectError, setDisconnectError] = useState<{ count: number } | null>(null);
-  const isConnected = !!(config?.provider_specific_id && config?.active);
-
-  const handleConnect = async () => {
-    try {
-      setIsConnecting(true);
-      if (!config) {
-        await initializePaymentConfig(orgId, { provider: provider.id, enabled: true }, provider.id, accessToken);
-        await mutate([`/payments/${orgId}/config`, accessToken]);
-      }
-      const redirectUri = getMainDomainUri(provider.callbackPath);
-      const url = await provider.getConnectUrl(orgId, accessToken, redirectUri);
-      window.open(url, '_blank');
-    } catch {
-      toast.error(t('dashboard.payments.configuration.failed_connect', { provider: provider.name }));
-    } finally {
-      setIsConnecting(false);
+    if (!config) return
+    const next: ConfigForm = {
+      mode: config.mode === 'live' ? 'live' : 'test',
+      public_key: config.public_key || '',
+      secret_key: '',
+      webhook_secret: '',
+      active: !!config.active,
     }
-  };
+    setForm(next)
+    setBaseline(next)
+  }, [config])
 
-  const handleDelete = async () => {
-    setDisconnectError(null);
+  const setField = <K extends keyof ConfigForm>(key: K, value: ConfigForm[K]) => {
+    setForm((prev) => ({ ...prev, [key]: value }))
+  }
+
+  const isDirty =
+    form.mode !== baseline.mode ||
+    form.public_key !== baseline.public_key ||
+    form.secret_key !== '' ||
+    form.webhook_secret !== '' ||
+    form.active !== baseline.active
+
+  const handleSave = async () => {
+    if (!org || !access_token) return
+    setIsSaving(true)
     try {
-      await deletePaymentConfig(orgId, config.id, accessToken);
-      toast.success(t('dashboard.payments.configuration.connection_removed', { provider: provider.name }));
-      mutate([`/payments/${orgId}/config`, accessToken]);
+      const payload: any = {
+        provider: 'chargily',
+        mode: form.mode,
+        public_key: form.public_key.trim() || null,
+        active: form.active,
+      }
+      if (form.secret_key.trim()) payload.secret_key = form.secret_key.trim()
+      if (form.webhook_secret.trim()) payload.webhook_secret = form.webhook_secret.trim()
+
+      const updated = await updatePaymentConfig(org.id, payload, access_token)
+      await mutate([`/payments/${org.id}/config`, access_token], updated, false)
+      const next: ConfigForm = {
+        mode: updated.mode === 'live' ? 'live' : 'test',
+        public_key: updated.public_key || '',
+        secret_key: '',
+        webhook_secret: '',
+        active: !!updated.active,
+      }
+      setForm(next)
+      setBaseline(next)
+      toast.success('Payment configuration saved')
     } catch (err: any) {
-      if (err?.status === 409 || err?.response?.status === 409) {
-        let detail: any = err?.detail ?? err?.response?.data?.detail;
-        try { detail = JSON.parse(detail); } catch {}
-        if (detail?.code === 'ACTIVE_SUBSCRIPTIONS_EXIST') {
-          setDisconnectError({ count: detail.count });
-          return;
-        }
-      }
-      toast.error(t('dashboard.payments.configuration.failed_remove_connection', { provider: provider.name }));
+      toast.error(err?.detail || 'Failed to save payment configuration')
+    } finally {
+      setIsSaving(false)
     }
-  };
+  }
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 text-sm text-gray-500">
+        Loading payment configuration…
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 text-sm text-red-500">
+        Error loading payment configuration
+      </div>
+    )
+  }
+
+  const configured = !!config?.configured
+  const statusLabel = !configured
+    ? 'Not configured'
+    : config?.active
+      ? 'Active'
+      : 'Inactive'
+  const statusClass = !configured
+    ? 'text-gray-500 bg-gray-100'
+    : config?.active
+      ? 'text-green-700 bg-green-100'
+      : 'text-amber-700 bg-amber-100'
 
   return (
-    <div className="border border-gray-200 rounded-xl overflow-hidden">
-      {/* Main row */}
-      <div className="flex items-center justify-between px-5 py-4 bg-white">
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg shrink-0">
-            <provider.Icon size={22} className="text-gray-700" />
-          </div>
-          <div>
-            <div className="flex items-center space-x-2 flex-wrap gap-y-1">
-              <span className="font-semibold text-gray-900">{provider.name}</span>
-              {config ? (
-                isConnected ? (
-                  <span className="inline-flex items-center space-x-1 text-xs text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
-                    <CheckCircle2 size={10} />
-                    <span>{t('dashboard.payments.configuration.connected')}</span>
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center space-x-1 text-xs text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
-                    <XCircle size={10} />
-                    <span>{t('dashboard.payments.configuration.authorization_required')}</span>
-                  </span>
-                )
-              ) : (
-                <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                  {t('dashboard.payments.configuration.not_configured')}
-                </span>
-              )}
-            </div>
-            <p className="text-sm text-gray-500 mt-0.5">{t(provider.tagline)}</p>
-            {isConnected && (
-              <p className="text-xs text-gray-400 mt-0.5 font-mono truncate max-w-xs">
-                {config.provider_specific_id}
-              </p>
-            )}
-          </div>
+    <div className="space-y-3">
+      {/* ===== Action Row ===== */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className={`inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full ${statusClass}`}>
+            <span className="w-2.5 h-2.5 rounded bg-current opacity-70" />
+            {statusLabel}
+          </span>
         </div>
-
-        {/* Actions */}
-        <div className="flex items-center space-x-2 shrink-0">
-          <a
-            href={provider.docsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-400 hover:text-gray-600 transition p-1"
-            title={t('dashboard.payments.configuration.docs', { provider: provider.name })}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={isDirty && !isSaving ? handleSave : undefined}
+            disabled={isSaving || !isDirty}
+            className={`inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors ${
+              isSaving
+                ? 'bg-black text-white border-black opacity-50 cursor-not-allowed'
+                : isDirty
+                  ? 'bg-black text-white border-black hover:opacity-90 cursor-pointer'
+                  : 'bg-white text-gray-600 border-gray-200 cursor-default'
+            }`}
           >
-            <ExternalLink size={15} />
-          </a>
-
-          {isConnected ? (
-            <>
-              <Button
-                onClick={handleConnect}
-                disabled={isConnecting}
-                variant="outline"
-                size="sm"
-                className="text-xs"
-              >
-                {isConnecting ? (
-                  <Loader2 size={12} className="animate-spin mr-1" />
-                ) : (
-                  <UnplugIcon size={12} className="mr-1" />
-                )}
-                {t('dashboard.payments.configuration.reconnect')}
-              </Button>
-              <ConfirmationModal
-                confirmationButtonText={t('dashboard.payments.configuration.remove')}
-                confirmationMessage={t('dashboard.payments.configuration.remove_confirm_message', { provider: provider.name })}
-                dialogTitle={t('dashboard.payments.configuration.remove_dialog_title', { provider: provider.name })}
-                dialogTrigger={
-                  <Button variant="destructive" size="sm" className="text-xs">
-                    <Trash2 size={12} className="mr-1" />
-                    {t('dashboard.payments.configuration.remove')}
-                  </Button>
-                }
-                functionToExecute={handleDelete}
-                status="warning"
-              />
-            </>
-          ) : (
-            <Button
-              onClick={handleConnect}
-              disabled={isConnecting}
-              size="sm"
-              className="text-xs bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              {isConnecting ? (
-                <Loader2 size={12} className="animate-spin mr-1" />
-              ) : (
-                <UnplugIcon size={12} className="mr-1" />
-              )}
-              {config ? t('dashboard.payments.configuration.complete_setup') : t('dashboard.payments.configuration.connect')}
-            </Button>
-          )}
+            {isSaving ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : isDirty ? (
+              <SaveAll size={14} />
+            ) : (
+              <Check size={14} />
+            )}
+            <span>{isSaving ? 'Saving' : isDirty ? 'Save' : 'Saved'}</span>
+          </button>
         </div>
       </div>
 
-      {/* Active subscription disconnect error */}
-      {disconnectError && (
-        <div className="bg-red-50 border-t border-red-100 px-5 py-3 text-sm text-red-700">
-          <div className="flex items-start space-x-2">
-            <AlertTriangle size={16} className="shrink-0 mt-0.5" />
-            <p>
-              {t('dashboard.payments.configuration.active_subscribers_prefix')}{' '}
-              <strong>{t('dashboard.payments.configuration.active_subscribers', { count: disconnectError.count })}</strong>
-              {t('dashboard.payments.configuration.active_subscribers_suffix')}
+      {/* ===== Card 1: Chargily credentials ===== */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <div className="flex items-start justify-between mb-5">
+          <div>
+            <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500">
+              Chargily Pay v2
+            </h3>
+            <p className="text-sm text-gray-500 mt-1">
+              Accept EDAHABIA and CIB payments in Algerian Dinar.
             </p>
           </div>
-        </div>
-      )}
-
-      {/* Warning strip when config exists but OAuth not completed */}
-      {config && !isConnected && !disconnectError && (
-        <div className="bg-amber-50 border-t border-amber-100 px-5 py-2 text-xs text-amber-700 flex items-center justify-between">
-          <div className="flex items-center space-x-1.5">
-            <Info size={12} className="shrink-0" />
-            <span>
-              {t('dashboard.payments.configuration.oauth_incomplete_prefix')}{' '}
-              <strong>{t('dashboard.payments.configuration.complete_setup')}</strong>{' '}
-              {t('dashboard.payments.configuration.oauth_incomplete_suffix')}
-            </span>
+          <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg shrink-0">
+            <CreditCard size={20} className="text-gray-700" />
           </div>
-          <ConfirmationModal
-            confirmationButtonText={t('dashboard.payments.configuration.start_over')}
-            confirmationMessage={t('dashboard.payments.configuration.start_over_confirm_message', { provider: provider.name })}
-            dialogTitle={t('dashboard.payments.configuration.start_over_dialog_title')}
-            dialogTrigger={
-              <button className="ml-4 shrink-0 underline hover:text-amber-900 transition-colors cursor-pointer">
-                {t('dashboard.payments.configuration.start_over')}
-              </button>
-            }
-            functionToExecute={handleDelete}
-            status="warning"
+        </div>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label size="small" weight="plus">Mode</Label>
+            <div className="inline-flex rounded-lg border border-gray-200 p-0.5 bg-gray-50">
+              {(['test', 'live'] as PaymentMode[]).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setField('mode', mode)}
+                  className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                    form.mode === mode
+                      ? 'bg-white shadow-sm text-gray-900 font-medium'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  {mode === 'test' ? 'Test' : 'Live'}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-gray-400">
+              Test uses the Chargily sandbox; live takes real payments.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label size="small" weight="plus" htmlFor="chargily-public-key">
+              Public key
+            </Label>
+            <Input
+              id="chargily-public-key"
+              value={form.public_key}
+              onChange={(e) => setField('public_key', e.target.value)}
+              placeholder="pk_…"
+              autoComplete="off"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label size="small" weight="plus" htmlFor="chargily-secret-key">
+                Secret key
+              </Label>
+              <Input
+                id="chargily-secret-key"
+                type="password"
+                value={form.secret_key}
+                onChange={(e) => setField('secret_key', e.target.value)}
+                placeholder={config?.has_secret_key ? '•••••••• (stored)' : 'sk_…'}
+                autoComplete="new-password"
+              />
+              <p className="text-xs text-gray-400">
+                Write-only. Stored encrypted and never returned by the API.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label size="small" weight="plus" htmlFor="chargily-webhook-secret">
+                Webhook secret
+              </Label>
+              <Input
+                id="chargily-webhook-secret"
+                type="password"
+                value={form.webhook_secret}
+                onChange={(e) => setField('webhook_secret', e.target.value)}
+                placeholder={config?.has_webhook_secret ? '•••••••• (stored)' : 'Optional'}
+                autoComplete="new-password"
+              />
+              <p className="text-xs text-gray-400">
+                Defaults to the secret key when left empty.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ===== Card 2: Enable payments ===== */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500">
+              Enable payments
+            </h3>
+            <p className="text-sm text-gray-500 mt-1">
+              Paid resources can only be purchased while this is on.
+            </p>
+          </div>
+          <Switch
+            checked={form.active}
+            onCheckedChange={(checked) => setField('active', checked)}
           />
         </div>
-      )}
-    </div>
-  );
-};
+        {form.active && !config?.has_secret_key && !form.secret_key.trim() && (
+          <p className="text-xs text-amber-600 mt-3">
+            Add a secret key before enabling payments.
+          </p>
+        )}
+      </div>
 
-export default PaymentsConfigurationPage;
+      {/* ===== Security note ===== */}
+      <div className="flex items-start gap-2 px-1 text-xs text-gray-400">
+        <ShieldCheck size={14} className="shrink-0 mt-0.5" />
+        <span>
+          Credentials are stored per organization. Secret keys are encrypted at
+          rest and only used server-side when talking to Chargily.
+        </span>
+      </div>
+    </div>
+  )
+}
+
+export default PaymentsConfigurationPage

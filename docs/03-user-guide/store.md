@@ -2,7 +2,7 @@
 
 > Purchasing courses on Koodook.
 
-> **Implementation status:** the Store/checkout flow is **not live yet**. Course pages, prices and the "Get access" entry point exist; the Chargily checkout and webhook that would complete a purchase are still to be built. See [Payments — Progress & Roadmap](../08-features/payments/progress.md).
+> **Implementation status:** the paid flow is live — "Get access" opens Chargily, and the return page confirms the purchase. See [Payments — Progress & Roadmap](../08-features/payments/progress.md).
 
 ---
 
@@ -17,8 +17,10 @@ The **Store** page shows courses available for purchase.
    - **EDAHABIA** --- Algérie Poste e-wallet
    - **CIB** --- Bank card (SATIM)
 5. Complete payment on the secure Chargily page
-6. You are redirected back to Koodook on success
-7. The course is immediately accessible
+6. You are redirected to a **success** page that confirms your access
+7. Press **Back to course** to start learning
+
+If the payment fails or is cancelled, you land on a **failure** page instead. You are not charged, and the same button takes you back to the course so you can try again.
 
 ## Payment Methods
 

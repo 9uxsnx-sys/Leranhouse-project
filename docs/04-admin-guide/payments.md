@@ -2,7 +2,7 @@
 
 > Configure Chargily Pay v2 to accept Algerian Dinar payments via EDAHABIA (Algérie Poste) and CIB cards on the Koodook platform.
 
-> **Implementation status:** pricing (Payments → Offers) and access management (Access tab, all three modes) are **live**. Chargily checkout creation, the webhook receiver, and the Configuration tab are **not built yet**. Until they land, no real payment can be taken and the Transactions/Overview/Payouts tabs show sample data. See [Payments — Progress & Roadmap](../08-features/payments/progress.md).
+> **Implementation status:** pricing (Payments → Offers), payments configuration (Payments → Configuration), access management (Access tab, all three modes), checkout creation, the Chargily webhook receiver and the post-payment result pages are **live** — a completed payment grants access, enrolls the learner, and lands on a success page. The Transactions/Overview/Payouts tabs still show sample data. See [Payments — Progress & Roadmap](../08-features/payments/progress.md).
 
 ## Overview of Chargily Pay v2 Integration
 
@@ -38,8 +38,6 @@ Before accepting payments, you need to connect Koodook to your Chargily Pay acco
 4. Click **Save Configuration**.
 
 Credentials are stored **per organization** in `paymentconfig`; secret keys are encrypted at rest and never returned by the API.
-
-> **Note:** the Configuration tab is currently UI-only — the `GET`/`PUT /payments/{org_id}/config` endpoints still need to be added. See the [Progress & Roadmap](../08-features/payments/progress.md).
 
 > **Security warning:** Never share your Secret Key. It is used for server-to-server communication only. Store it securely and rotate it periodically from the Chargily dashboard.
 
@@ -90,7 +88,7 @@ Webhooks allow Chargily to notify Koodook about payment events in real time.
 3. Select the events to listen for: `checkout.paid`, `checkout.failed`, `checkout.canceled`.
 4. Save the webhook.
 
-> The webhook receiver is not implemented yet — this section documents the target contract. See the [Progress & Roadmap](../08-features/payments/progress.md).
+> The webhook receiver is live: send `checkout.paid`, `checkout.failed`, `checkout.canceled` to the URL above.
 
 **For local development (using ngrok):**
 1. Start ngrok against the API port: `ngrok http 1338`.

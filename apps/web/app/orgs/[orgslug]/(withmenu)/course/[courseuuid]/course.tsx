@@ -10,13 +10,16 @@ import {
   getCourseThumbnailMediaDirectory,
   getCourseBannerMediaDirectory,
 } from '@services/media/media'
-import { Backpack, Check, File, StickyNote, Video, Square, Image as ImageIcon, Lock, Clock, BookOpen, Award, Download, ChevronDown, BarChart3, RefreshCw } from 'lucide-react'
+import { Backpack, Check, File, StickyNote, Video, Square, Image as ImageIcon, Lock, Clock, BookOpen, Award, Download, ChevronDown, BarChart3, RefreshCw, Loader2 } from 'lucide-react'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useMediaQuery } from 'usehooks-ts'
 import CourseActionsMobile from '@components/Objects/Courses/CourseActions/CourseActionsMobile'
 import { useRegisterBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import useSWR from 'swr'
+import useSWR, { mutate as globalMutate } from 'swr'
+import toast from 'react-hot-toast'
+import { startCourse, startTrail } from '@services/courses/activity'
+import { createResourceCheckout } from '@services/payments/checkout'
 import { useTranslation } from 'react-i18next'
 import CourseCommunitySection from '@components/Objects/Communities/CourseCommunitySection'
 import CourseShare from '@components/Objects/Courses/CourseShare/CourseShare'
@@ -113,6 +116,46 @@ const CourseClient = (props: any) => {
   const progressPercent = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0
   const instructorData = meta.instructor?.name ? meta.instructor : null
   const requirementsList = meta.requirements ? meta.requirements.split('\n').filter((r: string) => r.trim()) : []
+
+  const [isStarting, setIsStarting] = useState(false)
+
+  const isPaidCourse = course?.access_type === 'paid'
+  const coursePrice = typeof course?.price_amount === 'number' ? course.price_amount : null
+
+  const handleGetAccess = async () => {
+    if (!course?.course_uuid || !org?.id || !access_token) return
+    setIsStarting(true)
+    try {
+      if (isPaidCourse) {
+        const checkout = await createResourceCheckout(
+          org.id,
+          { resource_uuid: course.course_uuid, resource_type: 'course' },
+          access_token
+        )
+        if (checkout?.checkout_url) {
+          window.location.href = checkout.checkout_url
+          return
+        }
+        throw new Error('Missing checkout URL')
+      }
+
+      try {
+        await startCourse(course.course_uuid, orgslug, access_token)
+      } catch (err: any) {
+        const detail = String(err?.detail || err?.message || '')
+        if (!detail.toLowerCase().includes('trail not found')) throw err
+        await startTrail(org.id, session?.data?.user?.id, access_token)
+        await startCourse(course.course_uuid, orgslug, access_token)
+      }
+
+      await globalMutate(`${getAPIUrl()}trail/org/${org.id}/trail`)
+      toast.success(t('course.added_to_progress', 'Course added to your progress'))
+    } catch (err: any) {
+      toast.error(err?.detail || t('course.get_access_failed', 'Could not start this course'))
+    } finally {
+      setIsStarting(false)
+    }
+  }
   if (!initialCourse && !serverError && courseLoading) {
     return <PageLoading />
   }
@@ -397,10 +440,32 @@ const CourseClient = (props: any) => {
                     <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                       <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-4">Get Access</h3>
                       <p className="text-sm text-gray-500 mb-2 leading-snug">
-                        Purchase this course to start learning
+                        {isPaidCourse
+                          ? 'Purchase this course to start learning'
+                          : 'Add this course to your progress to start learning'}
                       </p>
-                      <Button variant="primary" size="large" className="w-full">
-                        Get Access
+                      {isPaidCourse && coursePrice !== null && coursePrice > 0 && (
+                        <p className="text-2xl font-semibold text-gray-900 mb-4">
+                          {coursePrice.toLocaleString()} <span className="text-sm font-normal text-gray-500">DZD</span>
+                        </p>
+                      )}
+                      <Button
+                        variant="primary"
+                        size="large"
+                        className="w-full"
+                        onClick={handleGetAccess}
+                        disabled={isStarting || !access_token}
+                      >
+                        {isStarting ? (
+                          <span className="inline-flex items-center gap-2">
+                            <Loader2 size={16} className="animate-spin" />
+                            Please wait…
+                          </span>
+                        ) : isPaidCourse ? (
+                          'Get Access'
+                        ) : (
+                          'Add to Progress'
+                        )}
                       </Button>
                     </div>
                   )}

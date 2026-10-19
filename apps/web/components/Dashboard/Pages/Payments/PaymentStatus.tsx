@@ -3,6 +3,27 @@ import React from 'react'
 
 export type PaymentStatus = 'paid' | 'failed' | 'pending' | 'refunded'
 
+/**
+ * Maps backend `paymentorder.status` values onto the four colours the tables
+ * render. Terminal failures collapse into `failed`; partial refunds into
+ * `refunded`; everything still in flight is `pending`.
+ */
+export function mapOrderStatus(raw: string | null | undefined): PaymentStatus {
+  switch (raw) {
+    case 'paid':
+      return 'paid'
+    case 'failed':
+    case 'canceled':
+    case 'expired':
+      return 'failed'
+    case 'refunded':
+    case 'partially_refunded':
+      return 'refunded'
+    default:
+      return 'pending'
+  }
+}
+
 const STATUS_SQUARE: Record<PaymentStatus, string> = {
   paid: 'bg-green-500',
   failed: 'bg-red-500',

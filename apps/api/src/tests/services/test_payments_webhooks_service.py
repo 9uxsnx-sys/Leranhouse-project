@@ -1,0 +1,260 @@
+"""Service tests for the Chargily webhook receiver."""
+
+import hashlib
+import hmac
+import json
+
+import pytest
+from fastapi import HTTPException
+from sqlmodel import select
+from starlette.requests import Request
+
+from src.db.courses.courses import Course
+from src.db.payments.enums import (
+    EntitlementStatusEnum,
+    PaymentModeEnum,
+    PaymentOrderStatusEnum,
+    PaymentProviderEnum,
+    WebhookEventStatusEnum,
+)
+from src.db.payments.payment_configs import PaymentConfig
+from src.db.payments.payment_orders import PaymentOrder
+from src.db.payments.payment_webhook_events import PaymentWebhookEvent
+from src.db.payments.resource_entitlements import ResourceEntitlement
+from src.db.trail_runs import TrailRun
+from src.db.trails import Trail
+from src.services.payments.webhooks import (
+    handle_chargily_webhook,
+    verify_signature,
+)
+from src.services.webhooks.crypto import encrypt_secret
+
+SECRET = "test_sk_webhook"
+ORG_UUID = "org_test"
+CHECKOUT_ID = "ch_123"
+
+
+def _sign(body: bytes, secret: str = SECRET) -> str:
+    return hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
+
+
+def _request(body: bytes, signature: str | None) -> Request:
+    headers = [(b"content-type", b"application/json")]
+    if signature is not None:
+        headers.append((b"signature", signature.encode()))
+    scope = {
+        "type": "http",
+        "method": "POST",
+        "path": "/",
+        "headers": headers,
+        "query_string": b"",
+    }
+
+    async def receive():
+        return {"type": "http.request", "body": body, "more_body": False}
+
+    return Request(scope, receive)
+
+
+def _payload(event_id: str = "evt_1", event_type: str = "checkout.paid") -> dict:
+    return {
+        "id": event_id,
+        "entity": "event",
+        "livemode": "false",
+        "type": event_type,
+        "data": {
+            "id": CHECKOUT_ID,
+            "entity": "checkout",
+            "amount": 1500,
+            "fees": 15,
+            "fees_on_merchant": 15,
+            "status": "paid" if event_type == "checkout.paid" else "failed",
+            "payment_method": "edahabia",
+            "metadata": {"order_uuid": "order_test", "user_id": "2", "org_id": "1"},
+        },
+    }
+
+
+@pytest.fixture
+def payment_config(db, org):
+    config = PaymentConfig(
+        org_id=org.id,
+        provider=PaymentProviderEnum.CHARGILY,
+        mode=PaymentModeEnum.TEST,
+        public_key="pk_test",
+        secret_key_encrypted=encrypt_secret(SECRET),
+        active=True,
+    )
+    db.add(config)
+    db.commit()
+    db.refresh(config)
+    return config
+
+
+@pytest.fixture
+def pending_order(db, org, course, regular_user):
+    order = PaymentOrder(
+        order_uuid="order_test",
+        org_id=org.id,
+        user_id=regular_user.id,
+        resource_uuid=course.course_uuid,
+        resource_type="course",
+        resource_name=course.name,
+        amount=1500,
+        currency="DZD",
+        status=PaymentOrderStatusEnum.PENDING,
+        chargily_checkout_id=CHECKOUT_ID,
+    )
+    db.add(order)
+    db.commit()
+    db.refresh(order)
+    return order
+
+
+class TestVerifySignature:
+    def test_accepts_matching_signature(self):
+        body = b'{"a":1}'
+        assert verify_signature(body, _sign(body), SECRET) is True
+
+    def test_rejects_missing_or_wrong_signature(self):
+        body = b'{"a":1}'
+        assert verify_signature(body, None, SECRET) is False
+        assert verify_signature(body, "deadbeef", SECRET) is False
+
+
+class TestChargilyWebhook:
+    async def test_checkout_paid_grants_access_and_enrolls(
+        self, db, org, payment_config, pending_order, regular_user
+    ):
+        body = json.dumps(_payload()).encode()
+        result = await handle_chargily_webhook(
+            _request(body, _sign(body)), ORG_UUID, db
+        )
+        assert result["status"] == "ok"
+
+        order = db.exec(
+            select(PaymentOrder).where(PaymentOrder.id == pending_order.id)
+        ).one()
+        assert order.status == PaymentOrderStatusEnum.PAID
+        assert order.paid_at is not None
+        assert order.fees_on_merchant == 15
+
+        entitlement = db.exec(
+            select(ResourceEntitlement).where(
+                ResourceEntitlement.user_id == regular_user.id
+            )
+        ).one()
+        assert entitlement.status == EntitlementStatusEnum.ACTIVE
+        assert entitlement.source.value == "purchase"
+        assert entitlement.order_id == order.id
+
+        # The purchase lands in the learner's Progress tab.
+        trail = db.exec(select(Trail).where(Trail.user_id == regular_user.id)).one()
+        run = db.exec(
+            select(TrailRun).where(TrailRun.trail_id == trail.id)
+        ).one()
+        enrolled_course = db.exec(
+            select(Course).where(Course.course_uuid == order.resource_uuid)
+        ).one()
+        assert run.course_id == enrolled_course.id
+
+        event = db.exec(select(PaymentWebhookEvent)).one()
+        assert event.status == WebhookEventStatusEnum.PROCESSED
+        assert event.processed_at is not None
+
+    async def test_duplicate_event_is_a_noop(
+        self, db, org, payment_config, pending_order, regular_user
+    ):
+        body = json.dumps(_payload()).encode()
+        signature = _sign(body)
+
+        await handle_chargily_webhook(_request(body, signature), ORG_UUID, db)
+        second = await handle_chargily_webhook(_request(body, signature), ORG_UUID, db)
+
+        assert second == {"status": "ok", "duplicate": True}
+        assert len(db.exec(select(PaymentWebhookEvent)).all()) == 1
+        assert (
+            len(
+                db.exec(
+                    select(ResourceEntitlement).where(
+                        ResourceEntitlement.user_id == regular_user.id
+                    )
+                ).all()
+            )
+            == 1
+        )
+
+    async def test_missing_signature_is_rejected(
+        self, db, org, payment_config, pending_order
+    ):
+        body = json.dumps(_payload()).encode()
+        with pytest.raises(HTTPException) as exc:
+            await handle_chargily_webhook(_request(body, None), ORG_UUID, db)
+        assert exc.value.status_code == 400
+
+    async def test_tampered_signature_is_rejected(
+        self, db, org, payment_config, pending_order
+    ):
+        body = json.dumps(_payload()).encode()
+        with pytest.raises(HTTPException) as exc:
+            await handle_chargily_webhook(_request(body, "0" * 64), ORG_UUID, db)
+        assert exc.value.status_code == 403
+
+    async def test_failed_checkout_updates_order_only(
+        self, db, org, payment_config, pending_order, regular_user
+    ):
+        body = json.dumps(_payload(event_type="checkout.failed")).encode()
+        await handle_chargily_webhook(_request(body, _sign(body)), ORG_UUID, db)
+
+        order = db.exec(select(PaymentOrder)).one()
+        assert order.status == PaymentOrderStatusEnum.FAILED
+        assert db.exec(select(ResourceEntitlement)).first() is None
+
+    async def test_canceled_checkout_updates_order_only(
+        self, db, org, payment_config, pending_order
+    ):
+        body = json.dumps(_payload(event_type="checkout.canceled")).encode()
+        await handle_chargily_webhook(_request(body, _sign(body)), ORG_UUID, db)
+
+        order = db.exec(select(PaymentOrder)).one()
+        assert order.status == PaymentOrderStatusEnum.CANCELED
+
+    async def test_webhook_secret_is_preferred_when_set(
+        self, db, org, payment_config, pending_order
+    ):
+        payment_config.webhook_secret_encrypted = encrypt_secret("whsec_custom")
+        db.add(payment_config)
+        db.commit()
+
+        body = json.dumps(_payload()).encode()
+        # Signed with the API secret → rejected.
+        with pytest.raises(HTTPException) as exc:
+            await handle_chargily_webhook(_request(body, _sign(body)), ORG_UUID, db)
+        assert exc.value.status_code == 403
+
+        # Signed with the dedicated webhook secret → accepted.
+        result = await handle_chargily_webhook(
+            _request(body, _sign(body, "whsec_custom")), ORG_UUID, db
+        )
+        assert result["status"] == "ok"
+
+    async def test_unknown_order_is_acknowledged(
+        self, db, org, payment_config
+    ):
+        payload = _payload(event_id="evt_unknown")
+        payload["data"]["id"] = "ch_missing"
+        body = json.dumps(payload).encode()
+
+        result = await handle_chargily_webhook(_request(body, _sign(body)), ORG_UUID, db)
+
+        assert result["status"] == "ok"
+        event = db.exec(select(PaymentWebhookEvent)).one()
+        assert event.status == WebhookEventStatusEnum.PROCESSED
+
+    async def test_unknown_org_is_rejected(self, db, payment_config):
+        body = json.dumps(_payload()).encode()
+        with pytest.raises(HTTPException) as exc:
+            await handle_chargily_webhook(
+                _request(body, _sign(body)), "org_missing", db
+            )
+        assert exc.value.status_code == 404

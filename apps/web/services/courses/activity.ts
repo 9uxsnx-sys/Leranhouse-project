@@ -6,6 +6,15 @@ import { getAPIUrl } from '@services/config/config'
  GET requests are called from the frontend using SWR (https://swr.vercel.app/)
 */
 
+export async function startTrail(org_id: number, user_id: number, access_token: any) {
+  const result: any = await fetch(
+    `${getAPIUrl()}trail/start`,
+    RequestBodyWithAuthHeader('POST', { org_id, user_id }, null, access_token)
+  )
+  const res = await errorHandling(result)
+  return res
+}
+
 export async function startCourse(course_uuid: string, org_slug: string,access_token:any) {
   const result: any = await fetch(
     `${getAPIUrl()}trail/add_course/${course_uuid}`,
