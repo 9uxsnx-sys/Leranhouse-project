@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
       const collections = await getOrgCollections(orgInfo.id).catch(() => [])
       for (const collection of collections) {
         sitemapUrls.push({
-          loc: `${baseUrl}collections/${collection.collection_uuid.replace('collection_', '')}`,
+          loc: `${baseUrl}collection/${collection.collection_uuid.replace('collection_', '')}`,
           priority: 0.6,
           changefreq: 'weekly',
           lastmod: collection.update_date,

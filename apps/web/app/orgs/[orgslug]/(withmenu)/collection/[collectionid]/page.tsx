@@ -87,7 +87,7 @@ const CollectionPage = async (props: { params: MetadataProps['params'] }) => {
 
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: 'Home', url: await getServerCanonicalUrl(params.orgslug, '/') },
-    { name: 'Collections', url: await getServerCanonicalUrl(params.orgslug, '/courses') },
+    { name: 'Collections', url: await getServerCanonicalUrl(params.orgslug, '/collections') },
     { name: 'Collection', url: await getServerCanonicalUrl(params.orgslug, `/collection/${params.collectionid}`) },
   ])
 

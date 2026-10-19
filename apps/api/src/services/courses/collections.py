@@ -18,6 +18,7 @@ from src.db.courses.activities import Activity
 from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.chapters import Chapter
 from src.db.courses.courses import Course
+from src.db.organizations import Organization
 from src.db.payments.enums import AccessTypeEnum
 from src.db.roles import Role
 from src.db.usergroup_resources import UserGroupResource
@@ -153,6 +154,36 @@ def _sync_access_flags(collection: Collection, fields_set: set[str]) -> None:
         )
 
 
+async def _check_catalog_read_access(
+    request: Request,
+    db_session: Session,
+    current_user: PublicUser | AnonymousUser,
+    collection: Collection,
+) -> None:
+    """Guard the collection catalog (metadata and member list).
+
+    A published paid bundle is a product page: learners must be able to browse
+    what they are buying before they pay. The lessons stay protected by each
+    course's own RBAC check. Private (``users_only``) and draft collections keep
+    the strict RBAC denial.
+    """
+    decision = await check_resource_access(
+        request,
+        db_session,
+        current_user,
+        collection.collection_uuid,
+        AccessAction.READ,
+        raise_on_deny=False,
+    )
+    if decision.allowed:
+        return
+    if collection.published and collection.access_type == AccessTypeEnum.PAID:
+        return
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN, detail=decision.reason
+    )
+
+
 ####################################################
 # CRUD
 ####################################################
@@ -166,10 +197,7 @@ async def get_collection(
 ) -> CollectionRead:
     collection = _get_collection_or_404(db_session, collection_uuid)
 
-    # RBAC check
-    await check_resource_access(
-        request, db_session, current_user, collection.collection_uuid, AccessAction.READ
-    )
+    await _check_catalog_read_access(request, db_session, current_user, collection)
 
     acting_user_id = resolve_acting_user_id(current_user)
     include_unpublished = _is_org_admin(
@@ -357,6 +385,17 @@ async def delete_collection(
         request, db_session, current_user, collection.collection_uuid, AccessAction.DELETE
     )
 
+    # Clean up collection media so deleting a bundle does not leave files behind.
+    org = db_session.exec(
+        select(Organization).where(Organization.id == collection.org_id)
+    ).first()
+    if org:
+        from src.services.courses.transfer.storage_utils import delete_storage_directory
+
+        delete_storage_directory(
+            f"content/orgs/{org.org_uuid}/collections/{collection.collection_uuid}"
+        )
+
     db_session.delete(collection)
     db_session.commit()
 
@@ -379,9 +418,7 @@ async def get_collection_courses(
 ) -> List[CollectionCourseRead]:
     collection = _get_collection_or_404(db_session, collection_uuid)
 
-    await check_resource_access(
-        request, db_session, current_user, collection.collection_uuid, AccessAction.READ
-    )
+    await _check_catalog_read_access(request, db_session, current_user, collection)
 
     acting_user_id = resolve_acting_user_id(current_user)
     include_unpublished = _is_org_admin(
@@ -498,6 +535,15 @@ async def add_course_to_collection(
             update_date=str(datetime.now()),
         )
     )
+    try:
+        db_session.flush()
+        # Publish rules apply immediately: a published bundle must not accept a
+        # draft course just because the course was added after publishing.
+        _validate_publishable(db_session, collection)
+    except HTTPException:
+        db_session.rollback()
+        raise
+
     collection.update_date = str(datetime.now())
     db_session.add(collection)
     db_session.commit()

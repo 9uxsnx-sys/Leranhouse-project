@@ -118,7 +118,10 @@ function EditCollectionContent({ collection, orgslug, onUpdated }: EditCollectio
     const list: any[] = orgCourses || []
     const candidates = list.filter(
       (course: any) =>
-        course.access_type !== 'users_only' && !memberUuids.has(course.course_uuid)
+        course.access_type !== 'users_only' &&
+        !memberUuids.has(course.course_uuid) &&
+        // Published bundles may only contain published courses.
+        (!collection?.published || course.published)
     )
     if (!pickerSearch.trim()) return candidates
     return candidates.filter((course: any) =>

@@ -56,7 +56,7 @@ export async function getOrgCollections(
   next?: any
 ) {
   const result: any = await fetch(
-    `${getAPIUrl()}collections/org/${org_id}/page/1/limit/10`,
+    `${getAPIUrl()}collections/org/${org_id}/page/1/limit/100`,
     RequestBodyWithAuthHeader('GET', null, next, access_token)
   )
   const res = await errorHandling(result)

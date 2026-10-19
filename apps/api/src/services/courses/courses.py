@@ -1139,11 +1139,40 @@ async def update_course(
             .where(CollectionCourse.course_id == course.id)
         ).all()
         if collection_names:
+            db_session.rollback()
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=(
                     "This course is part of the following collections and cannot "
                     "be made private: " + ", ".join(sorted(collection_names))
+                ),
+            )
+
+    # A live bundle must keep showing every member it advertises: a member
+    # course cannot be unpublished while a published collection contains it.
+    if (
+        course.published is False
+        and "published" in course_object.model_fields_set
+    ):
+        live_bundle_names = db_session.exec(
+            select(Collection.name)
+            .join(
+                CollectionCourse,
+                CollectionCourse.collection_id == Collection.id,
+            )
+            .where(
+                CollectionCourse.course_id == course.id,
+                Collection.published == True,  # noqa: E712
+            )
+        ).all()
+        if live_bundle_names:
+            db_session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    "This course is part of the following published collections "
+                    "and cannot be unpublished: "
+                    + ", ".join(sorted(live_bundle_names))
                 ),
             )
 

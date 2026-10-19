@@ -20,6 +20,8 @@ from src.db.courses.courses import (
     FullCourseRead,
     ThumbnailType,
 )
+from src.db.collections import Collection
+from src.db.collections_courses import CollectionCourse
 from src.db.courses.activities import Activity, ActivityTypeEnum, ActivitySubTypeEnum
 from src.db.payments.enums import AccessTypeEnum
 from src.db.courses.blocks import Block, BlockTypeEnum
@@ -779,6 +781,104 @@ class TestCourseMutationsAndRights:
             )
 
         assert updated.open_to_contributors is True
+
+    @pytest.mark.asyncio
+    async def test_update_course_users_only_rejected_when_in_collection(
+        self, db, org, course, admin_user, mock_request
+    ):
+        collection = Collection(
+            name="Design Bundle",
+            public=True,
+            published=True,
+            org_id=org.id,
+            collection_uuid="collection_guard_test",
+            creation_date=str(datetime.now()),
+            update_date=str(datetime.now()),
+        )
+        db.add(collection)
+        db.commit()
+        db.refresh(collection)
+        db.add(
+            CollectionCourse(
+                collection_id=collection.id,
+                course_id=course.id,
+                org_id=org.id,
+                creation_date=str(datetime.now()),
+                update_date=str(datetime.now()),
+            )
+        )
+        db.commit()
+
+        with patch(
+            "src.services.courses.courses.check_resource_access",
+            new_callable=AsyncMock,
+        ), patch(
+            "src.services.courses.courses.authorization_verify_based_on_org_admin_status",
+            new_callable=AsyncMock,
+            return_value=True,
+        ):
+            with pytest.raises(HTTPException) as exc_info:
+                await update_course(
+                    mock_request,
+                    CourseUpdate(access_type=AccessTypeEnum.USERS_ONLY),
+                    course.course_uuid,
+                    admin_user,
+                    db,
+                )
+
+        assert exc_info.value.status_code == 409
+        assert "Design Bundle" in str(exc_info.value.detail)
+        db.refresh(course)
+        assert course.access_type != AccessTypeEnum.USERS_ONLY
+
+    @pytest.mark.asyncio
+    async def test_update_course_unpublish_rejected_when_in_published_collection(
+        self, db, org, course, admin_user, mock_request
+    ):
+        collection = Collection(
+            name="Live Bundle",
+            public=True,
+            published=True,
+            org_id=org.id,
+            collection_uuid="collection_unpublish_guard",
+            creation_date=str(datetime.now()),
+            update_date=str(datetime.now()),
+        )
+        db.add(collection)
+        db.commit()
+        db.refresh(collection)
+        db.add(
+            CollectionCourse(
+                collection_id=collection.id,
+                course_id=course.id,
+                org_id=org.id,
+                creation_date=str(datetime.now()),
+                update_date=str(datetime.now()),
+            )
+        )
+        db.commit()
+
+        with patch(
+            "src.services.courses.courses.check_resource_access",
+            new_callable=AsyncMock,
+        ), patch(
+            "src.services.courses.courses.authorization_verify_based_on_org_admin_status",
+            new_callable=AsyncMock,
+            return_value=True,
+        ):
+            with pytest.raises(HTTPException) as exc_info:
+                await update_course(
+                    mock_request,
+                    CourseUpdate(published=False),
+                    course.course_uuid,
+                    admin_user,
+                    db,
+                )
+
+        assert exc_info.value.status_code == 409
+        assert "Live Bundle" in str(exc_info.value.detail)
+        db.refresh(course)
+        assert course.published is True
 
     @pytest.mark.asyncio
     async def test_update_course_thumbnail_image_sets_both(

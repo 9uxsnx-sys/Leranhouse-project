@@ -307,7 +307,11 @@ Add a `collection_` branch:
 | Collection is `paid` → `price_amount > 0` | publish / update | 422 |
 | Collection is `paid` → at least one member | publish / update | 422 |
 | Publish → all members published | publish | 422 with offender list |
+| Add draft course to a published collection | add course | 422 |
 | Member course cannot switch to `users_only` | course update | 409 with collection names |
+| Member course cannot be unpublished while its collection is published | course update | 409 with collection names |
+| Published paid bundle metadata is readable by non-buyers (product page) | get collection / members | 200 |
+| Private (`users_only`) and draft bundles stay hidden from non-members | get collection / members | 403 |
 | Draft collection cannot be purchased | checkout | 400 |
 | Duplicate collection purchase | checkout | 400 |
 | `update_collection` without `courses` keeps membership | update | — |
@@ -365,6 +369,7 @@ Minor: `/trail` sorts by `creation_date`; six runs share one timestamp. Add a na
 - Listing, detail, success-page branch, nav entries, retire the legacy create form.
 - Exit: buy from the collection page → all courses in `/trail`.
 - Verified: a signed `checkout.paid` for a 2-course bundle produced 3 active entitlements (bundle + 2 courses) and both courses on the Progress page; the Access tab Public → Paid → price → Save round-trip persists `access_type=PAID`.
+- Post-audit fixes: paid bundle pages are browsable by non-buyers so the Get access CTA is reachable; adding a draft member to a published bundle is rejected; unpublishing a member of a published bundle is rejected; deleting a bundle removes its uploaded media; sitemap and breadcrumb links point at `/collection/:uuid` and `/collections`.
 
 ### Phase 7 — Deferred
 - SEO tab, Offers row type, podcasts as members (polymorphic join table), removal of the Payment Groups tab.

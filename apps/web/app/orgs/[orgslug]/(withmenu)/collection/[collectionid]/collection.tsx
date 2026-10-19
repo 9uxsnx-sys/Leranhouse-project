@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import React, { useMemo, useState } from 'react'
 import useSWR from 'swr'
 import { useTranslation } from 'react-i18next'
@@ -48,6 +49,7 @@ const CollectionClient = ({
   collectionid: string
 }) => {
   const { t } = useTranslation()
+  const router = useRouter()
   const session = useLHSession() as any
   const accessToken = session?.data?.tokens?.access_token
   const org = useOrg() as any
@@ -55,7 +57,7 @@ const CollectionClient = ({
   const collectionUuid = `collection_${collectionid}`
 
   const { data: collection, error } = useSWR(
-    collectionid && accessToken
+    collectionid
       ? `${getAPIUrl()}collections/${collectionUuid}`
       : null,
     (url: string) => swrFetcher(url, accessToken),
@@ -165,10 +167,15 @@ const CollectionClient = ({
       : ''
 
   const handleGetAccess = async () => {
-    if (!collection?.collection_uuid || !org?.id || !accessToken) return
+    if (!collection?.collection_uuid || !org?.id) return
 
     if (!isPaid) {
       document.getElementById('included')?.scrollIntoView({ behavior: 'smooth' })
+      return
+    }
+
+    if (!accessToken) {
+      router.push('/auth/login')
       return
     }
 

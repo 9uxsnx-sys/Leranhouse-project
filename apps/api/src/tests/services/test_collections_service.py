@@ -133,6 +133,44 @@ class TestGetCollection:
         assert course.id in course_ids
         assert private_course.id not in course_ids
 
+    @pytest.mark.asyncio
+    async def test_get_collection_paid_is_browsable_by_non_buyers(
+        self, db, org, course, collection, regular_user, anonymous_user, mock_request
+    ):
+        # A paid bundle is a product page: metadata and members must be visible
+        # before the learner pays. Content stays protected per course.
+        collection.public = False
+        collection.published = True
+        collection.access_type = AccessTypeEnum.PAID
+        collection.price_amount = 1500
+        db.add(collection)
+        db.commit()
+        db.refresh(collection)
+
+        for viewer in (regular_user, anonymous_user):
+            result = await get_collection(
+                mock_request, "collection_test", viewer, db
+            )
+            assert result.name == "Test Collection"
+            assert len(result.courses) == 1
+            assert result.access_type == AccessTypeEnum.PAID
+
+    @pytest.mark.asyncio
+    async def test_get_collection_users_only_stays_hidden(
+        self, db, org, collection, regular_user, mock_request
+    ):
+        collection.public = False
+        collection.published = True
+        collection.access_type = AccessTypeEnum.USERS_ONLY
+        db.add(collection)
+        db.commit()
+        db.refresh(collection)
+
+        with pytest.raises(HTTPException) as exc_info:
+            await get_collection(mock_request, "collection_test", regular_user, db)
+
+        assert exc_info.value.status_code == 403
+
 
 class TestCreateCollection:
     """Tests for create_collection()."""
@@ -402,6 +440,23 @@ class TestCollectionMembership:
             )
 
         assert exc_info.value.status_code == 422
+
+    @pytest.mark.asyncio
+    async def test_add_draft_course_to_published_collection_is_rejected(
+        self, db, org, course, collection, admin_user, mock_request, bypass_rbac
+    ):
+        draft = _make_course(
+            db, org, id=55, name="Draft", course_uuid="course_draft",
+            public=True, published=False,
+        )
+
+        with pytest.raises(HTTPException) as exc_info:
+            await add_course_to_collection(
+                mock_request, "collection_test", draft.course_uuid, admin_user, db
+            )
+
+        assert exc_info.value.status_code == 422
+        assert "published" in str(exc_info.value.detail).lower()
 
     @pytest.mark.asyncio
     async def test_add_duplicate_course_is_rejected(
