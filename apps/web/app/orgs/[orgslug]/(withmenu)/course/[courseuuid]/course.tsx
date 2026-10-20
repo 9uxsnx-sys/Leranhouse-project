@@ -33,7 +33,7 @@ import { Button } from '@/components/ui/button'
 import { useAnalytics } from '@/hooks/useAnalytics'
 
 const CourseClient = (props: any) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [learnings, setLearnings] = useState<any>([])
   const [expandedChapters, setExpandedChapters] = useState<{[key: string]: boolean}>({})
   const courseuuid = props.courseuuid
@@ -344,7 +344,7 @@ const CourseClient = (props: any) => {
                     <div className="w-20 h-20 rounded-2xl bg-white shadow-sm ring-1 ring-black/5 flex items-center justify-center mx-auto">
                       <BookOpen className="w-10 h-10 text-indigo-400" />
                     </div>
-                    <Text size="small" className="text-gray-400 mt-3">Course banner</Text>
+                    <Text size="small" className="text-gray-400 mt-3">{t('course.page.banner')}</Text>
                   </div>
                 </div>
               )}
@@ -368,7 +368,7 @@ const CourseClient = (props: any) => {
                     <div className="flex flex-wrap items-center gap-2 mt-4">
                       <Badge variant="grey" className="flex items-center gap-1">
                         <BookOpen size={12} />
-                        {stats.lessons} lessons
+                        {t('course.page.lessons', { count: stats.lessons })}
                       </Badge>
                       <Badge variant="grey" className="flex items-center gap-1">
                         <Clock size={12} />
@@ -395,7 +395,7 @@ const CourseClient = (props: any) => {
                   {/* ── 4. ABOUT THIS COURSE ── */}
                   {course?.about && (
                     <div>
-                      <Heading level="h1" className="!text-2xl mb-4">About This Course</Heading>
+                      <Heading level="h1" className="!text-2xl mb-4">{t('course.page.about_title')}</Heading>
                       <div className="space-y-4">
                         {course.about.split('\n\n').filter((p: string) => p.trim()).map((paragraph: string, idx: number) => (
                           <Text key={idx} size="base" className="text-ui-fg-subtle leading-relaxed block">
@@ -422,9 +422,9 @@ const CourseClient = (props: any) => {
                   {/* ── SIDEBAR 1: Access / Progress ── */}
                   {isEnrolled ? (
                     <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                      <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">In Progress</h3>
+                      <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('course.page.in_progress')}</h3>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-gray-900">{progressPercent}% Complete</span>
+                        <span className="text-sm font-semibold text-gray-900">{t('course.page.progress_complete', { percent: progressPercent })}</span>
                         <span className="text-sm text-gray-500">{completedSteps}/{totalSteps}</span>
                       </div>
                       <div className="w-full h-1.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
@@ -432,17 +432,17 @@ const CourseClient = (props: any) => {
                       </div>
                       <Link href={getUriWithOrg(orgslug, `/course/${courseuuid}/lesson-preview`)} className="block w-full mt-4">
                         <Button variant="primary" size="large" className="w-full">
-                          Continue Learning
+                          {t('course.page.continue_learning')}
                         </Button>
                       </Link>
                     </div>
                   ) : (
                     <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                      <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-4">Get Access</h3>
+                      <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-4">{t('course.page.get_access_title')}</h3>
                       <p className="text-sm text-gray-500 mb-2 leading-snug">
                         {isPaidCourse
-                          ? 'Purchase this course to start learning'
-                          : 'Add this course to your progress to start learning'}
+                          ? t('course.page.purchase_hint')
+                          : t('course.page.add_hint')}
                       </p>
                       {isPaidCourse && coursePrice !== null && coursePrice > 0 && (
                         <p className="text-2xl font-semibold text-gray-900 mb-4">
@@ -459,12 +459,12 @@ const CourseClient = (props: any) => {
                         {isStarting ? (
                           <span className="inline-flex items-center gap-2">
                             <Loader2 size={16} className="animate-spin" />
-                            Please wait…
+                            {t('course.page.please_wait')}
                           </span>
                         ) : isPaidCourse ? (
-                          'Get Access'
+                          t('course.page.get_access')
                         ) : (
-                          'Add to Progress'
+                          t('course.page.add_to_progress')
                         )}
                       </Button>
                     </div>
@@ -472,43 +472,47 @@ const CourseClient = (props: any) => {
 
                   {/* ── SIDEBAR 2: Course Includes ── */}
                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">This Course Includes</h3>
+                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('course.page.includes_title')}</h3>
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
                         <Clock size={16} className="text-gray-400 shrink-0" />
-                        <span className="text-sm text-gray-600">{courseIncludes.videoHours} hours of video</span>
+                        <span className="text-sm text-gray-600">{t('course.page.video_hours', { count: courseIncludes.videoHours })}</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <BookOpen size={16} className="text-gray-400 shrink-0" />
-                        <span className="text-sm text-gray-600">{courseIncludes.totalLessons} lessons</span>
+                        <span className="text-sm text-gray-600">{t('course.page.lessons', { count: courseIncludes.totalLessons })}</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <Download size={16} className="text-gray-400 shrink-0" />
-                        <span className="text-sm text-gray-600">{courseIncludes.resources} downloadable resources</span>
+                        <span className="text-sm text-gray-600">{t('course.page.resources', { count: courseIncludes.resources })}</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <Award size={16} className="text-gray-400 shrink-0" />
-                        <span className="text-sm text-gray-600">Certificate of completion</span>
+                        <span className="text-sm text-gray-600">{t('course.page.certificate')}</span>
                       </div>
                     </div>
                   </div>
 
                   {/* ── SIDEBAR 3: Updates ── */}
                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Updates</h3>
+                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('course.page.updates_title')}</h3>
                     <div className="flex items-center gap-3">
                       <RefreshCw size={16} className="text-gray-400 shrink-0" />
                       <span className="text-sm text-gray-600">
-                        Last updated {course.update_date ? new Date(course.update_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'}
+                        {t('course.page.last_updated', {
+                          date: course.update_date
+                            ? new Date(course.update_date).toLocaleDateString(i18n.language || 'en', { year: 'numeric', month: 'short', day: 'numeric' })
+                            : t('course.page.not_available'),
+                        })}
                       </span>
                     </div>
                   </div>
 
                   {/* ── SIDEBAR 4: Community ── */}
                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Community</h3>
+                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('course.page.community_title')}</h3>
                     <p className="text-sm text-gray-600">
-                      This course includes access to a dedicated community where you can discuss, ask questions, and learn together with fellow students.
+                      {t('course.page.community_description')}
                     </p>
                   </div>
 
