@@ -374,6 +374,8 @@ The price itself is edited in **Payments → Offers**, not in the collection Acc
 
 For a **public** bundle there is no checkout: `POST /collections/{uuid}/claim` records the learner in `collectionuser` (inventory). Removing that row through the Access roster removes the bundle from their inventory.
 
+Revoking a buyer's bundle entitlement (`DELETE /payments/{org_id}/entitlements?resource_uuid=collection_…`) also revokes the member entitlements created by the same order (`order_id`). Separately purchased items and manual grants are untouched. No refund is issued.
+
 ---
 
 ## Related Resources

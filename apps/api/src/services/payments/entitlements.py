@@ -305,7 +305,7 @@ async def bulk_revoke_entitlements(
     reason: str = "manual",
 ):
     org, _ = await authorize_org_admin(current_user, org_id, db_session)
-    _resolve_resource(org.id, resource_uuid, db_session)
+    resource_type, _ = _resolve_resource(org.id, resource_uuid, db_session)
 
     revoked: list[int] = []
     not_found: list[int] = []
@@ -328,6 +328,27 @@ async def bulk_revoke_entitlements(
         entitlement.revoked_at = now
         entitlement.revoke_reason = reason
         db_session.add(entitlement)
+
+        # A bundle purchase fans out into one entitlement per member. Removing
+        # the bundle must revoke exactly what that order granted: same order_id,
+        # same user. Separately bought items and manual grants keep their own
+        # order (or none) and stay untouched.
+        if resource_type == "collection" and entitlement.order_id is not None:
+            cascaded = db_session.exec(
+                select(ResourceEntitlement).where(
+                    ResourceEntitlement.org_id == org.id,
+                    ResourceEntitlement.user_id == user_id,
+                    ResourceEntitlement.order_id == entitlement.order_id,
+                    ResourceEntitlement.status == EntitlementStatusEnum.ACTIVE,
+                    ResourceEntitlement.resource_uuid != resource_uuid,
+                )
+            ).all()
+            for member_entitlement in cascaded:
+                member_entitlement.status = EntitlementStatusEnum.REVOKED
+                member_entitlement.revoked_at = now
+                member_entitlement.revoke_reason = reason
+                db_session.add(member_entitlement)
+
         revoked.append(user_id)
 
     db_session.commit()

@@ -280,12 +280,14 @@ function EditCollectionAccess({ collection, orgslug, onUpdated }: EditCollection
           await mutateAccess()
           await refreshAll()
           toast.success(
-            t(
-              action === 'link'
-                ? 'dashboard.courses.access.users.added'
-                : 'dashboard.courses.access.users.removed',
-              { count: ids.length }
-            )
+            mode === 'paid' && action === 'unlink'
+              ? t('collections.dashboard.access.access_removed_count', { count: ids.length })
+              : t(
+                  action === 'link'
+                    ? 'dashboard.courses.access.users.added'
+                    : 'dashboard.courses.access.users.removed',
+                  { count: ids.length }
+                )
           )
         } else {
           toast.error(
@@ -381,7 +383,12 @@ function EditCollectionAccess({ collection, orgslug, onUpdated }: EditCollection
         if (res.status === 200) {
           await mutateAccess()
           await refreshAll()
-          toast.success(t('dashboard.courses.access.users.removed', { count: 1 }), { id: toastId })
+          toast.success(
+            mode === 'paid'
+              ? t('collections.dashboard.access.access_removed')
+              : t('dashboard.courses.access.users.removed', { count: 1 }),
+            { id: toastId }
+          )
         } else {
           toast.error(t('dashboard.courses.access.users.remove_error'), { id: toastId })
         }
@@ -525,7 +532,9 @@ function EditCollectionAccess({ collection, orgslug, onUpdated }: EditCollection
               >
                 <Trash2 size={14} className="text-red-500" />
                 <span className="text-xs text-red-600">
-                  {t('dashboard.courses.access.delete')}
+                  {mode === 'paid'
+                    ? t('collections.dashboard.access.remove_access')
+                    : t('dashboard.courses.access.delete')}
                 </span>
               </DropdownMenuItem>
             </DropdownMenuContent>

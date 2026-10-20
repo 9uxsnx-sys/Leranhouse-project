@@ -60,6 +60,8 @@ DELETE /api/v1/payments/{org_id}/entitlements?resource_uuid=course_…&user_ids=
 
 Flips matching rows to `status=revoked` and sets `revoked_at` / `revoke_reason`. Rows are never deleted. Response: `{ revoked, not_found }`.
 
+**Collection cascade:** when `resource_uuid` is a `collection_…`, the revoke also flips every ACTIVE entitlement for the same user and the same `order_id` (the per-course/per-podcast rows granted by that bundle purchase). Items bought separately have a different `order_id` and manual grants have none, so they stay active. `TrailRun`s are never deleted — progress is kept, access is denied by the entitlement check.
+
 ### List orders
 
 ```

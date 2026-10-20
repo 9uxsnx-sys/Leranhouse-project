@@ -6,7 +6,12 @@ import pytest
 from fastapi import HTTPException
 from sqlmodel import select
 
-from src.db.payments.enums import EntitlementStatusEnum
+from src.db.payments.enums import (
+    EntitlementSourceEnum,
+    EntitlementStatusEnum,
+    PaymentOrderStatusEnum,
+)
+from src.db.payments.payment_orders import PaymentOrder
 from src.db.payments.resource_entitlements import ResourceEntitlement
 from src.services.payments.entitlements import (
     bulk_grant_entitlements,
@@ -179,3 +184,155 @@ class TestCollectionEntitlements:
                     mock_request, admin_user, other_org.id, COURSE_UUID, db
                 )
         assert exc.value.status_code == 404
+
+
+def _make_order(db, org, collection, user_id: int, order_uuid: str) -> PaymentOrder:
+    order = PaymentOrder(
+        order_uuid=order_uuid,
+        org_id=org.id,
+        user_id=user_id,
+        resource_uuid=collection.collection_uuid,
+        resource_type="collection",
+        amount=2500,
+        currency="DZD",
+        status=PaymentOrderStatusEnum.PAID,
+    )
+    db.add(order)
+    db.commit()
+    db.refresh(order)
+    return order
+
+
+def _grant(
+    db,
+    org,
+    user_id: int,
+    resource_uuid: str,
+    resource_type: str = "course",
+    *,
+    order_id: int | None = None,
+    source: EntitlementSourceEnum = EntitlementSourceEnum.PURCHASE,
+) -> ResourceEntitlement:
+    row = ResourceEntitlement(
+        org_id=org.id,
+        user_id=user_id,
+        resource_uuid=resource_uuid,
+        resource_type=resource_type,
+        source=source,
+        order_id=order_id,
+        status=EntitlementStatusEnum.ACTIVE,
+    )
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return row
+
+
+class TestCollectionAccessRevoke:
+    """Revoking a bundle must revoke exactly what its order granted."""
+
+    async def test_revoke_collection_cascades_granting_order(
+        self, db, org, collection, course, admin_user, regular_user, authorized, mock_request
+    ):
+        bundle_order = _make_order(db, org, collection, regular_user.id, "order_bundle")
+        other_order = _make_order(db, org, collection, regular_user.id, "order_other")
+
+        _grant(
+            db,
+            org,
+            regular_user.id,
+            collection.collection_uuid,
+            "collection",
+            order_id=bundle_order.id,
+        )
+        _grant(
+            db,
+            org,
+            regular_user.id,
+            course.course_uuid,
+            "course",
+            order_id=bundle_order.id,
+        )
+        _grant(
+            db,
+            org,
+            regular_user.id,
+            "course_individually_bought",
+            "course",
+            order_id=other_order.id,
+        )
+        _grant(
+            db,
+            org,
+            regular_user.id,
+            "course_manual_grant",
+            "course",
+            source=EntitlementSourceEnum.MANUAL,
+        )
+
+        result = await bulk_revoke_entitlements(
+            mock_request,
+            admin_user,
+            org.id,
+            collection.collection_uuid,
+            [regular_user.id],
+            db,
+        )
+        assert result == {"revoked": [regular_user.id], "not_found": []}
+
+        rows = {
+            row.resource_uuid: row
+            for row in db.exec(
+                select(ResourceEntitlement).where(
+                    ResourceEntitlement.user_id == regular_user.id
+                )
+            ).all()
+        }
+        assert rows[collection.collection_uuid].status == EntitlementStatusEnum.REVOKED
+        assert rows[course.course_uuid].status == EntitlementStatusEnum.REVOKED
+        assert (
+            rows["course_individually_bought"].status == EntitlementStatusEnum.ACTIVE
+        )
+        assert rows["course_manual_grant"].status == EntitlementStatusEnum.ACTIVE
+        assert rows[course.course_uuid].revoked_at is not None
+
+    async def test_revoke_manual_collection_grant_does_not_cascade(
+        self, db, org, collection, course, admin_user, regular_user, authorized, mock_request
+    ):
+        _grant(
+            db,
+            org,
+            regular_user.id,
+            collection.collection_uuid,
+            "collection",
+            source=EntitlementSourceEnum.MANUAL,
+        )
+        _grant(
+            db,
+            org,
+            regular_user.id,
+            course.course_uuid,
+            "course",
+            source=EntitlementSourceEnum.MANUAL,
+        )
+
+        result = await bulk_revoke_entitlements(
+            mock_request,
+            admin_user,
+            org.id,
+            collection.collection_uuid,
+            [regular_user.id],
+            db,
+        )
+        assert result == {"revoked": [regular_user.id], "not_found": []}
+
+        rows = {
+            row.resource_uuid: row
+            for row in db.exec(
+                select(ResourceEntitlement).where(
+                    ResourceEntitlement.user_id == regular_user.id
+                )
+            ).all()
+        }
+        assert rows[collection.collection_uuid].status == EntitlementStatusEnum.REVOKED
+        assert rows[course.course_uuid].status == EntitlementStatusEnum.ACTIVE

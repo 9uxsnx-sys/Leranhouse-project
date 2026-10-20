@@ -1517,7 +1517,12 @@
                                                          "no_linked_groups":  "No user groups are linked",
                                                          "groups_description":  "Members of a linked user group can access this collection.",
                                                          "search_users":  "Search users",
-                                                         "search_groups":  "Search user groups"
+                                                         "search_groups":  "Search user groups",
+                                                         "remove_access":  "Remove access",
+                                                         "access_removed":  "Access removed",
+                                                         "access_removed_count":  "Access removed for {{count}} users",
+                                                         "access_removed_count_one":  "Access removed for {{count}} user",
+                                                         "access_removed_count_other":  "Access removed for {{count}} users"
                                                      }
                                       }
                     },

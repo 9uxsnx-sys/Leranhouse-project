@@ -79,7 +79,9 @@ The toolbar is search → bulk action → mode button → publish toggle.
 | **Private** | UserGroups linked to the bundle | Select + link/unlink |
 | **Paid** | Buyers / granted users (entitlement roster) | Select + grant/revoke |
 
-Removing a learner in Public mode drops the bundle from their inventory; removing an entitlement in Paid mode revokes their paid access. Unpublishing a course that belongs to a published bundle is blocked, and a member course cannot be switched to private, so a live bundle always matches what it advertises.
+Removing a learner in Public mode drops the bundle from their inventory; removing access in Paid mode revokes the bundle and every item that purchase granted, while items bought separately stay owned. It is access-only — no refund is issued.
+
+Unpublishing a course that belongs to a published bundle is blocked, and a member course cannot be switched to private, so a live bundle always matches what it advertises.
 
 ### SEO
 
