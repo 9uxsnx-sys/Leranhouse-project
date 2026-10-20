@@ -675,6 +675,7 @@
                         "title":  "Communities",
                         "new_community":  "New Community",
                         "search_placeholder":  "Search communities...",
+                        "search_communities":  "Search communities...",
                         "search_results":  "Found {{count}} community(ies) for \"{{query}}\"",
                         "select_communities":  "Select",
                         "no_search_results":  "No communities found",
@@ -758,6 +759,7 @@
                                          "edit":  "Edit",
                                          "delete":  "Delete",
                                          "save":  "Save",
+                                         "saving":  "Saving…",
                                          "cancel":  "Cancel",
                                          "failed_to_post":  "Failed to post reply. Please try again.",
                                          "content_not_allowed":  "Your reply contains content that is not allowed.",
@@ -1073,6 +1075,7 @@
                },
     "podcasts":  {
                      "podcasts":  "Podcasts",
+                     "all_podcasts":  "All podcasts",
                      "browse_description":  "Listen to podcasts from this organization",
                      "new_podcast":  "New Podcast",
                      "select_podcasts":  "Select",
@@ -4055,6 +4058,9 @@
                                                                                  "title":  "Users",
                                                                                  "subtitle":  "Manage your organization users, assign roles and permissions"
                                                                              },
+                                                                   "add":  {
+                                                                               "title":  "Add Users"
+                                                                           },
                                                                    "signups":  {
                                                                                    "title":  "Invite Codes",
                                                                                    "subtitle":  "Manage invite codes for private access to your organization"
