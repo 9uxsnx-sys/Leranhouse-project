@@ -41,13 +41,13 @@ const DropdownMenuSubTrigger = React.forwardRef<
       "active:bg-ui-bg-component-hover",
       "data-[disabled]:text-ui-fg-disabled data-[disabled]:pointer-events-none",
       "data-[state=open]:!bg-ui-bg-component-hover",
-      inset && "pl-8",
+      inset && "ps-8",
       className
     )}
     {...props}
   >
     {children}
-    <ChevronRightIcon className="text-ui-fg-muted ml-auto h-4 w-4" />
+    <ChevronRightIcon className="text-ui-fg-muted ms-auto h-4 w-4 rtl:rotate-180" />
   </DropdownMenuPrimitive.SubTrigger>
 ))
 DropdownMenuSubTrigger.displayName =
@@ -110,7 +110,7 @@ const DropdownMenuItem = React.forwardRef<
       "active:bg-ui-bg-component-hover",
       "data-[disabled]:text-ui-fg-disabled data-[disabled]:pointer-events-none",
       "data-[highlighted]:bg-ui-bg-component-hover",
-      inset && "pl-8",
+      inset && "ps-8",
       className
     )}
     {...props}
@@ -125,7 +125,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
   <DropdownMenuPrimitive.CheckboxItem
     ref={ref}
     className={cn(
-      "bg-ui-bg-component text-ui-fg-base txt-compact-small relative flex cursor-pointer select-none items-center rounded-md py-1.5 pl-[31px] pr-2 outline-none transition-colors",
+      "bg-ui-bg-component text-ui-fg-base txt-compact-small relative flex cursor-pointer select-none items-center rounded-md py-1.5 ps-[31px] pe-2 outline-none transition-colors",
       "focus-visible:bg-ui-bg-component-hover focus:bg-ui-bg-component-hover",
       "active:bg-ui-bg-component-hover",
       "data-[disabled]:text-ui-fg-disabled data-[disabled]:pointer-events-none",
@@ -135,7 +135,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
     checked={checked}
     {...props}
   >
-    <span className="absolute left-2 flex size-[15px] items-center justify-center">
+    <span className="absolute start-2 flex size-[15px] items-center justify-center">
       <DropdownMenuPrimitive.ItemIndicator>
         <CheckIcon className="h-4 w-4" />
       </DropdownMenuPrimitive.ItemIndicator>
@@ -153,7 +153,7 @@ const DropdownMenuRadioItem = React.forwardRef<
   <DropdownMenuPrimitive.RadioItem
     ref={ref}
     className={cn(
-      "bg-ui-bg-component txt-compact-small relative flex cursor-pointer select-none items-center rounded-md py-1.5 pl-[31px] pr-2 outline-none transition-colors",
+      "bg-ui-bg-component txt-compact-small relative flex cursor-pointer select-none items-center rounded-md py-1.5 ps-[31px] pe-2 outline-none transition-colors",
       "focus-visible:bg-ui-bg-component-hover focus:bg-ui-bg-component-hover",
       "active:bg-ui-bg-component-hover",
       "data-[disabled]:text-ui-fg-disabled data-[disabled]:pointer-events-none",
@@ -162,7 +162,7 @@ const DropdownMenuRadioItem = React.forwardRef<
     )}
     {...props}
   >
-    <span className="absolute left-2 flex size-[15px] items-center justify-center">
+    <span className="absolute start-2 flex size-[15px] items-center justify-center">
       <DropdownMenuPrimitive.ItemIndicator>
         <DotFilledIcon className="text-ui-fg-base h-4 w-4" />
       </DropdownMenuPrimitive.ItemIndicator>
@@ -182,7 +182,7 @@ const DropdownMenuLabel = React.forwardRef<
     ref={ref}
     className={cn(
       "text-ui-fg-subtle txt-compact-xsmall-plus",
-      inset && "pl-8",
+      inset && "ps-8",
       className
     )}
     {...props}
@@ -211,7 +211,7 @@ const DropdownMenuShortcut = ({
 }: React.HTMLAttributes<HTMLSpanElement>) => {
   return (
     <span
-      className={cn("text-ui-fg-subtle txt-compact-small ml-auto tracking-widest", className)}
+      className={cn("text-ui-fg-subtle txt-compact-small ms-auto tracking-widest", className)}
       {...props}
     />
   )

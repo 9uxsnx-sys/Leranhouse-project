@@ -53,7 +53,7 @@ export function PodcastSidebar({ podcast }: PodcastSidebarProps) {
       <Container className="pt-6 pb-6">
         <Heading level="h3">Updates</Heading>
         <div className="mt-4">
-          <div className="relative pl-5 before:absolute before:left-[3px] before:top-2 before:bottom-2 before:w-px before:bg-gray-300 space-y-4">
+          <div className="relative ps-5 before:absolute before:start-[3px] before:top-2 before:bottom-2 before:w-px before:bg-gray-300 space-y-4">
             {MOCK_UPDATES.map((update, idx) => (
               <div key={idx} className="relative">
                 <Text weight="plus" size="small">{update.title}</Text>

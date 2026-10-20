@@ -24,7 +24,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       "aria-[invalid=true]:!shadow-borders-error invalid:!shadow-borders-error",
       "[&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden",
       size === "base" ? "txt-compact-small h-8 px-2 py-1.5" : "txt-compact-small h-7 px-2 py-1",
-      isSearch && (size === "base" ? "pl-8" : "pl-7"),
+      isSearch && (size === "base" ? "ps-8" : "ps-7"),
       className
     )
 
@@ -33,7 +33,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         <div className="relative w-full">
           <div
             className={cn(
-              "text-gray-600 pointer-events-none absolute bottom-0 left-0 flex items-center justify-center",
+              "text-gray-600 pointer-events-none absolute bottom-0 start-0 flex items-center justify-center",
               size === "base" ? "h-8 w-8" : "h-7 w-7"
             )}
             role="img"

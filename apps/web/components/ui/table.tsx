@@ -72,8 +72,8 @@ const TableRow = React.forwardRef<
     ref={ref}
     className={cn(
       "bg-ui-bg-base hover:bg-ui-bg-base-hover border-ui-border-base transition-fg border-b",
-      "[&_td:last-child]:pr-6 [&_th:last-child]:pr-6",
-      "[&_td:first-child]:pl-6 [&_th:first-child]:pl-6",
+      "[&_td:last-child]:pe-6 [&_th:last-child]:pe-6",
+      "[&_td:first-child]:ps-6 [&_th:first-child]:ps-6",
       "data-[state=selected]:bg-ui-bg-subtle",
       className
     )}
@@ -89,7 +89,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "txt-compact-small-plus h-12 py-0 pl-0 pr-6 text-left font-medium",
+      "txt-compact-small-plus h-12 py-0 ps-0 pe-6 text-start font-medium",
       className
     )}
     {...props}
@@ -103,7 +103,7 @@ const TableCell = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <td
     ref={ref}
-    className={cn("h-12 py-0 pl-0 pr-6 align-middle", className)}
+    className={cn("h-12 py-0 ps-0 pe-6 align-middle", className)}
     {...props}
   />
 ))
@@ -115,7 +115,7 @@ const TableCaption = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <caption
     ref={ref}
-    className={cn("text-ui-fg-muted mt-4 text-left text-sm", className)}
+    className={cn("text-ui-fg-muted mt-4 text-start text-sm", className)}
     {...props}
   />
 ))

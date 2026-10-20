@@ -66,12 +66,18 @@
                    "search":  "Search",
                    "all":  "All",
                    "view_all":  "View all",
+                   "select":  "Select",
+                   "deselect":  "Deselect",
+                   "see_more":  "See more",
+                   "see_less":  "See less",
+                   "show_less":  "Show less",
                    "all_courses":  "All Courses",
                    "easy":  "Easy",
                    "medium":  "Medium",
                    "hard":  "Hard",
                    "aria":  {
                                 "dashboard_mobile_actions":  "Dashboard mobile actions",
+                                "community_mobile_actions":  "Community mobile actions",
                                 "go_to_dashboard_home":  "Go to dashboard home",
                                 "manage_courses":  "Manage courses",
                                 "manage_assignments":  "Manage assignments",
@@ -91,7 +97,8 @@
                                 "close_menu":  "Close menu",
                                 "open_menu":  "Open menu",
                                 "breadcrumb":  "Breadcrumb",
-                                "clear_search":  "Clear search"
+                                "clear_search":  "Clear search",
+                                "actions_menu":  "Actions menu"
                             },
                    "all_assignments":  "All Assignments",
                    "recent":  "Recent",

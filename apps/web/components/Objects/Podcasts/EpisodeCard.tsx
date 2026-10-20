@@ -50,7 +50,7 @@ export default function EpisodeCard({ episode, podcast, savedProgress }: Episode
       <div className="flex items-center gap-2 px-4 py-4">
         {/* Number */}
         <span
-          className={`flex-shrink-0 w-6 text-right text-[15px] font-semibold leading-none mr-1.5 ${
+          className={`flex-shrink-0 w-6 text-end text-[15px] font-semibold leading-none me-1.5 ${
             isCurrentEpisode ? 'text-indigo-600' : 'text-gray-300'
           }`}
         >
@@ -86,7 +86,7 @@ export default function EpisodeCard({ episode, podcast, savedProgress }: Episode
                   : 'opacity-100 rotate-0 scale-100'
               }`}
             >
-              <Play size={13} fill="currentColor" className="ml-0.5" />
+              <Play size={13} fill="currentColor" className="ms-0.5" />
             </div>
             <div
               className={`absolute inset-0 flex items-center justify-center transition-all duration-200 ${

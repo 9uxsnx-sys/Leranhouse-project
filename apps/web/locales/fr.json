@@ -69,6 +69,7 @@
     "hard": "Difficile",
     "aria": {
       "dashboard_mobile_actions": "Actions mobiles du tableau de bord",
+      "community_mobile_actions": "Actions mobiles de la communauté",
       "go_to_dashboard_home": "Aller à l'accueil du tableau de bord",
       "manage_courses": "Gérer les cours",
       "manage_assignments": "Gérer les devoirs",
@@ -88,13 +89,19 @@
       "close_menu": "Fermer le menu",
       "open_menu": "Ouvrir le menu",
       "breadcrumb": "Fil d'Ariane",
-      "clear_search": "Effacer la recherche"
+      "clear_search": "Effacer la recherche",
+      "actions_menu": "Menu d'actions"
     },
     "all_assignments": "Tous les devoirs",
     "recent": "Récent",
     "expand": "Développer",
     "collapse": "Réduire",
     "view_all": "Voir tout",
+    "select": "Sélectionner",
+    "deselect": "Désélectionner",
+    "see_more": "Voir plus",
+    "see_less": "Voir moins",
+    "show_less": "Afficher moins",
     "help": "Aide",
     "help_menu": {
       "documentation": "Documentation",

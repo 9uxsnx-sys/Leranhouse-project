@@ -141,7 +141,7 @@ function OptionC({ p }: { p: ShowcasePodcast }) {
           </div>
         )}
         {/* Episode count badge */}
-        <div className="absolute top-2 right-2 bg-black/70 text-white text-[11px] font-medium px-2 py-0.5 rounded-full">
+        <div className="absolute top-2 end-2 bg-black/70 text-white text-[11px] font-medium px-2 py-0.5 rounded-full">
           {p.episodeCount} {p.episodeCount === 1 ? 'ep' : 'eps'}
         </div>
       </div>
@@ -185,14 +185,14 @@ function OptionD({ p }: { p: ShowcasePodcast }) {
           </div>
         )}
         {/* Headphone icon badge */}
-        <div className="absolute top-2 left-2 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center">
+        <div className="absolute top-2 start-2 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
             <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
           </svg>
         </div>
         {/* Play button */}
-        <div className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow">
+        <div className="absolute bottom-2 end-2 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="black">
             <path d="M8 5v14l11-7z" />
           </svg>

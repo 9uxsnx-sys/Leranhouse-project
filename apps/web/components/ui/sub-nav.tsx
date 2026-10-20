@@ -60,7 +60,7 @@ export function SubNav({ items, currentPath, className }: SubNavProps) {
   return (
     <div
       ref={containerRef}
-      className={cn("grid grid-cols-[2px_1fr] gap-y-3 gap-x-4 ml-4 py-2", className)}
+      className={cn("grid grid-cols-[2px_1fr] gap-y-3 gap-x-4 ms-4 py-2", className)}
     >
       {/* Vertical rail — spans exactly the number of items */}
       <div

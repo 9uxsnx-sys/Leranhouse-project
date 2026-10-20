@@ -33,7 +33,7 @@ export default function CourseLearnings({
           <Heading level="h2">{title}</Heading>
           <Text size="base" className="text-ui-fg-muted">{subtitle}</Text>
         </div>
-        <ul className="mt-3 space-y-2 pl-3">
+        <ul className="mt-3 space-y-2 ps-3">
           {items.map((item, idx) => (
             <li key={idx} className="flex items-start gap-4">
               <span className="text-ui-fg-muted shrink-0">&rsaquo;</span>

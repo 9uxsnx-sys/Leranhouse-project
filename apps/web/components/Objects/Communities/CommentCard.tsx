@@ -149,13 +149,13 @@ export function CommentCard({
 
   return (
     <div
-      className="relative pl-[36px]"
+      className="relative ps-[36px]"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Thread line - removed */}
 
-      <div className="absolute left-[3px] top-[10px] z-10">
+      <div className="absolute start-[3px] top-[10px] z-10">
         <UserAvatar
           width={28}
           rounded="rounded-full"
@@ -168,7 +168,7 @@ export function CommentCard({
       </div>
 
       {/* Content */}
-      <div className="pb-3 pt-3 pl-2">
+      <div className="pb-3 pt-3 ps-2">
         {isEditing ? (
           <div className="space-y-2">
             {error && (
@@ -226,7 +226,7 @@ export function CommentCard({
                     <DropdownMenuContent align="end" className="w-36">
                       {isAuthor && (
                         <DropdownMenuItem onClick={() => setIsEditing(true)}>
-                          <Pencil className="mr-2 h-4 w-4" />
+                          <Pencil className="me-2 h-4 w-4" />
                           {t('communities.comments.edit')}
                         </DropdownMenuItem>
                       )}
@@ -235,7 +235,7 @@ export function CommentCard({
                           onClick={handleDelete}
                           className="text-red-600 focus:text-red-600 focus:bg-red-50"
                         >
-                          <Trash2 className="mr-2 h-4 w-4" />
+                          <Trash2 className="me-2 h-4 w-4" />
                           {t('communities.comments.delete')}
                         </DropdownMenuItem>
                       )}

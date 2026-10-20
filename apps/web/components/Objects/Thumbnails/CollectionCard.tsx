@@ -86,7 +86,7 @@ export function CollectionCard({ id, title, description, courses, org_uuid, href
           </div>
         )}
         {owned && (
-          <span className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-md bg-white/95 px-2 py-0.5 text-[11px] font-medium text-emerald-600 shadow-sm ring-1 ring-black/5">
+          <span className="absolute top-2 start-2 inline-flex items-center gap-1 rounded-md bg-white/95 px-2 py-0.5 text-[11px] font-medium text-emerald-600 shadow-sm ring-1 ring-black/5">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20 6 9 17l-5-5" />
             </svg>

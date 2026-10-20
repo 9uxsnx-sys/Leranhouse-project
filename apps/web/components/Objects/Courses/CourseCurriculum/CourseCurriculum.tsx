@@ -103,7 +103,7 @@ function ModuleCard({
       {/* ── Header (always visible, clickable) ── */}
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between px-5 py-3 text-left transition-colors hover:bg-black/[0.02]"
+        className="w-full flex items-center justify-between px-5 py-3 text-start transition-colors hover:bg-black/[0.02]"
       >
         <Text weight="plus" size="base" className="text-ui-fg-base truncate">
           {module.title}
@@ -111,7 +111,7 @@ function ModuleCard({
         <ChevronDown
           size={14}
           className={cn(
-            'text-ui-fg-muted shrink-0 ml-2 transition-transform duration-200',
+            'text-ui-fg-muted shrink-0 ms-2 transition-transform duration-200',
             isOpen && 'rotate-180'
           )}
         />
@@ -156,7 +156,7 @@ function ModuleCard({
                 <Text size="base" className="text-ui-fg-base">
                   {idx + 1}. {lesson.title}
                 </Text>
-                <Text size="small" className="text-ui-fg-muted shrink-0 ml-3">
+                <Text size="small" className="text-ui-fg-muted shrink-0 ms-3">
                   {lesson.duration}
                 </Text>
               </div>

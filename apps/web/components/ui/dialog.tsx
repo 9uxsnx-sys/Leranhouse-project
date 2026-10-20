@@ -68,7 +68,7 @@ const DialogContent = React.forwardRef<
       {children}
       {!hideCloseButton && (
         <DialogPrimitive.Close
-          className="text-ui-fg-muted hover:bg-ui-bg-subtle-hover absolute right-4 top-4 rounded-md p-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none"
+          className="text-ui-fg-muted hover:bg-ui-bg-subtle-hover absolute end-4 top-4 rounded-md p-1.5 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none"
           aria-label="Close dialog"
         >
           <XMark className="h-4 w-4" />
@@ -86,7 +86,7 @@ const DialogHeader = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "flex flex-col space-y-0 text-center sm:text-left",
+      "flex flex-col space-y-0 text-center sm:text-start",
       className
     )}
     {...props}

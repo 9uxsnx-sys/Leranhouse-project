@@ -67,6 +67,7 @@ function ReplyItem({ reply, replyName, replyTime }: {
   replyName: string
   replyTime: string
 }) {
+  const { t } = useTranslation()
   const [replyExpanded, setReplyExpanded] = useState(false)
   const replyContentRef = useRef<HTMLParagraphElement>(null)
   const [replyNeedsTruncation, setReplyNeedsTruncation] = useState(false)
@@ -110,7 +111,7 @@ function ReplyItem({ reply, replyName, replyTime }: {
               onClick={() => setReplyExpanded(!replyExpanded)}
               className="text-sm font-semibold tracking-wide text-gray-500 hover:text-gray-700 transition-colors mt-0.5"
             >
-              {replyExpanded ? 'See less' : 'See more'}
+              {replyExpanded ? t('common.see_less') : t('common.see_more')}
             </button>
           )}
         </div>
@@ -262,7 +263,7 @@ export function DiscussionCard({
       let truncated = contentText.slice(0, lastSpace > 0 ? lastSpace : best).trimEnd()
 
       // Ensure text + '... See more' fits within 2 lines (not overflowing to line 3)
-      const suffix = '... See more'
+      const suffix = `... ${t('common.see_more')}`
       measurer.textContent = truncated + suffix
       if (measurer.scrollHeight > twoLinesHeight) {
         const words = truncated.split(' ')
@@ -408,7 +409,7 @@ export function DiscussionCard({
                     {' '}
                     <button
                       onClick={(e) => { e.stopPropagation(); setIsExpanded(false); }}
-                      className="inline ml-1.5 text-sm font-semibold tracking-wide text-gray-500 hover:text-gray-700"
+                      className="inline ms-1.5 text-sm font-semibold tracking-wide text-gray-500 hover:text-gray-700"
                     >
                       See less
                     </button>

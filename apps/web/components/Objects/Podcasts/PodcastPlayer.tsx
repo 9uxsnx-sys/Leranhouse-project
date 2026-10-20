@@ -269,7 +269,7 @@ export default function PodcastPlayer() {
             </div>
           ) : (
             <div className="flex-1 flex items-center gap-3">
-              <span className="text-xs text-gray-500 w-12 text-right tabular-nums">
+              <span className="text-xs text-gray-500 w-12 text-end tabular-nums">
                 {formatDuration(Math.floor(currentTime))}
               </span>
               <div ref={waveformRef} className="flex-1 cursor-pointer" />

@@ -69,6 +69,7 @@
     "hard": "صعب",
     "aria": {
       "dashboard_mobile_actions": "إجراءات لوحة التحكم على الجوال",
+      "community_mobile_actions": "إجراءات المجتمع على الجوال",
       "go_to_dashboard_home": "الانتقال إلى الصفحة الرئيسية للوحة التحكم",
       "manage_courses": "إدارة الدورات",
       "manage_assignments": "إدارة الواجبات",
@@ -88,13 +89,19 @@
       "close_menu": "إغلاق القائمة",
       "open_menu": "فتح القائمة",
       "breadcrumb": "مسار التنقل",
-      "clear_search": "مسح البحث"
+      "clear_search": "مسح البحث",
+      "actions_menu": "قائمة الإجراءات"
     },
     "all_assignments": "جميع الواجبات",
     "recent": "الأخيرة",
     "expand": "توسيع",
     "collapse": "تصغير",
     "view_all": "عرض الكل",
+    "select": "تحديد",
+    "deselect": "إلغاء التحديد",
+    "see_more": "عرض المزيد",
+    "see_less": "عرض أقل",
+    "show_less": "إظهار أقل",
     "help": "مساعدة",
     "help_menu": {
       "documentation": "الوثائق",

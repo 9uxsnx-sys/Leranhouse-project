@@ -37,7 +37,7 @@ function StatusBadge({
   return (
     <span
       className={cn(
-        "txt-compact-xsmall-plus bg-ui-bg-subtle text-ui-fg-subtle border-ui-border-base box-border flex w-fit select-none items-center overflow-hidden rounded-md border pl-0 pr-1 leading-none",
+        "txt-compact-xsmall-plus bg-ui-bg-subtle text-ui-fg-subtle border-ui-border-base box-border flex w-fit select-none items-center overflow-hidden rounded-md border ps-0 pe-1 leading-none",
         className
       )}
       {...props}
