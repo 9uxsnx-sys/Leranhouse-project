@@ -420,7 +420,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
   async function runCode() {
     if (isRunning) return
     if (contents.test_cases.length === 0) {
-      toast.error('No test cases defined')
+      toast.error(t('dashboard.assignments.editor.task_editor.code.no_test_cases'))
       return
     }
     setIsRunning(true)
@@ -448,7 +448,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
       if (!resp.ok) {
         const errText = await resp.text().catch(() => '')
         console.error('Judge0 error response:', resp.status, errText)
-        toast.error(`Code execution failed (${resp.status})`)
+        toast.error(t('dashboard.assignments.editor.task_editor.code.exec_failed_status', { status: resp.status }))
         return
       }
 
@@ -468,7 +468,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
       setResults(newResults)
     } catch (err) {
       console.error('Code execution error:', err)
-      toast.error('Code execution failed')
+      toast.error(t('dashboard.assignments.editor.task_editor.code.exec_failed'))
     } finally {
       setIsRunning(false)
     }
@@ -498,7 +498,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
       })
 
       if (!resp.ok) {
-        toast.error('Code execution failed during grading')
+        toast.error(t('dashboard.assignments.editor.task_editor.code.exec_failed_grading'))
         return
       }
 
@@ -546,13 +546,13 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
       )
       if (res.success) {
         getAssignmentTaskSubmissionFromIdentifiedUserUI()
-        toast.success(`Task graded: ${finalGrade}/${maxPoints} points`)
+        toast.success(t('dashboard.assignments.editor.task_editor.code.graded_summary', { grade: finalGrade, max: maxPoints }))
       } else {
-        toast.error('Error grading task')
+        toast.error(t('dashboard.assignments.editor.task_editor.code.grade_error'))
       }
     } catch (err) {
       console.error('Grading error:', err)
-      toast.error('Error during grading')
+      toast.error(t('dashboard.assignments.editor.task_editor.code.grading_error'))
     } finally {
       setIsRunning(false)
     }
@@ -605,7 +605,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
             {/* Language & Grading Mode */}
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="flex flex-col space-y-1 flex-1">
-                <label className="text-xs font-semibold text-slate-500">Language</label>
+                <label className="text-xs font-semibold text-slate-500">{t('dashboard.assignments.editor.task_editor.code.language')}</label>
                 <select
                   value={contents.language_id}
                   onChange={(e) => {
@@ -628,7 +628,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
                 </select>
               </div>
               <div className="flex flex-col space-y-1 flex-1">
-                <label className="text-xs font-semibold text-slate-500">Grading Mode</label>
+                <label className="text-xs font-semibold text-slate-500">{t('dashboard.assignments.editor.task_editor.code.grading_mode')}</label>
                 <select
                   value={contents.grading_mode}
                   onChange={(e) =>
@@ -636,16 +636,16 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
                   }
                   className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-white"
                 >
-                  <option value="equal_weight">Equal Weight</option>
-                  <option value="binary">Binary (All or Nothing)</option>
-                  <option value="custom_weights">Custom Weights</option>
+                  <option value="equal_weight">{t('dashboard.assignments.editor.task_editor.code.equal_weight')}</option>
+                  <option value="binary">{t('dashboard.assignments.editor.task_editor.code.binary_option')}</option>
+                  <option value="custom_weights">{t('dashboard.assignments.editor.task_editor.code.custom_weights')}</option>
                 </select>
               </div>
             </div>
 
             {/* Starter Code */}
             <div className="flex flex-col space-y-1">
-              <label className="text-xs font-semibold text-slate-500">Starter Code</label>
+              <label className="text-xs font-semibold text-slate-500">{t('dashboard.assignments.editor.task_editor.code.starter_code')}</label>
               <div className={`rounded-md overflow-hidden ${cmClassName}`}>
                 {cmTheme && (
                   <CodeMirror
@@ -690,13 +690,13 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
             {/* Test Cases */}
             <div className="flex flex-col space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-slate-500">Test Cases</label>
+                <label className="text-xs font-semibold text-slate-500">{t('dashboard.assignments.editor.task_editor.code.test_cases')}</label>
                 <button
                   onClick={addTestCase}
                   className="flex items-center space-x-1 text-xs font-semibold text-emerald-600 hover:text-emerald-700"
                 >
                   <Plus size={14} />
-                  <span>Add Test Case</span>
+                  <span>{t('dashboard.assignments.editor.task_editor.code.add_test_case')}</span>
                 </button>
               </div>
               {contents.test_cases.map((tc, index) => (
@@ -709,7 +709,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
                       <input
                         value={tc.label}
                         onChange={(e) => updateTestCase(index, 'label', e.target.value)}
-                        placeholder="Test label"
+                        placeholder={t('dashboard.assignments.editor.task_editor.code.test_label')}
                         className="px-2 py-1 text-sm border border-gray-200 rounded-md flex-1"
                       />
                       <button
@@ -719,10 +719,10 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
                             ? 'bg-amber-100 text-amber-700'
                             : 'bg-slate-100 text-slate-500'
                         }`}
-                        title={tc.hidden ? 'Hidden from students' : 'Visible to students'}
+                        title={tc.hidden ? t('dashboard.assignments.editor.task_editor.code.hidden_from_students') : t('dashboard.assignments.editor.task_editor.code.visible_to_students')}
                       >
                         {tc.hidden ? <EyeOff size={12} /> : <Eye size={12} />}
-                        <span>{tc.hidden ? 'Hidden' : 'Visible'}</span>
+                        <span>{tc.hidden ? t('dashboard.assignments.editor.task_editor.code.hidden') : t('dashboard.assignments.editor.task_editor.code.visible')}</span>
                       </button>
                       {contents.grading_mode === 'custom_weights' && (
                         <input
@@ -731,7 +731,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
                           onChange={(e) => updateTestCase(index, 'weight', Math.max(1, Number(e.target.value)))}
                           className="w-16 px-2 py-1 text-sm border border-gray-200 rounded-md text-center"
                           min={1}
-                          title="Weight"
+                          title={t('dashboard.assignments.editor.task_editor.code.weight')}
                         />
                       )}
                     </div>
@@ -744,21 +744,21 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
                   </div>
                   <div className="flex flex-col sm:flex-row gap-2">
                     <div className="flex flex-col space-y-1 flex-1">
-                      <label className="text-[10px] font-semibold text-slate-400 uppercase">Stdin</label>
+                      <label className="text-[10px] font-semibold text-slate-400 uppercase">{t('dashboard.assignments.editor.task_editor.code.stdin')}</label>
                       <textarea
                         value={tc.stdin}
                         onChange={(e) => updateTestCase(index, 'stdin', e.target.value)}
-                        placeholder="Input"
+                        placeholder={t('dashboard.assignments.editor.task_editor.code.stdin_placeholder')}
                         rows={2}
                         className="px-2 py-1 text-sm border border-gray-200 rounded-md font-mono resize-y"
                       />
                     </div>
                     <div className="flex flex-col space-y-1 flex-1">
-                      <label className="text-[10px] font-semibold text-slate-400 uppercase">Expected Stdout</label>
+                      <label className="text-[10px] font-semibold text-slate-400 uppercase">{t('dashboard.assignments.editor.task_editor.code.expected_stdout')}</label>
                       <textarea
                         value={tc.expectedStdout}
                         onChange={(e) => updateTestCase(index, 'expectedStdout', e.target.value)}
-                        placeholder="Expected output"
+                        placeholder={t('dashboard.assignments.editor.task_editor.code.expected_output_placeholder')}
                         rows={2}
                         className="px-2 py-1 text-sm border border-gray-200 rounded-md font-mono resize-y"
                       />
@@ -821,7 +821,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
                 className="flex items-center space-x-1.5 px-3 py-1.5 text-sm font-semibold bg-slate-700 text-white rounded-md hover:bg-slate-800 disabled:opacity-50"
               >
                 {isRunning ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />}
-                <span>{isRunning ? 'Running...' : 'Run Tests'}</span>
+                <span>{isRunning ? t('dashboard.assignments.editor.task_editor.code.running') : t('dashboard.assignments.editor.task_editor.code.run_tests')}</span>
               </button>
             </div>
 
@@ -836,12 +836,12 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
             {/* Language badge */}
             <div className="flex items-center space-x-2">
               <span className="px-2 py-0.5 text-xs font-semibold bg-slate-100 text-slate-600 rounded-full">
-                {selectedLang?.name || 'Unknown'}
+                {selectedLang?.name || t('dashboard.assignments.editor.task_editor.code.unknown')}
               </span>
               {/* Hidden-test badge only if the task allows showing the count */}
               {hiddenTestCount > 0 && contents.show_hidden_test_count !== false && (
                 <span className="px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-700 rounded-full">
-                  {hiddenTestCount} hidden test{hiddenTestCount > 1 ? 's' : ''}
+                  {t('dashboard.assignments.editor.task_editor.code.hidden_tests_count', { count: hiddenTestCount })}
                 </span>
               )}
             </div>
@@ -876,7 +876,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
                   className="flex items-center space-x-1.5 px-3 py-1.5 text-sm font-semibold bg-emerald-600 text-white rounded-md hover:bg-emerald-700 disabled:opacity-50"
                 >
                   {isRunning ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />}
-                  <span>{isRunning ? 'Running...' : 'Run Tests'}</span>
+                  <span>{isRunning ? t('dashboard.assignments.editor.task_editor.code.running') : t('dashboard.assignments.editor.task_editor.code.run_tests')}</span>
                 </button>
               </div>
             )}
@@ -941,10 +941,10 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
             {/* Language badge */}
             <div className="flex items-center space-x-2">
               <span className="px-2 py-0.5 text-xs font-semibold bg-slate-100 text-slate-600 rounded-full">
-                {selectedLang?.name || 'Unknown'}
+                {selectedLang?.name || t('dashboard.assignments.editor.task_editor.code.unknown')}
               </span>
               <span className="px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-700 rounded-full">
-                {contents.grading_mode === 'binary' ? 'Binary' : contents.grading_mode === 'custom_weights' ? 'Custom Weights' : 'Equal Weight'}
+                {contents.grading_mode === 'binary' ? t('dashboard.assignments.editor.task_editor.code.binary') : contents.grading_mode === 'custom_weights' ? t('dashboard.assignments.editor.task_editor.code.custom_weights') : t('dashboard.assignments.editor.task_editor.code.equal_weight')}
               </span>
             </div>
 
@@ -975,7 +975,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
                   className="flex items-center space-x-1 text-xs font-semibold text-slate-500 hover:text-slate-700"
                 >
                   {showSolution ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                  <span>Reference Solution</span>
+                  <span>{t('dashboard.assignments.editor.task_editor.code.reference_solution_label')}</span>
                 </button>
                 {showSolution && (
                   <div className={`rounded-md overflow-hidden ${cmClassName}`}>
@@ -1000,7 +1000,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
             {isRunning && (
               <div className="flex items-center space-x-2 text-sm text-slate-500">
                 <Loader2 size={14} className="animate-spin" />
-                <span>Running tests...</span>
+                <span>{t('dashboard.assignments.editor.task_editor.code.running_tests')}</span>
               </div>
             )}
 
@@ -1024,6 +1024,7 @@ function TestResultsPanel({
   view: 'student' | 'grading'
   showDetailsOnFail?: boolean
 }) {
+  const { t } = useTranslation()
   const passedCount = results.filter((r) => r.passed).length
   const totalCount = results.length
 
@@ -1031,7 +1032,7 @@ function TestResultsPanel({
     <div className="flex flex-col space-y-2 p-3 bg-slate-50 rounded-md border border-slate-200">
       <div className="flex items-center justify-between">
         <span className="text-sm font-semibold text-slate-600">
-          Results: {passedCount}/{totalCount} passed
+          {t('dashboard.assignments.editor.task_editor.code.results_summary', { passed: passedCount, total: totalCount })}
         </span>
         <span
           className={`px-2 py-0.5 text-xs font-bold rounded-full ${
@@ -1040,7 +1041,7 @@ function TestResultsPanel({
               : 'bg-red-100 text-red-700'
           }`}
         >
-          {passedCount === totalCount ? 'All Passed' : 'Some Failed'}
+          {passedCount === totalCount ? t('dashboard.assignments.editor.task_editor.code.all_passed') : t('dashboard.assignments.editor.task_editor.code.some_failed')}
         </span>
       </div>
       <div className="flex flex-col space-y-1.5">
@@ -1072,25 +1073,25 @@ function TestResultsPanel({
                 <div className="mt-1.5 pl-6 text-xs space-y-0.5">
                   {result.expected_stdout !== null && (
                     <div>
-                      <span className="text-slate-400">Expected: </span>
+                      <span className="text-slate-400">{t('dashboard.assignments.editor.task_editor.code.expected_label')} </span>
                       <code className="text-slate-600 bg-white px-1 rounded">{result.expected_stdout}</code>
                     </div>
                   )}
                   {result.actual_stdout !== null && (
                     <div>
-                      <span className="text-slate-400">Got: </span>
+                      <span className="text-slate-400">{t('dashboard.assignments.editor.task_editor.code.got_label')} </span>
                       <code className="text-red-600 bg-white px-1 rounded">{result.actual_stdout}</code>
                     </div>
                   )}
                   {result.stderr && (
                     <div>
-                      <span className="text-slate-400">Error: </span>
+                      <span className="text-slate-400">{t('dashboard.assignments.editor.task_editor.code.error_label')} </span>
                       <code className="text-red-600 bg-white px-1 rounded text-[11px] break-all">{result.stderr}</code>
                     </div>
                   )}
                   {result.compile_output && (
                     <div>
-                      <span className="text-slate-400">Compile: </span>
+                      <span className="text-slate-400">{t('dashboard.assignments.editor.task_editor.code.compile_label')} </span>
                       <code className="text-red-600 bg-white px-1 rounded text-[11px] break-all">{result.compile_output}</code>
                     </div>
                   )}
@@ -1098,7 +1099,7 @@ function TestResultsPanel({
               )}
               {isHidden && !result.passed && (
                 <div className="mt-1 pl-6 text-xs text-slate-400 italic">
-                  Details hidden — this is a hidden test case
+                  {t('dashboard.assignments.editor.task_editor.code.details_hidden')}
                 </div>
               )}
             </div>

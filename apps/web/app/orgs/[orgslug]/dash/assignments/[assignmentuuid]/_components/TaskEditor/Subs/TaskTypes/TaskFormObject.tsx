@@ -113,7 +113,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
             updatedQuestions[qIndex].blanks.splice(bIndex, 1);
             setQuestions(updatedQuestions);
         } else {
-            toast.error('Cannot delete the last blank. At least one blank is required.');
+            toast.error(t('dashboard.assignments.editor.task_editor.form.last_blank_error'));
         }
     };
 
@@ -210,7 +210,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
 
     const submitFC = async () => {
         if (userSubmissions.submissions.length === 0) {
-            toast.error('Please fill in at least one blank before submitting.');
+            toast.error(t('dashboard.assignments.editor.task_editor.form.fill_blank_error'));
             return;
         }
 
@@ -229,7 +229,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
         );
 
         if (res) {
-            toast.success('Form submitted successfully!');
+            toast.success(t('dashboard.assignments.editor.task_editor.form.submitted_success'));
             // Update userSubmissions with the returned UUID for future updates
             const updatedUserSubmissions = {
                 ...userSubmissions,
@@ -241,13 +241,13 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
             mutate(`${getAPIUrl()}assignments/${assignment.assignment_object.assignment_uuid}/tasks/submissions/me`);
         } else {
             console.error('Submission error:', res);
-            toast.error('Error submitting form, please retry later.');
+            toast.error(t('dashboard.assignments.editor.task_editor.form.submit_error'));
         }
     };
 
     const gradeFC = async () => {
         if (!user_id) {
-            toast.error('User ID is required for grading.');
+            toast.error(t('dashboard.assignments.editor.task_editor.form.user_id_required'));
             return;
         }
 
@@ -281,9 +281,9 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
         const res = await handleAssignmentTaskSubmission(values, assignmentTaskUUID, assignment.assignment_object.assignment_uuid, access_token);
         if (res) {
             getAssignmentTaskSubmissionFromIdentifiedUserUI();
-            toast.success(`Task graded successfully with ${finalGrade} points (${correctAnswers}/${totalBlanks} correct)`);
+            toast.success(t('dashboard.assignments.editor.task_editor.form.graded_success', { grade: finalGrade, correct: correctAnswers, total: totalBlanks }));
         } else {
-            toast.error('Error grading task, please retry later.');
+            toast.error(t('dashboard.assignments.editor.task_editor.form.grade_error'));
         }
     };
 
@@ -416,13 +416,13 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
             >
                 {view === 'grading' && (
                     <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-                        <h3 className="text-sm font-semibold text-gray-800 mb-2">Submission Summary</h3>
+                        <h3 className="text-sm font-semibold text-gray-800 mb-2">{t('dashboard.assignments.editor.task_editor.form.submission_summary')}</h3>
                         <div className="grid grid-cols-3 gap-4 text-sm">
                             <div className="text-center">
                                 <div className="text-lg font-bold text-blue-600">
                                     {questions.flatMap(q => q.blanks).length}
                                 </div>
-                                <div className="text-gray-600">Total Blanks</div>
+                                <div className="text-gray-600">{t('dashboard.assignments.editor.task_editor.form.total_blanks')}</div>
                             </div>
                             <div className="text-center">
                                 <div className="text-lg font-bold text-green-600">
@@ -431,7 +431,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
                                         return userAnswer && userAnswer.answer.toLowerCase().trim() === blank.correctAnswer.toLowerCase().trim();
                                     }).length}
                                 </div>
-                                <div className="text-gray-600">Correct</div>
+                                <div className="text-gray-600">{t('dashboard.assignments.editor.task_editor.form.correct')}</div>
                             </div>
                             <div className="text-center">
                                 <div className="text-lg font-bold text-red-600">
@@ -440,7 +440,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
                                         return userAnswer && userAnswer.answer.toLowerCase().trim() === blank.correctAnswer.toLowerCase().trim();
                                     }).length}
                                 </div>
-                                <div className="text-gray-600">Incorrect</div>
+                                <div className="text-gray-600">{t('dashboard.assignments.editor.task_editor.form.incorrect')}</div>
                             </div>
                         </div>
                     </div>
@@ -453,7 +453,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
                                     <input
                                         value={question.questionText}
                                         onChange={(e) => handleQuestionChange(qIndex, e.target.value)}
-                                        placeholder="Enter your question with blanks (use ___ for blanks)"
+                                        placeholder={t('dashboard.assignments.editor.task_editor.form.question_placeholder')}
                                         className="w-full px-3 text-neutral-600 bg-[#00008b00] border-2 border-gray-200 rounded-md border-dotted text-sm font-bold"
                                     />
                                 ) : (
@@ -484,13 +484,13 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
                                                     <input
                                                         value={blank.placeholder}
                                                         onChange={(e) => handleBlankChange(qIndex, bIndex, 'placeholder', e.target.value)}
-                                                        placeholder="Placeholder text for the blank"
+                                                        placeholder={t('dashboard.assignments.editor.task_editor.form.blank_placeholder')}
                                                         className="w-full mx-2 px-3 pr-6 text-neutral-600 bg-[#00008b00] border-2 border-gray-200 rounded-md border-dotted text-sm font-bold"
                                                     />
                                                     <input
                                                         value={blank.correctAnswer}
                                                         onChange={(e) => handleBlankChange(qIndex, bIndex, 'correctAnswer', e.target.value)}
-                                                        placeholder="Correct answer"
+                                                        placeholder={t('dashboard.assignments.editor.task_editor.form.correct_answer_placeholder')}
                                                         className="w-full mx-2 px-3 pr-6 text-neutral-600 bg-lime-50 border-2 border-lime-200 rounded-md border-dotted text-sm font-bold"
                                                     />
                                                     <input
@@ -565,12 +565,12 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
                                                     )?.answer?.toLowerCase().trim() === blank.correctAnswer.toLowerCase().trim() ? (
                                                         <>
                                                             <Check size={12} className="mx-auto" />
-                                                            <p className="mx-auto font-bold text-xs">Correct</p>
+                                                            <p className="mx-auto font-bold text-xs">{t('dashboard.assignments.editor.task_editor.form.correct')}</p>
                                                         </>
                                                     ) : (
                                                         <>
                                                             <X size={12} className="mx-auto" />
-                                                            <p className="mx-auto font-bold text-xs">Incorrect</p>
+                                                            <p className="mx-auto font-bold text-xs">{t('dashboard.assignments.editor.task_editor.form.incorrect')}</p>
                                                         </>
                                                     )}
                                                 </div>
@@ -617,7 +617,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
                             onClick={addQuestion}
                         >
                             <PlusCircle size={14} className="inline-block" />
-                            <span>Add Question</span>
+                            <span>{t('dashboard.assignments.editor.task_editor.form.add_question')}</span>
                         </div>
                     </div>
                 )}
@@ -628,7 +628,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
     return (
         <div className='flex flex-row space-x-2 text-sm items-center'>
             <Info size={12} />
-            <p>No questions found</p>
+            <p>{t('dashboard.assignments.editor.task_editor.form.no_questions')}</p>
         </div>
     );
 }

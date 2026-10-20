@@ -7,16 +7,18 @@ import { useAssignmentsTask, useAssignmentsTaskDispatch } from '@components/Cont
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import 'dayjs/locale/fr'
+import 'dayjs/locale/ar'
 
 dayjs.extend(relativeTime)
 
-const TASK_TYPE_META: Record<string, { label: string; Icon: React.ComponentType<{ size?: number; className?: string }> }> = {
-    QUIZ: { label: 'Quiz', Icon: ListTodo },
-    FILE_SUBMISSION: { label: 'File upload', Icon: FileUp },
-    FORM: { label: 'Form', Icon: Type },
-    CODE: { label: 'Code', Icon: Code2 },
-    SHORT_ANSWER: { label: 'Short answer', Icon: Pencil },
-    NUMBER_ANSWER: { label: 'Number', Icon: Hash },
+const TASK_TYPE_META: Record<string, { labelKey: string; Icon: React.ComponentType<{ size?: number; className?: string }> }> = {
+    QUIZ: { labelKey: 'quiz', Icon: ListTodo },
+    FILE_SUBMISSION: { labelKey: 'file_submission', Icon: FileUp },
+    FORM: { labelKey: 'form', Icon: Type },
+    CODE: { labelKey: 'code', Icon: Code2 },
+    SHORT_ANSWER: { labelKey: 'short_answer', Icon: Pencil },
+    NUMBER_ANSWER: { labelKey: 'number_answer', Icon: Hash },
 }
 
 function stripMarkup(text: string): string {
@@ -28,7 +30,7 @@ function stripMarkup(text: string): string {
 }
 
 function AssignmentTasks({ assignment_uuid }: any) {
-    const { t } = useTranslation()
+    const { t, i18n } = useTranslation()
     const assignments = useAssignments() as any;
     const assignmentTask = useAssignmentsTask() as any;
     const assignmentTaskHook = useAssignmentsTaskDispatch() as any;
@@ -69,19 +71,22 @@ function AssignmentTasks({ assignment_uuid }: any) {
                 {tasks.length > 0 && (
                     <div className='px-1 pt-1 pb-0.5 flex items-center justify-between'>
                         <span className='text-[10px] font-semibold text-gray-400 uppercase tracking-wider'>
-                            {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'}
+                            {t('dashboard.assignments.editor.tasks_count', { count: tasks.length })}
                         </span>
-                        <span className='text-[10px] font-medium text-gray-300'>newest first</span>
+                        <span className='text-[10px] font-medium text-gray-300'>{t('dashboard.assignments.editor.newest_first')}</span>
                     </div>
                 )}
 
                 {tasks.map((task: any, index: number) => {
-                    const meta = TASK_TYPE_META[task.assignment_type] ?? { label: task.assignment_type, Icon: Type }
+                    const meta = TASK_TYPE_META[task.assignment_type] ?? { labelKey: task.assignment_type, Icon: Type }
                     const Icon = meta.Icon
+                    const typeLabel = TASK_TYPE_META[task.assignment_type]
+                        ? t(`dashboard.assignments.editor.task_types.${meta.labelKey}.title`)
+                        : task.assignment_type
                     const isSelected = task.assignment_task_uuid === assignmentTask.selectedAssignmentTaskUUID
                     const descriptionPreview = stripMarkup(task.description || '')
                     const createdAt = task.creation_date ? dayjs(task.creation_date) : null
-                    const createdLabel = createdAt?.isValid() ? createdAt.fromNow() : null
+                    const createdLabel = createdAt?.isValid() ? createdAt.locale(i18n.language || 'en').fromNow() : null
                     const position = tasks.length - index
 
                     return (
@@ -110,14 +115,14 @@ function AssignmentTasks({ assignment_uuid }: any) {
                                         <span className='inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-100 text-gray-500 font-bold'>
                                             {position}
                                         </span>
-                                        <span>{meta.label}</span>
+                                        <span>{typeLabel}</span>
                                     </div>
                                     <Icon size={13} className='text-gray-300' />
                                 </div>
 
                                 {/* Title */}
                                 <div className='text-sm font-semibold text-gray-800 leading-snug break-words'>
-                                    {task.title || <span className='text-gray-300 italic font-normal'>Untitled task</span>}
+                                    {task.title || <span className='text-gray-300 italic font-normal'>{t('dashboard.assignments.editor.untitled_task')}</span>}
                                 </div>
 
                                 {/* Description */}
@@ -134,7 +139,7 @@ function AssignmentTasks({ assignment_uuid }: any) {
                                         <span>{createdLabel ?? '—'}</span>
                                     </div>
                                     {typeof task.max_grade_value === 'number' && task.max_grade_value !== 100 && (
-                                        <span className='font-medium text-gray-500'>out of {task.max_grade_value}</span>
+                                        <span className='font-medium text-gray-500'>{t('dashboard.assignments.editor.out_of', { points: task.max_grade_value })}</span>
                                     )}
                                 </div>
                             </div>
@@ -144,7 +149,7 @@ function AssignmentTasks({ assignment_uuid }: any) {
 
                 {tasks.length === 0 && assignments && (
                     <div className='rounded-xl border border-dashed border-gray-200 bg-gray-50/50 px-4 py-8 text-center'>
-                        <div className='text-xs text-gray-400'>No tasks yet — add one to get started.</div>
+                        <div className='text-xs text-gray-400'>{t('dashboard.assignments.editor.no_tasks')}</div>
                     </div>
                 )}
             </div>
