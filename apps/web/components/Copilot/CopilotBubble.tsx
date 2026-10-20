@@ -38,6 +38,7 @@ import {
   groupSessionsByDate,
 } from '@/app/orgs/[orgslug]/(withmenu)/copilot/copilot'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
+import { useTranslation } from 'react-i18next'
 
 type ChatMessage = {
   role: 'user' | 'assistant'
@@ -70,6 +71,7 @@ export default function CopilotBubble(props: CopilotBubbleProps) {
 }
 
 function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubbleProps) {
+  const { t } = useTranslation()
   const session = useLHSession() as any
   const org = useOrg() as any
   const accessToken = session?.data?.tokens?.access_token
@@ -150,7 +152,7 @@ function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubb
       setSelectedCourse(s.course_uuid || null)
       setChatMode(s.mode || 'course_only')
       isNewChatRef.current = false
-    } catch { setError('Failed to load session') }
+    } catch { setError(t('copilot.failed_to_load_session')) }
     finally { setIsLoadingSession(false) }
   }, [accessToken, aichatUuid])
 
@@ -294,28 +296,28 @@ function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubb
           <div className="flex items-center justify-between px-3 h-11 border-b border-neutral-100 dark:border-neutral-800/60 flex-shrink-0">
             <div className="flex items-center gap-1.5">
               <button
-                aria-label="Toggle conversations list"
+                aria-label={t('copilot.toggle_conversations')}
                 onClick={() => setShowSessions(!showSessions)}
                 className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all"
-                title="Conversations"
+                title={t('copilot.conversations')}
               >
                 <List size={14} />
               </button>
               <span className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">
-                Course Copilot
+                {t('copilot.title')}
               </span>
             </div>
             <div className="flex items-center gap-0.5">
               <button
-                aria-label="New chat"
+                aria-label={t('copilot.new_chat')}
                 onClick={handleNewChat}
                 className="p-1.5 rounded-lg text-neutral-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 transition-all"
-                title="New chat"
+                title={t('copilot.new_chat')}
               >
                 <Plus size={14} />
               </button>
               <button
-                aria-label="Close copilot"
+                aria-label={t('copilot.close_copilot')}
                 onClick={() => onOpenChange(false)}
                 className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all"
               >
@@ -332,18 +334,18 @@ function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubb
                 className="flex items-center gap-2 w-full px-3 py-2 mb-2 text-xs font-semibold rounded-xl bg-violet-600 hover:bg-violet-700 text-white transition-colors"
               >
                 <Plus size={13} weight="bold" />
-                New Chat
+                {t('copilot.new_chat')}
               </button>
               {sessions.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-32 text-center px-4">
                   <ChatCircleDots size={20} className="text-neutral-300 dark:text-neutral-600 mb-2" />
-                  <p className="text-xs text-neutral-400 dark:text-neutral-500">No conversations yet</p>
+                  <p className="text-xs text-neutral-400 dark:text-neutral-500">{t('copilot.no_conversations')}</p>
                 </div>
               ) : (
                 groupSessionsByDate(sessions).map((group) => (
-                  <div key={group.label} className="mb-3">
+                  <div key={group.labelKey} className="mb-3">
                     <p className="text-[10px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider px-2 py-1">
-                      {group.label}
+                      {t(`copilot.sessions.${group.labelKey}`)}
                     </p>
                     {group.sessions.map((s) => (
                       <SessionItem
@@ -365,7 +367,7 @@ function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubb
                 {isLoadingSession && (
                   <div className="flex flex-col items-center justify-center h-full">
                     <SpinnerGap size={18} className="animate-spin text-violet-400 mb-2" />
-                    <span className="text-xs text-neutral-400">Loading...</span>
+                    <span className="text-xs text-neutral-400">{t('copilot.loading')}</span>
                   </div>
                 )}
 
@@ -384,9 +386,9 @@ function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubb
                       </svg>
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Course Copilot</p>
+                      <p className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">{t('copilot.title')}</p>
                       <p className="text-[11px] text-neutral-400 dark:text-neutral-500 mt-1 leading-relaxed max-w-[230px]">
-                        Ask questions about your courses.
+                        {t('copilot.empty_description_short')}
                       </p>
                     </div>
                   </div>
@@ -440,14 +442,14 @@ function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubb
               {/* Input bar */}
               <div className="flex items-center gap-1 px-2.5 py-2 border-t border-neutral-100 dark:border-neutral-800/60 flex-shrink-0">
                 <button
-                  aria-label="Select chat mode"
+                  aria-label={t('copilot.select_chat_mode')}
                   onClick={() => setChatMode(chatMode === 'course_only' ? 'general' : 'course_only')}
                   className={`flex items-center gap-1 px-1.5 py-1.5 text-xs rounded-lg transition-all flex-shrink-0 ${
                     chatMode === 'general'
                       ? 'bg-violet-50 dark:bg-violet-500/10 text-violet-600'
                       : 'text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800'
                   }`}
-                  title={chatMode === 'general' ? 'General mode' : 'Course only'}
+                  title={chatMode === 'general' ? t('copilot.general_mode') : t('copilot.course_only_mode')}
                 >
                   {chatMode === 'general' ? <GlobeSimple size={13} weight="duotone" /> : <BookOpen size={13} weight="duotone" />}
                 </button>
@@ -455,7 +457,7 @@ function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubb
                 {messages.length > 0 && (
                   <div className="relative flex-shrink-0" ref={dropdownRef}>
                     <button
-                      aria-label="Select course"
+                      aria-label={t('copilot.select_course')}
                       onClick={() => setCourseDropdownOpen(!courseDropdownOpen)}
                       className="flex items-center gap-0.5 px-1.5 py-1.5 text-xs rounded-lg text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all"
                     >
@@ -480,13 +482,13 @@ function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubb
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(input) }
                   }}
-                  aria-label="Ask about your courses"
-                  placeholder={isLoadingSession ? 'Loading...' : isWaiting ? 'Thinking...' : 'Ask about your courses...'}
+                  aria-label={t('copilot.ask_aria')}
+                  placeholder={isLoadingSession ? t('copilot.loading') : isWaiting ? t('copilot.thinking') : t('copilot.ask_placeholder')}
                   disabled={isInputDisabled}
                   className="flex-1 min-w-0 bg-transparent outline-none text-xs text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 disabled:opacity-40"
                 />
                 <button
-                  aria-label="Send message"
+                  aria-label={t('copilot.send_message')}
                   onClick={() => sendMessage(input)}
                   disabled={isInputDisabled || !input.trim()}
                   className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-lg bg-violet-600 hover:bg-violet-700 disabled:bg-neutral-200 dark:disabled:bg-neutral-700 disabled:cursor-not-allowed text-white transition-colors"
@@ -504,7 +506,7 @@ function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubb
         onClick={() => onOpenChange(!open)}
         className="fixed bottom-4 right-4 z-[9999] flex items-center justify-center rounded-full bg-violet-600 hover:bg-violet-700 text-white transition-all duration-200 hover:scale-105 active:scale-95 nice-shadow"
         style={{ width: 44, height: 44 }}
-        aria-label="Open Copilot"
+        aria-label={t('copilot.open_copilot')}
       >
         {open ? <X size={18} weight="bold" /> : <ChatCircle size={20} weight="fill" />}
       </button>

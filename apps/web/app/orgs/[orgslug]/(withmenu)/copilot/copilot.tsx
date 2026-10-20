@@ -42,6 +42,7 @@ import {
   GlobeSimple,
 } from '@phosphor-icons/react'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 
 export type CopilotProps = {
   orgslug: string
@@ -66,11 +67,11 @@ export function groupSessionsByDate(sessions: RAGChatSession[]) {
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   const weekAgo = new Date(todayStart.getTime() - 7 * 24 * 60 * 60 * 1000)
 
-  const groups: { label: string; sessions: RAGChatSession[] }[] = [
-    { label: 'Favorites', sessions: [] },
-    { label: 'Today', sessions: [] },
-    { label: 'Previous 7 days', sessions: [] },
-    { label: 'Older', sessions: [] },
+  const groups: { labelKey: string; sessions: RAGChatSession[] }[] = [
+    { labelKey: 'favorites', sessions: [] },
+    { labelKey: 'today', sessions: [] },
+    { labelKey: 'previous_7_days', sessions: [] },
+    { labelKey: 'older', sessions: [] },
   ]
 
   for (const s of sessions) {
@@ -88,6 +89,7 @@ export function groupSessionsByDate(sessions: RAGChatSession[]) {
 }
 
 export function CopilotChat({ orgslug }: CopilotProps) {
+  const { t } = useTranslation()
   const session = useLHSession() as any
   const org = useOrg() as any
   const accessToken = session?.data?.tokens?.access_token
@@ -215,8 +217,8 @@ export function CopilotChat({ orgslug }: CopilotProps) {
       setChatMode(sessionMeta.mode || 'course_only')
       isNewChatRef.current = false
     } catch {
-      setError('Failed to load session')
-      toast.error('Failed to load session')
+      setError(t('copilot.failed_to_load_session'))
+      toast.error(t('copilot.failed_to_load_session'))
     } finally {
       setIsLoadingSession(false)
     }
@@ -244,7 +246,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
         handleNewChat()
       }
     } catch {
-      toast.error('Failed to delete session')
+      toast.error(t('copilot.failed_to_delete_session'))
     }
   }, [accessToken, aichatUuid, mutateSessions, handleNewChat])
 
@@ -258,7 +260,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
         toast.success('Session renamed')
       }
     } catch {
-      toast.error('Failed to rename session')
+      toast.error(t('copilot.failed_to_rename_session'))
     }
   }, [accessToken, aichatUuid, mutateSessions])
 
@@ -273,7 +275,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
         toast.success(updated.favorite ? 'Added to favorites' : 'Removed from favorites')
       }
     } catch {
-      toast.error('Failed to update favorite')
+      toast.error(t('copilot.failed_to_update_favorite'))
     }
   }, [accessToken, aichatUuid, currentSessionFavorite, mutateSessions])
 
@@ -396,7 +398,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
                 className="flex items-center gap-2 px-3 py-1.5 text-[13px] font-medium rounded-lg bg-violet-600 hover:bg-violet-700 text-white transition-colors"
               >
                 <Plus size={14} weight="bold" />
-                <span>New Chat</span>
+                <span>{t('copilot.new_chat')}</span>
               </button>
               <button
                 onClick={() => setSidebarOpen(false)}
@@ -411,13 +413,13 @@ export function CopilotChat({ orgslug }: CopilotProps) {
               {sessions.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-32 text-center px-4">
                   <ChatCircleDots size={24} className="text-neutral-300 dark:text-neutral-600 mb-2" />
-                  <p className="text-xs text-neutral-400 dark:text-neutral-500">No conversations yet</p>
+                  <p className="text-xs text-neutral-400 dark:text-neutral-500">{t('copilot.no_conversations')}</p>
                 </div>
               ) : (
                 groupSessionsByDate(sessions).map((group) => (
-                  <div key={group.label} className="mb-3">
+                  <div key={group.labelKey} className="mb-3">
                     <p className="text-[10px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider px-2 py-1.5">
-                      {group.label}
+                      {t(`copilot.sessions.${group.labelKey}`)}
                     </p>
                     {group.sessions.map((s) => (
                       <SessionItem
@@ -476,7 +478,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
           {isLoadingSession && (
             <div className="flex flex-col items-center justify-center h-full">
               <SpinnerGap size={20} className="animate-spin text-violet-400 mb-2" />
-              <span className="text-sm text-neutral-400 dark:text-neutral-500">Loading conversation...</span>
+              <span className="text-sm text-neutral-400 dark:text-neutral-500">{t('copilot.loading_conversation')}</span>
             </div>
           )}
 
@@ -496,9 +498,9 @@ export function CopilotChat({ orgslug }: CopilotProps) {
               </svg>
               </div>
               <div className="space-y-2">
-                <h2 className="text-xl font-bold text-neutral-900 dark:text-white">Course Copilot</h2>
+                <h2 className="text-xl font-bold text-neutral-900 dark:text-white">{t('copilot.title')}</h2>
                 <p className="text-sm text-neutral-500 dark:text-neutral-400 max-w-md leading-relaxed">
-                  Ask questions about your courses and get answers grounded in course content, with references to the source material.
+                  {t('copilot.empty_description')}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -513,7 +515,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
                     }`}
                   >
                     <BookOpen size={15} weight="duotone" />
-                    <span>Course Only</span>
+                    <span>{t('copilot.course_only')}</span>
                   </button>
                   <button
                     onClick={() => setChatMode('general')}
@@ -524,7 +526,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
                     }`}
                   >
                     <GlobeSimple size={15} weight="duotone" />
-                    <span>General</span>
+                    <span>{t('copilot.general')}</span>
                   </button>
                 </div>
                 {/* Course picker */}
@@ -619,10 +621,10 @@ export function CopilotChat({ orgslug }: CopilotProps) {
                 ? 'bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400'
                 : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800'
             }`}
-            title={chatMode === 'general' ? 'General Knowledge mode' : 'Course Only mode'}
+            title={chatMode === 'general' ? t('copilot.general_knowledge_mode') : t('copilot.course_only_mode')}
           >
             {chatMode === 'general' ? <GlobeSimple size={13} weight="duotone" /> : <BookOpen size={13} weight="duotone" />}
-            <span className="hidden sm:inline">{chatMode === 'general' ? 'General' : 'Course'}</span>
+            <span className="hidden sm:inline">{chatMode === 'general' ? t('copilot.general') : t('copilot.course')}</span>
           </button>
           {messages.length > 0 && (
             <div className="relative" ref={dropdownRef}>
@@ -641,8 +643,8 @@ export function CopilotChat({ orgslug }: CopilotProps) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            aria-label="Ask about your courses"
-            placeholder={isLoadingSession ? 'Loading conversation...' : isWaiting ? 'Thinking...' : chatMode === 'general' ? 'Ask anything...' : 'Ask about your courses...'}
+            aria-label={t('copilot.ask_aria')}
+            placeholder={isLoadingSession ? t('copilot.loading_conversation') : isWaiting ? t('copilot.thinking') : chatMode === 'general' ? t('copilot.ask_anything_placeholder') : t('copilot.ask_placeholder')}
             disabled={isInputDisabled}
             className="flex-1 bg-transparent outline-none text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 disabled:opacity-40"
           />
@@ -667,6 +669,7 @@ export function ChatTopBar({ title, isFavorite, onRename, onToggleFavorite, onTo
   onToggleSidebar?: () => void
   showMenuButton?: boolean
 }) {
+  const { t } = useTranslation()
   const [isEditing, setIsEditing] = useState(false)
   const [editValue, setEditValue] = useState(title)
   const editInputRef = useRef<HTMLInputElement>(null)
@@ -740,7 +743,7 @@ export function ChatTopBar({ title, isFavorite, onRename, onToggleFavorite, onTo
             ? 'text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10'
             : 'text-neutral-300 dark:text-neutral-600 hover:text-amber-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
         }`}
-        title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+        title={isFavorite ? t('copilot.favorite_remove') : t('copilot.favorite_add')}
       >
         <Star size={16} weight={isFavorite ? 'fill' : 'regular'} />
       </button>
@@ -796,6 +799,7 @@ export function AssistantMessage({ content, sources, orgslug, isStreaming, isWai
   isStreaming?: boolean
   isWaiting?: boolean
 }) {
+  const { t } = useTranslation()
   const courseNames = [...new Set(sources.map((s) => s.course_name).filter(Boolean))]
 
   return (
@@ -804,7 +808,7 @@ export function AssistantMessage({ content, sources, orgslug, isStreaming, isWai
       {courseNames.length > 0 && !isWaiting && (
         <div className="flex items-center gap-1.5 text-[11px] text-neutral-400 dark:text-neutral-500 font-medium">
           <BookOpen size={11} weight="bold" className="text-violet-400" />
-          <span>Answering from {courseNames.join(', ')}</span>
+          <span>{t('copilot.answering_from', { courses: courseNames.join(', ') })}</span>
         </div>
       )}
 
@@ -957,6 +961,7 @@ export function CourseDropdown({ courses, selectedCourse, onSelect, position = '
   onSelect: (uuid: string | null) => void
   position?: 'top' | 'bottom'
 }) {
+  const { t } = useTranslation()
   const positionClass = position === 'top' ? 'bottom-full mb-1' : 'top-full mt-1'
   return (
     <div className={`absolute left-0 ${positionClass} w-72 max-h-72 overflow-y-auto rounded-xl bg-white dark:bg-neutral-900 nice-shadow z-50 py-1`}>
@@ -967,7 +972,7 @@ export function CourseDropdown({ courses, selectedCourse, onSelect, position = '
         }`}
       >
         <Sparkle size={15} weight="duotone" className="text-violet-500 flex-shrink-0" />
-        <span>All courses</span>
+        <span>{t('copilot.all_courses')}</span>
       </button>
       <div className="h-px bg-neutral-100 dark:bg-neutral-800 mx-2 my-1" />
       {Array.isArray(courses) && courses.map((course: any) => (
@@ -989,6 +994,7 @@ export function CourseDropdown({ courses, selectedCourse, onSelect, position = '
 }
 
 export function SourcesCompact({ sources, orgslug }: { sources: StreamSourceData['sources']; orgslug: string }) {
+  const { t } = useTranslation()
   return (
     <div className="relative z-10 flex flex-wrap gap-x-3 gap-y-1 px-1">
       {sources.map((source, i) => {
@@ -1004,7 +1010,7 @@ export function SourcesCompact({ sources, orgslug }: { sources: StreamSourceData
               {i + 1}
             </span>
             <span className="truncate max-w-xs font-medium text-neutral-500 dark:text-neutral-400 group-hover:text-violet-600 dark:group-hover:text-violet-400">
-              {source.activity_name || 'Unknown'}
+              {source.activity_name || t('copilot.unknown')}
             </span>
           </span>
         )

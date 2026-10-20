@@ -4598,6 +4598,47 @@
         }
       }
     },
+    "copilot": {
+      "title": "مساعد الدورات",
+      "new_chat": "محادثة جديدة",
+      "no_conversations": "لا توجد محادثات بعد",
+      "loading": "جاري التحميل...",
+      "loading_conversation": "جاري تحميل المحادثة...",
+      "thinking": "جارٍ التفكير...",
+      "ask_aria": "اسأل عن دوراتك",
+      "ask_placeholder": "اسأل عن دوراتك...",
+      "ask_anything_placeholder": "اسأل أي شيء...",
+      "send_message": "إرسال الرسالة",
+      "open_copilot": "فتح المساعد",
+      "close_copilot": "إغلاق المساعد",
+      "toggle_conversations": "إظهار/إخفاء قائمة المحادثات",
+      "conversations": "المحادثات",
+      "select_chat_mode": "اختيار وضع المحادثة",
+      "select_course": "اختيار دورة",
+      "course_only": "الدورة فقط",
+      "course_only_mode": "وضع الدورة فقط",
+      "general": "عام",
+      "general_mode": "الوضع العام",
+      "general_knowledge_mode": "وضع المعرفة العامة",
+      "course": "دورة",
+      "empty_description": "اطرح أسئلة عن دوراتك واحصل على إجابات مستندة إلى محتوى الدورات، مع مراجع إلى المصادر.",
+      "empty_description_short": "اطرح أسئلة عن دوراتك.",
+      "answering_from": "الإجابة من {{courses}}",
+      "all_courses": "جميع الدورات",
+      "unknown": "غير معروف",
+      "favorite_add": "إضافة إلى المفضلة",
+      "favorite_remove": "إزالة من المفضلة",
+      "failed_to_load_session": "فشل تحميل المحادثة",
+      "failed_to_delete_session": "فشل حذف المحادثة",
+      "failed_to_rename_session": "فشل إعادة تسمية المحادثة",
+      "failed_to_update_favorite": "فشل تحديث المفضلة",
+      "sessions": {
+        "favorites": "المفضلة",
+        "today": "اليوم",
+        "previous_7_days": "آخر 7 أيام",
+        "older": "أقدم"
+      }
+    },
     "assignments": {
       "home": {
         "title": "الواجبات",

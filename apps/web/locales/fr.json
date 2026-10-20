@@ -4486,6 +4486,47 @@
         }
       }
     },
+    "copilot": {
+      "title": "Copilote de cours",
+      "new_chat": "Nouvelle conversation",
+      "no_conversations": "Aucune conversation pour l'instant",
+      "loading": "Chargement...",
+      "loading_conversation": "Chargement de la conversation...",
+      "thinking": "Réflexion...",
+      "ask_aria": "Posez des questions sur vos cours",
+      "ask_placeholder": "Posez des questions sur vos cours...",
+      "ask_anything_placeholder": "Posez n'importe quelle question...",
+      "send_message": "Envoyer le message",
+      "open_copilot": "Ouvrir le copilote",
+      "close_copilot": "Fermer le copilote",
+      "toggle_conversations": "Afficher/masquer la liste des conversations",
+      "conversations": "Conversations",
+      "select_chat_mode": "Choisir le mode de conversation",
+      "select_course": "Choisir un cours",
+      "course_only": "Cours uniquement",
+      "course_only_mode": "Mode cours uniquement",
+      "general": "Général",
+      "general_mode": "Mode général",
+      "general_knowledge_mode": "Mode connaissances générales",
+      "course": "Cours",
+      "empty_description": "Posez des questions sur vos cours et obtenez des réponses fondées sur le contenu des cours, avec des références aux sources.",
+      "empty_description_short": "Posez des questions sur vos cours.",
+      "answering_from": "Réponse à partir de {{courses}}",
+      "all_courses": "Tous les cours",
+      "unknown": "Inconnu",
+      "favorite_add": "Ajouter aux favoris",
+      "favorite_remove": "Retirer des favoris",
+      "failed_to_load_session": "Échec du chargement de la conversation",
+      "failed_to_delete_session": "Échec de la suppression de la conversation",
+      "failed_to_rename_session": "Échec du renommage de la conversation",
+      "failed_to_update_favorite": "Échec de la mise à jour du favori",
+      "sessions": {
+        "favorites": "Favoris",
+        "today": "Aujourd'hui",
+        "previous_7_days": "7 derniers jours",
+        "older": "Plus anciennes"
+      }
+    },
     "assignments": {
       "home": {
         "title": "Devoirs",
