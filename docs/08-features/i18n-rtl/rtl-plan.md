@@ -1,15 +1,15 @@
 # i18n & RTL — Research & Plan
 
-> **Status:** Direction plumbing shipped (`<html lang/dir>` + `DirectionProvider` + Arabic font). Logical-property refactor, RTL exceptions, JS coordinate fixes and QA pending.
+> **Status:** Direction plumbing shipped (`<html lang/dir>` + `DirectionProvider` + Arabic font). French and Arabic text are complete. Logical-property refactor is **in progress** — shared primitives, cards, assignments, copilot and course widgets are done; analytics/settings pages, course player, public pages and the editor remain. See [progress.md](./progress.md) for the live handoff log.
 > **Goal:** Ship **three** languages — English (exists), French (exists), Arabic (exists) — with **accurate RTL** for Arabic, done the *professional* way (real bidirectional layout, not a global CSS flip).
 > **Scope:** the Next.js web app at `apps/web`.
-> **Companion docs:** [design-tokens.md](../../07-ui-reference/design-tokens.md), [patterns.md](../../07-ui-reference/patterns.md), [frontend/overview.md](../../05-developer-guide/frontend/overview.md).
+> **Companion docs:** [progress.md](./progress.md), [design-tokens.md](../../07-ui-reference/design-tokens.md), [patterns.md](../../07-ui-reference/patterns.md), [frontend/overview.md](../../05-developer-guide/frontend/overview.md).
 
 ---
 
 ## 0. TL;DR
 
-**The translations are done. The direction plumbing is in place. The layout refactor is not.**
+**The translations are done. The direction plumbing is in place. The layout refactor is partly done.**
 
 Three locales ship (`en`, `fr`, `ar`) and i18n is fully wired (lazy loading, language switcher, org-default-language sync). Direction plumbing now exists too:
 
@@ -17,7 +17,7 @@ Three locales ship (`en`, `fr`, `ar`) and i18n is fully wired (lazy loading, lan
 - Radix **`DirectionProvider`** wraps the app in `I18nContext.tsx`; `useDirection()` is consumed where overlays need it (`hover-menu.tsx`).
 - **Noto Sans Arabic** is loaded next to Inter.
 
-What remains is the hard part: **~900 physical directional utilities**, RTL exceptions (charts, media controls, code blocks), JS coordinate math, `dir="auto"` for user content, `cmdk`/DnD direction props, and the lint guard. Until those are converted, the page shell is correctly RTL but individual components can still be pinned LTR.
+The logical-property refactor is underway. Shared primitives, all card surfaces, the assignments section, the copilot and the course-detail widgets are converted. What remains: dashboard analytics/settings pages, the course player, the public pages, the rich-text editor, plus the RTL exceptions (charts, media controls), JS coordinate math, `dir="auto"` for user content, `cmdk`/DnD direction props, and the lint guard. See [progress.md](./progress.md) for the file-level inventory.
 
 ---
 

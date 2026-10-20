@@ -79,6 +79,7 @@ The documents in this section describe cross-cutting feature areas that touch mu
 | Document | Description |
 |----------|-------------|
 | [RTL Plan](./i18n-rtl/rtl-plan.md) | English / French / Arabic with accurate bidirectional layout: direction plumbing shipped (SSR `lang`/`dir`, `DirectionProvider`, Arabic font); logical-property refactor and QA pending |
+| [Progress & Handoff](./i18n-rtl/progress.md) | Live log: commit ledger per phase, what the RTL refactor has covered, the remaining file inventory, verification commands, gotchas and open decisions |
 
 ### Planned (Future)
 
