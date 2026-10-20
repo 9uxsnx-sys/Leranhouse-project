@@ -1,14 +1,15 @@
 'use client'
-import React, { useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import useSWR from 'swr'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 import {
-  BookCopy,
+  BookOpen,
+  Check,
   ChevronLeft,
   ChevronRight,
+  Headphones,
   Loader2,
-  Mic,
   MoreHorizontal,
   Plus,
   Search,
@@ -18,31 +19,25 @@ import {
 import { TableCard } from '@components/Analytics/Card'
 import { Column, DataTable } from '@components/Analytics/DataTable'
 import { EmptyState } from '@components/Analytics/Feedback'
-import Modal from '@components/Objects/StyledElements/Modal/Modal'
-import { Button } from '@components/ui/button'
+import { ConceptIcon } from '@components/ui/icons'
+import { IconButton } from '@components/ui/icon-button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@components/ui/dropdown-menu'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { useOrg } from '@components/Contexts/OrgContext'
 import {
   addResourceToCollection,
-  getCollectionCourses,
   removeResourceFromCollection,
 } from '@services/courses/collections'
 import { getAPIUrl } from '@services/config/config'
-import {
-  getCourseThumbnailMediaDirectory,
-  getPodcastThumbnailMediaDirectory,
-} from '@services/media/media'
 import { swrFetcher } from '@services/utils/ts/requests'
-import { searchMatchesAny } from '@/lib/search/normalize'
 
-const PAGE_SIZE = 20
+const ITEMS_PER_PAGE = 10
 
 type EditCollectionContentProps = {
   collection: any
@@ -61,253 +56,216 @@ function formatDate(dateStr: string | null | undefined): string {
   })
 }
 
-function accessLabel(accessType: string, t: any): string {
-  switch (accessType) {
-    case 'paid':
-      return t('collections.dashboard.content.paid')
-    case 'users_only':
-      return t('collections.dashboard.content.private')
-    default:
-      return t('collections.dashboard.content.free')
-  }
-}
-
-function EditCollectionContent({ collection, orgslug, onUpdated }: EditCollectionContentProps) {
+function EditCollectionContent({ collection, onUpdated }: EditCollectionContentProps) {
   const { t } = useTranslation()
   const session = useLHSession() as any
-  const org = useOrg() as any
   const accessToken = session?.data?.tokens?.access_token
 
   const collectionUuid = collection?.collection_uuid
-  const [search, setSearch] = useState('')
+
+  const [searchValue, setSearchValue] = useState('')
   const [page, setPage] = useState(1)
-  const [isPickerOpen, setIsPickerOpen] = useState(false)
-  const [pickerSearch, setPickerSearch] = useState('')
-  const [busyUuid, setBusyUuid] = useState<string | null>(null)
+  const [selectedIds, setSelectedIds] = useState<Set<string | number>>(new Set())
+  const [isBulkWorking, setIsBulkWorking] = useState(false)
+  const [kindFilter, setKindFilter] = useState<'' | 'course' | 'podcast'>('')
+  const [statusFilter, setStatusFilter] = useState<'' | 'published' | 'draft'>('')
 
-  const debouncedSearch = useDebounce(search, 300)
+  const debouncedSearch = useDebounce(searchValue, 300)
+  const isSearching = debouncedSearch.trim().length > 0
 
-  const listKey =
+  useEffect(() => {
+    setPage(1)
+    setSelectedIds(new Set())
+  }, [debouncedSearch, kindFilter, statusFilter])
+
+  // Linked mode lists the collection members; searching switches the same
+  // table to the organization resources that can still be added.
+  const membersKey =
     collectionUuid && accessToken
-      ? `${getAPIUrl()}collections/${collectionUuid}/courses?search=${encodeURIComponent(
-          debouncedSearch
-        )}&page=${page}&limit=${PAGE_SIZE}`
+      ? `${getAPIUrl()}collections/${collectionUuid}/members?filter=${
+          isSearching ? 'available' : 'linked'
+        }&search=${encodeURIComponent(debouncedSearch)}&kind=${kindFilter}&status=${statusFilter}&page=${page}&limit=${ITEMS_PER_PAGE}`
       : null
 
-  const { data: rows, isLoading, isValidating, mutate } = useSWR(
-    listKey,
+  const { data, error, isValidating, mutate } = useSWR(
+    membersKey,
     (url: string) => swrFetcher(url, accessToken),
     { revalidateOnFocus: false }
   )
 
-  const courses: any[] = rows || []
+  const rows: any[] = data?.items || []
+  const total: number = data?.total || 0
+  const isInitialLoading = !data && isValidating
+  const isPageTransitioning = !!data && isValidating
 
-  const orgCoursesKey =
-    isPickerOpen && org?.id
-      ? `${getAPIUrl()}courses/org_slug/${orgslug}/page/1/limit/500?include_unpublished=true`
-      : null
-
-  const { data: orgCourses } = useSWR(
-    orgCoursesKey,
-    (url: string) => swrFetcher(url, accessToken),
-    { revalidateOnFocus: false }
-  )
-
-  const orgPodcastsKey =
-    isPickerOpen && org?.slug
-      ? `${getAPIUrl()}podcasts/org_slug/${orgslug}/page/1/limit/100?include_unpublished=true`
-      : null
-
-  const { data: orgPodcasts } = useSWR(
-    orgPodcastsKey,
-    (url: string) => swrFetcher(url, accessToken),
-    { revalidateOnFocus: false }
-  )
-
-  const memberUuids = useMemo(() => {
-    const ids = new Set<string>()
-    ;(collection?.courses || []).forEach((item: any) =>
-      ids.add(item.resource_uuid || item.course_uuid)
-    )
-    ;(courses || []).forEach((item: any) => ids.add(item.resource_uuid || item.course_uuid))
-    return ids
-  }, [collection?.courses, courses])
-
-  const availableResources = useMemo(() => {
-    const courseItems = (orgCourses || []).map((course: any) => ({
-      kind: 'course' as const,
-      uuid: course.course_uuid,
-      name: course.name,
-      description: course.description,
-      thumbnail_image: course.thumbnail_image,
-      access_type: course.access_type,
-      published: course.published,
-    }))
-    const podcastItems = (orgPodcasts || []).map((podcast: any) => ({
-      kind: 'podcast' as const,
-      uuid: podcast.podcast_uuid,
-      name: podcast.name,
-      description: podcast.description,
-      thumbnail_image: podcast.thumbnail_image,
-      access_type: podcast.access_type,
-      published: podcast.published,
-    }))
-
-    const candidates = [...courseItems, ...podcastItems].filter(
-      (item: any) =>
-        item.access_type !== 'users_only' &&
-        !memberUuids.has(item.uuid) &&
-        // Published bundles may only contain published items.
-        (!collection?.published || item.published)
-    )
-    if (!pickerSearch.trim()) return candidates
-    return candidates.filter((item: any) =>
-      searchMatchesAny([item.name, item.description], pickerSearch)
-    )
-  }, [orgCourses, orgPodcasts, memberUuids, pickerSearch, collection?.published])
-
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     await mutate()
     await onUpdated()
-  }
+  }, [mutate, onUpdated])
 
-  const handleAdd = async (resource: any) => {
-    if (!collectionUuid || busyUuid) return
-    setBusyUuid(resource.uuid)
-    try {
-      const res = await addResourceToCollection(collectionUuid, resource.uuid, accessToken)
-      if (res.success === false) {
-        toast.error(res.data?.detail || t('collections.dashboard.content.add_error'))
-        return
+  const changePage = useCallback((nextPage: number) => {
+    setPage(nextPage)
+    setSelectedIds(new Set())
+  }, [])
+
+  const handleBulkAction = useCallback(async () => {
+    const ids = Array.from(selectedIds).map(String)
+    if (!collectionUuid || ids.length === 0 || isBulkWorking) return
+
+    setIsBulkWorking(true)
+    const toastId = toast.loading(
+      isSearching
+        ? t('collections.dashboard.content.adding')
+        : t('collections.dashboard.content.removing')
+    )
+
+    let success = 0
+    let failed = 0
+    for (const resourceUuid of ids) {
+      try {
+        const res = isSearching
+          ? await addResourceToCollection(collectionUuid, resourceUuid, accessToken)
+          : await removeResourceFromCollection(collectionUuid, resourceUuid, accessToken)
+        if (res.success) success += 1
+        else failed += 1
+      } catch {
+        failed += 1
       }
-      await refresh()
-      toast.success(t('collections.dashboard.content.added_success'))
-    } catch (err: any) {
-      toast.error(err?.message || t('collections.dashboard.content.add_error'))
-    } finally {
-      setBusyUuid(null)
     }
-  }
 
-  const handleRemove = async (row: any) => {
-    if (!collectionUuid || busyUuid) return
-    const resourceUuid = row.resource_uuid || row.course_uuid
-    setBusyUuid(resourceUuid)
-    try {
-      const res = await removeResourceFromCollection(
-        collectionUuid,
-        resourceUuid,
-        accessToken
+    setSelectedIds(new Set())
+    await refresh()
+
+    if (failed === 0) {
+      toast.success(
+        t(
+          isSearching
+            ? 'collections.dashboard.content.bulk_added_success'
+            : 'collections.dashboard.content.bulk_removed_success',
+          { count: success }
+        ),
+        { id: toastId }
       )
-      if (res.success === false) {
-        toast.error(res.data?.detail || t('collections.dashboard.content.remove_error'))
-        return
-      }
-      await refresh()
-      toast.success(t('collections.dashboard.content.removed_success'))
-    } catch (err: any) {
-      toast.error(err?.message || t('collections.dashboard.content.remove_error'))
-    } finally {
-      setBusyUuid(null)
+    } else {
+      toast.error(
+        t('collections.dashboard.content.bulk_partial', {
+          success,
+          error: failed,
+        }),
+        { id: toastId }
+      )
     }
+    setIsBulkWorking(false)
+  }, [
+    selectedIds,
+    collectionUuid,
+    isBulkWorking,
+    isSearching,
+    accessToken,
+    refresh,
+    t,
+  ])
+
+  const handleRemoveRow = useCallback(
+    async (row: any) => {
+      if (!collectionUuid || isBulkWorking) return
+      setIsBulkWorking(true)
+      const toastId = toast.loading(t('collections.dashboard.content.removing'))
+      try {
+        const res = await removeResourceFromCollection(
+          collectionUuid,
+          row.resource_uuid,
+          accessToken
+        )
+        if (res.success) {
+          await refresh()
+          toast.success(
+            t('collections.dashboard.content.bulk_removed_success', { count: 1 }),
+            { id: toastId }
+          )
+        } else {
+          toast.error(
+            res.data?.detail || t('collections.dashboard.content.remove_error'),
+            { id: toastId }
+          )
+        }
+      } catch (err: any) {
+        toast.error(
+          err?.message || t('collections.dashboard.content.remove_error'),
+          { id: toastId }
+        )
+      } finally {
+        setIsBulkWorking(false)
+      }
+    },
+    [collectionUuid, isBulkWorking, accessToken, refresh, t]
+  )
+
+  const hasActiveFilters = Boolean(kindFilter || statusFilter)
+
+  const clearFilters = () => {
+    setKindFilter('')
+    setStatusFilter('')
   }
 
   const columns: Column<any>[] = [
     {
       key: 'name',
       header: t('collections.dashboard.content.item'),
-      sortable: true,
-      value: (row) => row.name || '',
       render: (row) => {
-        const resourceUuid = row.resource_uuid || row.course_uuid
         const isPodcast = row.resource_type === 'podcast'
         return (
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-12 h-8 rounded-md bg-gray-100 overflow-hidden shrink-0">
-              {row.thumbnail_image ? (
-                <img
-                  src={
-                    isPodcast
-                      ? getPodcastThumbnailMediaDirectory(
-                          org?.org_uuid,
-                          resourceUuid,
-                          row.thumbnail_image
-                        )
-                      : getCourseThumbnailMediaDirectory(
-                          org?.org_uuid,
-                          resourceUuid,
-                          row.thumbnail_image
-                        )
-                  }
-                  alt={row.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  {isPodcast ? (
-                    <Mic size={14} className="text-gray-300" />
-                  ) : (
-                    <BookCopy size={14} className="text-gray-300" />
-                  )}
-                </div>
-              )}
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="font-medium text-gray-900 truncate">{row.name}</span>
-                {!row.published && (
-                  <span className="text-[10px] font-semibold uppercase tracking-wide text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">
-                    {t('collections.dashboard.content.draft')}
-                  </span>
-                )}
-              </div>
-            </div>
+            {isPodcast ? (
+              <Headphones size={16} className="shrink-0 text-gray-400" />
+            ) : (
+              <BookOpen size={16} className="shrink-0 text-gray-400" />
+            )}
+            <span className="font-medium text-gray-900 truncate">{row.name}</span>
+            {!row.published && (
+              <span className="text-[11px] text-gray-400 shrink-0">
+                {t('collections.dashboard.content.draft')}
+              </span>
+            )}
           </div>
         )
       },
     },
     {
-      key: 'access',
-      header: t('collections.dashboard.content.access'),
-      width: '120px',
+      key: 'type',
+      header: t('collections.dashboard.content.type'),
+      width: '130px',
       render: (row) => (
-        <span className="text-[13px] text-gray-600">{accessLabel(row.access_type, t)}</span>
+        <span className="inline-flex items-center gap-1.5 text-gray-600">
+          <span className="w-2.5 h-2.5 rounded bg-gray-300" />
+          {row.resource_type === 'podcast'
+            ? t('collections.dashboard.content.podcast')
+            : t('collections.dashboard.content.course')}
+        </span>
       ),
     },
     {
       key: 'price',
       header: t('collections.dashboard.content.price'),
-      width: '120px',
+      width: '140px',
+      align: 'right',
       render: (row) =>
         row.access_type === 'paid' && row.price_amount ? (
-          <span className="text-[13px] text-gray-600">
-            {row.price_amount.toLocaleString()} {row.price_currency}
+          <span className="text-[13px] text-gray-600 tabular-nums">
+            {row.price_amount.toLocaleString()}{' '}
+            <span className="text-[11px] font-medium text-gray-400">
+              {row.price_currency}
+            </span>
           </span>
         ) : (
           <span className="text-[13px] text-gray-400">—</span>
         ),
     },
     {
-      key: 'lessons',
-      header: t('collections.dashboard.content.lessons'),
-      width: '100px',
-      align: 'right',
-      sortable: true,
-      value: (row) => row.lessons ?? 0,
-      render: (row) => (
-        <span className="text-[13px] text-gray-600">
-          {row.lessons ?? 0}
-          {row.resource_type === 'podcast' && (
-            <span className="text-[11px] text-gray-400 ml-1">
-              {t('collections.dashboard.content.episodes')}
-            </span>
-          )}
-        </span>
-      ),
-    },
-    {
       key: 'added',
-      header: t('collections.dashboard.content.added'),
+      header: isSearching
+        ? t('collections.dashboard.content.created')
+        : t('collections.dashboard.content.added'),
       width: '140px',
       align: 'right',
       render: (row) => (
@@ -316,7 +274,10 @@ function EditCollectionContent({ collection, orgslug, onUpdated }: EditCollectio
         </span>
       ),
     },
-    {
+  ]
+
+  if (!isSearching) {
+    columns.push({
       key: 'actions',
       header: '',
       width: '60px',
@@ -327,13 +288,9 @@ function EditCollectionContent({ collection, orgslug, onUpdated }: EditCollectio
             <DropdownMenuTrigger asChild>
               <button
                 className="p-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
-                aria-label={t('collections.dashboard.actions')}
+                aria-label={t('common.view_details')}
               >
-                {busyUuid === (row.resource_uuid || row.course_uuid) ? (
-                  <Loader2 size={16} className="animate-spin" />
-                ) : (
-                  <MoreHorizontal size={16} />
-                )}
+                <MoreHorizontal size={16} />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
@@ -342,7 +299,7 @@ function EditCollectionContent({ collection, orgslug, onUpdated }: EditCollectio
               sideOffset={6}
             >
               <DropdownMenuItem
-                onClick={() => handleRemove(row)}
+                onClick={() => handleRemoveRow(row)}
                 className="gap-2 text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-red-50 focus:bg-red-50"
               >
                 <Trash2 size={14} className="text-red-500" />
@@ -354,24 +311,53 @@ function EditCollectionContent({ collection, orgslug, onUpdated }: EditCollectio
           </DropdownMenu>
         </span>
       ),
-    },
-  ]
+    })
+  }
 
-  const totalPages = Math.max(1, Math.ceil(courses.length / PAGE_SIZE))
+  const pagination = (
+    <div className="flex items-center justify-between">
+      <span className="text-xs text-gray-500">
+        {t('dashboard.users.active_users.pagination.showing', {
+          start: (page - 1) * ITEMS_PER_PAGE + 1,
+          end: Math.min(page * ITEMS_PER_PAGE, total),
+          total,
+        })}
+      </span>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => changePage(page - 1)}
+          disabled={page === 1}
+          className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+        >
+          <ChevronLeft className="w-4 h-4 text-gray-600" />
+        </button>
+        <span className="text-xs text-gray-600 font-medium min-w-[64px] text-center">
+          {t('dashboard.users.active_users.pagination.page', {
+            current: page,
+            total: Math.ceil(total / ITEMS_PER_PAGE),
+          })}
+        </span>
+        <button
+          onClick={() => changePage(page + 1)}
+          disabled={page * ITEMS_PER_PAGE >= total}
+          className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+        >
+          <ChevronRight className="w-4 h-4 text-gray-600" />
+        </button>
+      </div>
+    </div>
+  )
 
   return (
-    <div className="space-y-4">
-      {/* Toolbar */}
-      <div className="flex items-center gap-3">
+    <div>
+      {/* Toolbar — same pattern as the Users tab and course Access tab */}
+      <div className="flex items-center gap-3 mb-5">
         <div className="relative w-80">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
           <input
             type="text"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value)
-              setPage(1)
-            }}
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
             placeholder={t('collections.dashboard.content.search_placeholder')}
             className="w-full h-7 pl-8 pr-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
           />
@@ -379,184 +365,155 @@ function EditCollectionContent({ collection, orgslug, onUpdated }: EditCollectio
 
         <div className="flex-1" />
 
-        <Button
-          variant="primary"
-          size="small"
-          className="gap-x-1.5"
-          onClick={() => {
-            setPickerSearch('')
-            setIsPickerOpen(true)
-          }}
+        <button
+          onClick={handleBulkAction}
+          disabled={isBulkWorking}
+          className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white border-gray-200 hover:bg-gray-50 disabled:opacity-50 ${
+            isSearching ? 'text-gray-600' : 'text-red-600'
+          } ${selectedIds.size === 0 ? 'invisible pointer-events-none' : ''}`}
         >
-          <Plus size={14} />
-          {t('collections.dashboard.content.add_item')}
-        </Button>
+          {isBulkWorking ? (
+            <Loader2 size={14} className="animate-spin" />
+          ) : isSearching ? (
+            <Plus size={14} />
+          ) : (
+            <Trash2 size={14} />
+          )}
+          {isSearching
+            ? t('collections.dashboard.content.bulk_add', {
+                count: selectedIds.size,
+              })
+            : t('collections.dashboard.content.bulk_remove', {
+                count: selectedIds.size,
+              })}
+        </button>
+
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger asChild>
+            <IconButton
+              size="small"
+              variant="transparent"
+              className="bg-white hover:bg-gray-50 shadow-borders-base relative"
+              aria-label={t('collections.dashboard.content.filter')}
+            >
+              <ConceptIcon.filter size={14} />
+              {hasActiveFilters && (
+                <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-indigo-500" />
+              )}
+            </IconButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="end"
+            className="min-w-[190px] rounded-lg border border-gray-200 bg-white p-1 shadow-md"
+            sideOffset={6}
+          >
+            <div className="px-2.5 pt-1.5 pb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+              {t('collections.dashboard.content.filters.type')}
+            </div>
+            {[
+              { value: '', label: t('collections.dashboard.content.filters.all_types') },
+              { value: 'course', label: t('collections.dashboard.content.course') },
+              { value: 'podcast', label: t('collections.dashboard.content.podcast') },
+            ].map((option) => (
+              <DropdownMenuItem
+                key={`kind-${option.value}`}
+                onClick={() => setKindFilter(option.value as '' | 'course' | 'podcast')}
+                className="justify-between text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
+              >
+                <span className="text-gray-700 text-xs">{option.label}</span>
+                {kindFilter === option.value && <Check size={12} className="text-gray-500" />}
+              </DropdownMenuItem>
+            ))}
+
+            <DropdownMenuSeparator />
+
+            <div className="px-2.5 pt-1.5 pb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+              {t('collections.dashboard.content.filters.status')}
+            </div>
+            {[
+              { value: '', label: t('collections.dashboard.content.filters.all_statuses') },
+              { value: 'published', label: t('collections.dashboard.content.filters.published') },
+              { value: 'draft', label: t('collections.dashboard.content.filters.draft') },
+            ].map((option) => (
+              <DropdownMenuItem
+                key={`status-${option.value}`}
+                onClick={() =>
+                  setStatusFilter(option.value as '' | 'published' | 'draft')
+                }
+                className="justify-between text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
+              >
+                <span className="text-gray-700 text-xs">{option.label}</span>
+                {statusFilter === option.value && (
+                  <Check size={12} className="text-gray-500" />
+                )}
+              </DropdownMenuItem>
+            ))}
+
+            {hasActiveFilters && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={clearFilters}
+                  className="text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
+                >
+                  <span className="text-xs font-medium text-red-600">
+                    {t('collections.dashboard.content.filters.clear')}
+                  </span>
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
-      {isLoading ? (
+      {error ? (
+        <TableCard>
+          <EmptyState
+            icon={Search}
+            title={t('collections.dashboard.content.load_error')}
+          />
+        </TableCard>
+      ) : isInitialLoading ? (
         <TableCard>
           <div className="py-16 flex justify-center">
             <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
           </div>
         </TableCard>
-      ) : courses.length === 0 ? (
+      ) : rows.length === 0 ? (
         <TableCard>
           <EmptyState
-            icon={BookCopy}
+            icon={isSearching ? Search : BookOpen}
             title={
-              debouncedSearch
+              isSearching
                 ? t('collections.dashboard.content.no_results')
                 : t('collections.dashboard.content.no_courses')
             }
             description={
-              debouncedSearch ? undefined : t('collections.dashboard.content.no_courses_description')
-            }
-            action={
-              !debouncedSearch ? (
-                <Button
-                  variant="secondary"
-                  size="small"
-                  className="gap-x-1.5"
-                  onClick={() => {
-                    setPickerSearch('')
-                    setIsPickerOpen(true)
-                  }}
-                >
-                  <Plus size={14} />
-                  {t('collections.dashboard.content.add_item')}
-                </Button>
-              ) : undefined
+              isSearching
+                ? undefined
+                : t('collections.dashboard.content.linked_empty_description')
             }
           />
         </TableCard>
       ) : (
-        <TableCard
-          footer={
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-500">
-                {t('collections.dashboard.content.item_count', { count: courses.length })}
-              </span>
-              {totalPages > 1 && (
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setPage(Math.max(1, page - 1))}
-                    disabled={page === 1}
-                    className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                  >
-                    <ChevronLeft className="w-4 h-4 text-gray-600" />
-                  </button>
-                  <span className="text-xs text-gray-600 font-medium min-w-[64px] text-center">
-                    {page} / {totalPages}
-                  </span>
-                  <button
-                    onClick={() => setPage(Math.min(totalPages, page + 1))}
-                    disabled={page >= totalPages}
-                    className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                  >
-                    <ChevronRight className="w-4 h-4 text-gray-600" />
-                  </button>
-                </div>
-              )}
-            </div>
-          }
-        >
+        <TableCard footer={total > ITEMS_PER_PAGE ? pagination : undefined}>
           <div className="relative">
-            {isValidating && (
+            {isPageTransitioning && (
               <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center">
                 <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
               </div>
             )}
-            <DataTable columns={columns} rows={courses} />
+            <DataTable
+              columns={columns}
+              rows={rows}
+              selectable
+              getRowId={(row) => row.resource_uuid}
+              selectedIds={selectedIds}
+              onSelectionChange={setSelectedIds}
+            />
           </div>
         </TableCard>
       )}
-
-      {/* Add course picker */}
-      <Modal
-        isDialogOpen={isPickerOpen}
-        onOpenChange={setIsPickerOpen}
-        minHeight="no-min"
-        dialogTitle={t('collections.dashboard.content.add_item')}
-        dialogDescription={t('collections.dashboard.content.picker_description')}
-        dialogContent={
-          <div className="space-y-3">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-              <input
-                type="text"
-                value={pickerSearch}
-                onChange={(e) => setPickerSearch(e.target.value)}
-                placeholder={t('collections.dashboard.content.search_placeholder')}
-                className="w-full h-8 pl-8 pr-2 text-sm text-gray-700 border border-gray-300 rounded-lg placeholder:text-gray-500 focus:outline-none"
-              />
-            </div>
-
-            <div className="max-h-[380px] overflow-y-auto divide-y divide-gray-100 border border-gray-200 rounded-lg">
-              {availableResources.length === 0 ? (
-                <p className="text-sm text-gray-500 p-4 text-center">
-                  {t('collections.dashboard.content.no_available')}
-                </p>
-              ) : (
-                availableResources.map((resource: any) => (
-                  <div key={resource.uuid} className="flex items-center gap-3 p-3">
-                    <div className="w-12 h-8 rounded-md bg-gray-100 overflow-hidden shrink-0">
-                      {resource.thumbnail_image ? (
-                        <img
-                          src={
-                            resource.kind === 'podcast'
-                              ? getPodcastThumbnailMediaDirectory(
-                                  org?.org_uuid,
-                                  resource.uuid,
-                                  resource.thumbnail_image
-                                )
-                              : getCourseThumbnailMediaDirectory(
-                                  org?.org_uuid,
-                                  resource.uuid,
-                                  resource.thumbnail_image
-                                )
-                          }
-                          alt={resource.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          {resource.kind === 'podcast' ? (
-                            <Mic size={14} className="text-gray-300" />
-                          ) : (
-                            <BookCopy size={14} className="text-gray-300" />
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {resource.name}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {accessLabel(resource.access_type, t)}
-                        {!resource.published && ` · ${t('collections.dashboard.content.draft')}`}
-                      </p>
-                    </div>
-                    <Button
-                      variant="secondary"
-                      size="small"
-                      onClick={() => handleAdd(resource)}
-                      disabled={busyUuid === resource.uuid}
-                    >
-                      {busyUuid === resource.uuid ? (
-                        <Loader2 size={14} className="animate-spin" />
-                      ) : (
-                        <Plus size={14} />
-                      )}
-                      {t('collections.dashboard.content.add')}
-                    </Button>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        }
-      />
     </div>
   )
 }

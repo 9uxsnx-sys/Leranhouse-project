@@ -2,8 +2,8 @@
 
 > Turn the existing (but dormant) **Collections** resource into a first-class, course-grade product: full media, three access modes, a dashboard editor, and a purchase flow that mirrors buying each course individually.
 
-**Status:** complete — Phase 0 ✅ (paid lock verified), Phase 1 ✅ (schema, migration, RBAC), Phase 2 ✅ (CRUD, membership, validation), Phase 3 ✅ (media), Phase 4 ✅ (checkout, snapshot, fan-out), Phase 5 ✅ (dashboard listing + editor), Phase 6 ✅ (learner listing, detail, success branch, nav; buy → all courses in Progress), Phase 7 ✅ (SEO tab, Offers row type, podcast members, Payment Groups removal).
-**Last updated:** 2026-10-19
+**Status:** complete — Phase 0 ✅ (paid lock verified), Phase 1 ✅ (schema, migration, RBAC), Phase 2 ✅ (CRUD, membership, validation), Phase 3 ✅ (media), Phase 4 ✅ (checkout, snapshot, fan-out), Phase 5 ✅ (dashboard listing + editor), Phase 6 ✅ (learner listing, detail, success branch, nav; buy → all courses in Progress), Phase 7 ✅ (SEO tab, Offers row type, podcast members, Payment Groups removal), Phase 8 ✅ (Content/Access parity with courses, collection inventory roster, claim flow).
+**Last updated:** 2026-10-20
 **Scope:** desktop/web only. No mobile action bar. No refunds.
 
 ---
@@ -193,13 +193,15 @@ Global rules:
 - A course that belongs to **any** collection cannot be switched to `users_only` (409 listing the collection names). This prevents bundles becoming unsellable after the fact.
 - `public` is kept in sync with `access_type` for legacy listing queries (`public = access_type == public`).
 
-**Dashboard Access tab**
+**Dashboard Access tab** — byte-for-byte parity with the course Access tab:
 
 | Mode | Panel |
 |---|---|
-| Public | notice only — no user table (everyone has access) |
-| Private | link/unlink UserGroups (`/usergroups/resource/{collection_uuid}`) |
-| Paid | price field + entitlement roster (`/payments/{org_id}/entitlements?resource_uuid=collection_…`) with manual add/remove |
+| Public | learner inventory roster (`collectionuser`): search → available members → select → **Add N**; browsing → select → **Remove N**; row menu → Details / Delete |
+| Private | linked UserGroups (`/usergroups/resource/{collection_uuid}`) with Members/Added columns, selectable bulk link/unlink, same search semantics as courses |
+| Paid | entitlement roster (`/payments/{org_id}/entitlements?resource_uuid=collection_…`) with selectable bulk grant/revoke and the same Details panel |
+
+The mode is a single cycling button (Public → Private → Paid). Paid is skipped with a toast when `price_amount <= 0`; the price is edited **only** in Payments → Offers. Publish is an independent toolbar button.
 
 ---
 
@@ -254,7 +256,7 @@ Same shell as the course editor: title row, `PageTabs variant="pill"`, `max-w-7x
 | Tab | Content |
 |---|---|
 | **General** | name, description, about, learnings editor, tags, cover + banner media section, publish toggle, preview link |
-| **Content** | `SectionCard bleed` + `DataTable`: Course (thumb + name + Draft tag), Access, Price, Lessons, Added, ⋯ → Remove. Toolbar: search + **Add course** picker (excludes `users_only` and existing members). Footer: "N courses · M lessons". |
+| **Content** | `SectionCard bleed` + `DataTable`: Resource (type icon + name + Draft tag), Type, Price, Added. Browsing lists linked items; typing in search switches the same table to `filter=available`. Toolbar: search → bulk Add/Remove → filter menu (Type / Status). Footer: `Showing X–Y of Z`, 10 per page. Row menu → Remove. |
 | **Access** | three-mode cycle as described in §7 |
 
 ---
@@ -384,6 +386,13 @@ Minor: `/trail` sorts by `creation_date`; six runs share one timestamp. Add a na
 - **Purchase fan-out**: `price_snapshot.resources` snapshots every member; webhooks grant per-resource entitlements and only course members get a `TrailRun`.
 - **Payment Groups removed**: tab, page, service and locale keys deleted; offers use Collections instead.
 
+### Phase 8 — Delivered
+
+- **Content tab rebuilt as a course-style table**: single `DataTable` with Resource / Type / Price / Added, server-side `GET /collections/{uuid}/members?filter=linked|available&search=&kind=&status=&page=&limit=` returning `{ items, total }`, row selection with bulk **Add N / Remove N**, Type + Status filter menu, and `Showing X–Y of Z` pagination. The old "Add item" modal picker was removed.
+- **Access tab is a 1:1 copy of the course Access tab**: cycling mode button (paid skipped when there is no price), publish toggle, selectable user/group tables, bulk actions, row Details/Delete menus, course empty states and copy. The price editor and `pendingPaid` flow were deleted — price is edited only in Payments → Offers.
+- **Collection inventory roster**: new `collectionuser` table (migration `v5a6b7c8d9e0`) with `collection_id`/`user_id`/`org_id`, unique per learner+bundle. `GET/POST/DELETE /collections/{uuid}/access/users` mirror the course endpoints; `POST /collections/{uuid}/claim` is called by the learner's **Get access** button on public bundles (idempotent, org membership required). Removing a row drops the bundle from the learner's inventory.
+- **Paid/private unchanged upstream**: entitlements and UserGroups are already resource-generic, so only the UI needed parity work.
+
 ---
 
 ## 14. Testing strategy
@@ -396,6 +405,8 @@ Minor: `/trail` sorts by `creation_date`; six runs share one timestamp. Add a na
 - Webhook: fan-out count, idempotency, duplicate skip, snapshot authority.
 - Entitlements: `_resolve_resource` handles `collection_`.
 - RBAC: public/private/paid access decisions for `collection_`.
+- Access roster: linked/available listing, search, idempotent enroll/unenroll, non-member skip, claim idempotency (`test_collection_access_service.py`, `test_collections_router.py`).
+- Members table: `filter=linked|available`, `kind`/`status` filters and totals (`test_collections_service.py`).
 
 **Frontend**
 - `tsc --noEmit` must stay at the 25-line baseline.

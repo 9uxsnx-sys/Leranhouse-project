@@ -319,10 +319,19 @@ def _build_collection_reads(
         seen.add(key)
         courses_by_collection.setdefault(cc.collection_id, []).append(course)
 
+    member_counts = dict(
+        db_session.exec(
+            select(CollectionCourse.collection_id, func.count())
+            .where(CollectionCourse.collection_id.in_(collection_ids))  # type: ignore[attr-defined]
+            .group_by(CollectionCourse.collection_id)
+        ).all()
+    )
+
     return [
         CollectionRead(
             **c.model_dump(),
             courses=courses_by_collection.get(c.id, []),
+            member_count=int(member_counts.get(c.id, 0)),
         )
         for c in collections
     ]

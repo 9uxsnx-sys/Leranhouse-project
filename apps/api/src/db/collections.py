@@ -74,6 +74,7 @@ class CollectionUpdate(SQLModel):
 class CollectionRead(CollectionBase):
     id: int
     courses: list
+    member_count: int = 0
     collection_uuid: str
     creation_date: str
     update_date: str
@@ -95,3 +96,15 @@ class CollectionCourseRead(SQLModel):
     price_currency: str = "DZD"
     lessons: int = 0
     creation_date: str = ""
+
+
+class CollectionMembersPage(SQLModel):
+    """Paginated page used by the dashboard Content table.
+
+    ``filter=linked`` lists the members of the collection, while
+    ``filter=available`` lists the organization resources that can still be
+    added (search + add flow, mirroring the course Access tab).
+    """
+
+    items: list[CollectionCourseRead]
+    total: int

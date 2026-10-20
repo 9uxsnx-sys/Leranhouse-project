@@ -18,6 +18,8 @@ A published paid collection is intentionally browsable by non-buyers so the **Ge
 
 Members are polymorphic: each `collectioncourse` row stores a `resource_type` (`course` or `podcast`) and a `resource_uuid` (`course_…` / `podcast_…`). The legacy nullable `course_id` is still populated for course members.
 
+Learner inventory is tracked separately in `collectionuser` (one row per learner + bundle). A public bundle gains a row when the learner presses **Get access**, which is the collection equivalent of the `TrailRun` a public course creates when a learner starts it. Paid access keeps using payment entitlements and private access keeps using user groups.
+
 All endpoints are under the Collections router at `/api/v1/collections`. The legacy `public` boolean is kept in sync with `access_type` (`public=true` ⇔ `access_type=public`).
 
 `collection_uuid` values are prefixed (`collection_...`). Routes expect the full UUID.
@@ -39,7 +41,9 @@ All endpoints are under the Collections router at `/api/v1/collections`. The leg
 | Last member removed from a paid bundle | `422` |
 | Member course switched to `users_only` | `409` (course update) with collection names |
 | Member course unpublished while its bundle is published | `409` (course update) with collection names |
-| Deleting a bundle | Uploaded media directory is removed |
+| Deleting a bundle | Uploaded media directory is removed; `collectioncourse` and `collectionuser` rows cascade |
+| Claiming a public bundle | Requires org membership; idempotent |
+| Access roster endpoints | RBAC `collections` update permission (admins/maintainers) |
 
 ---
 
@@ -82,7 +86,7 @@ The organization always comes from the query string, never from the body.
 
 ### Response (200 OK)
 
-`CollectionRead`: every `CollectionBase` field (including `seo`) plus `id`, `collection_uuid`, `creation_date`, `update_date`, and `courses` (member resource objects).
+`CollectionRead`: every `CollectionBase` field (including `seo`) plus `id`, `collection_uuid`, `creation_date`, `update_date`, `member_count` (courses + podcasts), and `courses` (member course objects).
 
 ---
 
@@ -153,6 +157,93 @@ The path keeps its historical name, but the endpoint returns every member (cours
 ```
 
 `limit` is capped at 100. `lessons` is the number of activities across all chapters for a course, or the number of episodes for a podcast. Rows are sorted by `creation_date` descending.
+
+---
+
+## Paginated Collection Members (dashboard)
+
+```
+GET /api/v1/collections/{collection_uuid}/members
+    ?filter=linked|available
+    &search={q}
+    &kind=course|podcast
+    &status=published|draft
+    &page={page}&limit={limit}
+```
+
+Powers the dashboard **Content** tab. Returns a paginated envelope instead of a bare array:
+
+```json
+{
+  "items": [ /* CollectionCourseRead rows, same shape as above */ ],
+  "total": 12
+}
+```
+
+| Parameter | Behaviour |
+|---|---|
+| `filter=linked` (default) | Members already in the bundle |
+| `filter=available` | Org courses and podcasts that can still be added (skips members, `users_only` items, and drafts when the bundle is published) |
+| `search` | Case-insensitive match on name/description |
+| `kind` | `course` or `podcast`; omitted = both |
+| `status` | `published` or `draft`; omitted = both |
+| `page` / `limit` | Server-side pagination, `limit` capped at 100 |
+
+---
+
+## Access Roster
+
+Learner-inventory endpoints behind the dashboard **Access → Public** table. They mirror `/courses/{uuid}/access/users`.
+
+```
+GET /api/v1/collections/{collection_uuid}/access/users
+    ?filter=enrolled|available&search={q}&page={page}&limit={limit}
+```
+
+- `filter=enrolled` (default) → learners with a `collectionuser` row, newest first.
+- `filter=available` → org members without a row (the search picker).
+
+```json
+{
+  "items": [
+    {
+      "user": { "id": 2, "username": "learner", "...": "UserRead" },
+      "role": { "id": 4, "name": "User" },
+      "joined_at": "2026-09-01 10:00:00",
+      "enrolled_at": "2026-10-20 09:12:00",
+      "status": null
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "limit": 10
+}
+```
+
+```
+POST   /api/v1/collections/{collection_uuid}/access/users?user_ids=1,2
+DELETE /api/v1/collections/{collection_uuid}/access/users?user_ids=1,2
+```
+
+- `POST` adds org members to the inventory; non-members are returned in `skipped`.
+- `DELETE` removes the inventory rows. It does not touch paid entitlements or UserGroups.
+- Both return `{ "enrolled": [...], "already_enrolled": [...], "skipped": [...] }` / `{ "removed": [...], "not_enrolled": [...] }`.
+
+---
+
+## Claim Collection
+
+```
+POST /api/v1/collections/{collection_uuid}/claim
+```
+
+Called by the learner's **Get access** button on a public bundle. Adds a `collectionuser` row so the bundle enters the learner's inventory and appears in the Public roster. Idempotent:
+
+```json
+{ "claimed": true, "already_claimed": false }
+```
+
+Repeat calls return `{ "claimed": false, "already_claimed": true }`. Requires org membership (`403` otherwise) and read access to the bundle.
 
 ---
 
@@ -229,7 +320,7 @@ Partial update: only fields present in the JSON body are applied (used for name,
 DELETE /api/v1/collections/{collection_uuid}
 ```
 
-Deletes the collection, cascades its membership rows, and removes its uploaded media directory (`content/orgs/{org_uuid}/collections/{collection_uuid}`). Existing entitlements and `TrailRun` rows are intentionally left untouched, so learners who already bought the bundle keep access.
+Deletes the collection, cascades its membership (`collectioncourse`) and inventory (`collectionuser`) rows, and removes its uploaded media directory (`content/orgs/{org_uuid}/collections/{collection_uuid}`). Existing entitlements and `TrailRun` rows are intentionally left untouched, so learners who already bought the bundle keep access.
 
 ---
 
@@ -278,6 +369,10 @@ On `checkout.paid`, the webhook:
 - creates one `TrailRun` per member **course** so the Progress page lists them like individually bought courses. Podcasts are entitlement-only and do not create a `TrailRun`.
 
 Members added after the purchase are **not** included; members removed after the purchase remain owned.
+
+The price itself is edited in **Payments → Offers**, not in the collection Access tab. `POST /collections/{uuid}` with `price_amount` remains available for the Offers editor.
+
+For a **public** bundle there is no checkout: `POST /collections/{uuid}/claim` records the learner in `collectionuser` (inventory). Removing that row through the Access roster removes the bundle from their inventory.
 
 ---
 

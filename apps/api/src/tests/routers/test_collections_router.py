@@ -118,3 +118,49 @@ class TestUpdateCollection:
         assert response.status_code == 200
         body = response.json()
         assert body["name"] == "Updated Collection"
+
+
+class TestCollectionAccessUsers:
+    """Tests for the dashboard Access tab endpoints."""
+
+    async def test_list_available_and_enrolled(
+        self, client, org, collection, regular_user, bypass_rbac
+    ):
+        available = await client.get(
+            "/api/v1/collections/collection_test/access/users?filter=available"
+        )
+        assert available.status_code == 200
+        assert available.json()["total"] >= 1
+
+        enroll = await client.post(
+            f"/api/v1/collections/collection_test/access/users?user_ids={regular_user.id}"
+        )
+        assert enroll.status_code == 200
+        assert enroll.json()["enrolled"] == [regular_user.id]
+
+        enrolled = await client.get(
+            "/api/v1/collections/collection_test/access/users?filter=enrolled"
+        )
+        assert enrolled.status_code == 200
+        assert enrolled.json()["total"] == 1
+
+        remove = await client.delete(
+            f"/api/v1/collections/collection_test/access/users?user_ids={regular_user.id}"
+        )
+        assert remove.status_code == 200
+        assert remove.json()["removed"] == [regular_user.id]
+
+    async def test_claim_is_idempotent(self, client, org, collection, bypass_rbac):
+        first = await client.post("/api/v1/collections/collection_test/claim")
+        assert first.status_code == 200
+        assert first.json() == {"claimed": True, "already_claimed": False}
+
+        second = await client.post("/api/v1/collections/collection_test/claim")
+        assert second.status_code == 200
+        assert second.json() == {"claimed": False, "already_claimed": True}
+
+    async def test_access_users_not_found(self, client, bypass_rbac):
+        response = await client.get(
+            "/api/v1/collections/collection_missing/access/users?filter=enrolled"
+        )
+        assert response.status_code == 404

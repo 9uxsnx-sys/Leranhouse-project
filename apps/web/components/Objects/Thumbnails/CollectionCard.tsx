@@ -1,6 +1,7 @@
 'use client'
 import { useMemo } from 'react'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 import {
   getCollectionThumbnailMediaDirectory,
   getCourseThumbnailMediaDirectory,
@@ -15,28 +16,32 @@ export interface CollectionCardProps {
   href?: string
   public: boolean
   creation_date: string
+  /** Total members (courses + podcasts). Falls back to `courses.length`. */
+  memberCount?: number
   /** Collection's own cover. Falls back to the first member course's cover. */
   thumbnail_image?: string
   collection_uuid?: string
 }
 
-function formatDate(dateStr: string) {
-  if (!dateStr) return 'Recently'
+function formatRelativeDate(dateStr: string, locale: string) {
+  if (!dateStr) return ''
   try {
     const date = new Date(dateStr)
     const now = new Date()
     const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24))
-    if (diffDays < 1) return 'Today'
-    if (diffDays < 7) return `${diffDays}d ago`
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`
-    if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`
-    return `${Math.floor(diffDays / 365)}y ago`
+    const relative = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' })
+    if (diffDays < 1) return relative.format(0, 'day')
+    if (diffDays < 7) return relative.format(-diffDays, 'day')
+    if (diffDays < 30) return relative.format(-Math.floor(diffDays / 7), 'week')
+    if (diffDays < 365) return relative.format(-Math.floor(diffDays / 30), 'month')
+    return relative.format(-Math.floor(diffDays / 365), 'year')
   } catch {
-    return 'Recently'
+    return ''
   }
 }
 
-export function CollectionCard({ id, title, description, courses, org_uuid, href, thumbnail_image, collection_uuid, ...props }: CollectionCardProps) {
+export function CollectionCard({ id, title, description, courses, org_uuid, href, thumbnail_image, collection_uuid, memberCount, ...props }: CollectionCardProps) {
+  const { t, i18n } = useTranslation()
   const firstCourse = courses?.[0]
   const imageUrl = thumbnail_image && collection_uuid && org_uuid
     ? getCollectionThumbnailMediaDirectory(org_uuid, collection_uuid, thumbnail_image)
@@ -54,11 +59,17 @@ export function CollectionCard({ id, title, description, courses, org_uuid, href
     return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0]
   }, [courses])
 
+  const itemCount = memberCount ?? courses?.length ?? 0
+  const meta = [
+    t('collections.item_count', { count: itemCount }),
+    difficulty || t('collections.all_levels'),
+    formatRelativeDate(props.creation_date, i18n.language),
+  ].filter(Boolean)
+
   return (
     <Link
       href={href || `/collection/${id}`}
-      className="flex flex-col h-full bg-white border border-[#E7E7E7] rounded-[12px] overflow-hidden transition-all duration-200 hover:-translate-y-[1px] hover:border-[#DADADA] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
-      style={{ transformOrigin: 'top center' }}
+      className="flex flex-col h-full bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden"
     >
       {/* 16:9 Cover Image */}
       <div className="relative overflow-hidden bg-gray-100 shrink-0" style={{ aspectRatio: '16/9' }}>
@@ -83,9 +94,7 @@ export function CollectionCard({ id, title, description, courses, org_uuid, href
             {description || 'placeholder'}
           </p>
         </div>
-        <p className="text-[12px] text-gray-400 mt-1.5">
-          {courses?.length || 0} {courses?.length === 1 ? 'course' : 'courses'} &middot; {difficulty || 'All levels'} &middot; {formatDate(props.creation_date)}
-        </p>
+        <p className="text-[12px] text-gray-400 mt-1.5">{meta.join(' · ')}</p>
       </div>
     </Link>
   )

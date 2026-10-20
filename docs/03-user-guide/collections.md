@@ -22,7 +22,7 @@ Selecting a card opens the collection page:
 - `N items · M lessons · K episodes` plus an ownership badge when the learner owns the bundle
 - **What you'll learn** and **About this collection**
 - **What is included**: every member course and podcast as a standard card (podcasts show their episode count)
-- Sidebar with the bundle price and a **Get access** button
+- Sidebar with the bundle price and a **Get access** button. On a public bundle, pressing it claims the bundle: the learner is added to the dashboard Access roster and the bundle enters their inventory. On a paid bundle it starts checkout.
 
 ## Buying a Bundle
 
@@ -34,7 +34,7 @@ For a paid bundle, **Get access** starts a normal Chargily checkout for the coll
 - Courses that were already owned are not duplicated.
 - Courses and podcasts added to the bundle later are **not** granted retroactively; members removed later remain owned.
 
-There are no refunds on the platform; access is revoked manually from the dashboard when needed.
+There are no refunds on the platform; access is revoked manually from the dashboard when needed. In Public mode, removing a learner from the Access roster drops the bundle from their inventory.
 
 ## Managing Collections (Dashboard)
 
@@ -48,7 +48,12 @@ Name, description, about, "what you'll learn" items, cover image, banner, and ta
 
 ### Content
 
-A table of the items in the bundle with access, price, lesson or episode count and date added. Use **Add item** to open the picker (courses and podcasts) and the row menu to remove an item.
+A table of the bundle's items. By default it lists what is already inside; typing in the search field switches the same table to the organization's courses and podcasts that are **not** in the bundle yet.
+
+- Columns: Resource (type icon + name + Draft tag), Type, Price, Added.
+- Select rows, then use **Add N items** while searching or **Remove N items** while browsing. The row menu also removes a single item.
+- The filter button narrows by **Type** (Course / Podcast) and **Status** (Published / Draft). Filtering is server-side, so the totals stay correct.
+- Footer: `Showing X–Y of Z` with prev/page/next, 10 items per page.
 
 Rules enforced here:
 
@@ -58,17 +63,23 @@ Rules enforced here:
 
 ### Access
 
-Choose the same three modes as a course:
+Identical to the course Access tab.
 
-| Mode | Meaning |
-|---|---|
-| **Public** | Anyone can browse the bundle and its courses |
-| **Private** | Only members of linked UserGroups can see it |
-| **Paid** | Anyone can browse the bundle; buying it unlocks every member course |
+The toolbar is search → bulk action → mode button → publish toggle.
 
-For **Paid**, set a positive DZD price and grant or revoke access per user in the roster below the price card. For **Private**, link and unlink UserGroups. The publish toggle in the toolbar hides the bundle from learners while keeping it editable.
+- The mode button cycles **Public → Private → Paid**. Paid is skipped while the bundle has no price, with a toast pointing to **Payments → Offers**.
+- The price is set **only** in Payments → Offers. The Access tab never edits it.
+- Bulk actions appear only with a selection: **Add N** while searching, **Remove N** while browsing.
+- The row menu offers **Details** (profile, role, status, added/joined/last login) and **Delete**.
+- The publish toggle hides the bundle from learners while keeping it editable.
 
-Unpublishing a course that belongs to a published bundle is blocked, and a member course cannot be switched to private, so a live bundle always matches what it advertises.
+| Mode | Table | Actions |
+|---|---|---|
+| **Public** | Learners who claimed the bundle (inventory) | Select + add/remove. A learner is added when they press **Get access** on the public bundle page. |
+| **Private** | UserGroups linked to the bundle | Select + link/unlink |
+| **Paid** | Buyers / granted users (entitlement roster) | Select + grant/revoke |
+
+Removing a learner in Public mode drops the bundle from their inventory; removing an entitlement in Paid mode revokes their paid access. Unpublishing a course that belongs to a published bundle is blocked, and a member course cannot be switched to private, so a live bundle always matches what it advertises.
 
 ### SEO
 

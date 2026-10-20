@@ -10,6 +10,7 @@ from src.db.collections import (
     Collection,
     CollectionCourseRead,
     CollectionCreate,
+    CollectionMembersPage,
     CollectionRead,
     CollectionUpdate,
 )
@@ -97,7 +98,11 @@ def _build_read(
     courses = _member_courses(
         db_session, int(collection.id), int(collection.org_id), include_unpublished
     )
-    return CollectionRead(**collection.model_dump(), courses=courses)
+    return CollectionRead(
+        **collection.model_dump(),
+        courses=courses,
+        member_count=_member_count(db_session, collection),
+    )
 
 
 def _member_count(db_session: Session, collection: Collection) -> int:
@@ -437,24 +442,13 @@ async def delete_collection(
 ####################################################
 
 
-async def get_collection_courses(
-    request: Request,
-    collection_uuid: str,
-    current_user: PublicUser | AnonymousUser,
+def _list_member_rows(
     db_session: Session,
-    search: str = "",
-    page: int = 1,
-    limit: int = 20,
-) -> List[CollectionCourseRead]:
-    collection = _get_collection_or_404(db_session, collection_uuid)
-
-    await _check_catalog_read_access(request, db_session, current_user, collection)
-
-    acting_user_id = resolve_acting_user_id(current_user)
-    include_unpublished = _is_org_admin(
-        db_session, int(collection.org_id), acting_user_id
-    )
-
+    collection: Collection,
+    include_unpublished: bool,
+    query: str = "",
+) -> list[CollectionCourseRead]:
+    """Build every member row (courses + podcasts) with lesson/episode counts."""
     members = db_session.exec(
         select(CollectionCourse).where(
             CollectionCourse.collection_id == collection.id,
@@ -510,7 +504,6 @@ async def get_collection_courses(
         ).all()
     ) if podcast_ids else {}
 
-    query = search.strip().lower()
     result: list[CollectionCourseRead] = []
 
     for member in members:
@@ -574,8 +567,211 @@ async def get_collection_courses(
         )
 
     result.sort(key=lambda item: item.creation_date or "", reverse=True)
+    return result
+
+
+def _list_available_rows(
+    db_session: Session,
+    collection: Collection,
+    include_unpublished: bool,
+    query: str = "",
+) -> list[CollectionCourseRead]:
+    """Organization resources that can still join this collection.
+
+    Mirrors the dashboard picker rules: private items are never selectable and
+    a published bundle only accepts published items.
+    """
+    member_uuids = set(
+        db_session.exec(
+            select(CollectionCourse.resource_uuid).where(
+                CollectionCourse.collection_id == collection.id
+            )
+        ).all()
+    )
+
+    courses = list(
+        db_session.exec(
+            select(Course).where(Course.org_id == collection.org_id)
+        ).all()
+    )
+    podcasts = list(
+        db_session.exec(
+            select(Podcast).where(Podcast.org_id == collection.org_id)
+        ).all()
+    )
+
+    candidates: list[tuple[str, Course | Podcast]] = []
+    for course in courses:
+        if course.course_uuid in member_uuids:
+            continue
+        if course.access_type == AccessTypeEnum.USERS_ONLY:
+            continue
+        if collection.published and not course.published:
+            continue
+        if not include_unpublished and (
+            not course.published
+            or course.access_type not in (AccessTypeEnum.PUBLIC, AccessTypeEnum.PAID)
+        ):
+            continue
+        candidates.append(("course", course))
+    for podcast in podcasts:
+        if podcast.podcast_uuid in member_uuids:
+            continue
+        if podcast.access_type == AccessTypeEnum.USERS_ONLY:
+            continue
+        if collection.published and not podcast.published:
+            continue
+        if not include_unpublished and (
+            not podcast.published
+            or podcast.access_type not in (AccessTypeEnum.PUBLIC, AccessTypeEnum.PAID)
+        ):
+            continue
+        candidates.append(("podcast", podcast))
+
+    if query:
+        candidates = [
+            (kind, resource)
+            for kind, resource in candidates
+            if query in (resource.name or "").lower()
+            or query in (resource.description or "").lower()
+        ]
+
+    course_ids = [
+        int(resource.id)  # type: ignore[arg-type]
+        for kind, resource in candidates
+        if kind == "course"
+    ]
+    podcast_ids = [
+        int(resource.id)  # type: ignore[arg-type]
+        for kind, resource in candidates
+        if kind == "podcast"
+    ]
+
+    lesson_counts = dict(
+        db_session.exec(
+            select(Chapter.course_id, func.count(Activity.id))
+            .join(ChapterActivity, ChapterActivity.chapter_id == Chapter.id)
+            .join(Activity, Activity.id == ChapterActivity.activity_id)
+            .where(Chapter.course_id.in_(course_ids))  # type: ignore[attr-defined]
+            .group_by(Chapter.course_id)
+        ).all()
+    ) if course_ids else {}
+    episode_counts = dict(
+        db_session.exec(
+            select(PodcastEpisode.podcast_id, func.count(PodcastEpisode.id))
+            .where(PodcastEpisode.podcast_id.in_(podcast_ids))  # type: ignore[attr-defined]
+            .group_by(PodcastEpisode.podcast_id)
+        ).all()
+    ) if podcast_ids else {}
+
+    rows: list[CollectionCourseRead] = []
+    for kind, resource in candidates:
+        if kind == "podcast":
+            podcast = resource  # type: ignore[assignment]
+            rows.append(
+                CollectionCourseRead(
+                    id=int(podcast.id),  # type: ignore[arg-type]
+                    resource_type="podcast",
+                    resource_uuid=podcast.podcast_uuid,
+                    course_uuid=None,
+                    name=podcast.name,
+                    description=podcast.description,
+                    thumbnail_image=podcast.thumbnail_image,
+                    access_type=podcast.access_type,
+                    published=podcast.published,
+                    price_amount=podcast.price_amount,
+                    price_currency=podcast.price_currency,
+                    lessons=int(episode_counts.get(podcast.id, 0)),
+                    creation_date=podcast.creation_date,
+                )
+            )
+            continue
+        course = resource  # type: ignore[assignment]
+        rows.append(
+            CollectionCourseRead(
+                id=int(course.id),  # type: ignore[arg-type]
+                resource_type="course",
+                resource_uuid=course.course_uuid,
+                course_uuid=course.course_uuid,
+                name=course.name,
+                description=course.description,
+                thumbnail_image=course.thumbnail_image,
+                access_type=course.access_type,
+                published=course.published,
+                price_amount=course.price_amount,
+                price_currency=course.price_currency,
+                lessons=int(lesson_counts.get(course.id, 0)),
+                creation_date=course.creation_date,
+            )
+        )
+
+    rows.sort(key=lambda item: item.creation_date or "", reverse=True)
+    return rows
+
+
+async def get_collection_members_page(
+    request: Request,
+    collection_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+    filter_by: str = "linked",
+    search: str = "",
+    kind: str = "",
+    status: str = "",
+    page: int = 1,
+    limit: int = 10,
+) -> CollectionMembersPage:
+    collection = _get_collection_or_404(db_session, collection_uuid)
+
+    await _check_catalog_read_access(request, db_session, current_user, collection)
+
+    acting_user_id = resolve_acting_user_id(current_user)
+    include_unpublished = _is_org_admin(
+        db_session, int(collection.org_id), acting_user_id
+    )
+
+    query = search.strip().lower()
+    if filter_by == "available":
+        rows = _list_available_rows(
+            db_session, collection, include_unpublished, query
+        )
+    else:
+        rows = _list_member_rows(db_session, collection, include_unpublished, query)
+
+    if kind in ("course", "podcast"):
+        rows = [row for row in rows if row.resource_type == kind]
+    if status == "published":
+        rows = [row for row in rows if row.published]
+    elif status == "draft":
+        rows = [row for row in rows if not row.published]
+
     start = (page - 1) * limit
-    return result[start : start + limit]
+    return CollectionMembersPage(items=rows[start : start + limit], total=len(rows))
+
+
+async def get_collection_courses(
+    request: Request,
+    collection_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+    search: str = "",
+    page: int = 1,
+    limit: int = 20,
+) -> List[CollectionCourseRead]:
+    collection = _get_collection_or_404(db_session, collection_uuid)
+
+    await _check_catalog_read_access(request, db_session, current_user, collection)
+
+    acting_user_id = resolve_acting_user_id(current_user)
+    include_unpublished = _is_org_admin(
+        db_session, int(collection.org_id), acting_user_id
+    )
+
+    rows = _list_member_rows(
+        db_session, collection, include_unpublished, search.strip().lower()
+    )
+    start = (page - 1) * limit
+    return rows[start : start + limit]
 
 
 def _resource_type_from_uuid(resource_uuid: str) -> str:
@@ -830,6 +1026,15 @@ async def get_collections(
 
     batch_results = db_session.exec(batch_statement).all()
 
+    # Member counts include podcasts, so listing cards report every item.
+    member_counts = dict(
+        db_session.exec(
+            select(CollectionCourse.collection_id, func.count())
+            .where(CollectionCourse.collection_id.in_(collection_ids))  # type: ignore[attr-defined]
+            .group_by(CollectionCourse.collection_id)
+        ).all()
+    )
+
     # Group courses by collection_id, deduplicating
     collection_courses_map: dict[int, list[Course]] = {}
     seen: set[tuple[int, int]] = set()
@@ -842,7 +1047,11 @@ async def get_collections(
     collections_with_courses = []
     for collection in collections:
         courses = collection_courses_map.get(collection.id, [])
-        collection_read = CollectionRead(**collection.model_dump(), courses=courses)
+        collection_read = CollectionRead(
+            **collection.model_dump(),
+            courses=courses,
+            member_count=int(member_counts.get(collection.id, 0)),
+        )
         collections_with_courses.append(collection_read)
 
     return collections_with_courses

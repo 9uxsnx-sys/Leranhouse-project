@@ -121,20 +121,39 @@ export async function updateCollection(
   return await getResponseMetadata(result)
 }
 
-export async function getCollectionCourses(
+export async function linkUsersToCollection(
   collection_uuid: string,
-  access_token: string,
-  search = '',
-  page = 1,
-  limit = 20
+  user_ids: number[],
+  access_token: any
 ) {
   const result: any = await fetch(
-    `${getAPIUrl()}collections/${collection_uuid}/courses?search=${encodeURIComponent(
-      search
-    )}&page=${page}&limit=${limit}`,
-    RequestBodyWithAuthHeader('GET', null, null, access_token)
+    `${getAPIUrl()}collections/${collection_uuid}/access/users?user_ids=${user_ids.join(',')}`,
+    RequestBodyWithAuthHeader('POST', null, null, access_token)
   )
-  return await errorHandling(result)
+  return await getResponseMetadata(result)
+}
+
+export async function unlinkUsersFromCollection(
+  collection_uuid: string,
+  user_ids: number[],
+  access_token: any
+) {
+  const result: any = await fetch(
+    `${getAPIUrl()}collections/${collection_uuid}/access/users?user_ids=${user_ids.join(',')}`,
+    RequestBodyWithAuthHeader('DELETE', null, null, access_token)
+  )
+  return await getResponseMetadata(result)
+}
+
+export async function claimCollection(
+  collection_uuid: string,
+  access_token: any
+) {
+  const result: any = await fetch(
+    `${getAPIUrl()}collections/${collection_uuid}/claim`,
+    RequestBodyWithAuthHeader('POST', null, null, access_token)
+  )
+  return await getResponseMetadata(result)
 }
 
 export async function addCourseToCollection(

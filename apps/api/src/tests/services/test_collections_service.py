@@ -25,6 +25,7 @@ from src.services.courses.collections import (
     delete_collection,
     get_collection,
     get_collection_courses,
+    get_collection_members_page,
     get_collections,
     remove_course_from_collection,
     remove_resource_from_collection,
@@ -579,6 +580,55 @@ class TestCollectionMembership:
         )
 
         assert rows == []
+
+    @pytest.mark.asyncio
+    async def test_members_page_lists_linked_rows_with_total(
+        self, db, org, course, collection, admin_user, mock_request, bypass_rbac
+    ):
+        page = await get_collection_members_page(
+            mock_request, "collection_test", admin_user, db
+        )
+
+        assert page.total == 1
+        assert len(page.items) == 1
+        assert page.items[0].course_uuid == course.course_uuid
+
+    @pytest.mark.asyncio
+    async def test_members_page_available_excludes_members(
+        self, db, org, course, collection, admin_user, mock_request, bypass_rbac
+    ):
+        extra = _make_course(db, org, id=91, name="Addable Course")
+
+        page = await get_collection_members_page(
+            mock_request,
+            "collection_test",
+            admin_user,
+            db,
+            filter_by="available",
+        )
+
+        uuids = [row.resource_uuid for row in page.items]
+        assert extra.course_uuid in uuids
+        assert course.course_uuid not in uuids
+        assert page.total == len(page.items)
+
+    @pytest.mark.asyncio
+    async def test_members_page_available_search(
+        self, db, org, course, collection, admin_user, mock_request, bypass_rbac
+    ):
+        _make_course(db, org, id=92, name="Searchable Course")
+
+        page = await get_collection_members_page(
+            mock_request,
+            "collection_test",
+            admin_user,
+            db,
+            filter_by="available",
+            search="searchable",
+        )
+
+        assert page.total == 1
+        assert page.items[0].name == "Searchable Course"
 
     @pytest.mark.asyncio
     async def test_add_podcast_and_list_it_as_member(

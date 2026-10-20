@@ -33,6 +33,7 @@ import { Heading } from '@/components/ui/heading'
 import { Text } from '@/components/ui/text'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { createResourceCheckout } from '@services/payments/checkout'
+import { claimCollection } from '@services/courses/collections'
 import {
   getCollectionBannerMediaDirectory,
   getCollectionThumbnailMediaDirectory,
@@ -195,6 +196,15 @@ const CollectionClient = ({
     if (!collection?.collection_uuid || !org?.id) return
 
     if (!isPaid) {
+      // Claiming adds the bundle to the learner inventory, mirroring how a
+      // public course gains a TrailRun once a learner starts it.
+      if (accessToken && collection?.collection_uuid) {
+        try {
+          await claimCollection(collection.collection_uuid, accessToken)
+        } catch {
+          // Non-blocking: browsing the bundle still works without a claim.
+        }
+      }
       document.getElementById('included')?.scrollIntoView({ behavior: 'smooth' })
       return
     }

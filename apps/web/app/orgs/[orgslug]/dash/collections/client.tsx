@@ -1,5 +1,6 @@
 'use client'
-import { BookCopy, ChevronLeft, ChevronRight, Loader2, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { BookCopy, ChevronLeft, ChevronRight, ListChecks, Loader2, Trash2 } from 'lucide-react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useMemo, useState } from 'react'
 import useSWR from 'swr'
@@ -14,12 +15,14 @@ import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import { ActionRow, ActionRowActions, ActionRowSearch, ActionRowSpacer } from '@components/ui/action-row'
 import { Button } from '@components/ui/button'
 import { ConceptIcon } from '@components/ui/icons'
+import { IconButton } from '@components/ui/icon-button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@components/ui/dropdown-menu'
+import { CogSixTooth, EllipsisHorizontal, Trash } from '@components/Objects/Icons/MedusaIcons'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { createCollection, deleteCollection } from '@services/courses/collections'
 import { revalidateTags, swrFetcher } from '@services/utils/ts/requests'
@@ -55,21 +58,41 @@ function CollectionsHome(params: CollectionsHomeProps) {
   const collections: any[] = useMemo(() => data || [], [data])
 
   const [searchQuery, setSearchQuery] = useState('')
+  const [activeFilter, setActiveFilter] = useState<'all' | 'public' | 'users_only' | 'paid'>('all')
   const [currentPage, setCurrentPage] = useState(1)
   const [isCreating, setIsCreating] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [newName, setNewName] = useState('')
 
+  // Selection state
+  const [selectedCollections, setSelectedCollections] = useState<Set<string>>(new Set())
+  const [isSelectMode, setIsSelectMode] = useState(false)
+
+  // Reset to page 1 when search or filter changes
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery])
+  }, [searchQuery, activeFilter])
 
   const filtered = useMemo(() => {
-    if (!searchQuery.trim()) return collections
-    return collections.filter((collection: any) =>
-      searchMatchesAny([collection.name, collection.description], searchQuery)
-    )
-  }, [collections, searchQuery])
+    let list = collections
+
+    if (activeFilter !== 'all') {
+      list = list.filter((collection: any) => {
+        const accessType = String(
+          collection.access_type || (collection.public ? 'public' : 'users_only')
+        ).toLowerCase()
+        return accessType === activeFilter
+      })
+    }
+
+    if (searchQuery.trim()) {
+      list = list.filter((collection: any) =>
+        searchMatchesAny([collection.name, collection.description], searchQuery)
+      )
+    }
+
+    return list
+  }, [collections, searchQuery, activeFilter])
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
   const paginated = useMemo(() => {
@@ -77,8 +100,38 @@ function CollectionsHome(params: CollectionsHomeProps) {
     return filtered.slice(start, start + ITEMS_PER_PAGE)
   }, [filtered, currentPage])
 
+  // Pagination handlers
   const goToPage = (page: number) => {
-    if (page >= 1 && page <= totalPages) setCurrentPage(page)
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page)
+      setSelectedCollections(new Set())
+    }
+  }
+
+  const getVisiblePageNumbers = () => {
+    const pages: (number | string)[] = []
+    const maxVisible = 5
+
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i)
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) pages.push(i)
+        pages.push('...')
+        pages.push(totalPages)
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1)
+        pages.push('...')
+        for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i)
+      } else {
+        pages.push(1)
+        pages.push('...')
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i)
+        pages.push('...')
+        pages.push(totalPages)
+      }
+    }
+    return pages
   }
 
   const openCreate = () => {
@@ -132,6 +185,58 @@ function CollectionsHome(params: CollectionsHomeProps) {
     }
   }
 
+  // Toggle collection selection
+  const toggleCollectionSelection = (collectionUuid: string) => {
+    const newSelection = new Set(selectedCollections)
+    if (newSelection.has(collectionUuid)) {
+      newSelection.delete(collectionUuid)
+    } else {
+      newSelection.add(collectionUuid)
+    }
+    setSelectedCollections(newSelection)
+  }
+
+  // Clear selection
+  const clearSelection = () => {
+    setSelectedCollections(new Set())
+  }
+
+  // Bulk delete collections
+  const bulkDeleteCollections = async () => {
+    const toastId = toast.loading(
+      t('collections.select.deleting_collections', { count: selectedCollections.size })
+    )
+    let successCount = 0
+    let errorCount = 0
+
+    for (const collectionUuid of selectedCollections) {
+      try {
+        await deleteCollection(collectionUuid, access_token)
+        successCount++
+      } catch {
+        errorCount++
+      }
+    }
+
+    toast.dismiss(toastId)
+    if (errorCount === 0) {
+      toast.success(
+        t('collections.select.collections_deleted_success', { count: successCount })
+      )
+    } else {
+      toast.error(
+        t('collections.select.collections_deleted_partial', {
+          success: successCount,
+          error: errorCount,
+        })
+      )
+    }
+
+    clearSelection()
+    await mutate()
+    await revalidateTags(['collections'], params.orgslug)
+  }
+
   if (isLoading) {
     return (
       <div className="pt-8 px-6 flex justify-center py-24">
@@ -171,23 +276,112 @@ function CollectionsHome(params: CollectionsHomeProps) {
 
           <ActionRowSpacer />
 
+          {/* +New Collection Button (opens create modal) */}
+          <Button
+            variant="primary"
+            size="small"
+            className="gap-x-1.5"
+            onClick={openCreate}
+          >
+            <ConceptIcon.add size={14} />
+            {t('collections.dashboard.new_collection')}
+          </Button>
+
+          {/* Select Toggle + bulk actions */}
           <ActionRowActions>
             <Button
-              variant="primary"
+              variant="secondary"
               size="small"
               className="gap-x-1.5"
-              onClick={openCreate}
+              onClick={() => {
+                setIsSelectMode((prev) => !prev)
+                if (isSelectMode) clearSelection()
+              }}
             >
-              <ConceptIcon.add size={14} />
-              {t('collections.dashboard.new_collection')}
+              <ListChecks size={14} />
+              <span>
+                {isSelectMode ? t('cancel') : t('collections.select.select_collections')}
+              </span>
             </Button>
+
+            {selectedCollections.size > 0 && (
+              <ConfirmationModal
+                confirmationButtonText={t('collections.select.delete_selected')}
+                confirmationMessage={t('collections.select.delete_selected_confirm', {
+                  count: selectedCollections.size,
+                })}
+                dialogTitle={t('collections.select.delete_collections_title')}
+                dialogTrigger={
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    className="gap-x-1.5 text-red-600 border-red-200 hover:bg-red-50"
+                  >
+                    <Trash2 size={14} />
+                    <span>{t('collections.select.delete_selected')}</span>
+                  </Button>
+                }
+                functionToExecute={bulkDeleteCollections}
+                status="warning"
+              />
+            )}
           </ActionRowActions>
+
+          {/* Filter — icon-only trigger + DropdownMenu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <IconButton
+                size="small"
+                variant="transparent"
+                className="bg-white hover:bg-gray-50 shadow-borders-base"
+                aria-label="Filter"
+              >
+                <ConceptIcon.filter size={14} />
+              </IconButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-white min-w-0 w-48">
+              <DropdownMenuItem onClick={() => setActiveFilter('all')} className="flex items-center justify-between">
+                <span>{t('collections.filter.all_collections')}</span>
+                {activeFilter === 'all' && <ConceptIcon.check size={12} className="text-gray-500" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setActiveFilter('public')} className="flex items-center justify-between">
+                <span>{t('collections.filter.public')}</span>
+                {activeFilter === 'public' && <ConceptIcon.check size={12} className="text-gray-500" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setActiveFilter('users_only')} className="flex items-center justify-between">
+                <span>{t('collections.filter.private')}</span>
+                {activeFilter === 'users_only' && <ConceptIcon.check size={12} className="text-gray-500" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setActiveFilter('paid')} className="flex items-center justify-between">
+                <span>{t('collections.filter.paid')}</span>
+                {activeFilter === 'paid' && <ConceptIcon.check size={12} className="text-gray-500" />}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </ActionRow>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 content-start">
         {paginated.map((collection: any) => (
           <div key={collection.collection_uuid} className="relative group">
+            {/* Selection checkbox - visible in select mode */}
+            {isSelectMode && (
+              <label className="absolute top-2 left-2 z-20 w-5 h-5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectedCollections.has(collection.collection_uuid)}
+                  onChange={() => toggleCollectionSelection(collection.collection_uuid)}
+                  onClick={(e) => e.stopPropagation()}
+                  className="sr-only peer"
+                />
+                <div className="w-full h-full rounded-md border border-gray-300 bg-white peer-checked:bg-gray-500 peer-checked:border-gray-500 flex items-center justify-center transition-all duration-200 shadow-sm peer-hover:border-gray-400 peer-checked:shadow-md">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className="scale-0 peer-checked:scale-100 transition-transform duration-200">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
+              </label>
+            )}
+
             <CollectionCard
               id={removeCollectionPrefix(collection.collection_uuid)}
               collection_uuid={collection.collection_uuid}
@@ -198,6 +392,7 @@ function CollectionsHome(params: CollectionsHomeProps) {
               thumbnail_image={collection.thumbnail_image}
               public={collection.public}
               creation_date={collection.creation_date}
+              memberCount={collection.member_count}
               href={getUriWithOrg(
                 params.orgslug,
                 `/dash/collections/collection/${removeCollectionPrefix(
@@ -206,66 +401,30 @@ function CollectionsHome(params: CollectionsHomeProps) {
               )}
             />
 
-            <div className="absolute top-2 right-2 z-20">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    aria-label={t('collections.dashboard.actions')}
-                    className="p-1.5 rounded-md bg-white/90 backdrop-blur-sm text-gray-500 hover:text-gray-700 shadow-borders-base transition-colors"
-                  >
-                    <MoreHorizontal size={16} />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-44 bg-white">
-                  <DropdownMenuItem
-                    onClick={() =>
-                      router.push(
-                        getUriWithOrg(
-                          params.orgslug,
-                          `/dash/collections/collection/${removeCollectionPrefix(
-                            collection.collection_uuid
-                          )}/general`
-                        )
-                      )
-                    }
-                    className="gap-2 cursor-pointer"
-                  >
-                    <Pencil size={14} className="text-gray-400" />
-                    {t('collections.dashboard.edit')}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <ConfirmationModal
-                      confirmationMessage={t('collections.delete_collection_confirm')}
-                      confirmationButtonText={t('collections.delete_collection')}
-                      dialogTitle={t('collections.delete_collection_title', {
-                        name: collection.name,
-                      })}
-                      dialogTrigger={
-                        <button className="w-full text-left flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] font-medium text-red-600 hover:bg-red-50 transition-colors">
-                          <Trash2 size={14} />
-                          {t('collections.delete_collection')}
-                        </button>
-                      }
-                      functionToExecute={() => handleDelete(collection)}
-                      status="warning"
-                    />
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+            {/* Admin 3-dot menu overlay */}
+            <CollectionEditOptions
+              collection={collection}
+              orgSlug={params.orgslug}
+              deleteCollection={() => handleDelete(collection)}
+            />
           </div>
         ))}
 
-        {filtered.length === 0 && searchQuery && (
+        {/* Empty state — search or filter with no results */}
+        {filtered.length === 0 && (searchQuery || activeFilter !== 'all') && (
           <div className="col-span-full flex flex-col justify-center items-center py-16 px-4">
             <div className="p-4 bg-ui-bg-base rounded-full shadow-borders-base mb-4">
               <BookCopy className="w-8 h-8 text-ui-fg-muted" strokeWidth={1.5} />
             </div>
             <h2 className="text-xl font-semibold text-ui-fg-base mb-2">
-              {t('collections.dashboard.no_search_results')}
+              {searchQuery
+                ? t('collections.dashboard.no_search_results')
+                : t('collections.filter.empty')}
             </h2>
             <p className="txt-compact-small text-ui-fg-muted">
-              {t('collections.dashboard.try_different_search')}
+              {searchQuery
+                ? t('collections.dashboard.try_different_search')
+                : t('collections.filter.try_different')}
             </p>
           </div>
         )}
@@ -289,6 +448,7 @@ function CollectionsHome(params: CollectionsHomeProps) {
         )}
       </div>
 
+      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-1 pt-6 pb-8">
           <Button
@@ -302,18 +462,23 @@ function CollectionsHome(params: CollectionsHomeProps) {
           </Button>
 
           <div className="flex items-center gap-1 mx-2">
-            {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => goToPage(page)}
-                className={`w-7 h-7 txt-compact-small-plus rounded-md transition-colors ${
-                  currentPage === page
-                    ? 'bg-ui-bg-base shadow-borders-base text-ui-fg-base'
-                    : 'text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-base-hover'
-                }`}
-              >
-                {page}
-              </button>
+            {getVisiblePageNumbers().map((page, index) => (
+              <React.Fragment key={index}>
+                {page === '...' ? (
+                  <span className="px-2 py-1 txt-compact-small text-ui-fg-muted">...</span>
+                ) : (
+                  <button
+                    onClick={() => goToPage(page as number)}
+                    className={`w-7 h-7 txt-compact-small-plus rounded-md transition-colors ${
+                      currentPage === page
+                        ? 'bg-ui-bg-base shadow-borders-base text-ui-fg-base'
+                        : 'text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-base-hover'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                )}
+              </React.Fragment>
             ))}
           </div>
 
@@ -371,6 +536,77 @@ function CollectionsHome(params: CollectionsHomeProps) {
           </div>
         }
       />
+    </div>
+  )
+}
+
+const CollectionEditOptions = ({
+  collection,
+  orgSlug,
+  deleteCollection,
+}: {
+  collection: any
+  orgSlug: string
+  deleteCollection: () => Promise<void>
+}) => {
+  const { t } = useTranslation()
+  const [isOpen, setIsOpen] = React.useState(false)
+
+  const itemClass =
+    'w-full text-left flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] font-medium text-gray-700 hover:bg-gray-100 transition-colors'
+  const itemClassDanger =
+    'w-full text-left flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] font-medium text-red-600 hover:bg-red-50 transition-colors'
+
+  return (
+    <div
+      className={`absolute top-2 right-2 z-20 transition-opacity ${
+        !isOpen ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
+      }`}
+    >
+      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+        <DropdownMenuTrigger asChild>
+          <IconButton
+            variant="transparent"
+            size="small"
+            aria-label={t('collections.dashboard.actions')}
+            className="bg-white/90 backdrop-blur-sm"
+          >
+            <EllipsisHorizontal />
+          </IconButton>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-0 w-44">
+          <DropdownMenuItem asChild>
+            <Link
+              prefetch={false}
+              href={getUriWithOrg(
+                orgSlug,
+                `/dash/collections/collection/${removeCollectionPrefix(
+                  collection.collection_uuid
+                )}/general`
+              )}
+              className={itemClass}
+            >
+              <CogSixTooth /> {t('collections.dashboard.edit')}
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <ConfirmationModal
+              confirmationButtonText={t('collections.delete_collection')}
+              confirmationMessage={t('collections.delete_collection_confirm')}
+              dialogTitle={t('collections.delete_collection_title', {
+                name: collection.name,
+              })}
+              dialogTrigger={
+                <button className={itemClassDanger}>
+                  <Trash /> {t('collections.delete_collection')}
+                </button>
+              }
+              functionToExecute={deleteCollection}
+              status="warning"
+            />
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   )
 }

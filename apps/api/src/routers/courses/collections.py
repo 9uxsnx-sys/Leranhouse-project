@@ -1,9 +1,10 @@
-from typing import List
+from typing import List, Literal
 from fastapi import APIRouter, Depends, File, Form, Query, Request, UploadFile
 from src.core.events.database import get_db_session
 from src.db.collections import (
     CollectionCourseRead,
     CollectionCreate,
+    CollectionMembersPage,
     CollectionRead,
     CollectionUpdate,
 )
@@ -16,12 +17,19 @@ from src.services.courses.collection_media import (
     update_collection_banner,
     update_collection_thumbnail,
 )
+from src.services.courses.collection_access import (
+    bulk_enroll_collection_users,
+    bulk_unenroll_collection_users,
+    claim_collection,
+    list_collection_access_users,
+)
 from src.services.courses.collections import (
     add_course_to_collection,
     add_resource_to_collection,
     create_collection,
     get_collection,
     get_collection_courses,
+    get_collection_members_page,
     get_collections,
     remove_course_from_collection,
     remove_resource_from_collection,
@@ -134,6 +142,148 @@ async def api_get_collection_courses(
         search=search,
         page=page,
         limit=limit,
+    )
+
+
+@router.get(
+    "/{collection_uuid}/members",
+    response_model=CollectionMembersPage,
+    summary="Paginated collection members",
+    description=(
+        "Paginated members table used by the dashboard Content tab. "
+        "`filter=linked` lists current members; `filter=available` lists the "
+        "organization courses and podcasts that can still be added."
+    ),
+    responses={
+        200: {"description": "Page of members or addable resources."},
+        404: {"description": "Collection not found"},
+    },
+)
+async def api_get_collection_members(
+    request: Request,
+    collection_uuid: str,
+    filter_by: str = Query(default="linked", alias="filter"),
+    search: str = "",
+    kind: str = "",
+    status: str = "",
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=10, ge=1, le=100),
+    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+) -> CollectionMembersPage:
+    return await get_collection_members_page(
+        request,
+        collection_uuid,
+        current_user,
+        db_session,
+        filter_by=filter_by,
+        search=search,
+        kind=kind,
+        status=status,
+        page=page,
+        limit=limit,
+    )
+
+
+def _parse_user_ids(user_ids: str) -> list[int]:
+    ids: list[int] = []
+    for raw in user_ids.split(","):
+        raw = raw.strip()
+        if not raw:
+            continue
+        try:
+            ids.append(int(raw))
+        except ValueError:
+            continue
+    return ids
+
+
+@router.get(
+    "/{collection_uuid}/access/users",
+    summary="List collection access users",
+    description=(
+        "List learners who claimed a collection (`filter=enrolled`), or "
+        "organization members that are not listed yet (`filter=available`). "
+        "Supports search and pagination."
+    ),
+)
+async def api_list_collection_access_users(
+    request: Request,
+    collection_uuid: str,
+    filter: Literal["enrolled", "available"] = Query(default="enrolled"),
+    search: str = "",
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=10, ge=1, le=100),
+    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+):
+    return await list_collection_access_users(
+        request,
+        collection_uuid,
+        current_user,
+        db_session,
+        list_filter=filter,
+        search=search,
+        page=page,
+        limit=limit,
+    )
+
+
+@router.post(
+    "/{collection_uuid}/access/users",
+    summary="Link users to a collection",
+    description="Add organization members to the collection inventory.",
+)
+async def api_bulk_enroll_collection_users(
+    request: Request,
+    collection_uuid: str,
+    user_ids: str = Query(description="Comma-separated user ids"),
+    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+):
+    return await bulk_enroll_collection_users(
+        request,
+        collection_uuid,
+        _parse_user_ids(user_ids),
+        current_user,
+        db_session,
+    )
+
+
+@router.delete(
+    "/{collection_uuid}/access/users",
+    summary="Unlink users from a collection",
+    description="Remove users from the collection inventory.",
+)
+async def api_bulk_unenroll_collection_users(
+    request: Request,
+    collection_uuid: str,
+    user_ids: str = Query(description="Comma-separated user ids"),
+    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+):
+    return await bulk_unenroll_collection_users(
+        request,
+        collection_uuid,
+        _parse_user_ids(user_ids),
+        current_user,
+        db_session,
+    )
+
+
+@router.post(
+    "/{collection_uuid}/claim",
+    summary="Claim a collection",
+    description="Add the current learner to the collection inventory (idempotent).",
+)
+async def api_claim_collection(
+    request: Request,
+    collection_uuid: str,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+):
+    return await claim_collection(
+        request, collection_uuid, current_user, db_session
     )
 
 
