@@ -71,7 +71,7 @@ export default function CopilotBubble(props: CopilotBubbleProps) {
 }
 
 function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubbleProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const session = useLHSession() as any
   const org = useOrg() as any
   const accessToken = session?.data?.tokens?.access_token
@@ -281,14 +281,14 @@ function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubb
       {/* Floating panel */}
       {panelMounted && (
         <div
-          className="fixed bottom-[72px] right-4 z-[9998] flex flex-col bg-white dark:bg-neutral-900 rounded-2xl overflow-hidden nice-shadow"
+          className="fixed bottom-[72px] end-4 z-[9998] flex flex-col bg-white dark:bg-neutral-900 rounded-2xl overflow-hidden nice-shadow"
           style={{
             width: 'min(340px, calc(100vw - 24px))',
             height: 'min(480px, calc(100vh - 110px))',
             opacity: panelVisible ? 1 : 0,
             transform: panelVisible ? 'scale(1) translateY(0)' : 'scale(0.94) translateY(10px)',
             filter: panelVisible ? 'blur(0px)' : 'blur(6px)',
-            transformOrigin: 'bottom right',
+            transformOrigin: i18n.dir() === 'rtl' ? 'bottom left' : 'bottom right',
             transition: 'opacity 0.2s ease, transform 0.2s ease, filter 0.2s ease',
           }}
         >
@@ -504,7 +504,7 @@ function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubb
       {/* FAB */}
       <button
         onClick={() => onOpenChange(!open)}
-        className="fixed bottom-4 right-4 z-[9999] flex items-center justify-center rounded-full bg-violet-600 hover:bg-violet-700 text-white transition-all duration-200 hover:scale-105 active:scale-95 nice-shadow"
+        className="fixed bottom-4 end-4 z-[9999] flex items-center justify-center rounded-full bg-violet-600 hover:bg-violet-700 text-white transition-all duration-200 hover:scale-105 active:scale-95 nice-shadow"
         style={{ width: 44, height: 44 }}
         aria-label={t('copilot.open_copilot')}
       >

@@ -87,7 +87,8 @@
       "open_help_menu": "فتح قائمة المساعدة",
       "close_menu": "إغلاق القائمة",
       "open_menu": "فتح القائمة",
-      "breadcrumb": "مسار التنقل"
+      "breadcrumb": "مسار التنقل",
+      "clear_search": "مسح البحث"
     },
     "all_assignments": "جميع الواجبات",
     "recent": "الأخيرة",

@@ -87,7 +87,8 @@
       "open_help_menu": "Ouvrir le menu d'aide",
       "close_menu": "Fermer le menu",
       "open_menu": "Ouvrir le menu",
-      "breadcrumb": "Fil d'Ariane"
+      "breadcrumb": "Fil d'Ariane",
+      "clear_search": "Effacer la recherche"
     },
     "all_assignments": "Tous les devoirs",
     "recent": "Récent",

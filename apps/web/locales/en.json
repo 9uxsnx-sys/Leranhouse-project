@@ -90,7 +90,8 @@
                                 "open_help_menu":  "Open help menu",
                                 "close_menu":  "Close menu",
                                 "open_menu":  "Open menu",
-                                "breadcrumb":  "Breadcrumb"
+                                "breadcrumb":  "Breadcrumb",
+                                "clear_search":  "Clear search"
                             },
                    "all_assignments":  "All Assignments",
                    "recent":  "Recent",
