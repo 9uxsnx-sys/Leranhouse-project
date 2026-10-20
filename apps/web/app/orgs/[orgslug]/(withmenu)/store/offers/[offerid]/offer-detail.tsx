@@ -55,6 +55,7 @@ function getResourceUrl(orgslug: string, resource: Resource): string | null {
 }
 
 function ResourceCard({ resource, orgslug }: { resource: Resource; orgslug: string }) {
+  const { t } = useTranslation()
   const src = resource.thumbnail_image && resource.resource_type === 'course'
     ? getCourseThumbnailMediaDirectory(resource.org_uuid, resource.resource_uuid, resource.thumbnail_image)
     : null
@@ -79,7 +80,7 @@ function ResourceCard({ resource, orgslug }: { resource: Resource; orgslug: stri
         <div className="p-2">
           <span className="inline-flex items-center gap-1 text-xs font-semibold text-white bg-black/50 backdrop-blur-sm rounded-full px-2 py-0.5 capitalize">
             {resourceIcon(resource.resource_type, 10)}
-            {resource.resource_type}
+            {t(`store.resource_types.${resource.resource_type}`, { defaultValue: resource.resource_type })}
           </span>
         </div>
       </div>
@@ -100,7 +101,7 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
   const session = useLHSession() as any
   const token = session?.data?.tokens?.access_token ?? access_token
   const router = useRouter()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [loading, setLoading] = useState(false)
 
   useRegisterBreadcrumb([
@@ -113,9 +114,9 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
       <GeneralWrapperStyled>
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <AlertCircle size={32} className="text-gray-300 mb-3" />
-          <h2 className="font-bold text-gray-600 text-lg">Offer not found</h2>
-          <Link href={getUriWithOrg(orgslug, '/store')} className="mt-4 text-sm text-indigo-600 hover:underline">
-            ← Back to store
+          <h2 className="font-bold text-gray-600 text-lg">{t('store.offer.not_found')}</h2>
+          <Link href={getUriWithOrg(orgslug, '/store')} className="mt-4 inline-flex items-center gap-1.5 text-sm text-indigo-600 hover:underline">
+            <ArrowLeft size={14} className="rtl:rotate-180" /> {t('store.offer.back_to_store')}
           </Link>
         </div>
       </GeneralWrapperStyled>
@@ -141,10 +142,10 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
       if (url) {
         window.location.href = url
       } else {
-        toast.error('Could not start checkout. Please try again.')
+        toast.error(t('store.offer.checkout_failed'))
       }
     } catch {
-      toast.error('An error occurred. Please try again.')
+      toast.error(t('store.offer.error'))
     } finally {
       setLoading(false)
     }
@@ -157,7 +158,7 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
           href={getUriWithOrg(orgslug, '/store')}
           className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 transition-colors mb-7"
         >
-          <ArrowLeft size={14} /> Back to store
+          <ArrowLeft size={14} className="rtl:rotate-180" /> {t('store.offer.back_to_store')}
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -168,11 +169,11 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
               <div className="flex items-center gap-2 mb-2.5">
                 {isSubscription ? (
                   <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-700 bg-indigo-100 rounded-full px-3 py-1">
-                    <RefreshCcw size={11} /> Subscription
+                    <RefreshCcw size={11} /> {t('store.badge.subscription')}
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-600 bg-gray-100 rounded-full px-3 py-1">
-                    <SquareCheck size={11} /> One-time payment
+                    <SquareCheck size={11} /> {t('store.badge.one_time_payment')}
                   </span>
                 )}
               </div>
@@ -184,7 +185,7 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
             {resources.length > 0 && (
               <div>
                 <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-4">
-                  What&apos;s included · {resources.length} {resources.length === 1 ? 'resource' : 'resources'}
+                  {t('store.offer.whats_included')} · {t('store.offer.resource', { count: resources.length })}
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {resources.map((r) => (
@@ -197,7 +198,7 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
             {/* Benefits */}
             {benefits.length > 0 && (
               <div className="bg-white rounded-xl nice-shadow p-5">
-                <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3">Benefits</h2>
+                <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide mb-3">{t('store.offer.benefits')}</h2>
                 <ul className="space-y-2.5">
                   {benefits.map((b, i) => (
                     <li key={i} className="flex items-start gap-2.5 text-sm text-gray-700">
@@ -216,16 +217,20 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
               {/* Price */}
               <div className="mb-5">
                 <p className="text-xs text-gray-400 font-medium mb-1">
-                  {offer.price_type === 'customer_choice' ? 'Pay what you want (min.)' : isSubscription ? 'Subscription price' : 'One-time price'}
+                  {offer.price_type === 'customer_choice'
+                    ? t('store.offer.pay_what_you_want')
+                    : isSubscription
+                      ? t('store.offer.subscription_price')
+                      : t('store.offer.one_time_price')}
                 </p>
                 <div className={`text-4xl font-black ${isSubscription ? 'text-indigo-700' : 'text-gray-900'}`}>
-                  {new Intl.NumberFormat('en-US', {
+                  {new Intl.NumberFormat(i18n.language || 'en', {
                     style: 'currency',
                     currency: offer.currency,
                   }).format(offer.amount)}
                 </div>
                 {isSubscription && (
-                  <p className="text-sm text-indigo-400 font-medium mt-0.5">recurring</p>
+                  <p className="text-sm text-indigo-400 font-medium mt-0.5">{t('store.recurring')}</p>
                 )}
               </div>
 
@@ -240,22 +245,22 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
                 }`}
               >
                 {loading ? (
-                  <><Loader2 size={15} className="animate-spin" /> Processing…</>
+                  <><Loader2 size={15} className="animate-spin" /> {t('store.offer.processing')}</>
                 ) : (
-                  <>{isSubscription ? 'Subscribe now' : 'Get access'}</>
+                  <>{isSubscription ? t('store.offer.subscribe_now') : t('store.get_access')}</>
                 )}
               </button>
 
               {!token && (
                 <p className="text-xs text-center text-gray-400 mt-3">
-                  You&apos;ll be asked to sign in before checkout.
+                  {t('store.offer.sign_in_hint')}
                 </p>
               )}
 
               {/* Resource summary */}
               {resources.length > 0 && (
                 <div className="mt-5 pt-4 border-t border-gray-100">
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Included</p>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">{t('store.offer.included')}</p>
                   <div className="space-y-2">
                     {resources.map((r) => {
                       const src = r.thumbnail_image && r.resource_type === 'course'
@@ -283,9 +288,9 @@ export default function OfferDetailClient({ orgslug, orgId, offerUuid, offer, ac
 
               {/* Trust signals */}
               <div className="mt-5 pt-4 border-t border-gray-100 space-y-1.5">
-                <p className="text-xs text-gray-400 flex items-center gap-1.5"><ShoppingBag size={11} /> Secure checkout via Stripe</p>
-                {isSubscription && <p className="text-xs text-gray-400">✓ Cancel anytime</p>}
-                <p className="text-xs text-gray-400">✓ Instant access after payment</p>
+                <p className="text-xs text-gray-400 flex items-center gap-1.5"><ShoppingBag size={11} /> {t('store.offer.secure_checkout')}</p>
+                {isSubscription && <p className="text-xs text-gray-400">✓ {t('store.offer.cancel_anytime')}</p>}
+                <p className="text-xs text-gray-400">✓ {t('store.offer.instant_access')}</p>
               </div>
             </div>
           </div>

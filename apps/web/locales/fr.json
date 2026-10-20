@@ -815,7 +815,16 @@
       "no_discussions": "Pas encore de discussions",
       "start_first": "Lancez la première discussion"
     },
-    "search_communities": "Rechercher des communautés…"
+    "search_communities": "Rechercher des communautés…",
+    "empty_description": "Les communautés apparaîtront ici une fois créées",
+    "all_communities": "Toutes les communautés",
+    "newest": "Plus récentes",
+    "course_communities": "Communautés de cours",
+    "general": "Générales",
+    "results_one": "{{count}} résultat pour « {{query}} »",
+    "results_other": "{{count}} résultats pour « {{query}} »",
+    "filter_empty_title": "Aucune communauté ne correspond à ce filtre",
+    "try_different_filter": "Essayez un autre filtre"
   },
   "podcasts": {
     "podcasts": "Podcasts",
@@ -6559,5 +6568,65 @@
     "next": "Suivant",
     "previous": "Précédent",
     "showing_page": "Page {{current}} sur {{total}}"
+  },
+  "trail": {
+    "search_placeholder": "Rechercher des cours...",
+    "results_one": "{{count}} résultat pour « {{query}} »",
+    "results_other": "{{count}} résultats pour « {{query}} »",
+    "filter": "Filtrer",
+    "all": "Tous",
+    "in_progress": "En cours",
+    "completed": "Terminés",
+    "newest": "Plus récents",
+    "oldest": "Plus anciens",
+    "no_results": "Aucun résultat",
+    "try_different": "Essayez une autre recherche ou un autre filtre",
+    "previous": "Précédent",
+    "next": "Suivant"
+  },
+  "store": {
+    "title": "Boutique",
+    "subtitle": "Débloquez du contenu premium de {{org}}",
+    "empty_title": "Aucune offre disponible pour le moment",
+    "empty_description": "Revenez bientôt — les offres et abonnements apparaîtront ici dès qu'ils seront disponibles.",
+    "not_available_title": "Boutique indisponible",
+    "not_available_description": "Cette organisation n'a pas encore activé sa boutique.",
+    "offers_available_one": "{{count}} offre disponible",
+    "offers_available_other": "{{count}} offres disponibles",
+    "more_included": "+{{count}} autres inclus",
+    "min": "min.",
+    "recurring": "récurrent",
+    "subscribe": "S'abonner",
+    "get_access": "Accéder",
+    "badge": {
+      "subscription": "Abonnement",
+      "one_time": "Paiement unique",
+      "one_time_payment": "Paiement unique"
+    },
+    "resource_types": {
+      "course": "Cours",
+      "podcast": "Podcast",
+      "playground": "Playground"
+    },
+    "offer": {
+      "not_found": "Offre introuvable",
+      "back_to_store": "Retour à la boutique",
+      "checkout_failed": "Impossible de démarrer le paiement. Veuillez réessayer.",
+      "error": "Une erreur est survenue. Veuillez réessayer.",
+      "whats_included": "Ce qui est inclus",
+      "resource_one": "{{count}} ressource",
+      "resource_other": "{{count}} ressources",
+      "benefits": "Avantages",
+      "pay_what_you_want": "Payez ce que vous voulez (min.)",
+      "subscription_price": "Prix de l'abonnement",
+      "one_time_price": "Prix unique",
+      "processing": "Traitement…",
+      "subscribe_now": "S'abonner maintenant",
+      "sign_in_hint": "Vous devrez vous connecter avant le paiement.",
+      "included": "Inclus",
+      "secure_checkout": "Paiement sécurisé via Stripe",
+      "cancel_anytime": "Annulez à tout moment",
+      "instant_access": "Accès immédiat après paiement"
+    }
   }
 }

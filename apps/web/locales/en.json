@@ -682,6 +682,15 @@
                         "try_different_search":  "Try a different search term",
                         "no_communities":  "No communities yet",
                         "no_communities_description":  "Create a community to start discussions",
+                        "empty_description":  "Communities will appear here once they are created",
+                        "all_communities":  "All Communities",
+                        "newest":  "Newest",
+                        "course_communities":  "Course Communities",
+                        "general":  "General",
+                        "results_one":  "{{count}} result for “{{query}}”",
+                        "results_other":  "{{count}} results for “{{query}}”",
+                        "filter_empty_title":  "No communities match this filter",
+                        "try_different_filter":  "Try a different filter",
                         "public":  "Public",
                         "private":  "Private",
                         "discussions":  "discussions",
@@ -1065,7 +1074,7 @@
                                         "delete_multiple":  "Delete {{count}} items",
                                         "duplicate":  "Duplicate"
                                     },
-                   "pagination":  {
+                    "pagination":  {
                                       "previous":  "Previous",
                                       "next":  "Next",
                                       "page_of":  "Page {{current}} of {{total}}",
@@ -6486,6 +6495,66 @@
                                 "community_description":  "This course includes access to a dedicated community where you can discuss, ask questions, and learn together with fellow students."
                             }
                },
+    "trail":  {
+                  "search_placeholder":  "Search courses...",
+                  "results_one":  "{{count}} result for \"{{query}}\"",
+                  "results_other":  "{{count}} results for \"{{query}}\"",
+                  "filter":  "Filter",
+                  "all":  "All",
+                  "in_progress":  "In Progress",
+                  "completed":  "Completed",
+                  "newest":  "Newest",
+                  "oldest":  "Oldest",
+                  "no_results":  "No results found",
+                  "try_different":  "Try a different search or filter",
+                  "previous":  "Previous",
+                  "next":  "Next"
+              },
+    "store":  {
+                  "title":  "Store",
+                  "subtitle":  "Unlock premium content from {{org}}",
+                  "empty_title":  "No offers available yet",
+                  "empty_description":  "Check back soon — offers and subscriptions will appear here when they become available.",
+                  "not_available_title":  "Store not available",
+                  "not_available_description":  "This organization has not enabled their store yet.",
+                  "offers_available_one":  "{{count}} offer available",
+                  "offers_available_other":  "{{count}} offers available",
+                  "more_included":  "+{{count}} more included",
+                  "min":  "min.",
+                  "recurring":  "recurring",
+                  "subscribe":  "Subscribe",
+                  "get_access":  "Get access",
+                  "badge":  {
+                                "subscription":  "Subscription",
+                                "one_time":  "One-time",
+                                "one_time_payment":  "One-time payment"
+                            },
+                  "resource_types":  {
+                                         "course":  "Course",
+                                         "podcast":  "Podcast",
+                                         "playground":  "Playground"
+                                     },
+                  "offer":  {
+                                "not_found":  "Offer not found",
+                                "back_to_store":  "Back to store",
+                                "checkout_failed":  "Could not start checkout. Please try again.",
+                                "error":  "An error occurred. Please try again.",
+                                "whats_included":  "What\u0027s included",
+                                "resource_one":  "{{count}} resource",
+                                "resource_other":  "{{count}} resources",
+                                "benefits":  "Benefits",
+                                "pay_what_you_want":  "Pay what you want (min.)",
+                                "subscription_price":  "Subscription price",
+                                "one_time_price":  "One-time price",
+                                "processing":  "Processing…",
+                                "subscribe_now":  "Subscribe now",
+                                "sign_in_hint":  "You\u0027ll be asked to sign in before checkout.",
+                                "included":  "Included",
+                                "secure_checkout":  "Secure checkout via Stripe",
+                                "cancel_anytime":  "Cancel anytime",
+                                "instant_access":  "Instant access after payment"
+                            }
+              },
     "pagination":  {
                        "next":  "Next",
                        "previous":  "Previous",

@@ -41,12 +41,12 @@ function CommunitiesClient(props: CommunitiesClientProps) {
   // Filter label for display
   const filterLabel = useMemo(() => {
     switch (activeFilter) {
-      case 'all': return 'All Communities'
-      case 'newest': return 'Newest'
-      case 'course': return 'Course Communities'
-      case 'general': return 'General'
+      case 'all': return t('communities.all_communities')
+      case 'newest': return t('communities.newest')
+      case 'course': return t('communities.course_communities')
+      case 'general': return t('communities.general')
     }
-  }, [activeFilter])
+  }, [activeFilter, t])
 
   // Filter + search communities
   const filteredCommunities = useMemo(() => {
@@ -145,19 +145,19 @@ function CommunitiesClient(props: CommunitiesClientProps) {
           {/* Search + results count group (left side) */}
           <div className="flex items-center gap-3">
             <div className="relative w-80">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t('communities.search_communities') || 'Search communities...'}
-                className="w-full h-7 pl-8 pr-2 text-sm bg-white shadow-borders-base rounded-md placeholder:text-gray-400 focus:outline-none"
+                placeholder={t('communities.search_communities')}
+                className="w-full h-7 ps-8 pe-2 text-sm bg-white shadow-borders-base rounded-md placeholder:text-gray-400 focus:outline-none"
               />
             </div>
 
             {searchQuery && (
               <span className="txt-compact-xsmall text-ui-fg-muted whitespace-nowrap">
-                {filteredCommunities.length} result{filteredCommunities.length !== 1 ? 's' : ''} for &ldquo;{searchQuery}&rdquo;
+                {t('communities.results', { count: filteredCommunities.length, query: searchQuery })}
               </span>
             )}
           </div>
@@ -177,19 +177,19 @@ function CommunitiesClient(props: CommunitiesClientProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white min-w-0 w-40">
               <DropdownMenuItem onSelect={() => setActiveFilter('all')} className="flex items-center justify-between">
-                <span>All Communities</span>
+                <span>{t('communities.all_communities')}</span>
                 {activeFilter === 'all' && <CheckSquare size={12} className="text-gray-500" />}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setActiveFilter('newest')} className="flex items-center justify-between">
-                <span>Newest</span>
+                <span>{t('communities.newest')}</span>
                 {activeFilter === 'newest' && <CheckSquare size={12} className="text-gray-500" />}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setActiveFilter('course')} className="flex items-center justify-between">
-                <span>Course Communities</span>
+                <span>{t('communities.course_communities')}</span>
                 {activeFilter === 'course' && <CheckSquare size={12} className="text-gray-500" />}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setActiveFilter('general')} className="flex items-center justify-between">
-                <span>General</span>
+                <span>{t('communities.general')}</span>
                 {activeFilter === 'general' && <CheckSquare size={12} className="text-gray-500" />}
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -223,10 +223,10 @@ function CommunitiesClient(props: CommunitiesClientProps) {
                 <MessagesSquare className="w-8 h-8 text-ui-fg-muted" strokeWidth={1.5} />
               </div>
               <h2 className="text-xl font-semibold text-ui-fg-base mb-2">
-                No communities found
+                {t('communities.no_search_results')}
               </h2>
               <p className="txt-compact-small text-ui-fg-muted">
-                Try a different search term
+                {t('communities.try_different_search')}
               </p>
             </div>
           )}
@@ -238,10 +238,10 @@ function CommunitiesClient(props: CommunitiesClientProps) {
                 <MessagesSquare className="w-8 h-8 text-ui-fg-muted" strokeWidth={1.5} />
               </div>
               <h2 className="text-xl font-semibold text-ui-fg-base mb-2">
-                No {filterLabel.toLowerCase()} communities
+                {t('communities.filter_empty_title')}
               </h2>
               <p className="txt-compact-small text-ui-fg-muted">
-                Try a different filter
+                {t('communities.try_different_filter')}
               </p>
             </div>
           )}
@@ -253,10 +253,10 @@ function CommunitiesClient(props: CommunitiesClientProps) {
                 <Users className="w-8 h-8 text-ui-fg-muted" strokeWidth={1.5} />
               </div>
               <h1 className="text-xl font-semibold text-ui-fg-base mb-2">
-                No communities yet
+                {t('communities.no_communities')}
               </h1>
               <p className="txt-compact-small text-ui-fg-muted mb-6 text-center max-w-xs">
-                Communities will appear here once they are created
+                {t('communities.empty_description')}
               </p>
             </div>
           )}

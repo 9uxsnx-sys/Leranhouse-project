@@ -136,43 +136,43 @@ function Trail(params: any) {
           <div className="flex items-center gap-3 mb-8">
             <div className="flex items-center gap-3">
               <div className="relative w-80">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search courses..."
-                  className="w-full h-7 pl-8 pr-2 text-sm bg-white shadow-borders-base rounded-md placeholder:text-gray-400 focus:outline-none"
+                  placeholder={t('trail.search_placeholder')}
+                  className="w-full h-7 ps-8 pe-2 text-sm bg-white shadow-borders-base rounded-md placeholder:text-gray-400 focus:outline-none"
                 />
               </div>
               {searchQuery && (
                 <span className="txt-compact-xsmall text-ui-fg-muted whitespace-nowrap">
-                  {filteredRuns.length} result{filteredRuns.length !== 1 ? 's' : ''} for &quot;{searchQuery}&quot;
+                  {t('trail.results', { count: filteredRuns.length, query: searchQuery })}
                 </span>
               )}
             </div>
             <div className="flex-1" />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 focus-visible:ring-0 shadow-borders-base" aria-label="Filter">
+                <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 focus-visible:ring-0 shadow-borders-base" aria-label={t('trail.filter')}>
                   <SlidersHorizontal size={15} />
                 </IconButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-white min-w-0 w-32">
                 <DropdownMenuItem onSelect={() => setFilterStatus('all')}>
-                  {filterStatus === 'all' && <span className="text-indigo-600 mr-1.5">✓</span>}All
+                  {filterStatus === 'all' && <span className="text-indigo-600 mr-1.5">✓</span>}{t('trail.all')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setFilterStatus('in-progress')}>
-                  {filterStatus === 'in-progress' && <span className="text-indigo-600 mr-1.5">✓</span>}In Progress
+                  {filterStatus === 'in-progress' && <span className="text-indigo-600 mr-1.5">✓</span>}{t('trail.in_progress')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setFilterStatus('completed')}>
-                  {filterStatus === 'completed' && <span className="text-indigo-600 mr-1.5">✓</span>}Completed
+                  {filterStatus === 'completed' && <span className="text-indigo-600 mr-1.5">✓</span>}{t('trail.completed')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setSortOrder('newest')}>
-                  {sortOrder === 'newest' && <span className="text-indigo-600 mr-1.5">✓</span>}Newest
+                  {sortOrder === 'newest' && <span className="text-indigo-600 mr-1.5">✓</span>}{t('trail.newest')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setSortOrder('oldest')}>
-                  {sortOrder === 'oldest' && <span className="text-indigo-600 mr-1.5">✓</span>}Oldest
+                  {sortOrder === 'oldest' && <span className="text-indigo-600 mr-1.5">✓</span>}{t('trail.oldest')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -201,10 +201,10 @@ function Trail(params: any) {
                 <BookOpen className="w-8 h-8 text-ui-fg-muted" strokeWidth={1.5} />
               </div>
               <h2 className="text-xl font-semibold text-ui-fg-base mb-2">
-                No results found
+                {t('trail.no_results')}
               </h2>
               <p className="txt-compact-small text-ui-fg-muted">
-                Try a different search or filter
+                {t('trail.try_different')}
               </p>
             </div>
           ) : (
@@ -225,8 +225,8 @@ function Trail(params: any) {
         {totalPages >= 1 && (
           <div className="flex items-center justify-center gap-1 pt-6 pb-0">
             <Button variant="transparent" size="small" onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>
-              <ChevronLeft className="w-4 h-4" />
-              <span className="hidden sm:inline ml-1">Previous</span>
+              <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
+              <span className="hidden sm:inline ms-1">{t('trail.previous')}</span>
             </Button>
             <div className="flex items-center gap-1 mx-2">
               {getVisiblePageNumbers().map((page, index) => (
@@ -249,8 +249,8 @@ function Trail(params: any) {
               ))}
             </div>
             <Button variant="transparent" size="small" onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}>
-              <span className="hidden sm:inline mr-1">Next</span>
-              <ChevronRight className="w-4 h-4" />
+              <span className="hidden sm:inline me-1">{t('trail.next')}</span>
+              <ChevronRight className="w-4 h-4 rtl:rotate-180" />
             </Button>
           </div>
         )}
