@@ -260,7 +260,7 @@ Subpages:
 
 - **Medusa design tokens**: Dashboard uses the same design system as the user-facing section: CSS variables, `shadow-borders-base`, `shadow-elevation-card-rest`, `bg-ui-bg-subtle`, `text-ui-fg-muted`, etc.
 - **Role-based access**: `AdminAuthorization` component wraps the entire dashboard at the "page" level. Individual pages and actions use `useCourseRights` and permission checks.
-- **Plan-based restrictions**: `PlanBadge`, `PlanRestrictedFeature`, and plan-gated tabs (Certification, SEO) restrict features based on the organization's subscription plan.
+- **Plan-based restrictions**: `PlanRestrictedFeature` is a transparent pass-through (`PlanBadge`, the upgrade banner and the upgrade modal were removed), so plan-gated tabs such as Certification and SEO render directly. `FeatureDisabledView` remains the only gate and is driven by deployment feature flags.
 - **Command palette**: Global `CommandPalette` component triggered by a search icon in the top bar or via Ctrl+K / Cmd+K keyboard shortcut.
 - **SWR data fetching**: Dashboard components use SWR for data fetching with caching and deduplication.
 - **Animated sub-navigation**: User management sub-nav uses `framer-motion`'s `AnimatePresence` for smooth expand/collapse animations.

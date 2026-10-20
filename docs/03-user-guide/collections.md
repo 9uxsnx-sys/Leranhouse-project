@@ -14,7 +14,7 @@ A collection has the same editorial surface as a course: cover image, banner, ti
 
 ## Browsing Collections
 
-The **Collections** page lists every bundle the learner can see, with search and pagination. Each card shows the bundle's own cover when set, otherwise the cover of its first course.
+The **Collections** page lists every bundle the learner can see, with search and pagination. Each card shows the bundle's own cover when set, otherwise the cover of its first course. Bundles the learner already claimed or bought carry an **Owned** badge, and the filter menu gains a **My bundles** option that narrows the grid to their library.
 
 Selecting a card opens the collection page:
 
@@ -22,7 +22,7 @@ Selecting a card opens the collection page:
 - `N items · M lessons · K episodes` plus an ownership badge when the learner owns the bundle
 - **What you'll learn** and **About this collection**
 - **What is included**: every member course and podcast as a standard card (podcasts show their episode count)
-- Sidebar with the bundle price and a **Get access** button. On a public bundle, pressing it claims the bundle: the learner is added to the dashboard Access roster and the bundle enters their inventory. On a paid bundle it starts checkout.
+- Sidebar with the bundle price and a **Get access** button. On a public bundle, pressing it claims the bundle: the learner is added to the dashboard Access roster and the bundle enters their inventory, with a confirmation toast and the sidebar switching to **Your bundle**. On a paid bundle it starts checkout.
 
 ## Buying a Bundle
 

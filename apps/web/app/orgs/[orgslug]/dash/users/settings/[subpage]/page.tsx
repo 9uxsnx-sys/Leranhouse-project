@@ -12,9 +12,7 @@ import OrgUserGroups from '@components/Dashboard/Pages/Users/OrgUserGroups/OrgUs
 import OrgRoles from '@components/Dashboard/Pages/Users/OrgRoles/OrgRoles'
 import OrgAuditLogs from '@components/Dashboard/Pages/Org/OrgAuditLogs/OrgAuditLogs'
 import { useTranslation } from 'react-i18next'
-import PlanBadge from '@components/Dashboard/Shared/PlanRestricted/PlanBadge'
 import { PlanLevel } from '@services/plans/plans'
-import { usePlan } from '@components/Hooks/usePlan'
 import { PageTabs } from '@components/ui/page-tabs'
 import { SectionIcon } from '@components/ui/icons'
 
@@ -28,7 +26,6 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
   const params = use(props.params);
   const session = useLHSession() as any
   const org = useOrg() as any
-  const currentPlan = usePlan()
   const [H1Label, setH1Label] = React.useState('')
   const isMobile = useMediaQuery('(max-width: 767px)')
 
@@ -110,9 +107,6 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
             label: tab.label,
             icon: tab.icon,
             href: getUriWithOrg(params.orgslug, '') + tab.href,
-            badge: (tab as any).requiresPlan ? (
-              <PlanBadge currentPlan={currentPlan} requiredPlan={(tab as any).requiresPlan} size="sm" noMargin />
-            ) : undefined,
           }))}
         />
       </div>

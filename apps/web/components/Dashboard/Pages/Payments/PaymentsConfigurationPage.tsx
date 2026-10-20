@@ -5,10 +5,13 @@ import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getPaymentConfigs, updatePaymentConfig } from '@services/payments/payments'
 import { Input } from '@components/ui/input'
-import { Label } from '@components/ui/label'
-import { Switch } from '@components/ui/switch'
-import { Check, CreditCard, Loader2, SaveAll, ShieldCheck } from 'lucide-react'
+import FormLayout, {
+  FormField,
+  FormLabelAndMessage,
+} from '@components/Objects/StyledElements/Form/Form'
+import { Check, Loader2, SaveAll } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 import useSWR, { mutate } from 'swr'
 
 type PaymentMode = 'test' | 'live'
@@ -29,7 +32,47 @@ const EMPTY_FORM: ConfigForm = {
   active: false,
 }
 
+const fieldClassName =
+  'bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none'
+
+const Toggle = ({
+  checked,
+  onChange,
+  disabled,
+  label,
+}: {
+  checked: boolean
+  onChange: (checked: boolean) => void
+  disabled?: boolean
+  label: string
+}) => (
+  <label className="flex items-start gap-3 cursor-pointer">
+    <div
+      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors mt-0.5 ${
+        checked ? 'bg-black' : 'bg-gray-300'
+      } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+    >
+      <span
+        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
+          checked ? 'translate-x-[18px]' : 'translate-x-[2px]'
+        }`}
+      />
+      <input
+        type="checkbox"
+        className="sr-only"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        disabled={disabled}
+      />
+    </div>
+    <div className="min-w-0">
+      <span className="text-sm text-gray-600 select-none">{label}</span>
+    </div>
+  </label>
+)
+
 const PaymentsConfigurationPage: React.FC = () => {
+  const { t } = useTranslation()
   const org = useOrg() as any
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
@@ -95,9 +138,9 @@ const PaymentsConfigurationPage: React.FC = () => {
       }
       setForm(next)
       setBaseline(next)
-      toast.success('Payment configuration saved')
+      toast.success(t('dashboard.payments.configuration.save_success'))
     } catch (err: any) {
-      toast.error(err?.detail || 'Failed to save payment configuration')
+      toast.error(err?.detail || t('dashboard.payments.configuration.save_error'))
     } finally {
       setIsSaving(false)
     }
@@ -106,7 +149,7 @@ const PaymentsConfigurationPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 text-sm text-gray-500">
-        Loading payment configuration…
+        {t('dashboard.payments.configuration.loading')}
       </div>
     )
   }
@@ -114,17 +157,17 @@ const PaymentsConfigurationPage: React.FC = () => {
   if (error) {
     return (
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 text-sm text-red-500">
-        Error loading payment configuration
+        {t('dashboard.payments.configuration.error_loading')}
       </div>
     )
   }
 
   const configured = !!config?.configured
   const statusLabel = !configured
-    ? 'Not configured'
+    ? t('dashboard.payments.configuration.status_not_configured')
     : config?.active
-      ? 'Active'
-      : 'Inactive'
+      ? t('dashboard.payments.configuration.status_active')
+      : t('dashboard.payments.configuration.status_inactive')
   const statusClass = !configured
     ? 'text-gray-500 bg-gray-100'
     : config?.active
@@ -132,163 +175,146 @@ const PaymentsConfigurationPage: React.FC = () => {
       : 'text-amber-700 bg-amber-100'
 
   return (
-    <div className="space-y-3">
-      {/* ===== Action Row ===== */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className={`inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full ${statusClass}`}>
+    <FormLayout onSubmit={(e: any) => e.preventDefault()}>
+      <div className="space-y-3">
+        {/* ── ACTION ROW ── */}
+        <div className="flex items-center justify-between">
+          <span
+            className={`inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full ${statusClass}`}
+          >
             <span className="w-2.5 h-2.5 rounded bg-current opacity-70" />
             {statusLabel}
           </span>
-        </div>
-        <div className="flex items-center gap-2">
+
           <button
             type="button"
-            onClick={isDirty && !isSaving ? handleSave : undefined}
-            disabled={isSaving || !isDirty}
+            onClick={isDirty ? handleSave : undefined}
+            disabled={isSaving}
             className={`inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors ${
               isSaving
                 ? 'bg-black text-white border-black opacity-50 cursor-not-allowed'
-                : isDirty
-                  ? 'bg-black text-white border-black hover:opacity-90 cursor-pointer'
-                  : 'bg-white text-gray-600 border-gray-200 cursor-default'
+                : !isDirty
+                  ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                  : 'bg-black text-white border-black hover:opacity-90 cursor-pointer'
             }`}
           >
             {isSaving ? (
               <Loader2 size={14} className="animate-spin" />
-            ) : isDirty ? (
-              <SaveAll size={14} />
-            ) : (
+            ) : !isDirty ? (
               <Check size={14} />
+            ) : (
+              <SaveAll size={14} />
             )}
-            <span>{isSaving ? 'Saving' : isDirty ? 'Save' : 'Saved'}</span>
+            <span>
+              {isSaving
+                ? t('dashboard.payments.configuration.saving')
+                : !isDirty
+                  ? t('dashboard.payments.configuration.saved')
+                  : t('dashboard.payments.configuration.save')}
+            </span>
           </button>
         </div>
-      </div>
 
-      {/* ===== Card 1: Chargily credentials ===== */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <div className="flex items-start justify-between mb-5">
-          <div>
-            <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500">
-              Chargily Pay v2
-            </h3>
-            <p className="text-sm text-gray-500 mt-1">
-              Accept EDAHABIA and CIB payments in Algerian Dinar.
-            </p>
-          </div>
-          <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg shrink-0">
-            <CreditCard size={20} className="text-gray-700" />
-          </div>
-        </div>
+        {/* ── CONFIGURATION ── */}
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+            {t('dashboard.payments.configuration.provider_title')}
+          </h3>
 
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label size="small" weight="plus">Mode</Label>
-            <div className="inline-flex rounded-lg border border-gray-200 p-0.5 bg-gray-50">
-              {(['test', 'live'] as PaymentMode[]).map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => setField('mode', mode)}
-                  className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                    form.mode === mode
-                      ? 'bg-white shadow-sm text-gray-900 font-medium'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  {mode === 'test' ? 'Test' : 'Live'}
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-gray-400">
-              Test uses the Chargily sandbox; live takes real payments.
-            </p>
-          </div>
+          <div className="space-y-4">
+            <FormField name="mode">
+              <FormLabelAndMessage label={t('dashboard.payments.configuration.mode_label')} />
+              <div className="inline-flex rounded-lg border border-gray-200 p-0.5 bg-gray-50 w-fit">
+                {(['test', 'live'] as PaymentMode[]).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setField('mode', mode)}
+                    className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                      form.mode === mode
+                        ? 'bg-white shadow-sm text-gray-900 font-medium'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    {mode === 'test'
+                      ? t('dashboard.payments.configuration.mode_test')
+                      : t('dashboard.payments.configuration.mode_live')}
+                  </button>
+                ))}
+              </div>
+            </FormField>
 
-          <div className="space-y-2">
-            <Label size="small" weight="plus" htmlFor="chargily-public-key">
-              Public key
-            </Label>
-            <Input
-              id="chargily-public-key"
-              value={form.public_key}
-              onChange={(e) => setField('public_key', e.target.value)}
-              placeholder="pk_…"
-              autoComplete="off"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label size="small" weight="plus" htmlFor="chargily-secret-key">
-                Secret key
-              </Label>
-              <Input
-                id="chargily-secret-key"
-                type="password"
-                value={form.secret_key}
-                onChange={(e) => setField('secret_key', e.target.value)}
-                placeholder={config?.has_secret_key ? '•••••••• (stored)' : 'sk_…'}
-                autoComplete="new-password"
+            <FormField name="public_key">
+              <FormLabelAndMessage
+                label={t('dashboard.payments.configuration.public_key_label')}
               />
-              <p className="text-xs text-gray-400">
-                Write-only. Stored encrypted and never returned by the API.
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label size="small" weight="plus" htmlFor="chargily-webhook-secret">
-                Webhook secret
-              </Label>
               <Input
-                id="chargily-webhook-secret"
-                type="password"
-                value={form.webhook_secret}
-                onChange={(e) => setField('webhook_secret', e.target.value)}
-                placeholder={config?.has_webhook_secret ? '•••••••• (stored)' : 'Optional'}
-                autoComplete="new-password"
+                className={fieldClassName}
+                value={form.public_key}
+                onChange={(e) => setField('public_key', e.target.value)}
+                placeholder="pk_…"
+                autoComplete="off"
+                disabled={isSaving}
               />
-              <p className="text-xs text-gray-400">
-                Defaults to the secret key when left empty.
-              </p>
+            </FormField>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField name="secret_key">
+                <FormLabelAndMessage
+                  label={t('dashboard.payments.configuration.secret_key_label')}
+                />
+                <Input
+                  className={fieldClassName}
+                  type="password"
+                  value={form.secret_key}
+                  onChange={(e) => setField('secret_key', e.target.value)}
+                  placeholder={
+                    config?.has_secret_key
+                      ? t('dashboard.payments.configuration.stored_placeholder')
+                      : 'sk_…'
+                  }
+                  autoComplete="new-password"
+                  disabled={isSaving}
+                />
+              </FormField>
+
+              <FormField name="webhook_secret">
+                <FormLabelAndMessage
+                  label={t('dashboard.payments.configuration.webhook_secret_label')}
+                />
+                <Input
+                  className={fieldClassName}
+                  type="password"
+                  value={form.webhook_secret}
+                  onChange={(e) => setField('webhook_secret', e.target.value)}
+                  placeholder={
+                    config?.has_webhook_secret
+                      ? t('dashboard.payments.configuration.stored_placeholder')
+                      : t('dashboard.payments.configuration.optional_placeholder')
+                  }
+                  autoComplete="new-password"
+                  disabled={isSaving}
+                />
+              </FormField>
+            </div>
+
+            <div className="border-t border-gray-100 pt-4">
+              <Toggle
+                checked={form.active}
+                onChange={(checked) => setField('active', checked)}
+                disabled={isSaving}
+                label={t('dashboard.payments.configuration.enable_title')}
+              />
+              {form.active && !config?.has_secret_key && !form.secret_key.trim() && (
+                <p className="text-xs text-amber-600 mt-2 ms-12">
+                  {t('dashboard.payments.configuration.secret_required')}
+                </p>
+              )}
             </div>
           </div>
         </div>
       </div>
-
-      {/* ===== Card 2: Enable payments ===== */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500">
-              Enable payments
-            </h3>
-            <p className="text-sm text-gray-500 mt-1">
-              Paid resources can only be purchased while this is on.
-            </p>
-          </div>
-          <Switch
-            checked={form.active}
-            onCheckedChange={(checked) => setField('active', checked)}
-          />
-        </div>
-        {form.active && !config?.has_secret_key && !form.secret_key.trim() && (
-          <p className="text-xs text-amber-600 mt-3">
-            Add a secret key before enabling payments.
-          </p>
-        )}
-      </div>
-
-      {/* ===== Security note ===== */}
-      <div className="flex items-start gap-2 px-1 text-xs text-gray-400">
-        <ShieldCheck size={14} className="shrink-0 mt-0.5" />
-        <span>
-          Credentials are stored per organization. Secret keys are encrypted at
-          rest and only used server-side when talking to Chargily.
-        </span>
-      </div>
-    </div>
+    </FormLayout>
   )
 }
 

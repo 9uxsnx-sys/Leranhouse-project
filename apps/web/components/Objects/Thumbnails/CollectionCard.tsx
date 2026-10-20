@@ -21,6 +21,8 @@ export interface CollectionCardProps {
   /** Collection's own cover. Falls back to the first member course's cover. */
   thumbnail_image?: string
   collection_uuid?: string
+  /** True when the learner claimed or bought this bundle. */
+  owned?: boolean
 }
 
 function formatRelativeDate(dateStr: string, locale: string) {
@@ -40,7 +42,7 @@ function formatRelativeDate(dateStr: string, locale: string) {
   }
 }
 
-export function CollectionCard({ id, title, description, courses, org_uuid, href, thumbnail_image, collection_uuid, memberCount, ...props }: CollectionCardProps) {
+export function CollectionCard({ id, title, description, courses, org_uuid, href, thumbnail_image, collection_uuid, memberCount, owned, ...props }: CollectionCardProps) {
   const { t, i18n } = useTranslation()
   const firstCourse = courses?.[0]
   const imageUrl = thumbnail_image && collection_uuid && org_uuid
@@ -82,6 +84,14 @@ export function CollectionCard({ id, title, description, courses, org_uuid, href
               <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
             </svg>
           </div>
+        )}
+        {owned && (
+          <span className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-md bg-white/95 px-2 py-0.5 text-[11px] font-medium text-emerald-600 shadow-sm ring-1 ring-black/5">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+            {t('collections.owned_badge')}
+          </span>
         )}
       </div>
       {/* Content */}

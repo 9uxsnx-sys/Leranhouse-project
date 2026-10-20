@@ -12,9 +12,7 @@ import OrgEditSEO from '@components/Dashboard/Pages/Org/OrgEditSEO/OrgEditSEO'
 import OrgEditAutomations from '@components/Dashboard/Pages/Org/OrgEditAutomations/OrgEditAutomations'
 import { useTranslation } from 'react-i18next'
 import { useOrg } from '@components/Contexts/OrgContext'
-import PlanBadge from '@components/Dashboard/Shared/PlanRestricted/PlanBadge'
 import { PlanLevel } from '@services/plans/plans'
-import { usePlan } from '@components/Hooks/usePlan'
 import { PageTabs } from '@components/ui/page-tabs'
 import { SectionIcon } from '@components/ui/icons'
 
@@ -43,7 +41,6 @@ function OrgPage(props: { params: Promise<OrgParams> }) {
   const { t } = useTranslation()
   const params = use(props.params);
   const org = useOrg() as any
-  const currentPlan = usePlan()
   const [H1Label, setH1Label] = React.useState('')
   const SETTING_TABS = getSettingTabs(t)
 
@@ -76,9 +73,6 @@ function OrgPage(props: { params: Promise<OrgParams> }) {
             label: tab.label,
             icon: tab.icon,
             href: getUriWithOrg(params.orgslug, '') + `/dash/org/settings/${tab.id}`,
-            badge: tab.requiredPlan ? (
-              <PlanBadge currentPlan={currentPlan} requiredPlan={tab.requiredPlan} size="sm" noMargin />
-            ) : undefined,
           }))}
         />
       </div>

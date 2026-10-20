@@ -164,3 +164,45 @@ class TestCollectionAccessUsers:
             "/api/v1/collections/collection_missing/access/users?filter=enrolled"
         )
         assert response.status_code == 404
+
+
+class TestCollectionLearnerState:
+    """Tests for the learner access-state and library endpoints."""
+
+    async def test_access_state_defaults_to_not_owned(self, client, org, collection):
+        response = await client.get(
+            "/api/v1/collections/collection_test/access/state"
+        )
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "claimed": False,
+            "has_paid_access": False,
+            "has_group_access": False,
+            "owned": False,
+        }
+
+    async def test_access_state_reports_claim(self, client, org, collection):
+        await client.post("/api/v1/collections/collection_test/claim")
+
+        response = await client.get(
+            "/api/v1/collections/collection_test/access/state"
+        )
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["claimed"] is True
+        assert body["owned"] is True
+
+    async def test_my_collections_lists_claimed_bundle(self, client, org, collection):
+        empty = await client.get("/api/v1/collections/org/1/mine")
+        assert empty.status_code == 200
+        assert empty.json() == []
+
+        await client.post("/api/v1/collections/collection_test/claim")
+
+        response = await client.get("/api/v1/collections/org/1/mine")
+        assert response.status_code == 200
+        assert [item["collection_uuid"] for item in response.json()] == [
+            "collection_test"
+        ]

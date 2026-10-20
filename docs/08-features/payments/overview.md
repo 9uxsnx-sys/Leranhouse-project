@@ -214,9 +214,9 @@ The `/dash/payments/{subpage}` section uses the same shell as **Organization Set
 | **Overview** | `/dash/payments/overview` | Date-range action row + *Preview shop*, full-width revenue area chart, recent payments table (10 rows) |
 | **Transactions** | `/dash/payments/transactions` | Search + status filter, table: learner, course, method (EDAHABIA/CIB), amount, status, date |
 | **Offers** | `/dash/payments/offers` | Single table of every course and podcast: resource, type, access, inline **Price (DZD)** input, added date. Toolbar = search + filter + one Save for all edited rows. **This is the only place prices are set.** |
-| **Payment Groups** | `/dash/payments/groups` | Bundles of courses for subscriptions / multi-course offers, UserGroup syncs |
-| **Payouts** | `/dash/payments/payouts` | Month picker, editable monthly costs, live 40/60 profit split, pro-rata teacher payout table |
-| **Configuration** | `/dash/payments/configuration` | Chargily connection, sandbox/live keys, webhook status |
+| **Payment Groups** | `/dash/payments/groups` | Removed — superseded by Collections; the route redirects to the overview |
+| **Payouts** | `/dash/payments/payouts` | Month picker (month name only), editable monthly costs, live 40/60 profit split, pro-rata teacher payout table with total row |
+| **Configuration** | `/dash/payments/configuration` | Single Chargily section: Test/Live mode, public key, secret key, webhook secret, enable toggle |
 
 Removed in this pass: the old `overview | offers | groups | configuration` underline bar, the header buttons, and the **second** tab bar inside Overview (`customers | transactions | subscriptions`). Customers and subscriptions are folded into **Transactions**; Stripe-only surfaces are dropped because Chargily has no subscription model.
 
@@ -229,19 +229,19 @@ Removed in this pass: the old `overview | offers | groups | configuration` under
 | Offers tab (prices for courses & podcasts) | **Done** — reads `price_amount`, writes via the existing update endpoints |
 | Chargily checkout creation | **Done** — `POST /payments/{org_id}/checkout` + course page redirect |
 | Chargily webhook receiver | **Done** — HMAC-verified, idempotent, grants entitlement + enrolls |
-| Transactions / Overview / Payouts tabs | **Transactions + Overview done** — live orders and revenue from `GET /payments/{org_id}/orders` and `/overview`; Payouts still renders sample data |
+| Transactions / Overview / Payouts tabs | **Done** — live orders, revenue and payout reports from `GET /payments/{org_id}/orders`, `/overview` and `/payouts` |
 | Payments Configuration | **Done** — `GET` / `PUT /payments/{org_id}/config` + Chargily form |
 | Learner checkout ("Get access") | **Done** — paid redirects to Chargily and unlocks via the webhook; free enrolls immediately |
 | Post-payment success/failure page | **Done** — `/orgs/{slug}/payment/{success,failure}`, polls until the entitlement lands |
 
-- `OSS_GATE = false` in [page.tsx](../../../apps/web/app/orgs/[orgslug]/dash/payments/[subpage]/page.tsx) is a **local design preview only**. Set it back to `true` before shipping — payments is EE-only.
+- Payments is available in **every deployment**: the OSS gate and the plan requirement were removed, so the tab never shows an upgrade screen.
 - The ordered remaining work is tracked in [Progress & Roadmap](./progress.md).
 
 ### Frontend files
 
 | File | Purpose |
 |---|---|
-| `app/orgs/[orgslug]/dash/payments/[subpage]/page.tsx` | Shell, tab set, plan/feature gates |
+| `app/orgs/[orgslug]/dash/payments/[subpage]/page.tsx` | Shell + tab set (no plan/OSS gate) |
 | `components/Dashboard/Pages/Payments/PaymentsOverviewPage.tsx` | Overview tab — live revenue chart + recent payments |
 | `components/Dashboard/Pages/Payments/PaymentsTransactionsPage.tsx` | Transactions tab — live orders (search, status filter, pagination) |
 | `components/Dashboard/Home/PaymentsTable.tsx` | Recent payments table — fetches the newest orders |

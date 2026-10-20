@@ -2,13 +2,10 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { usePlan } from '@components/Hooks/usePlan'
-import { planMeetsRequirement } from '@services/plans/plans'
 import { useAnalyticsTab, useOrgCourses } from '@services/analytics/tabs'
 import type { AnalyticsCard } from '@services/analytics/tabs'
 import { DateRangeFilter, FilterSelect } from '@components/Analytics/Filters'
 import { TabCard } from '@components/Analytics/TabCard'
-import { SectionCard } from '@components/Analytics/Card'
 import PaymentsTable from './PaymentsTable'
 
 const RANGES = ['7d', '30d', '90d']
@@ -57,8 +54,6 @@ export default function DashboardHome() {
   const session = useLHSession() as any
 
   const username = session?.data?.user?.username || ''
-  const plan = usePlan()
-  const analyticsEnabled = planMeetsRequirement(plan, 'standard')
 
   const [range, setRange] = useState('30d')
   const [course, setCourse] = useState('all')
@@ -69,7 +64,7 @@ export default function DashboardHome() {
     range,
     course,
     {},
-    analyticsEnabled
+    true
   )
 
   const enrollmentTrend = localizeCard(
@@ -114,31 +109,21 @@ export default function DashboardHome() {
       </div>
 
       {/* Full-row chart */}
-      {analyticsEnabled ? (
-        <TabCard card={enrollmentTrend} loading={isLoading} />
-      ) : (
-        <SectionCard title={t('dashboard.home.analytics')}>
-          <p className="text-xs text-gray-500 py-4">
-            {t('dashboard.home.analytics_locked_description')}
-          </p>
-        </SectionCard>
-      )}
+      <TabCard card={enrollmentTrend} loading={isLoading} />
 
       {/* Row 2 — payments (UI only) + completion funnel */}
       <div className="grid grid-cols-12 gap-6 mt-6">
-        <div className={`col-span-12 ${analyticsEnabled ? 'lg:col-span-7' : ''}`}>
+        <div className="col-span-12 lg:col-span-7">
           <PaymentsTable />
         </div>
-        {analyticsEnabled && (
-          <div className="col-span-12 lg:col-span-5 flex flex-col justify-between gap-6">
-            <TabCard
-              card={completionFunnel}
-              loading={isLoading}
-              chartHeight={280}
-            />
-            <TabCard card={learnerProgress} loading={isLoading} chartHeight={268} />
-          </div>
-        )}
+        <div className="col-span-12 lg:col-span-5 flex flex-col justify-between gap-6">
+          <TabCard
+            card={completionFunnel}
+            loading={isLoading}
+            chartHeight={280}
+          />
+          <TabCard card={learnerProgress} loading={isLoading} chartHeight={268} />
+        </div>
       </div>
     </div>
   )

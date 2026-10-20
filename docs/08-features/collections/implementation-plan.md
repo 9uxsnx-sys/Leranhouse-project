@@ -392,6 +392,7 @@ Minor: `/trail` sorts by `creation_date`; six runs share one timestamp. Add a na
 - **Access tab is a 1:1 copy of the course Access tab**: cycling mode button (paid skipped when there is no price), publish toggle, selectable user/group tables, bulk actions, row Details/Delete menus, course empty states and copy. The price editor and `pendingPaid` flow were deleted — price is edited only in Payments → Offers.
 - **Collection inventory roster**: new `collectionuser` table (migration `v5a6b7c8d9e0`) with `collection_id`/`user_id`/`org_id`, unique per learner+bundle. `GET/POST/DELETE /collections/{uuid}/access/users` mirror the course endpoints; `POST /collections/{uuid}/claim` is called by the learner's **Get access** button on public bundles (idempotent, org membership required). Removing a row drops the bundle from the learner's inventory.
 - **Paid/private unchanged upstream**: entitlements and UserGroups are already resource-generic, so only the UI needed parity work.
+- **Learner library visibility**: `GET /collections/{uuid}/access/state` drives the collection sidebar (`claimed` / `has_paid_access` / `has_group_access`), and `GET /collections/org/{id}/mine` feeds the catalog **Owned** badge and **My bundles** filter. The claim button now reports success/failure and refreshes the sidebar; podcast-only bundles use "Start learning" instead of linking to an empty Progress page. The payment success page polls the access state rather than TrailRuns, so bundles containing only podcasts activate correctly.
 
 ---
 
@@ -406,6 +407,7 @@ Minor: `/trail` sorts by `creation_date`; six runs share one timestamp. Add a na
 - Entitlements: `_resolve_resource` handles `collection_`.
 - RBAC: public/private/paid access decisions for `collection_`.
 - Access roster: linked/available listing, search, idempotent enroll/unenroll, non-member skip, claim idempotency (`test_collection_access_service.py`, `test_collections_router.py`).
+- Learner library: access-state variants (none/claim/paid/revoked/group) and `/org/{id}/mine` (claimed + paid, drafts excluded, anonymous empty).
 - Members table: `filter=linked|available`, `kind`/`status` filters and totals (`test_collections_service.py`).
 
 **Frontend**

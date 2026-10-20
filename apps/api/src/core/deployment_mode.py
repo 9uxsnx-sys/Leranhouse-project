@@ -13,9 +13,10 @@ from src.core.ee_hooks import is_ee_available, get_ee_hooks
 
 DeploymentMode = Literal['saas', 'oss', 'ee']
 
-# Features blocked in OSS mode but available in EE and plan-gated in SaaS
+# Features blocked in OSS mode but available in EE and plan-gated in SaaS.
+# Payments is our own stack and must stay available in every deployment.
 EE_ONLY_FEATURES: frozenset[str] = frozenset({
-    'sso', 'audit_logs', 'payments', 'analytics_advanced', 'scorm'
+    'sso', 'audit_logs', 'analytics_advanced', 'scorm'
 })
 
 

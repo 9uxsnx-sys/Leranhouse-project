@@ -21,7 +21,6 @@ import {
   Pencil,
   Zap,
   SkipForward,
-  Lock,
   MoreHorizontal,
   Palette,
   Command,
@@ -36,9 +35,6 @@ import { MarkdownLogo } from '@phosphor-icons/react'
 import { ConceptIcon } from '@components/ui/icons'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getUriWithOrg } from '@services/config/config'
-import { usePlan } from '@components/Hooks/usePlan'
-import { PlanLevel, planMeetsRequirement } from '@services/plans/plans'
-import PlanBadge from '@components/Dashboard/Shared/PlanRestricted/PlanBadge'
 import WelcomeGlobe from './WelcomeGlobe'
 import { useTranslation } from 'react-i18next'
 
@@ -123,7 +119,6 @@ export default function OnboardingBar() {
     completeStep,
     dismiss,
     dismissed,
-    skipStep,
     toggleMinimized,
     toggleExpanded,
     toggleShowAllSteps,
@@ -135,7 +130,6 @@ export default function OnboardingBar() {
   const { t } = useTranslation()
   const [showFarewell, setShowFarewell] = useState(false)
   const isDev = process.env.NODE_ENV === 'development'
-  const currentPlan = usePlan()
 
   const pathname = usePathname()
   const router = useRouter()
@@ -395,8 +389,6 @@ export default function OnboardingBar() {
                             const config = STEP_CONFIG[step.id]
                             const Icon = config?.icon || BookOpen
                             const actionHref = getActionHref(step.id)
-                            const requiredPlan = step.requiredPlan as PlanLevel | undefined
-                            const isLocked = requiredPlan && !planMeetsRequirement(currentPlan, requiredPlan)
 
                             return (
                               <motion.div
@@ -438,11 +430,6 @@ export default function OnboardingBar() {
                                             className="text-emerald-400 shrink-0"
                                           />
                                         )
-                                      ) : isLocked ? (
-                                        <Lock
-                                          size={24}
-                                          className="text-amber-400 shrink-0"
-                                        />
                                       ) : (
                                         <Icon
                                           size={24}
@@ -462,14 +449,6 @@ export default function OnboardingBar() {
                                           >
                                             {t(`onboarding.steps.${step.id}.title`)}
                                           </p>
-                                          {requiredPlan && (
-                                            <PlanBadge
-                                              currentPlan={currentPlan}
-                                              requiredPlan={requiredPlan}
-                                              size="sm"
-                                              noMargin
-                                            />
-                                          )}
                                         </div>
                                         {!step.completed && (
                                           <p className="text-xs text-gray-400 mt-0.5">
@@ -480,17 +459,7 @@ export default function OnboardingBar() {
                                     </div>
 
                                     <div className="flex items-center gap-2">
-                                      {!step.completed && isLocked && (
-                                        <button
-                                          onClick={() => skipStep(step.id)}
-                                          className="relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors shrink-0"
-                                        >
-                                          <SkipForward size={14} />
-                                          {t('onboarding.skip')}
-                                        </button>
-                                      )}
-
-                                      {!step.completed && !isLocked && actionHref && (
+                                      {!step.completed && actionHref && (
                                         <button
                                           onClick={() => navigateTo(actionHref)}
                                           className="relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors shrink-0"

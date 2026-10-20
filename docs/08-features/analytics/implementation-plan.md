@@ -255,7 +255,7 @@ Phase 2 made the Tier B cards *possible*; it does not make them *populated*. Eve
 2. **No `analytics_events` exists today** — events currently go to Tinybird (`events.datasource` with `timestamp DateTime`). Phase 2 is net-new wiring, not a rename.
 3. **`run_type` is `VARCHAR` on existing DBs** (added in migration `e1f2a3b4c5d6`) but a model enum on a fresh `create_all` → compare as a plain string.
 4. **`user` has `email_verified`, not `is_verified`.** Join date = `userorganization.creation_date` (the API's `joined_at`).
-5. **Certificates & payments are EE-only** in this checkout → "Certified" funnel stage and all money metrics are deferred.
+5. **Certificates are EE-only** in this checkout, and payments now ships in every deployment — the "Certified" funnel stage is deferred, but money metrics can be wired to `paymentorder`.
 6. **`upvote_count` is denormalised** on `discussion`/`discussioncomment` — use it, don't re-count votes.
 7. **Community listings sort by the string `creation_date`** (the composite index includes it) → lexicographic ordering; fine for ISO-8601, but don't mix formats at ingest.
 8. **Lesson ordering lives on the join tables**, not the entities: `coursechapter.order` (chapter position) and `chapteractivity.order` (activity position). `chapter` and `activity` have no `order` column — don't look for one.

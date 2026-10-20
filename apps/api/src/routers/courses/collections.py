@@ -21,7 +21,9 @@ from src.services.courses.collection_access import (
     bulk_enroll_collection_users,
     bulk_unenroll_collection_users,
     claim_collection,
+    get_collection_access_state,
     list_collection_access_users,
+    list_my_collections,
 )
 from src.services.courses.collections import (
     add_course_to_collection,
@@ -182,6 +184,45 @@ async def api_get_collection_members(
         status=status,
         page=page,
         limit=limit,
+    )
+
+
+@router.get(
+    "/org/{org_id}/mine",
+    response_model=List[CollectionRead],
+    summary="List my collections",
+    description=(
+        "Collections in the learner's library: claimed public bundles plus "
+        "collections with an active paid entitlement."
+    ),
+)
+async def api_list_my_collections(
+    request: Request,
+    org_id: int,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+) -> List[CollectionRead]:
+    return await list_my_collections(request, org_id, current_user, db_session)
+
+
+@router.get(
+    "/{collection_uuid}/access/state",
+    summary="Get my access state for a collection",
+    description=(
+        "Returns whether the acting learner claimed the bundle (`claimed`), "
+        "has an active paid entitlement (`has_paid_access`), is in a linked "
+        "user group (`has_group_access`), and whether it is in their library "
+        "(`owned`)."
+    ),
+)
+async def api_get_collection_access_state(
+    request: Request,
+    collection_uuid: str,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+):
+    return await get_collection_access_state(
+        request, collection_uuid, current_user, db_session
     )
 
 

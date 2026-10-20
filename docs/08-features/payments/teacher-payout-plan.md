@@ -302,13 +302,13 @@ CREATE TABLE teacher_payouts (
 
 ## Admin Dashboard Design
 
-> **v1 (implemented, UI-only):** the payout surface lives under
+> **v1 (implemented):** the payout surface lives under
 > **Admin Dashboard → Payments → Payouts** (`/dash/payments/payouts`). It renders
 > a month picker, editable monthly costs, the live 40/60 profit split and the
-> pro-rata teacher payout table with sample data. The five-tab **Earnings**
-> structure below is the future, expanded version; a dedicated section is deferred
-> until the ledger and payout tables exist — see
-> [Revenue Analytics](./revenue-analytics.md).
+> pro-rata teacher payout table, all computed from real `paid` orders by
+> `GET /payments/{org_id}/payouts`. The five-tab **Earnings** structure below is
+> the future, expanded version; a dedicated section is deferred until the ledger
+> and payout tables exist — see [Revenue Analytics](./revenue-analytics.md).
 
 The planned design is a new tab under the admin dashboard: **Earnings**.
 

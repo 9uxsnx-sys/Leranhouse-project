@@ -2,17 +2,14 @@
 import React, { use, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react'
-import { isOSSMode } from '@services/config/config'
 import { getUriWithOrg } from '@services/config/config'
-import { BadgeDollarSign, Gem, LineChart, ScrollText, Settings, Users } from 'lucide-react'
+import { Gem, LineChart, ScrollText, Settings, Users } from 'lucide-react'
 import PaymentsConfigurationPage from '@components/Dashboard/Pages/Payments/PaymentsConfigurationPage'
 import PaymentsOffersPage from '@components/Dashboard/Pages/Payments/PaymentsOffersPage'
 import PaymentsOverviewPage from '@components/Dashboard/Pages/Payments/PaymentsOverviewPage'
 import PaymentsPayoutsPage from '@components/Dashboard/Pages/Payments/PaymentsPayoutsPage'
 import PaymentsTransactionsPage from '@components/Dashboard/Pages/Payments/PaymentsTransactionsPage'
-import PlanRestrictedFeature from '@components/Dashboard/Shared/PlanRestricted/PlanRestrictedFeature'
 import FeatureDisabledView from '@components/Dashboard/Shared/FeatureDisabled/FeatureDisabledView'
-import { usePlan } from '@components/Hooks/usePlan'
 import { PageTabs } from '@components/ui/page-tabs'
 import { useTranslation } from 'react-i18next'
 
@@ -21,18 +18,11 @@ export type PaymentsParams = {
   orgslug: string
 }
 
-/**
- * Payments is EE-only. OSS deployments see the enterprise restriction instead
- * of the dashboard; cloud orgs need the `standard` plan (Gate 2 below).
- */
-const OSS_GATE = true
-
 function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
   const { t } = useTranslation()
   const params = use(props.params);
   const router = useRouter()
   const subpage = params.subpage || 'overview'
-  const currentPlan = usePlan()
 
   const tabs = [
     { id: 'overview', label: t('dashboard.payments.tabs.overview'), icon: LineChart },
@@ -48,22 +38,6 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
       router.replace(getUriWithOrg(params.orgslug, '/dash/payments/overview'))
     }
   }, [subpage, params.orgslug, router])
-
-  // Gate 1: OSS deployment → payments is EE-only, blocked entirely
-  if (OSS_GATE && isOSSMode()) {
-    return (
-      <PlanRestrictedFeature
-        currentPlan={currentPlan}
-        requiredPlan="enterprise"
-        icon={BadgeDollarSign}
-        titleKey="common.plans.feature_restricted.payments.title"
-        descriptionKey="common.plans.feature_restricted.payments.description"
-        fullScreen
-      >
-        <></>
-      </PlanRestrictedFeature>
-    )
-  }
 
   const content = (
     <div className="min-h-screen w-full bg-[#f8f8f8]">
@@ -110,24 +84,10 @@ function PaymentsPage(props: { params: Promise<PaymentsParams> }) {
     </div>
   )
 
-  // Gate 2: plan-based restriction for cloud users (standard required)
   return (
-    <PlanRestrictedFeature
-      currentPlan={currentPlan}
-      requiredPlan="standard"
-      icon={BadgeDollarSign}
-      titleKey="common.plans.feature_restricted.payments.title"
-      descriptionKey="common.plans.feature_restricted.payments.description"
-      fullScreen
-    >
-      {OSS_GATE ? (
-        <FeatureDisabledView featureName="payments" orgslug={params.orgslug} context="dashboard">
-          {content}
-        </FeatureDisabledView>
-      ) : (
-        content
-      )}
-    </PlanRestrictedFeature>
+    <FeatureDisabledView featureName="payments" orgslug={params.orgslug} context="dashboard">
+      {content}
+    </FeatureDisabledView>
   )
 }
 

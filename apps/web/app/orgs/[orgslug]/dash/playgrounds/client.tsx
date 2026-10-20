@@ -33,6 +33,8 @@ import { useRouter } from 'next/navigation'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import PlanRestrictedFeature from '@components/Dashboard/Shared/PlanRestricted/PlanRestrictedFeature'
 import FeatureDisabledView from '@components/Dashboard/Shared/FeatureDisabled/FeatureDisabledView'
+import { Button } from '@components/ui/button'
+import { ConceptIcon } from '@components/ui/icons'
 import { PlanLevel } from '@services/plans/plans'
 import { usePlan } from '@components/Hooks/usePlan'
 import { searchMatchesAny } from '@/lib/search/normalize'
@@ -206,14 +208,16 @@ export default function PlaygroundsListClient({ org_id, orgslug }: PlaygroundsLi
                 ressourceType="playgrounds"
                 orgId={org_id}
               >
-                <button
+                <Button
+                  variant="primary"
+                  size="small"
+                  className="gap-x-1.5"
                   onClick={openCreateModal}
                   disabled={isCreating}
-                  className="rounded-lg bg-primary transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-primary-foreground nice-shadow flex space-x-2 items-center hover:bg-primary/90 hover:scale-105 disabled:opacity-50"
                 >
-                  <div>New Playground</div>
-                  <div className="text-md bg-white/20 px-1 rounded-full">+</div>
-                </button>
+                  <ConceptIcon.add size={14} />
+                  New Playground
+                </Button>
               </AuthenticatedClientElement>
             </div>
           </div>

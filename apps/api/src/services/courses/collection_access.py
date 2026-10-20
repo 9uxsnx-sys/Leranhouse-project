@@ -4,12 +4,21 @@ from fastapi import HTTPException, Request, status
 from sqlmodel import Session, and_, func, or_, select
 
 from src.db.collection_users import CollectionUser
-from src.db.collections import Collection
+from src.db.collections import Collection, CollectionRead
+from src.db.payments.enums import EntitlementStatusEnum
+from src.db.payments.resource_entitlements import ResourceEntitlement
 from src.db.roles import Role, RoleRead
+from src.db.usergroup_resources import UserGroupResource
+from src.db.usergroup_user import UserGroupUser
 from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, APITokenUser, PublicUser, User, UserRead
 from src.security.auth import resolve_acting_user_id
 from src.security.rbac import AccessAction, check_resource_access
+from src.services.courses.collections import (
+    _build_read,
+    _check_catalog_read_access,
+    _get_collection_or_404,
+)
 from src.services.search.normalization import LIKE_ESCAPE_CHAR, build_like_pattern
 
 
@@ -297,3 +306,108 @@ async def claim_collection(
     db_session.commit()
 
     return {"claimed": True, "already_claimed": False}
+
+
+async def get_collection_access_state(
+    request: Request,
+    collection_uuid: str,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+) -> dict:
+    """Return the acting learner's relationship to one collection.
+
+    ``owned`` is the bundle-inventory flag used by the learner sidebar:
+    a public claim or an active paid entitlement. Group access is reported
+    separately because private bundles are borrowed access, not ownership.
+    """
+    collection = _get_collection_or_404(db_session, collection_uuid)
+
+    await _check_catalog_read_access(request, db_session, current_user, collection)
+
+    user_id = resolve_acting_user_id(current_user)
+    claimed = False
+    has_paid_access = False
+    has_group_access = False
+
+    if user_id:
+        claimed = (
+            db_session.exec(
+                select(CollectionUser.id).where(
+                    CollectionUser.collection_id == collection.id,
+                    CollectionUser.user_id == user_id,
+                    CollectionUser.org_id == collection.org_id,
+                )
+            ).first()
+            is not None
+        )
+        has_paid_access = (
+            db_session.exec(
+                select(ResourceEntitlement.id).where(
+                    ResourceEntitlement.org_id == collection.org_id,
+                    ResourceEntitlement.user_id == user_id,
+                    ResourceEntitlement.resource_uuid == collection.collection_uuid,
+                    ResourceEntitlement.status == EntitlementStatusEnum.ACTIVE,
+                )
+            ).first()
+            is not None
+        )
+        has_group_access = (
+            db_session.exec(
+                select(UserGroupResource.id)
+                .join(
+                    UserGroupUser,
+                    UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
+                )
+                .where(
+                    UserGroupResource.resource_uuid == collection.collection_uuid,
+                    UserGroupResource.org_id == collection.org_id,
+                    UserGroupUser.user_id == user_id,
+                )
+            ).first()
+            is not None
+        )
+
+    return {
+        "claimed": claimed,
+        "has_paid_access": has_paid_access,
+        "has_group_access": has_group_access,
+        "owned": claimed or has_paid_access,
+    }
+
+
+async def list_my_collections(
+    request: Request,
+    org_id: int,
+    current_user: PublicUser | AnonymousUser,
+    db_session: Session,
+) -> list[CollectionRead]:
+    """Collections in the learner's library: claimed public bundles + paid ones."""
+    user_id = resolve_acting_user_id(current_user)
+    if user_id == 0:
+        return []
+
+    claimed_ids = select(CollectionUser.collection_id).where(
+        CollectionUser.user_id == user_id,
+        CollectionUser.org_id == org_id,
+    )
+    paid_uuids = select(ResourceEntitlement.resource_uuid).where(
+        ResourceEntitlement.org_id == org_id,
+        ResourceEntitlement.user_id == user_id,
+        ResourceEntitlement.resource_type == "collection",
+        ResourceEntitlement.status == EntitlementStatusEnum.ACTIVE,
+    )
+
+    collections = db_session.exec(
+        select(Collection)
+        .where(
+            Collection.org_id == org_id,
+            Collection.published == True,  # noqa: E712
+            or_(
+                Collection.id.in_(claimed_ids),  # type: ignore[attr-defined]
+                Collection.collection_uuid.in_(paid_uuids),  # type: ignore[attr-defined]
+            ),
+        )
+        .order_by(Collection.update_date.desc())  # type: ignore[attr-defined]
+    ).all()
+
+    return [_build_read(db_session, collection) for collection in collections]

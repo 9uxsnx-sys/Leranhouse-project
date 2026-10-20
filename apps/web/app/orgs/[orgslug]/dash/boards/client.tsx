@@ -25,6 +25,8 @@ import {
 } from "@components/ui/dropdown-menu"
 import { PlanLevel } from '@services/plans/plans'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
+import { Button } from '@components/ui/button'
+import { ConceptIcon } from '@components/ui/icons'
 import { usePlan } from '@components/Hooks/usePlan'
 import { searchMatchesAny } from '@/lib/search/normalize'
 
@@ -273,10 +275,10 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
                   />
                 }
                 dialogTrigger={
-                  <button className="rounded-lg bg-primary transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-primary-foreground nice-shadow flex space-x-2 items-center hover:bg-primary/90 hover:scale-105">
-                    <div>{t('boards.new_board')}</div>
-                    <div className="text-md bg-white/20 px-1 rounded-full">+</div>
-                  </button>
+                  <Button variant="primary" size="small" className="gap-x-1.5">
+                    <ConceptIcon.add size={14} />
+                    {t('boards.new_board')}
+                  </Button>
                 }
               />
             </AuthenticatedClientElement>

@@ -247,6 +247,42 @@ Repeat calls return `{ "claimed": false, "already_claimed": true }`. Requires or
 
 ---
 
+## My Library & Access State
+
+Two learner-facing endpoints power the catalog **Owned** badge, the **My bundles** filter, and the collection page sidebar.
+
+```
+GET /api/v1/collections/org/{org_id}/mine
+```
+
+Returns the published collections in the learner's library — claimed public bundles plus bundles with an active paid entitlement. Anonymous callers receive an empty list.
+
+```json
+[
+  { "collection_uuid": "collection_abc", "name": "Web Fundamentals", "...": "CollectionRead" }
+]
+```
+
+```
+GET /api/v1/collections/{collection_uuid}/access/state
+```
+
+Returns the acting learner's relationship to one bundle:
+
+```json
+{
+  "claimed": true,
+  "has_paid_access": false,
+  "has_group_access": false,
+  "owned": true
+}
+```
+
+- `owned` = `claimed or has_paid_access`; it drives the "Your bundle" sidebar and the catalog badge.
+- `has_group_access` is reported separately because a private bundle lent through a UserGroup is borrowed access, not ownership.
+
+---
+
 ## Add Resource
 
 ```

@@ -282,4 +282,4 @@ Defined in `apps/web/components/Objects/Modals/SearchModal.tsx`. A command-palet
 - **SWR data fetching**: Client components use SWR with `swrFetcher` for data fetching with caching and revalidation.
 - **Lazy loading**: Heavy activity components (Video, Document, Assignment, AI panels, SCORM) are lazy-loaded with `next/dynamic` and wrapped in `Suspense` with a `LoadingFallback` spinner.
 - **Authentication**: `AuthenticatedClientElement` and `SessionGate` control access to authenticated features.
-- **Plan-based restrictions**: `PlanBadge`, `PlanRestrictedFeature`, and `FeatureDisabledView` components restrict features based on the organization's subscription plan.
+- **Feature gates**: `FeatureDisabledView` hides features that a deployment disables; plan badges and the plan upgrade surfaces have been removed, and `PlanRestrictedFeature` is now a transparent pass-through.

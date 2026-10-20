@@ -92,7 +92,7 @@ GET /api/v1/payments/{org_id}/payouts?month=2026-10
   "currency": "DZD",
   "gross_revenue": 15000,
   "gateway_fees": 375,
-  "manual_costs": 3500,
+  "manual_costs": { "hosting": 2000, "marketing": 1000, "other": 500 },
   "total_costs": 3875,
   "net_profit": 11125,
   "teacher_share_percent": 40,
@@ -102,14 +102,22 @@ GET /api/v1/payments/{org_id}/payouts?month=2026-10
   "unattributed_revenue": 0,
   "order_count": 2,
   "teachers": [
-    { "user_id": 1, "name": "Admin", "revenue": 15000, "share_percent": 100, "payout": 4450 }
+    {
+      "user_id": 1,
+      "name": "Admin",
+      "email": "admin@school.dev",
+      "courses": 2,
+      "gross": 15000,
+      "share": 1.0,
+      "payout": 4450
+    }
   ]
 }
 ```
 
-`gateway_fees` comes from `fees_on_merchant` (falling back to `fees`). `manual_costs` is the sum of the month's `hosting` + `marketing` + `other`. `net_profit = max(0, gross − total_costs)`, `teacher_pool = round(net × 40%)`, `platform_pool = net − teacher_pool`.
+`gateway_fees` comes from `fees_on_merchant` (falling back to `fees`). `manual_costs` is the month's saved `{ hosting, marketing, other }`. `total_costs = gateway_fees + hosting + marketing + other`. `net_profit = max(0, gross − total_costs)`, `teacher_pool = round(net × 40%)`, `platform_pool = net − teacher_pool`.
 
-Attribution: course orders belong to their course; collection orders are split evenly across `price_snapshot["courses"]` (rounding remainder to the first teacher). Each course's revenue goes to its active **MAINTAINERs**, else its active **CREATORs**. Revenue without an active author is reported in `unattributed_revenue` and stays with the platform.
+Attribution: course orders belong to their course; collection orders are split evenly across `price_snapshot["courses"]` (rounding remainder to the first teacher). Each course's revenue goes to its active **MAINTAINERs**, else its active **CREATORs**. Revenue without an active author is reported in `unattributed_revenue` and stays with the platform. Per teacher, `share = attributed revenue / total attributed revenue` (a 0–1 fraction) and `payout = round(teacher_pool × share)`.
 
 ### Update payout costs
 

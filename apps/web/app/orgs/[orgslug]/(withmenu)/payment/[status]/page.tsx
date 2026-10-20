@@ -45,7 +45,7 @@ export default function PaymentResultPage({
   // Poll the learner's trail: the webhook creates the TrailRun(s) when the
   // payment is confirmed, so their presence is our "access is active" signal.
   const { data: trailData } = useSWR(
-    isSuccess && access_token && org?.id
+    isSuccess && !isCollection && access_token && org?.id
       ? `${getAPIUrl()}trail/org/${org.id}/trail`
       : null,
     (url) => swrFetcher(url, access_token),
@@ -55,13 +55,17 @@ export default function PaymentResultPage({
     }
   )
 
-  // Bundles fan out to every member course, so we wait for all of them.
-  const { data: collectionMembers } = useSWR(
+  // Bundles are granted as a single entitlement. TrailRuns are not a reliable
+  // signal here because podcasts never create one, so poll the access state.
+  const { data: collectionAccessState } = useSWR(
     isSuccess && isCollection && resource && access_token
-      ? `${getAPIUrl()}collections/${resource}/courses?limit=100`
+      ? `${getAPIUrl()}collections/${resource}/access/state`
       : null,
     (url) => swrFetcher(url, access_token),
-    { revalidateOnFocus: false }
+    {
+      refreshInterval: isSuccess && !activated ? 2000 : 0,
+      revalidateOnFocus: false,
+    }
   )
 
   const { data: collectionMeta } = useSWR(
@@ -80,15 +84,7 @@ export default function PaymentResultPage({
     )
   }, [trailData, resource, isCollection])
 
-  const collectionActivated = useMemo(() => {
-    if (!isCollection || !trailData?.runs || !collectionMembers?.length) return false
-    const runCourseUuids = new Set(
-      trailData.runs.map((run: any) => run.course?.course_uuid).filter(Boolean)
-    )
-    return collectionMembers.every((course: any) =>
-      runCourseUuids.has(course.course_uuid)
-    )
-  }, [isCollection, trailData, collectionMembers])
+  const collectionActivated = Boolean(collectionAccessState?.has_paid_access)
 
   useEffect(() => {
     if (isCollection ? collectionActivated : activeRun) setActivated(true)

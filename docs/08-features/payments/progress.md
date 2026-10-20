@@ -2,7 +2,7 @@
 
 > Where the payments work stopped, what is already shipped, and the ordered list of what remains. Update this file whenever a step lands.
 
-**Last updated:** 2026-10-19
+**Last updated:** 2026-10-20
 
 ---
 
@@ -24,7 +24,7 @@
 | 10b | Collection bundles — checkout, member snapshot, per-course fan-out | ✅ Done |
 | 11 | Podcast Access tab parity | ✅ Done |
 | 12 | Payments Configuration (per-org Chargily keys) | ✅ Done |
-| 13 | Flip `OSS_GATE` back to `true` and ship | ✅ Done |
+| 13 | Remove the OSS/plan gate — payments available in every deployment | ✅ Done |
 
 ---
 
@@ -107,7 +107,7 @@ Files: [`services/payments/config.py`](../../../apps/api/src/services/payments/c
 
 - `GET /payments/{org_id}/config` — provider, mode, public key, `active`, and `has_secret_key` / `has_webhook_secret` flags. Secrets are **never** returned.
 - `PUT /payments/{org_id}/config` — upsert; secrets encrypted with Fernet, write-only; activating requires both a public and a secret key.
-- Configuration tab rebuilt as a Chargily form: Test/Live mode, public key, secret key, webhook secret, enable toggle, and the shared Save / Saved / Saving action row.
+- Configuration tab is a single section card that follows the dashboard settings-section pattern: uppercase section title, Test/Live mode segmented control, public key, secret key + webhook secret, then the black pill **Enable payments** toggle. The action row uses the shared Save / Saved / Saving button, and the page has no descriptive copy under the section title.
 - Tests: [`test_payments_config_service.py`](../../../apps/api/src/tests/services/test_payments_config_service.py)
 
 ### 7. Chargily webhook receiver
@@ -168,7 +168,8 @@ Files: [`services/payments/payouts.py`](../../../apps/api/src/services/payments/
 - Attribution: course orders → the course; collection orders → split evenly across `price_snapshot["courses"]` with the rounding remainder going to the first teacher. Each course's revenue goes to its active MAINTAINERs, else CREATORs. Revenue with no active author is reported as `unattributed_revenue` and stays with the platform.
 - Per-teacher `share = teacher_revenue / attributed_revenue`, `payout = round(teacher_pool × share)`.
 - `PUT /payments/{org_id}/payouts/costs` with `{ month, hosting, marketing, other }` upserts the month's costs and returns the recalculated report. Negative values or a malformed month → `422`.
-- The tab has a 12-month picker, editable hosting/marketing/other (Save only when dirty), read-only gateway fees, the profit-split card, the unattributed row and the teacher table.
+- The tab has a month picker (month name only, no year in the label), editable hosting/marketing/other costs, read-only gateway fees, the profit-split card, the unattributed row and the teacher table.
+- Layout: action row (month picker left, save button right — same box size), then a 7/5 grid of *Monthly costs* and *Profit split*, then the teacher table with the paid-order count in the header and a total-payout footer. Cost rows use spacing instead of dividers, and the amount fields are neutral bordered inputs (no blue focus/hover shadow).
 - Tests: [`test_payments_payouts_service.py`](../../../apps/api/src/tests/services/test_payments_payouts_service.py)
 
 ---
@@ -193,12 +194,12 @@ Files: [`services/payments/payouts.py`](../../../apps/api/src/services/payments/
 - Members are polymorphic (`course` / `podcast`) through `collectioncourse.resource_type` + `resource_uuid`; `POST/DELETE /collections/{uuid}/resources` manages both, and collections now appear as rows in Payments → Offers.
 - Full plan: [Collections — Implementation Plan](../collections/implementation-plan.md).
 
-### 13. Ship gate
+### 13. Deployment availability
 
-- `OSS_GATE = true` is restored in [`app/orgs/[orgslug]/dash/payments/[subpage]/page.tsx`](../../../apps/web/app/orgs/[orgslug]/dash/payments/[subpage]/page.tsx).
-- Gate 1: OSS deployments get the enterprise restriction screen; verified live (`LH_mode=oss`).
-- Gate 2: cloud orgs need the **standard** plan (unchanged) and the org's `payments` feature flag.
-- Verified: backend suite `2440 passed, 2 skipped, 8 failed` (the 8 are the pre-existing Windows path-separator failures in `content/transfer`); frontend typecheck holds at the 25-line pre-existing baseline.
+- `payments` was removed from `EE_ONLY_FEATURES` in [`core/deployment_mode.py`](../../../apps/api/src/core/deployment_mode.py), so the API no longer reports the feature as unavailable in OSS deployments.
+- [`PlanRestrictedFeature`](../../../apps/web/components/Dashboard/Shared/PlanRestricted/PlanRestrictedFeature.tsx) is now a transparent wrapper, and `FreePlanUpgradeBanner`, `UpgradeModal` and `AdvancedGate` were deleted. Plan badges were removed from the settings, course, users and org tabs.
+- [`app/orgs/[orgslug]/dash/payments/[subpage]/page.tsx`](../../../apps/web/app/orgs/[orgslug]/dash/payments/[subpage]/page.tsx) renders the tab content directly; no paywall, no upgrade screen. Only `FeatureDisabledView` remains as an explicit deployment kill-switch.
+- Verified: `/orgs/default/dash/payments/{overview,transactions,offers,payouts,configuration}` all return `200`; frontend typecheck holds at the 25-line pre-existing baseline.
 
 ---
 
@@ -229,7 +230,7 @@ Single file / single test:
 .\.venv\Scripts\python.exe -m pytest src/tests/services/test_payments_entitlements_service.py -q
 ```
 
-Baseline at the time of writing: **2382 passed, 2 skipped, 8 failed** — all 8 are pre-existing Windows/environment failures (path separators, SVG heuristic, community config, chapters tuple unpack, communities list). They are not caused by payments work.
+Baseline at the time of writing: **2466 passed, 2 skipped, 8 failed** — all 8 are pre-existing Windows/environment failures (path separators, SVG heuristic, community config, chapters tuple unpack, communities list). They are not caused by payments work.
 
 ### Frontend typecheck
 
@@ -267,4 +268,4 @@ Admin: `admin@school.dev` / `admin123456`, user id `1`, org slug `default`, org 
 - **Fees are plan-based.** Never hardcode a percentage — read `fees` and `fees_on_merchant` from Chargily and store them on the order.
 - **`webhook_endpoint` is per checkout**, so multi-tenant routing and ngrok work without dashboard changes.
 - **Signature is computed over the raw request body.** Read `await request.body()` before any JSON parsing; never re-serialize the payload before verifying.
-- **Payments are EE-only.** `OSS_GATE` must be `true` before shipping.
+- **Payments is available in every deployment.** There is no OSS or plan gate on `/dash/payments/*`; only `FeatureDisabledView` can hide the section when a deployment explicitly disables the feature.

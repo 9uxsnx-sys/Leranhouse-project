@@ -78,10 +78,12 @@ const CollectionClient = ({
     { revalidateOnFocus: false }
   )
 
-  const { data: trailData } = useSWR(
-    accessToken && org?.id ? `${getAPIUrl()}trail/org/${org.id}/trail` : null,
+  const { data: accessState, mutate: mutateAccessState } = useSWR(
+    accessToken && collection?.collection_uuid
+      ? `${getAPIUrl()}collections/${collection.collection_uuid}/access/state`
+      : null,
     (url: string) => swrFetcher(url, accessToken),
-    { revalidateOnFocus: false, dedupingInterval: 30000 }
+    { revalidateOnFocus: false }
   )
 
   const members: any[] = useMemo(
@@ -127,29 +129,8 @@ const CollectionClient = ({
     [members]
   )
 
-  const completedRuns = useMemo(() => {
-    if (!trailData?.runs || members.length === 0) return 0
-    const runCourseUuids = new Set(
-      trailData.runs
-        .map((run: any) => run.course?.course_uuid)
-        .filter(Boolean)
-    )
-    // Podcasts are unlocked by an entitlement, not a TrailRun; completion is
-    // tracked on the course members only.
-    return members.filter(
-      (course: any) =>
-        !isPodcastMember(course) &&
-        course.course_uuid &&
-        runCourseUuids.has(course.course_uuid)
-    ).length
-  }, [trailData, members])
-
-  const courseMemberCount = useMemo(
-    () => members.filter((member: any) => !isPodcastMember(member)).length,
-    [members]
-  )
-
-  const isOwned = courseMemberCount > 0 && completedRuns === courseMemberCount
+  const isOwned = Boolean(accessState?.owned)
+  const hasCourseMembers = members.some((member: any) => !isPodcastMember(member))
 
   const isPaid = collection?.access_type === 'paid'
   const price =
@@ -196,16 +177,25 @@ const CollectionClient = ({
     if (!collection?.collection_uuid || !org?.id) return
 
     if (!isPaid) {
-      // Claiming adds the bundle to the learner inventory, mirroring how a
-      // public course gains a TrailRun once a learner starts it.
-      if (accessToken && collection?.collection_uuid) {
-        try {
-          await claimCollection(collection.collection_uuid, accessToken)
-        } catch {
-          // Non-blocking: browsing the bundle still works without a claim.
-        }
+      if (!accessToken) {
+        router.push(getUriWithOrg(orgslug, '/login'))
+        return
       }
-      document.getElementById('included')?.scrollIntoView({ behavior: 'smooth' })
+      setIsStarting(true)
+      try {
+        const res = await claimCollection(collection.collection_uuid, accessToken)
+        if (res.success === false) {
+          toast.error(res.data?.detail || t('collections.claim_error'))
+          return
+        }
+        await mutateAccessState()
+        toast.success(t('collections.claimed_success'))
+        document.getElementById('included')?.scrollIntoView({ behavior: 'smooth' })
+      } catch (err: any) {
+        toast.error(err?.message || t('collections.claim_error'))
+      } finally {
+        setIsStarting(false)
+      }
       return
     }
 
@@ -405,11 +395,28 @@ const CollectionClient = ({
                     <p className="text-sm text-gray-500 mb-4 leading-snug">
                       {t('collections.owned_description')}
                     </p>
-                    <Link href={getUriWithOrg(orgslug, '/trail')}>
-                      <Button variant="primary" size="large" className="w-full">
-                        {t('collections.go_to_progress')}
+                    {hasCourseMembers ? (
+                      <Link href={getUriWithOrg(orgslug, '/trail')}>
+                        <Button variant="primary" size="large" className="w-full">
+                          {t('collections.go_to_progress')}
+                        </Button>
+                      </Link>
+                    ) : (
+                      // Podcast-only bundles never create TrailRuns, so Progress
+                      // would be empty. Send the learner to the item list.
+                      <Button
+                        variant="primary"
+                        size="large"
+                        className="w-full"
+                        onClick={() =>
+                          document
+                            .getElementById('included')
+                            ?.scrollIntoView({ behavior: 'smooth' })
+                        }
+                      >
+                        {t('collections.start_learning')}
                       </Button>
-                    </Link>
+                    )}
                   </>
                 ) : (
                   <>
@@ -429,7 +436,7 @@ const CollectionClient = ({
                       size="large"
                       className="w-full"
                       onClick={handleGetAccess}
-                      disabled={isStarting || !accessToken}
+                      disabled={isStarting}
                     >
                       {isStarting ? (
                         <span className="inline-flex items-center gap-2">

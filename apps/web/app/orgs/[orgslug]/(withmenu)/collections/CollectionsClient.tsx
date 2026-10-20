@@ -1,8 +1,12 @@
 'use client'
 import React, { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import useSWR from 'swr'
 import { Search, BookCopy, ChevronLeft, ChevronRight } from 'lucide-react'
 import { CollectionCard } from '@components/Objects/Thumbnails/CollectionCard'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { getAPIUrl } from '@services/config/config'
+import { swrFetcher } from '@services/utils/ts/requests'
 import { searchMatchesAny } from '@/lib/search/normalize'
 
 import {
@@ -22,19 +26,43 @@ interface CollectionsClientProps {
 
 function CollectionsClient(props: CollectionsClientProps) {
   const { t } = useTranslation()
+  const session = useLHSession() as any
+  const accessToken = session?.data?.tokens?.access_token
   const orgslug = props.orgslug
   const allCollections = props.collections
   const org_uuid = props.org_uuid
 
+  // Bundles the learner already claimed or bought — drives the "Owned" badge
+  // and the "My bundles" catalog filter.
+  const { data: myCollections } = useSWR(
+    accessToken && props.org_id
+      ? `${getAPIUrl()}collections/org/${props.org_id}/mine`
+      : null,
+    (url: string) => swrFetcher(url, accessToken),
+    { revalidateOnFocus: false }
+  )
+
+  const ownedUuids = useMemo(
+    () =>
+      new Set<string>(
+        (myCollections || []).map((item: any) => item.collection_uuid)
+      ),
+    [myCollections]
+  )
+
   // Search state
   const [searchQuery, setSearchQuery] = useState('')
-  const [activeFilter, setActiveFilter] = useState<'all' | 'public' | 'users_only' | 'paid'>('all')
+  const [activeFilter, setActiveFilter] = useState<'all' | 'public' | 'users_only' | 'paid' | 'owned'>('all')
 
   // Filter collections based on search and access mode
   const filteredCollections = useMemo(() => {
     let collections = allCollections
 
-    if (activeFilter !== 'all') {
+    if (activeFilter === 'owned') {
+      collections = collections.filter((col: any) =>
+        ownedUuids.has(col.collection_uuid)
+      )
+    } else if (activeFilter !== 'all') {
       collections = collections.filter((col: any) => {
         const accessType = String(
           col.access_type || (col.public ? 'public' : 'users_only')
@@ -50,7 +78,7 @@ function CollectionsClient(props: CollectionsClientProps) {
     }
 
     return collections
-  }, [allCollections, searchQuery, activeFilter])
+  }, [allCollections, searchQuery, activeFilter, ownedUuids])
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
@@ -158,6 +186,11 @@ function CollectionsClient(props: CollectionsClientProps) {
               <DropdownMenuItem onClick={() => setActiveFilter('all')}>
                 {t('collections.filter.all_collections')}
               </DropdownMenuItem>
+              {ownedUuids.size > 0 && (
+                <DropdownMenuItem onClick={() => setActiveFilter('owned')}>
+                  {t('collections.filter.owned')}
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={() => setActiveFilter('public')}>
                 {t('collections.filter.public')}
               </DropdownMenuItem>
@@ -187,6 +220,7 @@ function CollectionsClient(props: CollectionsClientProps) {
             public={collection.public || false}
             creation_date={collection.creation_date || collection.created_at || ''}
             memberCount={collection.member_count}
+            owned={ownedUuids.has(collection.collection_uuid)}
             href={`/orgs/${orgslug}/collection/${collection.collection_uuid.replace('collection_', '')}`}
           />
         ))}

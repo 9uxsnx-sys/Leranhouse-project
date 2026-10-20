@@ -4,7 +4,6 @@ import DashMobileMenu from '@components/Dashboard/Menus/DashMobileMenu';
 import { AdminTopBar } from '@components/Dashboard/Menus/AdminTopBar';
 import OnboardingBar from '@components/Dashboard/Onboarding/OnboardingBar';
 import WelcomeModal from '@components/Dashboard/Onboarding/WelcomeModal';
-import FreePlanUpgradeBanner from '@components/Dashboard/Shared/PlanRestricted/FreePlanUpgradeBanner';
 import AdminAuthorization from '@components/Security/AdminAuthorization'
 import { SessionGate } from '@components/Contexts/LHSessionContext'
 import { CommandPaletteProvider } from '@components/Dashboard/CommandPalette/CommandPaletteContext'
@@ -33,7 +32,6 @@ function ClientAdminLayout({
                         )}
                         <div className="flex flex-col w-full min-h-dvh relative isolate">
                             <AdminTopBar />
-                            <FreePlanUpgradeBanner />
                             {children}
                             <OnboardingBar />
                         </div>

@@ -273,7 +273,14 @@ export default function PaymentsOffersPage() {
                 if (row.kind === 'course') {
                     await updateCourse(row.uuid, { price_amount: amount }, access_token)
                 } else if (row.kind === 'collection') {
-                    await updateCollection(row.uuid, { price_amount: amount }, access_token)
+                    // updateCollection returns metadata instead of throwing, so a
+                    // rejected update would otherwise be reported as saved.
+                    const res = await updateCollection(
+                        row.uuid,
+                        { price_amount: amount },
+                        access_token
+                    )
+                    if (res?.success === false) failed += 1
                 } else {
                     await updatePodcast(row.uuid, { price_amount: amount }, access_token)
                 }

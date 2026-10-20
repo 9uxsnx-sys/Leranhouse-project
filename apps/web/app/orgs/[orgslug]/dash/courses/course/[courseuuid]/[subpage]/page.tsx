@@ -14,8 +14,7 @@ import { useRouter } from 'next/navigation'
 import { getUriWithOrg } from '@services/config/config';
 import { useTranslation } from 'react-i18next';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { PlanLevel, isFeatureAvailable } from '@services/plans/plans';
-import PlanBadge from '@components/Dashboard/Shared/PlanRestricted/PlanBadge';
+import { PlanLevel } from '@services/plans/plans';
 import PlanRestrictedFeature from '@components/Dashboard/Shared/PlanRestricted/PlanRestrictedFeature';
 import CourseAnalyticsTab from '@components/Dashboard/Analytics/Course/CourseAnalyticsTab';
 import { usePlan } from '@components/Hooks/usePlan'
@@ -46,8 +45,6 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
   const router = useRouter();
   const org = useOrg() as any;
   const currentPlan = usePlan();
-  const hasCertificationsAccess = isFeatureAvailable('certifications', currentPlan);
-  const hasSEOAccess = isFeatureAvailable('seo', currentPlan);
 
   function getEntireCourseUUID(courseuuid: string) {
     // add course_ to uuid
@@ -182,9 +179,6 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
                       {t('dashboard.courses.settings.access_restricted.message', { tab: tab.label })}
                     </div>
                   </div>
-                ) : undefined,
-                badge: (tab as any).requiresPlan ? (
-                  <PlanBadge currentPlan={currentPlan} requiredPlan={(tab as any).requiresPlan} size="sm" noMargin />
                 ) : undefined,
               }
             })}

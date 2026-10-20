@@ -2,7 +2,7 @@
 
 > Configure Chargily Pay v2 to accept Algerian Dinar payments via EDAHABIA (Algérie Poste) and CIB cards on the Koodook platform.
 
-> **Implementation status:** pricing (Payments → Offers), payments configuration (Payments → Configuration), access management (Access tab, all three modes), checkout creation, the Chargily webhook receiver and the post-payment result pages are **live** — a completed payment grants access, enrolls the learner, and lands on a success page. The Transactions/Overview/Payouts tabs still show sample data. See [Payments — Progress & Roadmap](../08-features/payments/progress.md).
+> **Implementation status:** pricing (Payments → Offers), payments configuration (Payments → Configuration), access management (Access tab, all three modes), checkout creation, the Chargily webhook receiver, the post-payment result pages, and the Transactions / Overview / Payouts tabs are **live** — every tab reads real order data. A completed payment grants access, enrolls the learner, and lands on a success page. Payments is available in every deployment (no plan or OSS gate). See [Payments — Progress & Roadmap](../08-features/payments/progress.md).
 
 ## Overview of Chargily Pay v2 Integration
 
@@ -31,11 +31,12 @@ Before accepting payments, you need to connect Koodook to your Chargily Pay acco
 
 ### Step 3: Configure in Koodook
 1. Go to **Admin Dashboard → Payments → Configuration**.
-2. Paste the **API Key** and **Secret Key** into the corresponding fields.
+2. Paste the **API Key** and **Secret Key** into the corresponding fields, and the **Webhook Secret** if you set one in Chargily.
 3. Set the **Mode**:
    - **Test** — use test credentials for development and testing.
    - **Live** — use live credentials for real payments.
-4. Click **Save Configuration**.
+4. Turn on **Enable payments** (a secret key is required before it can be enabled).
+5. Click **Save** in the action row.
 
 Credentials are stored **per organization** in `paymentconfig`; secret keys are encrypted at rest and never returned by the API.
 
@@ -74,7 +75,7 @@ Clearing the field and saving removes the price. There is no sale price, no sale
 - 3D Secure authentication is performed if supported by the issuing bank.
 - The payment is processed through the Algerian interbank system.
 
-Both methods are enabled by default. You can disable one method from **Admin Dashboard → Settings → Payments → Payment Methods** if needed.
+Both methods are enabled by default; the learner picks one at checkout.
 
 ## Webhook Configuration
 
@@ -147,18 +148,24 @@ Use the following test credentials in sandbox mode:
 
 The order status updates to "Refunded" or "Partially Refunded". A **full** refund revokes the entitlement, so the learner loses access; a **partial** refund keeps it. Nothing is deleted — the order and the entitlement row stay for audit.
 
-## Payout Settings
+## Payouts
 
-Payouts refer to the transfer of collected funds from Chargily to your bank account.
+Chargily settles the money it collects; **Payments → Payouts** is Koodook's own monthly reconciliation and teacher-payout report. It does not move money — it tells you how much to send each teacher.
 
-1. In your **Chargily merchant dashboard**, go to **Settings → Payouts**.
-2. Configure your bank account details (Algerian bank account required).
-3. Set the **payout schedule**:
-   - **Automatic** — Funds are transferred on a regular schedule (weekly, bi-weekly, or monthly).
-   - **Manual** — You initiate payouts on demand.
-4. Confirm the payout configuration.
+1. Open **Admin Dashboard → Payments → Payouts**.
+2. Pick the month in the selector (the label shows the month name; the report covers that calendar month).
+3. Enter the month's **Hosting & infrastructure**, **Marketing & ads** and **Other operating costs**. Press **Save** — the report recalculates immediately.
+4. Read the result:
+   - **Gross revenue** — paid orders whose `paid_at` falls inside the month.
+   - **Payment gateway fees** — Chargily's `fees_on_merchant` for those orders (read-only).
+   - **Net profit** — gross revenue minus gateway fees and the costs you entered.
+   - **Teacher pool / Platform pool** — net profit split 40% / 60%.
+   - **Teacher payouts** — the teacher pool shared pro-rata by each teacher's attributed revenue, with a total row.
+5. Transfer each teacher's payout outside Koodook (bank transfer or cash) and keep your own record of the payment.
 
-Koodook does not manage payouts directly — this is handled entirely within your Chargily merchant account. The **Pending Payouts** figure shown in Koodook's analytics is informational and reflects the balance of completed but unpaid transactions.
+Revenue attribution: a course order counts towards that course; a collection (bundle) order is split evenly across its member courses. Each course's revenue goes to its active **maintainers**, otherwise its **creator**. Revenue with no active author is listed as **Unattributed revenue** and stays with the platform.
+
+Chargily's own settlement schedule (when Chargily pays *you*) is still configured in the Chargily merchant dashboard under **Settings → Payouts**.
 
 ## Currency Configuration
 
@@ -168,11 +175,6 @@ Koodook is configured to use **Algerian Dinar (DZD)** as its sole currency.
 - All course prices are entered and displayed in DZD.
 - All transaction amounts in the admin panel are in DZD.
 - Chargily processes payments in DZD.
-- Reports and analytics show amounts in DZD.
+- Payout reports and analytics show amounts in DZD.
 
-To verify or change the currency setting:
-1. Go to **Admin Dashboard → Settings → Payments → Currency**.
-2. The currency is set to **DZD (Algerian Dinar)** .
-3. If you change the currency, all existing prices must be updated manually. Historical transaction data remains in the original currency.
-
-> **Note:** Koodook does not support multi-currency at this time. If you need to serve users in other countries, consider setting up a separate instance with the appropriate currency.
+Currency is fixed in the payments stack (`dzd` / `DZD`), so there is no settings screen to change it. Koodook does not support multi-currency at this time; if you need to serve users in other countries, run a separate instance with the appropriate currency.
