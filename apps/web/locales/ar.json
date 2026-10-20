@@ -6855,5 +6855,43 @@
       "years_ago_many": "قبل {{count}} سنة",
       "years_ago_other": "قبل {{count}} سنة"
     }
+  },
+  "lesson": {
+    "preview": {
+      "title": "الدرس",
+      "course_outline": "مخطط الدورة",
+      "module_lesson": "الوحدة {{module}} · الدرس {{lesson}} من {{total}}",
+      "no_modules_loaded": "لم يتم تحميل أي وحدات",
+      "no_modules_available": "لا توجد وحدات متاحة",
+      "lesson_video": "فيديو الدرس",
+      "lesson_content": "محتوى الدرس",
+      "what_youll_learn": "ما ستتعلمه",
+      "what_youll_learn_lead": "بنهاية هذا الدرس، ستكون قادرًا على",
+      "no_objectives": "لم تُحدَّد أهداف تعلم لهذا الدرس.",
+      "key_takeaways": "أهم النقاط",
+      "no_takeaways": "لم تُحدَّد نقاط رئيسية لهذا الدرس.",
+      "resources": "الموارد",
+      "whats_included": "ما يتضمنه",
+      "resources_lead": "ملفات وموارد قابلة للتنزيل لهذا الدرس",
+      "no_resources": "لم تُحدَّد موارد لهذا الدرس.",
+      "quick_check": "اختبار سريع",
+      "no_knowledge_checks": "لم تُحدَّد اختبارات معرفية لهذا الدرس.",
+      "up_next": "التالي",
+      "continue_hint": "تابع إلى الدرس التالي في {{module}}.",
+      "this_module": "هذه الوحدة",
+      "course_complete": "اكتملت الدورة",
+      "course_complete_description": "لقد أكملت جميع دروس هذه الدورة.",
+      "previous": "السابق",
+      "next": "التالي",
+      "mark_complete": "وضع علامة مكتمل",
+      "mark_complete_error": "تعذّر وضع علامة مكتمل",
+      "unsupported_activity": "نوع نشاط غير مدعوم",
+      "no_activity_content": "لا يوجد محتوى للنشاط",
+      "course_not_found": "الدورة غير موجودة",
+      "course_not_found_description": "قد لا تكون هذه الدورة موجودة أو ليس لديك صلاحية الوصول إليها.",
+      "failed_to_load": "تعذّر تحميل الدرس",
+      "check_connection": "يرجى التحقق من اتصالك والمحاولة مرة أخرى.",
+      "refresh_page": "تحديث الصفحة"
+    }
   }
 }

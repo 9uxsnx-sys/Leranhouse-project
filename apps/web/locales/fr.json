@@ -6674,5 +6674,43 @@
       "years_ago_one": "il y a {{count}} an",
       "years_ago_other": "il y a {{count}} ans"
     }
+  },
+  "lesson": {
+    "preview": {
+      "title": "Leçon",
+      "course_outline": "Plan du cours",
+      "module_lesson": "Module {{module}} · Leçon {{lesson}} sur {{total}}",
+      "no_modules_loaded": "Aucun module chargé",
+      "no_modules_available": "Aucun module disponible",
+      "lesson_video": "Vidéo de la leçon",
+      "lesson_content": "Contenu de la leçon",
+      "what_youll_learn": "Ce que vous allez apprendre",
+      "what_youll_learn_lead": "À la fin de cette leçon, vous serez capable de",
+      "no_objectives": "Aucun objectif d'apprentissage défini pour cette leçon.",
+      "key_takeaways": "Points clés",
+      "no_takeaways": "Aucun point clé défini pour cette leçon.",
+      "resources": "Ressources",
+      "whats_included": "Ce qui est inclus",
+      "resources_lead": "Fichiers et ressources téléchargeables pour cette leçon",
+      "no_resources": "Aucune ressource définie pour cette leçon.",
+      "quick_check": "Vérification rapide",
+      "no_knowledge_checks": "Aucune vérification des connaissances définie pour cette leçon.",
+      "up_next": "À suivre",
+      "continue_hint": "Passez à la leçon suivante dans {{module}}.",
+      "this_module": "ce module",
+      "course_complete": "Cours terminé",
+      "course_complete_description": "Vous avez terminé toutes les leçons de ce cours.",
+      "previous": "Précédent",
+      "next": "Suivant",
+      "mark_complete": "Marquer comme terminé",
+      "mark_complete_error": "Impossible de marquer comme terminé",
+      "unsupported_activity": "Type d'activité non pris en charge",
+      "no_activity_content": "Aucun contenu d'activité disponible",
+      "course_not_found": "Cours introuvable",
+      "course_not_found_description": "Ce cours n'existe peut-être pas ou vous n'y avez peut-être pas accès.",
+      "failed_to_load": "Impossible de charger la leçon",
+      "check_connection": "Vérifiez votre connexion et réessayez.",
+      "refresh_page": "Actualiser la page"
+    }
   }
 }
