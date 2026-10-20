@@ -205,10 +205,10 @@ function Courses(props: CourseProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white min-w-0 w-28">
-              <DropdownMenuItem onClick={() => setActiveFilter('All')}>All Courses</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setActiveFilter('Easy')}>Easy</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setActiveFilter('Medium')}>Medium</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setActiveFilter('Hard')}>Hard</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setActiveFilter('All')}>{t('common.all_courses')}</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setActiveFilter('Easy')}>{t('common.easy')}</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setActiveFilter('Medium')}>{t('common.medium')}</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setActiveFilter('Hard')}>{t('common.hard')}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 

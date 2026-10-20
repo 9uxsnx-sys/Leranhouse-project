@@ -740,6 +740,9 @@
                         "discussion_list":  {
                                                 "search_placeholder":  "Search discussions...",
                                                 "sort_by":  "Sort by:",
+                                                "latest":  "Latest",
+                                                "all":  "All",
+                                                "filter_discussions":  "Filter discussions",
                                                 "latest_activity":  "Latest activity",
                                                 "top":  "Top",
                                                 "hot":  "Hot",
@@ -1601,6 +1604,12 @@
                        "save_your_progress":  "Save your progress",
                        "unmark_tooltip":  "Click the checkbox to unmark as complete if needed",
                        "mark_tooltip":  "Click the checkbox to mark this activity as complete",
+                       "embed":  {
+                                     "updated":  "Embed URL updated",
+                                     "update_error":  "Failed to update URL",
+                                     "not_configured":  "No embed URL configured",
+                                     "enter_url_preview":  "Enter an embed URL above to preview"
+                                 },
                        "failed_mark_complete":  "Failed to mark activity as complete",
                        "failed_unmark_complete":  "Failed to unmark activity as complete",
                        "click_to_flip":  "Click to flip",
@@ -1862,7 +1871,24 @@
                     "my_courses":  "My Courses",
                     "purchases":  "Purchases",
                     "no_purchased_courses":  "No purchased courses yet",
-                    "purchased_courses_description":  "Courses you have purchased or subscribed to will appear here"
+                    "purchased_courses_description":  "Courses you have purchased or subscribed to will appear here",
+                    "purchases_subtitle":  "Your active purchases and subscriptions",
+                    "no_purchases":  "No purchases yet",
+                    "no_purchases_description":  "Your purchases and subscriptions will appear here once you buy something from the store.",
+                    "browse_store":  "Browse store",
+                    "invoices_receipts":  "Invoices & receipts",
+                    "invoices_description":  "View and download all your invoices via the billing portal",
+                    "open_portal":  "Open portal",
+                    "subscription":  "Subscription",
+                    "one_time_purchase":  "One-time purchase",
+                    "active":  "Active",
+                    "recurring":  "recurring",
+                    "purchased_on":  "Purchased {{date}}",
+                    "view_offer":  "View offer",
+                    "manage_subscription":  "Manage subscription",
+                    "billing_portal_error":  "Could not open billing portal. Please try again.",
+                    "generic_error":  "An error occurred. Please try again.",
+                    "load_purchases_error":  "Could not load purchases. Please refresh and try again."
                 },
     "user":  {
                  "user_settings":  "User Settings",
