@@ -129,7 +129,7 @@ function UserLeftMenu() {
   return (
     <TooltipProvider delayDuration={0}>
     <nav
-      aria-label="User sidebar navigation"
+      aria-label={t('common.aria.user_sidebar_navigation')}
       className={cn(
         "hidden lg:flex flex-col shrink-0 h-screen sticky top-0 z-overlay border-e border-gray-200 bg-ui-bg-subtle transition-all duration-300",
         isCollapsed ? "w-[72px]" : "w-64"
@@ -288,7 +288,7 @@ function UserLeftMenu() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
-                  aria-label="Collapse sidebar"
+                  aria-label={t('common.aria.collapse_sidebar')}
                   onClick={toggleCollapse}
                   className="flex items-center w-full h-10 px-4 gap-x-2.5 rounded-xl text-ui-fg-subtle hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover transition-all"
                 >
@@ -307,7 +307,7 @@ function UserLeftMenu() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
-                  aria-label="Expand sidebar"
+                  aria-label={t('common.aria.expand_sidebar')}
                   onClick={toggleCollapse}
                   className="flex items-center justify-center w-full h-10 rounded-lg text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover transition-all"
                 >
@@ -343,7 +343,7 @@ function UserLeftMenu() {
               </HoverMenuContent>
             }
           >
-            <button aria-label="Open language menu" className={cn(
+            <button aria-label={t('common.aria.open_language_menu')} className={cn(
               "flex items-center w-full rounded-xl text-ui-fg-subtle hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover transition-all group",
               isCollapsed ? "justify-center h-10" : "h-10 px-4 gap-x-2.5"
             )}>
@@ -401,7 +401,7 @@ function UserLeftMenu() {
               </HoverMenuContent>
             }
           >
-            <button aria-label="Open help menu" className={cn(
+            <button aria-label={t('common.aria.open_help_menu')} className={cn(
               "flex items-center w-full rounded-xl text-ui-fg-subtle hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover transition-all group",
               isCollapsed ? "justify-center h-10" : "h-10 px-4 gap-x-2.5"
             )}>

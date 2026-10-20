@@ -22,30 +22,30 @@ function DashMobileMenu() {
   const showPayments = isEnabled('payments')
 
   return (
-    <nav aria-label="Dashboard mobile actions" className="fixed bottom-4 left-4 right-4 bg-black/90 backdrop-blur-lg text-white border border-white/10 rounded-2xl">
+    <nav aria-label={t('common.aria.dashboard_mobile_actions')} className="fixed bottom-4 left-4 right-4 bg-black/90 backdrop-blur-lg text-white border border-white/10 rounded-2xl">
       <div className="flex justify-around items-center h-16 px-2">
         <AdminAuthorization authorizationMode="component">
           <ToolTip content={t('common.home')} slateBlack sideOffset={8} side="top">
-            <Link href={`/`} className="flex flex-col items-center p-2" aria-label="Go to dashboard home">
+            <Link href={`/`} className="flex flex-col items-center p-2" aria-label={t('common.aria.go_to_dashboard_home')}>
               <House size={20} weight="bold" />
               <span className="text-xs mt-1">{t('common.home')}</span>
             </Link>
           </ToolTip>
           <ToolTip content={t('courses.courses')} slateBlack sideOffset={8} side="top">
-            <Link href={`/dash/courses`} className="flex flex-col items-center p-2" aria-label="Manage courses">
+            <Link href={`/dash/courses`} className="flex flex-col items-center p-2" aria-label={t('common.aria.manage_courses')}>
               <BookOpen size={20} weight="bold" />
               <span className="text-xs mt-1">{t('courses.courses')}</span>
             </Link>
           </ToolTip>
           <ToolTip content={t('common.assignments')} slateBlack sideOffset={8} side="top">
-            <Link href={`/dash/assignments`} className="flex flex-col items-center p-2" aria-label="Manage assignments">
+            <Link href={`/dash/assignments`} className="flex flex-col items-center p-2" aria-label={t('common.aria.manage_assignments')}>
               <Backpack size={20} />
               <span className="text-xs mt-1">{t('common.assignments')}</span>
             </Link>
           </ToolTip>
           {showCommunities && (
             <ToolTip content={t('communities.title')} slateBlack sideOffset={8} side="top">
-              <Link href={`/dash/communities`} className="flex flex-col items-center p-2" aria-label="Manage communities">
+              <Link href={`/dash/communities`} className="flex flex-col items-center p-2" aria-label={t('common.aria.manage_communities')}>
                 <ChatsCircle size={20} weight="bold" />
                 <span className="text-xs mt-1">{t('communities.title')}</span>
               </Link>
@@ -53,7 +53,7 @@ function DashMobileMenu() {
           )}
           {showPodcasts && (
             <ToolTip content={t('podcasts.podcasts')} slateBlack sideOffset={8} side="top">
-              <Link href={`/dash/podcasts`} className="flex flex-col items-center p-2" aria-label="Manage podcasts">
+              <Link href={`/dash/podcasts`} className="flex flex-col items-center p-2" aria-label={t('common.aria.manage_podcasts')}>
                 <Headphones size={20} weight="bold" />
                 <span className="text-xs mt-1">{t('podcasts.podcasts')}</span>
               </Link>
@@ -61,27 +61,27 @@ function DashMobileMenu() {
           )}
           {showPayments && (
             <ToolTip content={t('common.payments')} slateBlack sideOffset={8} side="top">
-              <Link href={`/dash/payments/overview`} className="flex flex-col items-center p-2" aria-label="Manage payments and billing">
+              <Link href={`/dash/payments/overview`} className="flex flex-col items-center p-2" aria-label={t('common.aria.manage_payments')}>
                 <CurrencyCircleDollar size={20} weight="bold" />
                 <span className="text-xs mt-1">{t('common.payments')}</span>
               </Link>
             </ToolTip>
           )}
           <ToolTip content={t('common.users')} slateBlack sideOffset={8} side="top">
-            <Link href={`/dash/users/settings/users`} className="flex flex-col items-center p-2" aria-label="Manage users">
+            <Link href={`/dash/users/settings/users`} className="flex flex-col items-center p-2" aria-label={t('common.aria.manage_users')}>
               <Users size={20} weight="bold" />
               <span className="text-xs mt-1">{t('common.users')}</span>
             </Link>
           </ToolTip>
           <ToolTip content={t('common.organization')} slateBlack sideOffset={8} side="top">
-            <Link href={`/dash/org/settings/general`} className="flex flex-col items-center p-2" aria-label="Organization settings">
+            <Link href={`/dash/org/settings/general`} className="flex flex-col items-center p-2" aria-label={t('common.aria.organization_settings')}>
               <Buildings size={20} weight="bold" />
               <span className="text-xs mt-1">{t('common.organization')}</span>
             </Link>
           </ToolTip>
         </AdminAuthorization>
         <ToolTip content={t('common.settings')} slateBlack sideOffset={8} side="top">
-          <Link href={'/account/general'} className="flex flex-col items-center p-2" aria-label="User account settings">
+          <Link href={'/account/general'} className="flex flex-col items-center p-2" aria-label={t('common.aria.user_account_settings')}>
             <Gear size={20} weight="bold" />
             <span className="text-xs mt-1">{t('common.settings')}</span>
           </Link>
@@ -90,7 +90,7 @@ function DashMobileMenu() {
           <button
             onClick={() => signOut({ callbackUrl: '/' })}
             className="flex flex-col items-center p-2 text-white/60 hover:text-white transition-colors"
-            aria-label="Sign out"
+            aria-label={t('common.aria.sign_out')}
           >
             <SignOut size={20} weight="bold" />
             <span className="text-xs mt-1">{t('user.sign_out')}</span>

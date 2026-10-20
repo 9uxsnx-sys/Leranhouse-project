@@ -93,7 +93,7 @@ const BreadcrumbNav = ({ orgslug }: { orgslug: string }) => {
   ]
 
   return (
-    <nav aria-label="Breadcrumb">
+    <nav aria-label={t('common.aria.breadcrumb')}>
       <ol className="text-ui-fg-muted txt-compact-small-plus flex select-none items-center">
         {crumbs.map((crumb, index) => {
           const isFirst = index === 0
@@ -325,7 +325,7 @@ export const OrgMenu = ({
                 className="hidden max-lg:flex"
                 variant="transparent"
                 size="small"
-                aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+                aria-label={isMenuOpen ? t('common.aria.close_menu') : t('common.aria.open_menu')}
                 onClick={toggleMenu}
               >
                 <BarsThree className="text-ui-fg-muted" />
@@ -339,7 +339,7 @@ export const OrgMenu = ({
                 variant="transparent"
                 size="small"
                 className="text-ui-fg-muted hover:text-ui-fg-subtle"
-                aria-label="Search"
+                aria-label={t('common.search')}
                 onClick={() => setSearchModalOpen(true)}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -476,7 +476,7 @@ export const OrgMenu = ({
                 variant="transparent"
                 className="text-ui-fg-subtle"
                 onClick={() => setIsMenuOpen(false)}
-                aria-label="Close menu"
+                aria-label={t('common.aria.close_menu')}
               >
                 <XMark />
               </IconButton>
@@ -525,6 +525,7 @@ const CopilotMenuButton = ({
   bubbleOpen: boolean
   onOpenBubble: (sessionUuid?: string) => void
 }) => {
+  const { t } = useTranslation()
   const session = useLHSession() as any
   const accessToken = session?.data?.tokens?.access_token
 
@@ -545,7 +546,7 @@ const CopilotMenuButton = ({
               <IconButton
                 variant="transparent"
                 size="small"
-                aria-label="Copilot"
+                aria-label={t('copilot.title')}
                 className="relative text-ui-fg-muted hover:text-ui-fg-subtle"
               >
                 <ChatBubble />
@@ -557,7 +558,7 @@ const CopilotMenuButton = ({
             </DropdownMenuTrigger>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="text-xs">
-            Copilot
+            {t('copilot.title')}
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -565,7 +566,7 @@ const CopilotMenuButton = ({
       <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuLabel className="flex items-center gap-2">
           <ChatBubble className="h-4 w-4" />
-          <span>Copilot</span>
+          <span>{t('copilot.title')}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
 
@@ -579,13 +580,13 @@ const CopilotMenuButton = ({
                   className="flex items-center gap-2 cursor-pointer"
                 >
                   <ChatBubble className="h-3.5 w-3.5 shrink-0 text-ui-fg-muted" />
-                  <span className="truncate text-[13px]">{s.title || 'Untitled'}</span>
+                  <span className="truncate text-[13px]">{s.title || t('copilot.untitled_conversation')}</span>
                 </DropdownMenuItem>
               ) : (
                 <DropdownMenuItem key={s.aichat_uuid} asChild>
                   <Link href={getUriWithOrg(orgslug, `/copilot?chat=${s.aichat_uuid}`)} className="flex items-center gap-2">
                     <ChatBubble className="h-3.5 w-3.5 shrink-0 text-ui-fg-muted" />
-                    <span className="truncate text-[13px]">{s.title || 'Untitled'}</span>
+                    <span className="truncate text-[13px]">{s.title || t('copilot.untitled_conversation')}</span>
                   </Link>
                 </DropdownMenuItem>
               )
@@ -594,7 +595,7 @@ const CopilotMenuButton = ({
           </>
         ) : (
           <div className="px-2 py-3 text-center">
-            <p className="text-xs text-ui-fg-muted">No conversations yet</p>
+            <p className="text-xs text-ui-fg-muted">{t('copilot.no_conversations')}</p>
           </div>
         )}
 
@@ -605,13 +606,13 @@ const CopilotMenuButton = ({
             className="flex items-center gap-2 font-medium cursor-pointer"
           >
             <ChatBubble className="h-4 w-4" />
-            <span>{recentSessions.length > 0 ? 'New conversation' : 'Start a conversation'}</span>
+            <span>{recentSessions.length > 0 ? t('copilot.new_conversation') : t('copilot.start_a_conversation')}</span>
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem asChild>
             <Link href={getUriWithOrg(orgslug, '/copilot')} className="flex items-center gap-2 font-medium">
               <ChatBubble className="h-4 w-4" />
-              <span>{recentSessions.length > 0 ? 'View all conversations' : 'Start a conversation'}</span>
+              <span>{recentSessions.length > 0 ? t('copilot.view_all_conversations') : t('copilot.start_a_conversation')}</span>
             </Link>
           </DropdownMenuItem>
         )}
@@ -624,7 +625,7 @@ const CopilotMenuButton = ({
           className="w-full flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-ui-bg-subtle-hover transition-fg group"
         >
           <span className="text-[13px] text-ui-fg-subtle group-hover:text-ui-fg-base transition-fg">
-            Open in bubble
+            {t('copilot.open_in_bubble')}
           </span>
           <span
             className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors flex-shrink-0 ${

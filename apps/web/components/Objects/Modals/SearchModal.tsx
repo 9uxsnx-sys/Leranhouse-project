@@ -184,7 +184,7 @@ export function SearchModal({ open, onClose, orgslug }: SearchModalProps) {
             <span className="truncate text-[12px] text-ui-fg-muted">{description}</span>
           ) : null}
         </span>
-        <span className="hidden text-ui-fg-muted/40 group-aria-selected/item:inline text-[11px] font-medium">Open</span>
+        <span className="hidden text-ui-fg-muted/40 group-aria-selected/item:inline text-[11px] font-medium">{t('search.open')}</span>
       </Command.Item>
     )
   }
@@ -210,7 +210,7 @@ export function SearchModal({ open, onClose, orgslug }: SearchModalProps) {
             <span className="truncate text-[12px] text-ui-fg-muted">{r.subtitle}</span>
           ) : null}
         </span>
-        <span className="hidden text-ui-fg-muted/40 group-aria-selected/item:inline text-[11px] font-medium">Open</span>
+        <span className="hidden text-ui-fg-muted/40 group-aria-selected/item:inline text-[11px] font-medium">{t('search.open')}</span>
       </Command.Item>
     )
   }
@@ -223,7 +223,7 @@ export function SearchModal({ open, onClose, orgslug }: SearchModalProps) {
           style={{ zIndex: 'var(--z-modal-backdrop)' as any }}
         />
         <DialogPrimitive.Content
-          aria-label="Search"
+          aria-label={t('search.search_title')}
           className="fixed left-1/2 top-[12%] flex w-[94vw] max-w-[640px] -translate-x-1/2 flex-col overflow-hidden rounded-2xl border border-ui-border-base bg-ui-bg-base shadow-elevation-card-rest data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:slide-in-from-top-2 data-[state=closed]:slide-out-to-top-2 data-[state=open]:duration-150 data-[state=closed]:duration-100 ease-out"
           style={{ zIndex: 'var(--z-modal)' as any }}
           onOpenAutoFocus={(e) => {
@@ -232,10 +232,10 @@ export function SearchModal({ open, onClose, orgslug }: SearchModalProps) {
             if (input) (input as HTMLInputElement).focus()
           }}
         >
-          <DialogPrimitive.Title className="sr-only">Search</DialogPrimitive.Title>
+          <DialogPrimitive.Title className="sr-only">{t('search.search_title')}</DialogPrimitive.Title>
 
           <Command
-            label="Search"
+            label={t('search.search_title')}
             shouldFilter={true}
             filter={(value: string, search: string) => {
               const haystack = normalizeForSearch(value)
@@ -253,7 +253,7 @@ export function SearchModal({ open, onClose, orgslug }: SearchModalProps) {
               <Command.Input
                 value={query}
                 onValueChange={setQuery}
-                placeholder="Search pages, courses..."
+                placeholder={t('search.modal_placeholder')}
                 onKeyDown={(e) => {
                   if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
                     e.preventDefault()
@@ -267,7 +267,7 @@ export function SearchModal({ open, onClose, orgslug }: SearchModalProps) {
                 className="w-full bg-transparent text-[15px] font-normal leading-tight tracking-tight text-ui-fg-base outline-none placeholder:text-ui-fg-muted/50"
               />
               {(isLoading || isWaiting) && (
-                <span className="shrink-0 text-[11px] text-ui-fg-muted/50">Loading</span>
+                <span className="shrink-0 text-[11px] text-ui-fg-muted/50">{t('search.loading')}</span>
               )}
               <kbd className="hidden sm:inline-flex h-[20px] items-center rounded-md border border-ui-border-base bg-ui-bg-field px-1.5 font-sans text-[11px] font-medium leading-none text-ui-fg-muted shadow-sm">
                 Esc
@@ -280,15 +280,15 @@ export function SearchModal({ open, onClose, orgslug }: SearchModalProps) {
               style={{ scrollbarColor: 'rgba(0,0,0,0.12) transparent', scrollbarWidth: 'thin' }}
             >
               <Command.Empty className="px-4 py-12 text-center text-sm text-ui-fg-muted/60">
-                {isLoading || isWaiting ? 'Loading...' : 'No results found'}
+                {isLoading || isWaiting ? t('search.loading') : t('search.no_results_found')}
               </Command.Empty>
 
-              <Command.Group heading="Pages">
+              <Command.Group heading={t('search.pages')}>
                 {userPages.map(renderPageItem)}
               </Command.Group>
 
               {contentResults && contentResults.length > 0 && (
-                <Command.Group heading="Content">
+                <Command.Group heading={t('search.content')}>
                   {contentResults.map(renderContentItem)}
                 </Command.Group>
               )}
@@ -297,16 +297,16 @@ export function SearchModal({ open, onClose, orgslug }: SearchModalProps) {
             {/* Footer — minimal, no border */}
             <div className="flex items-center gap-4 px-4 py-2.5 text-[11px] text-ui-fg-muted/40">
               <span className="inline-flex items-center gap-1">
-                <span>Navigate</span>
+                <span>{t('search.navigate')}</span>
                 <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">↑</kbd>
                 <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">↓</kbd>
               </span>
               <span className="inline-flex items-center gap-1">
-                <span>Open</span>
+                <span>{t('search.open')}</span>
                 <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">↵</kbd>
               </span>
               <span className="inline-flex items-center gap-1">
-                <span>New tab</span>
+                <span>{t('search.new_tab')}</span>
                 <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">⌘</kbd>
                 <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">↵</kbd>
               </span>
