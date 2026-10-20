@@ -127,9 +127,14 @@ export default async function PodcastPage({ params }: { params: PageParams }) {
 
   if (!podcastMeta) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <p className="text-gray-500">You do not have permission to view this podcast.</p>
-      </div>
+      <PodcastClient
+        orgslug={orgslug}
+        org_id={org?.id || 0}
+        podcastUuid={`podcast_${podcastuuid}`}
+        initialPodcast={null as any}
+        initialEpisodes={[]}
+        denied
+      />
     )
   }
 

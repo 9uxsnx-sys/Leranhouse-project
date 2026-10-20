@@ -1,35 +1,8 @@
 'use client'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 import { getPodcastThumbnailMediaDirectory } from '@services/media/media'
 import { useOrg } from '@components/Contexts/OrgContext'
-
-function formatDuration(totalSeconds: number): string {
-  if (totalSeconds <= 0) return 'N/A'
-  const hours = Math.floor(totalSeconds / 3600)
-  const minutes = Math.floor((totalSeconds % 3600) / 60)
-  if (hours > 0 && minutes > 0) return `${hours} hr ${minutes} min`
-  if (hours > 0) return `${hours} hr`
-  return `${minutes} min`
-}
-
-function formatDate(dateStr: string): string {
-  if (!dateStr) return ''
-  try {
-    const date = new Date(dateStr)
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-
-    if (diffDays === 0) return 'Today'
-    if (diffDays === 1) return 'Yesterday'
-    if (diffDays < 7) return `${diffDays} days ago`
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`
-    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`
-    return `${Math.floor(diffDays / 365)} years ago`
-  } catch {
-    return dateStr
-  }
-}
 
 export interface PodcastCardProps {
   id: string
@@ -44,7 +17,35 @@ export interface PodcastCardProps {
 }
 
 export function PodcastCard({ id, title, description, thumbnailImage, episodeCount, totalDurationSeconds, creationDate, org_uuid, href }: PodcastCardProps) {
+  const { t } = useTranslation()
   const org = useOrg() as any
+
+  const formatDuration = (totalSeconds: number): string => {
+    if (totalSeconds <= 0) return t('podcast.page.not_available')
+    const hours = Math.floor(totalSeconds / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+    if (hours > 0) return t('podcast.page.duration_hours', { hours, minutes })
+    return t('podcast.page.duration_minutes', { minutes })
+  }
+
+  const formatDate = (dateStr: string): string => {
+    if (!dateStr) return ''
+    try {
+      const date = new Date(dateStr)
+      const now = new Date()
+      const diffMs = now.getTime() - date.getTime()
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+      if (diffDays === 0) return t('podcast.card.today')
+      if (diffDays === 1) return t('podcast.card.yesterday')
+      if (diffDays < 7) return t('podcast.card.days_ago', { count: diffDays })
+      if (diffDays < 30) return t('podcast.card.weeks_ago', { count: Math.floor(diffDays / 7) })
+      if (diffDays < 365) return t('podcast.card.months_ago', { count: Math.floor(diffDays / 30) })
+      return t('podcast.card.years_ago', { count: Math.floor(diffDays / 365) })
+    } catch {
+      return dateStr
+    }
+  }
 
   const imageUrl = thumbnailImage
     ? getPodcastThumbnailMediaDirectory(org_uuid || org?.org_uuid, `podcast_${id}`, thumbnailImage)
@@ -79,7 +80,7 @@ export function PodcastCard({ id, title, description, thumbnailImage, episodeCou
           </p>
         </div>
         <p className="text-[12px] text-gray-400 mt-1.5">
-          {episodeCount} {episodeCount === 1 ? 'episode' : 'episodes'} &middot; {formatDuration(totalDurationSeconds)} &middot; {creationDate ? formatDate(creationDate) : ''}
+          {t('podcast.page.episode', { count: episodeCount })} &middot; {formatDuration(totalDurationSeconds)} &middot; {creationDate ? formatDate(creationDate) : ''}
         </p>
       </div>
     </Link>

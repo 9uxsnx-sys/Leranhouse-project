@@ -33,6 +33,7 @@ interface PodcastClientProps {
   podcastUuid: string
   initialPodcast: Podcast
   initialEpisodes: PodcastEpisode[]
+  denied?: boolean
 }
 
 export default function PodcastClient({
@@ -41,8 +42,9 @@ export default function PodcastClient({
   podcastUuid,
   initialPodcast,
   initialEpisodes,
+  denied = false,
 }: PodcastClientProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const isMobile = useMediaQuery('(max-width: 768px)')
   const { state } = usePodcastPlayer()
   const session = useLHSession() as any
@@ -69,7 +71,7 @@ export default function PodcastClient({
   const podcast = data?.podcast || initialPodcast
   const episodes = data?.episodes || initialEpisodes
   const totalDurationSeconds = episodes.reduce((sum, ep) => sum + (ep.duration_seconds || 0), 0)
-  const meta = (podcast as any).extra_metadata || {}
+  const meta = (podcast as any)?.extra_metadata || {}
 
   useRegisterBreadcrumb([
     { label: t('podcasts.podcasts'), href: '/podcasts' },
@@ -155,23 +157,33 @@ export default function PodcastClient({
 
   // Format duration from seconds to human-readable string
   const formatDuration = (seconds: number) => {
-    if (!seconds || seconds <= 0) return '0 min'
+    if (!seconds || seconds <= 0) return t('podcast.page.duration_minutes', { minutes: 0 })
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
     if (hours > 0) {
-      return `${hours}h ${minutes}min`
+      return t('podcast.page.duration_hours', { hours, minutes })
     }
-    return `${minutes}min`
+    return t('podcast.page.duration_minutes', { minutes })
   }
 
   // Add padding at bottom when player is visible
   const bottomPadding = state.isVisible ? (state.isMinimized ? 'pb-20' : 'pb-28') : ''
 
+  if (denied) {
+    return (
+      <GeneralWrapperStyled>
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <p className="text-gray-500">{t('podcast.page.no_permission')}</p>
+        </div>
+      </GeneralWrapperStyled>
+    )
+  }
+
   if (error) {
     return (
       <GeneralWrapperStyled>
         <div className="flex items-center justify-center min-h-[50vh]">
-          <p className="text-gray-500">Failed to load podcast</p>
+          <p className="text-gray-500">{t('podcast.page.failed_to_load')}</p>
         </div>
       </GeneralWrapperStyled>
     )
@@ -216,23 +228,23 @@ export default function PodcastClient({
                 <div className="flex flex-wrap items-center gap-2 mt-4">
                   <Badge variant="grey" className="flex items-center gap-1">
                     <Headphones size={12} />
-                    {episodes.length} {episodes.length === 1 ? 'episode' : 'episodes'}
+                    {t('podcast.page.episode', { count: episodes.length })}
                   </Badge>
                   <Badge variant="grey" className="flex items-center gap-1">
                     <Clock size={12} />
                     {meta.total_duration
-                      ? `${meta.total_duration} min`
+                      ? t('podcast.page.duration_minutes', { minutes: meta.total_duration })
                       : formatDuration(totalDurationSeconds)}
                   </Badge>
                   {podcast.authors?.length > 0 && (
                     <Badge variant="grey" className="flex items-center gap-1">
                       <User size={12} />
-                      {podcast.authors.length} {podcast.authors.length === 1 ? 'host' : 'hosts'}
+                      {t('podcast.page.host', { count: podcast.authors.length })}
                     </Badge>
                   )}
                   <Badge variant="grey" className="flex items-center gap-1">
                     <Award size={12} />
-                    Premium
+                    {t('podcast.page.premium')}
                   </Badge>
                 </div>
               </div>
@@ -241,19 +253,19 @@ export default function PodcastClient({
               <div className="flex items-center gap-3">
                 {/* Search Bar */}
                 <div className="relative w-80">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                  <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder={t('podcasts.search_placeholder') || 'Search episodes...'}
-                    className="w-full h-7 pl-8 pr-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
+                    placeholder={t('podcast.page.search_placeholder')}
+                    className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
                   />
                 </div>
 
                 {/* Results count */}
                 <span className="text-xs text-gray-400 whitespace-nowrap">
-                  {filteredEpisodes.length} {filteredEpisodes.length === 1 ? 'episode' : 'episodes'}
+                  {t('podcast.page.episode', { count: filteredEpisodes.length })}
                 </span>
 
                 {/* Spacer */}
@@ -267,25 +279,25 @@ export default function PodcastClient({
                 {/* Sort Dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label="Sort episodes">
+                    <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label={t('podcast.page.sort_aria')}>
                       <SortAsc size={15} />
                     </IconButton>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-white min-w-0 w-40 p-2">
                     <DropdownMenuItem onClick={() => setSortBy('recent')} className="flex items-center gap-2 text-sm cursor-pointer bg-white rounded-md">
                       <Clock size={14} className="text-gray-500" />
-                      <span className="text-gray-700">Latest</span>
-                      {sortBy === 'recent' && <span className="ml-auto text-gray-400">✓</span>}
+                      <span className="text-gray-700">{t('podcast.page.sort_latest')}</span>
+                      {sortBy === 'recent' && <span className="ms-auto text-gray-400">✓</span>}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setSortBy('oldest')} className="flex items-center gap-2 text-sm cursor-pointer bg-white rounded-md">
                       <Clock size={14} className="text-gray-500" />
-                      <span className="text-gray-700">Oldest</span>
-                      {sortBy === 'oldest' && <span className="ml-auto text-gray-400">✓</span>}
+                      <span className="text-gray-700">{t('podcast.page.sort_oldest')}</span>
+                      {sortBy === 'oldest' && <span className="ms-auto text-gray-400">✓</span>}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setSortBy('duration')} className="flex items-center gap-2 text-sm cursor-pointer bg-white rounded-md">
                       <ArrowUpDown size={14} className="text-gray-500" />
-                      <span className="text-gray-700">Duration</span>
-                      {sortBy === 'duration' && <span className="ml-auto text-gray-400">✓</span>}
+                      <span className="text-gray-700">{t('podcast.page.sort_duration')}</span>
+                      {sortBy === 'duration' && <span className="ms-auto text-gray-400">✓</span>}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -311,7 +323,7 @@ export default function PodcastClient({
               ) : (
                 <div className="text-center py-12">
                   <Search size={40} className="mx-auto text-gray-300 mb-3" />
-                  <p className="text-gray-500">No episodes match your search</p>
+                  <p className="text-gray-500">{t('podcast.page.no_match')}</p>
                 </div>
               )}
             </div>
@@ -323,9 +335,9 @@ export default function PodcastClient({
                 {/* ── SIDEBAR 1: In Progress / Get Access ── */}
                 {isEnrolled ? (
                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">In Progress</h3>
+                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('podcast.page.in_progress')}</h3>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold text-gray-900">{progressPercent}% Complete</span>
+                      <span className="text-sm font-semibold text-gray-900">{t('podcast.page.progress_complete', { percent: progressPercent })}</span>
                       <span className="text-sm text-gray-500">{completedEpisodes}/{totalEpisodes}</span>
                     </div>
                     <div className="w-full h-1.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
@@ -333,46 +345,46 @@ export default function PodcastClient({
                     </div>
                     <Link href={getUriWithOrg(orgslug, `/podcast/${podcastUuid}`)} className="block w-full mt-4">
                       <Button variant="primary" size="large" className="w-full">
-                        <Play size={16} className="mr-1.5" />
-                        Continue Listening
+                        <Play size={16} className="me-1.5" />
+                        {t('podcast.page.continue_listening')}
                       </Button>
                     </Link>
                   </div>
                 ) : (
                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-4">Get Access</h3>
+                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-4">{t('podcast.page.get_access')}</h3>
                     <p className="text-sm text-gray-500 mb-2 leading-snug">
-                      Get access to all episodes and updates
+                      {t('podcast.page.get_access_hint')}
                     </p>
                     <Button variant="primary" size="large" className="w-full" onClick={handleGetAccess}>
-                      Get Access
+                      {t('podcast.page.get_access')}
                     </Button>
                   </div>
                 )}
 
                 {/* ── SIDEBAR 2: Podcast Stats ── */}
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">This Podcast Includes</h3>
+                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('podcast.page.includes_title')}</h3>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
                       <Headphones size={16} className="text-gray-400 shrink-0" />
-                      <span className="text-sm text-gray-600">{episodes.length} {episodes.length === 1 ? 'episode' : 'episodes'}</span>
+                      <span className="text-sm text-gray-600">{t('podcast.page.episode', { count: episodes.length })}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <Clock size={16} className="text-gray-400 shrink-0" />
                       <span className="text-sm text-gray-600">
                         {meta.total_duration
-                          ? `${meta.total_duration} min total`
-                          : formatDuration(totalDurationSeconds) + ' total'}
+                          ? t('podcast.page.duration_minutes_total', { minutes: meta.total_duration })
+                          : t('podcast.page.total_suffix', { duration: formatDuration(totalDurationSeconds) })}
                       </span>
                     </div>
                     <div className="flex items-center gap-3">
                       <BookOpen size={16} className="text-gray-400 shrink-0" />
-                      <span className="text-sm text-gray-600">{podcast.authors?.length || 0} {podcast.authors?.length === 1 ? 'host' : 'hosts'}</span>
+                      <span className="text-sm text-gray-600">{t('podcast.page.host', { count: podcast.authors?.length || 0 })}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <Award size={16} className="text-gray-400 shrink-0" />
-                      <span className="text-sm text-gray-600">Premium content</span>
+                      <span className="text-sm text-gray-600">{t('podcast.page.premium_content')}</span>
                     </div>
                   </div>
                 </div>
@@ -380,7 +392,7 @@ export default function PodcastClient({
                 {/* ── SIDEBAR 3: Host ── */}
                 {(podcast.authors && podcast.authors.length > 0) || (meta.hosts && meta.hosts.length > 0) ? (
                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Hosted by</h3>
+                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('podcasts.hosted_by')}</h3>
                     <div className="space-y-3">
                       {meta.hosts && meta.hosts.length > 0 ? (
                         meta.hosts.map((host: any, index: number) => (
@@ -421,7 +433,7 @@ export default function PodcastClient({
                                 {author.user.first_name} {author.user.last_name}
                               </p>
                               <p className="text-xs text-gray-500 capitalize">
-                                {author.authorship === 'CREATOR' ? 'Host' : author.authorship.toLowerCase()}
+                                {author.authorship === 'CREATOR' ? t('podcast.page.host_label') : author.authorship.toLowerCase()}
                               </p>
                             </div>
                           </div>
@@ -433,20 +445,24 @@ export default function PodcastClient({
 
                 {/* ── SIDEBAR 4: Updates ── */}
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Updates</h3>
+                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('podcast.page.updates_title')}</h3>
                   <div className="flex items-center gap-3">
                     <RefreshCw size={16} className="text-gray-400 shrink-0" />
                     <span className="text-sm text-gray-600">
-                      Last updated {podcast.update_date ? new Date(podcast.update_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'}
+                      {t('podcast.page.last_updated', {
+                        date: podcast.update_date
+                          ? new Date(podcast.update_date).toLocaleDateString(i18n.language || 'en', { year: 'numeric', month: 'short', day: 'numeric' })
+                          : t('podcast.page.not_available'),
+                      })}
                     </span>
                   </div>
                 </div>
 
                 {/* ── SIDEBAR 5: Community ── */}
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Community</h3>
+                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('podcast.page.community_title')}</h3>
                   <p className="text-sm text-gray-600">
-                    This podcast includes access to a dedicated community where you can discuss, ask questions, and learn together with fellow listeners.
+                    {t('podcast.page.community_description')}
                   </p>
                 </div>
 

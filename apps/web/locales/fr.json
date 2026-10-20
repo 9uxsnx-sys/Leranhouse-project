@@ -6628,5 +6628,51 @@
       "cancel_anytime": "Annulez à tout moment",
       "instant_access": "Accès immédiat après paiement"
     }
+  },
+  "podcast": {
+    "page": {
+      "search_placeholder": "Rechercher des épisodes...",
+      "episode_one": "{{count}} épisode",
+      "episode_other": "{{count}} épisodes",
+      "host_one": "{{count}} animateur",
+      "host_other": "{{count}} animateurs",
+      "premium": "Premium",
+      "premium_content": "Contenu premium",
+      "failed_to_load": "Impossible de charger le podcast",
+      "no_match": "Aucun épisode ne correspond à votre recherche",
+      "sort_aria": "Trier les épisodes",
+      "sort_latest": "Récents",
+      "sort_oldest": "Anciens",
+      "sort_duration": "Durée",
+      "in_progress": "En cours",
+      "progress_complete": "{{percent}} % terminé",
+      "continue_listening": "Continuer l'écoute",
+      "get_access": "Accéder",
+      "get_access_hint": "Accédez à tous les épisodes et aux mises à jour",
+      "includes_title": "Ce podcast comprend",
+      "duration_hours": "{{hours}} h {{minutes}} min",
+      "duration_minutes": "{{minutes}} min",
+      "duration_minutes_total": "{{minutes}} min au total",
+      "total_suffix": "{{duration}} au total",
+      "host_label": "Animateur",
+      "updates_title": "Mises à jour",
+      "last_updated": "Dernière mise à jour {{date}}",
+      "not_available": "N/D",
+      "community_title": "Communauté",
+      "community_description": "Ce podcast donne accès à une communauté dédiée où vous pouvez discuter, poser des questions et apprendre avec d'autres auditeurs.",
+      "no_permission": "Vous n'avez pas la permission de consulter ce podcast."
+    },
+    "card": {
+      "today": "Aujourd'hui",
+      "yesterday": "Hier",
+      "days_ago_one": "il y a {{count}} jour",
+      "days_ago_other": "il y a {{count}} jours",
+      "weeks_ago_one": "il y a {{count}} semaine",
+      "weeks_ago_other": "il y a {{count}} semaines",
+      "months_ago_one": "il y a {{count}} mois",
+      "months_ago_other": "il y a {{count}} mois",
+      "years_ago_one": "il y a {{count}} an",
+      "years_ago_other": "il y a {{count}} ans"
+    }
   }
 }
