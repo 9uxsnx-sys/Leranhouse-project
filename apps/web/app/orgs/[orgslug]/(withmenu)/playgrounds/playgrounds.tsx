@@ -13,6 +13,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import FeatureDisabledView from '@components/Dashboard/Shared/FeatureDisabled/FeatureDisabledView'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
 import { searchMatchesAny } from '@/lib/search/normalize'
+import { useTranslation } from 'react-i18next'
 
 interface PlaygroundsClientProps {
   orgslug: string
@@ -25,6 +26,7 @@ export default function PlaygroundsClient({
   org_id,
   initialPlaygrounds,
 }: PlaygroundsClientProps) {
+  const { t } = useTranslation()
   const router = useRouter()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
@@ -100,7 +102,7 @@ export default function PlaygroundsClient({
       setPlaygrounds((prev) => [newPlayground, ...prev])
       router.push(`/editor/playground/${newPlayground.playground_uuid}/edit`)
     } catch {
-      toast.error('Failed to create playground')
+      toast.error(t('playground.create_error'))
     } finally {
       setIsCreating(false)
     }
@@ -118,14 +120,14 @@ export default function PlaygroundsClient({
         <GeneralWrapperStyled>
           <div className="flex flex-col space-y-2 mb-2">
             <div className="flex items-center justify-between">
-              <TypeOfContentTitle title="Playgrounds" type="pg" />
+              <TypeOfContentTitle title={t('playground.title')} type="pg" />
               {isUserAdmin && (
                 <button
                   onClick={openCreateModal}
                   disabled={isCreating}
                   className="rounded-lg bg-primary transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-primary-foreground nice-shadow flex space-x-2 items-center hover:bg-primary/90 hover:scale-105 disabled:opacity-50"
                 >
-                  <div>New Playground</div>
+                  <div>{t('playground.new_playground')}</div>
                   <div className="text-md bg-white/20 px-1 rounded-full">+</div>
                 </button>
               )}
@@ -135,19 +137,19 @@ export default function PlaygroundsClient({
             {playgrounds.length > 0 && (
               <div className="flex items-center gap-3 mb-4 flex-wrap">
                 <div className="relative w-full sm:w-80">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    aria-label="Search playgrounds"
-                    placeholder="Search playgrounds..."
-                    className="w-full pl-10 pr-10 py-2.5 bg-white nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0"
+                    aria-label={t('playground.search_aria')}
+                    placeholder={t('playground.search_placeholder')}
+                    className="w-full ps-10 pe-10 py-2.5 bg-white nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0"
                   />
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute end-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -159,7 +161,7 @@ export default function PlaygroundsClient({
             {/* Search results info */}
             {searchQuery && (
               <div className="mb-2 text-sm text-gray-500">
-                {filtered.length} result{filtered.length !== 1 ? 's' : ''} for &quot;{searchQuery}&quot;
+                {t('playground.results', { count: filtered.length, query: searchQuery })}
               </div>
             )}
 
@@ -177,8 +179,8 @@ export default function PlaygroundsClient({
               {filtered.length === 0 && searchQuery && (
                 <div className="col-span-full flex flex-col justify-center items-center py-12 px-4">
                   <Search className="w-12 h-12 text-gray-300 mb-4" />
-                  <h2 className="text-xl font-semibold text-gray-600 mb-2">No results for &quot;{searchQuery}&quot;</h2>
-                  <p className="text-gray-400">Try a different search term</p>
+                  <h2 className="text-xl font-semibold text-gray-600 mb-2">{t('playground.no_results_title', { query: searchQuery })}</h2>
+                  <p className="text-gray-400">{t('playground.try_different')}</p>
                 </div>
               )}
 
@@ -187,9 +189,9 @@ export default function PlaygroundsClient({
                   <div className="p-4 bg-white rounded-full nice-shadow mb-4">
                     <Cube className="w-8 h-8 text-gray-300" />
                   </div>
-                  <h1 className="text-xl font-bold text-gray-600 mb-2">No playgrounds yet</h1>
+                  <h1 className="text-xl font-bold text-gray-600 mb-2">{t('playground.empty_title')}</h1>
                   <p className="text-md text-gray-400 mb-6 max-w-xs text-center">
-                    Create interactive AI-generated experiences for your learners.
+                    {t('playground.empty_description')}
                   </p>
                   {isUserAdmin && (
                     <button
@@ -197,7 +199,7 @@ export default function PlaygroundsClient({
                       disabled={isCreating}
                       className="rounded-lg bg-primary transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-primary-foreground nice-shadow flex space-x-2 items-center hover:bg-primary/90 hover:scale-105 disabled:opacity-50"
                     >
-                      <div>New Playground</div>
+                      <div>{t('playground.new_playground')}</div>
                       <div className="text-md bg-white/20 px-1 rounded-full">+</div>
                     </button>
                   )}
@@ -213,8 +215,8 @@ export default function PlaygroundsClient({
                   disabled={currentPage === 1}
                   className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 bg-white nice-shadow rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  <ChevronLeft className="w-4 h-4" />
-                  <span className="hidden sm:inline">Previous</span>
+                  <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
+                  <span className="hidden sm:inline">{t('playground.previous')}</span>
                 </button>
 
                 <div className="flex items-center gap-1">
@@ -243,15 +245,15 @@ export default function PlaygroundsClient({
                   disabled={currentPage === totalPages}
                   className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 bg-white nice-shadow rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  <span className="hidden sm:inline">Next</span>
-                  <ChevronRight className="w-4 h-4" />
+                  <span className="hidden sm:inline">{t('playground.next')}</span>
+                  <ChevronRight className="w-4 h-4 rtl:rotate-180" />
                 </button>
               </div>
             )}
 
             {totalPages > 1 && (
               <div className="mt-2 text-center text-sm text-gray-500">
-                Page {currentPage} of {totalPages}
+                {t('playground.page_of', { current: currentPage, total: totalPages })}
               </div>
             )}
           </div>
@@ -263,27 +265,27 @@ export default function PlaygroundsClient({
     {showNameModal && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={() => setShowNameModal(false)}>
         <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4" onClick={(e) => e.stopPropagation()}>
-          <h2 className="text-base font-bold text-gray-900 mb-1">New Playground</h2>
-          <p className="text-xs text-gray-400 mb-4">Give your playground a name to get started.</p>
+          <h2 className="text-base font-bold text-gray-900 mb-1">{t('playground.create_title')}</h2>
+          <p className="text-xs text-gray-400 mb-4">{t('playground.create_description')}</p>
           <input
             autoFocus
             type="text"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') handleCreate(); if (e.key === 'Escape') setShowNameModal(false) }}
-            placeholder="e.g. Photosynthesis Quiz"
+            placeholder={t('playground.name_placeholder')}
             className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-black focus:border-transparent mb-4"
           />
           <div className="flex gap-2 justify-end">
             <button onClick={() => setShowNameModal(false)} className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
-              Cancel
+              {t('playground.cancel')}
             </button>
             <button
               onClick={handleCreate}
               disabled={isCreating}
               className="px-4 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
             >
-              {isCreating ? 'Creating…' : 'Create'}
+              {isCreating ? t('playground.creating') : t('playground.create')}
             </button>
           </div>
         </div>

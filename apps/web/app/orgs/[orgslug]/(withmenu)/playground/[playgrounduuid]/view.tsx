@@ -32,16 +32,16 @@ interface PlaygroundViewClientProps {
 }
 
 const ACCESS_BADGES = {
-  public: { icon: Globe, label: 'Public', className: 'bg-green-50 text-green-700' },
-  authenticated: { icon: Users, label: 'Members', className: 'bg-blue-50 text-blue-700' },
-  restricted: { icon: Lock, label: 'Restricted', className: 'bg-amber-50 text-amber-700' },
+  public: { icon: Globe, labelKey: 'playground.access_public', className: 'bg-green-50 text-green-700' },
+  authenticated: { icon: Users, labelKey: 'playground.access_members', className: 'bg-blue-50 text-blue-700' },
+  restricted: { icon: Lock, labelKey: 'playground.access_restricted', className: 'bg-amber-50 text-amber-700' },
 }
 
 export default function PlaygroundViewClient({
   playground,
   canEdit,
 }: PlaygroundViewClientProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [isFullscreen, setIsFullscreen] = useState(false)
   const iframeContainerRef = useRef<HTMLDivElement>(null)
 
@@ -85,7 +85,7 @@ export default function PlaygroundViewClient({
 
   const accessBadge = ACCESS_BADGES[playground.access_type] ?? ACCESS_BADGES.authenticated
   const AccessIcon = accessBadge.icon
-  const createdDate = dayjs(playground.creation_date).format('MMM D, YYYY')
+  const createdDate = dayjs(playground.creation_date).toDate().toLocaleDateString(i18n.language || 'en', { year: 'numeric', month: 'short', day: 'numeric' })
 
   const authorName = playground.author_first_name
     ? `${playground.author_first_name}${playground.author_last_name ? ` ${playground.author_last_name}` : ''}`
@@ -118,7 +118,7 @@ export default function PlaygroundViewClient({
             {/* Info card */}
             <div className="bg-white nice-shadow rounded-lg overflow-hidden">
               <div className="p-3 border-b border-gray-100">
-                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">About</p>
+                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">{t('playground.about')}</p>
                 <h1 className="text-sm font-bold text-gray-900 leading-snug">
                   {playground.name}
                 </h1>
@@ -132,7 +132,7 @@ export default function PlaygroundViewClient({
               <div className="px-3 py-2.5 space-y-2">
                 {authorName && (
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs text-gray-500">Author</span>
+                    <span className="text-xs text-gray-500">{t('playground.author')}</span>
                     <span className="flex items-center gap-1.5 text-xs text-gray-700 font-medium">
                       <UserAvatar
                         width={16}
@@ -146,25 +146,25 @@ export default function PlaygroundViewClient({
                   </div>
                 )}
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs text-gray-500">Access</span>
+                  <span className="text-xs text-gray-500">{t('playground.access')}</span>
                   <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold ${accessBadge.className}`}>
                     <AccessIcon size={9} />
-                    {accessBadge.label}
+                    {t(accessBadge.labelKey)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs text-gray-500">Created</span>
+                  <span className="text-xs text-gray-500">{t('playground.created')}</span>
                   <span className="flex items-center gap-1 text-xs text-gray-700">
                     <CalendarBlank size={10} className="text-gray-400" />
                     {createdDate}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs text-gray-500">Status</span>
+                  <span className="text-xs text-gray-500">{t('playground.status')}</span>
                   <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
                     playground.published ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'
                   }`}>
-                    {playground.published ? 'Published' : 'Draft'}
+                    {playground.published ? t('playground.published') : t('playground.draft')}
                   </span>
                 </div>
               </div>
@@ -176,7 +176,7 @@ export default function PlaygroundViewClient({
                     className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg text-xs font-bold bg-neutral-100 hover:bg-neutral-200 text-neutral-600 transition-colors"
                   >
                     <PencilSimple size={11} weight="bold" />
-                    Edit in Editor
+                    {t('playground.edit_in_editor')}
                   </Link>
                 )}
                 <button
@@ -184,7 +184,7 @@ export default function PlaygroundViewClient({
                   className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg text-xs font-bold bg-neutral-100 hover:bg-neutral-200 text-neutral-600 transition-colors"
                 >
                   <DownloadSimple size={11} weight="bold" />
-                  Download
+                  {t('playground.download')}
                 </button>
               </div>
             </div>
@@ -192,7 +192,7 @@ export default function PlaygroundViewClient({
             {/* Reactions card */}
             <div className="bg-white nice-shadow rounded-lg p-3">
               <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5">
-                Reactions
+                {t('playground.reactions')}
               </p>
               <PlaygroundReactionButton playgroundUuid={playground.playground_uuid} />
             </div>
@@ -213,15 +213,15 @@ export default function PlaygroundViewClient({
                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-white/80 backdrop-blur-sm nice-shadow text-neutral-500 hover:text-neutral-800 transition-colors"
               >
                 <DownloadSimple size={13} weight="bold" />
-                Download
+                {t('playground.download')}
               </button>
               <button
                 onClick={toggleFullscreen}
                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-white/80 backdrop-blur-sm nice-shadow text-neutral-500 hover:text-neutral-800 transition-colors"
               >
                 {isFullscreen
-                  ? <><ArrowsInSimple size={13} weight="bold" />Exit</>
-                  : <><ArrowsOutSimple size={13} weight="bold" />Fullscreen</>
+                  ? <><ArrowsInSimple size={13} weight="bold" />{t('playground.exit')}</>
+                  : <><ArrowsOutSimple size={13} weight="bold" />{t('playground.fullscreen')}</>
                 }
               </button>
             </div>
@@ -239,9 +239,9 @@ export default function PlaygroundViewClient({
                 <div className="w-14 h-14 rounded-2xl bg-white nice-shadow flex items-center justify-center mb-4">
                   <Sparkle size={24} weight="fill" className="text-gray-300" />
                 </div>
-                <p className="text-base font-semibold text-gray-500">No content yet</p>
+                <p className="text-base font-semibold text-gray-500">{t('playground.no_content')}</p>
                 <p className="text-sm text-gray-400 mt-1">
-                  {canEdit ? 'Open the editor to generate content.' : 'Check back later.'}
+                  {canEdit ? t('playground.open_editor_hint') : t('playground.check_back')}
                 </p>
                 {canEdit && (
                   <Link
@@ -249,7 +249,7 @@ export default function PlaygroundViewClient({
                     className="mt-4 flex items-center gap-1.5 px-4 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
                   >
                     <PencilSimple size={14} weight="bold" />
-                    Open Editor
+                    {t('playground.open_editor')}
                   </Link>
                 )}
               </div>
