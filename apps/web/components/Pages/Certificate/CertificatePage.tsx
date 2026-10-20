@@ -8,6 +8,7 @@ import { getUserCertificates } from '@services/courses/certifications';
 import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
 import { ArrowLeft, Download } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 import { getUriWithOrg } from '@services/config/config';
 
 interface CertificatePageProps {
@@ -17,6 +18,7 @@ interface CertificatePageProps {
 }
 
 const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qrCodeLink }) => {
+  const { t } = useTranslation();
   const session = useLHSession() as any;
   const org = useOrg() as any;
   const [userCertificate, setUserCertificate] = useState<any>(null);
@@ -27,7 +29,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
   useEffect(() => {
     const fetchCertificate = async () => {
       if (!session?.data?.tokens?.access_token) {
-        setError('Authentication required to view certificate');
+        setError(t('certificate.auth_required'));
         setIsLoading(false);
         return;
       }
@@ -47,18 +49,18 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
         if (result.success && result.data && result.data.length > 0) {
           setUserCertificate(result.data[0]);
         } else {
-          setError('No certificate found for this course');
+          setError(t('certificate.no_certificate_found'));
         }
       } catch (error) {
         console.error('Error fetching certificate:', error);
-        setError('Failed to load certificate. Please try again later.');
+        setError(t('certificate.failed_load'));
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchCertificate();
-  }, [courseid, session?.data?.tokens?.access_token, org?.id]);
+  }, [courseid, session?.data?.tokens?.access_token, org?.id, t]);
 
 
 
@@ -318,7 +320,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
 
     } catch (error) {
       console.error('Error generating PDF:', error);
-      toast.error('Failed to generate PDF. Please try again.');
+      toast.error(t('certificate.pdf_error'));
     }
   };
 
@@ -327,7 +329,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading certificate...</p>
+          <p className="text-gray-600">{t('certificate.loading_certificate')}</p>
         </div>
       </div>
     );
@@ -338,14 +340,14 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-6">
           <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-red-800 mb-2">Certificate Not Available</h2>
+            <h2 className="text-xl font-semibold text-red-800 mb-2">{t('certificate.not_available')}</h2>
             <p className="text-red-600 mb-4">{error}</p>
             <Link
               href={getUriWithOrg(orgslug, '') + `/course/${courseid}`}
               className="inline-flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition duration-200"
             >
-              <ArrowLeft className="w-5 h-5" />
-              <span>Back to Course</span>
+              <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
+              <span>{t('certificate.back_to_course')}</span>
             </Link>
           </div>
         </div>
@@ -358,16 +360,16 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-6">
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-yellow-800 mb-2">No Certificate Found</h2>
+            <h2 className="text-xl font-semibold text-yellow-800 mb-2">{t('certificate.no_certificate_found_title')}</h2>
             <p className="text-yellow-600 mb-4">
-              No certificate is available for this course. Please contact your instructor for more information.
+              {t('certificate.no_certificate_available')}
             </p>
             <Link
               href={getUriWithOrg(orgslug, '') + `/course/${courseid}`}
               className="inline-flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition duration-200"
             >
-              <ArrowLeft className="w-5 h-5" />
-              <span>Back to Course</span>
+              <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
+              <span>{t('certificate.back_to_course')}</span>
             </Link>
           </div>
         </div>
@@ -384,8 +386,8 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
             href={getUriWithOrg(orgslug, '') + `/course/${courseid}`}
             className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition duration-200"
           >
-            <ArrowLeft className="w-5 h-5" />
-            <span>Back to Course</span>
+            <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
+            <span>{t('certificate.back_to_course')}</span>
           </Link>
           
           <div className="flex items-center space-x-4">
@@ -394,7 +396,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
               className="inline-flex items-center space-x-2 bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition duration-200"
             >
               <Download className="w-5 h-5" />
-              <span>Download PDF</span>
+              <span>{t('certificate.download_pdf')}</span>
             </button>
           </div>
         </div>
