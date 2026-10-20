@@ -26,6 +26,7 @@
                                      "submit_to_directories":  "Submit to Podcast Directories",
                                      "tips_for_distribution":  "Tips for Successful Distribution"
                                  },
+                   "filter":  "Filter",
                    "hello":  "Hello",
                    "home":  "Home",
                    "back_to_home":  "Back to Home",
@@ -66,6 +67,9 @@
                    "all":  "All",
                    "view_all":  "View all",
                    "all_courses":  "All Courses",
+                   "easy":  "Easy",
+                   "medium":  "Medium",
+                   "hard":  "Hard",
                    "all_assignments":  "All Assignments",
                    "recent":  "Recent",
                    "expand":  "Expand",

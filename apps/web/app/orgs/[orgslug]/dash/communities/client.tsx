@@ -281,26 +281,26 @@ const CommunitiesDashClient = ({
                 size="small"
                 variant="transparent"
                 className="bg-white hover:bg-gray-50 shadow-borders-base"
-                aria-label="Filter"
+                aria-label={t('common.filter')}
               >
                 <ConceptIcon.filter size={14} />
               </IconButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white min-w-0 w-40">
               <DropdownMenuItem onSelect={() => setActiveFilter('all')} className="flex items-center justify-between">
-                <span>All Communities</span>
+                <span>{t('communities.all_communities')}</span>
                 {activeFilter === 'all' && <ConceptIcon.check size={12} className="text-gray-500" />}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setActiveFilter('newest')} className="flex items-center justify-between">
-                <span>Newest</span>
+                <span>{t('communities.newest')}</span>
                 {activeFilter === 'newest' && <ConceptIcon.check size={12} className="text-gray-500" />}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setActiveFilter('course')} className="flex items-center justify-between">
-                <span>Course Communities</span>
+                <span>{t('communities.course_communities')}</span>
                 {activeFilter === 'course' && <ConceptIcon.check size={12} className="text-gray-500" />}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setActiveFilter('general')} className="flex items-center justify-between">
-                <span>General</span>
+                <span>{t('communities.general')}</span>
                 {activeFilter === 'general' && <ConceptIcon.check size={12} className="text-gray-500" />}
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -420,8 +420,8 @@ const CommunitiesDashClient = ({
             onClick={() => goToPage(currentPage - 1)}
             disabled={currentPage === 1}
           >
-            <ChevronLeft className="w-4 h-4" />
-            <span className="hidden sm:inline ml-1">Previous</span>
+            <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
+            <span className="hidden sm:inline ms-1">{t('pagination.previous')}</span>
           </Button>
 
           <div className="flex items-center gap-1 mx-2">
@@ -451,8 +451,8 @@ const CommunitiesDashClient = ({
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage === totalPages}
           >
-            <span className="hidden sm:inline mr-1">Next</span>
-            <ChevronRight className="w-4 h-4" />
+            <span className="hidden sm:inline me-1">{t('pagination.next')}</span>
+            <ChevronRight className="w-4 h-4 rtl:rotate-180" />
           </Button>
         </div>
       )}

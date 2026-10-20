@@ -537,26 +537,26 @@ function CoursesHome(params: CourseProps) {
                 size="small"
                 variant="transparent"
                 className="bg-white hover:bg-gray-50 shadow-borders-base"
-                aria-label="Filter"
+                aria-label={t('common.filter')}
               >
                 <ConceptIcon.filter size={14} />
               </IconButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white min-w-0 w-40">
               <DropdownMenuItem onClick={() => setActiveFilter('All')} className="flex items-center justify-between">
-                <span>All Courses</span>
+                <span>{t('common.all_courses')}</span>
                 {activeFilter === 'All' && <ConceptIcon.check size={12} className="text-gray-500" />}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setActiveFilter('Easy')} className="flex items-center justify-between">
-                <span>Easy</span>
+                <span>{t('common.easy')}</span>
                 {activeFilter === 'Easy' && <ConceptIcon.check size={12} className="text-gray-500" />}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setActiveFilter('Medium')} className="flex items-center justify-between">
-                <span>Medium</span>
+                <span>{t('common.medium')}</span>
                 {activeFilter === 'Medium' && <ConceptIcon.check size={12} className="text-gray-500" />}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setActiveFilter('Hard')} className="flex items-center justify-between">
-                <span>Hard</span>
+                <span>{t('common.hard')}</span>
                 {activeFilter === 'Hard' && <ConceptIcon.check size={12} className="text-gray-500" />}
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -743,8 +743,8 @@ function CoursesHome(params: CourseProps) {
             onClick={() => goToPage(currentPage - 1)}
             disabled={currentPage === 1}
           >
-            <ChevronLeft className="w-4 h-4" />
-            <span className="hidden sm:inline ml-1">{t('pagination.previous')}</span>
+            <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
+            <span className="hidden sm:inline ms-1">{t('pagination.previous')}</span>
           </Button>
 
           <div className="flex items-center gap-1 mx-2">
@@ -774,8 +774,8 @@ function CoursesHome(params: CourseProps) {
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage === totalPages}
           >
-            <span className="hidden sm:inline mr-1">{t('pagination.next')}</span>
-            <ChevronRight className="w-4 h-4" />
+            <span className="hidden sm:inline me-1">{t('pagination.next')}</span>
+            <ChevronRight className="w-4 h-4 rtl:rotate-180" />
           </Button>
         </div>
       )}

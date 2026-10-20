@@ -334,7 +334,7 @@ function CollectionsHome(params: CollectionsHomeProps) {
                 size="small"
                 variant="transparent"
                 className="bg-white hover:bg-gray-50 shadow-borders-base"
-                aria-label="Filter"
+                aria-label={t('common.filter')}
               >
                 <ConceptIcon.filter size={14} />
               </IconButton>
@@ -457,8 +457,8 @@ function CollectionsHome(params: CollectionsHomeProps) {
             onClick={() => goToPage(currentPage - 1)}
             disabled={currentPage === 1}
           >
-            <ChevronLeft className="w-4 h-4" />
-            <span className="hidden sm:inline ml-1">{t('pagination.previous')}</span>
+            <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
+            <span className="hidden sm:inline ms-1">{t('pagination.previous')}</span>
           </Button>
 
           <div className="flex items-center gap-1 mx-2">
@@ -488,8 +488,8 @@ function CollectionsHome(params: CollectionsHomeProps) {
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage === totalPages}
           >
-            <span className="hidden sm:inline mr-1">{t('pagination.next')}</span>
-            <ChevronRight className="w-4 h-4" />
+            <span className="hidden sm:inline me-1">{t('pagination.next')}</span>
+            <ChevronRight className="w-4 h-4 rtl:rotate-180" />
           </Button>
         </div>
       )}
