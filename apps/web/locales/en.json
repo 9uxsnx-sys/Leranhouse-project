@@ -2390,6 +2390,12 @@
                                                                    "thumbnail_label":  "Thumbnail",
                                                                    "image_search_placeholder":  "Search for images..."
                                                                },
+                                                      "locale":  {
+                                                                   "source":  "Source",
+                                                                   "translation":  "Translation",
+                                                                   "missing":  "No translation yet",
+                                                                   "inherited":  "Showing the source text. Edit a field to translate it."
+                                                               },
                                                       "thumbnail":  {
                                                                         "upload_image":  "Upload Image",
                                                                         "upload_video":  "Upload Video",

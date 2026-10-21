@@ -2080,6 +2080,12 @@
           "thumbnail_label": "Miniature",
           "image_search_placeholder": "Rechercher des images..."
         },
+        "locale": {
+          "source": "Source",
+          "translation": "Traduction",
+          "missing": "Aucune traduction pour le moment",
+          "inherited": "Le texte source est affiché. Modifiez un champ pour le traduire."
+        },
         "thumbnail": {
           "upload_image": "Télécharger une image",
           "upload_video": "Télécharger une vidéo",

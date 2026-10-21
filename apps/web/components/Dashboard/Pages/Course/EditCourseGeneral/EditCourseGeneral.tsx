@@ -24,6 +24,13 @@ import { SafeImage } from '@components/Objects/SafeImage';
 
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { updateCourse } from '@services/courses/courses';
+import {
+  CourseTranslation,
+  getCourseTranslations,
+  upsertCourseTranslation,
+} from '@services/courses/translations';
+import i18n from '@/lib/i18n';
+import { getCurrentLanguageNativeName } from '@/lib/languages';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { mutate } from 'swr';
 import toast from 'react-hot-toast';
@@ -114,6 +121,40 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
 
   const previousValuesRef = useRef<any>(null);
 
+  // ── Content locale ──
+  // The locale selected in the language switcher decides which content we edit.
+  // The base course row always holds the source locale; other locales live in
+  // course_translation rows.
+  const contentLocale = i18n.language.split('-')[0]
+  const sourceLocale = (courseStructure?.source_locale || 'en').split('-')[0]
+  const isSourceLocale = contentLocale === sourceLocale
+  const [translation, setTranslation] = useState<CourseTranslation | null>(null)
+  const [isSavingTranslation, setIsSavingTranslation] = useState(false)
+
+  useEffect(() => {
+    if (isSourceLocale || !courseStructure?.course_uuid) {
+      setTranslation(null)
+      return
+    }
+    let cancelled = false
+    ;(async () => {
+      try {
+        const rows = await getCourseTranslations(
+          courseStructure.course_uuid,
+          session.data?.tokens?.access_token
+        )
+        if (!cancelled) {
+          setTranslation(rows.find(row => row.locale === contentLocale) || null)
+        }
+      } catch {
+        if (!cancelled) setTranslation(null)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [contentLocale, isSourceLocale, courseStructure?.course_uuid, session.data?.tokens?.access_token])
+
   // Initialize learnings as a JSON array if it's not already
   const initializeLearnings = useCallback((learnings: any) => {
     if (!learnings) {
@@ -178,11 +219,14 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
   const initialValues = useMemo(() => {
     const thumbnailType = courseStructure?.thumbnail_type || 'image';
     const meta = courseStructure?.extra_metadata || {};
+    // Non-source locales start from their translation when one exists, and from
+    // the source text otherwise (so the author sees what they are translating).
+    const localized = !isSourceLocale && translation ? translation : null;
     return {
-      name: courseStructure?.name || '',
-      description: courseStructure?.description || '',
-      about: courseStructure?.about || '',
-      learnings: initializeLearnings(courseStructure?.learnings || ''),
+      name: localized?.name ?? courseStructure?.name ?? '',
+      description: localized?.description ?? courseStructure?.description ?? '',
+      about: localized?.about ?? courseStructure?.about ?? '',
+      learnings: initializeLearnings(localized?.learnings ?? courseStructure?.learnings ?? ''),
       public: courseStructure?.public || false,
       thumbnail_type: thumbnailType,
       // extra_metadata fields
@@ -198,7 +242,8 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
     };
   }, [courseStructure?.name, courseStructure?.description, courseStructure?.about,
       courseStructure?.learnings, courseStructure?.public,
-      courseStructure?.thumbnail_type, courseStructure?.extra_metadata, initializeLearnings, initializeRequirements]);
+      courseStructure?.thumbnail_type, courseStructure?.extra_metadata, initializeLearnings, initializeRequirements,
+      translation, isSourceLocale]);
 
   const formik = useFormik({
     initialValues,
@@ -213,6 +258,9 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
   // Sync form changes to context — compare against formik.initialValues
   // so that reinitialization from server data is never treated as a user edit
   useEffect(() => {
+    // Translation edits are saved through the translations endpoint, so they must
+    // never leak into the shared course structure used by the other tabs.
+    if (!isSourceLocale) return;
     if (isLoading || isSaving) return;
 
     // Compare current values against formik's own initialValues.
@@ -258,7 +306,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
     } else {
       previousValuesRef.current = null;
     }
-  }, [formik.values, formik.initialValues, isLoading, isSaving, syncChanges]);
+  }, [formik.values, formik.initialValues, isLoading, isSaving, syncChanges, isSourceLocale]);
 
   const isPublished = courseStructure?.published ?? false;
   const courseUUID = courseStructure?.course_uuid ?? ''
@@ -317,8 +365,17 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
     session.data?.tokens?.access_token, dispatchCourse, props.orgslug, t
   ]);
 
-  const isSaved = course?.isSaved ?? true;
-  const isActiveSaving = isSaving || isManualSaving;
+  // In a translation locale the shared course structure is untouched, so the
+  // save state has to come from the form itself.
+  const hasTranslationChanges =
+    !isSourceLocale &&
+    (formik.values.name !== formik.initialValues.name ||
+      formik.values.description !== formik.initialValues.description ||
+      formik.values.about !== formik.initialValues.about ||
+      formik.values.learnings !== formik.initialValues.learnings)
+
+  const isSaved = isSourceLocale ? (course?.isSaved ?? true) : !hasTranslationChanges;
+  const isActiveSaving = isSaving || isManualSaving || isSavingTranslation;
 
   const handleManualSave = useCallback(async () => {
     if (isActiveSaving || !courseUUID) return;
@@ -330,6 +387,30 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
     dispatchCourse({ type: 'setSaving', payload: true });
 
     try {
+      if (!isSourceLocale) {
+        setIsSavingTranslation(true);
+        await upsertCourseTranslation(
+          courseUUID,
+          contentLocale,
+          {
+            name: formik.values.name,
+            description: formik.values.description,
+            about: formik.values.about,
+            learnings: formik.values.learnings,
+            tags: translation?.tags ?? null,
+            seo: translation?.seo ?? null,
+          },
+          session.data?.tokens?.access_token
+        );
+        const rows = await getCourseTranslations(
+          courseUUID,
+          session.data?.tokens?.access_token
+        );
+        setTranslation(rows.find(row => row.locale === contentLocale) || null);
+        toast.success(t('dashboard.courses.save.success'));
+        return;
+      }
+
       await updateCourse(
         courseUUID,
         courseStructure,
@@ -349,8 +430,10 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
     } finally {
       dispatchCourse({ type: 'setSaving', payload: false });
       setIsManualSaving(false);
+      setIsSavingTranslation(false);
     }
-  }, [isActiveSaving, courseUUID, courseStructure, cacheKey, session.data?.tokens?.access_token, dispatchCourse, props.orgslug, debounceManager]);
+  }, [isActiveSaving, courseUUID, courseStructure, cacheKey, session.data?.tokens?.access_token, dispatchCourse, props.orgslug, debounceManager,
+      isSourceLocale, contentLocale, formik.values, translation]);
 
   // useCourseFieldSync handles the unmount cleanup (flushing pending edits
   // instead of discarding them), so no local cleanup is needed here.
@@ -384,6 +467,26 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
 
                 {/* Right: Save + Publish */}
                 <div className="flex items-center gap-2">
+                  <span
+                    className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600"
+                    title={
+                      isSourceLocale
+                        ? t('dashboard.courses.general.locale.source')
+                        : t('dashboard.courses.general.locale.translation')
+                    }
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${isSaved ? 'bg-teal-500' : 'bg-amber-400'}`}
+                    />
+                    <span>{getCurrentLanguageNativeName(contentLocale)}</span>
+                    <span className="text-gray-400">
+                      {isSourceLocale
+                        ? t('dashboard.courses.general.locale.source')
+                        : translation
+                          ? t('dashboard.courses.general.locale.translation')
+                          : t('dashboard.courses.general.locale.missing')}
+                    </span>
+                  </span>
                   <button
                     onClick={isSaved ? undefined : handleManualSave}
                     disabled={isActiveSaving}
@@ -432,6 +535,12 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                   </button>
                 </div>
               </div>
+
+              {!isSourceLocale && !translation && (
+                <div className="text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
+                  {t('dashboard.courses.general.locale.inherited')}
+                </div>
+              )}
 
               {/* ── BASIC INFORMATION ── */}
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">

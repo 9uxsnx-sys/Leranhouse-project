@@ -2152,6 +2152,12 @@
           "thumbnail_label": "الصورة المصغرة",
           "image_search_placeholder": "بحث عن صور..."
         },
+        "locale": {
+          "source": "المصدر",
+          "translation": "الترجمة",
+          "missing": "لا توجد ترجمة بعد",
+          "inherited": "يتم عرض النص الأصلي. عدّل حقلاً لترجمته."
+        },
         "thumbnail": {
           "upload_image": "رفع صورة",
           "upload_video": "رفع فيديو",
