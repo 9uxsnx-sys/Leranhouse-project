@@ -625,12 +625,18 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
 
             {/* Lesson Content */}
             <section id="lesson-content" className="scroll-mt-24">
-              <Heading level="h1" className="!text-2xl mb-5 ms-1">
+              <Heading level="h1" className="!text-2xl mb-5">
                 {renderedActivity?.activity_type === 'TYPE_VIDEO' ? t('lesson.preview.lesson_video') : t('lesson.preview.lesson_content')}
               </Heading>
               {renderedActivity ? (
                 <Suspense fallback={<LoadingFallback />}>
-                  {renderActivityContent(renderedActivity, courseuuid, t)}
+                  {renderedActivity.activity_type === 'TYPE_DYNAMIC' ? (
+                    <div className="lesson-rich-text rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] px-6 py-6">
+                      {renderActivityContent(renderedActivity, courseuuid, t)}
+                    </div>
+                  ) : (
+                    renderActivityContent(renderedActivity, courseuuid, t)
+                  )}
                 </Suspense>
               ) : currentActivity ? (
                 <LoadingFallback />
@@ -647,27 +653,30 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
             {/* Key Takeaways */}
             {takeaways.length > 0 && (
               <section id="summary" className="scroll-mt-24">
-                <Heading level="h1" className="!text-2xl mb-5 ms-1">{t('lesson.preview.key_takeaways')}</Heading>
-                <ul className="space-y-4">
-                  {takeaways.map((takeaway: { title: string; items: string[] }, idx: number) => (
-                    <li key={idx}>
-                      <div className="flex items-start gap-2">
-                        <span className="text-ui-fg-muted shrink-0 mt-0.5">&bull;</span>
-                        <Text size="base" className="text-black text-[17px]">{takeaway.title}</Text>
-                      </div>
-                      {takeaway.items && takeaway.items.length > 0 && (
-                        <ul className="ms-6 mt-2 space-y-1.5">
-                          {takeaway.items.map((item: string, iidx: number) => (
-                            <li key={iidx} className="flex items-start gap-2">
-                              <span className="text-ui-fg-muted shrink-0">&bull;</span>
-                              <Text size="base" className="text-black text-[17px]">{item}</Text>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </li>
-                  ))}
-                </ul>
+                <Heading level="h1" className="!text-2xl mb-5">
+                  {t('lesson.preview.key_takeaways')}
+                </Heading>
+                <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] px-5 py-5">
+                  <ul className="space-y-4">
+                    {takeaways.map((takeaway: { title: string; items: string[] }, idx: number) => (
+                      <li key={idx}>
+                        <Text weight="plus" size="base" className="text-ui-fg-base block">
+                          {takeaway.title}
+                        </Text>
+                        {takeaway.items && takeaway.items.length > 0 && (
+                          <ul className="mt-2 space-y-1.5 ps-5">
+                            {takeaway.items.map((item: string, iidx: number) => (
+                              <li key={iidx} className="flex items-start gap-2">
+                                <span className="text-ui-fg-muted shrink-0">&bull;</span>
+                                <Text size="base" className="text-ui-fg-subtle text-[16px]">{item}</Text>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </section>
             )}
 

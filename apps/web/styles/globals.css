@@ -2556,6 +2556,52 @@ html[dir='rtl'] samp {
 .canva-content-wrapper .ProseMirror pre .hljs-emphasis { font-style: italic; }
 .canva-content-wrapper .ProseMirror pre .hljs-strong { font-weight: 700; }
 
+/* ─── Lesson Preview: rich-text body inside a card ─── */
+.lesson-rich-text .canva-content-wrapper .ProseMirror {
+  padding: 0;
+}
+.lesson-rich-text .canva-content-wrapper .ProseMirror p {
+  font-size: 16px;
+  line-height: 1.75;
+  margin-bottom: 16px;
+}
+.lesson-rich-text .canva-content-wrapper .ProseMirror p:last-child {
+  margin-bottom: 0;
+}
+.lesson-rich-text .canva-content-wrapper .ProseMirror li {
+  font-size: 16px;
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+.lesson-rich-text .canva-content-wrapper .ProseMirror li p {
+  margin-bottom: 0;
+}
+.lesson-rich-text .canva-content-wrapper .ProseMirror ul,
+.lesson-rich-text .canva-content-wrapper .ProseMirror ol {
+  padding: 0;
+  padding-inline-start: 24px;
+  margin-bottom: 20px;
+}
+.lesson-rich-text .canva-content-wrapper .ProseMirror > *:first-child {
+  margin-top: 0;
+}
+.lesson-rich-text .canva-content-wrapper .ProseMirror h2 {
+  font-size: 22px;
+  line-height: 1.35;
+  font-weight: 600;
+  margin: 28px 0 12px;
+}
+.lesson-rich-text .canva-content-wrapper .ProseMirror h3 {
+  font-size: 18px;
+  line-height: 1.4;
+  font-weight: 600;
+  margin: 24px 0 10px;
+}
+.lesson-rich-text .canva-content-wrapper .ProseMirror a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 /* ─── DynamicCanva Mobile Overrides ─── */
 @media (max-width: 768px) {
   .canva-content-wrapper > div:first-child:not(:last-child) {

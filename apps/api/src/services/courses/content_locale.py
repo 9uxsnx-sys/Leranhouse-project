@@ -46,7 +46,7 @@ def apply_chapter_locale(chapter: ChapterRead, locale: Optional[str]) -> None:
 def apply_activity_locale(
     activity: ActivityRead, locale: Optional[str], include_content: bool = True
 ) -> None:
-    """Override an activity's name/content in place when a translation exists."""
+    """Override an activity's display fields in place when a translation exists."""
     data = _translation_for(activity.extra_metadata, locale)
     if not data:
         return
@@ -56,6 +56,20 @@ def apply_activity_locale(
     content = data.get("content")
     if include_content and isinstance(content, dict) and content:
         activity.content = content
+    # Structured lesson sections shown by the learner page (objectives,
+    # takeaways, downloadable resources, knowledge checks) are content too.
+    overlay = {
+        key: data[key]
+        for key in (
+            "learning_objectives",
+            "takeaways",
+            "resources",
+            "knowledge_checks",
+        )
+        if isinstance(data.get(key), list) and data[key]
+    }
+    if overlay:
+        activity.extra_metadata = {**(activity.extra_metadata or {}), **overlay}
 
 
 def apply_course_content_locale(chapters: list[ChapterRead], locale: Optional[str]) -> None:
