@@ -52,6 +52,19 @@ def get_translation_row(
     ).first()
 
 
+def _overlay_from_translation(translation: CourseTranslation) -> dict:
+    overlay = {
+        "name": translation.name,
+        "description": translation.description,
+        "about": translation.about,
+        "learnings": translation.learnings,
+        "tags": translation.tags,
+    }
+    if translation.seo:
+        overlay["seo"] = translation.seo
+    return overlay
+
+
 def build_translation_overlay(
     course: Course, locale: Optional[str], db_session: Session
 ) -> Tuple[dict, str, bool]:
@@ -72,17 +85,7 @@ def build_translation_overlay(
     if not translation:
         return {}, source_locale, True
 
-    overlay = {
-        "name": translation.name,
-        "description": translation.description,
-        "about": translation.about,
-        "learnings": translation.learnings,
-        "tags": translation.tags,
-    }
-    if translation.seo:
-        overlay["seo"] = translation.seo
-
-    return overlay, requested, False
+    return _overlay_from_translation(translation), requested, False
 
 
 def apply_overlay(model, course: Course, locale: Optional[str], db_session: Session):
@@ -97,6 +100,68 @@ def apply_overlay(model, course: Course, locale: Optional[str], db_session: Sess
             "is_fallback": is_fallback,
         }
     )
+
+
+def apply_overlay_bulk(course_reads, locale: Optional[str], db_session: Session):
+    """Localize a page of course reads with a single translation query.
+
+    List endpoints cannot afford one SELECT per course, so every translation row
+    for the page is fetched at once.
+    """
+    requested = normalize_locale(locale)
+    if not requested or not course_reads:
+        return course_reads
+
+    pending_ids = [
+        read.id
+        for read in course_reads
+        if read.id
+        and normalize_locale(getattr(read, "source_locale", None)) != requested
+    ]
+
+    rows: dict[int, CourseTranslation] = {}
+    if pending_ids:
+        translations = db_session.exec(
+            select(CourseTranslation).where(
+                CourseTranslation.course_id.in_(pending_ids),
+                CourseTranslation.locale == requested,
+            )
+        ).all()
+        rows = {row.course_id: row for row in translations}
+
+    localized = []
+    for read in course_reads:
+        source_locale = (
+            normalize_locale(getattr(read, "source_locale", None)) or DEFAULT_LOCALE
+        )
+        if requested == source_locale or not read.id:
+            localized.append(
+                read.model_copy(
+                    update={"content_locale": source_locale, "is_fallback": False}
+                )
+            )
+            continue
+
+        translation = rows.get(read.id)
+        if not translation:
+            localized.append(
+                read.model_copy(
+                    update={"content_locale": source_locale, "is_fallback": True}
+                )
+            )
+            continue
+
+        localized.append(
+            read.model_copy(
+                update={
+                    **_overlay_from_translation(translation),
+                    "content_locale": requested,
+                    "is_fallback": False,
+                }
+            )
+        )
+
+    return localized
 
 
 async def list_course_translations(

@@ -6765,6 +6765,7 @@
                    "noPermission":  "You do not have permission to view this course.",
                    "page":  {
                                 "banner":  "Course banner",
+                                "only_available_in":  "This course is only available in {{language}}.",
                                 "about_title":  "About This Course",
                                 "in_progress":  "In Progress",
                                 "progress_complete":  "{{percent}}% complete",

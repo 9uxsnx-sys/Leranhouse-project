@@ -9,6 +9,8 @@ import { getOrgThumbnailMediaDirectory, getOrgOgImageMediaDirectory } from '@ser
 import { getCanonicalUrl, getOrgSeoConfig, buildPageTitle, buildBreadcrumbJsonLd } from '@/lib/seo/utils'
 import { getServerCanonicalUrl } from '@/lib/seo/utils.server'
 import { JsonLd } from '@components/SEO/JsonLd'
+import { cookies } from 'next/headers'
+import { localeCode } from '@/lib/direction'
 
 type MetadataProps = {
   params: Promise<{ orgslug: string }>
@@ -75,6 +77,8 @@ const CoursesPage = async (params: any) => {
   const orgslug = (await params.params).orgslug
   const session = await getServerSession()
   const access_token = session?.tokens?.access_token
+  const cookieStore = await cookies()
+  const locale = localeCode(cookieStore.get('i18next')?.value) || 'en'
 
   const [org, coursesResult] = await Promise.all([
     getOrganizationContextInfo(orgslug, {
@@ -84,7 +88,9 @@ const CoursesPage = async (params: any) => {
     getOrgCourses(
       orgslug,
       { revalidate: 120, tags: ['courses'] },
-      access_token ?? undefined
+      access_token ?? undefined,
+      false,
+      locale
     ).catch((error: any) => {
       if (error?.status === 403) return []
       throw error

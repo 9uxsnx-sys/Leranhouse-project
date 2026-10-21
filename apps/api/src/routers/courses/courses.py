@@ -609,6 +609,9 @@ async def api_get_course_by_orgslug(
     limit: int,
     org_slug: str,
     include_unpublished: bool = False,
+    locale: Optional[str] = Query(
+        default=None, description="Content locale (falls back to the source locale)"
+    ),
     db_session: Session = Depends(get_db_session),
     current_user: PublicUser = Depends(get_current_user),
 ) -> List[CourseRead]:
@@ -616,7 +619,14 @@ async def api_get_course_by_orgslug(
     Get courses by page and limit
     """
     return await get_courses_orgslug(
-        request, current_user, org_slug, db_session, page, limit, include_unpublished
+        request,
+        current_user,
+        org_slug,
+        db_session,
+        page,
+        limit,
+        include_unpublished,
+        locale,
     )
 
 
@@ -668,6 +678,9 @@ async def api_search_courses(
     query: str = Query(..., min_length=1, max_length=200, description="Search query"),
     page: int = Query(default=1, ge=1, description="Page number"),
     limit: int = Query(default=10, ge=1, le=50, description="Items per page (max 50)"),
+    locale: Optional[str] = Query(
+        default=None, description="Content locale (falls back to the source locale)"
+    ),
     db_session: Session = Depends(get_db_session),
     current_user: PublicUser = Depends(get_current_user),
 ) -> List[CourseRead]:
@@ -680,7 +693,7 @@ async def api_search_courses(
     - Uses parameterized SQL queries (SQL injection protected)
     """
     return await search_courses(
-        request, current_user, org_slug, query, db_session, page, limit
+        request, current_user, org_slug, query, db_session, page, limit, locale
     )
 
 

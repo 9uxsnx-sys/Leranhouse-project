@@ -372,7 +372,7 @@ const sections: SectionDescriptor<any>[] = [
 const PER_PAGE = 9
 
 function SearchPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const router = useRouter()
   const searchParams = useSearchParams()
   const session = useLHSession() as any
@@ -425,6 +425,7 @@ function SearchPage() {
       PER_PAGE,
       null,
       session?.data?.tokens?.access_token,
+      i18n.language,
     )
       .then((response) => {
         if (cancelled) return
@@ -445,7 +446,7 @@ function SearchPage() {
     return () => {
       cancelled = true
     }
-  }, [urlQuery, urlPage, org?.slug, session?.data?.tokens?.access_token])
+  }, [urlQuery, urlPage, org?.slug, session?.data?.tokens?.access_token, i18n.language])
 
   const totalResults = useMemo(
     () => sections.reduce((sum, s) => sum + s.total(results), 0),

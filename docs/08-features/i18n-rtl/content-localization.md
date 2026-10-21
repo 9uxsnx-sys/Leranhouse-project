@@ -1,6 +1,6 @@
 # Multilingual course authoring — research & proposal
 
-> **Status:** plan agreed (see §7.1). Phases A, B and C are implemented; Phase D (learner fallback hint, emails/certificates/search) is next.
+> **Status:** plan agreed (see §7.1). Phases A–C are done; Phase D covers the learner pages, catalog, landing cards, search and the fallback hint. Trail lists, certificates and emails remain.
 > **Trigger:** a course authored in English shows English body text inside an Arabic (RTL) UI.
 > Translation of the *interface* is done; this document is about translating *content*.
 
@@ -328,9 +328,23 @@ New course tab (`/dash/courses/course/<uuid>/translations`) showing one row per 
 
 **Decision:** CSV instead of `.xlsx` — no spreadsheet dependency in the web app, and Excel/LibreOffice open the BOM-prefixed file cleanly. This closes open question 5 in §8.
 
-### Phase D — learner side and beyond
+### Phase D — learner side and beyond — **partially done**
 
-Course page fallback hint; emails, certificates and search resolving through the same helper. Chapters/activities (document per locale), then collections/podcasts/offers, are separate phases.
+| Surface | Status |
+|---|---|
+| Course page | done — resolves from the `i18next` cookie; a client-side switch re-fetches |
+| Activity page | done — same cookie, so the lesson header/sidebar match the course |
+| Courses catalog (`/courses`) | done — server-rendered in the visitor's locale |
+| Landing page course cards | done — SWR key includes the locale |
+| Search | done — `?locale=` on both search endpoints; results show translated names |
+| Fallback hint | done — "This course is only available in {{language}}." above the title when `is_fallback` |
+| Trail lists (dashboard "continue learning", course progress) | **not done** — trail endpoints still return source names |
+| Certificates, emails, payment receipts | **not done on purpose** — certificates need Arabic font support in the PDF generator, and receipts/entitlements should stay in the course's source language |
+
+Notes:
+
+- List endpoints (`/courses/org_slug/...`, search) localize with **one** translation query per page (`apply_overlay_bulk`), not one per course. The Redis cache still stores only the source-locale payload.
+- Search matches the **source** text only in v1; searching an Arabic title will not find the course until the query is run against `course_translation` too.
 
 ### Out of scope for v1
 

@@ -18,14 +18,15 @@ interface LandingCustomProps {
 }
 
 function LandingCustom({ landing, orgslug }: LandingCustomProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
+  const contentLocale = (i18n.language || 'en').split('-')[0]
 
-  // Fetch all courses for the organization
+  // Fetch all courses for the organization, in the visitor's language
   const { data: allCourses } = useSWR(
-    orgslug ? [orgslug, access_token] : null,
-    ([slug, token]) => getOrgCourses(slug, null, token)
+    orgslug ? [orgslug, access_token, contentLocale] : null,
+    ([slug, token, locale]) => getOrgCourses(slug, null, token, false, locale as string)
   )
 
   const renderSection = (section: LandingSection) => {

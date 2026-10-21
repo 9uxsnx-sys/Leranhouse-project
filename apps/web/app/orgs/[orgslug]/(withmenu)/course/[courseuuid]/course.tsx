@@ -10,7 +10,8 @@ import {
   getCourseThumbnailMediaDirectory,
   getCourseBannerMediaDirectory,
 } from '@services/media/media'
-import { Backpack, Check, File, StickyNote, Video, Square, Image as ImageIcon, Lock, Clock, BookOpen, Award, Download, ChevronDown, BarChart3, RefreshCw, Loader2 } from 'lucide-react'
+import { Backpack, Check, File, StickyNote, Video, Square, Image as ImageIcon, Lock, Clock, BookOpen, Award, Download, ChevronDown, BarChart3, RefreshCw, Loader2, Info } from 'lucide-react'
+import { getCurrentLanguageNativeName } from '@/lib/languages'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useMediaQuery } from 'usehooks-ts'
 import CourseActionsMobile from '@components/Objects/Courses/CourseActions/CourseActionsMobile'
@@ -375,6 +376,16 @@ const CourseClient = (props: any) => {
                 <div className="flex-1 min-w-0 max-w-3xl space-y-8">
                   {/* ── 2. COURSE TITLE + STATS + SHARE ── */}
                   <div>
+                    {course?.is_fallback && (
+                      <div className="inline-flex items-center gap-2 mb-3 rounded-lg border border-amber-100 bg-amber-50 px-3 py-1.5 text-xs text-amber-800">
+                        <Info size={13} className="shrink-0" />
+                        <span>
+                          {t('course.page.only_available_in', {
+                            language: getCurrentLanguageNativeName(course.content_locale || 'en'),
+                          })}
+                        </span>
+                      </div>
+                    )}
                     <h1 dir="auto" className="text-2xl md:text-3xl font-semibold text-ui-fg-base leading-tight">{course.name}</h1>
                     {course?.description && (
                       <Text dir="auto" size="base" className="text-ui-fg-subtle mt-2 leading-relaxed">

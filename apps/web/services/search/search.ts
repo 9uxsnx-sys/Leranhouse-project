@@ -9,8 +9,15 @@ export async function searchOrgContent(
   limit: number = 10,
   next: any,
   access_token?: any,
+  locale?: string,
 ) {
-  const url = `${getAPIUrl()}search/org_slug/${org_slug}?query=${encodeURIComponent(query)}&page=${page}&limit=${limit}`
+  const params = new URLSearchParams({
+    query,
+    page: String(page),
+    limit: String(limit),
+  })
+  if (locale) params.set('locale', locale)
+  const url = `${getAPIUrl()}search/org_slug/${org_slug}?${params.toString()}`
   const result: any = await fetch(
     url,
     RequestBodyWithAuthHeader('GET', null, next, access_token),

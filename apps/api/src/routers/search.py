@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional, Union
 from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from sqlmodel import Session
 from src.core.events.database import get_db_session
@@ -27,6 +27,9 @@ async def api_search_across_org(
     query: str = Query(..., min_length=1, max_length=200, description="Search query"),
     page: int = Query(default=1, ge=1, description="Page number"),
     limit: int = Query(default=10, ge=1, le=50, description="Items per page (max 50)"),
+    locale: Optional[str] = Query(
+        default=None, description="Content locale (falls back to the source locale)"
+    ),
     db_session: Session = Depends(get_db_session),
     current_user: Union[PublicUser, APITokenUser] = Depends(get_current_user),
 ) -> SearchResult:
@@ -59,5 +62,6 @@ async def api_search_across_org(
         search_query=query,
         db_session=db_session,
         page=page,
-        limit=limit
+        limit=limit,
+        locale=locale,
     )

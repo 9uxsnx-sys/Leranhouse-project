@@ -15,9 +15,14 @@ export async function getOrgCourses(
   org_slug: string,
   next: any,
   access_token?: any,
-  include_unpublished: boolean = false
+  include_unpublished: boolean = false,
+  locale?: string
 ) {
-  const url = `${getAPIUrl()}courses/org_slug/${org_slug}/page/1/limit/100${include_unpublished ? '?include_unpublished=true' : ''}`
+  const params = new URLSearchParams()
+  if (include_unpublished) params.set('include_unpublished', 'true')
+  if (locale) params.set('locale', locale)
+  const query = params.toString() ? `?${params.toString()}` : ''
+  const url = `${getAPIUrl()}courses/org_slug/${org_slug}/page/1/limit/100${query}`
   const result: any = await fetch(
     url,
     RequestBodyWithAuthHeader('GET', null, next, access_token)

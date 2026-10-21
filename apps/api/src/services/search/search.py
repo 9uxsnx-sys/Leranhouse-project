@@ -104,6 +104,7 @@ async def search_across_org(
     db_session: Session,
     page: int = 1,
     limit: int = 10,
+    locale: str | None = None,
 ) -> SearchResult:
     """Search across the org's resources with per-type access control.
 
@@ -159,7 +160,7 @@ async def search_across_org(
     # ── Courses ──────────────────────────────────────────────────────────────
     # `search_courses` already applies its own per-user access filter.
     courses = await search_courses(
-        request, current_user, org_slug, search_query, db_session, page, limit
+        request, current_user, org_slug, search_query, db_session, page, limit, locale
     )
     total_courses = len(courses)
 

@@ -6979,6 +6979,7 @@
     "noPermission": "ليس لديك إذن لعرض هذه الدورة.",
     "page": {
       "banner": "بانر الدورة",
+      "only_available_in": "هذه الدورة متاحة فقط باللغة {{language}}.",
       "about_title": "حول هذه الدورة",
       "in_progress": "قيد التقدّم",
       "progress_complete": "اكتمل {{percent}}٪",

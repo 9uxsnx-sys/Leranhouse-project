@@ -39,7 +39,7 @@ from src.security.rbac import (
 from src.security.rbac.constants import ADMIN_OR_MAINTAINER_ROLE_IDS
 from src.security.superadmin import is_user_superadmin
 from src.services.courses.thumbnails import upload_thumbnail
-from src.services.courses.translations import apply_overlay
+from src.services.courses.translations import apply_overlay, apply_overlay_bulk
 from src.services.search.normalization import LIKE_ESCAPE_CHAR, build_like_pattern
 from src.services.webhooks.dispatch import dispatch_webhooks
 from fastapi import HTTPException, Request, UploadFile, status
@@ -256,6 +256,7 @@ async def get_courses_orgslug(
     page: int = 1,
     limit: int = 10,
     include_unpublished: bool = False,
+    locale: str | None = None,
 ) -> List[CourseRead]:
     # Cap limit to prevent excessive DB reads
     limit = min(limit, 100)
@@ -270,7 +271,9 @@ async def get_courses_orgslug(
         from src.services.courses.cache import get_cached_courses_list
         cached = get_cached_courses_list(org_slug, page, limit)
         if cached is not None:
-            return [CourseRead.model_validate(c) for c in cached]
+            return apply_overlay_bulk(
+                [CourseRead.model_validate(c) for c in cached], locale, db_session
+            )
 
     offset = (page - 1) * limit
 
@@ -408,7 +411,8 @@ async def get_courses_orgslug(
             [cr.model_dump() for cr in course_reads]
         )
 
-    return course_reads
+    # The cache always holds the source-locale payload; localize per request.
+    return apply_overlay_bulk(course_reads, locale, db_session)
 
 
 async def get_courses_count_orgslug(
@@ -507,6 +511,7 @@ async def search_courses(
     db_session: Session,
     page: int = 1,
     limit: int = 10,
+    locale: str | None = None,
 ) -> List[CourseRead]:
     """
     Search courses within an organization.
@@ -615,7 +620,7 @@ async def search_courses(
             "id": course.id or 0,
             "authors": course_authors.get(course.course_uuid, []),
         })
-        course_reads.append(course_read)
+        course_reads.append(apply_overlay(course_read, course, locale, db_session))
 
     return course_reads
 
