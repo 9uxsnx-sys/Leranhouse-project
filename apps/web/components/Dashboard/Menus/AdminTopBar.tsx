@@ -257,44 +257,54 @@ function AdminBreadcrumbNav() {
   // Page-registered crumbs continue the trail past the tab name.
   if (pageTrail?.length) crumbs.push(...pageTrail)
 
-  const isSingle = crumbs.length === 1
-
   return (
     <nav aria-label="Breadcrumb">
       <ol className="text-ui-fg-muted txt-compact-small-plus flex select-none items-center">
         {crumbs.map((crumb, index) => {
           const isLast = index === crumbs.length - 1
+          const isMiddle = index > 0 && !isLast
           return (
-            <li key={index} className="flex items-center">
-              {!isLast && crumb.href ? (
-                <Link
-                  href={crumb.href}
-                  className="transition-fg hover:text-ui-fg-subtle"
-                >
-                  {crumb.label}
-                </Link>
-              ) : !isLast && crumb.onClick ? (
-                <button
-                  type="button"
-                  onClick={crumb.onClick}
-                  className="transition-fg hover:text-ui-fg-subtle cursor-pointer"
-                >
-                  {crumb.label}
-                </button>
-              ) : (
-                <div>
-                  {!isSingle && <span className="block lg:hidden">...</span>}
-                  <span className={isSingle ? '' : 'hidden lg:block'}>
+            <React.Fragment key={index}>
+              {/* Mobile: collapse every middle crumb into a single ellipsis. */}
+              {isLast && crumbs.length > 2 && (
+                <li className="flex items-center lg:hidden">
+                  <span>...</span>
+                  <span className="mx-2">
+                    <TriangleRightMini className="rtl:rotate-180" />
+                  </span>
+                </li>
+              )}
+              <li className={`items-center ${isMiddle ? 'hidden lg:flex' : 'flex'}`}>
+                {!isLast && crumb.href ? (
+                  <Link
+                    href={crumb.href}
+                    className="transition-fg hover:text-ui-fg-subtle inline-block max-w-[160px] truncate align-bottom"
+                  >
+                    {crumb.label}
+                  </Link>
+                ) : !isLast && crumb.onClick ? (
+                  <button
+                    type="button"
+                    onClick={crumb.onClick}
+                    className="transition-fg hover:text-ui-fg-subtle cursor-pointer inline-block max-w-[160px] truncate align-bottom text-start"
+                  >
+                    {crumb.label}
+                  </button>
+                ) : (
+                  <span
+                    aria-current={isLast ? 'page' : undefined}
+                    className={`inline-block truncate align-bottom ${isLast ? 'max-w-[220px]' : 'max-w-[160px]'}`}
+                  >
                     {crumb.label}
                   </span>
-                </div>
-              )}
-              {!isLast && (
-                <span className="mx-2">
-                  <TriangleRightMini className="rtl:rotate-180" />
-                </span>
-              )}
-            </li>
+                )}
+                {!isLast && (
+                  <span className="mx-2">
+                    <TriangleRightMini className="rtl:rotate-180" />
+                  </span>
+                )}
+              </li>
+            </React.Fragment>
           )
         })}
       </ol>

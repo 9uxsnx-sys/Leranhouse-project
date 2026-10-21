@@ -351,3 +351,28 @@ Verified in code (`tsc` clean against the 23-error baseline, all route fallbacks
 | 4 | **Collections / Playgrounds parents** | No section parent while the listings are orphaned; detail pages register `Home > {Entity}` |
 | 5 | **Board canvas** | Out of scope — it renders outside the learner shell |
 | 6 | **`Home` landing** | Left as-is (placeholder page); revisit with the learner home work |
+
+---
+
+## 11. As built (current state)
+
+**Learner shell.** The activity page registers `Courses > {Course} > {Module} > {Lesson}`. The lesson preview page (`/course/[courseuuid]/lesson-preview?activityid=…`) is no longer a mock surface — it is what the dashboard **Preview** button opens and it renders real course data — so it now registers the same trail:
+
+- Crumb 1 links to `/courses`, crumb 2 links to `/course/{courseuuid}` (org prefix applied by `OrgMenu`).
+- Module comes from the selected activity's chapter; lesson from the loaded activity, so local "next lesson" navigation updates the trail without a route change.
+
+**Admin shell.** The admin top bar derives `Home > Dashboard > {Section} > {Entity} > {Tab}` from the pathname. Pages that navigate in local state can now extend it through `DashboardBreadcrumbContext`:
+
+```tsx
+useRegisterDashboardBreadcrumb([
+  { label: moduleName, onClick: backToLessonList },
+  { label: lessonName },
+])
+```
+
+- Provider lives in `dash/ClientAdminLayout.tsx`, so the top bar and the page share it.
+- `EditCourseStructure` registers the module (clickable → back to the module's lesson list) and the lesson when one is open, giving `… > Content > {Module} > {Lesson}`.
+- Crumbs support `href` (route) or `onClick` (in-page state); the last crumb is never a link.
+- Mobile collapse is unified: `Home > … > Current` in both shells (previously the admin rendered one ellipsis per hidden crumb).
+- Labels truncate at `160px` (last crumb `220px`) so a long course + lesson name cannot push the top bar controls off-screen.
+
