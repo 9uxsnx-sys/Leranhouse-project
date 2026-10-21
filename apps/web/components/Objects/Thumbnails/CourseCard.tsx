@@ -52,12 +52,12 @@ export function CourseCard({ id, title, description, image, lessons, duration, d
             {description || 'placeholder'}
           </p>
         </div>
-        {/* Metadata: directly below description */}
-        {metaParts.length > 0 && (
-          <p dir="auto" className="text-[12px] text-gray-400 mt-1.5">
-            {metaParts.join(' · ')}
-          </p>
-        )}
+        {/* Metadata: directly below description. The row is always rendered
+            (invisible when empty) so every card in a grid keeps the same
+            height — older courses often have no duration/difficulty set. */}
+        <p dir="auto" className={`text-[12px] text-gray-400 mt-1.5 ${metaParts.length === 0 ? 'invisible' : ''}`}>
+          {metaParts.length > 0 ? metaParts.join(' · ') : '\u00A0'}
+        </p>
       </div>
     </Link>
   )
