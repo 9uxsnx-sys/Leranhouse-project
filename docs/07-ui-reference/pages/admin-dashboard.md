@@ -221,7 +221,9 @@ Subpages:
 **Route**: `/orgs/[orgslug]/dash/podcasts` — File: `apps/web/app/orgs/[orgslug]/dash/podcasts/client.tsx`
 
 - **Podcast list** with search.
-- **Podcast editor**: `/orgs/[orgslug]/dash/podcasts/podcast/[podcastuuid]/[subpage]` — Edit podcast details, manage episodes, upload audio.
+- **Podcast editor**: `/orgs/[orgslug]/dash/podcasts/podcast/[podcastuuid]/[subpage]` with pill tabs — **General** (name, description, about, hosts, duration, media), **Episodes** (drag-and-drop list, per-episode editor, audio upload), **Access** (public / user groups / paid), **Translations** (language coverage, copy-from-source, delete, CSV), **Distribution** (RSS + directory guide).
+- Episode rows and the episode editor use the locked card surface (`bg-white rounded-xl border border-gray-100 shadow-sm`).
+- The General and Episodes editors follow the platform language switcher: source locale writes the base row, other locales write `podcast_translation` / `podcast_episode_translation`.
 
 ### Board Management
 

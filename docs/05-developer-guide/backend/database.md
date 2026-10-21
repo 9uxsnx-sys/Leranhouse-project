@@ -64,6 +64,10 @@ SQLAlchemy events are registered for pool monitoring:
 | `Chapter` | `coursechapter` | Course module/chapter structure |
 | `Activity` | `activity` | Individual lessons within chapters |
 | `Collection` | `collection` | Content collections (courses grouped by org) |
+| `CourseTranslation` | `course_translation` | One locale of a course (name, description, about, learnings, tags, SEO, requirements) |
+| `CollectionTranslation` | `collection_translation` | One locale of a collection |
+| `PodcastTranslation` | `podcast_translation` | One locale of a podcast |
+| `PodcastEpisodeTranslation` | `podcast_episode_translation` | One locale of an episode (title, description) |
 | `User` | `user` | Platform users with roles and memberships |
 | `UserGroup` | `usergroup` | Access groups for resource gating |
 | `PaymentOrder` | `payment_order` | Payment transactions via Chargily |

@@ -65,6 +65,8 @@ src/services/
 │   │   └── utils.py             # Activity content structure utilities
 │   ├── certifications.py        # Certification management
 │   ├── collections.py           # Collection CRUD
+│   ├── collection_translations.py # Collection locale overlays + CRUD
+│   ├── translations.py          # Course locale overlays + CRUD
 │   ├── contributors.py          # Contributor management
 │   ├── locks.py                 # Lock-based access checks
 │   ├── lock_usergroups.py       # UserGroup lock management
@@ -99,6 +101,7 @@ src/services/
 ├── podcasts/
 │   ├── podcasts.py              # Podcast CRUD
 │   ├── episodes.py              # Episode CRUD
+│   ├── translations.py          # Podcast + episode locale overlays + CRUD
 │   └── thumbnails.py            # Podcast thumbnail management
 ├── roles/
 │   └── roles.py                 # Role CRUD

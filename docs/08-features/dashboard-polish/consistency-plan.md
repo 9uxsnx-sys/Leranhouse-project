@@ -44,7 +44,7 @@ The dashboard was built area-by-area over time, so the same things are done diff
 bg-white rounded-xl border border-gray-100 shadow-sm
 ```
 
-Applied to dashboard section cards, the course page sidebar cards, the learner lesson page cards (What You'll Learn, Key Takeaways, Resources, Quick Check, Course Outline, Up Next), and the module/lesson rows in the course Content tab. Do **not** use `shadow-borders-base`, `nice-shadow`, `ring-1 ring-black/*`, or `shadow-[0_0_0_1px_...]` for these containers — those read as a black outline. Media frames (thumbnail placeholders, the video fallback gradient) keep their own ring treatment.
+Applied to dashboard section cards, the course page sidebar cards, the learner lesson page cards (What You'll Learn, Key Takeaways, Resources, Quick Check, Course Outline, Up Next), the module/lesson rows in the course Content tab, the podcast episode rows in the dashboard Episodes tab, and the learner `EpisodeCard`. Do **not** use `shadow-borders-base`, `nice-shadow`, `ring-1 ring-black/*`, or `shadow-[0_0_0_1px_...]` for these containers — those read as a black outline. Media frames (thumbnail placeholders, the video fallback gradient) keep their own ring treatment.
 
 ---
 

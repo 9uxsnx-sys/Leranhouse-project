@@ -29,6 +29,16 @@ Organization
      +-- Certificate
      |
      +-- Collection (course bundle)
+     |     +-- CollectionTranslation (per locale)
+     |
+     +-- Podcast
+           +-- PodcastEpisode
+           +-- PodcastTranslation (per locale)
+           +-- PodcastEpisodeTranslation (per locale)
+
+Course
+  +-- CourseTranslation (per locale)
+  +-- extra_metadata.translations[locale] (chapters / activities)
 ```
 
 ---
@@ -110,6 +120,43 @@ Organization
 - **Constraints**: no `users_only` member resources; published bundles only contain published resources; paid bundles require a positive price and at least one member
 - **Purchase**: checkout snapshots every member UUID in `price_snapshot.resources` (and course-only members in `price_snapshot.courses`); the Chargily webhook grants one entitlement per member, plus one `TrailRun` per course member (podcasts are entitlement-only)
 
+### Podcast
+
+- **Represents**: An audio series owned by an organization, with the same editorial surface as a course
+- **Key fields**: name, description, about, tags, `thumbnail_image`, `banner_image`, `public`, `published`, `access_type`, `price_amount`, `price_currency`, `seo` (JSONB), `extra_metadata` (hosts, total duration), `source_locale`
+- **Relationships**: belongs to Organization, has many `PodcastEpisode` rows (cascade on delete), has many `PodcastTranslation` rows
+- **Access**: public / users_only (user-group linked) / paid; unpublished content is only readable by authors, admins and maintainers
+
+### PodcastEpisode
+
+- **Represents**: One episode of a podcast
+- **Key fields**: `title`, `description`, `audio_file`, `duration_seconds`, `episode_number`, `thumbnail_image`, `published`, `order`, `episode_uuid`
+- **Relationships**: belongs to Podcast (cascade on delete), has many `PodcastEpisodeTranslation` rows
+- **Notes**: episodes inherit the podcast's `source_locale`; audio, thumbnail and order are never localized
+
+---
+
+## Content Localization
+
+Every translatable entity keeps **one base row in its source language** plus optional translation rows. Reads resolve `requested locale → base row`; a missing translation returns the source text with `is_fallback: true` (podcasts/collections also return `content_locale`).
+
+| Base table | Source marker | Translation table | Translatable fields |
+|---|---|---|---|
+| `course` | `source_locale` | `course_translation` | name, description, about, learnings, tags, seo, extra_metadata |
+| `chapter` / `activity` | parent course locale | — (inside `extra_metadata.translations[locale]`) | name, description, learning objectives, takeaways, resources, knowledge checks |
+| `collection` | `source_locale` | `collection_translation` | name, description, about, learnings, tags, seo |
+| `podcast` | `source_locale` | `podcast_translation` | name, description, about, tags, seo |
+| `podcastepisode` | parent podcast locale | `podcast_episode_translation` | title, description |
+
+Rules shared by these tables:
+
+- Translation tables carry `locale`, `state` (`draft` / `machine` / `reviewed` / `published`), `source_updated_at`, `translated_by`, `creation_date`, `update_date`, and a unique constraint on `(parent_id, locale)`.
+- Structural fields (media, price, access type, publish state, hosts, audio, ordering) are **never** localized.
+- Overlays are applied **after** access/lock checks, so a translation can never reveal locked content.
+- List endpoints localize with **one** translation query per page (`apply_*_overlay_bulk`), never one per row.
+
+Migration files: `w6b7c8d9e0f1_add_course_translations.py`, `y0f1a2b3c4d5_add_collection_translations.py`, `z1a2b3c4d5e6_add_podcast_translations.py`.
+
 ---
 
 ## Database
@@ -117,5 +164,5 @@ Organization
 - **PostgreSQL** with `pgvector` extension (for AI embeddings)
 - **SQLModel** ORM (Python) --- combines SQLAlchemy + Pydantic
 - **Alembic** for database migrations
-- Migrations stored in `apps/api/src/db/migrations/`
+- Migrations stored in `apps/api/migrations/versions/`
 - Dev database accessible via `docker exec -it learnhouse-db-dev psql -U learnhouse -d learnhouse`

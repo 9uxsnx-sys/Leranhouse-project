@@ -414,10 +414,73 @@ Revoking a buyer's bundle entitlement (`DELETE /payments/{org_id}/entitlements?r
 
 ---
 
+## Localization
+
+Content locale is a query parameter on every read endpoint. Omitting it returns the source row.
+
+| Endpoint | Localized fields |
+|---|---|
+| `GET /collections/{uuid}?locale=fr` | name, description, about, learnings, tags, seo |
+| `GET /collections/org/{org_id}/page/{page}/limit/{limit}?locale=fr` | same, one translation query per page |
+| `GET /collections/{uuid}/courses?locale=fr` | member course names/descriptions |
+| `GET /collections/{uuid}/members?locale=fr` | dashboard Content table (linked + available) |
+| `GET /collections/org/{org_id}/mine?locale=fr` | "My bundles" |
+
+`CollectionRead` always carries:
+
+```json
+{
+  "source_locale": "en",
+  "content_locale": "fr",
+  "is_fallback": false
+}
+```
+
+`is_fallback: true` means a locale was requested but no translation row exists, so the source text is returned. `content_locale` then equals `source_locale`.
+
+### List translations
+
+```
+GET /api/v1/collections/{collection_uuid}/translations
+```
+
+Returns every `CollectionTranslationRead` row (`locale`, `name`, `description`, `about`, `learnings`, `tags`, `seo`, `state`, `source_updated_at`, `translated_by`, dates). Requires update permission on the collection.
+
+### Upsert a translation
+
+```
+PUT /api/v1/collections/{collection_uuid}/translations/{locale}
+```
+
+```json
+{
+  "name": "Paquet de test FR",
+  "description": "Description FR",
+  "about": "…",
+  "learnings": "[{\"id\":\"1\",\"text\":\"…\",\"emoji\":\"✅\"}]",
+  "tags": "design,ux",
+  "seo": { "title": "SEO FR" }
+}
+```
+
+`name` is required. Writing the collection's source locale returns **422** — update the collection itself instead. Supports the same RBAC as the dashboard General tab.
+
+### Delete a translation
+
+```
+DELETE /api/v1/collections/{collection_uuid}/translations/{locale}
+```
+
+Removes the row; subsequent reads fall back to the source locale.
+
+---
+
 ## Related Resources
 
 | Document | Description |
 |---|---|
 | [Courses](./courses.md) | Course CRUD and access modes |
+| [Podcasts](./podcasts.md) | Podcast and episode CRUD, localization |
 | [Payments](./payments.md) | Checkout, orders, entitlements, webhooks |
 | [Collections Implementation Plan](../08-features/collections/implementation-plan.md) | Design decisions, schema, access model, phased delivery |
+| [Collections localization](../08-features/i18n-rtl/collections-localization.md) | Storage, overlay resolution and dashboard/learner surfaces |

@@ -40,7 +40,7 @@ There are no refunds on the platform; access is revoked manually from the dashbo
 
 Open **Dashboard → Collections**. The listing supports search, creation, editing and deletion.
 
-Selecting a collection opens an editor with four tabs.
+Selecting a collection opens an editor with five tabs.
 
 ### General
 
@@ -86,5 +86,16 @@ Unpublishing a course that belongs to a published bundle is blocked, and a membe
 ### SEO
 
 The same fields as a course: meta title, description and keywords, Open Graph, Twitter Card, robots directives, and structured data. Validation mirrors the course SEO tab, and the action row only enables **Save** when something changed.
+
+### Translations
+
+A per-language coverage table (Name, Description, About, Learnings, Tags, SEO) with a status per row: **Source**, **Not started**, **Partial**, **Complete**.
+
+- **Copy from source** seeds a language in one click.
+- **Delete** removes a language (two-step confirm); reads fall back to the source.
+- **Export/import CSV** hands the text to an external translator (`<collection>.<locale>.csv`, UTF-8 with BOM so Excel opens Arabic correctly).
+- Editing itself happens in the General and SEO tabs: the platform language switcher decides which language you write, and the action row shows the language chip plus **Copy from source** when you are in a translation.
+
+Learners see the collection in the language of the interface they chose. Untranslated collections show the source text with an amber note: *"This collection is only available in English."*
 
 Deleting a bundle removes its uploaded media. Learners who already bought it keep access to the courses they were granted.

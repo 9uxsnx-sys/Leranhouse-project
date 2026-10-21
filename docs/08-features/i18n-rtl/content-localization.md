@@ -1,6 +1,6 @@
 # Multilingual course authoring — research & proposal
 
-> **Status:** plan agreed (see §7.1). Phases A–C are done; Phase D covers the learner pages, catalog, landing cards, search and the fallback hint. Trail lists, certificates and emails remain.
+> **Status:** done for courses (settings, SEO, chapters, lessons). Collections and podcasts follow the same contract — see [collections-localization.md](./collections-localization.md) and [podcasts-localization.md](./podcasts-localization.md). Trail lists, certificates, offers and emails remain untranslated on purpose.
 > **Trigger:** a course authored in English shows English body text inside an Arabic (RTL) UI.
 > Translation of the *interface* is done; this document is about translating *content*.
 
@@ -351,7 +351,7 @@ Notes:
 - List endpoints (`/courses/org_slug/...`, search) localize with **one** translation query per page (`apply_overlay_bulk`), not one per course. The Redis cache still stores only the source-locale payload.
 - Search matches the **source** text only in v1; searching an Arabic title will not find the course until the query is run against `course_translation` too.
 
-### Next phase — content, then podcasts and collections
+### Entity coverage — content, podcasts and collections
 
 Course **settings** (this document) are complete: metadata, SEO, requirements, translations tab and the learner surfaces listed above. The lesson/chapter layer is now localized too:
 

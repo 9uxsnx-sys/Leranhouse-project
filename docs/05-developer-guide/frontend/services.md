@@ -18,6 +18,8 @@ services/
 │   ├── assignments.ts     # Assignment management
 │   ├── certifications.ts  # Certificate operations
 │   ├── collections.ts     # Collection operations
+│   ├── collectionTranslations.ts # Collection locale rows
+│   ├── translations.ts    # Course locale rows
 │   ├── migration.ts       # Course migration
 │   ├── transfer.ts        # Course transfer
 │   └── updates.ts         # Course updates/changelog
@@ -64,7 +66,8 @@ services/
 │   └── search.ts          # Search operations
 ├── podcasts/
 │   ├── podcasts.ts        # Podcast CRUD
-│   └── episodes.ts        # Episode CRUD
+│   ├── episodes.ts        # Episode CRUD
+│   └── podcastTranslations.ts # Podcast + episode locale rows
 └── ee/
     ├── audit_logs.ts      # Enterprise audit logs
     └── superadmin.ts      # Superadmin operations

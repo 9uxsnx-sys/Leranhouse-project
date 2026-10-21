@@ -64,6 +64,7 @@ Each release provides a summary of changes organized by category:
 
 ### New Features
 
+- **Multilingual content — courses, collections and podcasts** — Content can now be authored in English, French and Arabic while keeping one record per entity. A `source_locale` column names the base row; every other language lives in a translation table (`course_translation`, `collection_translation`, `podcast_translation`, `podcast_episode_translation`; chapters and lessons use `extra_metadata.translations`). Every read endpoint accepts `?locale=` and returns `content_locale` / `is_fallback`, so untranslated content falls back to the source with an amber notice on the learner page. The dashboard follows the platform language switcher: the editor writes the base row in the source language and the translation row everywhere else, with a language chip, "Copy from source", and a per-entity **Translations** tab (coverage matrix, delete, CSV export/import). Search payloads and learner listings are localized as well.
 - **Drag-and-drop reordering for podcast episodes** — Episodes can now be reordered by dragging the grip handle. The custom order persists via API and is reflected in the public podcast page.
 - **Drag-and-drop reordering for course modules and lessons** — Modules and lessons in the course content editor can now be reordered with the same drag-and-drop pattern as episodes.
 - **Select mode with checkboxes** — Clicking "Select" in the toolbar replaces drag handles with checkboxes on episodes, modules, and lessons. Drag-and-drop is disabled in select mode. Selected items show a blue ring and filled checkbox.
@@ -74,6 +75,7 @@ Each release provides a summary of changes organized by category:
 
 ### Improvements
 
+- **Unified card surface** — Curriculum modules and lessons, lesson-page sections, podcast episode rows and learner episode cards now use the same surface as dashboard section cards (`bg-white rounded-xl border border-gray-100 shadow-sm`) instead of the black hairline (`shadow-borders-base`, `border-black/10`). The "MODULE N" label was removed from the curriculum header.
 - **Organization branding tab redesign** — The Branding settings tab now uses unified section cards (Logo & Favicon, Theme, Auth) with a row-based upload-container pattern for Logo, Favicon, Logomark, and Thumbnail. The Primary Color field is hex-only (the native OS color picker was removed) and saves through a single top Action Row button.
 - **Community discussions redesign** — Discussion cards now use an inline create card and inline replies with smoother animations.
 

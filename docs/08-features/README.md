@@ -80,6 +80,9 @@ The documents in this section describe cross-cutting feature areas that touch mu
 |----------|-------------|
 | [RTL Plan](./i18n-rtl/rtl-plan.md) | English / French / Arabic with accurate bidirectional layout: direction plumbing shipped (SSR `lang`/`dir`, `DirectionProvider`, Arabic font); logical-property refactor and QA pending |
 | [Progress & Handoff](./i18n-rtl/progress.md) | Live log: commit ledger per phase, what the RTL refactor has covered, the remaining file inventory, verification commands, gotchas and open decisions |
+| [Content Localization](./i18n-rtl/content-localization.md) | Course metadata, SEO, chapters and lessons: `course_translation`, `extra_metadata.translations`, fallback chain, dashboard editors and learner surfaces |
+| [Collections Localization](./i18n-rtl/collections-localization.md) | `collection_translation`, `?locale=` on every read, locale-aware General/SEO editors, Translations tab, learner listing and fallback notice |
+| [Podcasts Localization](./i18n-rtl/podcasts-localization.md) | `podcast_translation` + `podcast_episode_translation`, localized `/meta` and episode lists, locale-aware editors, Translations tab, card-surface unification |
 
 ### Planned (Future)
 

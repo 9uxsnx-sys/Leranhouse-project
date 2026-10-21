@@ -2,8 +2,8 @@
 
 > **Last updated:** 2026-10-21
 > **Branch:** `feat/learnhouse-1.2.0-custom`
-> **Latest checkpoint:** `714318f4` — *i18n(rtl): keep certificate layout LTR but auto-direction its text*
-> **Companion docs:** [RTL Plan](./rtl-plan.md) (research + strategy), [Dashboard Polish](../dashboard-polish/consistency-plan.md)
+> **Latest checkpoint:** `504335af` — *feat(podcasts): localize podcasts and episodes, unify episode cards*
+> **Companion docs:** [RTL Plan](./rtl-plan.md) (research + strategy), [Content Localization](./content-localization.md), [Collections Localization](./collections-localization.md), [Podcasts Localization](./podcasts-localization.md), [Dashboard Polish](../dashboard-polish/consistency-plan.md)
 
 This is the working log. Read this first when resuming; read `rtl-plan.md` for the reasoning behind the approach.
 
@@ -11,7 +11,7 @@ This is the working log. Read this first when resuming; read `rtl-plan.md` for t
 
 ## 1. Where we are, in one paragraph
 
-English is the master language. French and Arabic are fully translated (text only), and the hardcoded-JSX extraction pass for the **real UI** is done. **Phase 4 (RTL layout) is complete for every reachable screen** — 259/259 + 288/288 physical utilities converted in the final two sweeps. **Phase 5 (polish) is complete** except the lint guard, which is blocked by a broken ESLint pipeline in this repo (see §7.4): locale-aware `Intl.*` formatting, `dir="auto"` on user content, the embed resize delta and the logical CSS in discussion rich text are all in.
+English is the master language. French and Arabic are fully translated (text only), and the hardcoded-JSX extraction pass for the **real UI** is done. **Phase 4 (RTL layout) is complete for every reachable screen** — 259/259 + 288/288 physical utilities converted in the final two sweeps. **Phase 5 (polish) is complete** except the lint guard, which is blocked by a broken ESLint pipeline in this repo (see §7.4): locale-aware `Intl.*` formatting, `dir="auto"` on user content, the embed resize delta and the logical CSS in discussion rich text are all in. **Content localization is shipped for courses, collections and podcasts** (§12): base row + translation table, `?locale=` on every read, locale-aware dashboard editors, Translations tabs and learner fallback notices.
 
 ---
 
@@ -106,6 +106,23 @@ This cycle:
 | Commit | Scope | State |
 |---|---|---|
 | `7165ed0e` | `Intl.*`/`toLocale*` locale args → `i18n.language` (31 files) + `dir="auto"` on user content | done |
+
+### Content localization cycle (courses → collections → podcasts)
+
+| Commit | Scope | State |
+|---|---|---|
+| `cb598e54` | Collections: `collection_translation`, `?locale=` on every read, locale-aware General/SEO, Translations tab, learner listing/detail | done |
+| `504335af` | Podcasts: `podcast_translation` + `podcast_episode_translation`, localized `/meta` and episode list, locale-aware General/Episodes, Translations tab, learner pages, episode card surface | done |
+
+Lesson-page and breadcrumb work from the same cycle (reference for future surfaces):
+
+| Commit | Scope |
+|---|---|
+| `1fa20fc6` | Rebuilt the 21 demo lessons in en/fr/ar with objectives, takeaways, knowledge checks and resources |
+| `15a84779` | Lesson page renders only dashboard-authored blocks (video slot, learnings, takeaways, resources, quiz) |
+| `4ba889e8` / `723f1e15` | Lesson page + module/lesson rows on the locked card surface |
+| `b88bf0c1` | `Content` breadcrumb returns to the module list |
+| `fc8fc091` | Removed the "MODULE N" label from the curriculum |
 
 ---
 
@@ -263,7 +280,7 @@ cd apps\web
 .\node_modules\.bin\tsc.cmd --noEmit --ignoreDeprecations 6.0 | Measure-Object -Line
 ```
 
-**Baseline is 25 lines / exit code 2.** These 8 errors are pre-existing and unrelated:
+**Baseline is the pre-existing error set (24–25 lines, exit code 1–2 depending on the tsc version).** These errors are pre-existing and unrelated:
 
 | Area | Count |
 |---|---|
@@ -315,3 +332,89 @@ Any new error is a regression — fix it before committing.
 8. Phase 5 polish.
 
 Commit + push after each numbered bucket so there is always a rollback point.
+
+---
+
+## 12. Content localization — as built
+
+Three entities now share one contract. The per-entity details live in the companion docs; this is the cross-cutting summary.
+
+### Status
+
+| Surface | Storage | Status |
+|---|---|---|
+| Course metadata (name, description, about, learnings, tags, SEO, requirements/duration) | `course_translation` | done |
+| Course content (chapters, lessons, objectives, takeaways, resources, knowledge checks) | `extra_metadata.translations[locale]` | done |
+| Collections (name, description, about, learnings, tags, SEO) | `collection_translation` | done |
+| Podcasts (name, description, about, tags, SEO) | `podcast_translation` | done |
+| Episodes (title, description) | `podcast_episode_translation` | done |
+| Podcast RSS, trail lists, receipts/entitlements | — | deliberately source-locale |
+| Offers, certificates | — | not started |
+
+### Contract (do not break these when adding a fourth entity)
+
+1. **Base row = source locale.** A `source_locale` column on the parent (`course`, `collection`, `podcast`) names it. Existing queries keep working; no backfill.
+2. **One translation table per entity** (episodes included), with `(parent_id, locale)` unique, `state`, `source_updated_at`, `translated_by`, dates.
+3. **Resolution:** `requested locale → base row`; missing row sets `is_fallback: true` and `content_locale = source_locale`.
+4. **Overlays run after access checks** (RBAC, publication, paid locks), so a translation can never reveal locked content.
+5. **One query per page** on listings (`apply_*_overlay_bulk`); never join per row. Server-side caches store the **source payload only**.
+6. **`PUT …/translations/{locale}` rejects the source locale with 422.** The source row is only written through the normal update endpoint.
+7. **Dashboard fetches the parent without `locale`** — the editors need the source row as their baseline. Localized rows are fetched separately (hook or list SWR key).
+8. **Structural fields are never localized**: media, price, access type, publish state, hosts, audio, ordering, course chapters.
+
+### Dashboard UX (identical on all three editors)
+
+- Action row chip: language native name + dot (`teal` = saved / `amber` = unsaved) + `Source` / `Translation` / `Missing`.
+- **Copy from source** appears only in a non-source locale.
+- Missing translation shows an "inherited" hint; typing creates the row on save.
+- **Translations tab**: coverage matrix per language, copy-from-source, two-step delete, CSV export/import (UTF-8 BOM, so Excel opens Arabic correctly).
+- SEO follows the same rule; it stays read-only until the locale has a translation row (the API needs a `name`).
+
+### Learner surfaces
+
+- Listing pages read the `i18next` cookie server-side and pass `locale` to the API.
+- Detail pages pass `locale` in both the server fetch and the client SWR key, so a language switch re-fetches.
+- `generateMetadata` uses the same cookie; translated titles/descriptions reach `<head>` and JSON-LD.
+- Fallback hint above the title: "This … is only available in {{language}}." (`is_fallback`).
+
+### Card surface (locked)
+
+Every new container uses `bg-white rounded-xl border border-gray-100 shadow-sm`. Banned: `shadow-borders-base`, `nice-shadow`, `ring-1 ring-black/*`, `border-black/*`. The podcast episode rows (`shadow-borders-base` → card surface) and learner `EpisodeCard` (`border-black/10` → `border-gray-100`) were aligned in `504335af`.
+
+### Verification
+
+```powershell
+# locales
+foreach ($f in @('en','fr','ar')) { Get-Content "apps/web/locales/$f.json" -Raw | ConvertFrom-Json | Out-Null }
+
+# migrations (single head, then upgrade)
+cd apps/api; .\.venv\Scripts\alembic.exe heads; .\.venv\Scripts\alembic.exe upgrade head
+
+# typecheck — pre-existing error set only
+cd apps/web; .\node_modules\.bin\tsc.cmd --noEmit --ignoreDeprecations 6.0
+```
+
+API smoke tests used in this cycle (dev CLI, `admin@school.dev`):
+
+```
+PUT /collections/{uuid}/translations/fr   → 200, name = "… FR"
+GET /collections/{uuid}?locale=fr         → content_locale=fr, is_fallback=false, seo overlaid
+GET /collections/{uuid}?locale=ar         → source name, is_fallback=true
+DELETE …/translations/fr                  → reads fall back
+
+PUT /podcasts/{uuid}/translations/fr      → 200
+PUT /podcasts/episodes/{uuid}/translations/fr → 200
+GET /podcasts/{uuid}/meta?locale=fr       → localized podcast + episode title
+GET /podcasts/{uuid}/meta?locale=ar       → source podcast, is_fallback=true, source episode title
+```
+
+### File map
+
+| Layer | Courses | Collections | Podcasts |
+|---|---|---|---|
+| Migration | `w6b7c8d9e0f1_add_course_translations.py` | `y0f1a2b3c4d5_add_collection_translations.py` | `z1a2b3c4d5e6_add_podcast_translations.py` |
+| Models | `src/db/courses/course_translations.py` | `src/db/collection_translations.py` | `src/db/podcast_translations.py` |
+| Service | `src/services/courses/translations.py` | `src/services/courses/collection_translations.py` | `src/services/podcasts/translations.py` |
+| Web service | `services/courses/translations.ts` | `services/courses/collectionTranslations.ts` | `services/podcasts/podcastTranslations.ts` |
+| Hook | `Hooks/useCourseTranslation.ts` | `Hooks/useCollectionTranslation.ts` | `Hooks/usePodcastTranslation.ts` |
+| Translations tab | `EditCourseTranslations.tsx` | `EditCollectionTranslations.tsx` | `EditPodcastTranslations.tsx` |

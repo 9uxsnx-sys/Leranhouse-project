@@ -287,6 +287,9 @@ Defined in `apps/web/components/Objects/Modals/SearchModal.tsx`. A command-palet
 
 - **Podcast player page**: Episode list, player controls, and podcast info.
 - Global `PodcastPlayer` persists playback across pages via the `PodcastPlayerProvider`.
+- **Localized content**: the server fetch and the client SWR key both carry the `i18next` locale, so the title, description and episode titles follow the interface language. When the podcast has no translation for that language, an amber note above the title reads *"This podcast is only available in {{language}}."*
+- **Episode cards** (`components/Objects/Podcasts/EpisodeCard.tsx`) sit on the standard card surface — `rounded-xl bg-white border border-gray-100 shadow-sm`, hover `border-gray-200`. No black hairline.
+- Episode search and sorting run on the localized titles.
 
 ## Mobile Responsive Behavior
 
