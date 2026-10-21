@@ -78,8 +78,18 @@ export const initialLocaleReady = loadLocale(i18n.language.split('-')[0]);
 /**
  * Switch language safely — preloads the bundle before switching
  * so the UI never flashes English as a fallback.
+ *
+ * `userPicked` (default) marks the choice as deliberate so an organization's
+ * default language does not override it on the next page load.
  */
-export async function changeLanguage(lng: string) {
+export async function changeLanguage(lng: string, userPicked = true) {
+  if (userPicked) {
+    try {
+      localStorage.setItem('i18nextLng_userPicked', '1')
+    } catch {
+      /* private mode — org default will re-apply, acceptable */
+    }
+  }
   await loadLocale(lng)
   return i18n.changeLanguage(lng)
 }
