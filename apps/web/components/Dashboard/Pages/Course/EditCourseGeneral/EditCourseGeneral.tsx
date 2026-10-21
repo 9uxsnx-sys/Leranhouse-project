@@ -4,7 +4,7 @@ import FormLayout, {
   FormLabelAndMessage,
 } from '@components/Objects/StyledElements/Form/Form';
 import { useFormik } from 'formik';
-import { AlertTriangle, Eye, Globe, GlobeLock, Loader2, Check, SaveAllIcon } from 'lucide-react';
+import { AlertTriangle, Eye, Globe, GlobeLock, Loader2, Check, SaveAllIcon, Copy } from 'lucide-react';
 import * as Form from '@radix-ui/react-form';
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import CourseMediaSection from './CourseMediaSection';
@@ -25,11 +25,10 @@ import { SafeImage } from '@components/Objects/SafeImage';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { updateCourse } from '@services/courses/courses';
 import {
-  CourseTranslation,
   getCourseTranslations,
   upsertCourseTranslation,
 } from '@services/courses/translations';
-import i18n from '@/lib/i18n';
+import { useCourseTranslation } from '@components/Hooks/useCourseTranslation';
 import { getCurrentLanguageNativeName } from '@/lib/languages';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { mutate } from 'swr';
@@ -125,35 +124,13 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
   // The locale selected in the language switcher decides which content we edit.
   // The base course row always holds the source locale; other locales live in
   // course_translation rows.
-  const contentLocale = i18n.language.split('-')[0]
-  const sourceLocale = (courseStructure?.source_locale || 'en').split('-')[0]
-  const isSourceLocale = contentLocale === sourceLocale
-  const [translation, setTranslation] = useState<CourseTranslation | null>(null)
+  const {
+    contentLocale,
+    isSourceLocale,
+    translation,
+    setTranslation,
+  } = useCourseTranslation(courseStructure?.course_uuid, courseStructure?.source_locale || 'en')
   const [isSavingTranslation, setIsSavingTranslation] = useState(false)
-
-  useEffect(() => {
-    if (isSourceLocale || !courseStructure?.course_uuid) {
-      setTranslation(null)
-      return
-    }
-    let cancelled = false
-    ;(async () => {
-      try {
-        const rows = await getCourseTranslations(
-          courseStructure.course_uuid,
-          session.data?.tokens?.access_token
-        )
-        if (!cancelled) {
-          setTranslation(rows.find(row => row.locale === contentLocale) || null)
-        }
-      } catch {
-        if (!cancelled) setTranslation(null)
-      }
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [contentLocale, isSourceLocale, courseStructure?.course_uuid, session.data?.tokens?.access_token])
 
   // Initialize learnings as a JSON array if it's not already
   const initializeLearnings = useCallback((learnings: any) => {
@@ -435,6 +412,18 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
   }, [isActiveSaving, courseUUID, courseStructure, cacheKey, session.data?.tokens?.access_token, dispatchCourse, props.orgslug, debounceManager,
       isSourceLocale, contentLocale, formik.values, translation]);
 
+  // Seed the translation form with the source text so the author only rewrites
+  // what actually differs. Nothing is persisted until Save is pressed.
+  const copyFromSource = useCallback(() => {
+    formik.setValues({
+      ...formik.values,
+      name: courseStructure?.name ?? '',
+      description: courseStructure?.description ?? '',
+      about: courseStructure?.about ?? '',
+      learnings: initializeLearnings(courseStructure?.learnings ?? ''),
+    });
+  }, [formik.values, courseStructure?.name, courseStructure?.description, courseStructure?.about, courseStructure?.learnings, initializeLearnings]);
+
   // useCourseFieldSync handles the unmount cleanup (flushing pending edits
   // instead of discarding them), so no local cleanup is needed here.
 
@@ -467,6 +456,16 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
 
                 {/* Right: Save + Publish */}
                 <div className="flex items-center gap-2">
+                  {!isSourceLocale && (
+                    <button
+                      type="button"
+                      onClick={copyFromSource}
+                      className="hidden sm:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+                    >
+                      <Copy size={14} />
+                      <span>{t('dashboard.courses.general.locale.copy_from_source')}</span>
+                    </button>
+                  )}
                   <span
                     className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600"
                     title={

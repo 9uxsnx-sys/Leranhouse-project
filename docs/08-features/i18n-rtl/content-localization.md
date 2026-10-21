@@ -1,6 +1,6 @@
 # Multilingual course authoring — research & proposal
 
-> **Status:** plan agreed (see §7.1). Phase A is implemented and verified end to end; Phase B is next.
+> **Status:** plan agreed (see §7.1). Phases A and B are implemented and verified; Phase C (Translations tab) is next.
 > **Trigger:** a course authored in English shows English body text inside an Arabic (RTL) UI.
 > Translation of the *interface* is done; this document is about translating *content*.
 
@@ -302,9 +302,20 @@ Implementation notes carried forward:
 - The dashboard `CourseProvider` deliberately fetches **without** `locale` — the General tab needs the source row as its baseline.
 - `upsert` rejects writing the source locale (422); the base row is edited through the normal course update.
 
-### Phase B — remaining fields
+### Phase B — remaining fields — **done**
 
-`description`, `about`, `learnings`, `tags`, `seo`. One commit per field group. Adds **Copy from source** (seed a locale in one click).
+| Field | Status |
+|---|---|
+| `name`, `description`, `about`, `learnings` | done in Phase A — they share the General form |
+| `seo` | done — the SEO tab reads/writes the translation's `seo` object with its own action row |
+| `tags` | **skipped** — no course-tags editor exists in the dashboard, and v1 only covers real UI |
+| Copy from source | done — button in the General action row, visible only in a non-source locale |
+
+Notes:
+
+- SEO stays read-only until the locale has a translation row (the API needs a `name`). The tab shows a hint instead of silently dropping the save.
+- `seo.keywords` is the closest thing to tags, and it is translated with the rest of the SEO block.
+- The learner `generateMetadata` reads the same overlaid `seo`, so translated titles/descriptions reach `<head>`.
 
 ### Phase C — Translations tab
 

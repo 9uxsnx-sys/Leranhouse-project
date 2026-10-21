@@ -2084,7 +2084,8 @@
           "source": "Source",
           "translation": "Traduction",
           "missing": "Aucune traduction pour le moment",
-          "inherited": "Le texte source est affiché. Modifiez un champ pour le traduire."
+          "inherited": "Le texte source est affiché. Modifiez un champ pour le traduire.",
+          "copy_from_source": "Copier depuis la source"
         },
         "thumbnail": {
           "upload_image": "Télécharger une image",
@@ -3025,6 +3026,9 @@
           "select_placeholder": "Sélectionner...",
           "twitter_title_label": "Titre Twitter",
           "twitter_title_placeholder": "Titre personnalisé pour le partage sur Twitter"
+        },
+        "locale": {
+          "needs_translation": "Traduisez d'abord l'onglet Général — le SEO appartient à une traduction."
         },
         "sections": {
           "basic": {

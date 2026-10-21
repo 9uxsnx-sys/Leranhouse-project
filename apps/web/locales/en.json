@@ -2394,7 +2394,8 @@
                                                                    "source":  "Source",
                                                                    "translation":  "Translation",
                                                                    "missing":  "No translation yet",
-                                                                   "inherited":  "Showing the source text. Edit a field to translate it."
+                                                                   "inherited":  "Showing the source text. Edit a field to translate it.",
+                                                                   "copy_from_source":  "Copy from source"
                                                                },
                                                       "thumbnail":  {
                                                                         "upload_image":  "Upload Image",
@@ -2715,6 +2716,9 @@
                                       "seo":  {
                                                   "title":  "SEO Settings",
                                                   "subtitle":  "Optimize your course for search engines and social media sharing",
+                                                  "locale":  {
+                                                                 "needs_translation":  "Translate the General tab first — SEO belongs to a translation."
+                                                             },
                                                   "sections":  {
                                                                    "basic":  {
                                                                                  "title":  "Basic SEO",

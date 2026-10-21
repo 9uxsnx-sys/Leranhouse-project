@@ -2156,7 +2156,8 @@
           "source": "المصدر",
           "translation": "الترجمة",
           "missing": "لا توجد ترجمة بعد",
-          "inherited": "يتم عرض النص الأصلي. عدّل حقلاً لترجمته."
+          "inherited": "يتم عرض النص الأصلي. عدّل حقلاً لترجمته.",
+          "copy_from_source": "نسخ من المصدر"
         },
         "thumbnail": {
           "upload_image": "رفع صورة",
@@ -3108,6 +3109,9 @@
           "select_placeholder": "اختر...",
           "twitter_title_label": "عنوان تويتر",
           "twitter_title_placeholder": "عنوان مخصص لمشاركة تويتر"
+        },
+        "locale": {
+          "needs_translation": "ترجم تبويب «عام» أولاً — بيانات SEO تتبع الترجمة."
         },
         "sections": {
           "basic": {

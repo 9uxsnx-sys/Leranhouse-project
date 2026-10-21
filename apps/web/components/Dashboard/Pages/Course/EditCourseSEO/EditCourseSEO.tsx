@@ -1,10 +1,10 @@
-'use client'
+﻿'use client'
 import FormLayout, {
   FormField,
   FormLabelAndMessage,
 } from '@components/Objects/StyledElements/Form/Form';
 import { useFormik } from 'formik';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Loader2, Check, SaveAllIcon } from 'lucide-react';
 import * as Form from '@radix-ui/react-form';
 import React, { useEffect, useRef, useMemo } from 'react';
 import { useCourseFieldSync } from '@components/Contexts/CourseContext';
@@ -12,6 +12,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { useTranslation } from 'react-i18next';
+import { useLHSession } from '@components/Contexts/LHSessionContext';
+import { useCourseTranslation } from '@components/Hooks/useCourseTranslation';
+import {
+  getCourseTranslations,
+  upsertCourseTranslation,
+} from '@services/courses/translations';
+import { getCurrentLanguageNativeName } from '@/lib/languages';
+import toast from 'react-hot-toast';
 
 type EditCourseSEOProps = {
   orgslug: string
@@ -81,11 +89,30 @@ const isValidUrl = (url: string) => {
   }
 };
 
+// Shape expected by the API — empty strings are stored as null so the resolver
+// can fall back to the course fields.
+const toSeoData = (values: SEOValues) => ({
+  title: values.title || null,
+  description: values.description || null,
+  keywords: values.keywords || null,
+  canonical_url: values.canonical_url || null,
+  og_title: values.og_title || null,
+  og_description: values.og_description || null,
+  og_image: values.og_image || null,
+  twitter_card: values.twitter_card || null,
+  twitter_title: values.twitter_title || null,
+  twitter_description: values.twitter_description || null,
+  robots_noindex: values.robots_noindex,
+  robots_nofollow: values.robots_nofollow,
+  enable_jsonld: values.enable_jsonld,
+});
+
 const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none";
 
 function EditCourseSEO(props: EditCourseSEOProps) {
   const { t } = useTranslation()
   const [error, setError] = React.useState('');
+  const session = useLHSession() as any;
 
   const {
     syncChanges,
@@ -94,11 +121,22 @@ function EditCourseSEO(props: EditCourseSEOProps) {
     isSaving,
   } = useCourseFieldSync('editCourseSEO');
 
+  // ── Content locale ──
+  // Editing in any locale other than the source writes the translation row
+  // instead of the shared course structure.
+  const {
+    contentLocale,
+    isSourceLocale,
+    translation,
+    setTranslation,
+  } = useCourseTranslation(courseStructure?.course_uuid, courseStructure?.source_locale || 'en')
+  const [isSavingTranslation, setIsSavingTranslation] = React.useState(false)
+
   const hasInitializedRef = useRef(false);
   const previousValuesRef = useRef<SEOValues | null>(null);
 
   const initialValues = useMemo((): SEOValues => {
-    const seo = courseStructure?.seo || {};
+    const seo = (!isSourceLocale && translation?.seo) ? translation.seo : (courseStructure?.seo || {});
     return {
       title: seo.title || '',
       description: seo.description || '',
@@ -114,7 +152,7 @@ function EditCourseSEO(props: EditCourseSEOProps) {
       robots_nofollow: seo.robots_nofollow || false,
       enable_jsonld: seo.enable_jsonld !== false,
     };
-  }, [courseStructure?.seo]);
+  }, [courseStructure?.seo, translation, isSourceLocale]);
 
   const formik = useFormik({
     initialValues,
@@ -124,6 +162,8 @@ function EditCourseSEO(props: EditCourseSEOProps) {
   });
 
   useEffect(() => {
+    // Translation edits are saved through the translations endpoint.
+    if (!isSourceLocale) return;
     if (isLoading || isSaving) return;
 
     if (!hasInitializedRef.current) {
@@ -143,26 +183,49 @@ function EditCourseSEO(props: EditCourseSEOProps) {
     );
 
     if (hasChanges) {
-      const seoData = {
-        title: formik.values.title || null,
-        description: formik.values.description || null,
-        keywords: formik.values.keywords || null,
-        canonical_url: formik.values.canonical_url || null,
-        og_title: formik.values.og_title || null,
-        og_description: formik.values.og_description || null,
-        og_image: formik.values.og_image || null,
-        twitter_card: formik.values.twitter_card || null,
-        twitter_title: formik.values.twitter_title || null,
-        twitter_description: formik.values.twitter_description || null,
-        robots_noindex: formik.values.robots_noindex,
-        robots_nofollow: formik.values.robots_nofollow,
-        enable_jsonld: formik.values.enable_jsonld,
-      };
-
-      syncChanges({ seo: seoData });
+      syncChanges({ seo: toSeoData(formik.values) });
       previousValuesRef.current = { ...formik.values };
     }
-  }, [formik.values, isLoading, isSaving, syncChanges]);
+  }, [formik.values, isLoading, isSaving, syncChanges, isSourceLocale]);
+
+  // A translation row cannot exist without the general fields, so SEO stays
+  // read-only until the General tab has been translated once.
+  const isTranslationLocked = !isSourceLocale && !translation
+  const isDisabled = isSaving || isTranslationLocked
+
+  const hasTranslationChanges =
+    !isSourceLocale &&
+    Object.keys(formik.values).some(
+      key => formik.values[key as keyof SEOValues] !== formik.initialValues[key as keyof SEOValues]
+    )
+  const isSaved = !hasTranslationChanges
+
+  const handleSaveTranslation = async () => {
+    if (!courseStructure?.course_uuid || !translation || isSavingTranslation) return
+    setIsSavingTranslation(true)
+    try {
+      await upsertCourseTranslation(
+        courseStructure.course_uuid,
+        contentLocale,
+        {
+          name: translation.name,
+          description: translation.description,
+          about: translation.about,
+          learnings: translation.learnings,
+          tags: translation.tags,
+          seo: toSeoData(formik.values),
+        },
+        session?.data?.tokens?.access_token
+      )
+      const rows = await getCourseTranslations(courseStructure.course_uuid, session?.data?.tokens?.access_token)
+      setTranslation(rows.find(row => row.locale === contentLocale) || null)
+      toast.success(t('dashboard.courses.save.success'))
+    } catch (err) {
+      toast.error(t('dashboard.courses.save.error'))
+    } finally {
+      setIsSavingTranslation(false)
+    }
+  }
 
   if (isLoading || !courseStructure) {
     return <div>{t('dashboard.courses.settings.loading')}</div>;
@@ -176,6 +239,57 @@ function EditCourseSEO(props: EditCourseSEOProps) {
             <div className="flex justify-center bg-red-200 rounded-md text-red-950 space-x-2 items-center p-4 mb-6 transition-all shadow-xs">
               <AlertTriangle size={18} />
               <div className="font-bold text-sm">{error}</div>
+            </div>
+          )}
+
+          {/* Action row — translations are saved explicitly, the source locale autosaves */}
+          {!isSourceLocale && (
+            <div className="flex items-center justify-end gap-2">
+              <span
+                className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600"
+                title={t('dashboard.courses.general.locale.translation')}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${isSaved ? 'bg-teal-500' : 'bg-amber-400'}`} />
+                <span>{getCurrentLanguageNativeName(contentLocale)}</span>
+                <span className="text-gray-400">
+                  {translation
+                    ? t('dashboard.courses.general.locale.translation')
+                    : t('dashboard.courses.general.locale.missing')}
+                </span>
+              </span>
+              <button
+                type="button"
+                onClick={handleSaveTranslation}
+                disabled={isSaved || isSavingTranslation || isTranslationLocked}
+                className={`inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors ${
+                  isSavingTranslation
+                    ? 'bg-black text-white border-black opacity-50 cursor-not-allowed'
+                    : isSaved
+                      ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                      : 'bg-black text-white border-black hover:opacity-90 cursor-pointer'
+                }`}
+              >
+                {isSavingTranslation ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : isSaved ? (
+                  <Check size={14} />
+                ) : (
+                  <SaveAllIcon size={14} />
+                )}
+                <span>
+                  {isSavingTranslation
+                    ? t('dashboard.courses.save.saving')
+                    : isSaved
+                      ? t('dashboard.courses.save.saved')
+                      : t('dashboard.courses.save.save')}
+                </span>
+              </button>
+            </div>
+          )}
+
+          {isTranslationLocked && (
+            <div className="text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
+              {t('dashboard.courses.seo.locale.needs_translation')}
             </div>
           )}
 
@@ -197,7 +311,7 @@ function EditCourseSEO(props: EditCourseSEOProps) {
                     value={formik.values.title}
                     type="text"
                     placeholder={t('dashboard.courses.seo.form.title_placeholder')}
-                    disabled={isSaving}
+                    disabled={isDisabled}
                   />
                 </Form.Control>
               </FormField>
@@ -213,7 +327,7 @@ function EditCourseSEO(props: EditCourseSEOProps) {
                     onChange={formik.handleChange}
                     value={formik.values.description}
                     placeholder={t('dashboard.courses.seo.form.description_placeholder')}
-                    disabled={isSaving}
+                    disabled={isDisabled}
                   />
                 </Form.Control>
               </FormField>
@@ -230,7 +344,7 @@ function EditCourseSEO(props: EditCourseSEOProps) {
                     value={formik.values.keywords}
                     type="text"
                     placeholder={t('dashboard.courses.seo.form.keywords_placeholder')}
-                    disabled={isSaving}
+                    disabled={isDisabled}
                   />
                 </Form.Control>
               </FormField>
@@ -247,7 +361,7 @@ function EditCourseSEO(props: EditCourseSEOProps) {
                     value={formik.values.canonical_url}
                     type="text"
                     placeholder={t('dashboard.courses.seo.form.canonical_url_placeholder')}
-                    disabled={isSaving}
+                    disabled={isDisabled}
                   />
                 </Form.Control>
               </FormField>
@@ -272,7 +386,7 @@ function EditCourseSEO(props: EditCourseSEOProps) {
                     value={formik.values.og_title}
                     type="text"
                     placeholder={t('dashboard.courses.seo.form.og_title_placeholder')}
-                    disabled={isSaving}
+                    disabled={isDisabled}
                   />
                 </Form.Control>
               </FormField>
@@ -288,7 +402,7 @@ function EditCourseSEO(props: EditCourseSEOProps) {
                     onChange={formik.handleChange}
                     value={formik.values.og_description}
                     placeholder={t('dashboard.courses.seo.form.og_description_placeholder')}
-                    disabled={isSaving}
+                    disabled={isDisabled}
                   />
                 </Form.Control>
               </FormField>
@@ -305,7 +419,7 @@ function EditCourseSEO(props: EditCourseSEOProps) {
                     value={formik.values.og_image}
                     type="text"
                     placeholder={t('dashboard.courses.seo.form.og_image_placeholder')}
-                    disabled={isSaving}
+                    disabled={isDisabled}
                   />
                 </Form.Control>
               </FormField>
@@ -326,7 +440,7 @@ function EditCourseSEO(props: EditCourseSEOProps) {
                   <Select
                     value={formik.values.twitter_card || undefined}
                     onValueChange={(value) => formik.setFieldValue('twitter_card', value)}
-                    disabled={isSaving}
+                    disabled={isDisabled}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder={t('dashboard.courses.seo.form.select_placeholder')} />
@@ -350,7 +464,7 @@ function EditCourseSEO(props: EditCourseSEOProps) {
                       value={formik.values.twitter_title}
                       type="text"
                       placeholder={t('dashboard.courses.seo.form.twitter_title_placeholder')}
-                      disabled={isSaving}
+                      disabled={isDisabled}
                     />
                   </Form.Control>
                 </FormField>
@@ -367,7 +481,7 @@ function EditCourseSEO(props: EditCourseSEOProps) {
                     onChange={formik.handleChange}
                     value={formik.values.twitter_description}
                     placeholder={t('dashboard.courses.seo.form.twitter_description_placeholder')}
-                    disabled={isSaving}
+                    disabled={isDisabled}
                   />
                 </Form.Control>
               </FormField>
@@ -381,7 +495,7 @@ function EditCourseSEO(props: EditCourseSEOProps) {
             </h3>
             <div className="space-y-4">
               <label className="flex items-center gap-3 cursor-pointer">
-                <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${formik.values.robots_noindex ? 'bg-black' : 'bg-gray-300'} ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${formik.values.robots_noindex ? 'bg-black' : 'bg-gray-300'} ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
                   <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${formik.values.robots_noindex ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
                   <input
                     type="checkbox"
@@ -390,14 +504,14 @@ function EditCourseSEO(props: EditCourseSEOProps) {
                     onChange={formik.handleChange}
                     name="robots_noindex"
                     id="robots_noindex"
-                    disabled={isSaving}
+                    disabled={isDisabled}
                   />
                 </div>
                 <span className="text-sm text-gray-600 select-none">{t('dashboard.courses.seo.form.robots_noindex_label')}</span>
               </label>
 
               <label className="flex items-center gap-3 cursor-pointer">
-                <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${formik.values.robots_nofollow ? 'bg-black' : 'bg-gray-300'} ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${formik.values.robots_nofollow ? 'bg-black' : 'bg-gray-300'} ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
                   <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${formik.values.robots_nofollow ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
                   <input
                     type="checkbox"
@@ -406,14 +520,14 @@ function EditCourseSEO(props: EditCourseSEOProps) {
                     onChange={formik.handleChange}
                     name="robots_nofollow"
                     id="robots_nofollow"
-                    disabled={isSaving}
+                    disabled={isDisabled}
                   />
                 </div>
                 <span className="text-sm text-gray-600 select-none">{t('dashboard.courses.seo.form.robots_nofollow_label')}</span>
               </label>
 
               <label className="flex items-center gap-3 cursor-pointer pt-2">
-                <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${formik.values.enable_jsonld ? 'bg-black' : 'bg-gray-300'} ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${formik.values.enable_jsonld ? 'bg-black' : 'bg-gray-300'} ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
                   <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${formik.values.enable_jsonld ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
                   <input
                     type="checkbox"
@@ -422,7 +536,7 @@ function EditCourseSEO(props: EditCourseSEOProps) {
                     onChange={formik.handleChange}
                     name="enable_jsonld"
                     id="enable_jsonld"
-                    disabled={isSaving}
+                    disabled={isDisabled}
                   />
                 </div>
                 <span className="text-sm text-gray-600 select-none">{t('dashboard.courses.seo.form.enable_jsonld_label')}</span>
