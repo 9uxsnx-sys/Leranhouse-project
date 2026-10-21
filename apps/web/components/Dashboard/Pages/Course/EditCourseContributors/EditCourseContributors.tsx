@@ -245,7 +245,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                 className={`inline-flex items-center gap-1.5 text-sm ${
                     isCreator
                         ? 'opacity-50 cursor-not-allowed'
-                        : 'cursor-pointer hover:bg-gray-100 rounded px-1 py-0.5 -ml-1 -my-0.5 transition-colors'
+                        : 'cursor-pointer hover:bg-gray-100 rounded px-1 py-0.5 -ms-1 -my-0.5 transition-colors'
                 }`}
             >
                 <span className={`w-2.5 h-2.5 rounded ${isActive ? 'bg-green-500' : 'bg-red-500'}`} />
@@ -473,13 +473,13 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                 <div>
                     <div className="flex items-center gap-3 mb-5">
                         <div className="relative w-80">
-                            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                            <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
                             <input
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder={t('dashboard.courses.contributors.search.placeholder')}
-                                className="w-full h-7 pl-8 pr-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
+                                className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
                             />
                         </div>
                         <div className="flex-1" />

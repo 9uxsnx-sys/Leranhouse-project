@@ -139,12 +139,12 @@ export const CustomSelectItem: React.FC<CustomSelectItemProps> = ({
 
   return (
     <div
-      className={`relative flex w-full cursor-default select-none items-center rounded-md py-2.5 pl-3 pr-10 text-sm outline-hidden focus:bg-gray-100 focus:text-gray-900 hover:bg-gray-100 hover:text-gray-900 transition-colors ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
+      className={`relative flex w-full cursor-default select-none items-center rounded-md py-2.5 ps-3 pe-10 text-sm outline-hidden focus:bg-gray-100 focus:text-gray-900 hover:bg-gray-100 hover:text-gray-900 transition-colors ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
       onClick={() => !disabled && onValueChange(value)}
     >
       {children}
       {selectedValue === value && (
-        <span className="absolute right-3 flex h-4 w-4 items-center justify-center">
+        <span className="absolute end-3 flex h-4 w-4 items-center justify-center">
           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
           </svg>

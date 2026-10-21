@@ -635,13 +635,13 @@ function EditCourseAccess(props: EditCourseAccessProps) {
             {/* ── TOOLBAR ── */}
             <div className="flex items-center gap-3 mb-5">
                 <div className="relative w-80">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                    <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
                     <input
                         type="text"
                         value={searchValue}
                         onChange={(e) => setSearchValue(e.target.value)}
                         placeholder={searchPlaceholder}
-                        className="w-full h-7 pl-8 pr-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
+                        className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
                     />
                 </div>
 
@@ -824,7 +824,7 @@ function EditCourseAccess(props: EditCourseAccessProps) {
                             className="pointer-events-auto w-[340px] rounded-xl border border-gray-200 bg-white shadow-lg"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <div className="flex justify-end pt-3 pr-3">
+                            <div className="flex justify-end pt-3 pe-3">
                                 <button
                                     onClick={() => setDetailUser(null)}
                                     className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"

@@ -552,7 +552,7 @@ const CopilotMenuButton = ({
                 <ChatBubble />
                 {/* Active indicator dot */}
                 {isBubbleMode && bubbleOpen && (
-                  <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-primary ring-2 ring-white dark:ring-neutral-900" />
+                  <span className="absolute top-1 end-1 h-1.5 w-1.5 rounded-full bg-primary ring-2 ring-white dark:ring-neutral-900" />
                 )}
               </IconButton>
             </DropdownMenuTrigger>

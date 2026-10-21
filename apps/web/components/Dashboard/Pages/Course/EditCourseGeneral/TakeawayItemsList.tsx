@@ -197,7 +197,7 @@ const TakeawayItemsList = ({ value, onChange, error }: TakeawayItemsListProps) =
               </div>
 
               {/* Sub-points */}
-              <div className="ml-10 pb-2 pr-2.5 space-y-1">
+              <div className="ms-10 pb-2 pe-2.5 space-y-1">
                 {item.items.map((sub, subIdx) => {
                   const isSubDragging = dragSub?.mainIdx === idx && dragSub?.subIdx === subIdx
                   return (

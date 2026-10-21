@@ -124,7 +124,7 @@ const cmStyles: React.CSSProperties = {
 const cmClassName = [
   '[&_.cm-editor]:!bg-[#1a1b26]',
   '[&_.cm-gutters]:!bg-[#1a1b26]',
-  '[&_.cm-gutters]:!border-r-transparent',
+  '[&_.cm-gutters]:!border-e-transparent',
   '[&_.cm-activeLineGutter]:!bg-[#24283b]',
   '[&_.cm-activeLine]:!bg-[#24283b]',
   '[&_.cm-editor]:!outline-none',

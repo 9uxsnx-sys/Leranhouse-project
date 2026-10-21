@@ -353,10 +353,10 @@ const OrgAuditLogs = () => {
                   </SelectContent>
                 </Select>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                  <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
                   <Input
                     placeholder={t('dashboard.organization.audit_logs.placeholders.search')}
-                    className="pl-9 w-[180px] h-9 text-xs border-none focus-visible:ring-0 rounded-none"
+                    className="ps-9 w-[180px] h-9 text-xs border-none focus-visible:ring-0 rounded-none"
                     value={filters.searchValue}
                     onChange={(e) => {
                       setFilters({ ...filters, searchValue: e.target.value })

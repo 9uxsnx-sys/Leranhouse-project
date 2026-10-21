@@ -611,7 +611,7 @@ function CoursesHome(params: CourseProps) {
             <div key={course.course_uuid} className="relative group">
               {/* Selection checkbox - visible in select mode */}
               {isSelectMode && (
-                <label className="absolute top-2 left-2 z-20 w-5 h-5 cursor-pointer">
+                <label className="absolute top-2 start-2 z-20 w-5 h-5 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={selectedCourses.has(course.course_uuid)}

@@ -37,7 +37,7 @@ export default function CommandPaletteTrigger({ isCollapsed = false }: Props) {
       type="button"
       onClick={() => setOpen(true)}
       aria-label={t('dashboard.search.trigger')}
-      className="group flex h-10 w-full items-center gap-x-2.5 rounded-xl px-4 text-left text-ui-fg-subtle transition-colors hover:bg-ui-bg-subtle-hover hover:text-ui-fg-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-fg-muted/20"
+      className="group flex h-10 w-full items-center gap-x-2.5 rounded-xl px-4 text-start text-ui-fg-subtle transition-colors hover:bg-ui-bg-subtle-hover hover:text-ui-fg-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ui-fg-muted/20"
     >
       <ConceptIcon.search size={18} className="shrink-0" />
       <span className="flex-1 text-sm font-medium">

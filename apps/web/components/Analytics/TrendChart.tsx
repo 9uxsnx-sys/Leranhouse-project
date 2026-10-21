@@ -16,7 +16,7 @@ export function ChartTooltip({ active, payload, label, formatter }: any) {
         <div key={i} className="flex items-center gap-2 text-[12px]">
           <span className="w-2 h-2 rounded-full shrink-0" style={{ background: p.color || p.fill }} />
           <span className="text-gray-500">{p.name}</span>
-          <span className="ml-auto pl-3 font-semibold text-gray-900 tabular-nums">
+          <span className="ms-auto ps-3 font-semibold text-gray-900 tabular-nums">
             {formatter ? formatter(p.value) : formatNumber(p.value)}
           </span>
         </div>

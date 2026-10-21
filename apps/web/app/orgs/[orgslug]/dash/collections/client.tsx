@@ -366,7 +366,7 @@ function CollectionsHome(params: CollectionsHomeProps) {
           <div key={collection.collection_uuid} className="relative group">
             {/* Selection checkbox - visible in select mode */}
             {isSelectMode && (
-              <label className="absolute top-2 left-2 z-20 w-5 h-5 cursor-pointer">
+              <label className="absolute top-2 start-2 z-20 w-5 h-5 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={selectedCollections.has(collection.collection_uuid)}
@@ -553,13 +553,13 @@ const CollectionEditOptions = ({
   const [isOpen, setIsOpen] = React.useState(false)
 
   const itemClass =
-    'w-full text-left flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] font-medium text-gray-700 hover:bg-gray-100 transition-colors'
+    'w-full text-start flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] font-medium text-gray-700 hover:bg-gray-100 transition-colors'
   const itemClassDanger =
-    'w-full text-left flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] font-medium text-red-600 hover:bg-red-50 transition-colors'
+    'w-full text-start flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] font-medium text-red-600 hover:bg-red-50 transition-colors'
 
   return (
     <div
-      className={`absolute top-2 right-2 z-20 transition-opacity ${
+      className={`absolute top-2 end-2 z-20 transition-opacity ${
         !isOpen ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
       }`}
     >

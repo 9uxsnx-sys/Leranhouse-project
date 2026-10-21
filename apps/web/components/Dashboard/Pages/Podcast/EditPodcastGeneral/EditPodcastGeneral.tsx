@@ -299,7 +299,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                           <button
                             type="button"
                             onClick={() => setExpandedHosts(prev => ({ ...prev, [index]: !isOpen }))}
-                            className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-100/50 transition-colors"
+                            className="w-full flex items-center justify-between px-4 py-3 text-start hover:bg-gray-100/50 transition-colors"
                           >
                             <div className="flex items-center gap-2.5">
                               <span className="text-sm font-semibold text-gray-800">{t('podcasts.dashboard.general.host_label', { number: index + 1 })}</span>

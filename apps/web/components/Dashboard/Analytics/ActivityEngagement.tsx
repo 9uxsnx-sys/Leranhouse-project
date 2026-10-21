@@ -45,12 +45,12 @@ export default function ActivityEngagement({ days = '30' }: { days?: string }) {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-gray-400 text-xs uppercase tracking-wider border-b border-gray-100">
+              <tr className="text-start text-gray-400 text-xs uppercase tracking-wider border-b border-gray-100">
                 <th className="pb-2">{t('analytics.overview.activity')}</th>
                 <th className="pb-2">{t('analytics.common.type')}</th>
-                <th className="pb-2 text-right">{t('analytics.common.views')}</th>
-                <th className="pb-2 text-right">{t('analytics.common.completions')}</th>
-                <th className="pb-2 text-right">{t('analytics.overview.avg_time')}</th>
+                <th className="pb-2 text-end">{t('analytics.common.views')}</th>
+                <th className="pb-2 text-end">{t('analytics.common.completions')}</th>
+                <th className="pb-2 text-end">{t('analytics.overview.avg_time')}</th>
               </tr>
             </thead>
             <tbody>
@@ -73,9 +73,9 @@ export default function ActivityEngagement({ days = '30' }: { days?: string }) {
                       )}
                     </td>
                     <td className="py-2 text-gray-400 text-xs">{getTypeLabel(row.activity_type, t)}</td>
-                    <td className="py-2 text-right text-gray-500">{row.views}</td>
-                    <td className="py-2 text-right text-gray-500">{row.completions}</td>
-                    <td className="py-2 text-right text-gray-500">
+                    <td className="py-2 text-end text-gray-500">{row.views}</td>
+                    <td className="py-2 text-end text-gray-500">{row.completions}</td>
+                    <td className="py-2 text-end text-gray-500">
                       {row.avg_seconds_spent != null && row.avg_seconds_spent > 0 ? `${Math.round(row.avg_seconds_spent)}s` : '—'}
                     </td>
                   </tr>

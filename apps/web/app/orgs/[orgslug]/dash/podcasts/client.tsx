@@ -294,7 +294,7 @@ const PodcastsDashClient = ({
                 onClick={() => isSelectMode && toggleSelection(podcast.podcast_uuid)}
               >
                 {isSelectMode && (
-                  <label className="absolute top-2 left-2 z-20 w-5 h-5 cursor-pointer">
+                  <label className="absolute top-2 start-2 z-20 w-5 h-5 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={isSelected}

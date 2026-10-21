@@ -89,7 +89,7 @@ function PodcastDistribution({ orgslug, podcastuuid }: PodcastDistributionProps)
                 <p className="text-xs text-gray-400">{t('podcasts.dashboard.distribution.apple.also_on_apple_music')}</p>
               </div>
             </div>
-            <ol className="text-sm text-gray-600 space-y-2 ml-1">
+            <ol className="text-sm text-gray-600 space-y-2 ms-1">
               <li className="flex items-start space-x-2">
                 <span className="font-semibold text-gray-800 shrink-0">1.</span>
                 <span>{t('podcasts.dashboard.distribution.apple.step1_before')} <a href="https://podcastsconnect.apple.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">podcastsconnect.apple.com</a> {t('podcasts.dashboard.distribution.apple.step1_after')}</span>
@@ -120,7 +120,7 @@ function PodcastDistribution({ orgslug, podcastuuid }: PodcastDistributionProps)
                 <p className="text-xs text-gray-400">{t('podcasts.dashboard.distribution.spotify.largest_platform')}</p>
               </div>
             </div>
-            <ol className="text-sm text-gray-600 space-y-2 ml-1">
+            <ol className="text-sm text-gray-600 space-y-2 ms-1">
               <li className="flex items-start space-x-2">
                 <span className="font-semibold text-gray-800 shrink-0">1.</span>
                 <span>{t('podcasts.dashboard.distribution.spotify.step1_before')} <a href="https://podcasters.spotify.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">podcasters.spotify.com</a> {t('podcasts.dashboard.distribution.spotify.step1_after')}</span>
@@ -151,7 +151,7 @@ function PodcastDistribution({ orgslug, podcastuuid }: PodcastDistributionProps)
                 <p className="text-xs text-gray-400">{t('podcasts.dashboard.distribution.youtube.migrated_note')}</p>
               </div>
             </div>
-            <ol className="text-sm text-gray-600 space-y-2 ml-1">
+            <ol className="text-sm text-gray-600 space-y-2 ms-1">
               <li className="flex items-start space-x-2">
                 <span className="font-semibold text-gray-800 shrink-0">1.</span>
                 <span>{t('podcasts.dashboard.distribution.youtube.step1')} <a href="https://podcasts.google.com/publish" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">podcasts.google.com/publish</a></span>
@@ -182,7 +182,7 @@ function PodcastDistribution({ orgslug, podcastuuid }: PodcastDistributionProps)
                 <p className="text-xs text-gray-400">{t('podcasts.dashboard.distribution.amazon.also_on_alexa')}</p>
               </div>
             </div>
-            <ol className="text-sm text-gray-600 space-y-2 ml-1">
+            <ol className="text-sm text-gray-600 space-y-2 ms-1">
               <li className="flex items-start space-x-2">
                 <span className="font-semibold text-gray-800 shrink-0">1.</span>
                 <span>{t('podcasts.dashboard.distribution.amazon.step1_before')} <a href="https://podcasters.amazon.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">podcasters.amazon.com</a> {t('podcasts.dashboard.distribution.amazon.step1_after')}</span>

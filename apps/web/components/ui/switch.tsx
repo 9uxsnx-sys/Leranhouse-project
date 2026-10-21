@@ -29,8 +29,8 @@ const thumbVariants = cva({
   variants: {
     size: {
       small:
-        "h-[12px] w-[12px] data-[state=checked]:translate-x-3.5 data-[state=unchecked]:translate-x-0.5",
-      base: "h-[14px] w-[14px] transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0.5",
+        "h-[12px] w-[12px] data-[state=checked]:translate-x-3.5 data-[state=unchecked]:translate-x-0.5 rtl:data-[state=checked]:-translate-x-3.5 rtl:data-[state=unchecked]:-translate-x-0.5",
+      base: "h-[14px] w-[14px] transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0.5 rtl:data-[state=checked]:-translate-x-4 rtl:data-[state=unchecked]:-translate-x-0.5",
     },
   },
   defaultVariants: {

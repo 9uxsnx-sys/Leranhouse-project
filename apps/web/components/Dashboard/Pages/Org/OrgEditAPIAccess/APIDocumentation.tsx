@@ -270,7 +270,7 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
     return (
       <div className="pb-4">
         <div className="flex justify-center items-center py-12">
-          <RefreshCw className="animate-spin text-gray-400 mr-2" size={24} />
+          <RefreshCw className="animate-spin text-gray-400 me-2" size={24} />
           <span className="text-gray-500">{t('dashboard.organization.api_access.docs.loading')}</span>
         </div>
       </div>
@@ -283,7 +283,7 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
         <div className="text-center py-12">
           <p className="text-red-500 mb-4">{error}</p>
           <Button onClick={loadSpec} variant="outline">
-            <RefreshCw size={16} className="mr-2" />
+            <RefreshCw size={16} className="me-2" />
             {t('dashboard.organization.api_access.docs.retry')}
           </Button>
         </div>
@@ -357,7 +357,7 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
                                   {param.required && (
                                     <span className="text-xs text-red-500">{t('dashboard.organization.api_access.docs.required')}</span>
                                   )}
-                                  <span className="text-xs text-gray-400 ml-auto">
+                                  <span className="text-xs text-gray-400 ms-auto">
                                     {param.schema?.type || 'any'}
                                   </span>
                                   {param.description && (
@@ -376,7 +376,7 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
                             <div>
                               <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
                                 {t('dashboard.organization.api_access.docs.request_body')}
-                                <span className="font-mono text-gray-400 ml-2">
+                                <span className="font-mono text-gray-400 ms-2">
                                   {getSchemaTypeLabel(endpoint.requestBody.content['application/json'].schema)}
                                 </span>
                               </h4>
@@ -389,7 +389,7 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
                                       <div key={key} className="flex items-center gap-3 px-3 py-2">
                                         <code className="text-sm text-gray-800 font-medium">{key}</code>
                                         {isRequired && <span className="text-xs text-red-500">{t('dashboard.organization.api_access.docs.required')}</span>}
-                                        <span className="text-xs text-gray-400 ml-auto">{resolvedProp?.type || 'any'}</span>
+                                        <span className="text-xs text-gray-400 ms-auto">{resolvedProp?.type || 'any'}</span>
                                         {resolvedProp?.description && (
                                           <span className="text-xs text-gray-500 truncate max-w-[200px]">{resolvedProp.description}</span>
                                         )}
@@ -426,7 +426,7 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
                                       </Badge>
                                       <span className="text-xs text-gray-600">{res.description || ''}</span>
                                       {responseSchema && (
-                                        <span className="text-xs text-gray-400 font-mono ml-auto">
+                                        <span className="text-xs text-gray-400 font-mono ms-auto">
                                           {getSchemaTypeLabel(responseSchema)}
                                         </span>
                                       )}

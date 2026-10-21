@@ -108,14 +108,14 @@ const KnowledgeCheckItemsList = ({ value, onChange, error }: KnowledgeCheckItems
                 draggable
                 onDragStart={onDragStart(idx)}
                 onDragEnd={() => setDragIdx(null)}
-                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing p-0.5"
+                className="absolute start-2.5 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing p-0.5"
                 title={t('dashboard.courses.general.knowledge_checks.drag_to_reorder')}
               >
                 <GripVertical size={14} />
               </div>
 
               {/* Row 1: Question + Delete */}
-              <div className="flex items-center gap-2 pl-7">
+              <div className="flex items-center gap-2 ps-7">
                 <input
                   type="text"
                   value={item.question}
@@ -135,7 +135,7 @@ const KnowledgeCheckItemsList = ({ value, onChange, error }: KnowledgeCheckItems
               </div>
 
               {/* Row 2: Answer input */}
-              <div className="flex items-center gap-2 pl-7">
+              <div className="flex items-center gap-2 ps-7">
                 <input
                   type="text"
                   value={item.answer}

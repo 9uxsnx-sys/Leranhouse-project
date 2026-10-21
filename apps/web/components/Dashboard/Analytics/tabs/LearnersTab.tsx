@@ -28,7 +28,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   return (
     <div className="flex justify-between items-center gap-4">
       <span className="text-xs text-gray-400 shrink-0">{label}</span>
-      <span className="text-sm text-gray-700 text-right">{children}</span>
+      <span className="text-sm text-gray-700 text-end">{children}</span>
     </div>
   )
 }
@@ -49,7 +49,7 @@ function LearnerDetailDialog({ userId, onClose }: { userId: number; onClose: () 
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close */}
-          <div className="flex justify-end pt-3 pr-3">
+          <div className="flex justify-end pt-3 pe-3">
             <button
               onClick={onClose}
               className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"

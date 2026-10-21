@@ -115,7 +115,7 @@ function NavLinkItem({
     return (
       <button
         onClick={onSearchClick}
-        className={`${NAV_BASE} w-full text-left`}
+        className={`${NAV_BASE} w-full text-start`}
       >
         <Icon className="w-5 h-5" />
         <Text size="small" weight="plus" leading="compact" className="text-sm">

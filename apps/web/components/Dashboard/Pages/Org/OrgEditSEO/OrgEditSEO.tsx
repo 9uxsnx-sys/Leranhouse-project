@@ -188,7 +188,7 @@ const OrgEditSEO: React.FC = () => {
                           {sitemapUrl}
                         </a>
                       </div>
-                      <div className="flex items-center space-x-1 shrink-0 ml-2">
+                      <div className="flex items-center space-x-1 shrink-0 ms-2">
                         <button
                           type="button"
                           onClick={() => copyToClipboard(sitemapUrl)}
@@ -218,7 +218,7 @@ const OrgEditSEO: React.FC = () => {
                           {robotsUrl}
                         </a>
                       </div>
-                      <div className="flex items-center space-x-1 shrink-0 ml-2">
+                      <div className="flex items-center space-x-1 shrink-0 ms-2">
                         <button
                           type="button"
                           onClick={() => copyToClipboard(robotsUrl)}

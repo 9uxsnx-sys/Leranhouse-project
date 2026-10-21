@@ -133,7 +133,7 @@ export function DataTable<T extends Record<string, any>>({
           <thead>
             <tr className="border-b border-gray-100">
               {selectionEnabled && (
-                <th className="w-[40px] pb-2.5 pl-6 pr-0 text-start align-middle">
+                <th className="w-[40px] pb-2.5 ps-6 pe-0 text-start align-middle">
                   <span className="flex items-center justify-center w-4 h-4">
                     <Checkbox
                       checked={allSelected}
@@ -152,7 +152,7 @@ export function DataTable<T extends Record<string, any>>({
                     onClick={canSort ? () => toggleSort(col) : undefined}
                     className={cn(
                       'px-6 pb-2.5 text-[13px] font-semibold tracking-wide uppercase text-gray-500 whitespace-nowrap align-middle',
-                      selectionEnabled && col === columns[0] && 'pl-4',
+                      selectionEnabled && col === columns[0] && 'ps-4',
                       alignClass(col.align),
                       canSort && 'cursor-pointer select-none transition-colors hover:text-gray-700'
                     )}
@@ -187,7 +187,7 @@ export function DataTable<T extends Record<string, any>>({
                 >
                   {selectionEnabled && (
                     <td
-                      className="w-[40px] pl-6 pr-0 align-middle"
+                      className="w-[40px] ps-6 pe-0 align-middle"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <span className="flex items-center justify-center w-4 h-4">
@@ -204,7 +204,7 @@ export function DataTable<T extends Record<string, any>>({
                       key={col.key}
                       className={cn(
                         'px-6 py-3.5 align-middle text-sm text-gray-700',
-                        selectionEnabled && col === columns[0] && 'pl-4',
+                        selectionEnabled && col === columns[0] && 'ps-4',
                         alignClass(col.align)
                       )}
                     >

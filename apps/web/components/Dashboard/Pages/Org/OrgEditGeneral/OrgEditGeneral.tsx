@@ -235,13 +235,13 @@ const LanguageSection: React.FC<{
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-100/50 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-3 text-start hover:bg-gray-100/50 transition-colors"
       >
         <div className="flex items-center gap-2.5">
           <Globe className="w-4 h-4 text-gray-500 flex-shrink-0" />
           <span className="text-sm font-semibold text-gray-800">
             {currentLang ? (
-              <><span className="font-mono text-gray-400 mr-1.5">{currentLang.code.toUpperCase()}</span>{currentLang.nativeName}</>
+              <><span className="font-mono text-gray-400 me-1.5">{currentLang.code.toUpperCase()}</span>{currentLang.nativeName}</>
             ) : (
               t('dashboard.organization.settings.default_language')
             )}
@@ -270,16 +270,16 @@ const LanguageSection: React.FC<{
                   <div
                     key={lang.code}
                     onClick={() => { onChange(lang.code); setIsExpanded(false) }}
-                    className={`relative flex cursor-pointer items-center rounded-md py-2 pl-3 pr-8 text-sm hover:bg-gray-100 transition-colors ${
+                    className={`relative flex cursor-pointer items-center rounded-md py-2 ps-3 pe-8 text-sm hover:bg-gray-100 transition-colors ${
                       isSelected ? 'bg-gray-100 font-medium' : ''
                     }`}
                   >
                     <span className="text-xs text-gray-700">
-                      <span className="font-mono text-gray-400 mr-1.5">{lang.code.toUpperCase()}</span>
+                      <span className="font-mono text-gray-400 me-1.5">{lang.code.toUpperCase()}</span>
                       {lang.nativeName}
                     </span>
                     {isSelected && (
-                      <span className="absolute right-2 text-gray-600">
+                      <span className="absolute end-2 text-gray-600">
                         <Check size={14} strokeWidth={2.5} />
                       </span>
                     )}

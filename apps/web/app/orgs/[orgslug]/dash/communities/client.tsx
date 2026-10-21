@@ -321,7 +321,7 @@ const CommunitiesDashClient = ({
                 onClick={() => isSelectMode && toggleSelection(community.community_uuid)}
               >
                 {isSelectMode && (
-                  <label className="absolute top-2 left-2 z-10 w-5 h-5 cursor-pointer">
+                  <label className="absolute top-2 start-2 z-10 w-5 h-5 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={isSelected}

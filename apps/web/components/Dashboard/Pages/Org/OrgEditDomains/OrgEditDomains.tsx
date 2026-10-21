@@ -210,7 +210,7 @@ const OrgEditDomains: React.FC = () => {
     if (domain.status !== 'verified') {
       return (
         <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500">
-          <Shield size={12} className="mr-1" />
+          <Shield size={12} className="me-1" />
           N/A
         </Badge>
       )
@@ -222,7 +222,7 @@ const OrgEditDomains: React.FC = () => {
     if (loading && !sslStatus) {
       return (
         <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-600">
-          <Loader2 size={12} className="mr-1 animate-spin" />
+          <Loader2 size={12} className="me-1 animate-spin" />
           {t('dashboard.organization.domains.ssl.checking')}
         </Badge>
       )
@@ -231,7 +231,7 @@ const OrgEditDomains: React.FC = () => {
     if (!sslStatus) {
       return (
         <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500">
-          <Shield size={12} className="mr-1" />
+          <Shield size={12} className="me-1" />
           {t('dashboard.organization.domains.ssl.checking')}
         </Badge>
       )
@@ -241,28 +241,28 @@ const OrgEditDomains: React.FC = () => {
       case 'active':
         return (
           <Badge variant="outline" className="border-transparent bg-green-100 text-green-800" title={t('dashboard.organization.domains.ssl.tooltip', { issuer: sslStatus.issuer || t('common.unknown'), expires: sslStatus.expires || t('common.unknown') })}>
-            <ShieldCheck size={12} className="mr-1" />
+            <ShieldCheck size={12} className="me-1" />
             {t('dashboard.organization.domains.ssl.active')}
           </Badge>
         )
       case 'provisioning':
         return (
           <Badge variant="outline" className="border-transparent bg-yellow-100 text-yellow-800" title={sslStatus.message}>
-            <Loader2 size={12} className="mr-1 animate-spin" />
+            <Loader2 size={12} className="me-1 animate-spin" />
             {t('dashboard.organization.domains.ssl.provisioning')}
           </Badge>
         )
       case 'invalid':
         return (
           <Badge variant="outline" className="border-transparent bg-red-100 text-red-800" title={sslStatus.message}>
-            <ShieldAlert size={12} className="mr-1" />
+            <ShieldAlert size={12} className="me-1" />
             {t('dashboard.organization.domains.ssl.invalid')}
           </Badge>
         )
       default:
         return (
           <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-600" title={sslStatus.message}>
-            <ShieldAlert size={12} className="mr-1" />
+            <ShieldAlert size={12} className="me-1" />
             {t('common.unknown')}
           </Badge>
         )
@@ -274,21 +274,21 @@ const OrgEditDomains: React.FC = () => {
       case 'verified':
         return (
           <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500">
-            <CheckCircle2 size={12} className="mr-1" />
+            <CheckCircle2 size={12} className="me-1" />
             {t('dashboard.organization.domains.status.verified')}
           </Badge>
         )
       case 'pending':
         return (
           <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500">
-            <Clock size={12} className="mr-1" />
+            <Clock size={12} className="me-1" />
             {t('dashboard.organization.domains.status.pending')}
           </Badge>
         )
       case 'failed':
         return (
           <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500">
-            <XCircle size={12} className="mr-1" />
+            <XCircle size={12} className="me-1" />
             {t('dashboard.organization.domains.status.failed')}
           </Badge>
         )

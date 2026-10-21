@@ -28,7 +28,7 @@ export function BreakdownList({ data, nameKey, valueKey, formatter }: BreakdownL
               style={{ width: `${((d[valueKey] || 0) / total) * 100}%`, background: t.categorical[i % t.categorical.length] }}
             />
           </div>
-          <span className="w-20 shrink-0 border-l border-gray-100 pl-3 text-right text-[13px] font-semibold text-gray-900 tabular-nums">
+          <span className="w-20 shrink-0 border-s border-gray-100 ps-3 text-end text-[13px] font-semibold text-gray-900 tabular-nums">
             {formatter ? formatter(d[valueKey]) : `${Math.round(((d[valueKey] || 0) / total) * 100)}%`}
           </span>
         </div>

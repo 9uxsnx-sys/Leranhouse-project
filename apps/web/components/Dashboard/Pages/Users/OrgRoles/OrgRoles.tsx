@@ -238,7 +238,7 @@ const PermissionSection = ({
             <button
                 type="button"
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-gray-100/50 transition-colors"
+                className="w-full flex items-center justify-between px-4 py-3 text-start hover:bg-gray-100/50 transition-colors"
             >
                 <div className="flex items-center gap-2.5">
                     <Icon className="w-4 h-4 text-gray-500 flex-shrink-0" />
@@ -755,13 +755,13 @@ function OrgRoles() {
             {/* Toolbar Row */}
             <div className="flex items-center gap-3 mb-5">
                 <div className="relative w-80">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                    <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
                     <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder={t('dashboard.users.roles.search_placeholder')}
-                        className="w-full h-7 pl-8 pr-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
+                        className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
                     />
                 </div>
 
@@ -851,7 +851,7 @@ function OrgRoles() {
                             <div
                                 key={role.id}
                                 onClick={() => handleRoleClick(role)}
-                                className={`w-full text-left px-5 py-4 rounded-xl bg-white shadow-borders-base transition-colors flex items-center justify-between group ${
+                                className={`w-full text-start px-5 py-4 rounded-xl bg-white shadow-borders-base transition-colors flex items-center justify-between group ${
                                     isSystem ? 'opacity-70 cursor-default' : 'hover:border-gray-200 cursor-pointer'
                                 }`}
                             >
