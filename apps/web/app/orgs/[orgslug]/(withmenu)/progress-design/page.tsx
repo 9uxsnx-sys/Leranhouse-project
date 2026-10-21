@@ -153,13 +153,13 @@ export default function ProgressDesignPreview() {
       <div className="flex items-center gap-3 mb-8">
         <div className="flex items-center gap-3">
           <div className="relative w-80">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+            <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search courses..."
-              className="w-full h-7 pl-8 pr-2 text-sm bg-white shadow-borders-base rounded-md placeholder:text-gray-400 focus:outline-none"
+              className="w-full h-7 ps-8 pe-2 text-sm bg-white shadow-borders-base rounded-md placeholder:text-gray-400 focus:outline-none"
             />
           </div>
           {searchQuery && (
@@ -177,19 +177,19 @@ export default function ProgressDesignPreview() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="bg-white min-w-0 w-32">
             <DropdownMenuItem onSelect={() => setFilterStatus('all')}>
-              {filterStatus === 'all' && <span className="text-indigo-600 mr-1.5">✓</span>}All
+              {filterStatus === 'all' && <span className="text-indigo-600 me-1.5">✓</span>}All
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => setFilterStatus('in-progress')}>
-              {filterStatus === 'in-progress' && <span className="text-indigo-600 mr-1.5">✓</span>}In Progress
+              {filterStatus === 'in-progress' && <span className="text-indigo-600 me-1.5">✓</span>}In Progress
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => setFilterStatus('completed')}>
-              {filterStatus === 'completed' && <span className="text-indigo-600 mr-1.5">✓</span>}Completed
+              {filterStatus === 'completed' && <span className="text-indigo-600 me-1.5">✓</span>}Completed
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => setSortOrder('newest')}>
-              {sortOrder === 'newest' && <span className="text-indigo-600 mr-1.5">✓</span>}Newest
+              {sortOrder === 'newest' && <span className="text-indigo-600 me-1.5">✓</span>}Newest
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => setSortOrder('oldest')}>
-              {sortOrder === 'oldest' && <span className="text-indigo-600 mr-1.5">✓</span>}Oldest
+              {sortOrder === 'oldest' && <span className="text-indigo-600 me-1.5">✓</span>}Oldest
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -224,7 +224,7 @@ export default function ProgressDesignPreview() {
         <div className="flex items-center justify-center gap-1 pt-6 pb-0">
           <Button variant="transparent" size="small" onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}>
             <ChevronLeft className="w-4 h-4" />
-            <span className="hidden sm:inline ml-1">Previous</span>
+            <span className="hidden sm:inline ms-1">Previous</span>
           </Button>
           <div className="flex items-center gap-1 mx-2">
             {getVisiblePageNumbers().map((page, index) => (
@@ -247,7 +247,7 @@ export default function ProgressDesignPreview() {
             ))}
           </div>
           <Button variant="transparent" size="small" onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}>
-            <span className="hidden sm:inline mr-1">Next</span>
+            <span className="hidden sm:inline me-1">Next</span>
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>

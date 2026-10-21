@@ -423,9 +423,9 @@ function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubb
                       <button
                         key={i}
                         onClick={() => sendMessage(s)}
-                        className="group flex items-center gap-1.5 w-fit max-w-full text-left px-2.5 py-1.5 text-[11px] rounded-xl text-neutral-600 dark:text-neutral-300 bg-neutral-50 dark:bg-neutral-800/50 hover:bg-violet-50 dark:hover:bg-violet-500/10 hover:text-violet-700 transition-all"
+                        className="group flex items-center gap-1.5 w-fit max-w-full text-start px-2.5 py-1.5 text-[11px] rounded-xl text-neutral-600 dark:text-neutral-300 bg-neutral-50 dark:bg-neutral-800/50 hover:bg-violet-50 dark:hover:bg-violet-500/10 hover:text-violet-700 transition-all"
                       >
-                        <ArrowRight size={10} weight="bold" className="flex-shrink-0 text-neutral-400 group-hover:text-violet-500" />
+                        <ArrowRight size={10} weight="bold" className="flex-shrink-0 text-neutral-400 group-hover:text-violet-500 rtl:rotate-180" />
                         <span className="truncate">{s}</span>
                       </button>
                     ))}

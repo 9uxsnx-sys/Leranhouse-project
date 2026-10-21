@@ -173,13 +173,13 @@ function Courses(props: CourseProps) {
           <div className="flex items-center gap-3">
             {/* Search — custom search bar with icon */}
             <div className="relative w-80">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('courses.search_courses')}
-                className="w-full h-7 pl-8 pr-2 text-sm bg-white shadow-borders-base rounded-md placeholder:text-gray-400 focus:outline-none"
+                className="w-full h-7 ps-8 pe-2 text-sm bg-white shadow-borders-base rounded-md placeholder:text-gray-400 focus:outline-none"
               />
             </div>
 
@@ -216,11 +216,11 @@ function Courses(props: CourseProps) {
           {usergroupsAvailable && usergroups.length > 0 && (
             <div className="relative flex items-center gap-1.5">
               <div className="relative">
-                <Users className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ui-fg-muted w-3.5 h-3.5 pointer-events-none" />
+                <Users className="absolute start-2.5 top-1/2 -translate-y-1/2 text-ui-fg-muted w-3.5 h-3.5 pointer-events-none" />
                 <select
                   value={selectedUsergroupId}
                   onChange={(e) => handleUsergroupChange(e.target.value)}
-                  className="h-7 pl-7 pr-7 txt-compact-small bg-ui-bg-field hover:bg-ui-bg-field-hover shadow-borders-base rounded-md appearance-none cursor-pointer min-w-[140px] outline-none focus-visible:shadow-borders-interactive-with-active"
+                  className="h-7 ps-7 pe-7 txt-compact-small bg-ui-bg-field hover:bg-ui-bg-field-hover shadow-borders-base rounded-md appearance-none cursor-pointer min-w-[140px] outline-none focus-visible:shadow-borders-interactive-with-active"
                 >
                   <option value="">{t('courses.usergroup_filter.all_courses')}</option>
                   {usergroups.map((ug: any) => (
@@ -237,7 +237,7 @@ function Courses(props: CourseProps) {
                 <Info className="w-3.5 h-3.5" />
               </button>
               {showUsergroupInfo && (
-                <div className="absolute top-full left-0 mt-2 z-50 w-72 bg-ui-bg-component shadow-elevation-flyout rounded-lg p-3">
+                <div className="absolute top-full start-0 mt-2 z-50 w-72 bg-ui-bg-component shadow-elevation-flyout rounded-lg p-3">
                   <p className="txt-compact-xsmall-plus text-ui-fg-subtle mb-1">{t('courses.usergroup_filter.info_title')}</p>
                   <p className="txt-compact-xsmall text-ui-fg-muted leading-relaxed">{t('courses.usergroup_filter.info_description')}</p>
                 </div>
@@ -309,7 +309,7 @@ function Courses(props: CourseProps) {
             disabled={currentPage === 1}
           >
             <ChevronLeft className="w-4 h-4" />
-            <span className="hidden sm:inline ml-1">{t('pagination.previous')}</span>
+            <span className="hidden sm:inline ms-1">{t('pagination.previous')}</span>
           </Button>
 
           <div className="flex items-center gap-1 mx-2">
@@ -339,7 +339,7 @@ function Courses(props: CourseProps) {
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage === totalPages}
           >
-            <span className="hidden sm:inline mr-1">{t('pagination.next')}</span>
+            <span className="hidden sm:inline me-1">{t('pagination.next')}</span>
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>

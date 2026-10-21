@@ -378,7 +378,7 @@ const CourseClient = (props: any) => {
                         <BarChart3 size={12} />
                         {stats.difficulty}
                       </Badge>
-                      <div className="ml-auto">
+                      <div className="ms-auto">
                         <CourseShare
                           courseName={course.name}
                           courseUrl={getUriWithOrg(orgslug, `/course/${courseuuid}`)}

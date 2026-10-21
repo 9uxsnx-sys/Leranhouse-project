@@ -69,7 +69,7 @@ export function SubNav({ items, currentPath, className }: SubNavProps) {
         style={{ gridRow: `1 / span ${items.length}`, gridColumn: 1 }}
       >
         <div
-          className="absolute left-0 w-full rounded-[100vw] bg-neutral-500 transition-all duration-200 ease-out pointer-events-none"
+          className="absolute start-0 w-full rounded-[100vw] bg-neutral-500 transition-all duration-200 ease-out pointer-events-none"
           style={{ top: indicatorTop, height: indicatorHeight }}
         />
       </div>

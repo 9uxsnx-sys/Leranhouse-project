@@ -144,13 +144,13 @@ function CollectionsClient(props: CollectionsClientProps) {
           <div className="flex items-center gap-3">
             {/* Search — custom search bar with icon */}
             <div className="relative w-80">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('collections.dashboard.search_placeholder')}
-                className="w-full h-7 pl-8 pr-2 text-sm bg-white shadow-borders-base rounded-md placeholder:text-gray-400 focus:outline-none"
+                className="w-full h-7 ps-8 pe-2 text-sm bg-white shadow-borders-base rounded-md placeholder:text-gray-400 focus:outline-none"
               />
             </div>
 
@@ -270,7 +270,7 @@ function CollectionsClient(props: CollectionsClientProps) {
             disabled={currentPage === 1}
           >
             <ChevronLeft className="w-4 h-4" />
-            <span className="hidden sm:inline ml-1">{t('pagination.previous')}</span>
+            <span className="hidden sm:inline ms-1">{t('pagination.previous')}</span>
           </Button>
 
           <div className="flex items-center gap-1 mx-2">
@@ -300,7 +300,7 @@ function CollectionsClient(props: CollectionsClientProps) {
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage === totalPages}
           >
-            <span className="hidden sm:inline mr-1">{t('pagination.next')}</span>
+            <span className="hidden sm:inline me-1">{t('pagination.next')}</span>
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>

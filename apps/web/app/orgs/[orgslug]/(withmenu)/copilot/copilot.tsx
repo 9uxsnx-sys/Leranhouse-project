@@ -582,7 +582,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
                     <button
                       key={i}
                       onClick={() => sendMessage(s)}
-                      className="group flex items-center gap-2.5 w-fit max-w-full text-left px-3.5 py-2.5 text-[13px] rounded-xl text-neutral-600 dark:text-neutral-300 bg-neutral-50 dark:bg-neutral-800/50 hover:bg-violet-50 dark:hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-300 nice-shadow transition-all"
+                      className="group flex items-center gap-2.5 w-fit max-w-full text-start px-3.5 py-2.5 text-[13px] rounded-xl text-neutral-600 dark:text-neutral-300 bg-neutral-50 dark:bg-neutral-800/50 hover:bg-violet-50 dark:hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-300 nice-shadow transition-all"
                     >
                       <ArrowRight size={13} weight="bold" className="flex-shrink-0 text-neutral-400 group-hover:text-violet-500 transition-colors" />
                       <span className="truncate">{s}</span>
@@ -764,7 +764,7 @@ export function SessionItem({ session, isActive, onSelect, onDelete }: {
       onClick={onSelect}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className={`group w-full text-left px-3 py-2 rounded-xl text-sm transition-all flex items-center gap-2 ${
+      className={`group w-full text-start px-3 py-2 rounded-xl text-sm transition-all flex items-center gap-2 ${
         isActive
           ? 'bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 font-medium'
           : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800/60'
@@ -967,7 +967,7 @@ export function CourseDropdown({ courses, selectedCourse, onSelect, position = '
     <div className={`absolute start-0 ${positionClass} w-72 max-h-72 overflow-y-auto rounded-xl bg-white dark:bg-neutral-900 nice-shadow z-50 py-1`}>
       <button
         onClick={() => onSelect(null)}
-        className={`w-full text-left px-3.5 py-2.5 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors flex items-center gap-2.5 ${
+        className={`w-full text-start px-3.5 py-2.5 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors flex items-center gap-2.5 ${
           !selectedCourse ? 'text-violet-600 dark:text-violet-400 font-medium bg-violet-50/60 dark:bg-violet-500/10' : 'text-neutral-700 dark:text-neutral-300'
         }`}
       >
@@ -979,7 +979,7 @@ export function CourseDropdown({ courses, selectedCourse, onSelect, position = '
         <button
           key={course.course_uuid}
           onClick={() => onSelect(course.course_uuid)}
-          className={`w-full text-left px-3.5 py-2.5 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors flex items-center gap-2.5 ${
+          className={`w-full text-start px-3.5 py-2.5 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors flex items-center gap-2.5 ${
             selectedCourse === course.course_uuid
               ? 'text-violet-600 dark:text-violet-400 font-medium bg-violet-50/60 dark:bg-violet-500/10'
               : 'text-neutral-700 dark:text-neutral-300'

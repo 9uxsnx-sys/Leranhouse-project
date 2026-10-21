@@ -224,7 +224,7 @@ export function SearchModal({ open, onClose, orgslug }: SearchModalProps) {
         />
         <DialogPrimitive.Content
           aria-label={t('search.search_title')}
-          className="fixed left-1/2 top-[12%] flex w-[94vw] max-w-[640px] -translate-x-1/2 flex-col overflow-hidden rounded-2xl border border-ui-border-base bg-ui-bg-base shadow-elevation-card-rest data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:slide-in-from-top-2 data-[state=closed]:slide-out-to-top-2 data-[state=open]:duration-150 data-[state=closed]:duration-100 ease-out"
+          className="fixed start-1/2 top-[12%] flex w-[94vw] max-w-[640px] -translate-x-1/2 flex-col overflow-hidden rounded-2xl border border-ui-border-base bg-ui-bg-base shadow-elevation-card-rest data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:slide-in-from-top-2 data-[state=closed]:slide-out-to-top-2 data-[state=open]:duration-150 data-[state=closed]:duration-100 ease-out"
           style={{ zIndex: 'var(--z-modal)' as any }}
           onOpenAutoFocus={(e) => {
             e.preventDefault()

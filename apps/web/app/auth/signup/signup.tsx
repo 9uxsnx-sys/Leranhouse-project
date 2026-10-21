@@ -132,7 +132,7 @@ const LoggedInJoinScreen = ({ inviteCode, org }: JoinScreenProps) => {
         {/* User Info */}
         <div className="flex items-center gap-3">
           <UserAvatar rounded="rounded-xl" border="border-2" width={48} />
-          <div className="text-left">
+          <div className="text-start">
             <p className="font-medium text-gray-900">
               {session.data?.user?.first_name} {session.data?.user?.last_name}
             </p>

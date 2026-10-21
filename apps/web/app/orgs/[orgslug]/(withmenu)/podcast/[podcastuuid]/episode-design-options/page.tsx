@@ -176,7 +176,7 @@ function OptionAHorizontalCard({
               {episode.isPlaying ? (
                 <Pause size={16} className="text-gray-900" fill="currentColor" />
               ) : (
-                <Play size={16} className="text-gray-900 ml-0.5" fill="currentColor" />
+                <Play size={16} className="text-gray-900 ms-0.5" fill="currentColor" />
               )}
             </div>
           </div>
@@ -236,7 +236,7 @@ function OptionAHorizontalCard({
           {episode.isPlaying ? (
             <Pause size={16} fill="currentColor" />
           ) : (
-            <Play size={16} fill="currentColor" className="ml-0.5" />
+            <Play size={16} fill="currentColor" className="ms-0.5" />
           )}
         </button>
       </div>
@@ -284,7 +284,7 @@ function OptionBStackedCard({
                 {episode.isPlaying ? (
                   <Pause size={18} fill="currentColor" />
                 ) : (
-                  <Play size={18} fill="currentColor" className="ml-0.5" />
+                  <Play size={18} fill="currentColor" className="ms-0.5" />
                 )}
               </div>
             </div>
@@ -448,7 +448,7 @@ function OptionCMinimalRow({
         {episode.isPlaying ? (
           <Pause size={12} fill="currentColor" />
         ) : (
-          <Play size={12} fill="currentColor" className="ml-0.5" />
+          <Play size={12} fill="currentColor" className="ms-0.5" />
         )}
       </button>
     </div>
@@ -627,10 +627,10 @@ export default function EpisodeDesignOptionsPreview() {
             <table className="w-full text-xs">
               <thead>
                 <tr className="border-b border-gray-100">
-                  <th className="text-left px-4 py-3 font-semibold text-gray-700">Aspect</th>
-                  <th className="text-left px-4 py-3 font-semibold text-indigo-700">A — Horizontal Card</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-700">B — Stacked Card</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-700">C — Minimal Row</th>
+                  <th className="text-start px-4 py-3 font-semibold text-gray-700">Aspect</th>
+                  <th className="text-start px-4 py-3 font-semibold text-indigo-700">A — Horizontal Card</th>
+                  <th className="text-start px-4 py-3 font-semibold text-gray-700">B — Stacked Card</th>
+                  <th className="text-start px-4 py-3 font-semibold text-gray-700">C — Minimal Row</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">

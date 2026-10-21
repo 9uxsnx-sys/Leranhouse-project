@@ -136,7 +136,7 @@ function InviteOnlySignUpComponent(props: InviteOnlySignUpProps) {
           <div className="flex items-center gap-2 mb-6 rounded-lg border border-gray-200 bg-gray-50 px-3.5 py-2.5">
             <Ticket size={15} className="text-gray-400 shrink-0" />
             <span className="text-[13px] text-gray-500">{t('auth.invite_code')}</span>
-            <span className="ml-auto text-[13px] font-semibold font-mono text-gray-900">
+            <span className="ms-auto text-[13px] font-semibold font-mono text-gray-900">
               {props.inviteCode}
             </span>
           </div>

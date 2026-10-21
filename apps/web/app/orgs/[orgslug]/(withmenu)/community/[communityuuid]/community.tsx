@@ -126,13 +126,13 @@ const CommunityClient = ({
             <div className="flex items-center gap-3 mb-4">
               {/* Search Bar */}
               <div className="relative w-80">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t('communities.discussion_list.search_placeholder')}
-                  className="w-full h-7 pl-8 pr-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
+                  className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
                 />
               </div>
 
@@ -177,7 +177,7 @@ const CommunityClient = ({
                       <path d="M2.5 4.5h10M4.5 7.5h6M6.5 10.5h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                     {(sortBy !== 'recent' || selectedLabel !== null) && (
-                      <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-indigo-500 rounded-full" />
+                      <span className="absolute -top-0.5 -end-0.5 w-2 h-2 bg-indigo-500 rounded-full" />
                     )}
                   </IconButton>
                 </DropdownMenuTrigger>
@@ -185,17 +185,17 @@ const CommunityClient = ({
                   <DropdownMenuItem onClick={() => setSortBy('recent')} className="flex items-center gap-2 text-sm cursor-pointer bg-white rounded-md">
                     <span className="text-gray-500"><Clock size={14} /></span>
                     <span className="text-gray-700">{t('communities.discussion_list.latest')}</span>
-                    {sortBy === 'recent' && <CheckSquare size={12} className="ml-auto text-gray-500 shrink-0" />}
+                    {sortBy === 'recent' && <CheckSquare size={12} className="ms-auto text-gray-500 shrink-0" />}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setSortBy('upvotes')} className="flex items-center gap-2 text-sm cursor-pointer bg-white rounded-md">
                     <span className="text-gray-500"><TrendingUp size={14} /></span>
                     <span className="text-gray-700">{t('communities.discussion_list.top')}</span>
-                    {sortBy === 'upvotes' && <CheckSquare size={12} className="ml-auto text-gray-500 shrink-0" />}
+                    {sortBy === 'upvotes' && <CheckSquare size={12} className="ms-auto text-gray-500 shrink-0" />}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setSortBy('hot')} className="flex items-center gap-2 text-sm cursor-pointer bg-white rounded-md">
                     <span className="text-gray-500"><Flame size={14} /></span>
                     <span className="text-gray-700">{t('communities.discussion_list.hot')}</span>
-                    {sortBy === 'hot' && <CheckSquare size={12} className="ml-auto text-gray-500 shrink-0" />}
+                    {sortBy === 'hot' && <CheckSquare size={12} className="ms-auto text-gray-500 shrink-0" />}
                   </DropdownMenuItem>
 
                   <div className="border-t border-gray-200 my-1" />
@@ -203,7 +203,7 @@ const CommunityClient = ({
                   <DropdownMenuItem onClick={() => setSelectedLabel(null)} className="flex items-center gap-2 text-sm cursor-pointer bg-white rounded-md">
                     <span className="text-gray-500"><MessageSquare size={14} /></span>
                     <span className="text-gray-700">{t('communities.discussion_list.all')}</span>
-                    {selectedLabel === null && <CheckSquare size={12} className="ml-auto text-gray-500 shrink-0" />}
+                    {selectedLabel === null && <CheckSquare size={12} className="ms-auto text-gray-500 shrink-0" />}
                   </DropdownMenuItem>
                   {DISCUSSION_LABELS.map((label) => (
                     <DropdownMenuItem key={label.id} onClick={() => setSelectedLabel(label.id)} className="flex items-center gap-2 text-sm cursor-pointer bg-white rounded-md">
@@ -215,7 +215,7 @@ const CommunityClient = ({
                          <MessageSquare size={14} />}
                       </span>
                       <span className="text-gray-700">{t(`communities.labels.${label.id}`)}</span>
-                      {selectedLabel === label.id && <CheckSquare size={12} className="ml-auto text-gray-500 shrink-0" />}
+                      {selectedLabel === label.id && <CheckSquare size={12} className="ms-auto text-gray-500 shrink-0" />}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>

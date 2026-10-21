@@ -177,7 +177,7 @@ export function MedusaSidebarContent({ orgslug, onSearchClick }: { orgslug: stri
             <div className="relative">
               {/* Floating active indicator */}
               <div
-                className="absolute left-0 right-0 bg-ui-bg-base shadow-elevation-card-rest rounded-xl transition-all duration-200 ease-out pointer-events-none"
+                className="absolute start-0 end-0 bg-ui-bg-base shadow-elevation-card-rest rounded-xl transition-all duration-200 ease-out pointer-events-none"
                 style={{ top: indicatorTop, height: 40, opacity: activeIndex >= 0 ? 1 : 0 }}
               />
               <div className="relative flex flex-col">

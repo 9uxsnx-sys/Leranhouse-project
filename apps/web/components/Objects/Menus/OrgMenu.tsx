@@ -465,7 +465,7 @@ export const OrgMenu = ({
           onClick={() => setIsMenuOpen(false)}
         />
         <div
-          className={`bg-ui-bg-subtle shadow-elevation-modal fixed inset-y-2 start-2 flex w-full max-w-[304px] flex-col overflow-hidden rounded-lg border-r transition-transform duration-200 ${
+          className={`bg-ui-bg-subtle shadow-elevation-modal fixed inset-y-2 start-2 flex w-full max-w-[304px] flex-col overflow-hidden rounded-lg border-e transition-transform duration-200 ${
             isMenuOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >

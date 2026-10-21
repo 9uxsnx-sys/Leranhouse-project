@@ -49,8 +49,8 @@ const EmbedActivity = lazy(() => import('@components/Objects/Activities/Embed/Em
 const LoadingFallback = () => (
   <div className="flex items-center justify-center h-64">
     <div className="relative w-6 h-6">
-      <div className="absolute top-0 left-0 w-full h-full border-2 border-gray-100 rounded-full"></div>
-      <div className="absolute top-0 left-0 w-full h-full border-2 border-gray-400 rounded-full animate-spin border-t-transparent"></div>
+      <div className="absolute top-0 start-0 w-full h-full border-2 border-gray-100 rounded-full"></div>
+      <div className="absolute top-0 start-0 w-full h-full border-2 border-gray-400 rounded-full animate-spin border-t-transparent"></div>
     </div>
   </div>
 )
@@ -174,9 +174,9 @@ function CourseOutlineSidebar({ currentActivityId, chapters, onNavigate }: { cur
     <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] overflow-hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-5 py-4 text-left transition-colors hover:bg-black/[0.02]"
+        className="w-full flex items-center justify-between px-5 py-4 text-start transition-colors hover:bg-black/[0.02]"
       >
-        <div className="min-w-0 flex-1 pr-2">
+        <div className="min-w-0 flex-1 pe-2">
           <Text weight="plus" size="large" className="text-ui-fg-base truncate block">
             {currentActivityName || t('lesson.preview.course_outline')}
           </Text>
@@ -275,7 +275,7 @@ function OnThisPageSidebar({ activeSection }: { activeSection: string }) {
     <div>
       <div ref={containerRef} className="relative space-y-0.5">
         <span
-          className="absolute left-0 w-[3px] h-4 bg-ui-fg-base rounded-full pointer-events-none transition-all duration-300 ease-in-out"
+          className="absolute start-0 w-[3px] h-4 bg-ui-fg-base rounded-full pointer-events-none transition-all duration-300 ease-in-out"
           style={{ top: indicatorTop }}
         />
         {MOCK_SECTIONS.map((section) => (
@@ -283,10 +283,10 @@ function OnThisPageSidebar({ activeSection }: { activeSection: string }) {
             key={section.id}
             data-section={section.id}
             onClick={() => scrollTo(section.id)}
-            className="group relative w-full text-left py-1 text-[14px] transition-colors"
+            className="group relative w-full text-start py-1 text-[14px] transition-colors"
           >
             <span className={cn(
-              'inline-block pl-4 transition-colors',
+              'inline-block ps-4 transition-colors',
               activeSection === section.id
                 ? 'text-ui-fg-base font-medium'
                 : 'text-ui-fg-subtle group-hover:text-ui-fg-base'
@@ -309,9 +309,9 @@ function KnowledgeCheckCard({ question, answer }: { question: string; answer: st
     <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] overflow-hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-5 py-3 text-left transition-colors"
+        className="w-full flex items-center justify-between px-5 py-3 text-start transition-colors"
       >
-        <Text weight="plus" size="base" className="text-ui-fg-base truncate pr-2">
+        <Text weight="plus" size="base" className="text-ui-fg-base truncate pe-2">
           {question}
         </Text>
         <ChevronDown
@@ -576,7 +576,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
                   <Heading level="h2">{t('lesson.preview.what_youll_learn')}</Heading>
                   <Text size="base" className="text-ui-fg-muted">{t('lesson.preview.what_youll_learn_lead')}</Text>
                 </div>
-                <ul className="mt-3 space-y-2 pl-3">
+                <ul className="mt-3 space-y-2 ps-3">
                   {(currentActivity?.extra_metadata?.learning_objectives || []).length > 0
                     ? currentActivity.extra_metadata.learning_objectives.map((item: string, idx: number) => (
                         <li key={idx} className="flex items-start gap-2">
@@ -595,7 +595,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
 
             {/* Lesson Content */}
             <section id="lesson-content" className="scroll-mt-24">
-              <Heading level="h1" className="!text-2xl mb-5 ml-1">
+              <Heading level="h1" className="!text-2xl mb-5 ms-1">
                 {currentActivity?.activity_type === 'TYPE_VIDEO' ? t('lesson.preview.lesson_video') : t('lesson.preview.lesson_content')}
               </Heading>
               {currentActivity ? (
@@ -614,7 +614,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
 
             {/* Key Takeaways */}
             <section id="summary" className="scroll-mt-24">
-              <Heading level="h1" className="!text-2xl mb-5 ml-1">{t('lesson.preview.key_takeaways')}</Heading>
+              <Heading level="h1" className="!text-2xl mb-5 ms-1">{t('lesson.preview.key_takeaways')}</Heading>
               {(currentActivity?.extra_metadata?.takeaways || []).length > 0 ? (
                 <ul className="space-y-4">
                   {currentActivity.extra_metadata.takeaways.map((takeaway: { title: string; items: string[] }, idx: number) => (
@@ -624,7 +624,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
                         <Text size="base" className="text-black text-[17px]">{takeaway.title}</Text>
                       </div>
                       {takeaway.items && takeaway.items.length > 0 && (
-                        <ul className="ml-6 mt-2 space-y-1.5">
+                        <ul className="ms-6 mt-2 space-y-1.5">
                           {takeaway.items.map((item: string, iidx: number) => (
                             <li key={iidx} className="flex items-start gap-2">
                               <span className="text-ui-fg-muted shrink-0">&bull;</span>
@@ -637,7 +637,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
                   ))}
                 </ul>
               ) : (
-                <div className="ml-1">
+                <div className="ms-1">
                   <Text size="base" className="text-ui-fg-subtle italic">{t('lesson.preview.no_takeaways')}</Text>
                 </div>
               )}
@@ -652,7 +652,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
                     <Heading level="h2">{t('lesson.preview.whats_included')}</Heading>
                     <Text size="base" className="text-ui-fg-muted">{t('lesson.preview.resources_lead')}</Text>
                   </div>
-                  <ul className="mt-3 space-y-3 pl-3">
+                  <ul className="mt-3 space-y-3 ps-3">
                     {currentActivity.extra_metadata.resources.map((resource: { name: string; url: string }, i: number) => (
                       <li key={i} className="flex items-start gap-2">
                         <span className="text-ui-fg-muted shrink-0">&bull;</span>

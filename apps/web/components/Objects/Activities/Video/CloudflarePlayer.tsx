@@ -435,7 +435,7 @@ const CloudflarePlayer: React.FC<CloudflarePlayerProps> = ({
         >
           <div className="transition-all duration-200 hover:scale-105">
             <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
-              <Play className="w-8 h-8 text-white ml-1" fill="white" />
+              <Play className="w-8 h-8 text-white ms-1" fill="white" />
             </div>
           </div>
         </div>
@@ -467,12 +467,12 @@ const CloudflarePlayer: React.FC<CloudflarePlayerProps> = ({
             >
               {/* Buffered */}
               <div
-                className="absolute inset-y-0 left-0 bg-white/30 rounded-full"
+                className="absolute inset-y-0 start-0 bg-white/30 rounded-full"
                 style={{ width: `${buffered * 100}%` }}
               />
               {/* Progress */}
               <div
-                className="absolute inset-y-0 left-0 bg-primary rounded-full"
+                className="absolute inset-y-0 start-0 bg-primary rounded-full"
                 style={{ width: `${played * 100}%` }}
               />
               {/* Thumb */}
@@ -527,7 +527,7 @@ const CloudflarePlayer: React.FC<CloudflarePlayerProps> = ({
                 </button>
 
                 {/* Volume */}
-                <div className="flex items-center gap-1.5 ml-1">
+                <div className="flex items-center gap-1.5 ms-1">
                   <button
                     onClick={() => { const v = videoRef.current; if (v) { v.muted = !v.muted; setIsMuted(v.muted) } }}
                     className="w-10 h-10 rounded-full hover:bg-white/20 transition-colors flex items-center justify-center"
@@ -544,7 +544,7 @@ const CloudflarePlayer: React.FC<CloudflarePlayerProps> = ({
                   >
                     {/* Fill */}
                     <div
-                      className="absolute inset-y-0 left-0 bg-white rounded-full"
+                      className="absolute inset-y-0 start-0 bg-white rounded-full"
                       style={{ width: `${(isMuted ? 0 : volume) * 100}%` }}
                     />
                     {/* Thumb */}
@@ -556,7 +556,7 @@ const CloudflarePlayer: React.FC<CloudflarePlayerProps> = ({
                 </div>
 
                 {/* Time */}
-                <div className="text-white/90 text-sm font-medium tabular-nums ml-2 select-none">
+                <div className="text-white/90 text-sm font-medium tabular-nums ms-2 select-none">
                   {formatTime(currentTime)} / {formatTime(duration)}
                 </div>
               </div>
@@ -588,7 +588,7 @@ const CloudflarePlayer: React.FC<CloudflarePlayerProps> = ({
                     {playbackRate}x
                   </button>
                   {showSpeedMenu && (
-                    <div className="absolute bottom-full right-0 mb-2 bg-neutral-900/95 backdrop-blur-lg border border-white/10 rounded-lg overflow-hidden min-w-[140px] shadow-xl">
+                    <div className="absolute bottom-full end-0 mb-2 bg-neutral-900/95 backdrop-blur-lg border border-white/10 rounded-lg overflow-hidden min-w-[140px] shadow-xl">
                       <div className="px-3 py-1.5 text-[11px] text-white/50 font-medium border-b border-white/10">
                         Speed
                       </div>
@@ -596,7 +596,7 @@ const CloudflarePlayer: React.FC<CloudflarePlayerProps> = ({
                         <button
                           key={rate}
                           onClick={() => handleSpeedChange(rate)}
-                          className={`w-full px-3 py-2 text-left text-sm hover:bg-white/10 transition-colors ${
+                          className={`w-full px-3 py-2 text-start text-sm hover:bg-white/10 transition-colors ${
                             playbackRate === rate
                               ? 'text-white font-semibold bg-white/5'
                               : 'text-white/80'

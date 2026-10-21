@@ -160,19 +160,19 @@ function Trail(params: any) {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-white min-w-0 w-32">
                 <DropdownMenuItem onSelect={() => setFilterStatus('all')}>
-                  {filterStatus === 'all' && <span className="text-indigo-600 mr-1.5">✓</span>}{t('trail.all')}
+                  {filterStatus === 'all' && <span className="text-indigo-600 me-1.5">✓</span>}{t('trail.all')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setFilterStatus('in-progress')}>
-                  {filterStatus === 'in-progress' && <span className="text-indigo-600 mr-1.5">✓</span>}{t('trail.in_progress')}
+                  {filterStatus === 'in-progress' && <span className="text-indigo-600 me-1.5">✓</span>}{t('trail.in_progress')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setFilterStatus('completed')}>
-                  {filterStatus === 'completed' && <span className="text-indigo-600 mr-1.5">✓</span>}{t('trail.completed')}
+                  {filterStatus === 'completed' && <span className="text-indigo-600 me-1.5">✓</span>}{t('trail.completed')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setSortOrder('newest')}>
-                  {sortOrder === 'newest' && <span className="text-indigo-600 mr-1.5">✓</span>}{t('trail.newest')}
+                  {sortOrder === 'newest' && <span className="text-indigo-600 me-1.5">✓</span>}{t('trail.newest')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => setSortOrder('oldest')}>
-                  {sortOrder === 'oldest' && <span className="text-indigo-600 mr-1.5">✓</span>}{t('trail.oldest')}
+                  {sortOrder === 'oldest' && <span className="text-indigo-600 me-1.5">✓</span>}{t('trail.oldest')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

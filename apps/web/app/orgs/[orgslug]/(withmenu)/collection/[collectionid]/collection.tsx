@@ -288,7 +288,7 @@ const CollectionClient = ({
                     {t('collections.owned')}
                   </Badge>
                 )}
-                <div className="ml-auto">
+                <div className="ms-auto">
                   <CourseShare
                     courseName={collection.name}
                     courseUrl={getUriWithOrg(orgslug, `/collection/${collectionid}`)}

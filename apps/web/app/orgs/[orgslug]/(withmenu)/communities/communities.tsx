@@ -272,7 +272,7 @@ function CommunitiesClient(props: CommunitiesClientProps) {
             disabled={currentPage === 1}
           >
             <ChevronLeft className="w-4 h-4" />
-            <span className="hidden sm:inline ml-1">{t('pagination.previous')}</span>
+            <span className="hidden sm:inline ms-1">{t('pagination.previous')}</span>
           </Button>
 
           <div className="flex items-center gap-1 mx-2">
@@ -302,7 +302,7 @@ function CommunitiesClient(props: CommunitiesClientProps) {
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage === totalPages}
           >
-            <span className="hidden sm:inline mr-1">{t('pagination.next')}</span>
+            <span className="hidden sm:inline me-1">{t('pagination.next')}</span>
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>

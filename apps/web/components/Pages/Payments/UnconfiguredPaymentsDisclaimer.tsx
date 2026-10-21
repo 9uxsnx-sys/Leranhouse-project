@@ -38,7 +38,7 @@ function UnconfiguredPaymentsDisclaimer() {
         </p>
 
         {/* Steps */}
-        <div className="w-full max-w-md space-y-2 mb-8 text-left">
+        <div className="w-full max-w-md space-y-2 mb-8 text-start">
           {STEPS.map(({ icon: Icon, title, description }, i) => (
             <div
               key={i}

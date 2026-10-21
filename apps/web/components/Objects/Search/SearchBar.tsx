@@ -274,7 +274,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                       <BookCopy size={20} className="text-black/40" />
                     </div>
                   )}
-                  <div className="absolute -bottom-1 -right-1 bg-white shadow-sm p-1 rounded-full">
+                  <div className="absolute -bottom-1 -end-1 bg-white shadow-sm p-1 rounded-full">
                     <BookCopy size={11} className="text-black/60" />
                   </div>
                 </div>
@@ -384,11 +384,11 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           }}
           aria-label={t('search.search_placeholder')}
           placeholder={t('search.search_placeholder')}
-          className={`bg-ui-bg-field hover:bg-ui-bg-field-hover shadow-borders-base placeholder-ui-fg-muted text-ui-fg-base caret-ui-fg-base txt-compact-small w-full h-8 pl-8 pr-2 rounded-md outline-none transition-fg
+          className={`bg-ui-bg-field hover:bg-ui-bg-field-hover shadow-borders-base placeholder-ui-fg-muted text-ui-fg-base caret-ui-fg-base txt-compact-small w-full h-8 ps-8 pe-2 rounded-md outline-none transition-fg
                      focus-visible:shadow-borders-interactive-with-active
                      [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden`}
         />
-        <div className="text-ui-fg-muted pointer-events-none absolute bottom-0 left-0 flex h-8 w-8 items-center justify-center" role="img">
+        <div className="text-ui-fg-muted pointer-events-none absolute bottom-0 start-0 flex h-8 w-8 items-center justify-center" role="img">
           <Search className="h-4 w-4" />
         </div>
       </div>

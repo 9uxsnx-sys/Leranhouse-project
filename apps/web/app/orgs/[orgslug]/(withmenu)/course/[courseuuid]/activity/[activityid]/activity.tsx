@@ -52,8 +52,8 @@ const EmbedActivity = lazy(() => import('@components/Objects/Activities/Embed/Em
 const LoadingFallback = () => (
   <div className="flex items-center justify-center h-64">
     <div className="relative w-6 h-6">
-      <div className="absolute top-0 left-0 w-full h-full border-2 border-gray-100 rounded-full"></div>
-      <div className="absolute top-0 left-0 w-full h-full border-2 border-gray-400 rounded-full animate-spin border-t-transparent"></div>
+      <div className="absolute top-0 start-0 w-full h-full border-2 border-gray-100 rounded-full"></div>
+      <div className="absolute top-0 start-0 w-full h-full border-2 border-gray-400 rounded-full animate-spin border-t-transparent"></div>
     </div>
   </div>
 );
@@ -454,7 +454,7 @@ function ActivityClient(props: ActivityClientProps) {
                     animate={{ y: 0 }}
                     exit={{ y: -100 }}
                     transition={{ duration: 0.3 }}
-                    className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-b border-gray-100"
+                    className="fixed top-0 start-0 end-0 bg-white/90 backdrop-blur-xl border-b border-gray-100"
                     style={{ zIndex: 'var(--z-modal-content)' }}
                   >
                     <div className="container mx-auto px-4 py-2">
@@ -601,7 +601,7 @@ function ActivityClient(props: ActivityClientProps) {
                       animate={{ y: 0 }}
                       exit={{ y: 100 }}
                       transition={{ duration: 0.3 }}
-                      className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-gray-100"
+                      className="fixed bottom-0 start-0 end-0 bg-white/90 backdrop-blur-xl border-t border-gray-100"
                       style={{ zIndex: 'var(--z-modal-content)' }}
                     >
                       <div className="container mx-auto px-4">
@@ -620,7 +620,7 @@ function ActivityClient(props: ActivityClientProps) {
                               <ChevronLeft size={20} className="text-gray-800 shrink-0" />
                               <div className="flex flex-col items-start">
                                 <span className="text-xs text-gray-500">{t('common.previous')}</span>
-                                <span className="text-sm capitalize font-semibold text-left">
+                                <span className="text-sm capitalize font-semibold text-start">
                                   {prevActivity ? prevActivity.name : t('activities.no_previous_activity')}
                                 </span>
                               </div>
@@ -648,7 +648,7 @@ function ActivityClient(props: ActivityClientProps) {
                             >
                               <div className="flex flex-col items-end">
                                 <span className="text-xs text-gray-500">{t('common.next')}</span>
-                                <span className="text-sm capitalize font-semibold text-right">
+                                <span className="text-sm capitalize font-semibold text-end">
                                   {nextActivity ? nextActivity.name : t('activities.no_next_activity')}
                                 </span>
                               </div>
@@ -759,7 +759,7 @@ function ActivityClient(props: ActivityClientProps) {
                             <div className={`relative ${activity.activity_type === 'TYPE_SCORM' ? 'rounded-xl overflow-hidden' : ''}`}>
                               <button
                                 onClick={() => setIsFocusMode(true)}
-                                className={`absolute top-3 right-3 hidden sm:flex bg-white/90 hover:bg-white border border-gray-200 nice-shadow p-2 rounded-full cursor-pointer transition-all duration-200 group overflow-hidden pointer-events-auto`}
+                                className={`absolute top-3 end-3 hidden sm:flex bg-white/90 hover:bg-white border border-gray-200 nice-shadow p-2 rounded-full cursor-pointer transition-all duration-200 group overflow-hidden pointer-events-auto`}
                                 style={{ zIndex: 'var(--z-interactive)' }}
                                 title={t('activities.focus_mode')}
                               >
@@ -1387,8 +1387,8 @@ function CourseOutlineSidebar({ course, currentActivityId, orgslug, trailData }:
                     <div
                       className={`flex items-start gap-2.5 px-4 py-2.5 transition-colors cursor-pointer ${
                         isCurrent
-                          ? 'bg-gray-50 border-l-2 border-gray-900 pl-[14px]'
-                          : 'hover:bg-gray-50 border-l-2 border-transparent pl-4'
+                          ? 'bg-gray-50 border-s-2 border-gray-900 ps-[14px]'
+                          : 'hover:bg-gray-50 border-s-2 border-transparent ps-4'
                       }`}
                     >
                       <div className="mt-0.5 shrink-0">
@@ -1471,7 +1471,7 @@ function OnThisPageSidebar() {
           <button
             key={id}
             onClick={() => handleClick(id)}
-            className={`w-full text-left px-2 py-1.5 rounded-md text-xs transition-colors cursor-pointer ${
+            className={`w-full text-start px-2 py-1.5 rounded-md text-xs transition-colors cursor-pointer ${
               activeId === id
                 ? 'bg-gray-100 text-gray-900 font-semibold'
                 : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50 font-medium'
@@ -1662,7 +1662,7 @@ function AssignmentTools(props: {
         <button
           type="button"
           onClick={() => setIsGradeModalOpen(true)}
-          className={`${pillBg} rounded-md px-3 sm:px-4 nice-shadow flex flex-col items-start text-left p-2 sm:p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out`}
+          className={`${pillBg} rounded-md px-3 sm:px-4 nice-shadow flex flex-col items-start text-start p-2 sm:p-2.5 text-white hover:cursor-pointer transition delay-150 duration-300 ease-in-out`}
         >
           <span className="text-[10px] font-bold mb-1 uppercase text-white/90 flex items-center gap-1.5">
             <span>{t('common.status')}</span>
@@ -1721,10 +1721,10 @@ function AssignmentTools(props: {
                   : 'bg-gradient-to-br from-rose-50 via-orange-50 to-amber-50'
               }`}>
                 {/* Decorative blobs */}
-                <div className={`absolute -top-12 -right-12 w-44 h-44 rounded-full blur-3xl opacity-40 ${
+                <div className={`absolute -top-12 -end-12 w-44 h-44 rounded-full blur-3xl opacity-40 ${
                   isPassing ? 'bg-emerald-300' : 'bg-rose-300'
                 }`} />
-                <div className={`absolute -bottom-16 -left-12 w-44 h-44 rounded-full blur-3xl opacity-40 ${
+                <div className={`absolute -bottom-16 -start-12 w-44 h-44 rounded-full blur-3xl opacity-40 ${
                   isPassing ? 'bg-cyan-300' : 'bg-amber-300'
                 }`} />
 
@@ -1737,8 +1737,8 @@ function AssignmentTools(props: {
                     )}
                     {isPassing && (
                       <>
-                        <Sparkles size={16} className="absolute -top-1 -right-1 text-amber-500 drop-shadow" />
-                        <Sparkles size={12} className="absolute -bottom-1 -left-1 text-amber-400 drop-shadow" />
+                        <Sparkles size={16} className="absolute -top-1 -end-1 text-amber-500 drop-shadow" />
+                        <Sparkles size={12} className="absolute -bottom-1 -start-1 text-amber-400 drop-shadow" />
                       </>
                     )}
                   </div>
@@ -1781,7 +1781,7 @@ function AssignmentTools(props: {
                           >
                             {tb.submitted && (
                               <div
-                                className={`absolute inset-y-0 left-0 transition-all ${
+                                className={`absolute inset-y-0 start-0 transition-all ${
                                   passedTask ? 'bg-emerald-100/70' : 'bg-rose-100/70'
                                 }`}
                                 style={{ width: `${pct}%` }}
@@ -1789,7 +1789,7 @@ function AssignmentTools(props: {
                             )}
                             <div className="relative flex items-center justify-between gap-3">
                               <span className="text-sm text-gray-700 truncate" title={tb.description || `Task ${tb.index}`}>
-                                <span className="font-bold text-gray-400 mr-1.5">{tb.index}.</span>
+                                <span className="font-bold text-gray-400 me-1.5">{tb.index}.</span>
                                 {tb.description || `Task ${tb.index}`}
                               </span>
                               <span className={`text-xs font-bold flex-none ${
