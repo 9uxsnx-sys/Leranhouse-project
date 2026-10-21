@@ -43,9 +43,6 @@ const VideoActivity = lazy(() => import('@components/Objects/Activities/Video/Vi
 const DocumentPdfActivity = lazy(() => import('@components/Objects/Activities/DocumentPdf/DocumentPdf'))
 const AssignmentStudentActivity = lazy(() => import('@components/Objects/Activities/Assignment/AssignmentStudentActivity'))
 const ScormActivity = lazy(() => import('../../../../../../../ee/components/Activities/ScormActivity'))
-const MarkdownActivity = lazy(() => import('@components/Objects/Activities/Markdown/MarkdownActivity'))
-const EmbedActivity = lazy(() => import('@components/Objects/Activities/Embed/EmbedActivity'))
-const DynamicCanva = lazy(() => import('@components/Objects/Activities/DynamicCanva/DynamicCanva'))
 
 const LoadingFallback = () => (
   <div className="flex items-center justify-center h-64">
@@ -345,20 +342,8 @@ function KnowledgeCheckCard({ question, answer }: { question: string; answer: st
 
 function renderActivityContent(activity: any, courseuuid: string, t: (key: string) => string) {
   const activityType = activity.activity_type
-  const subType = activity.activity_sub_type
 
   switch (activityType) {
-    case 'TYPE_DYNAMIC':
-      if (subType === 'SUBTYPE_DYNAMIC_MARKDOWN') {
-        return <MarkdownActivity activity={activity} />
-      }
-      if (subType === 'SUBTYPE_DYNAMIC_EMBED') {
-        return <EmbedActivity activity={activity} />
-      }
-      // Rich-text lessons store a TipTap doc in activity.content — same renderer
-      // the learner activity page uses. The preview page has its own "On this
-      // page" sidebar, so the in-content TOC would be a duplicate column.
-      return <DynamicCanva content={activity.content} activity={activity} hideTableOfContents />
     case 'TYPE_VIDEO':
       return <VideoActivity course={{ course_uuid: courseuuid }} activity={activity} />
     case 'TYPE_DOCUMENT':
@@ -631,23 +616,19 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
               {renderedActivity ? (
                 <Suspense fallback={<LoadingFallback />}>
                   {renderedActivity.activity_type === 'TYPE_DYNAMIC' ? (
-                    <div className="space-y-6">
-                      {/* Every lesson reads as a video lesson. Until a video is
-                          attached, show the same calm gradient fallback the
-                          course banner uses instead of an empty slot. */}
-                      <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-gray-100 ring-1 ring-inset ring-black/5">
-                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-white to-indigo-500/10" />
-                        <div className="relative w-full h-full flex flex-col items-center justify-center gap-3">
-                          <div className="w-16 h-16 rounded-full bg-white/80 ring-1 ring-black/5 shadow-sm flex items-center justify-center">
-                            <Play className="w-6 h-6 text-ui-fg-base ms-0.5" fill="currentColor" />
-                          </div>
-                          <Text size="small" className="text-ui-fg-muted">
-                            {t('lesson.preview.video_unavailable')}
-                          </Text>
+                    /* Text lessons have no body on this page — everything the
+                       learner reads is authored in the dashboard lesson form
+                       (objectives, takeaways, resources, knowledge checks).
+                       The video slot is kept as the lesson's anchor. */
+                    <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-gray-100 ring-1 ring-inset ring-black/5">
+                      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-white to-indigo-500/10" />
+                      <div className="relative w-full h-full flex flex-col items-center justify-center gap-3">
+                        <div className="w-16 h-16 rounded-full bg-white/80 ring-1 ring-black/5 shadow-sm flex items-center justify-center">
+                          <Play className="w-6 h-6 text-ui-fg-base ms-0.5" fill="currentColor" />
                         </div>
-                      </div>
-                      <div className="lesson-rich-text rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] px-6 py-6">
-                        {renderActivityContent(renderedActivity, courseuuid, t)}
+                        <Text size="small" className="text-ui-fg-muted">
+                          {t('lesson.preview.video_unavailable')}
+                        </Text>
                       </div>
                     </div>
                   ) : (
