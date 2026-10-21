@@ -444,14 +444,17 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
   const currentActivity = currentIndex >= 0 ? allActivities[currentIndex] : null
   // The outline comes from the slim tree (no content), so the active lesson is
   // fetched in full — otherwise rich-text lessons render with empty content.
-  const { data: fullActivity } = useSWR(
+  const { data: fullActivity, error: activityError } = useSWR(
     currentActivity
       ? `${getAPIUrl()}activities/${currentActivity.activity_uuid}?locale=${locale}`
       : null,
     (url) => swrFetcher(url, access_token),
     { revalidateOnFocus: false, dedupingInterval: 10000 }
   )
-  const renderedActivity = fullActivity || currentActivity
+  // TipTap only reads `content` on mount, so the renderer must not mount with
+  // the slim stub ({}). Wait for the full payload; on error fall back to the
+  // stub so video/document lessons still render their player/file.
+  const renderedActivity = fullActivity || (activityError ? currentActivity : null)
 
   // Structured lesson fields are optional. Lesson bodies authored in the rich
   // editor already contain their own sections, so empty blocks are hidden
@@ -591,7 +594,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
     <GeneralWrapperStyled>
       {/* ── PAGE TITLE ── */}
       <h1 className="text-3xl md:text-4xl font-semibold text-ui-fg-base leading-tight max-w-7xl mx-auto mt-4">
-        {renderedActivity?.name || t('lesson.preview.title')}
+        {renderedActivity?.name || currentActivity?.name || t('lesson.preview.title')}
       </h1>
 
       {/* ── CONTENT (two-column layout) ── */}
@@ -629,6 +632,8 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
                 <Suspense fallback={<LoadingFallback />}>
                   {renderActivityContent(renderedActivity, courseuuid, t)}
                 </Suspense>
+              ) : currentActivity ? (
+                <LoadingFallback />
               ) : (
                 <div className="aspect-video bg-white rounded-xl flex items-center justify-center border border-gray-200">
                   <div className="text-center">
