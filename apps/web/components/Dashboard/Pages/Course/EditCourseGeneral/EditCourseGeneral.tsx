@@ -18,7 +18,7 @@ import {
 import LearningItemsList from './LearningItemsList';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select-field';
 import { useTranslation } from 'react-i18next';
 import { SafeImage } from '@components/Objects/SafeImage';
 
@@ -649,7 +649,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                           onValueChange={(value) => formik.setFieldValue('meta_difficulty', value)}
                           disabled={isSaving}
                         >
-                          <SelectTrigger className="h-9">
+                          <SelectTrigger className={fieldClassName}>
                             <SelectValue placeholder={t('dashboard.courses.general.details.difficulty_placeholder')} />
                           </SelectTrigger>
                           <SelectContent>

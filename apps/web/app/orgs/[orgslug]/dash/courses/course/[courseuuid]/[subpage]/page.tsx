@@ -2,12 +2,11 @@
 import React, { use, useEffect } from 'react';
 import { CourseProvider, useCourse } from '../../../../../../../../components/Contexts/CourseContext'
 import { motion } from 'motion/react'
-import { Award, BarChart3, Lock, Search } from 'lucide-react'
+import { Lock, Search } from 'lucide-react'
 import EditCourseStructure from '@components/Dashboard/Pages/Course/EditCourseStructure/EditCourseStructure'
 import EditCourseGeneral from '@components/Dashboard/Pages/Course/EditCourseGeneral/EditCourseGeneral'
 import EditCourseAccess from '@components/Dashboard/Pages/Course/EditCourseAccess/EditCourseAccess'
 import EditCourseContributors from '@components/Dashboard/Pages/Course/EditCourseContributors/EditCourseContributors'
-import EditCourseCertification from '@components/Dashboard/Pages/Course/EditCourseCertification/EditCourseCertification'
 import EditCourseSEO from '@components/Dashboard/Pages/Course/EditCourseSEO/EditCourseSEO'
 import EditCourseTranslations from '@components/Dashboard/Pages/Course/EditCourseTranslations/EditCourseTranslations'
 import { useCourseRights } from '@hooks/useCourseRights'
@@ -16,8 +15,7 @@ import { getUriWithOrg } from '@services/config/config';
 import { useTranslation } from 'react-i18next';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { PlanLevel } from '@services/plans/plans';
-import PlanRestrictedFeature from '@components/Dashboard/Shared/PlanRestricted/PlanRestrictedFeature';
-import CourseAnalyticsTab from '@components/Dashboard/Analytics/Course/CourseAnalyticsTab';
+import PlanRestrictedFeature from '@components/Dashboard/Shared/PlanRestricted/PlanRestrictedFeature'
 import { usePlan } from '@components/Hooks/usePlan'
 import { CourseEditSidebar } from '@components/Dashboard/Misc/CourseEditSidebar'
 import { PageTabs } from '@components/ui/page-tabs'
@@ -99,22 +97,6 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
       icon: SectionIcon.translations,
       href: `/dash/courses/course/${params.courseuuid}/translations`,
       requiredPermission: 'update' as const
-    },
-    {
-      key: 'certification',
-      label: t('dashboard.courses.settings.tabs.certification'),
-      icon: SectionIcon.certification,
-      href: `/dash/courses/course/${params.courseuuid}/certification`,
-      requiredPermission: 'create_certifications' as const,
-      requiresPlan: 'pro' as PlanLevel
-    },
-    {
-      key: 'analytics',
-      label: t('dashboard.courses.settings.tabs.analytics'),
-      icon: SectionIcon.analytics,
-      href: `/dash/courses/course/${params.courseuuid}/analytics`,
-      requiredPermission: 'update' as const,
-      requiresPlan: 'pro' as PlanLevel
     }
   ]
 
@@ -229,28 +211,6 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
                 ) : null}
                 {params.subpage == 'translations' && hasPermission('update') ? (
                   <EditCourseTranslations orgslug={params.orgslug} />
-                ) : null}
-                {params.subpage == 'certification' && hasPermission('create_certifications') ? (
-                  <PlanRestrictedFeature
-                    currentPlan={currentPlan}
-                    requiredPlan="pro"
-                    icon={Award}
-                    titleKey="common.plans.feature_restricted.certifications.title"
-                    descriptionKey="common.plans.feature_restricted.certifications.description"
-                  >
-                    <EditCourseCertification orgslug={params.orgslug} />
-                  </PlanRestrictedFeature>
-                ) : null}
-                {params.subpage == 'analytics' && hasPermission('update') ? (
-                  <PlanRestrictedFeature
-                    currentPlan={currentPlan}
-                    requiredPlan="pro"
-                    icon={BarChart3}
-                    titleKey="common.plans.feature_restricted.course_analytics.title"
-                    descriptionKey="common.plans.feature_restricted.course_analytics.description"
-                  >
-                    <CourseAnalyticsTab courseUUID={courseuuid} />
-                  </PlanRestrictedFeature>
                 ) : null}
               </motion.div>
             </main>

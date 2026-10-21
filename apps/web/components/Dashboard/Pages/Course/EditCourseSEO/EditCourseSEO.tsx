@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 import FormLayout, {
   FormField,
   FormLabelAndMessage,
@@ -10,7 +10,7 @@ import React, { useEffect, useRef, useMemo } from 'react';
 import { useCourseFieldSync } from '@components/Contexts/CourseContext';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select-field';
 import { useTranslation } from 'react-i18next';
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import { useCourseTranslation } from '@components/Hooks/useCourseTranslation';
