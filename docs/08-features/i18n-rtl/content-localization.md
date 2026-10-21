@@ -353,11 +353,23 @@ Notes:
 
 ### Next phase — content, then podcasts and collections
 
-Course **settings** (this document) are complete: metadata, SEO, requirements, translations tab and the learner surfaces listed above. The remaining content work is the lesson/chapter layer:
+Course **settings** (this document) are complete: metadata, SEO, requirements, translations tab and the learner surfaces listed above. The lesson/chapter layer is now localized too:
 
-1. **Course content tab** — chapter and activity titles/descriptions need their own translation rows and a locale selector in the editor; the learner sidebar and activity page must resolve them the same way the course header does.
-2. **Podcasts** — replicate the same model (`podcast_translation` / episode translations) and the same `locale` query parameter on read endpoints.
-3. **Collections** — same pattern for collection name/description.
+1. **Course content — v1 done.** Chapter/activity translations live in each row's `extra_metadata.translations[locale]`:
+   - chapter: `{ name, description }`
+   - activity: `{ name, content }` (content is the full TipTap doc)
+
+   The overlay is applied in `get_course_meta` **after** the source-locale cache read (`apply_course_content_locale`), so the Redis cache never stores translations. Activity detail endpoints (`/activities/{uuid}`, `/activities/id/{id}`, `/activities/chapter/{id}`) accept `?locale=` and apply the overlay after the paid-access/lock checks — a translation can never reveal locked content.
+
+   The learner curriculum is now dynamic: it renders real chapters, lesson titles, lesson counts and per-lesson minutes (`extra_metadata.duration`), and each lesson links to its activity page. Duration is read from `extra_metadata.duration` because slim course queries intentionally exclude activity `details`.
+
+   The demo course is seeded with **6 modules / 21 lessons** in en/fr/ar, each lesson carrying a short intro, key points, a practice task and two resource links.
+
+2. **Content editor — remaining.** The Content tab still edits the source row only; there is no locale switcher or per-locale editor for chapters/lessons yet, and the Translations tab coverage does not count content. That is the next incremental step.
+
+3. **Podcasts** — replicate the same model (`extra_metadata.translations` or a dedicated table once editing UI exists) and the same `locale` query parameter on read endpoints.
+
+4. **Collections** — same pattern for collection name/description.
 
 Validate each surface in all three languages before moving to the next one; the course content tab is the reference implementation.
 

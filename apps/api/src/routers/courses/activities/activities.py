@@ -223,6 +223,9 @@ async def api_get_editor_bootstrap(
 async def api_get_activity(
     request: Request,
     activity_uuid: str,
+    locale: Optional[str] = Query(
+        default=None, description="Content locale (falls back to the source locale)"
+    ),
     current_user: PublicUser = Depends(get_current_user),
     db_session=Depends(get_db_session),
 ) -> ActivityRead:
@@ -230,7 +233,7 @@ async def api_get_activity(
     Get single activity by activity_id
     """
     return await get_activity(
-        request, activity_uuid, current_user=current_user, db_session=db_session
+        request, activity_uuid, current_user=current_user, db_session=db_session, locale=locale
     )
 
 @router.get(
@@ -248,6 +251,9 @@ async def api_get_activity(
 async def api_get_activityby_id(
     request: Request,
     activity_id: str,
+    locale: Optional[str] = Query(
+        default=None, description="Content locale (falls back to the source locale)"
+    ),
     current_user: PublicUser = Depends(get_current_user),
     db_session=Depends(get_db_session),
 ) -> ActivityRead:
@@ -255,7 +261,7 @@ async def api_get_activityby_id(
     Get single activity by activity_id
     """
     return await get_activityby_id(
-        request, activity_id, current_user=current_user, db_session=db_session
+        request, activity_id, current_user=current_user, db_session=db_session, locale=locale
     )
 
 @router.get(
@@ -273,13 +279,16 @@ async def api_get_activityby_id(
 async def api_get_chapter_activities(
     request: Request,
     chapter_id: int,
+    locale: Optional[str] = Query(
+        default=None, description="Content locale (falls back to the source locale)"
+    ),
     current_user: PublicUser = Depends(get_current_user),
     db_session=Depends(get_db_session),
 ) -> List[ActivityRead]:
     """
     Get Activities for a chapter
     """
-    return await get_activities(request, chapter_id, current_user, db_session)
+    return await get_activities(request, chapter_id, current_user, db_session, locale=locale)
 
 
 @router.put(

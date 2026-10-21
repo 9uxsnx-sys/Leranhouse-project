@@ -19,6 +19,7 @@ import logging
 from src.core.ee_hooks import check_ee_activity_paid_access
 from src.security.rbac import check_resource_access, AccessAction
 from src.services.courses.activities.versioning import create_activity_version
+from src.services.courses.content_locale import apply_activity_locale
 from src.services.courses.locks import (
     batch_accessible_restricted_uuids,
     is_locked_for_user,
@@ -117,6 +118,7 @@ async def get_activity(
     activity_uuid: str,
     current_user: PublicUser,
     db_session: Session,
+    locale: str | None = None,
 ):
     # Optimize by joining Activity with Course and last modified user in a single query
     statement = (
@@ -152,6 +154,11 @@ async def get_activity(
     activity_read.last_modified_by_username = last_modified_user.username if last_modified_user else None
 
     _apply_activity_lock(activity_read, activity, course, current_user, db_session)
+
+    # Localize after the paid-access check so a translation can never reveal
+    # content the user is not entitled to.
+    if locale and not activity_read.is_locked:
+        apply_activity_locale(activity_read, locale, include_content=has_paid_access)
 
     return activity_read
 
@@ -332,6 +339,7 @@ async def get_activityby_id(
     activity_id: str,
     current_user: PublicUser,
     db_session: Session,
+    locale: str | None = None,
 ):
     # Optimize by joining Activity with Course in a single query
     statement = (
@@ -352,7 +360,9 @@ async def get_activityby_id(
     # RBAC check
     await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.READ)
 
-    return ActivityRead.model_validate(activity)
+    activity_read = ActivityRead.model_validate(activity)
+    apply_activity_locale(activity_read, locale)
+    return activity_read
 
 
 async def update_activity(
@@ -510,6 +520,7 @@ async def get_activities(
     coursechapter_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    locale: str | None = None,
 ) -> list[ActivityRead]:
     # Single query joining Activity, Chapter, and Course to avoid 3 sequential queries
     statement = (
@@ -533,4 +544,7 @@ async def get_activities(
     _, chapter, course = results[0]
     await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.READ)
 
-    return [ActivityRead.model_validate(activity) for activity, _, _ in results]
+    activities = [ActivityRead.model_validate(activity) for activity, _, _ in results]
+    for activity_read in activities:
+        apply_activity_locale(activity_read, locale)
+    return activities

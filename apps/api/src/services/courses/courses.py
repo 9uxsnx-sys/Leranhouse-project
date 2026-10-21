@@ -40,6 +40,7 @@ from src.security.rbac.constants import ADMIN_OR_MAINTAINER_ROLE_IDS
 from src.security.superadmin import is_user_superadmin
 from src.services.courses.thumbnails import upload_thumbnail
 from src.services.courses.translations import apply_overlay, apply_overlay_bulk
+from src.services.courses.content_locale import apply_course_content_locale
 from src.services.search.normalization import LIKE_ESCAPE_CHAR, build_like_pattern
 from src.services.webhooks.dispatch import dispatch_webhooks
 from fastapi import HTTPException, Request, UploadFile, status
@@ -201,9 +202,11 @@ async def get_course_meta(
         from src.services.courses.cache import get_cached_course_meta
         cached = get_cached_course_meta(course_uuid, slim)
         if cached is not None:
-            return apply_overlay(
+            cached_read = apply_overlay(
                 FullCourseRead.model_validate(cached), course, locale, db_session
             )
+            apply_course_content_locale(cached_read.chapters, locale)
+            return cached_read
 
     # Get course chapters — pass the already-loaded course to skip the
     # duplicate SELECT inside get_course_chapters.
@@ -245,7 +248,11 @@ async def get_course_meta(
         from src.services.courses.cache import set_cached_course_meta
         set_cached_course_meta(course_uuid, slim, course_read.model_dump())
 
-    return apply_overlay(course_read, course, locale, db_session)
+    course_read = apply_overlay(course_read, course, locale, db_session)
+    # Chapter/activity translations live in each row's extra_metadata, so they
+    # are applied after the (source-locale) cache read, never inside it.
+    apply_course_content_locale(course_read.chapters, locale)
+    return course_read
 
 
 async def get_courses_orgslug(

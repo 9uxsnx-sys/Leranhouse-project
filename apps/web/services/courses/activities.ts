@@ -138,10 +138,12 @@ export async function deleteActivity(activity_uuid: any, access_token: string) {
 export async function getActivityWithAuthHeader(
   activity_uuid: any,
   next: any,
-  access_token: string | null | undefined
+  access_token: string | null | undefined,
+  locale?: string
 ) {
+  const query = locale ? `?locale=${encodeURIComponent(locale)}` : ''
   const result = await fetch(
-    `${getAPIUrl()}activities/activity_${activity_uuid}`,
+    `${getAPIUrl()}activities/activity_${activity_uuid}${query}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token || undefined)
   )
   const res = await result.json()

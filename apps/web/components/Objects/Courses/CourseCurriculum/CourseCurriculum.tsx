@@ -1,87 +1,63 @@
 'use client'
 
 import React, { useState } from 'react'
+import Link from 'next/link'
 import { Heading } from '@/components/ui/heading'
 import { Text } from '@/components/ui/text'
 import { ChevronDown } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
+import { getUriWithOrg } from '@services/config/config'
 
 // ── Types ──
 
 interface Lesson {
-  title: string
-  duration: string
-  completed?: boolean
+  id: number
+  uuid: string
+  name: string
+  duration?: number
 }
 
 interface Module {
-  title: string
-  description: string
+  id: number
+  name: string
+  description?: string
   lessons: Lesson[]
 }
 
 interface CourseCurriculumProps {
-  modules?: Module[]
+  chapters?: any[]
+  orgslug?: string
+  courseuuid?: string
 }
 
-// ── Default mock data ──
+function cleanUuid(uuid?: string, prefix?: string) {
+  if (!uuid) return ''
+  return prefix ? uuid.replace(prefix, '') : uuid
+}
 
-const DEFAULT_MODULES: Module[] = [
-  {
-    title: 'Module 1: Foundations of UI Design',
-    description:
-      'Explore the core principles that make interfaces intuitive and beautiful. You will learn about visual hierarchy, color theory, typography, and how to establish a strong design foundation.',
-    lessons: [
-      { title: 'What is UI Design?', duration: '10 min', completed: true },
-      { title: 'Visual Hierarchy & Layout', duration: '15 min', completed: true },
-      { title: 'Color Theory Essentials', duration: '12 min', completed: false },
-      { title: 'Typography Fundamentals', duration: '14 min', completed: false },
-    ],
-  },
-  {
-    title: 'Module 2: Design Systems & Components',
-    description:
-      'Learn how to build and maintain scalable design systems. This module covers component architecture, design tokens, and creating reusable UI patterns that ensure consistency across products.',
-    lessons: [
-      { title: 'Introduction to Design Systems', duration: '12 min', completed: false },
-      { title: 'Design Tokens & Variables', duration: '18 min', completed: false },
-      { title: 'Building Component Libraries', duration: '20 min', completed: false },
-      { title: 'Documentation & Handoff', duration: '10 min', completed: false },
-    ],
-  },
-  {
-    title: 'Module 3: Prototyping & Interaction',
-    description:
-      'Master prototyping techniques using Figma and other modern tools. You will learn to create interactive prototypes that communicate design intent clearly to stakeholders and developers.',
-    lessons: [
-      { title: 'Wireframing Basics', duration: '8 min', completed: false },
-      { title: 'Interactive Prototypes in Figma', duration: '16 min', completed: false },
-      { title: 'Micro-interactions & Motion', duration: '14 min', completed: false },
-      { title: 'User Testing Your Prototypes', duration: '12 min', completed: false },
-    ],
-  },
-  {
-    title: 'Module 4: Real-World Projects',
-    description:
-      'Apply everything you have learned in a capstone project. Build a complete product interface from scratch, from research and wireframes to polished high-fidelity screens.',
-    lessons: [
-      { title: 'Project Brief & Research', duration: '10 min', completed: false },
-      { title: 'Sketches & Wireframes', duration: '15 min', completed: false },
-      { title: 'High-Fidelity Mockups', duration: '25 min', completed: false },
-      { title: 'Final Presentation', duration: '10 min', completed: false },
-    ],
-  },
-  {
-    title: 'Module 5: Final Quiz',
-    description:
-      'Put your knowledge to the test with a comprehensive quiz covering all modules. Each quiz section will challenge your understanding of UI design principles, design systems, and prototyping.',
-    lessons: [
-      { title: 'UI Design Fundamentals Quiz', duration: '15 min', completed: false },
-      { title: 'Design Systems & Components Quiz', duration: '12 min', completed: false },
-      { title: 'Prototyping & Interaction Quiz', duration: '10 min', completed: false },
-    ],
-  },
-]
+function toModule(chapter: any): Module {
+  return {
+    id: chapter.id,
+    name: chapter.name || '',
+    description: chapter.description || '',
+    lessons: (chapter.activities || []).map((activity: any) => ({
+      id: activity.id,
+      uuid: clearActivityUuid(activity.activity_uuid),
+      name: activity.name || '',
+      duration:
+        typeof activity.extra_metadata?.duration === 'number'
+          ? activity.extra_metadata.duration
+          : typeof activity.details?.duration === 'number'
+            ? activity.details.duration
+            : undefined,
+    })),
+  }
+}
+
+function clearActivityUuid(uuid?: string) {
+  return cleanUuid(uuid, 'activity_')
+}
 
 // ── Sub-components ──
 
@@ -90,13 +66,22 @@ function ModuleCard({
   index,
   isOpen,
   onToggle,
+  orgslug,
+  courseuuid,
 }: {
   module: Module
   index: number
   isOpen: boolean
   onToggle: () => void
+  orgslug: string
+  courseuuid: string
 }) {
+  const { t } = useTranslation()
   const lessonCount = module.lessons.length
+  const totalMinutes = module.lessons.reduce(
+    (acc, lesson) => acc + (lesson.duration || 0),
+    0
+  )
 
   return (
     <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] overflow-hidden">
@@ -105,9 +90,14 @@ function ModuleCard({
         onClick={onToggle}
         className="w-full flex items-center justify-between px-5 py-3 text-start transition-colors hover:bg-black/[0.02]"
       >
-        <Text weight="plus" size="base" className="text-ui-fg-base truncate">
-          {module.title}
-        </Text>
+        <span className="flex flex-col min-w-0">
+          <span className="text-[11px] uppercase tracking-wide text-ui-fg-muted">
+            {t('course.page.curriculum_module', { number: index + 1 })}
+          </span>
+          <Text weight="plus" size="base" className="text-ui-fg-base truncate">
+            {module.name}
+          </Text>
+        </span>
         <ChevronDown
           size={14}
           className={cn(
@@ -138,28 +128,39 @@ function ModuleCard({
           {/* Module info */}
           <div className="flex items-center gap-2 mb-4">
             <Text size="small" className="text-ui-fg-muted">
-              {lessonCount} lessons
+              {t('course.page.lessons', { count: lessonCount })}
             </Text>
-            <span className="text-ui-fg-muted text-[10px]">&middot;</span>
-            <Text size="small" className="text-ui-fg-muted">
-              {module.lessons.reduce((acc, l) => acc + parseInt(l.duration), 0)} min
-            </Text>
+            {totalMinutes > 0 && (
+              <>
+                <span className="text-ui-fg-muted text-[10px]">&middot;</span>
+                <Text size="small" className="text-ui-fg-muted">
+                  {totalMinutes} min
+                </Text>
+              </>
+            )}
           </div>
 
           {/* Lessons */}
           <div className="space-y-2">
             {module.lessons.map((lesson, idx) => (
-              <div
-                key={idx}
-                className="flex items-center justify-between py-1.5"
+              <Link
+                key={lesson.id ?? idx}
+                href={getUriWithOrg(
+                  orgslug,
+                  `/course/${courseuuid}/activity/${lesson.uuid}`
+                )}
+                prefetch={false}
+                className="flex items-center justify-between py-1.5 gap-3 rounded-md hover:bg-black/[0.02] transition-colors"
               >
-                <Text size="base" className="text-ui-fg-base">
-                  {idx + 1}. {lesson.title}
+                <Text size="base" className="text-ui-fg-base truncate">
+                  {idx + 1}. {lesson.name}
                 </Text>
-                <Text size="small" className="text-ui-fg-muted shrink-0 ms-3">
-                  {lesson.duration}
-                </Text>
-              </div>
+                {lesson.duration ? (
+                  <Text size="small" className="text-ui-fg-muted shrink-0 ms-3">
+                    {lesson.duration} min
+                  </Text>
+                ) : null}
+              </Link>
             ))}
           </div>
         </div>
@@ -171,26 +172,28 @@ function ModuleCard({
 
 // ── Main component ──
 
-export default function CourseCurriculum({ modules = DEFAULT_MODULES }: CourseCurriculumProps) {
+export default function CourseCurriculum({
+  chapters = [],
+  orgslug = '',
+  courseuuid = '',
+}: CourseCurriculumProps) {
+  const { t } = useTranslation()
   const [openIndex, setOpenIndex] = useState<number | null>(0)
 
-  const totalLessons = modules.reduce((acc, m) => acc + m.lessons.length, 0)
-  const totalDuration = modules.reduce(
-    (acc, m) => acc + m.lessons.reduce((sum, l) => sum + parseInt(l.duration), 0),
-    0
-  )
+  const modules = chapters.map(toModule)
+  if (modules.length === 0) return null
 
   return (
     <div>
       {/* Section header */}
       <div className="mb-5">
-        <Heading level="h1" className="!text-2xl">Course Curriculum</Heading>
+        <Heading level="h1" className="!text-2xl">{t('course.page.curriculum_title')}</Heading>
       </div>
 
       {/* Description */}
       <div className="mb-7">
         <Text size="base" className="text-ui-fg-subtle leading-relaxed">
-          This course covers everything from the fundamentals of UI design to building real-world projects. Each module is designed to build on the previous one, giving you a structured learning path from beginner to confident designer.
+          {t('course.page.curriculum_description')}
         </Text>
       </div>
 
@@ -198,9 +201,11 @@ export default function CourseCurriculum({ modules = DEFAULT_MODULES }: CourseCu
       <div className="space-y-2.5">
         {modules.map((module, idx) => (
           <ModuleCard
-            key={idx}
+            key={module.id ?? idx}
             module={module}
             index={idx}
+            orgslug={orgslug}
+            courseuuid={courseuuid}
             isOpen={openIndex === idx}
             onToggle={() => setOpenIndex(openIndex === idx ? null : idx)}
           />

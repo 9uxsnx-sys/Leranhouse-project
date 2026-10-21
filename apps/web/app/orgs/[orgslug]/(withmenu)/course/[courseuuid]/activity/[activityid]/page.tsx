@@ -23,12 +23,18 @@ type Session = {
   }
 }
 
+// The platform switcher drives the rendered language for both the course tree
+// and the activity content itself.
+async function getContentLocale() {
+  const cookieStore = await cookies()
+  return localeCode(cookieStore.get('i18next')?.value) || 'en'
+}
+
 // Shared fetch config so generateMetadata + page component use the same
 // Next.js fetch cache key, enabling automatic request deduplication.
 async function fetchCourseMetadata(courseuuid: string, access_token: string | null | undefined) {
   // Resolve the course in the language picked in the platform switcher.
-  const cookieStore = await cookies()
-  const locale = localeCode(cookieStore.get('i18next')?.value) || 'en'
+  const locale = await getContentLocale()
   return await getCourseMetadata(
     courseuuid,
     { revalidate: 120, tags: ['courses'] },
@@ -41,6 +47,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const params = await props.params;
   const session = await getServerSession()
   const access_token = session?.tokens?.access_token || null
+  const contentLocale = await getContentLocale()
 
   // Parallelize all metadata fetches
   const [org, course_meta, activity] = await Promise.all([
@@ -52,7 +59,8 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
     getActivityWithAuthHeader(
       params.activityid,
       { revalidate: 120, tags: ['activities'] },
-      access_token || null
+      access_token || null,
+      contentLocale
     ),
   ])
 
@@ -122,6 +130,7 @@ const ActivityPage = async (params: any) => {
   const activityid = (await params.params).activityid
   const courseuuid = (await params.params).courseuuid
   const orgslug = (await params.params).orgslug
+  const contentLocale = await getContentLocale()
 
   let course_meta
   let activity
@@ -132,7 +141,8 @@ const ActivityPage = async (params: any) => {
       getActivityWithAuthHeader(
         activityid,
         { revalidate: 120, tags: ['activities'] },
-        access_token || null
+        access_token || null,
+        contentLocale
       )
     ])
   } catch (error) {

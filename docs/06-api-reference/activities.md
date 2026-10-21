@@ -36,6 +36,7 @@ GET /api/v1/courses/activities/chapter/{chapter_id}
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `chapter_id` | integer | The chapter database ID |
+| `locale` | string | Content locale; overlays translated names/content from `extra_metadata.translations` |
 
 ### Response Body (200 OK)
 
@@ -64,8 +65,14 @@ GET /api/v1/courses/activities/chapter/{chapter_id}
 Retrieve a single activity by its UUID.
 
 ```
-GET /api/v1/courses/activities/{activity_uuid}
+GET /api/v1/courses/activities/{activity_uuid}?locale=ar
 ```
+
+### Query Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `locale` | string | Optional content locale. When a translation exists in `extra_metadata.translations[locale]`, its `name` and `content` replace the source values — but only after the paid-access and lock checks pass. |
 
 ### Response Body (200 OK)
 

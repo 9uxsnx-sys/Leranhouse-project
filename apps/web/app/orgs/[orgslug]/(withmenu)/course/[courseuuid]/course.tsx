@@ -454,7 +454,11 @@ const CourseClient = (props: any) => {
                   )}
 
                   {/* ── 5. COURSE CURRICULUM ── */}
-                  <CourseCurriculum />
+                  <CourseCurriculum
+                    chapters={course?.chapters || []}
+                    orgslug={orgslug}
+                    courseuuid={courseuuid}
+                  />
 
                   {/* ── 5. COURSE REQUIREMENTS ── */}
                   {requirementsList.length > 0 && (
