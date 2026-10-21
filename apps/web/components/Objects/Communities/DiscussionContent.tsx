@@ -16,7 +16,7 @@ export function DiscussionContent({ content }: DiscussionContentProps) {
   // Handle plain text content (legacy)
   if (typeof content === 'string') {
     return (
-      <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+      <p dir="auto" className="text-gray-700 whitespace-pre-wrap leading-relaxed">
         {content}
       </p>
     )
@@ -80,7 +80,9 @@ function DiscussionContentEditor({ content }: { content: any }) {
 
   return (
     <>
-      <EditorContent editor={editor} className="discussion-content-readonly" />
+      <div dir="auto">
+        <EditorContent editor={editor} className="discussion-content-readonly" />
+      </div>
       <style jsx global>{`
         .discussion-content-readonly .ProseMirror {
           outline: none;

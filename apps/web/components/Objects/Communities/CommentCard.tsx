@@ -246,7 +246,7 @@ export function CommentCard({
             </div>
 
             {/* Content text */}
-            <p className="text-sm text-gray-700 mt-0.5 whitespace-pre-wrap">{comment.content}</p>
+            <p dir="auto" className="text-sm text-gray-700 mt-0.5 whitespace-pre-wrap">{comment.content}</p>
 
             {/* Upvote button */}
             <div className="flex items-center gap-4 mt-1.5">

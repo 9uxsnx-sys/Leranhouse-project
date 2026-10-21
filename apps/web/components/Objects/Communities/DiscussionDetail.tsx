@@ -113,7 +113,7 @@ export function DiscussionDetail({
               {discussion.emoji && (
                 <span className="text-3xl flex-shrink-0">{discussion.emoji}</span>
               )}
-              <span>{discussion.title}</span>
+              <span dir="auto">{discussion.title}</span>
             </h1>
           </div>
 

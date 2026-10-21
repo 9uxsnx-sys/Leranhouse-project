@@ -1,4 +1,5 @@
 'use client'
+import i18n from '@/lib/i18n'
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -254,11 +255,11 @@ const CollectionClient = ({
           {/* ═══════════════ LEFT COLUMN ═══════════════ */}
           <div className="flex-1 min-w-0 max-w-3xl space-y-8">
             <div>
-              <h1 className="text-2xl md:text-3xl font-semibold text-ui-fg-base leading-tight">
+              <h1 dir="auto" className="text-2xl md:text-3xl font-semibold text-ui-fg-base leading-tight">
                 {collection.name}
               </h1>
               {collection.description && (
-                <Text size="base" className="text-ui-fg-subtle mt-2 leading-relaxed">
+                <Text dir="auto" size="base" className="text-ui-fg-subtle mt-2 leading-relaxed">
                   {collection.description}
                 </Text>
               )}
@@ -306,7 +307,7 @@ const CollectionClient = ({
                 <Heading level="h1" className="!text-2xl mb-4">
                   {t('collections.about_title')}
                 </Heading>
-                <div className="space-y-4">
+                <div dir="auto" className="space-y-4">
                   {collection.about
                     .split('\n\n')
                     .filter((paragraph: string) => paragraph.trim())
@@ -506,7 +507,7 @@ const CollectionClient = ({
                   <span className="text-sm text-gray-600">
                     {t('collections.last_updated', {
                       date: collection.update_date
-                        ? new Date(collection.update_date).toLocaleDateString('en-US', {
+                        ? new Date(collection.update_date).toLocaleDateString(i18n.language, {
                             year: 'numeric',
                             month: 'short',
                             day: 'numeric',

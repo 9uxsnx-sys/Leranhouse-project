@@ -1,4 +1,5 @@
 'use client'
+import i18n from '@/lib/i18n'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCoursePipe } from '../useAnalyticsDashboard'
@@ -8,7 +9,7 @@ import CourseWidgetCard, { WidgetIcon } from './CourseWidgetCard'
 
 function shortDate(v: string) {
   const d = new Date(v)
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  return d.toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })
 }
 
 export default function CourseViewToEnrollment({

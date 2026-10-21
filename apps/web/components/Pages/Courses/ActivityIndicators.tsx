@@ -80,7 +80,7 @@ const ActivityTooltipContent = memo(({
   <div className="bg-white rounded-lg nice-shadow py-3 px-4 min-w-[200px] animate-in fade-in duration-200">
     <div className="flex items-center gap-2">
       <ActivityTypeIcon activityType={activity.activity_type} />
-      <span className="text-sm text-gray-700">{activity.name}</span>
+      <span dir="auto" className="text-sm text-gray-700">{activity.name}</span>
       {isDone && (
         <span className="ms-auto text-gray-400">
           <Check size={14} />
@@ -264,7 +264,7 @@ const MobileChapterSelector = memo(({
                         isDone ? 'bg-teal-500' : isCurrent ? 'bg-gray-500 animate-pulse' : 'bg-zinc-200'
                       }`} />
                       <ActivityTypeIcon activityType={activity.activity_type} />
-                      <span className="truncate">{activity.name}</span>
+                      <span dir="auto" className="truncate">{activity.name}</span>
                       {isDone && <Check size={12} className="text-teal-500 ms-auto shrink-0" />}
                     </Link>
                   )

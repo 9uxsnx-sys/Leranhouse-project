@@ -148,15 +148,15 @@ const CourseThumbnailLanding: React.FC<PropsType> = ({ course, orgslug, customLi
       </Link>
       <div className='flex flex-col w-full p-4 space-y-3'>
         <div className="space-y-2">
-          <h2 className="font-bold text-gray-800 leading-tight text-base min-h-[2.75rem] line-clamp-2">{course.name}</h2>
-          <p className='text-xs text-gray-700 leading-normal min-h-[3.75rem] line-clamp-3'>{course.description}</p>
+          <h2 dir="auto" className="font-bold text-gray-800 leading-tight text-base min-h-[2.75rem] line-clamp-2">{course.name}</h2>
+          <p dir="auto" className='text-xs text-gray-700 leading-normal min-h-[3.75rem] line-clamp-3'>{course.description}</p>
         </div>
         
         <div className="flex flex-wrap items-center justify-between gap-2">
           {course.update_date && (
             <div className="inline-flex h-5 min-w-[140px] items-center justify-center px-2 rounded-md bg-gray-100/80 border border-gray-200">
               <span className="text-[10px] font-medium text-gray-600 truncate">
-                {t('common.updated')} {new Date(course.update_date).toLocaleDateString(i18n.language === 'fr' ? 'fr-FR' : 'en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                {t('common.updated')} {new Date(course.update_date).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric', year: 'numeric' })}
               </span>
             </div>
           )}

@@ -48,7 +48,7 @@ export function AccountSidebar({ orgslug, currentSubpage }: AccountSidebarProps)
         {/* User Bio (truncated) */}
         {user?.bio && (
           <div className="px-4 py-3 border-b border-gray-100">
-            <p className="text-sm text-gray-600 leading-relaxed line-clamp-3">
+            <p dir="auto" className="text-sm text-gray-600 leading-relaxed line-clamp-3">
               {user.bio}
             </p>
           </div>

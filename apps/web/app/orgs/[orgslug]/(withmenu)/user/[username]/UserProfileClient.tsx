@@ -192,7 +192,7 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
               <div className="mb-8">
                 <h2 className="text-xl font-semibold mb-4">{t('common.about')}</h2>
                 {userData.bio ? (
-                  <p className="text-gray-700">{userData.bio}</p>
+                  <p dir="auto" className="text-gray-700">{userData.bio}</p>
                 ) : (
                   <p className="text-gray-500 italic">{t('user.no_biography')}</p>
                 )}

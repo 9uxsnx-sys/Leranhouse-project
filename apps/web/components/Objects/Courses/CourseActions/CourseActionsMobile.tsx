@@ -1,3 +1,4 @@
+import i18n from '@/lib/i18n'
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -245,7 +246,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
         {linkedOffers.length > 0 ? (() => {
           const offer = linkedOffers[0];
           const formattedPrice = offer?.amount != null
-            ? new Intl.NumberFormat('en-US', { style: 'currency', currency: offer.currency ?? 'USD' }).format(offer.amount)
+            ? new Intl.NumberFormat(i18n.language, { style: 'currency', currency: offer.currency ?? 'USD' }).format(offer.amount)
             : null;
           const storeHref = org?.slug ? getUriWithOrg(org.slug, `/store/offers/${offer.offer_id}`) : '#';
 

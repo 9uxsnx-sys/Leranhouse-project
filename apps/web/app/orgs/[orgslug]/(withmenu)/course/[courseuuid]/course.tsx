@@ -358,9 +358,9 @@ const CourseClient = (props: any) => {
                 <div className="flex-1 min-w-0 max-w-3xl space-y-8">
                   {/* ── 2. COURSE TITLE + STATS + SHARE ── */}
                   <div>
-                    <h1 className="text-2xl md:text-3xl font-semibold text-ui-fg-base leading-tight">{course.name}</h1>
+                    <h1 dir="auto" className="text-2xl md:text-3xl font-semibold text-ui-fg-base leading-tight">{course.name}</h1>
                     {course?.description && (
-                      <Text size="base" className="text-ui-fg-subtle mt-2 leading-relaxed">
+                      <Text dir="auto" size="base" className="text-ui-fg-subtle mt-2 leading-relaxed">
                         {course.description}
                       </Text>
                     )}
@@ -396,7 +396,7 @@ const CourseClient = (props: any) => {
                   {course?.about && (
                     <div>
                       <Heading level="h1" className="!text-2xl mb-4">{t('course.page.about_title')}</Heading>
-                      <div className="space-y-4">
+                      <div dir="auto" className="space-y-4">
                         {course.about.split('\n\n').filter((p: string) => p.trim()).map((paragraph: string, idx: number) => (
                           <Text key={idx} size="base" className="text-ui-fg-subtle leading-relaxed block">
                             {paragraph.trim()}

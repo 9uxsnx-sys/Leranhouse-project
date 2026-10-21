@@ -1,4 +1,5 @@
 'use client'
+import i18n from '@/lib/i18n'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAnalyticsPipe } from './useAnalyticsDashboard'
@@ -14,7 +15,7 @@ import {
 
 const kFormatter = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v))
 const shortDate = (v: string) =>
-  new Date(v).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  new Date(v).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })
 
 export default function DAUChart({ days = '30' }: { days?: string }) {
   const { t } = useTranslation()
@@ -62,7 +63,7 @@ export default function DAUChart({ days = '30' }: { days?: string }) {
                   boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                 }}
                 labelFormatter={(label) =>
-                  new Date(label).toLocaleDateString('en-US', {
+                  new Date(label).toLocaleDateString(i18n.language, {
                     month: 'long',
                     day: 'numeric',
                     year: 'numeric',

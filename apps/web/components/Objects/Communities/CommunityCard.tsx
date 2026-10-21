@@ -59,13 +59,14 @@ function CommunityCard(props: PropsType) {
       <div className="p-3 flex flex-col space-y-1.5">
         <Link
           href={communityLink}
+          dir="auto"
           className="text-base font-bold text-gray-900 leading-tight hover:text-black transition-colors line-clamp-1"
         >
           {props.community.name}
         </Link>
 
         {props.community.description && (
-          <p className="text-[11px] text-gray-500 line-clamp-2 min-h-[1.5rem]">
+          <p dir="auto" className="text-[11px] text-gray-500 line-clamp-2 min-h-[1.5rem]">
             {props.community.description}
           </p>
         )}

@@ -1,4 +1,5 @@
 'use client'
+import i18n from '@/lib/i18n'
 import React from 'react'
 import {
   Dialog,
@@ -68,7 +69,7 @@ function relativeTime(ts: string, t: (key: string, options?: any) => string): st
 }
 
 function formatDate(ts: string): string {
-  return new Date(ts).toLocaleDateString('en-US', {
+  return new Date(ts).toLocaleDateString(i18n.language, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',

@@ -129,6 +129,7 @@ function PodcastThumbnail({ podcast, orgslug, customLink, isDashboard = false }:
         <div className="flex items-start justify-between">
           <Link
             href={podcastLink}
+            dir="auto"
             className="text-base font-bold text-gray-900 leading-tight hover:text-black transition-colors line-clamp-1"
           >
             {podcast.name}
@@ -136,7 +137,7 @@ function PodcastThumbnail({ podcast, orgslug, customLink, isDashboard = false }:
         </div>
 
         {podcast.description && (
-          <p className="text-[11px] text-gray-500 line-clamp-2 min-h-[1.5rem]">
+          <p dir="auto" className="text-[11px] text-gray-500 line-clamp-2 min-h-[1.5rem]">
             {podcast.description}
           </p>
         )}
@@ -174,7 +175,7 @@ function PodcastThumbnail({ podcast, orgslug, customLink, isDashboard = false }:
 
             {podcast.update_date && (
               <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-                {new Date(podcast.update_date).toLocaleDateString(i18n.language === 'fr' ? 'fr-FR' : 'en-US', { month: 'short', day: 'numeric' })}
+                {new Date(podcast.update_date).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })}
               </span>
             )}
           </div>

@@ -1,4 +1,5 @@
 'use client';
+import i18n from '@/lib/i18n'
 import React from 'react';
 import { Lock, ShoppingCart } from 'lucide-react';
 import { Button } from '@components/ui/button';
@@ -34,7 +35,7 @@ function PaymentWall({ offer, resourceName, resourceThumbnail, orgslug }: Paymen
   const org = useOrg() as any;
   const slug = orgslug ?? org?.slug;
 
-  const formattedPrice = new Intl.NumberFormat('en-US', {
+  const formattedPrice = new Intl.NumberFormat(i18n.language, {
     style: 'currency',
     currency: offer.currency,
   }).format(offer.amount);

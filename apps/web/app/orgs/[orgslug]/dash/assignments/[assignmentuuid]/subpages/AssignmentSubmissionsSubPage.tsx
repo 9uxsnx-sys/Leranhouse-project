@@ -1,3 +1,4 @@
+import i18n from '@/lib/i18n'
 import { useLHSession } from '@components/Contexts/LHSessionContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import Modal from '@components/Objects/StyledElements/Modal/Modal';
@@ -398,12 +399,12 @@ function SubmissionRow({
 
     const status = statusConfig[submission.submission_status] || statusConfig['SUBMITTED'];
     const submittedDate = new Date(submission.creation_date);
-    const dateStr = submittedDate.toLocaleDateString('en-UK', {
+    const dateStr = submittedDate.toLocaleDateString(i18n.language, {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
     });
-    const timeStr = submittedDate.toLocaleTimeString('en-UK', {
+    const timeStr = submittedDate.toLocaleTimeString(i18n.language, {
         hour: '2-digit',
         minute: '2-digit',
     });

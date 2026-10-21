@@ -1,4 +1,5 @@
 'use client'
+import i18n from '@/lib/i18n'
 import React, { useMemo, useState } from 'react'
 import { useAnalyticsPipe } from './useAnalyticsDashboard'
 import {
@@ -37,7 +38,7 @@ import { useTranslation } from 'react-i18next'
 
 const kFormatter = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v))
 const shortDate = (v: string) =>
-  new Date(v).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  new Date(v).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })
 
 const EVENT_META: Record<
   string,
@@ -143,7 +144,7 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
   // Custom tooltip for the DAU chart
   const DauTooltipContent = ({ active, payload, label }: any) => {
     if (!active || !payload?.length) return null
-    const dateStr = new Date(label).toLocaleDateString('en-US', {
+    const dateStr = new Date(label).toLocaleDateString(i18n.language, {
       month: 'long',
       day: 'numeric',
       year: 'numeric',

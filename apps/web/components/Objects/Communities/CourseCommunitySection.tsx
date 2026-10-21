@@ -58,9 +58,9 @@ export function CourseCommunitySection({ courseUuid, orgslug }: CourseCommunityS
         {/* Header */}
         <div className="p-4 border-b border-gray-100 flex items-center justify-between">
           <div>
-            <h3 className="font-semibold text-gray-900">{community.name}</h3>
+            <h3 dir="auto" className="font-semibold text-gray-900">{community.name}</h3>
             {community.description && (
-              <p className="text-sm text-gray-500 mt-0.5">{community.description}</p>
+              <p dir="auto" className="text-sm text-gray-500 mt-0.5">{community.description}</p>
             )}
           </div>
           <Link
@@ -107,7 +107,7 @@ export function CourseCommunitySection({ courseUuid, orgslug }: CourseCommunityS
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-gray-900 line-clamp-1">
+                      <h4 dir="auto" className="font-medium text-gray-900 line-clamp-1">
                         {discussion.title}
                       </h4>
                       <p className="text-xs text-gray-400 mt-1">

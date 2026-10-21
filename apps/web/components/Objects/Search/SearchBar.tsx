@@ -280,10 +280,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-medium text-black/80 truncate">{course.name}</h3>
+                    <h3 dir="auto" className="text-sm font-medium text-black/80 truncate">{course.name}</h3>
                     <span className="text-[10px] font-medium text-black/40 uppercase tracking-wide whitespace-nowrap">{t('search.course')}</span>
                   </div>
-                  <p className="text-xs text-black/50 truncate">{course.description}</p>
+                  <p dir="auto" className="text-xs text-black/50 truncate">{course.description}</p>
                 </div>
               </Link>
             ))}
@@ -308,10 +308,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-medium text-black/80 truncate">{collection.name}</h3>
+                    <h3 dir="auto" className="text-sm font-medium text-black/80 truncate">{collection.name}</h3>
                     <span className="text-[10px] font-medium text-black/40 uppercase tracking-wide whitespace-nowrap">{t('collections.collection')}</span>
                   </div>
-                  <p className="text-xs text-black/50 truncate">{collection.description}</p>
+                  <p dir="auto" className="text-xs text-black/50 truncate">{collection.description}</p>
                 </div>
               </Link>
             ))}

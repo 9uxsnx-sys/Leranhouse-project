@@ -210,11 +210,11 @@ function HomeClient() {
                     )}
 
                     <div className="ms-3 flex-1 min-w-0">
-                      <div className="font-semibold text-gray-900 tracking-tight truncate">
+                      <div dir="auto" className="font-semibold text-gray-900 tracking-tight truncate">
                         {org.name}
                       </div>
                       {org.description ? (
-                        <p className="text-xs text-black/40 truncate mt-0.5">{org.description}</p>
+                        <p dir="auto" className="text-xs text-black/40 truncate mt-0.5">{org.description}</p>
                       ) : (
                         <p className="text-xs text-black/30 truncate mt-0.5">{org.slug}</p>
                       )}

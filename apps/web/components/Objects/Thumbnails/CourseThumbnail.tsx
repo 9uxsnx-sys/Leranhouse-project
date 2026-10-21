@@ -164,14 +164,14 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
       <div className="p-3 flex flex-col gap-y-2">
         {/* Title */}
         <Link prefetch={false} href={courseLink} className="hover:opacity-80 transition-opacity">
-          <h3 className="text-ui-fg-base font-semibold text-sm leading-tight line-clamp-1">
+          <h3 dir="auto" className="text-ui-fg-base font-semibold text-sm leading-tight line-clamp-1">
             {course.name}
           </h3>
         </Link>
 
         {/* Description */}
         {course.description && (
-          <p className="text-ui-fg-subtle text-xs leading-relaxed line-clamp-3">
+          <p dir="auto" className="text-ui-fg-subtle text-xs leading-relaxed line-clamp-3">
             {course.description}
           </p>
         )}

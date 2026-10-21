@@ -96,7 +96,7 @@ const CourseProgress: React.FC<CourseProgressProps> = ({ course, orgslug, isOpen
                       )}
                       <div className="flex items-center space-x-2">
                         {getActivityTypeIcon(activity.activity_type)}
-                        <span className="text-gray-700 group-hover:text-gray-900">
+                        <span dir="auto" className="text-gray-700 group-hover:text-gray-900">
                           {activity.name}
                         </span>
                       </div>

@@ -1,4 +1,5 @@
 'use client'
+import i18n from '@/lib/i18n'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import LearnHouseSpinner from '@components/Objects/Loaders/LearnHouseSpinner'
@@ -33,7 +34,7 @@ function formatDate(dateStr: string | null | undefined): string {
   try {
     const date = new Date(dateStr)
     if (isNaN(date.getTime())) return '—'
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString(i18n.language, {
       year: 'numeric',
       month: 'short',
       day: 'numeric'

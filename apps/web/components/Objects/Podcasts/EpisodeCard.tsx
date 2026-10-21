@@ -59,6 +59,7 @@ export default function EpisodeCard({ episode, podcast, savedProgress }: Episode
 
         {/* Title */}
         <h4
+          dir="auto"
           className={`flex-1 min-w-0 text-[15px] font-medium truncate ${
             isCurrentEpisode ? 'text-indigo-700' : 'text-gray-900'
           }`}

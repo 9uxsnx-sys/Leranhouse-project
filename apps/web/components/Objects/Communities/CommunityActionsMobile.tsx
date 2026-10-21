@@ -32,7 +32,7 @@ export function CommunityActionsMobile({
 
           {/* Community Name */}
           <div className="flex-1 min-w-0">
-            <p className="font-medium text-gray-900 truncate text-sm">{community.name}</p>
+            <p dir="auto" className="font-medium text-gray-900 truncate text-sm">{community.name}</p>
             <p className="text-xs text-gray-400">
               {community.public ? t('communities.public') : t('communities.private')}
             </p>

@@ -1,4 +1,5 @@
 'use client'
+import i18n from '@/lib/i18n'
 import React, { useCallback, useEffect, useState } from 'react'
 import useSWR from 'swr'
 import toast from 'react-hot-toast'
@@ -49,7 +50,7 @@ function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr) return '—'
   const date = new Date(dateStr)
   if (isNaN(date.getTime())) return '—'
-  return date.toLocaleDateString('en-US', {
+  return date.toLocaleDateString(i18n.language, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

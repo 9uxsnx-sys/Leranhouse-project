@@ -312,7 +312,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
             <strong style="color: ${theme.primary};">${t('certificate.certificate_id')}:</strong> ${certificateId}
           </div>
           <div style="margin: 8px 0; font-size: 14px; color: #374151;">
-            <strong style="color: ${theme.primary};">${t('certificate.awarded')}:</strong> ${new Date(userCertificate.certificate_user.created_at).toLocaleDateString(i18n.language === 'fr' ? 'fr-FR' : 'en-US', {
+            <strong style="color: ${theme.primary};">${t('certificate.awarded')}:</strong> ${new Date(userCertificate.certificate_user.created_at).toLocaleDateString(i18n.language, {
               year: 'numeric',
               month: 'long',
               day: 'numeric'
@@ -484,7 +484,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
                     certificatePattern={userCertificate.certification.config.certificate_pattern}
                     certificateInstructor={userCertificate.certification.config.certificate_instructor}
                     certificateId={userCertificate.certificate_user.user_certification_uuid}
-                    awardedDate={new Date(userCertificate.certificate_user.created_at).toLocaleDateString(i18n.language === 'fr' ? 'fr-FR' : 'en-US', {
+                    awardedDate={new Date(userCertificate.certificate_user.created_at).toLocaleDateString(i18n.language, {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric'

@@ -82,9 +82,9 @@ const CommunityClient = ({
 
         {/* ── COMMUNITY TITLE + DESCRIPTION ── */}
         <div className="w-full mx-auto max-w-7xl mt-8 space-y-2">
-          <h1 className="text-2xl md:text-3xl font-semibold text-ui-fg-base leading-tight">{community.name}</h1>
+          <h1 dir="auto" className="text-2xl md:text-3xl font-semibold text-ui-fg-base leading-tight">{community.name}</h1>
           {community.description && (
-            <p className="text-base text-ui-fg-subtle leading-relaxed">
+            <p dir="auto" className="text-base text-ui-fg-subtle leading-relaxed">
               {community.description}
             </p>
           )}
@@ -114,9 +114,9 @@ const CommunityClient = ({
           <div className="flex-1 min-w-0 max-w-3xl space-y-8">
             {/* Mobile only shows community name */}
             <div className="md:hidden mb-4">
-              <h1 className="text-xl font-bold text-gray-900">{community.name}</h1>
+              <h1 dir="auto" className="text-xl font-bold text-gray-900">{community.name}</h1>
               {community.description && (
-                <p className="mt-1 text-sm text-gray-500 line-clamp-2">
+                <p dir="auto" className="mt-1 text-sm text-gray-500 line-clamp-2">
                   {community.description}
                 </p>
               )}

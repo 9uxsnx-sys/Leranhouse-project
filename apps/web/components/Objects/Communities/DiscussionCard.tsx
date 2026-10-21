@@ -102,6 +102,7 @@ function ReplyItem({ reply, replyName, replyTime }: {
         <div className="relative">
           <p
             ref={replyContentRef}
+            dir="auto"
             className={`text-sm text-gray-500 mt-0.5 whitespace-pre-wrap ${!replyExpanded && replyNeedsTruncation ? 'line-clamp-2' : ''}`}
           >
             {reply.content}
@@ -363,7 +364,7 @@ export function DiscussionCard({
 
       {/* Title */}
       <div>
-        <h3 className="text-[17px] font-semibold text-gray-900 leading-snug">
+        <h3 dir="auto" className="text-[17px] font-semibold text-gray-900 leading-snug">
           {discussion.title}
         </h3>
       </div>
@@ -380,7 +381,7 @@ export function DiscussionCard({
                   : 'opacity-100'
               }`}
             >
-              <p className="whitespace-pre-wrap">
+              <p dir="auto" className="whitespace-pre-wrap">
                 {textBeforeLastWord}
                 <span className="bg-gradient-to-l from-transparent to-gray-500 bg-clip-text text-transparent">
                   {lastWord}...{' '}
@@ -402,7 +403,7 @@ export function DiscussionCard({
             }`}
           >
             <div className="overflow-hidden min-h-0">
-              <p className="whitespace-pre-wrap">
+              <p dir="auto" className="whitespace-pre-wrap">
                 {contentText}
                 {isExpanded && needsTruncation && (
                   <>
@@ -422,6 +423,7 @@ export function DiscussionCard({
           {/* Hidden measurement element */}
           <div
             ref={contentRef}
+            dir="auto"
             className="absolute inset-0 pointer-events-none opacity-0 whitespace-pre-wrap"
             style={{ fontSize: 'inherit', lineHeight: 'inherit', fontFamily: 'inherit' }}
             aria-hidden="true"

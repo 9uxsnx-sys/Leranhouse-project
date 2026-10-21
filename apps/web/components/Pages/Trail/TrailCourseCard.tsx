@@ -97,7 +97,7 @@ function TrailCourseCard(props: TrailCourseCardProps) {
       <div className="px-4 pt-3 pb-4 flex flex-col flex-1">
         <div className="flex flex-col gap-1">
           <Link href={courseLink} className="no-underline">
-            <h3 className="text-[15px] font-semibold leading-snug line-clamp-2 text-gray-900 hover:text-gray-700 transition-colors">
+            <h3 dir="auto" className="text-[15px] font-semibold leading-snug line-clamp-2 text-gray-900 hover:text-gray-700 transition-colors">
               {course.name}
             </h3>
           </Link>

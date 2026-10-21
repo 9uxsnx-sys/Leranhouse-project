@@ -218,9 +218,9 @@ export default function PodcastClient({
             <div className="flex-1 min-w-0 max-w-3xl space-y-8">
               {/* ── PODCAST TITLE + STATS ── */}
               <div>
-                <h1 className="text-2xl md:text-3xl font-semibold text-ui-fg-base leading-tight">{podcast.name}</h1>
+                <h1 dir="auto" className="text-2xl md:text-3xl font-semibold text-ui-fg-base leading-tight">{podcast.name}</h1>
                 {podcast.description && (
-                  <p className="text-base text-ui-fg-subtle mt-2 leading-relaxed">
+                  <p dir="auto" className="text-base text-ui-fg-subtle mt-2 leading-relaxed">
                     {podcast.description}
                   </p>
                 )}

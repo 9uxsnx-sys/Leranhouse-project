@@ -1,4 +1,5 @@
 'use client';
+import i18n from '@/lib/i18n'
 
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -260,7 +261,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
             <strong style="color: ${theme.primary};">Certificate ID:</strong> ${certificateId}
           </div>
           <div style="margin: 8px 0; font-size: 14px; color: #374151;">
-            <strong style="color: ${theme.primary};">Awarded:</strong> ${new Date(userCertificate.certificate_user.created_at).toLocaleDateString('en-US', {
+            <strong style="color: ${theme.primary};">Awarded:</strong> ${new Date(userCertificate.certificate_user.created_at).toLocaleDateString(i18n.language, {
               year: 'numeric',
               month: 'long',
               day: 'numeric'
@@ -411,7 +412,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
               certificatePattern={userCertificate.certification.config.certificate_pattern}
               certificateInstructor={userCertificate.certification.config.certificate_instructor}
               certificateId={userCertificate.certificate_user.user_certification_uuid}
-              awardedDate={new Date(userCertificate.certificate_user.created_at).toLocaleDateString('en-US', {
+              awardedDate={new Date(userCertificate.certificate_user.created_at).toLocaleDateString(i18n.language, {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'

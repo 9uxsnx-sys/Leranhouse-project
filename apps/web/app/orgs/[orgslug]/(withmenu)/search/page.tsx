@@ -644,9 +644,9 @@ function ResourceCard({
         )}
       </div>
       <div className="p-3 flex-1 flex flex-col">
-        <h3 className="text-sm font-medium text-black/80 line-clamp-1">{title}</h3>
+        <h3 dir="auto" className="text-sm font-medium text-black/80 line-clamp-1">{title}</h3>
         {subtitle && (
-          <p className="text-xs text-black/50 line-clamp-2 mt-1">{subtitle}</p>
+          <p dir="auto" className="text-xs text-black/50 line-clamp-2 mt-1">{subtitle}</p>
         )}
         {footer}
       </div>
@@ -676,9 +676,9 @@ function InlineCard({
         {emoji ? <span>{emoji}</span> : <Icon size={18} className="text-black/50" />}
       </div>
       <div className="min-w-0 flex-1">
-        <h3 className="text-sm font-medium text-black/80 line-clamp-1">{title}</h3>
+        <h3 dir="auto" className="text-sm font-medium text-black/80 line-clamp-1">{title}</h3>
         {subtitle && (
-          <p className="text-xs text-black/50 line-clamp-2 mt-0.5">{subtitle}</p>
+          <p dir="auto" className="text-xs text-black/50 line-clamp-2 mt-0.5">{subtitle}</p>
         )}
       </div>
     </Link>

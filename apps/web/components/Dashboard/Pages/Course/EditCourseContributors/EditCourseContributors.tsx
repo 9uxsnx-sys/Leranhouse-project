@@ -1,3 +1,4 @@
+import i18n from '@/lib/i18n'
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
@@ -62,7 +63,7 @@ interface Contributor {
 // Helper function for date formatting
 const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
+    return date.toLocaleDateString(i18n.language, { 
         year: 'numeric',
         month: 'short',
         day: 'numeric'

@@ -1,4 +1,5 @@
 'use client'
+import i18n from '@/lib/i18n'
 import React from 'react'
 import { ChartCard, SectionCard } from './Card'
 import { TrendChart } from './TrendChart'
@@ -41,7 +42,7 @@ function formatDate(value: any) {
   if (!value) return '—'
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return String(value)
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  return date.toLocaleDateString(i18n.language, { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 /**

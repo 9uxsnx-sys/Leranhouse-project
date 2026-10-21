@@ -1,4 +1,5 @@
 'use client'
+import i18n from '@/lib/i18n'
 import React, { useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, RefreshCcw, SquareCheck, Sparkles, ChevronDown, ChevronUp } from 'lucide-react'
@@ -26,7 +27,7 @@ export function OfferCard({ offer, orgslug }: OfferCardProps) {
     ? offer.benefits.split(',').map((b) => b.trim()).filter(Boolean)
     : []
 
-  const formattedPrice = new Intl.NumberFormat('en-US', {
+  const formattedPrice = new Intl.NumberFormat(i18n.language, {
     style: 'currency',
     currency: offer.currency ?? 'USD',
   }).format(offer.amount)

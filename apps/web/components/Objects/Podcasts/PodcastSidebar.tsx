@@ -38,11 +38,11 @@ export function PodcastSidebar({ podcast }: PodcastSidebarProps) {
         </div>
         {/* Title + description */}
         <div className="px-5 pt-4 pb-5">
-          <h3 className="text-base font-semibold text-gray-900">
+          <h3 dir="auto" className="text-base font-semibold text-gray-900">
             {podcast.name}
           </h3>
           {podcast.description && (
-            <p className="text-sm text-gray-500 mt-1.5 leading-relaxed">
+            <p dir="auto" className="text-sm text-gray-500 mt-1.5 leading-relaxed">
               {podcast.description}
             </p>
           )}

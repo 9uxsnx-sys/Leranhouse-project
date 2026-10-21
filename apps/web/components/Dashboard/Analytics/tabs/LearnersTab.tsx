@@ -1,4 +1,5 @@
 'use client'
+import i18n from '@/lib/i18n'
 import React, { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight, MoreHorizontal, X } from 'lucide-react'
 import { SectionCard } from '@components/Analytics/Card'
@@ -20,7 +21,7 @@ function formatDate(value: string | null) {
   if (!value) return '—'
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  return date.toLocaleDateString(i18n.language, { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 /** Label/value row used across the learner-details card. */

@@ -680,7 +680,7 @@ function ActivityClient(props: ActivityClientProps) {
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">
                           {getChapterNameByActivityId(course, activity.id)}
                         </p>
-                        <h1 id="lesson-title" className="font-bold text-gray-950 text-xl sm:text-3xl first-letter:uppercase">
+                        <h1 id="lesson-title" dir="auto" className="font-bold text-gray-950 text-xl sm:text-3xl first-letter:uppercase">
                           {activity.name}
                         </h1>
                         {/* Authors */}
@@ -1399,7 +1399,7 @@ function CourseOutlineSidebar({ course, currentActivityId, orgslug, trailData }:
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className={`text-xs leading-snug ${isCurrent ? 'font-semibold text-gray-900' : 'font-medium text-gray-600'}`}>
+                        <p dir="auto" className={`text-xs leading-snug ${isCurrent ? 'font-semibold text-gray-900' : 'font-medium text-gray-600'}`}>
                           {activity.name}
                         </p>
                         <div className="flex items-center gap-1 mt-0.5 text-[10px] text-gray-400">

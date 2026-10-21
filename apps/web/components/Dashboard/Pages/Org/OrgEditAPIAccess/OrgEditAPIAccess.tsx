@@ -1,4 +1,5 @@
 'use client'
+import i18n from '@/lib/i18n'
 import React, { useState } from 'react'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -85,7 +86,7 @@ const OrgEditAPIAccess: React.FC = () => {
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return t('dashboard.organization.api_access.never')
     try {
-      return new Date(dateStr).toLocaleDateString('en-US', {
+      return new Date(dateStr).toLocaleDateString(i18n.language, {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
