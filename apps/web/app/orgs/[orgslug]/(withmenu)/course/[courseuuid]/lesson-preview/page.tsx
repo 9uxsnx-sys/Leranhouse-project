@@ -170,7 +170,7 @@ function CourseOutlineSidebar({ currentActivityId, chapters, onNavigate }: { cur
   }
 
   return (
-    <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] overflow-hidden">
+    <div className="rounded-xl bg-white border border-gray-100 shadow-sm overflow-hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between px-5 py-4 text-start transition-colors hover:bg-black/[0.02]"
@@ -305,7 +305,7 @@ function KnowledgeCheckCard({ question, answer }: { question: string; answer: st
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] overflow-hidden">
+    <div className="rounded-xl bg-white border border-gray-100 shadow-sm overflow-hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between px-5 py-3 text-start transition-colors"
@@ -355,7 +355,7 @@ function renderActivityContent(activity: any, courseuuid: string, t: (key: strin
       return <ScormActivity course={{ course_uuid: courseuuid }} activity={activity} />
     default:
       return (
-        <div className="aspect-video bg-white rounded-xl flex items-center justify-center border border-gray-200">
+        <div className="aspect-video bg-white rounded-xl flex items-center justify-center border border-gray-100 shadow-sm">
           <div className="text-center">
             <Play className="w-12 h-12 text-ui-fg-muted mx-auto mb-2" />
             <Text size="small" className="text-ui-fg-muted">{t('lesson.preview.unsupported_activity')}</Text>
@@ -612,7 +612,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
             {/* What You'll Learn */}
             {objectives.length > 0 && (
               <section id="what-youll-learn" className="scroll-mt-24">
-                <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] px-5 py-5">
+                <div className="rounded-xl bg-white border border-gray-100 shadow-sm px-5 py-5">
                   <div className="flex flex-col gap-0.5">
                     <Heading level="h2">{t('lesson.preview.what_youll_learn')}</Heading>
                     <Text size="base" className="text-ui-fg-muted">{t('lesson.preview.what_youll_learn_lead')}</Text>
@@ -659,7 +659,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
               ) : currentActivity ? (
                 <LoadingFallback />
               ) : (
-                <div className="aspect-video bg-white rounded-xl flex items-center justify-center border border-gray-200">
+                <div className="aspect-video bg-white rounded-xl flex items-center justify-center border border-gray-100 shadow-sm">
                   <div className="text-center">
                     <Play className="w-12 h-12 text-ui-fg-muted mx-auto mb-2" />
                     <Text size="small" className="text-ui-fg-muted">{t('lesson.preview.no_activity_content')}</Text>
@@ -674,7 +674,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
                 <Heading level="h1" className="!text-2xl mb-5">
                   {t('lesson.preview.key_takeaways')}
                 </Heading>
-                <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] px-5 py-5">
+                <div className="rounded-xl bg-white border border-gray-100 shadow-sm px-5 py-5">
                   <ul className="space-y-4">
                     {takeaways.map((takeaway: { title: string; items: string[] }, idx: number) => (
                       <li key={idx}>
@@ -702,7 +702,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
             {resources.length > 0 && (
               <section id="resources" className="scroll-mt-24">
                 <Heading level="h1" className="!text-2xl mb-5">{t('lesson.preview.resources')}</Heading>
-                <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] px-5 py-5">
+                <div className="rounded-xl bg-white border border-gray-100 shadow-sm px-5 py-5">
                   <div className="flex flex-col gap-0.5">
                     <Heading level="h2">{t('lesson.preview.whats_included')}</Heading>
                     <Text size="base" className="text-ui-fg-muted">{t('lesson.preview.resources_lead')}</Text>
@@ -744,7 +744,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
               <Heading level="h1" className="!text-2xl mb-5">{t('lesson.preview.up_next')}</Heading>
               {nextActivity ? (
                 <div
-                  className="border border-ui-bg-subtle rounded-lg p-5 cursor-pointer hover:bg-black/[0.02] transition-colors"
+                  className="bg-white border border-gray-100 rounded-xl shadow-sm p-5 cursor-pointer hover:bg-gray-50/60 transition-colors"
                   onClick={() => navigateTo(nextActivity)}
                 >
                   <div className="flex items-start gap-3">
@@ -760,7 +760,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
                   </div>
                 </div>
               ) : (
-                <div className="border border-ui-bg-subtle rounded-lg p-5">
+                <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-5">
                   <div className="flex items-start gap-3">
                     <BookOpen className="w-5 h-5 text-ui-fg-muted mt-0.5 shrink-0" />
                     <div>
