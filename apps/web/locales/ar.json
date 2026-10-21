@@ -2115,6 +2115,7 @@
           "contributors": "المساهمون",
           "certification": "الشهادات",
           "seo": "SEO",
+          "translations": "الترجمات",
           "analytics": "التحليلات"
         },
         "access_denied": {
@@ -3070,6 +3071,41 @@
           "description_placeholder": "وصف موجز لمحتوى هذا الدرس",
           "save_error": "فشل حفظ الدرس"
         }
+      },
+      "translations": {
+        "title": "ترجمات المحتوى",
+        "subtitle": "بدّل لغة لوحة التحكم لتحرير لغة أخرى. يعرض هذا التبويب نسبة التغطية وينقل العمل من وإلى جدول بيانات.",
+        "columns": {
+          "language": "اللغة",
+          "status": "الحالة",
+          "actions": "الإجراءات"
+        },
+        "fields": {
+          "name": "الاسم",
+          "description": "الوصف",
+          "about": "نبذة",
+          "learnings": "المكتسبات",
+          "seo": "SEO"
+        },
+        "status": {
+          "source": "المصدر",
+          "not_started": "لم يبدأ",
+          "partial": "جزئي",
+          "complete": "مكتمل"
+        },
+        "actions": {
+          "copy_from_source": "نسخ من المصدر",
+          "delete": "حذف الترجمة",
+          "confirm_delete": "تأكيد الحذف",
+          "export": "تصدير CSV",
+          "import": "استيراد CSV"
+        },
+        "copy_success": "تمت تهيئة الترجمة من اللغة المصدر",
+        "delete_success": "تم حذف الترجمة",
+        "action_error": "فشل هذا الإجراء. حاول مرة أخرى.",
+        "import_success": "تم استيراد الترجمة",
+        "import_error": "تعذّر استيراد هذا الملف. تحقق من صيغة CSV.",
+        "import_needs_name": "يجب أن يحتوي الملف على اسم. صدّر ملف CSV أولاً للحصول على الأعمدة الصحيحة."
       },
       "seo": {
         "errors": {

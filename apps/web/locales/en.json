@@ -2352,6 +2352,7 @@
                                                                     "access":  "Access",
                                                                     "contributors":  "Contributors",
                                                                     "seo":  "SEO",
+                                                                    "translations":  "Translations",
                                                                     "certification":  "Certification",
                                                                     "analytics":  "Analytics"
                                                                 },
@@ -2713,6 +2714,41 @@
                                                                         "oldest":  "Oldest first"
                                                                     }
                                                        },
+                                      "translations":  {
+                                                  "title":  "Content translations",
+                                                  "subtitle":  "Switch the dashboard language to edit a locale. This tab shows coverage and moves work in and out of a spreadsheet.",
+                                                  "columns":  {
+                                                                  "language":  "Language",
+                                                                  "status":  "Status",
+                                                                  "actions":  "Actions"
+                                                              },
+                                                  "fields":  {
+                                                                 "name":  "Name",
+                                                                 "description":  "Description",
+                                                                 "about":  "About",
+                                                                 "learnings":  "Learnings",
+                                                                 "seo":  "SEO"
+                                                             },
+                                                  "status":  {
+                                                                 "source":  "Source",
+                                                                 "not_started":  "Not started",
+                                                                 "partial":  "Partial",
+                                                                 "complete":  "Complete"
+                                                             },
+                                                  "actions":  {
+                                                                  "copy_from_source":  "Copy from source",
+                                                                  "delete":  "Delete translation",
+                                                                  "confirm_delete":  "Confirm delete",
+                                                                  "export":  "Export as CSV",
+                                                                  "import":  "Import CSV"
+                                                              },
+                                                  "copy_success":  "Translation seeded from the source language",
+                                                  "delete_success":  "Translation deleted",
+                                                  "action_error":  "That action failed. Please try again.",
+                                                  "import_success":  "Translation imported",
+                                                  "import_error":  "Could not import that file. Check the CSV format.",
+                                                  "import_needs_name":  "The file needs a name. Export a CSV first to get the right columns."
+                                              },
                                       "seo":  {
                                                   "title":  "SEO Settings",
                                                   "subtitle":  "Optimize your course for search engines and social media sharing",

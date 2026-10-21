@@ -2043,7 +2043,8 @@
           "contributors": "Contributeurs",
           "certification": "Certification",
           "analytics": "Analyses",
-          "seo": "SEO"
+          "seo": "SEO",
+          "translations": "Traductions"
         },
         "access_denied": {
           "title": "Accès refusé",
@@ -2988,6 +2989,41 @@
         }
       },
       "limit_reached": "Limite de cours atteinte ({{limit}})",
+      "translations": {
+        "title": "Traductions du contenu",
+        "subtitle": "Changez la langue du tableau de bord pour éditer une langue. Cet onglet montre la couverture et fait entrer et sortir le travail d'un tableur.",
+        "columns": {
+          "language": "Langue",
+          "status": "Statut",
+          "actions": "Actions"
+        },
+        "fields": {
+          "name": "Nom",
+          "description": "Description",
+          "about": "À propos",
+          "learnings": "Acquis",
+          "seo": "SEO"
+        },
+        "status": {
+          "source": "Source",
+          "not_started": "Non commencé",
+          "partial": "Partiel",
+          "complete": "Complet"
+        },
+        "actions": {
+          "copy_from_source": "Copier depuis la source",
+          "delete": "Supprimer la traduction",
+          "confirm_delete": "Confirmer la suppression",
+          "export": "Exporter en CSV",
+          "import": "Importer un CSV"
+        },
+        "copy_success": "Traduction initialisée depuis la langue source",
+        "delete_success": "Traduction supprimée",
+        "action_error": "Cette action a échoué. Veuillez réessayer.",
+        "import_success": "Traduction importée",
+        "import_error": "Impossible d'importer ce fichier. Vérifiez le format CSV.",
+        "import_needs_name": "Le fichier doit contenir un nom. Exportez d'abord un CSV pour obtenir les bonnes colonnes."
+      },
       "seo": {
         "errors": {
           "save_failed": "Échec de l'enregistrement des paramètres SEO"

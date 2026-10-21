@@ -1,6 +1,6 @@
 # Multilingual course authoring — research & proposal
 
-> **Status:** plan agreed (see §7.1). Phases A and B are implemented and verified; Phase C (Translations tab) is next.
+> **Status:** plan agreed (see §7.1). Phases A, B and C are implemented; Phase D (learner fallback hint, emails/certificates/search) is next.
 > **Trigger:** a course authored in English shows English body text inside an Arabic (RTL) UI.
 > Translation of the *interface* is done; this document is about translating *content*.
 
@@ -317,9 +317,16 @@ Notes:
 - `seo.keywords` is the closest thing to tags, and it is translated with the rest of the SEO block.
 - The learner `generateMetadata` reads the same overlaid `seo`, so translated titles/descriptions reach `<head>`.
 
-### Phase C — Translations tab
+### Phase C — Translations tab — **done**
 
-Coverage table (locales × fields, ✓ / ◐ / ⚠ / —), copy-from-source, delete-locale, per-locale `.xlsx` export and import.
+New course tab (`/dash/courses/course/<uuid>/translations`) showing one row per shipped language:
+
+- **Coverage** — ✓ per field (`name`, `description`, `about`, `learnings`, `seo`) plus a row status: Source / Not started / Partial / Complete.
+- **Copy from source** — creates the row for a locale in one click (all fields, SEO included).
+- **Delete** — two-step inline confirm.
+- **Export / import CSV** — `<course>.<locale>.csv`, UTF-8 with BOM so Excel opens Arabic correctly. Columns: `name`, `description`, `about`, `learnings`, `tags`, `seo.title`, `seo.description`, `seo.keywords`, `seo.canonical_url`, `seo.og_*`, `seo.twitter_*`. Import merges over the existing row; a missing `name` keeps the stored one.
+
+**Decision:** CSV instead of `.xlsx` — no spreadsheet dependency in the web app, and Excel/LibreOffice open the BOM-prefixed file cleanly. This closes open question 5 in §8.
 
 ### Phase D — learner side and beyond
 

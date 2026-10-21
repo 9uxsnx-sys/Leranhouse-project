@@ -9,6 +9,7 @@ import EditCourseAccess from '@components/Dashboard/Pages/Course/EditCourseAcces
 import EditCourseContributors from '@components/Dashboard/Pages/Course/EditCourseContributors/EditCourseContributors'
 import EditCourseCertification from '@components/Dashboard/Pages/Course/EditCourseCertification/EditCourseCertification'
 import EditCourseSEO from '@components/Dashboard/Pages/Course/EditCourseSEO/EditCourseSEO'
+import EditCourseTranslations from '@components/Dashboard/Pages/Course/EditCourseTranslations/EditCourseTranslations'
 import { useCourseRights } from '@hooks/useCourseRights'
 import { useRouter } from 'next/navigation'
 import { getUriWithOrg } from '@services/config/config';
@@ -91,6 +92,13 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
       href: `/dash/courses/course/${params.courseuuid}/seo`,
       requiredPermission: 'update' as const,
       requiresPlan: 'standard' as PlanLevel
+    },
+    {
+      key: 'translations',
+      label: t('dashboard.courses.settings.tabs.translations'),
+      icon: SectionIcon.translations,
+      href: `/dash/courses/course/${params.courseuuid}/translations`,
+      requiredPermission: 'update' as const
     },
     {
       key: 'certification',
@@ -218,6 +226,9 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
                   >
                     <EditCourseSEO orgslug={params.orgslug} />
                   </PlanRestrictedFeature>
+                ) : null}
+                {params.subpage == 'translations' && hasPermission('update') ? (
+                  <EditCourseTranslations orgslug={params.orgslug} />
                 ) : null}
                 {params.subpage == 'certification' && hasPermission('create_certifications') ? (
                   <PlanRestrictedFeature
