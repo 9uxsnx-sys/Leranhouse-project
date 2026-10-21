@@ -384,6 +384,8 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
           session.data?.tokens?.access_token
         );
         setTranslation(rows.find(row => row.locale === contentLocale) || null);
+        // The learner pages are server-rendered from a tagged fetch cache.
+        await revalidateTags(['courses'], props.orgslug);
         toast.success(t('dashboard.courses.save.success'));
         return;
       }

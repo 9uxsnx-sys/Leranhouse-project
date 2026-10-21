@@ -19,6 +19,7 @@ import {
   upsertCourseTranslation,
 } from '@services/courses/translations';
 import { getCurrentLanguageNativeName } from '@/lib/languages';
+import { revalidateTags } from '@services/utils/ts/requests';
 import toast from 'react-hot-toast';
 
 type EditCourseSEOProps = {
@@ -219,6 +220,8 @@ function EditCourseSEO(props: EditCourseSEOProps) {
       )
       const rows = await getCourseTranslations(courseStructure.course_uuid, session?.data?.tokens?.access_token)
       setTranslation(rows.find(row => row.locale === contentLocale) || null)
+      // SEO feeds the learner <head>, which is server-rendered from a tagged cache.
+      await revalidateTags(['courses'], props.orgslug)
       toast.success(t('dashboard.courses.save.success'))
     } catch (err) {
       toast.error(t('dashboard.courses.save.error'))

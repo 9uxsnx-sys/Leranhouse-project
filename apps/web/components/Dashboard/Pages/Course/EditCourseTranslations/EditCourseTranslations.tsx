@@ -13,6 +13,7 @@ import {
   getCourseTranslations,
   upsertCourseTranslation,
 } from '@services/courses/translations'
+import { revalidateTags } from '@services/utils/ts/requests'
 
 type Props = {
   orgslug: string
@@ -169,6 +170,7 @@ function EditCourseTranslations(props: Props) {
         access_token
       )
       await loadTranslations()
+      await revalidateTags(['courses'], props.orgslug)
       toast.success(t('dashboard.courses.translations.copy_success'))
     } catch {
       toast.error(t('dashboard.courses.translations.action_error'))
@@ -184,6 +186,7 @@ function EditCourseTranslations(props: Props) {
       await deleteCourseTranslation(courseUuid, locale, access_token)
       setConfirmDelete(null)
       await loadTranslations()
+      await revalidateTags(['courses'], props.orgslug)
       toast.success(t('dashboard.courses.translations.delete_success'))
     } catch {
       toast.error(t('dashboard.courses.translations.action_error'))
@@ -246,6 +249,7 @@ function EditCourseTranslations(props: Props) {
         access_token
       )
       await loadTranslations()
+      await revalidateTags(['courses'], props.orgslug)
       toast.success(t('dashboard.courses.translations.import_success'))
     } catch {
       toast.error(t('dashboard.courses.translations.import_error'))
