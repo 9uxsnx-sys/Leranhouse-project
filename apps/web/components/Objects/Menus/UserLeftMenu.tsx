@@ -5,7 +5,6 @@ import {
   House,
   BookOpen,
   Users,
-  ShoppingCart,
   Route,
   LayoutDashboard,
   Globe,
@@ -86,7 +85,6 @@ function UserLeftMenu() {
 
   const showCommunities = isEnabled('communities')
   const showPodcasts = isEnabled('podcasts')
-  const showPayments = isEnabled('payments')
   const showCollections = rf?.collections?.enabled !== false
 
   // Floating indicator: measure active nav item position
@@ -124,7 +122,7 @@ function UserLeftMenu() {
     ro.observe(container)
 
     return () => ro.disconnect()
-  }, [pathname, isCollapsed, showCommunities, showPodcasts, showPayments, measureIndicator])
+  }, [pathname, isCollapsed, showCommunities, showPodcasts, measureIndicator])
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -249,19 +247,6 @@ function UserLeftMenu() {
                   label={t('podcasts.podcasts')}
                   isCollapsed={isCollapsed}
                   active={isActivePath('/podcasts')}
-                />
-              </div>
-            )}
-
-            {/* Store */}
-            {showPayments && (
-              <div data-nav-item>
-                <MenuLink
-                  href={getUriWithOrg(orgslug, '/store')}
-                  icon={<ShoppingCart className="w-[18px] h-[18px]" />}
-                  label="Store"
-                  isCollapsed={isCollapsed}
-                  active={isActivePath('/store')}
                 />
               </div>
             )}
