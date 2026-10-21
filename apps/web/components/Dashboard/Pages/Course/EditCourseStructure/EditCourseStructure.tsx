@@ -358,7 +358,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
                         }}
                         role="button"
                         tabIndex={0}
-                        className={`w-full text-start px-5 py-4 rounded-xl bg-white shadow-borders-base transition-colors flex items-center justify-between group ${
+                        className={`w-full text-start px-5 py-4 rounded-xl bg-white border border-gray-100 shadow-sm transition-colors flex items-center justify-between group ${
                           isSelectMode
                             ? isSelected
                               ? 'ring-2 ring-blue-500/40 border-blue-200 cursor-pointer'
