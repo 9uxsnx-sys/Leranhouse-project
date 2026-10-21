@@ -13,6 +13,7 @@ from src.db.communities.communities import Community, CommunityRead
 from src.db.communities.discussions import Discussion, DiscussionRead
 from src.db.playgrounds import Playground, PlaygroundRead, PlaygroundAccessType
 from src.db.podcasts.podcasts import Podcast, PodcastRead
+from src.services.courses.collection_translations import apply_collection_overlay_bulk
 from src.services.courses.courses import search_courses
 from src.services.search.normalization import (
     LIKE_ESCAPE_CHAR,
@@ -256,7 +257,7 @@ async def search_across_org(
         db_session, podcasts_q, page, limit
     )
 
-    collection_reads = _build_collection_reads(db_session, collections)
+    collection_reads = _build_collection_reads(db_session, collections, locale)
 
     user_reads = [UserRead.model_validate(u) for u in users]
     community_reads = [CommunityRead.model_validate(c) for c in communities]
@@ -296,7 +297,7 @@ async def search_across_org(
 
 
 def _build_collection_reads(
-    db_session: Session, collections: Iterable[Collection]
+    db_session: Session, collections: Iterable[Collection], locale: str | None = None
 ) -> list[CollectionRead]:
     """Hydrate each collection with its course list in a single batched query."""
     collections = list(collections)
@@ -328,11 +329,15 @@ def _build_collection_reads(
         ).all()
     )
 
-    return [
-        CollectionRead(
-            **c.model_dump(),
-            courses=courses_by_collection.get(c.id, []),
-            member_count=int(member_counts.get(c.id, 0)),
-        )
-        for c in collections
-    ]
+    return apply_collection_overlay_bulk(
+        [
+            CollectionRead(
+                **c.model_dump(),
+                courses=courses_by_collection.get(c.id, []),
+                member_count=int(member_counts.get(c.id, 0)),
+            )
+            for c in collections
+        ],
+        locale,
+        db_session,
+    )

@@ -374,7 +374,7 @@ Course **settings** (this document) are complete: metadata, SEO, requirements, t
 
 3. **Podcasts** — replicate the same model (`extra_metadata.translations` or a dedicated table once editing UI exists) and the same `locale` query parameter on read endpoints.
 
-4. **Collections** — same pattern for collection name/description.
+4. **Collections — done.** Same contract as courses with a dedicated `collection_translation` table (`name`, `description`, `about`, `learnings`, `tags`, `seo`), `?locale=` on every read endpoint, a locale-aware General/SEO editor, a Translations tab, and localized learner listing/detail pages. See [collections-localization.md](./collections-localization.md).
 
 Validate each surface in all three languages before moving to the next one; the course content tab is the reference implementation.
 

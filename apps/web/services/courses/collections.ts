@@ -40,10 +40,12 @@ export async function createCollection(
 export async function getCollectionById(
   collection_uuid: any,
   access_token: string,
-  next: any
+  next: any,
+  locale?: string
 ) {
+  const query = locale ? `?locale=${encodeURIComponent(locale)}` : ''
   const result: any = await fetch(
-    `${getAPIUrl()}collections/collection_${collection_uuid}`,
+    `${getAPIUrl()}collections/collection_${collection_uuid}${query}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token)
   )
   const res = await errorHandling(result)
@@ -53,10 +55,12 @@ export async function getCollectionById(
 export async function getOrgCollections(
   org_id: string,
   access_token?: string,
-  next?: any
+  next?: any,
+  locale?: string
 ) {
+  const query = locale ? `?locale=${encodeURIComponent(locale)}` : ''
   const result: any = await fetch(
-    `${getAPIUrl()}collections/org/${org_id}/page/1/limit/100`,
+    `${getAPIUrl()}collections/org/${org_id}/page/1/limit/100${query}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token)
   )
   const res = await errorHandling(result)

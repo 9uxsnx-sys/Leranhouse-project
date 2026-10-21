@@ -1145,6 +1145,7 @@
     "claim_error": "تعذر إضافة هذه المجموعة الآن. يرجى المحاولة مرة أخرى.",
     "not_found": "المجموعة غير موجودة",
     "not_found_description": "قد لا تكون هذه المجموعة موجودة أو قد لا تملك صلاحية الوصول إليها.",
+    "only_available_in": "هذه المجموعة متاحة فقط باللغة {{language}}.",
     "lessons": "دروس",
     "episodes": "حلقات",
     "about_title": "نبذة عن هذه المجموعة",
@@ -1246,7 +1247,8 @@
         "general": "عام",
         "content": "المحتوى",
         "access": "الوصول",
-        "seo": "SEO"
+        "seo": "SEO",
+        "translations": "الترجمات"
       },
       "general": {
         "about_label": "نبذة",

@@ -1,7 +1,7 @@
 'use client'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { AlertTriangle, Check, Eye, Globe, GlobeLock, Loader2, SaveAllIcon } from 'lucide-react'
+import { AlertTriangle, Check, Copy, Eye, Globe, GlobeLock, Loader2, SaveAllIcon } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 
@@ -15,7 +15,13 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
+import { useCollectionTranslation } from '@components/Hooks/useCollectionTranslation'
+import { getCurrentLanguageNativeName } from '@/lib/languages'
 import { updateCollection } from '@services/courses/collections'
+import {
+  getCollectionTranslations,
+  upsertCollectionTranslation,
+} from '@services/courses/collectionTranslations'
 import { getUriWithOrg } from '@services/config/config'
 import { revalidateTags } from '@services/utils/ts/requests'
 
@@ -48,16 +54,33 @@ function EditCollectionGeneral({ collection, orgslug, onUpdated }: EditCollectio
   const org = useOrg() as any
   const accessToken = session?.data?.tokens?.access_token
 
-  const initialValues = useMemo(
-    () => ({
-      name: collection?.name || '',
-      description: collection?.description || '',
-      about: collection?.about || '',
-      learnings: initializeLearnings(collection?.learnings),
-      tags: collection?.tags || '',
-    }),
-    [collection?.name, collection?.description, collection?.about, collection?.learnings, collection?.tags]
-  )
+  // ── Content locale ──
+  // Same rule as the course editor: the base collection row holds the source
+  // locale, every other locale lives in collection_translation.
+  const { contentLocale, isSourceLocale, translation, setTranslation } =
+    useCollectionTranslation(
+      collection?.collection_uuid,
+      collection?.source_locale || 'en'
+    )
+
+  const initialValues = useMemo(() => {
+    const localized = !isSourceLocale && translation ? translation : null
+    return {
+      name: localized?.name ?? collection?.name ?? '',
+      description: localized?.description ?? collection?.description ?? '',
+      about: localized?.about ?? collection?.about ?? '',
+      learnings: initializeLearnings(localized?.learnings ?? collection?.learnings),
+      tags: localized?.tags ?? collection?.tags ?? '',
+    }
+  }, [
+    collection?.name,
+    collection?.description,
+    collection?.about,
+    collection?.learnings,
+    collection?.tags,
+    translation,
+    isSourceLocale,
+  ])
 
   const [values, setValues] = useState(initialValues)
   const [isSaving, setIsSaving] = useState(false)
@@ -86,11 +109,30 @@ function EditCollectionGeneral({ collection, orgslug, onUpdated }: EditCollectio
     setIsSaving(true)
     setError('')
     try {
-      const res = await updateCollection(collection.collection_uuid, changes, accessToken)
-      if (res.success === false) {
-        setError(res.data?.detail || res.HTTPmessage || t('collections.dashboard.save_error'))
-        toast.error(res.data?.detail || t('collections.dashboard.save_error'))
-        return
+      if (!isSourceLocale) {
+        // Translating never touches the base row.
+        await upsertCollectionTranslation(
+          collection.collection_uuid,
+          contentLocale,
+          {
+            name: values.name,
+            description: values.description,
+            about: values.about,
+            learnings: values.learnings,
+            tags: values.tags,
+            seo: translation?.seo ?? null,
+          },
+          accessToken
+        )
+        const rows = await getCollectionTranslations(collection.collection_uuid, accessToken)
+        setTranslation(rows.find((row) => row.locale === contentLocale) || null)
+      } else {
+        const res = await updateCollection(collection.collection_uuid, changes, accessToken)
+        if (res.success === false) {
+          setError(res.data?.detail || res.HTTPmessage || t('collections.dashboard.save_error'))
+          toast.error(res.data?.detail || t('collections.dashboard.save_error'))
+          return
+        }
       }
       await revalidateTags(['collections'], orgslug)
       await onUpdated()
@@ -101,7 +143,31 @@ function EditCollectionGeneral({ collection, orgslug, onUpdated }: EditCollectio
     } finally {
       setIsSaving(false)
     }
-  }, [isDirty, isSaving, changes, collection?.collection_uuid, accessToken, orgslug, onUpdated, t])
+  }, [
+    isDirty,
+    isSaving,
+    changes,
+    collection?.collection_uuid,
+    accessToken,
+    orgslug,
+    onUpdated,
+    t,
+    isSourceLocale,
+    contentLocale,
+    values,
+    translation,
+    setTranslation,
+  ])
+
+  const copyFromSource = useCallback(() => {
+    setValues({
+      name: collection?.name || '',
+      description: collection?.description || '',
+      about: collection?.about || '',
+      learnings: initializeLearnings(collection?.learnings),
+      tags: collection?.tags || '',
+    })
+  }, [collection?.name, collection?.description, collection?.about, collection?.learnings, collection?.tags])
 
   const togglePublish = useCallback(async () => {
     if (isPublishing) return
@@ -163,6 +229,34 @@ function EditCollectionGeneral({ collection, orgslug, onUpdated }: EditCollectio
           </Link>
 
           <div className="flex items-center gap-2">
+            {!isSourceLocale && (
+              <button
+                type="button"
+                onClick={copyFromSource}
+                className="hidden sm:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                <Copy size={14} />
+                <span>{t('dashboard.courses.general.locale.copy_from_source')}</span>
+              </button>
+            )}
+            <span
+              className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600"
+              title={
+                isSourceLocale
+                  ? t('dashboard.courses.general.locale.source')
+                  : t('dashboard.courses.general.locale.translation')
+              }
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${!isDirty ? 'bg-teal-500' : 'bg-amber-400'}`} />
+              <span>{getCurrentLanguageNativeName(contentLocale)}</span>
+              <span className="text-gray-400">
+                {isSourceLocale
+                  ? t('dashboard.courses.general.locale.source')
+                  : translation
+                    ? t('dashboard.courses.general.locale.translation')
+                    : t('dashboard.courses.general.locale.missing')}
+              </span>
+            </span>
             <button
               type="button"
               onClick={isDirty ? handleSave : undefined}
@@ -216,6 +310,12 @@ function EditCollectionGeneral({ collection, orgslug, onUpdated }: EditCollectio
             </button>
           </div>
         </div>
+
+        {!isSourceLocale && !translation && (
+          <div className="text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
+            {t('dashboard.courses.general.locale.inherited')}
+          </div>
+        )}
 
         {/* ── BASIC INFORMATION ── */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
@@ -272,7 +372,7 @@ function EditCollectionGeneral({ collection, orgslug, onUpdated }: EditCollectio
           </FormField>
         </div>
 
-        {/* ── MEDIA ── */}
+        {/* ── MEDIA (shared across locales) ── */}
         <CollectionMediaSection collection={collection} onUpdated={handleMediaUpdated} />
 
         {/* ── TAGS ── */}

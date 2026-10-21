@@ -18,6 +18,7 @@ from src.db.collections_courses import CollectionCourse
 from src.db.courses.activities import Activity
 from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.chapters import Chapter
+from src.db.courses.course_translations import CourseTranslation
 from src.db.courses.courses import Course
 from src.db.organizations import Organization
 from src.db.payments.enums import AccessTypeEnum
@@ -32,6 +33,11 @@ from src.security.auth import resolve_acting_user_id
 from src.security.rbac import check_resource_access, AccessAction
 from src.security.rbac.constants import ADMIN_OR_MAINTAINER_ROLE_IDS
 from src.security.superadmin import is_user_superadmin
+from src.services.courses.collection_translations import (
+    apply_collection_overlay,
+    apply_collection_overlay_bulk,
+)
+from src.services.courses.translations import DEFAULT_LOCALE, normalize_locale
 from src.services.webhooks.dispatch import dispatch_webhooks
 
 
@@ -93,16 +99,20 @@ def _member_courses(
 
 
 def _build_read(
-    db_session: Session, collection: Collection, include_unpublished: bool = False
+    db_session: Session,
+    collection: Collection,
+    include_unpublished: bool = False,
+    locale: str | None = None,
 ) -> CollectionRead:
     courses = _member_courses(
         db_session, int(collection.id), int(collection.org_id), include_unpublished
     )
-    return CollectionRead(
+    read = CollectionRead(
         **collection.model_dump(),
         courses=courses,
         member_count=_member_count(db_session, collection),
     )
+    return apply_collection_overlay(read, collection, locale, db_session)
 
 
 def _member_count(db_session: Session, collection: Collection) -> int:
@@ -225,6 +235,7 @@ async def get_collection(
     collection_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    locale: str | None = None,
 ) -> CollectionRead:
     collection = _get_collection_or_404(db_session, collection_uuid)
 
@@ -235,7 +246,7 @@ async def get_collection(
         db_session, int(collection.org_id), acting_user_id
     )
 
-    return _build_read(db_session, collection, include_unpublished)
+    return _build_read(db_session, collection, include_unpublished, locale)
 
 
 async def create_collection(
@@ -442,11 +453,35 @@ async def delete_collection(
 ####################################################
 
 
+def _course_translations_for(
+    db_session: Session, courses: list[Course], requested: str | None
+) -> dict[int, CourseTranslation]:
+    """Translations of the given courses in `requested`, with one query."""
+    if not requested or not courses:
+        return {}
+    ids = [
+        int(course.id)
+        for course in courses
+        if course.id is not None
+        and normalize_locale(getattr(course, "source_locale", None)) != requested
+    ]
+    if not ids:
+        return {}
+    rows = db_session.exec(
+        select(CourseTranslation).where(
+            CourseTranslation.course_id.in_(ids),  # type: ignore[attr-defined]
+            CourseTranslation.locale == requested,
+        )
+    ).all()
+    return {row.course_id: row for row in rows}
+
+
 def _list_member_rows(
     db_session: Session,
     collection: Collection,
     include_unpublished: bool,
     query: str = "",
+    locale: str | None = None,
 ) -> list[CollectionCourseRead]:
     """Build every member row (courses + podcasts) with lesson/episode counts."""
     members = db_session.exec(
@@ -484,6 +519,13 @@ def _list_member_rows(
             )
         ).all():
             podcasts_by_uuid[podcast.podcast_uuid] = podcast
+
+    # Member course cards show the course name/description, so they follow the
+    # requested language too (one extra query for the whole page).
+    requested = normalize_locale(locale)
+    course_translations = _course_translations_for(
+        db_session, list(courses_by_id.values()), requested
+    )
 
     lesson_counts = dict(
         db_session.exec(
@@ -546,7 +588,14 @@ def _list_member_rows(
             or course.access_type not in (AccessTypeEnum.PUBLIC, AccessTypeEnum.PAID)
         ):
             continue
-        if query and query not in (course.name or "").lower():
+        translation = course_translations.get(int(course.id)) if course.id else None
+        display_name = (translation.name or course.name) if translation else course.name
+        display_description = (
+            translation.description
+            if translation and translation.description is not None
+            else course.description
+        )
+        if query and query not in (display_name or "").lower():
             continue
         result.append(
             CollectionCourseRead(
@@ -554,8 +603,8 @@ def _list_member_rows(
                 resource_type="course",
                 resource_uuid=course.course_uuid,
                 course_uuid=course.course_uuid,
-                name=course.name,
-                description=course.description,
+                name=display_name,
+                description=display_description,
                 thumbnail_image=course.thumbnail_image,
                 access_type=course.access_type,
                 published=course.published,
@@ -575,6 +624,7 @@ def _list_available_rows(
     collection: Collection,
     include_unpublished: bool,
     query: str = "",
+    locale: str | None = None,
 ) -> list[CollectionCourseRead]:
     """Organization resources that can still join this collection.
 
@@ -636,6 +686,26 @@ def _list_available_rows(
             or query in (resource.description or "").lower()
         ]
 
+    requested = normalize_locale(locale)
+    course_translations = _course_translations_for(
+        db_session,
+        [resource for kind, resource in candidates if kind == "course"],  # type: ignore[misc]
+        requested,
+    )
+
+    def _localized(kind: str, resource) -> tuple[str, str | None]:
+        if kind != "course":
+            return resource.name, resource.description
+        translation = course_translations.get(int(resource.id)) if resource.id else None
+        if not translation:
+            return resource.name, resource.description
+        return (
+            translation.name or resource.name,
+            translation.description
+            if translation.description is not None
+            else resource.description,
+        )
+
     course_ids = [
         int(resource.id)  # type: ignore[arg-type]
         for kind, resource in candidates
@@ -666,6 +736,7 @@ def _list_available_rows(
 
     rows: list[CollectionCourseRead] = []
     for kind, resource in candidates:
+        display_name, display_description = _localized(kind, resource)
         if kind == "podcast":
             podcast = resource  # type: ignore[assignment]
             rows.append(
@@ -674,8 +745,8 @@ def _list_available_rows(
                     resource_type="podcast",
                     resource_uuid=podcast.podcast_uuid,
                     course_uuid=None,
-                    name=podcast.name,
-                    description=podcast.description,
+                    name=display_name,
+                    description=display_description,
                     thumbnail_image=podcast.thumbnail_image,
                     access_type=podcast.access_type,
                     published=podcast.published,
@@ -693,8 +764,8 @@ def _list_available_rows(
                 resource_type="course",
                 resource_uuid=course.course_uuid,
                 course_uuid=course.course_uuid,
-                name=course.name,
-                description=course.description,
+                name=display_name,
+                description=display_description,
                 thumbnail_image=course.thumbnail_image,
                 access_type=course.access_type,
                 published=course.published,
@@ -720,6 +791,7 @@ async def get_collection_members_page(
     status: str = "",
     page: int = 1,
     limit: int = 10,
+    locale: str | None = None,
 ) -> CollectionMembersPage:
     collection = _get_collection_or_404(db_session, collection_uuid)
 
@@ -733,10 +805,12 @@ async def get_collection_members_page(
     query = search.strip().lower()
     if filter_by == "available":
         rows = _list_available_rows(
-            db_session, collection, include_unpublished, query
+            db_session, collection, include_unpublished, query, locale
         )
     else:
-        rows = _list_member_rows(db_session, collection, include_unpublished, query)
+        rows = _list_member_rows(
+            db_session, collection, include_unpublished, query, locale
+        )
 
     if kind in ("course", "podcast"):
         rows = [row for row in rows if row.resource_type == kind]
@@ -757,6 +831,7 @@ async def get_collection_courses(
     search: str = "",
     page: int = 1,
     limit: int = 20,
+    locale: str | None = None,
 ) -> List[CollectionCourseRead]:
     collection = _get_collection_or_404(db_session, collection_uuid)
 
@@ -768,7 +843,7 @@ async def get_collection_courses(
     )
 
     rows = _list_member_rows(
-        db_session, collection, include_unpublished, search.strip().lower()
+        db_session, collection, include_unpublished, search.strip().lower(), locale
     )
     start = (page - 1) * limit
     return rows[start : start + limit]
@@ -971,6 +1046,7 @@ async def get_collections(
     db_session: Session,
     page: int = 1,
     limit: int = 10,
+    locale: str | None = None,
 ) -> List[CollectionRead]:
     org_id_int = int(org_id)
     acting_user_id = resolve_acting_user_id(current_user)
@@ -1054,4 +1130,4 @@ async def get_collections(
         )
         collections_with_courses.append(collection_read)
 
-    return collections_with_courses
+    return apply_collection_overlay_bulk(collections_with_courses, locale, db_session)

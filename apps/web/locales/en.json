@@ -1425,6 +1425,7 @@
                         "empty_collection":  "Empty Collection",
                         "not_found":  "Collection not found",
                         "not_found_description":  "This collection might not exist or you may not have access to it.",
+                        "only_available_in":  "This collection is only available in {{language}}.",
                         "no_courses":  "No items in this collection",
                         "no_courses_description":  "Courses and podcasts will appear here once they are added to the collection.",
                         "owned":  "You own this bundle",
@@ -1469,7 +1470,8 @@
                                                        "general":  "General",
                                                        "content":  "Content",
                                                        "access":  "Access",
-                                                       "seo":  "SEO"
+                                                       "seo":  "SEO",
+                                                       "translations":  "Translations"
                                                    },
                                           "general":  {
                                                           "about_label":  "About",

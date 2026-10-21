@@ -13,6 +13,7 @@ import EditCollectionGeneral from '@components/Dashboard/Pages/Collection/EditCo
 import EditCollectionContent from '@components/Dashboard/Pages/Collection/EditCollectionContent/EditCollectionContent'
 import EditCollectionAccess from '@components/Dashboard/Pages/Collection/EditCollectionAccess/EditCollectionAccess'
 import EditCollectionSEO from '@components/Dashboard/Pages/Collection/EditCollectionSEO/EditCollectionSEO'
+import EditCollectionTranslations from '@components/Dashboard/Pages/Collection/EditCollectionTranslations/EditCollectionTranslations'
 import { PageTabs } from '@components/ui/page-tabs'
 import { SectionIcon } from '@components/ui/icons'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
@@ -69,6 +70,12 @@ function CollectionEditorPage(props: { params: Promise<CollectionEditorParams> }
       label: t('collections.dashboard.tabs.seo'),
       icon: SectionIcon.seo,
       href: `/dash/collections/collection/${params.collectionuuid}/seo`,
+    },
+    {
+      key: 'translations',
+      label: t('collections.dashboard.tabs.translations'),
+      icon: SectionIcon.translations,
+      href: `/dash/collections/collection/${params.collectionuuid}/translations`,
     },
   ]
 
@@ -165,6 +172,13 @@ function CollectionEditorPage(props: { params: Promise<CollectionEditorParams> }
                     onUpdated={() => mutate()}
                   />
                 </PlanRestrictedFeature>
+              )}
+              {params.subpage === 'translations' && (
+                <EditCollectionTranslations
+                  collection={collection}
+                  orgslug={params.orgslug}
+                  onUpdated={() => mutate()}
+                />
               )}
             </>
           )}

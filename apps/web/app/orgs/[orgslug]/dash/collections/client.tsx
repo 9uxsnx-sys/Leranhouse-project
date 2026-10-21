@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useContentLocale } from '@components/Hooks/useCourseTranslation'
 import { CollectionCard } from '@components/Objects/Thumbnails/CollectionCard'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
@@ -43,10 +44,12 @@ function CollectionsHome(params: CollectionsHomeProps) {
   const org = useOrg() as any
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
+  const contentLocale = useContentLocale()
 
+  // The locale is part of the key so switching language refetches localized titles.
   const collectionsKey =
     access_token && params.org_id
-      ? `${getAPIUrl()}collections/org/${params.org_id}/page/1/limit/500`
+      ? `${getAPIUrl()}collections/org/${params.org_id}/page/1/limit/500?locale=${contentLocale}`
       : null
 
   const { data, isLoading, mutate } = useSWR(

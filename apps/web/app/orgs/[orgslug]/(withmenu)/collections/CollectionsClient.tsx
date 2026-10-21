@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import useSWR from 'swr'
 import { Search, BookCopy, ChevronLeft, ChevronRight } from 'lucide-react'
 import { CollectionCard } from '@components/Objects/Thumbnails/CollectionCard'
+import { useContentLocale } from '@components/Hooks/useCourseTranslation'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getAPIUrl } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
@@ -31,12 +32,13 @@ function CollectionsClient(props: CollectionsClientProps) {
   const orgslug = props.orgslug
   const allCollections = props.collections
   const org_uuid = props.org_uuid
+  const contentLocale = useContentLocale()
 
   // Bundles the learner already claimed or bought — drives the "Owned" badge
   // and the "My bundles" catalog filter.
   const { data: myCollections } = useSWR(
     accessToken && props.org_id
-      ? `${getAPIUrl()}collections/org/${props.org_id}/mine`
+      ? `${getAPIUrl()}collections/org/${props.org_id}/mine?locale=${contentLocale}`
       : null,
     (url: string) => swrFetcher(url, accessToken),
     { revalidateOnFocus: false }

@@ -1,4 +1,4 @@
-from typing import List, Literal
+from typing import List, Literal, Optional
 from fastapi import APIRouter, Depends, File, Form, Query, Request, UploadFile
 from src.core.events.database import get_db_session
 from src.db.collections import (
@@ -7,6 +7,10 @@ from src.db.collections import (
     CollectionMembersPage,
     CollectionRead,
     CollectionUpdate,
+)
+from src.db.collection_translations import (
+    CollectionTranslationRead,
+    CollectionTranslationUpsert,
 )
 from src.db.courses.courses import ThumbnailType
 from src.security.auth import get_current_user
@@ -37,6 +41,11 @@ from src.services.courses.collections import (
     remove_resource_from_collection,
     update_collection,
     delete_collection,
+)
+from src.services.courses.collection_translations import (
+    delete_collection_translation,
+    list_collection_translations,
+    upsert_collection_translation,
 )
 
 
@@ -82,13 +91,18 @@ async def api_create_collection(
 async def api_get_collection(
     request: Request,
     collection_uuid: str,
+    locale: Optional[str] = Query(
+        default=None, description="Content locale (falls back to the source locale)"
+    ),
     current_user: PublicUser = Depends(get_current_user),
     db_session=Depends(get_db_session),
 ) -> CollectionRead:
     """
     Get single collection by ID
     """
-    return await get_collection(request, collection_uuid, current_user, db_session)
+    return await get_collection(
+        request, collection_uuid, current_user, db_session, locale=locale
+    )
 
 
 @router.get(
@@ -105,13 +119,18 @@ async def api_get_collections_by(
     page: int,
     limit: int,
     org_id: str,
+    locale: Optional[str] = Query(
+        default=None, description="Content locale (falls back to the source locale)"
+    ),
     current_user: PublicUser = Depends(get_current_user),
     db_session=Depends(get_db_session),
 ) -> List[CollectionRead]:
     """
     Get collections by page and limit
     """
-    return await get_collections(request, org_id, current_user, db_session, page, limit)
+    return await get_collections(
+        request, org_id, current_user, db_session, page, limit, locale=locale
+    )
 
 
 @router.get(
@@ -133,6 +152,9 @@ async def api_get_collection_courses(
     search: str = "",
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=20, ge=1, le=100),
+    locale: Optional[str] = Query(
+        default=None, description="Content locale (falls back to the source locale)"
+    ),
     current_user: PublicUser = Depends(get_current_user),
     db_session=Depends(get_db_session),
 ) -> List[CollectionCourseRead]:
@@ -144,6 +166,7 @@ async def api_get_collection_courses(
         search=search,
         page=page,
         limit=limit,
+        locale=locale,
     )
 
 
@@ -170,6 +193,9 @@ async def api_get_collection_members(
     status: str = "",
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=10, ge=1, le=100),
+    locale: Optional[str] = Query(
+        default=None, description="Content locale (falls back to the source locale)"
+    ),
     current_user: PublicUser = Depends(get_current_user),
     db_session=Depends(get_db_session),
 ) -> CollectionMembersPage:
@@ -184,6 +210,7 @@ async def api_get_collection_members(
         status=status,
         page=page,
         limit=limit,
+        locale=locale,
     )
 
 
@@ -199,10 +226,15 @@ async def api_get_collection_members(
 async def api_list_my_collections(
     request: Request,
     org_id: int,
+    locale: Optional[str] = Query(
+        default=None, description="Content locale (falls back to the source locale)"
+    ),
     current_user: PublicUser = Depends(get_current_user),
     db_session=Depends(get_db_session),
 ) -> List[CollectionRead]:
-    return await list_my_collections(request, org_id, current_user, db_session)
+    return await list_my_collections(
+        request, org_id, current_user, db_session, locale=locale
+    )
 
 
 @router.get(
@@ -562,3 +594,64 @@ async def api_delete_collection(
     """
 
     return await delete_collection(request, collection_uuid, current_user, db_session)
+
+
+@router.get(
+    "/{collection_uuid}/translations",
+    response_model=List[CollectionTranslationRead],
+    summary="List collection translations",
+    description="List the locale rows attached to a collection. Requires edit permission.",
+)
+async def api_list_collection_translations(
+    request: Request,
+    collection_uuid: str,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+) -> List[CollectionTranslationRead]:
+    return await list_collection_translations(
+        request, collection_uuid, current_user, db_session
+    )
+
+
+@router.put(
+    "/{collection_uuid}/translations/{locale}",
+    response_model=CollectionTranslationRead,
+    summary="Create or update a collection translation",
+    description=(
+        "Upsert one locale of a collection. Writing the source locale is "
+        "rejected — update the collection itself instead."
+    ),
+    responses={
+        200: {"description": "Translation saved.", "model": CollectionTranslationRead},
+        404: {"description": "Collection not found"},
+        422: {"description": "Invalid locale or payload"},
+    },
+)
+async def api_upsert_collection_translation(
+    request: Request,
+    collection_uuid: str,
+    locale: str,
+    payload: CollectionTranslationUpsert,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+) -> CollectionTranslationRead:
+    return await upsert_collection_translation(
+        request, collection_uuid, locale, payload, current_user, db_session
+    )
+
+
+@router.delete(
+    "/{collection_uuid}/translations/{locale}",
+    summary="Delete a collection translation",
+    description="Remove one locale row. The base collection row is untouched.",
+)
+async def api_delete_collection_translation(
+    request: Request,
+    collection_uuid: str,
+    locale: str,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session=Depends(get_db_session),
+):
+    return await delete_collection_translation(
+        request, collection_uuid, locale, current_user, db_session
+    )

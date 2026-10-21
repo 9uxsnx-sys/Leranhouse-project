@@ -19,8 +19,14 @@ import {
   SelectValue,
 } from '@components/ui/select'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useCollectionTranslation } from '@components/Hooks/useCollectionTranslation'
+import { getCurrentLanguageNativeName } from '@/lib/languages'
 import { getUriWithOrg } from '@services/config/config'
 import { updateCollection } from '@services/courses/collections'
+import {
+  getCollectionTranslations,
+  upsertCollectionTranslation,
+} from '@services/courses/collectionTranslations'
 import { revalidateTags } from '@services/utils/ts/requests'
 
 type EditCollectionSEOProps = {
@@ -92,8 +98,23 @@ function EditCollectionSEO({ collection, orgslug, onUpdated }: EditCollectionSEO
   const session = useLHSession() as any
   const accessToken = session?.data?.tokens?.access_token
 
+  // ── Content locale ──
+  // Any locale other than the source writes the collection translation row.
+  const { contentLocale, isSourceLocale, translation, setTranslation } =
+    useCollectionTranslation(
+      collection?.collection_uuid,
+      collection?.source_locale || 'en'
+    )
+
+  // A translation row cannot exist without the general fields, so SEO stays
+  // read-only until the General tab has been translated once.
+  const isTranslationLocked = !isSourceLocale && !translation
+
   const initialValues = useMemo((): SEOValues => {
-    const seo = collection?.seo || {}
+    // SEO follows the content locale: source locale reads the base row,
+    // other locales read their translation row.
+    const seo =
+      !isSourceLocale && translation?.seo ? translation.seo : collection?.seo || {}
     return {
       title: seo.title || '',
       description: seo.description || '',
@@ -109,11 +130,15 @@ function EditCollectionSEO({ collection, orgslug, onUpdated }: EditCollectionSEO
       robots_nofollow: seo.robots_nofollow || false,
       enable_jsonld: seo.enable_jsonld !== false,
     }
-  }, [collection?.seo])
+  }, [collection?.seo, translation, isSourceLocale])
 
   const [values, setValues] = useState<SEOValues>(initialValues)
-  const [isSaving, setIsSaving] = useState(false)
+  const [isSavingRequest, setIsSavingRequest] = useState(false)
   const [error, setError] = useState('')
+
+  // Every field is disabled while a request runs or while the locale has no
+  // translation yet (the base row must not be edited from a translation view).
+  const isSaving = isSavingRequest || isTranslationLocked
 
   useEffect(() => {
     setValues(initialValues)
@@ -134,9 +159,9 @@ function EditCollectionSEO({ collection, orgslug, onUpdated }: EditCollectionSEO
   }, [])
 
   const handleSave = useCallback(async () => {
-    if (!isDirty || isSaving) return
+    if (!isDirty || isSaving || isTranslationLocked) return
     if (Object.keys(formErrors).length > 0) return
-    setIsSaving(true)
+    setIsSavingRequest(true)
     setError('')
     try {
       const seo = {
@@ -154,11 +179,34 @@ function EditCollectionSEO({ collection, orgslug, onUpdated }: EditCollectionSEO
         robots_nofollow: values.robots_nofollow,
         enable_jsonld: values.enable_jsonld,
       }
-      const res = await updateCollection(collection.collection_uuid, { seo }, accessToken)
-      if (res.success === false) {
-        setError(res.data?.detail || res.HTTPmessage || t('collections.dashboard.save_error'))
-        toast.error(res.data?.detail || t('collections.dashboard.save_error'))
-        return
+      if (!isSourceLocale) {
+        // Translating never touches the base row: keep the general fields of
+        // the existing translation and only swap its SEO payload.
+        await upsertCollectionTranslation(
+          collection.collection_uuid,
+          contentLocale,
+          {
+            name: translation?.name ?? collection?.name ?? '',
+            description: translation?.description ?? null,
+            about: translation?.about ?? null,
+            learnings: translation?.learnings ?? null,
+            tags: translation?.tags ?? null,
+            seo,
+          },
+          accessToken
+        )
+        const rows = await getCollectionTranslations(
+          collection.collection_uuid,
+          accessToken
+        )
+        setTranslation(rows.find((row) => row.locale === contentLocale) || null)
+      } else {
+        const res = await updateCollection(collection.collection_uuid, { seo }, accessToken)
+        if (res.success === false) {
+          setError(res.data?.detail || res.HTTPmessage || t('collections.dashboard.save_error'))
+          toast.error(res.data?.detail || t('collections.dashboard.save_error'))
+          return
+        }
       }
       await revalidateTags(['collections'], orgslug)
       await onUpdated()
@@ -167,11 +215,12 @@ function EditCollectionSEO({ collection, orgslug, onUpdated }: EditCollectionSEO
       setError(err?.message || t('collections.dashboard.save_error'))
       toast.error(err?.message || t('collections.dashboard.save_error'))
     } finally {
-      setIsSaving(false)
+      setIsSavingRequest(false)
     }
   }, [
     isDirty,
     isSaving,
+    isTranslationLocked,
     formErrors,
     values,
     collection?.collection_uuid,
@@ -179,6 +228,10 @@ function EditCollectionSEO({ collection, orgslug, onUpdated }: EditCollectionSEO
     orgslug,
     onUpdated,
     t,
+    isSourceLocale,
+    contentLocale,
+    translation,
+    setTranslation,
   ])
 
   const collectionId = (collection?.collection_uuid || '').replace('collection_', '')
@@ -237,34 +290,61 @@ function EditCollectionSEO({ collection, orgslug, onUpdated }: EditCollectionSEO
             <span>{t('dashboard.courses.preview')}</span>
           </Link>
 
-          <button
-            type="button"
-            onClick={isDirty ? handleSave : undefined}
-            disabled={isSaving || (isDirty && Object.keys(formErrors).length > 0)}
-            className={`inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors ${
-              isSaving
-                ? 'bg-black text-white border-black opacity-50 cursor-not-allowed'
-                : !isDirty
-                  ? 'bg-white text-gray-600 border-gray-200 cursor-default'
-                  : 'bg-black text-white border-black hover:opacity-90 cursor-pointer'
-            }`}
-          >
-            {isSaving ? (
-              <Loader2 size={14} className="animate-spin" />
-            ) : !isDirty ? (
-              <Check size={14} />
-            ) : (
-              <SaveAllIcon size={14} />
-            )}
-            <span>
-              {isSaving
-                ? t('dashboard.courses.save.saving')
-                : !isDirty
-                  ? t('dashboard.courses.save.saved')
-                  : t('dashboard.courses.save.save')}
+          <div className="flex items-center gap-2">
+            <span
+              className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600"
+              title={
+                isSourceLocale
+                  ? t('dashboard.courses.general.locale.source')
+                  : t('dashboard.courses.general.locale.translation')
+              }
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${!isDirty ? 'bg-teal-500' : 'bg-amber-400'}`} />
+              <span>{getCurrentLanguageNativeName(contentLocale)}</span>
+              <span className="text-gray-400">
+                {isSourceLocale
+                  ? t('dashboard.courses.general.locale.source')
+                  : translation
+                    ? t('dashboard.courses.general.locale.translation')
+                    : t('dashboard.courses.general.locale.missing')}
+              </span>
             </span>
-          </button>
+
+            <button
+              type="button"
+              onClick={isDirty ? handleSave : undefined}
+              disabled={isSavingRequest || (isDirty && Object.keys(formErrors).length > 0)}
+              className={`inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors ${
+                isSavingRequest
+                  ? 'bg-black text-white border-black opacity-50 cursor-not-allowed'
+                  : !isDirty || isTranslationLocked
+                    ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                    : 'bg-black text-white border-black hover:opacity-90 cursor-pointer'
+              }`}
+            >
+              {isSavingRequest ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : !isDirty || isTranslationLocked ? (
+                <Check size={14} />
+              ) : (
+                <SaveAllIcon size={14} />
+              )}
+              <span>
+                {isSavingRequest
+                  ? t('dashboard.courses.save.saving')
+                  : !isDirty || isTranslationLocked
+                    ? t('dashboard.courses.save.saved')
+                    : t('dashboard.courses.save.save')}
+              </span>
+            </button>
+          </div>
         </div>
+
+        {isTranslationLocked && (
+          <div className="text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
+            {t('dashboard.courses.general.locale.inherited')}
+          </div>
+        )}
 
         {/* ── BASIC SEO ── */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">

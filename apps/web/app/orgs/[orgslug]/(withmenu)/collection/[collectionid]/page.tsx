@@ -1,8 +1,10 @@
 import { Metadata } from 'next'
+import { cookies } from 'next/headers'
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
 import { getOrgThumbnailMediaDirectory, getOrgOgImageMediaDirectory } from '@services/media/media'
 import { getCollectionById } from '@services/courses/collections'
 import { getServerSession } from '@/lib/auth/server'
+import { localeCode } from '@/lib/direction'
 import { getOrgSeoConfig, buildPageTitle, buildBreadcrumbJsonLd } from '@/lib/seo/utils'
 import { getServerCanonicalUrl } from '@/lib/seo/utils.server'
 import { JsonLd } from '@components/SEO/JsonLd'
@@ -16,6 +18,8 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const params = await props.params
   const session = await getServerSession()
   const access_token = session?.tokens?.access_token
+  const cookieStore = await cookies()
+  const locale = localeCode(cookieStore.get('i18next')?.value) || 'en'
 
   const org = await getOrganizationContextInfo(params.orgslug, {
     revalidate: 120,
@@ -29,7 +33,8 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
     collection = await getCollectionById(
       params.collectionid,
       access_token || '',
-      { revalidate: 120, tags: ['collections'] }
+      { revalidate: 120, tags: ['collections'] },
+      locale
     )
   } catch {
     // Collection might not exist or user doesn't have access

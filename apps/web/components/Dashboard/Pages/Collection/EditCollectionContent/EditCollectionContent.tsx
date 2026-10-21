@@ -31,6 +31,7 @@ import {
 } from '@components/ui/dropdown-menu'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useContentLocale } from '@components/Hooks/useCourseTranslation'
 import {
   addResourceToCollection,
   removeResourceFromCollection,
@@ -63,6 +64,7 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
   const accessToken = session?.data?.tokens?.access_token
 
   const collectionUuid = collection?.collection_uuid
+  const contentLocale = useContentLocale()
 
   const [searchValue, setSearchValue] = useState('')
   const [page, setPage] = useState(1)
@@ -85,7 +87,7 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
     collectionUuid && accessToken
       ? `${getAPIUrl()}collections/${collectionUuid}/members?filter=${
           isSearching ? 'available' : 'linked'
-        }&search=${encodeURIComponent(debouncedSearch)}&kind=${kindFilter}&status=${statusFilter}&page=${page}&limit=${ITEMS_PER_PAGE}`
+        }&search=${encodeURIComponent(debouncedSearch)}&kind=${kindFilter}&status=${statusFilter}&page=${page}&limit=${ITEMS_PER_PAGE}&locale=${contentLocale}`
       : null
 
   const { data, error, isValidating, mutate } = useSWR(

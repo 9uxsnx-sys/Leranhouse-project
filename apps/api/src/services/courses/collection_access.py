@@ -380,6 +380,7 @@ async def list_my_collections(
     org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    locale: str | None = None,
 ) -> list[CollectionRead]:
     """Collections in the learner's library: claimed public bundles + paid ones."""
     user_id = resolve_acting_user_id(current_user)
@@ -410,4 +411,7 @@ async def list_my_collections(
         .order_by(Collection.update_date.desc())  # type: ignore[attr-defined]
     ).all()
 
-    return [_build_read(db_session, collection) for collection in collections]
+    return [
+        _build_read(db_session, collection, locale=locale)
+        for collection in collections
+    ]

@@ -41,6 +41,9 @@ class Collection(CollectionBase, table=True):
         sa_column=Column(BigInteger, ForeignKey("organization.id", ondelete="CASCADE"))
     )
     collection_uuid: str = ""
+    # The base row holds the source-locale content; other locales live in
+    # ``collection_translation`` (see translations service).
+    source_locale: str = Field(default="en")
     creation_date: str = ""
     update_date: str = ""
 
@@ -76,6 +79,10 @@ class CollectionRead(CollectionBase):
     courses: list
     member_count: int = 0
     collection_uuid: str
+    # Localization state, filled by the translations service on read.
+    source_locale: str = "en"
+    content_locale: str = "en"
+    is_fallback: bool = False
     creation_date: str
     update_date: str
 

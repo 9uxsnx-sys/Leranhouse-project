@@ -1,6 +1,8 @@
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
 import { Metadata } from 'next'
+import { cookies } from 'next/headers'
 import { getServerSession } from '@/lib/auth/server'
+import { localeCode } from '@/lib/direction'
 import { getOrgCollections } from '@services/courses/collections'
 import { getOrgThumbnailMediaDirectory } from '@services/media/media'
 import CollectionsClient from './CollectionsClient'
@@ -59,10 +61,13 @@ const CollectionsPage = async (params: any) => {
     tags: ['organizations'],
   })
   const org_id = org.id
+  const cookieStore = await cookies()
+  const locale = localeCode(cookieStore.get('i18next')?.value) || 'en'
   const collections = await getOrgCollections(
     org_id,
     access_token ?? undefined,
-    { revalidate: 120, tags: ['collections'] }
+    { revalidate: 120, tags: ['collections'] },
+    locale
   )
 
   return (

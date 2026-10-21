@@ -12,6 +12,7 @@ import {
   BookOpen,
   Check,
   Download,
+  Info,
   Layers,
   Loader2,
   Mic,
@@ -27,6 +28,8 @@ import { CourseCard } from '@components/Objects/Thumbnails/CourseCard'
 import { EmptyState } from '@components/Analytics/Feedback'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useContentLocale } from '@components/Hooks/useCourseTranslation'
+import { getCurrentLanguageNativeName } from '@/lib/languages'
 import { useRegisterBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -62,10 +65,11 @@ const CollectionClient = ({
   const org = useOrg() as any
 
   const collectionUuid = `collection_${collectionid}`
+  const contentLocale = useContentLocale()
 
   const { data: collection, error } = useSWR(
     collectionid
-      ? `${getAPIUrl()}collections/${collectionUuid}`
+      ? `${getAPIUrl()}collections/${collectionUuid}?locale=${contentLocale}`
       : null,
     (url: string) => swrFetcher(url, accessToken),
     { revalidateOnFocus: false }
@@ -73,7 +77,7 @@ const CollectionClient = ({
 
   const { data: memberRows } = useSWR(
     collection
-      ? `${getAPIUrl()}collections/${collectionUuid}/courses?limit=100`
+      ? `${getAPIUrl()}collections/${collectionUuid}/courses?limit=100&locale=${contentLocale}`
       : null,
     (url: string) => swrFetcher(url, accessToken),
     { revalidateOnFocus: false }
@@ -255,6 +259,16 @@ const CollectionClient = ({
           {/* ═══════════════ LEFT COLUMN ═══════════════ */}
           <div className="flex-1 min-w-0 max-w-3xl space-y-8">
             <div>
+              {collection.is_fallback && (
+                <div className="inline-flex items-center gap-2 mb-3 rounded-lg border border-amber-100 bg-amber-50 px-3 py-1.5 text-xs text-amber-800">
+                  <Info size={13} className="shrink-0" />
+                  <span>
+                    {t('collections.only_available_in', {
+                      language: getCurrentLanguageNativeName(collection.content_locale || 'en'),
+                    })}
+                  </span>
+                </div>
+              )}
               <h1 dir="auto" className="text-2xl md:text-3xl font-semibold text-ui-fg-base leading-tight">
                 {collection.name}
               </h1>
