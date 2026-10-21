@@ -215,7 +215,7 @@ export function DiscussionEditor({
         .discussion-editor-content .ProseMirror p.is-editor-empty:first-child::before {
           color: #9ca3af;
           content: attr(data-placeholder);
-          float: left;
+          float: inline-start;
           height: 0;
           pointer-events: none;
         }
@@ -241,13 +241,13 @@ export function DiscussionEditor({
 
         .discussion-editor-content .ProseMirror .discussion-bullet-list {
           list-style-type: disc;
-          padding-left: 1.5rem;
+          padding-inline-start: 1.5rem;
           margin-bottom: 0.5rem;
         }
 
         .discussion-editor-content .ProseMirror .discussion-ordered-list {
           list-style-type: decimal;
-          padding-left: 1.5rem;
+          padding-inline-start: 1.5rem;
           margin-bottom: 0.5rem;
         }
 
@@ -256,8 +256,8 @@ export function DiscussionEditor({
         }
 
         .discussion-editor-content .ProseMirror .discussion-blockquote {
-          border-left: 3px solid #e5e7eb;
-          padding-left: 1rem;
+          border-inline-start: 3px solid #e5e7eb;
+          padding-inline-start: 1rem;
           color: #6b7280;
           font-style: italic;
           margin: 0.5rem 0;

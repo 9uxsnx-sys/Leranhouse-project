@@ -232,8 +232,21 @@ Extension chrome only — `EmbedObjectsComponent.tsx` (7), `WebPreviewComponent.
    - `AudioBlockComponent`, `CloudflarePlayer`, `LearnHousePlayer` — **left as-is**: seek position is physical media geometry, not reading flow.
    - `WelcomeGlobe`, `Dashboard/Boards/**` — out of scope.
    - `Dashboard/Boards/Extensions/{useFrameDrag,useDragResize}.ts` — out of scope (Boards).
-4. **Lint guard** — a rule that flags `ml-*/mr-*/pl-*/pr-*/left-*/right-*/text-left/text-right/rounded-l-*/rounded-r-*` so the refactor cannot regress. Not implemented yet.
+4. **Lint guard** — **blocked, not implemented.** `npm run lint` cannot run in this repo at all: ESLint 10.0.2 crashes loading `eslint-config-next`'s React plugin (`TypeError: contextOrFilename.getFilename is not a function` in `eslint-plugin-react@7.37.5`), and `@eslint/js` is imported by [eslint.config.mjs](../../../apps/web/eslint.config.mjs) but not installed. Fixing that needs an ESLint / `eslint-config-next` version alignment first; the rule itself is a ~60-line inline flat-config plugin that scans `className` literals for physical utilities once the pipeline works again.
 5. ~~**`space-x-*` verification**~~ — **confirmed safe**. Tailwind v4.1.16 compiles `space-x-*` to `margin-inline-start` / `margin-inline-end` on `:where(& > :not(:last-child))`, so all 521 occurrences are already RTL-aware and need no changes.
+6. ~~**Raw CSS in styled-jsx**~~ — **done**: `DiscussionContent.tsx` and `DiscussionEditor.tsx` now use `padding-inline-start` / `border-inline-start` / `float: inline-start` instead of the physical properties.
+
+### Remaining physical utilities — all deliberate
+
+After the phase 5 sweep the only in-scope hits are intentional:
+
+| Pattern | Why it stays |
+|---|---|
+| `left-0 right-0`, `left-4 right-4` (DashLeftMenu, DashMobileMenu) | symmetric full-width insets |
+| Radix `data-[side=left]:slide-in-from-right-2` (ui primitives) | describes pointer entry position, not reading flow |
+| `hover-menu.tsx` | already branches on `isRTL` for real coordinate math |
+| `not-found.tsx` | nextra classes with explicit `ltr:` / `rtl:` variants |
+| `ScormActivity.tsx` spinner borders | two-tone rotating ring, physical by nature |
 
 ---
 
