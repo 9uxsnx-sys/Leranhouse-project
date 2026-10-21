@@ -365,7 +365,12 @@ Course **settings** (this document) are complete: metadata, SEO, requirements, t
 
    The demo course is seeded with **6 modules / 21 lessons** in en/fr/ar, each lesson carrying a short intro, key points, a practice task and two resource links.
 
-2. **Content editor — remaining.** The Content tab still edits the source row only; there is no locale switcher or per-locale editor for chapters/lessons yet, and the Translations tab coverage does not count content. That is the next incremental step.
+2. **Content editor — v1 done.** The Content tab follows the same rule as the General tab: the platform language switcher decides which language you edit, there is no second selector.
+   - Source locale → writes the base activity row (`name`, `content.description`, plus the designed sections in `extra_metadata`).
+   - Any other locale → writes only `extra_metadata.translations[locale]` (`name`, `description`, `learning_objectives`, `takeaways`, `resources`, `knowledge_checks`). The base row is never touched, so a translator cannot rename the source lesson.
+   - Missing translations open on the source text with an "inherited" hint and a **Copy from source** action; the chip next to the Save button shows the language, whether it is the source or a translation, and whether the current locale is missing.
+   - Auto-save is debounced (600 ms), flushes on unmount, and flushes into the language the edit was typed in before switching languages.
+   - Lesson bodies (`content` TipTap docs) are not edited here and are not rendered on the learner lesson page — every block the learner sees is authored in this form.
 
 3. **Podcasts** — replicate the same model (`extra_metadata.translations` or a dedicated table once editing UI exists) and the same `locale` query parameter on read endpoints.
 

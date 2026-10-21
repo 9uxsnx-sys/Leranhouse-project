@@ -209,6 +209,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
     return (
       <div className="mt-6">
         <LessonDetailForm
+          key={selectedActivity.activity_uuid}
           activity={selectedActivity}
           chapter={selectedChapter}
           orgslug={props.orgslug}

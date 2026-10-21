@@ -6,6 +6,24 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { CourseTranslation, getCourseTranslations } from '@services/courses/translations'
 
 /**
+ * Tracks the locale selected in the platform language switcher. There is no
+ * second content selector — the dashboard always edits the active language.
+ */
+export function useContentLocale() {
+  const [contentLocale, setContentLocale] = useState(() => (i18n.language || 'en').split('-')[0])
+
+  useEffect(() => {
+    const onLanguageChanged = (lng: string) => setContentLocale((lng || 'en').split('-')[0])
+    i18n.on('languageChanged', onLanguageChanged)
+    return () => {
+      i18n.off('languageChanged', onLanguageChanged)
+    }
+  }, [])
+
+  return contentLocale
+}
+
+/**
  * Resolves which content row the dashboard should edit.
  *
  * The base `course` row always holds the source locale; every other locale is a
@@ -16,15 +34,7 @@ export function useCourseTranslation(courseUuid: string | undefined, sourceLocal
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
 
-  const [contentLocale, setContentLocale] = useState(() => (i18n.language || 'en').split('-')[0])
-
-  useEffect(() => {
-    const onLanguageChanged = (lng: string) => setContentLocale((lng || 'en').split('-')[0])
-    i18n.on('languageChanged', onLanguageChanged)
-    return () => {
-      i18n.off('languageChanged', onLanguageChanged)
-    }
-  }, [])
+  const contentLocale = useContentLocale()
 
   const normalizedSource = (sourceLocale || 'en').split('-')[0]
   const isSourceLocale = contentLocale === normalizedSource

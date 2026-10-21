@@ -1,6 +1,5 @@
 'use client'
-import React, { useEffect, useState, useRef, useCallback } from 'react'
-import { useFormik } from 'formik'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import * as Form from '@radix-ui/react-form'
 import FormLayout, {
@@ -14,7 +13,10 @@ import ResourceItemsList from '../EditCourseGeneral/ResourceItemsList'
 import KnowledgeCheckItemsList from '../EditCourseGeneral/KnowledgeCheckItemsList'
 import { updateActivity } from '@services/courses/activities'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { ArrowLeft, Eye, Globe, GlobeLock, Loader2, Check, SaveAllIcon } from 'lucide-react'
+import { useCourse } from '@components/Contexts/CourseContext'
+import { useContentLocale } from '@components/Hooks/useCourseTranslation'
+import { getCurrentLanguageNativeName } from '@/lib/languages'
+import { Eye, Globe, GlobeLock, Loader2, Check, SaveAllIcon, Copy } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
 import { getUriWithOrg } from '@services/config/config'
@@ -28,275 +30,309 @@ type LessonDetailFormProps = {
   onBack: () => void
 }
 
+type LessonValues = {
+  name: string
+  description: string
+  objectivesStr: string
+  takeawaysStr: string
+  resourcesStr: string
+  checksStr: string
+}
+
 const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none"
+
+// Objectives are plain strings in extra_metadata but the list editor works with
+// {id, text, emoji} rows.
+const toObjectivesStr = (items: string[]) =>
+  JSON.stringify(items.map((text: string, i: number) => ({ id: `obj_${i}`, text, emoji: '📝' })))
+
+const readObjectives = (jsonStr: string): string[] => {
+  try {
+    const parsed = JSON.parse(jsonStr)
+    return Array.isArray(parsed) ? parsed.map((it: any) => it?.text || '') : []
+  } catch {
+    return []
+  }
+}
+
+const readArray = (jsonStr: string): any[] => {
+  try {
+    const parsed = JSON.parse(jsonStr)
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
+const sameList = (a: string, b: string) => a === b
+
+const snapshotOf = (v: LessonValues, published: boolean) =>
+  JSON.stringify({ ...v, published })
 
 function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: LessonDetailFormProps) {
   const { t } = useTranslation()
   const session = useLHSession() as any
   const org = useOrg() as any
+  const course = useCourse() as any
   const access_token = session?.data?.tokens?.access_token
+
+  // ── Content locale ──
+  // Same rule as the General tab: the base activity row holds the source locale,
+  // every other locale lives in extra_metadata.translations[locale].
+  const contentLocale = useContentLocale()
+  const sourceLocale = (course?.courseStructure?.source_locale || 'en').split('-')[0]
+  const isSourceLocale = contentLocale === sourceLocale
+
+  const [extraMeta, setExtraMeta] = useState<Record<string, any>>(activity.extra_metadata || {})
+  const extraMetaRef = useRef(extraMeta)
+  const translations = extraMeta.translations || {}
+  const translation = !isSourceLocale ? translations[contentLocale] || null : null
+
   const [published, setPublished] = useState(activity.published ?? false)
   const [isSavingLesson, setIsSavingLesson] = useState(false)
-  const debounceRef = useRef<NodeJS.Timeout | null>(null)
-  const lastSavedSnapshotRef = useRef('')
 
-  const initialMeta = activity.extra_metadata || {}
+  // ── Values for a given locale ──
 
-  // Formik for name + description
-  const formik = useFormik({
-    initialValues: {
-      name: activity.name || '',
-      description: activity.content?.description || '',
-    },
-    onSubmit: async () => {},
-    enableReinitialize: true,
-  })
-
-  // Array fields
-  const [learningObjectivesStr, setLearningObjectivesStr] = useState(() => {
-    const objs: string[] = initialMeta.learning_objectives || []
-    return JSON.stringify(
-      objs.map((text: string, i: number) => ({
-        id: `obj_${i}`,
-        text,
-        emoji: '📝',
-      }))
-    )
-  })
-  const [takeawaysStr, setTakeawaysStr] = useState(() =>
-    JSON.stringify(initialMeta.takeaways || [])
-  )
-  const [resourcesStr, setResourcesStr] = useState(() =>
-    JSON.stringify(initialMeta.resources || [])
-  )
-  const [knowledgeChecksStr, setKnowledgeChecksStr] = useState(() =>
-    JSON.stringify(initialMeta.knowledge_checks || [])
-  )
-
-  // Track initial values for change detection
-  const initialValuesRef = useRef({
+  // The `activity` prop is a snapshot from the course payload; after we save a
+  // source-locale edit it goes stale, so keep the live source text here.
+  const sourceRef = useRef({
     name: activity.name || '',
     description: activity.content?.description || '',
-    published: activity.published ?? false,
-    learningObjectivesStr: (() => {
-      const objs: string[] = initialMeta.learning_objectives || []
-      return JSON.stringify(objs.map((text: string, i: number) => ({ id: `obj_${i}`, text, emoji: '📝' })))
-    })(),
-    takeawaysStr: JSON.stringify(initialMeta.takeaways || []),
-    resourcesStr: JSON.stringify(initialMeta.resources || []),
-    knowledgeChecksStr: JSON.stringify(initialMeta.knowledge_checks || []),
   })
 
-  // Ref to track latest values for flush-on-unmount
-  const latestValuesRef = useRef({ name: '', description: '', published: false, meta: {} as any })
+  const valuesFor = useCallback(
+    (locale: string, meta: Record<string, any>, translated: Record<string, any> | null): LessonValues => {
+      const base: LessonValues = {
+        name: sourceRef.current.name,
+        description: sourceRef.current.description,
+        objectivesStr: toObjectivesStr(meta.learning_objectives || []),
+        takeawaysStr: JSON.stringify(meta.takeaways || []),
+        resourcesStr: JSON.stringify(meta.resources || []),
+        checksStr: JSON.stringify(meta.knowledge_checks || []),
+      }
+      if (!translated || locale === sourceLocale) return base
+      return {
+        name: translated.name ?? base.name,
+        description: translated.description ?? base.description,
+        objectivesStr: toObjectivesStr(translated.learning_objectives ?? meta.learning_objectives ?? []),
+        takeawaysStr: JSON.stringify(translated.takeaways ?? meta.takeaways ?? []),
+        resourcesStr: JSON.stringify(translated.resources ?? meta.resources ?? []),
+        checksStr: JSON.stringify(translated.knowledge_checks ?? meta.knowledge_checks ?? []),
+      }
+    },
+    [sourceLocale]
+  )
 
-  // Helper to convert LearningItemsList items to string array
-  const parseItemsList = (jsonStr: string): string[] => {
-    try {
-      const items = JSON.parse(jsonStr)
-      if (Array.isArray(items)) return items.map((it: any) => it.text || '')
-    } catch {}
-    return []
-  }
+  const [values, setValues] = useState<LessonValues>(() =>
+    valuesFor(contentLocale, extraMeta, !isSourceLocale ? translations[contentLocale] || null : null)
+  )
 
-  // Auto-save with debounce
+  const savedValuesRef = useRef<LessonValues>(values)
+  const savedPublishedRef = useRef(published)
+  // Latest values together with the locale they belong to. It intentionally
+  // does NOT follow a locale switch, so a pending edit is always flushed into
+  // the language it was typed in.
+  const lastValuesRef = useRef<{ values: LessonValues; published: boolean; locale: string }>({
+    values,
+    published,
+    locale: contentLocale,
+  })
+
+  // Seeded from the initial values so the button reads "Saved" on first paint.
+  const lastSavedSnapshotRef = useRef(snapshotOf(values, published))
+  const isSaved = snapshotOf(values, published) === lastSavedSnapshotRef.current
+
   useEffect(() => {
-    const learningObjectivesArr = parseItemsList(learningObjectivesStr)
-    let takeawaysArr = []
-    try { takeawaysArr = JSON.parse(takeawaysStr); if (!Array.isArray(takeawaysArr)) takeawaysArr = [] } catch { takeawaysArr = [] }
-    let resourcesArr = []
-    try { resourcesArr = JSON.parse(resourcesStr); if (!Array.isArray(resourcesArr)) resourcesArr = [] } catch { resourcesArr = [] }
-    let knowledgeChecksArr = []
-    try { knowledgeChecksArr = JSON.parse(knowledgeChecksStr); if (!Array.isArray(knowledgeChecksArr)) knowledgeChecksArr = [] } catch { knowledgeChecksArr = [] }
-    const currentMeta = {
-      learning_objectives: learningObjectivesArr,
-      takeaways: takeawaysArr,
-      resources: resourcesArr,
-      knowledge_checks: knowledgeChecksArr,
-    }
+    lastSavedSnapshotRef.current = snapshotOf(savedValuesRef.current, savedPublishedRef.current)
+    if (lastValuesRef.current.locale !== contentLocale) return
+    lastValuesRef.current = { values, published, locale: contentLocale }
+  }, [values, published, contentLocale])
 
-    const currentName = formik.values.name
-    const currentDesc = formik.values.description
-    const currentPublished = published
-    const init = initialValuesRef.current
+  // ── Persist ──
 
-    const nameChanged = currentName !== init.name
-    const descChanged = currentDesc !== init.description
-    const publishedChanged = currentPublished !== init.published
-    const metaChanged =
-      learningObjectivesStr !== init.learningObjectivesStr ||
-      takeawaysStr !== init.takeawaysStr ||
-      resourcesStr !== init.resourcesStr ||
-      knowledgeChecksStr !== init.knowledgeChecksStr
+  const persist = useCallback(
+    async (
+      locale: string,
+      isSource: boolean,
+      next: LessonValues,
+      nextPublished: boolean,
+      saved: LessonValues,
+      savedPublished: boolean
+    ) => {
+      const nameChanged = next.name !== saved.name
+      const descChanged = next.description !== saved.description
+      const publishedChanged = nextPublished !== savedPublished
+      const metaChanged =
+        !sameList(next.objectivesStr, saved.objectivesStr) ||
+        !sameList(next.takeawaysStr, saved.takeawaysStr) ||
+        !sameList(next.resourcesStr, saved.resourcesStr) ||
+        !sameList(next.checksStr, saved.checksStr)
 
-    if (!nameChanged && !descChanged && !publishedChanged && !metaChanged) return
+      if (!nameChanged && !descChanged && !publishedChanged && !metaChanged) return
 
-    latestValuesRef.current = { name: currentName, description: currentDesc, published: currentPublished, meta: currentMeta }
+      const meta = extraMetaRef.current || {}
+      const sections = {
+        learning_objectives: readObjectives(next.objectivesStr),
+        takeaways: readArray(next.takeawaysStr),
+        resources: readArray(next.resourcesStr),
+        knowledge_checks: readArray(next.checksStr),
+      }
 
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(async () => {
+      const data: any = {}
+      if (publishedChanged) data.published = nextPublished
+
+      if (isSource) {
+        if (nameChanged) data.name = next.name
+        if (descChanged) data.content = { ...(activity.content || {}), description: next.description }
+        if (metaChanged) data.extra_metadata = { ...meta, ...sections }
+      } else if (nameChanged || descChanged || metaChanged) {
+        // Translating never touches the base row — name, description and the
+        // designed sections all go into the locale entry.
+        data.extra_metadata = {
+          ...meta,
+          translations: {
+            ...(meta.translations || {}),
+            [locale]: {
+              ...((meta.translations || {})[locale] || {}),
+              name: next.name,
+              description: next.description,
+              ...sections,
+            },
+          },
+        }
+      }
+
+      if (Object.keys(data).length === 0) return
+
       setIsSavingLesson(true)
       try {
-        const data: any = {}
-        if (nameChanged) data.name = currentName
-        if (descChanged) data.content = { ...(activity.content || {}), description: currentDesc }
-        if (publishedChanged) data.published = currentPublished
-        if (metaChanged) data.extra_metadata = currentMeta
-
-        if (Object.keys(data).length > 0) {
-          await updateActivity(data, activity.activity_uuid, access_token)
-          const snapshot = JSON.stringify({
-            name: currentName,
-            description: currentDesc,
-            published: currentPublished,
-            learningObjectivesStr,
-            takeawaysStr,
-            resourcesStr,
-            knowledgeChecksStr,
-          })
-          lastSavedSnapshotRef.current = snapshot
-          initialValuesRef.current = {
-            name: currentName,
-            description: currentDesc,
-            published: currentPublished,
-            learningObjectivesStr,
-            takeawaysStr,
-            resourcesStr,
-            knowledgeChecksStr,
-          }
+        const updated: any = await updateActivity(data, activity.activity_uuid, access_token)
+        if (updated?.extra_metadata) {
+          extraMetaRef.current = updated.extra_metadata
+          setExtraMeta(updated.extra_metadata)
+        } else if (data.extra_metadata) {
+          extraMetaRef.current = data.extra_metadata
+          setExtraMeta(data.extra_metadata)
         }
+        if (isSource) {
+          if (nameChanged) sourceRef.current.name = next.name
+          if (descChanged) sourceRef.current.description = next.description
+        }
+        savedValuesRef.current = next
+        savedPublishedRef.current = nextPublished
+        lastSavedSnapshotRef.current = snapshotOf(next, nextPublished)
       } catch (e) {
         console.error('Failed to save lesson:', e)
         toast.error(t('dashboard.courses.structure.lesson_detail.save_error'))
       } finally {
         setIsSavingLesson(false)
       }
-    }, 600)
+    },
+    [activity.content, activity.activity_uuid, access_token, t]
+  )
 
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current)
-        const pending = latestValuesRef.current
-        const initVals = initialValuesRef.current
-        const data: any = {}
-        if (pending.name !== initVals.name) data.name = pending.name
-        if (pending.description !== initVals.description) data.content = { ...(activity.content || {}), description: pending.description }
-        if (pending.published !== initVals.published) data.published = pending.published
-        const metaChanged =
-          learningObjectivesStr !== initVals.learningObjectivesStr ||
-          takeawaysStr !== initVals.takeawaysStr ||
-          resourcesStr !== initVals.resourcesStr ||
-          knowledgeChecksStr !== initVals.knowledgeChecksStr
-        if (metaChanged) data.extra_metadata = pending.meta
-        if (Object.keys(data).length > 0) {
-          updateActivity(data, activity.activity_uuid, access_token).catch(console.error)
-        }
-      }
-    }
-  }, [formik.values, learningObjectivesStr, takeawaysStr, resourcesStr, knowledgeChecksStr, published])
-
-  // Compute save status for the indicator
-  const currentSnapshot = JSON.stringify({
-    name: formik.values.name,
-    description: formik.values.description,
-    published,
-    learningObjectivesStr,
-    takeawaysStr,
-    resourcesStr,
-    knowledgeChecksStr,
-  })
-  const hasUnsavedChanges = currentSnapshot !== lastSavedSnapshotRef.current
-
-  // Initialize snapshot on mount
+  // Debounced auto-save.
   useEffect(() => {
-    lastSavedSnapshotRef.current = currentSnapshot
+    if (isSaved) return
+    const timer = setTimeout(() => {
+      persist(
+        contentLocale,
+        isSourceLocale,
+        values,
+        published,
+        savedValuesRef.current,
+        savedPublishedRef.current
+      )
+    }, 600)
+    return () => clearTimeout(timer)
+  }, [values, published, isSaved, contentLocale, isSourceLocale, persist])
+
+  // Flush pending edits on unmount instead of discarding them.
+  useEffect(() => {
+    return () => {
+      const pending = lastValuesRef.current
+      persist(
+        pending.locale,
+        pending.locale === sourceLocale,
+        pending.values,
+        pending.published,
+        savedValuesRef.current,
+        savedPublishedRef.current
+      )
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Manual save: flush debounce and save immediately
-  const handleManualSave = useCallback(() => {
-    if (isSavingLesson) return
-
-    // Clear pending debounce
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current)
-    }
-
-    // Read latest values
-    const learningObjectivesArr = parseItemsList(learningObjectivesStr)
-    let takeawaysArr = []
-    try { takeawaysArr = JSON.parse(takeawaysStr); if (!Array.isArray(takeawaysArr)) takeawaysArr = [] } catch { takeawaysArr = [] }
-    let resourcesArr = []
-    try { resourcesArr = JSON.parse(resourcesStr); if (!Array.isArray(resourcesArr)) resourcesArr = [] } catch { resourcesArr = [] }
-    let knowledgeChecksArr = []
-    try { knowledgeChecksArr = JSON.parse(knowledgeChecksStr); if (!Array.isArray(knowledgeChecksArr)) knowledgeChecksArr = [] } catch { knowledgeChecksArr = [] }
-    const currentMeta = {
-      learning_objectives: learningObjectivesArr,
-      takeaways: takeawaysArr,
-      resources: resourcesArr,
-      knowledge_checks: knowledgeChecksArr,
-    }
-
-    const currentName = formik.values.name
-    const currentDesc = formik.values.description
-    const currentPublished = published
-    const init = initialValuesRef.current
-
-    const nameChanged = currentName !== init.name
-    const descChanged = currentDesc !== init.description
-    const publishedChanged = currentPublished !== init.published
-    const metaChanged =
-      learningObjectivesStr !== init.learningObjectivesStr ||
-      takeawaysStr !== init.takeawaysStr ||
-      resourcesStr !== init.resourcesStr ||
-      knowledgeChecksStr !== init.knowledgeChecksStr
-
-    if (!nameChanged && !descChanged && !publishedChanged && !metaChanged) return
-
-    setIsSavingLesson(true)
+  // Switching the dashboard language swaps the content we edit. Flush the
+  // previous locale first, then load the new one — waiting for the save keeps
+  // the two locales' saved-state refs from overwriting each other.
+  const previousLocaleRef = useRef(contentLocale)
+  useEffect(() => {
+    if (previousLocaleRef.current === contentLocale) return
+    previousLocaleRef.current = contentLocale
+    let cancelled = false
 
     ;(async () => {
-      try {
-        const data: any = {}
-        if (nameChanged) data.name = currentName
-        if (descChanged) data.content = { ...(activity.content || {}), description: currentDesc }
-        if (publishedChanged) data.published = currentPublished
-        if (metaChanged) data.extra_metadata = currentMeta
-
-        if (Object.keys(data).length > 0) {
-          await updateActivity(data, activity.activity_uuid, access_token)
-          const snapshot = JSON.stringify({
-            name: currentName,
-            description: currentDesc,
-            published: currentPublished,
-            learningObjectivesStr,
-            takeawaysStr,
-            resourcesStr,
-            knowledgeChecksStr,
-          })
-          lastSavedSnapshotRef.current = snapshot
-          initialValuesRef.current = {
-            name: currentName,
-            description: currentDesc,
-            published: currentPublished,
-            learningObjectivesStr,
-            takeawaysStr,
-            resourcesStr,
-            knowledgeChecksStr,
-          }
-        }
-      } catch (e) {
-        console.error('Failed to save lesson:', e)
-        toast.error(t('dashboard.courses.structure.lesson_detail.save_error'))
-      } finally {
-        setIsSavingLesson(false)
+      const pending = lastValuesRef.current
+      if (pending.locale !== contentLocale) {
+        await persist(
+          pending.locale,
+          pending.locale === sourceLocale,
+          pending.values,
+          pending.published,
+          savedValuesRef.current,
+          savedPublishedRef.current
+        )
       }
+      if (cancelled) return
+
+      const translated = !isSourceLocale
+        ? (extraMetaRef.current.translations || {})[contentLocale] || null
+        : null
+      const next = valuesFor(contentLocale, extraMetaRef.current, translated)
+      setValues(next)
+      savedValuesRef.current = next
+      lastSavedSnapshotRef.current = snapshotOf(next, savedPublishedRef.current)
+      lastValuesRef.current = { values: next, published: savedPublishedRef.current, locale: contentLocale }
     })()
-  }, [formik.values.name, formik.values.description, published, learningObjectivesStr, takeawaysStr, resourcesStr, knowledgeChecksStr, activity, access_token, isSavingLesson])
+
+    return () => {
+      cancelled = true
+    }
+  }, [contentLocale, isSourceLocale, persist, valuesFor])
+
+  // ── Actions ──
+
+  const handleManualSave = useCallback(() => {
+    if (isSavingLesson) return
+    persist(
+      contentLocale,
+      isSourceLocale,
+      values,
+      published,
+      savedValuesRef.current,
+      savedPublishedRef.current
+    )
+  }, [isSavingLesson, persist, contentLocale, isSourceLocale, values, published])
+
+  const copyFromSource = useCallback(() => {
+    const meta = extraMetaRef.current || {}
+    setValues({
+      name: sourceRef.current.name,
+      description: sourceRef.current.description,
+      objectivesStr: toObjectivesStr(meta.learning_objectives || []),
+      takeawaysStr: JSON.stringify(meta.takeaways || []),
+      resourcesStr: JSON.stringify(meta.resources || []),
+      checksStr: JSON.stringify(meta.knowledge_checks || []),
+    })
+  }, [])
+
+  const update = (patch: Partial<LessonValues>) =>
+    setValues((current) => ({ ...current, ...patch }))
 
   return (
     <div>
-      <FormLayout onSubmit={formik.handleSubmit} className="space-y-3">
+      <FormLayout onSubmit={(e: React.FormEvent) => e.preventDefault()} className="space-y-3">
         {/* ── ACTION ROW ── */}
         <div className="flex items-center justify-between">
           {/* Left: Preview */}
@@ -309,43 +345,67 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
             <span>{t('dashboard.courses.preview')}</span>
           </Link>
 
-          {/* Right: Save + Publish */}
+          {/* Right: Locale + Save + Publish */}
           <div className="flex items-center gap-2">
+            {!isSourceLocale && (
+              <button
+                type="button"
+                onClick={copyFromSource}
+                className="hidden sm:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                <Copy size={14} />
+                <span>{t('dashboard.courses.general.locale.copy_from_source')}</span>
+              </button>
+            )}
+            <span
+              className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600"
+              title={
+                isSourceLocale
+                  ? t('dashboard.courses.general.locale.source')
+                  : t('dashboard.courses.general.locale.translation')
+              }
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${isSaved ? 'bg-teal-500' : 'bg-amber-400'}`} />
+              <span>{getCurrentLanguageNativeName(contentLocale)}</span>
+              <span className="text-gray-400">
+                {isSourceLocale
+                  ? t('dashboard.courses.general.locale.source')
+                  : translation
+                    ? t('dashboard.courses.general.locale.translation')
+                    : t('dashboard.courses.general.locale.missing')}
+              </span>
+            </span>
             <button
-              onClick={hasUnsavedChanges ? handleManualSave : undefined}
+              onClick={isSaved ? undefined : handleManualSave}
               disabled={isSavingLesson}
               className={`inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors ${
                 isSavingLesson
                   ? 'bg-black text-white border-black opacity-50 cursor-not-allowed'
-                  : hasUnsavedChanges
-                    ? 'bg-black text-white border-black hover:opacity-90 cursor-pointer'
-                    : 'bg-white text-gray-600 border-gray-200 cursor-default'
+                  : isSaved
+                    ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                    : 'bg-black text-white border-black hover:opacity-90 cursor-pointer'
               }`}
             >
               {isSavingLesson ? (
                 <Loader2 size={14} className="animate-spin" />
-              ) : hasUnsavedChanges ? (
-                <SaveAllIcon size={14} />
-              ) : (
+              ) : isSaved ? (
                 <Check size={14} />
+              ) : (
+                <SaveAllIcon size={14} />
               )}
               <span>
                 {isSavingLesson
                   ? t('dashboard.courses.save.saving')
-                  : hasUnsavedChanges
-                    ? t('dashboard.courses.save.save')
-                    : t('dashboard.courses.save.saved')}
+                  : isSaved
+                    ? t('dashboard.courses.save.saved')
+                    : t('dashboard.courses.save.save')}
               </span>
             </button>
             <button
               onClick={() => setPublished(!published)}
               className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
             >
-              {published ? (
-                <Globe size={14} />
-              ) : (
-                <GlobeLock size={14} />
-              )}
+              {published ? <Globe size={14} /> : <GlobeLock size={14} />}
               <span>
                 {published ? t('dashboard.courses.published') : t('dashboard.courses.unpublished')}
               </span>
@@ -353,17 +413,23 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
           </div>
         </div>
 
+        {!isSourceLocale && !translation && (
+          <div className="text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
+            {t('dashboard.courses.general.locale.inherited')}
+          </div>
+        )}
+
         {/* ── BASIC INFORMATION ── */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
           <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('common.sections.overview')}</h3>
           <div className="space-y-4">
             <FormField name="name">
-              <FormLabelAndMessage label={t('dashboard.courses.structure.lesson_detail.name_label')} message={formik.errors.name as string} />
+              <FormLabelAndMessage label={t('dashboard.courses.structure.lesson_detail.name_label')} />
               <Form.Control asChild>
                 <Input
                   className={fieldClassName}
-                  onChange={formik.handleChange}
-                  value={formik.values.name}
+                  onChange={(e) => update({ name: e.target.value })}
+                  value={values.name}
                   type="text"
                   required
                 />
@@ -371,12 +437,12 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
             </FormField>
 
             <FormField name="description">
-              <FormLabelAndMessage label={t('dashboard.courses.structure.lesson_detail.description_label')} message={formik.errors.description as string} />
+              <FormLabelAndMessage label={t('dashboard.courses.structure.lesson_detail.description_label')} />
               <Form.Control asChild>
                 <Input
                   className={fieldClassName}
-                  onChange={formik.handleChange}
-                  value={formik.values.description}
+                  onChange={(e) => update({ description: e.target.value })}
+                  value={values.description}
                   type="text"
                   placeholder={t('dashboard.courses.structure.lesson_detail.description_placeholder')}
                 />
@@ -391,8 +457,8 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
           <FormField name="learningObjectives">
             <Form.Control asChild>
               <LearningItemsList
-                value={learningObjectivesStr}
-                onChange={(value) => setLearningObjectivesStr(value)}
+                value={values.objectivesStr}
+                onChange={(value) => update({ objectivesStr: value })}
               />
             </Form.Control>
           </FormField>
@@ -404,8 +470,8 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
           <FormField name="takeaways">
             <Form.Control asChild>
               <TakeawayItemsList
-                value={takeawaysStr}
-                onChange={(value) => setTakeawaysStr(value)}
+                value={values.takeawaysStr}
+                onChange={(value) => update({ takeawaysStr: value })}
               />
             </Form.Control>
           </FormField>
@@ -417,8 +483,8 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
           <FormField name="resources">
             <Form.Control asChild>
               <ResourceItemsList
-                value={resourcesStr}
-                onChange={(value) => setResourcesStr(value)}
+                value={values.resourcesStr}
+                onChange={(value) => update({ resourcesStr: value })}
               />
             </Form.Control>
           </FormField>
@@ -430,8 +496,8 @@ function LessonDetailForm({ activity, chapter, orgslug, course_uuid, onBack }: L
           <FormField name="knowledge_checks">
             <Form.Control asChild>
               <KnowledgeCheckItemsList
-                value={knowledgeChecksStr}
-                onChange={(value) => setKnowledgeChecksStr(value)}
+                value={values.checksStr}
+                onChange={(value) => update({ checksStr: value })}
               />
             </Form.Control>
           </FormField>

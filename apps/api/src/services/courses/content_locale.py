@@ -56,6 +56,11 @@ def apply_activity_locale(
     content = data.get("content")
     if include_content and isinstance(content, dict) and content:
         activity.content = content
+    # Activities have no top-level description column — the dashboard stores it
+    # inside content, so a translated description is merged there too.
+    description = data.get("description")
+    if isinstance(description, str):
+        activity.content = {**(activity.content or {}), "description": description}
     # Structured lesson sections shown by the learner page (objectives,
     # takeaways, downloadable resources, knowledge checks) are content too.
     overlay = {
