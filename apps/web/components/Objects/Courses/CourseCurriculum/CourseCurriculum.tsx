@@ -147,7 +147,7 @@ function ModuleCard({
                 key={lesson.id ?? idx}
                 href={getUriWithOrg(
                   orgslug,
-                  `/course/${courseuuid}/activity/${lesson.uuid}`
+                  `/course/${courseuuid}/lesson-preview?activityid=${lesson.uuid}`
                 )}
                 prefetch={false}
                 className="flex items-center justify-between py-1.5 gap-3 rounded-md hover:bg-black/[0.02] transition-colors"

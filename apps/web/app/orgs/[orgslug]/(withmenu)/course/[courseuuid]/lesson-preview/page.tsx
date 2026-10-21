@@ -45,6 +45,7 @@ const AssignmentStudentActivity = lazy(() => import('@components/Objects/Activit
 const ScormActivity = lazy(() => import('../../../../../../../ee/components/Activities/ScormActivity'))
 const MarkdownActivity = lazy(() => import('@components/Objects/Activities/Markdown/MarkdownActivity'))
 const EmbedActivity = lazy(() => import('@components/Objects/Activities/Embed/EmbedActivity'))
+const DynamicCanva = lazy(() => import('@components/Objects/Activities/DynamicCanva/DynamicCanva'))
 
 const LoadingFallback = () => (
   <div className="flex items-center justify-center h-64">
@@ -253,7 +254,7 @@ function CourseOutlineSidebar({ currentActivityId, chapters, onNavigate }: { cur
 
 // ── On This Page Sidebar (inline tip style) ──
 
-function OnThisPageSidebar({ activeSection }: { activeSection: string }) {
+function OnThisPageSidebar({ activeSection, sections = MOCK_SECTIONS }: { activeSection: string; sections?: { id: string; labelKey: string }[] }) {
   const { t } = useTranslation()
   const containerRef = useRef<HTMLDivElement>(null)
   const [indicatorTop, setIndicatorTop] = useState(0)
@@ -278,7 +279,7 @@ function OnThisPageSidebar({ activeSection }: { activeSection: string }) {
           className="absolute start-0 w-[3px] h-4 bg-ui-fg-base rounded-full pointer-events-none transition-all duration-300 ease-in-out"
           style={{ top: indicatorTop }}
         />
-        {MOCK_SECTIONS.map((section) => (
+        {sections.map((section) => (
           <button
             key={section.id}
             data-section={section.id}
@@ -354,7 +355,10 @@ function renderActivityContent(activity: any, courseuuid: string, t: (key: strin
       if (subType === 'SUBTYPE_DYNAMIC_EMBED') {
         return <EmbedActivity activity={activity} />
       }
-      return <MarkdownActivity activity={activity} />
+      // Rich-text lessons store a TipTap doc in activity.content — same renderer
+      // the learner activity page uses. Falling back to MarkdownActivity here
+      // showed "No markdown URL configured" for every rich-text lesson.
+      return <DynamicCanva content={activity.content} activity={activity} />
     case 'TYPE_VIDEO':
       return <VideoActivity course={{ course_uuid: courseuuid }} activity={activity} />
     case 'TYPE_DOCUMENT':
@@ -378,9 +382,11 @@ function renderActivityContent(activity: any, courseuuid: string, t: (key: strin
 // ── Lesson Preview Content ──
 
 function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid: string; activityid: string; orgslug: string }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
+  // Follow the platform language switcher, like the course page does.
+  const locale = (i18n.language || 'en').split('-')[0]
 
   // Fetch course data directly (not through CourseProvider) so we control
   // loading / error states instead of showing a blank white page.
@@ -388,7 +394,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
   // student-facing page — only published activities should show up.
   // NOTE: the API expects the course UUID with a "course_" prefix.
   const courseUuidWithPrefix = `course_${courseuuid}`
-  const apiUrl = `${getAPIUrl()}courses/${courseUuidWithPrefix}/meta?with_unpublished_activities=false&slim=true`
+  const apiUrl = `${getAPIUrl()}courses/${courseUuidWithPrefix}/meta?with_unpublished_activities=false&slim=true&locale=${locale}`
   // Use a stable key — only depend on session being ready, not on the token
   // value itself, so SWR doesn't re-fetch every time the token changes.
   // IMPORTANT: check that `session` is not null (context not yet initialized)
@@ -436,6 +442,31 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
   )
 
   const currentActivity = currentIndex >= 0 ? allActivities[currentIndex] : null
+  // The outline comes from the slim tree (no content), so the active lesson is
+  // fetched in full — otherwise rich-text lessons render with empty content.
+  const { data: fullActivity } = useSWR(
+    currentActivity
+      ? `${getAPIUrl()}activities/${currentActivity.activity_uuid}?locale=${locale}`
+      : null,
+    (url) => swrFetcher(url, access_token),
+    { revalidateOnFocus: false, dedupingInterval: 10000 }
+  )
+  const renderedActivity = fullActivity || currentActivity
+
+  // Structured lesson fields are optional. Lesson bodies authored in the rich
+  // editor already contain their own sections, so empty blocks are hidden
+  // instead of rendering "No … set for this lesson" placeholders.
+  const objectives = renderedActivity?.extra_metadata?.learning_objectives || []
+  const takeaways = renderedActivity?.extra_metadata?.takeaways || []
+  const resources = renderedActivity?.extra_metadata?.resources || []
+  const knowledgeChecks = renderedActivity?.extra_metadata?.knowledge_checks || []
+  const visibleSections = MOCK_SECTIONS.filter((section) => {
+    if (section.id === 'what-youll-learn') return objectives.length > 0
+    if (section.id === 'summary') return takeaways.length > 0
+    if (section.id === 'resources') return resources.length > 0
+    if (section.id === 'knowledge-check') return knowledgeChecks.length > 0
+    return true
+  })
   const prevActivity = currentIndex > 0 ? allActivities[currentIndex - 1] : null
   const nextActivity = currentIndex < allActivities.length - 1 ? allActivities[currentIndex + 1] : null
 
@@ -560,7 +591,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
     <GeneralWrapperStyled>
       {/* ── PAGE TITLE ── */}
       <h1 className="text-3xl md:text-4xl font-semibold text-ui-fg-base leading-tight max-w-7xl mx-auto mt-4">
-        {currentActivity?.name || t('lesson.preview.title')}
+        {renderedActivity?.name || t('lesson.preview.title')}
       </h1>
 
       {/* ── CONTENT (two-column layout) ── */}
@@ -570,37 +601,33 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
           <div className="flex-1 min-w-0 max-w-3xl space-y-12">
 
             {/* What You'll Learn */}
-            <section id="what-youll-learn" className="scroll-mt-24">
-              <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] px-5 py-5">
-                <div className="flex flex-col gap-0.5">
-                  <Heading level="h2">{t('lesson.preview.what_youll_learn')}</Heading>
-                  <Text size="base" className="text-ui-fg-muted">{t('lesson.preview.what_youll_learn_lead')}</Text>
-                </div>
-                <ul className="mt-3 space-y-2 ps-3">
-                  {(currentActivity?.extra_metadata?.learning_objectives || []).length > 0
-                    ? currentActivity.extra_metadata.learning_objectives.map((item: string, idx: number) => (
-                        <li key={idx} className="flex items-start gap-2">
-                          <span className="text-ui-fg-muted shrink-0">&bull;</span>
-                          <Text size="base" className="text-[16px]">{item}</Text>
-                        </li>
-                      ))
-                    : (
-                      <li className="flex items-start gap-2">
-                        <Text size="base" className="text-ui-fg-subtle italic">{t('lesson.preview.no_objectives')}</Text>
+            {objectives.length > 0 && (
+              <section id="what-youll-learn" className="scroll-mt-24">
+                <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] px-5 py-5">
+                  <div className="flex flex-col gap-0.5">
+                    <Heading level="h2">{t('lesson.preview.what_youll_learn')}</Heading>
+                    <Text size="base" className="text-ui-fg-muted">{t('lesson.preview.what_youll_learn_lead')}</Text>
+                  </div>
+                  <ul className="mt-3 space-y-2 ps-3">
+                    {objectives.map((item: string, idx: number) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <span className="text-ui-fg-muted shrink-0">&bull;</span>
+                        <Text size="base" className="text-[16px]">{item}</Text>
                       </li>
-                    )}
-                </ul>
-              </div>
-            </section>
+                    ))}
+                  </ul>
+                </div>
+              </section>
+            )}
 
             {/* Lesson Content */}
             <section id="lesson-content" className="scroll-mt-24">
               <Heading level="h1" className="!text-2xl mb-5 ms-1">
-                {currentActivity?.activity_type === 'TYPE_VIDEO' ? t('lesson.preview.lesson_video') : t('lesson.preview.lesson_content')}
+                {renderedActivity?.activity_type === 'TYPE_VIDEO' ? t('lesson.preview.lesson_video') : t('lesson.preview.lesson_content')}
               </Heading>
-              {currentActivity ? (
+              {renderedActivity ? (
                 <Suspense fallback={<LoadingFallback />}>
-                  {renderActivityContent(currentActivity, courseuuid, t)}
+                  {renderActivityContent(renderedActivity, courseuuid, t)}
                 </Suspense>
               ) : (
                 <div className="aspect-video bg-white rounded-xl flex items-center justify-center border border-gray-200">
@@ -613,11 +640,11 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
             </section>
 
             {/* Key Takeaways */}
-            <section id="summary" className="scroll-mt-24">
-              <Heading level="h1" className="!text-2xl mb-5 ms-1">{t('lesson.preview.key_takeaways')}</Heading>
-              {(currentActivity?.extra_metadata?.takeaways || []).length > 0 ? (
+            {takeaways.length > 0 && (
+              <section id="summary" className="scroll-mt-24">
+                <Heading level="h1" className="!text-2xl mb-5 ms-1">{t('lesson.preview.key_takeaways')}</Heading>
                 <ul className="space-y-4">
-                  {currentActivity.extra_metadata.takeaways.map((takeaway: { title: string; items: string[] }, idx: number) => (
+                  {takeaways.map((takeaway: { title: string; items: string[] }, idx: number) => (
                     <li key={idx}>
                       <div className="flex items-start gap-2">
                         <span className="text-ui-fg-muted shrink-0 mt-0.5">&bull;</span>
@@ -636,24 +663,20 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
                     </li>
                   ))}
                 </ul>
-              ) : (
-                <div className="ms-1">
-                  <Text size="base" className="text-ui-fg-subtle italic">{t('lesson.preview.no_takeaways')}</Text>
-                </div>
-              )}
-            </section>
+              </section>
+            )}
 
             {/* Downloadable Resources */}
-            <section id="resources" className="scroll-mt-24">
-              <Heading level="h1" className="!text-2xl mb-5">{t('lesson.preview.resources')}</Heading>
-              {(currentActivity?.extra_metadata?.resources || []).length > 0 ? (
+            {resources.length > 0 && (
+              <section id="resources" className="scroll-mt-24">
+                <Heading level="h1" className="!text-2xl mb-5">{t('lesson.preview.resources')}</Heading>
                 <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] px-5 py-5">
                   <div className="flex flex-col gap-0.5">
                     <Heading level="h2">{t('lesson.preview.whats_included')}</Heading>
                     <Text size="base" className="text-ui-fg-muted">{t('lesson.preview.resources_lead')}</Text>
                   </div>
                   <ul className="mt-3 space-y-3 ps-3">
-                    {currentActivity.extra_metadata.resources.map((resource: { name: string; url: string }, i: number) => (
+                    {resources.map((resource: { name: string; url: string }, i: number) => (
                       <li key={i} className="flex items-start gap-2">
                         <span className="text-ui-fg-muted shrink-0">&bull;</span>
                         <Text size="base" className="text-[16px] flex-1">{resource.name}</Text>
@@ -669,28 +692,20 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
                     ))}
                   </ul>
                 </div>
-              ) : (
-                <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] px-5 py-5">
-                  <Text size="base" className="text-ui-fg-subtle italic">{t('lesson.preview.no_resources')}</Text>
-                </div>
-              )}
-            </section>
+              </section>
+            )}
 
             {/* Knowledge Check */}
-            <section id="knowledge-check" className="scroll-mt-24">
-              <Heading level="h1" className="!text-2xl mb-5">{t('lesson.preview.quick_check')}</Heading>
-              {(currentActivity?.extra_metadata?.knowledge_checks || []).length > 0 ? (
+            {knowledgeChecks.length > 0 && (
+              <section id="knowledge-check" className="scroll-mt-24">
+                <Heading level="h1" className="!text-2xl mb-5">{t('lesson.preview.quick_check')}</Heading>
                 <div className="space-y-2.5">
-                  {currentActivity.extra_metadata.knowledge_checks.map((item: { question: string; answer: string }, i: number) => (
+                  {knowledgeChecks.map((item: { question: string; answer: string }, i: number) => (
                     <KnowledgeCheckCard key={i} question={item.question} answer={item.answer} />
                   ))}
                 </div>
-              ) : (
-                <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] px-5 py-5">
-                  <Text size="base" className="text-ui-fg-subtle italic">{t('lesson.preview.no_knowledge_checks')}</Text>
-                </div>
-              )}
-            </section>
+              </section>
+            )}
 
             {/* What's Next */}
             <section id="whats-next" className="scroll-mt-24">
@@ -771,7 +786,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
           <div className="w-full lg:w-72 xl:w-80 shrink-0">
             <div className="lg:sticky lg:top-8 space-y-4">
               <CourseOutlineSidebar currentActivityId={activeActivityId} chapters={chapters} onNavigate={(id) => setActiveActivityId(id)} />
-              <OnThisPageSidebar activeSection={activeSection} />
+              <OnThisPageSidebar activeSection={activeSection} sections={visibleSections} />
             </div>
           </div>
         </div>
