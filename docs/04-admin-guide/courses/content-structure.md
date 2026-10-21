@@ -128,12 +128,23 @@ Clicking a lesson opens the detail form with sectioned white cards.
 Above the sectioned cards, there is an inline **action row**:
 
 ```
-[👁 Preview]                    [Save] [Publish/Unpublish]
+[👁 Preview]        [Copy from source] [🌐 Language · Source/Translation] [Save] [Publish/Unpublish]
 ```
 
-- **Preview** (left) — opens the lesson preview page in a new tab, showing how the lesson appears to learners (What You'll Learn, activity content, Key Takeaways, Resources, Knowledge Checks). Links to `/course/{uuid}/lesson-preview?activityid={id}`.
+- **Copy from source** — translation locales only. Fills the form with the source-language text so the author rewrites what differs.
+- **Language chip** — shows the dashboard's active language plus whether this lesson is the source (`Source`), has a translation (`Translation`), or inherits the source (`Missing`). The dot is teal when saved, amber when there are unsaved edits.
+- **Preview** (left) — opens the lesson preview page in a new tab, showing how the lesson appears to learners: video slot, What You'll Learn, Key Takeaways, Resources, Knowledge Checks. Links to `/course/{uuid}/lesson-preview?activityid={id}`. The lesson's rich-text body is not rendered there — every block the learner reads is authored in this form.
 - **Save** (right) — white background when saved, black background when unsaved. Clicking triggers an immediate save. Not clickable when already in saved state.
-- **Publish/Unpublish** (right) — toggles the lesson's published state, saved via auto-save.
+- **Publish/Unpublish** (right) — toggles the lesson's published state (shared across locales), saved via auto-save.
+
+### Editing a translation
+
+The Content tab follows the platform language switcher — there is no second selector. With a non-source language active:
+
+- The module list and lesson list show the localized names.
+- The form loads that language's `name`, `description`, objectives, takeaways, resources and knowledge checks; empty fields fall back to the source text.
+- Saving writes only `extra_metadata.translations[locale]`. The base (source) lesson row is never modified, so a translator cannot rename or overwrite the source lesson.
+- Auto-save is debounced (600 ms), flushes on unmount, and flushes into the language the text was typed in before you switch languages.
 
 ### Basic Information
 

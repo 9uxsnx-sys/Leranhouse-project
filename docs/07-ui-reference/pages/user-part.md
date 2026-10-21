@@ -132,6 +132,27 @@ This is the most complex page in the user-facing section.
 - **Analytics**: Tracks `activity_view` on mount and `time_on_activity` (seconds spent) on unmount.
 - **Error states**: 403 for unauthorized access, load errors, and a dedicated loading skeleton.
 
+### Lesson Preview
+
+**Route**: `/orgs/[orgslug]/course/[courseuuid]/lesson-preview?activityid={activity_uuid}` — File: `apps/web/app/orgs/[orgslug]/(withmenu)/course/[courseuuid]/lesson-preview/page.tsx`
+
+The surface the dashboard **Preview** button opens; also the target of every lesson row in the course-page curriculum. It renders real data (course meta + the selected activity), not mock content.
+
+- **Lesson title** (h1), localized with `?locale=`.
+- **Left column** (`max-w-3xl`):
+  - **Lesson Content** — a 16:9 video slot. Real `TYPE_VIDEO` lessons render their player; text lessons render a gradient fallback (`from-indigo-50 via-white to-gray-100`) with a play circle and "No video for this lesson yet". The lesson's TipTap body is intentionally **not** rendered — the learner only sees what the dashboard lesson form authors.
+  - **What You'll Learn** — `extra_metadata.learning_objectives`.
+  - **Key Takeaways** — `extra_metadata.takeaways`.
+  - **Resources** — `extra_metadata.resources` with download links.
+  - **Quick Check** — `extra_metadata.knowledge_checks` as accordion cards.
+  - **Up Next** — the next activity in the flattened curriculum; clicking it swaps lessons without a route change.
+  - **Previous / Mark as Complete / Next** row.
+  - Empty sections are hidden entirely (no "No … set" placeholders).
+- **Right sidebar**: Course Outline (accordion listing modules and lessons with the current one highlighted) + On This Page (section anchors driven by `IntersectionObserver`).
+- **Breadcrumbs**: `Home > Courses > {Course} > {Module} > {Lesson}`; the module crumb is hidden below `lg`.
+- **Cards**: all section containers use the shared surface `bg-white rounded-xl border border-gray-100 shadow-sm`.
+- **Data**: course tree from `courses/{uuid}/meta?slim=true&locale=…`; the active lesson is re-fetched in full because the slim tree carries no activity content, and `DynamicCanva`-style renderers must not mount with an empty stub.
+
 ### Communities
 
 **Route**: `/orgs/[orgslug]/communities` — File: `apps/web/app/orgs/[orgslug]/(withmenu)/communities/communities.tsx`

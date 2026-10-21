@@ -30,7 +30,7 @@ Every route in the project belongs to one of two layouts:
 | `/orgs/[orgslug]/` | Home | To do |
 | `/orgs/[orgslug]/courses` | Courses | Done |
 | `/orgs/[orgslug]/course/[uuid]` | Course Detail | In progress |
-| `/orgs/[orgslug]/course/[uuid]/lesson-preview` | Lesson Preview | In progress |
+| `/orgs/[orgslug]/course/[uuid]/lesson-preview` | Lesson Preview | Done |
 | `/orgs/[orgslug]/course/[uuid]/activity/[activityid]` | Activity / Lesson | To do |
 | `/orgs/[orgslug]/collections` | Collections | Done |
 | `/orgs/[orgslug]/collection/[id]` | Collection Detail | Done |

@@ -173,7 +173,7 @@ Checking the learner UI changed several assumptions. These are the facts the tra
 
 | Surface | Why |
 |---|---|
-| `/course/[uuid]/lesson-preview` | Mock-data design preview; not linked in the product |
+| `/course/[uuid]/lesson-preview` | ~~Mock-data design preview~~ — now a real, linked surface: it registers `Courses > {Course} > {Module} > {Lesson}` (see §11) |
 | `/podcast/[uuid]/episode-design-options` | Mock-data design preview |
 | `/progress-design` | Mock-data design preview |
 | `/board/[uuid]` | Full-screen canvas, rendered **outside** `(withmenu)` — no `OrgMenu`, so no top bar |
