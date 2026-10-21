@@ -40,6 +40,13 @@ const CourseClient = (props: any) => {
   const orgslug = props.orgslug
   const initialCourse = props.course
   const serverError = props.serverError
+  // Server already resolved the course in the visitor's language. Track the
+  // active locale so a client-side language switch re-fetches the content.
+  const serverLocale = props.contentLocale || 'en'
+  const [contentLocale, setContentLocale] = useState(serverLocale)
+  useEffect(() => {
+    setContentLocale((i18n.language || 'en').split('-')[0])
+  }, [i18n.language])
   const org = useOrg() as any
   const router = useRouter()
   const isMobile = useMediaQuery('(max-width: 768px)')
@@ -56,8 +63,18 @@ const CourseClient = (props: any) => {
     { revalidateOnFocus: false }
   );
 
+  // Re-fetch the course in the newly selected language (only after a switch —
+  // the server render already carries the initial locale).
+  const { data: localeCourseData } = useSWR(
+    contentLocale !== serverLocale
+      ? `${getAPIUrl()}courses/course_${courseuuid}/meta?slim=true&locale=${contentLocale}`
+      : null,
+    (url) => swrFetcher(url, access_token),
+    { revalidateOnFocus: false, keepPreviousData: true }
+  );
+
   // Use server-provided course data, or client-fetched data as fallback
-  const course = initialCourse || clientCourseData;
+  const course = localeCourseData || initialCourse || clientCourseData;
 
   useRegisterBreadcrumb([
     { label: t('courses.courses'), href: '/courses' },

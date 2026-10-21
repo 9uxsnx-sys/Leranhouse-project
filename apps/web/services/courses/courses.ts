@@ -46,9 +46,12 @@ export async function getCourseMetadata(
   course_uuid: string,
   next: any,
   access_token: string | null | undefined,
-  options?: { slim?: boolean }
+  options?: { slim?: boolean; locale?: string }
 ) {
-  const params = options?.slim ? '?slim=true' : ''
+  const query = new URLSearchParams()
+  if (options?.slim) query.set('slim', 'true')
+  if (options?.locale) query.set('locale', options.locale)
+  const params = query.toString() ? `?${query.toString()}` : ''
   const result = await fetch(
     `${getAPIUrl()}courses/course_${course_uuid}/meta${params}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token || undefined)

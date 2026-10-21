@@ -9,6 +9,8 @@ import { getCanonicalUrl, getOrgSeoConfig, buildBreadcrumbJsonLd } from '@/lib/s
 import { getServerCanonicalUrl } from '@/lib/seo/utils.server'
 import { JsonLd } from '@components/SEO/JsonLd'
 import { notFound } from 'next/navigation'
+import { cookies } from 'next/headers'
+import { localeCode } from '@/lib/direction'
 
 type MetadataProps = {
   params: Promise<{ orgslug: string; courseuuid: string; activityid: string }>
@@ -24,11 +26,14 @@ type Session = {
 // Shared fetch config so generateMetadata + page component use the same
 // Next.js fetch cache key, enabling automatic request deduplication.
 async function fetchCourseMetadata(courseuuid: string, access_token: string | null | undefined) {
+  // Resolve the course in the language picked in the platform switcher.
+  const cookieStore = await cookies()
+  const locale = localeCode(cookieStore.get('i18next')?.value) || 'en'
   return await getCourseMetadata(
     courseuuid,
     { revalidate: 120, tags: ['courses'] },
     access_token || null,
-    { slim: true }
+    { slim: true, locale }
   )
 }
 

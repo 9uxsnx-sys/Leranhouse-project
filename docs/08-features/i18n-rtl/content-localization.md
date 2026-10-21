@@ -1,6 +1,6 @@
 # Multilingual course authoring — research & proposal
 
-> **Status:** plan agreed (see §7.1), implementation starting with Phase A.
+> **Status:** plan agreed (see §7.1). Phase A is implemented and verified end to end; Phase B is next.
 > **Trigger:** a course authored in English shows English body text inside an Arabic (RTL) UI.
 > Translation of the *interface* is done; this document is about translating *content*.
 
@@ -273,19 +273,34 @@ Scope confirmed with the product owner. **No badges on the courses listing and n
 4. **`state` column ships in v1** (`draft` default) but v1 serves every saved row. Approval workflow later becomes a UI change, not a migration.
 5. **Translations tab** holds coverage, copy-from-source, delete-locale and export/import. It does **not** hold editing.
 
-### Phase A — vertical slice (title only, end to end)
+### Phase A — vertical slice (title only, end to end) — **done**
 
 Proves the whole path before repeating it for every field.
 
-| Step | Work |
-|---|---|
-| A1 | Alembic migration: `course.source_locale` + `course_translation` (unique `course_id, locale`) |
-| A2 | `GET /courses/{uuid}?locale=xx` resolves translation → falls back to base row; returns `content_locale` and `is_fallback` |
-| A3 | `PUT /courses/{uuid}/translations/{locale}` upserts one row (same permission as the General tab) |
-| A4 | General form: title input reads/writes the locale selected in the switcher; untranslated values render dimmed as "inherited" |
-| A5 | Action row: locale name, status dot, `Saving… / Saved` |
+| Step | Work | Status |
+|---|---|---|
+| A1 | Alembic migration: `course.source_locale` + `course_translation` (unique `course_id, locale`) | done |
+| A2 | `GET /courses/{uuid}?locale=xx` resolves translation → falls back to base row; returns `content_locale` and `is_fallback` | done |
+| A3 | `PUT /courses/{uuid}/translations/{locale}` upserts one row (same permission as the General tab) | done |
+| A4 | General form: title input reads/writes the locale selected in the switcher; untranslated values render dimmed as "inherited" | done |
+| A5 | Action row: locale name, status dot, `Saving… / Saved` | done |
+| A6 | Learner page + activity page resolve the content locale from the same `i18next` cookie; client-side switch re-fetches | done |
 
 Done when: switch to Arabic → type an Arabic title → save → reload → the learner page shows the Arabic title, and English is unchanged.
+
+**Verified** against a live course (`GET /orgs/default/course/5e6c9e17-…`):
+
+| Cookie | `content_locale` | `is_fallback` | Rendered name | `<html lang dir>` |
+|---|---|---|---|---|
+| `i18next=ar` | `ar` | `false` | Arabic title | `ar` / `rtl` |
+| `i18next=en` | `en` | `false` | `UI/UX Design Masterclass` | `en` / `ltr` |
+| `i18next=fr` | `en` | `true` | English title (fallback) | `fr` / `ltr` |
+
+Implementation notes carried forward:
+
+- The course-meta cache stores the **source-locale payload only**; the overlay is applied per request, so a translation edit never poisons the cache.
+- The dashboard `CourseProvider` deliberately fetches **without** `locale` — the General tab needs the source row as its baseline.
+- `upsert` rejects writing the source locale (422); the base row is edited through the normal course update.
 
 ### Phase B — remaining fields
 

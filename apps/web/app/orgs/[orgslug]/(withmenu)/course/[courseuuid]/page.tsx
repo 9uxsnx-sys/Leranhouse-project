@@ -9,6 +9,15 @@ import { getCanonicalUrl, getOrgSeoConfig, buildPageTitle, buildBreadcrumbJsonLd
 import { getServerCanonicalUrl } from '@/lib/seo/utils.server'
 import { JsonLd } from '@components/SEO/JsonLd'
 import { notFound } from 'next/navigation'
+import { cookies } from 'next/headers'
+import { localeCode } from '@/lib/direction'
+
+// The platform language switcher drives the course content language too, so the
+// server resolves the course using the same `i18next` cookie the layout reads.
+async function getContentLocale(): Promise<string> {
+  const cookieStore = await cookies()
+  return localeCode(cookieStore.get('i18next')?.value) || 'en'
+}
 
 type MetadataProps = {
   params: Promise<{ orgslug: string; courseuuid: string }>
@@ -19,6 +28,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const params = await props.params;
   const session = await getServerSession()
   const access_token = session?.tokens?.access_token
+  const contentLocale = await getContentLocale()
 
   // Parallelize org + course metadata fetches
   // Use revalidate: 120 to match the page component and enable Next.js fetch dedup
@@ -31,7 +41,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
       params.courseuuid,
       { revalidate: 120, tags: ['courses'] },
       access_token ?? undefined,
-      { slim: true }
+      { slim: true, locale: contentLocale }
     ).catch(() => null),
   ])
 
@@ -108,6 +118,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 const CoursePage = async (params: any) => {
   const session = await getServerSession()
   const access_token = session?.tokens?.access_token
+  const contentLocale = await getContentLocale()
 
   // Await params before using them
   const { courseuuid, orgslug } = await params.params
@@ -121,7 +132,7 @@ const CoursePage = async (params: any) => {
       courseuuid,
       { revalidate: 120, tags: ['courses'] },
       access_token ?? undefined,
-      { slim: true }
+      { slim: true, locale: contentLocale }
     ).catch((error: any) => {
       fetchError = { status: error?.status }
       return null
@@ -186,6 +197,7 @@ const CoursePage = async (params: any) => {
         courseuuid={courseuuid}
         orgslug={orgslug}
         course={course_meta}
+        contentLocale={contentLocale}
         access_token={access_token}
         serverError={fetchError}
       />
