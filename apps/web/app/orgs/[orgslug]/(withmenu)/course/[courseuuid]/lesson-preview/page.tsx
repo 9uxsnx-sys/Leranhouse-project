@@ -631,8 +631,24 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
               {renderedActivity ? (
                 <Suspense fallback={<LoadingFallback />}>
                   {renderedActivity.activity_type === 'TYPE_DYNAMIC' ? (
-                    <div className="lesson-rich-text rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] px-6 py-6">
-                      {renderActivityContent(renderedActivity, courseuuid, t)}
+                    <div className="space-y-6">
+                      {/* Every lesson reads as a video lesson. Until a video is
+                          attached, show the same calm gradient fallback the
+                          course banner uses instead of an empty slot. */}
+                      <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-gray-100 ring-1 ring-inset ring-black/5">
+                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-white to-indigo-500/10" />
+                        <div className="relative w-full h-full flex flex-col items-center justify-center gap-3">
+                          <div className="w-16 h-16 rounded-full bg-white/80 ring-1 ring-black/5 shadow-sm flex items-center justify-center">
+                            <Play className="w-6 h-6 text-ui-fg-base ms-0.5" fill="currentColor" />
+                          </div>
+                          <Text size="small" className="text-ui-fg-muted">
+                            {t('lesson.preview.video_unavailable')}
+                          </Text>
+                        </div>
+                      </div>
+                      <div className="lesson-rich-text rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] px-6 py-6">
+                        {renderActivityContent(renderedActivity, courseuuid, t)}
+                      </div>
                     </div>
                   ) : (
                     renderActivityContent(renderedActivity, courseuuid, t)
