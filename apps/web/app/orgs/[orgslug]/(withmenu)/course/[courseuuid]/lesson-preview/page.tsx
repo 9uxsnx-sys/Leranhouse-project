@@ -356,9 +356,9 @@ function renderActivityContent(activity: any, courseuuid: string, t: (key: strin
         return <EmbedActivity activity={activity} />
       }
       // Rich-text lessons store a TipTap doc in activity.content — same renderer
-      // the learner activity page uses. Falling back to MarkdownActivity here
-      // showed "No markdown URL configured" for every rich-text lesson.
-      return <DynamicCanva content={activity.content} activity={activity} />
+      // the learner activity page uses. The preview page has its own "On this
+      // page" sidebar, so the in-content TOC would be a duplicate column.
+      return <DynamicCanva content={activity.content} activity={activity} hideTableOfContents />
     case 'TYPE_VIDEO':
       return <VideoActivity course={{ course_uuid: courseuuid }} activity={activity} />
     case 'TYPE_DOCUMENT':
