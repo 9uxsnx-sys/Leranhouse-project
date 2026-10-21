@@ -1,7 +1,9 @@
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
 import { Metadata } from 'next'
+import { cookies } from 'next/headers'
 import React from 'react'
 import { getServerSession } from '@/lib/auth/server'
+import { localeCode } from '@/lib/direction'
 import { getOrgPodcasts } from '@services/podcasts/podcasts'
 import PodcastsDashClient from './client'
 
@@ -38,11 +40,14 @@ async function PodcastsDashPage(params: any) {
 
   let podcasts = []
   try {
+    const cookieStore = await cookies()
+    const locale = localeCode(cookieStore.get('i18next')?.value) || 'en'
     podcasts = await getOrgPodcasts(
       orgslug,
       { revalidate: 0, tags: ['podcasts'] },
       access_token ? access_token : undefined,
-      true // include_unpublished for dashboard
+      true, // include_unpublished for dashboard
+      locale
     )
   } catch (error) {
     console.error('Failed to fetch podcasts:', error)

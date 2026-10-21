@@ -4,16 +4,22 @@ import { usePodcast } from '@components/Contexts/PodcastContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { updatePodcast } from '@services/podcasts/podcasts'
+import {
+  getPodcastTranslations,
+  upsertPodcastTranslation,
+} from '@services/podcasts/podcastTranslations'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { Formik, Form } from 'formik'
 import * as Yup from 'yup'
 import { useTranslation } from 'react-i18next'
-import { Loader2, Eye, Check, SaveAllIcon, Globe, GlobeLock, UploadCloud, ImageIcon, Trash2, Plus, X, ChevronRight } from 'lucide-react'
+import { Loader2, Eye, Check, SaveAllIcon, Globe, GlobeLock, UploadCloud, ImageIcon, Trash2, Plus, X, ChevronRight, Copy } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { Input } from '@components/ui/input'
 import { Textarea } from '@components/ui/textarea'
 import Link from 'next/link'
 import { getUriWithOrg } from '@services/config/config'
+import { usePodcastTranslation } from '@components/Hooks/usePodcastTranslation'
+import { getCurrentLanguageNativeName } from '@/lib/languages'
 import PodcastMediaSection from './PodcastMediaSection'
 
 const fieldClassName = "bg-ui-bg-field !shadow-none border border-ui-border-base focus:border-ui-border-strong focus-visible:!shadow-none transition-none"
@@ -24,7 +30,7 @@ interface EditPodcastGeneralProps {
 
 function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
   const { t } = useTranslation()
-  const { podcast, refreshPodcast, setPodcast, isLoading } = usePodcast()
+  const { podcast, refreshPodcast, isLoading } = usePodcast()
   const session = useLHSession() as any
   const org = useOrg() as any
   const [isSaving, setIsSaving] = useState(false)
@@ -35,14 +41,11 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
   const isPublished = podcast?.published ?? false
   const shortUuid = podcast?.podcast_uuid?.replace('podcast_', '')
 
-  const validationSchema = Yup.object({
-    name: Yup.string()
-      .required(t('podcasts.form.name_required'))
-      .min(3, t('podcasts.form.name_min_length'))
-      .max(100, t('podcasts.form.name_max_length')),
-    description: Yup.string().max(500, t('podcasts.form.description_max_length')),
-    about: Yup.string().max(2000, t('podcasts.dashboard.form.about_max_length')),
-  })
+  // ── Content locale ──
+  // The base podcast row holds the source locale; every other locale is a
+  // podcast_translation row. The platform switcher decides which one is edited.
+  const { contentLocale, isSourceLocale, translation, setTranslation } =
+    usePodcastTranslation(podcast?.podcast_uuid, podcast?.source_locale || 'en')
 
   if (isLoading || !podcast) {
     return (
@@ -54,31 +57,59 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
 
   const meta = podcast.extra_metadata || {}
   const initialValues = {
-    name: podcast.name || '',
-    description: podcast.description || '',
-    about: podcast.about || '',
+    name: (!isSourceLocale && translation ? translation.name : podcast.name) || '',
+    description:
+      (!isSourceLocale && translation ? translation.description : podcast.description) || '',
+    about: (!isSourceLocale && translation ? translation.about : podcast.about) || '',
     meta_total_duration: meta.total_duration?.toString() || '',
     meta_hosts: meta.hosts?.length > 0
       ? meta.hosts.map((h: any) => ({ name: h.name || '', title: h.title || '', avatar: h.avatar || '' }))
       : [],
   }
 
+  const validationSchema = Yup.object({
+    name: Yup.string()
+      .required(t('podcasts.form.name_required'))
+      .min(3, t('podcasts.form.name_min_length'))
+      .max(100, t('podcasts.form.name_max_length')),
+    description: Yup.string().max(500, t('podcasts.form.description_max_length')),
+    about: Yup.string().max(2000, t('podcasts.dashboard.form.about_max_length')),
+  })
+
   const handleSubmit = async (values: typeof initialValues) => {
     setIsSaving(true)
     const toastId = toast.loading(t('podcasts.dashboard.saving'))
     try {
-      const { meta_total_duration, meta_hosts, ...rest } = values
-      const extra_metadata: Record<string, any> = {}
-      if (meta_total_duration) extra_metadata.total_duration = parseInt(meta_total_duration, 10)
-      if (meta_hosts && meta_hosts.length > 0) {
-        extra_metadata.hosts = meta_hosts.filter((h: any) => h.name.trim())
-      }
+      if (!isSourceLocale) {
+        // Translating never touches the base row: hosts, media and access stay shared.
+        await upsertPodcastTranslation(
+          podcast.podcast_uuid,
+          contentLocale,
+          {
+            name: values.name,
+            description: values.description,
+            about: values.about,
+            tags: translation?.tags ?? podcast.tags ?? null,
+            seo: translation?.seo ?? podcast.seo ?? null,
+          },
+          accessToken
+        )
+        const rows = await getPodcastTranslations(podcast.podcast_uuid, accessToken)
+        setTranslation(rows.find((row) => row.locale === contentLocale) || null)
+      } else {
+        const { meta_total_duration, meta_hosts, ...rest } = values
+        const extra_metadata: Record<string, any> = {}
+        if (meta_total_duration) extra_metadata.total_duration = parseInt(meta_total_duration, 10)
+        if (meta_hosts && meta_hosts.length > 0) {
+          extra_metadata.hosts = meta_hosts.filter((h: any) => h.name.trim())
+        }
 
-      await updatePodcast(
-        podcast.podcast_uuid,
-        { ...rest, extra_metadata: Object.keys(extra_metadata).length > 0 ? extra_metadata : null },
-        accessToken
-      )
+        await updatePodcast(
+          podcast.podcast_uuid,
+          { ...rest, extra_metadata: Object.keys(extra_metadata).length > 0 ? extra_metadata : null },
+          accessToken
+        )
+      }
       await revalidateTags(['podcasts'], orgslug)
       await refreshPodcast()
       toast.success(t('podcasts.dashboard.saved'), { id: toastId })
@@ -128,7 +159,17 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ values, handleChange, errors, touched, isValid, dirty, submitForm, setFieldValue }) => (
+      {({ values, handleChange, errors, touched, isValid, dirty, submitForm, setFieldValue, setValues }) => {
+        const copyFromSource = () => {
+          setValues({
+            ...values,
+            name: podcast.name || '',
+            description: podcast.description || '',
+            about: podcast.about || '',
+          })
+        }
+
+        return (
         <Form>
           <div className="space-y-3">
             {/* ── ACTION ROW ── */}
@@ -143,6 +184,34 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
               </Link>
 
               <div className="flex items-center gap-2">
+                {!isSourceLocale && (
+                  <button
+                    type="button"
+                    onClick={copyFromSource}
+                    className="hidden sm:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+                  >
+                    <Copy size={14} />
+                    <span>{t('dashboard.courses.general.locale.copy_from_source')}</span>
+                  </button>
+                )}
+                <span
+                  className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600"
+                  title={
+                    isSourceLocale
+                      ? t('dashboard.courses.general.locale.source')
+                      : t('dashboard.courses.general.locale.translation')
+                  }
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${!dirty ? 'bg-teal-500' : 'bg-amber-400'}`} />
+                  <span>{getCurrentLanguageNativeName(contentLocale)}</span>
+                  <span className="text-gray-400">
+                    {isSourceLocale
+                      ? t('dashboard.courses.general.locale.source')
+                      : translation
+                        ? t('dashboard.courses.general.locale.translation')
+                        : t('dashboard.courses.general.locale.missing')}
+                  </span>
+                </span>
                 <button
                   type="button"
                   onClick={submitForm}
@@ -193,6 +262,12 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                 </button>
               </div>
             </div>
+
+            {!isSourceLocale && !translation && (
+              <div className="text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
+                {t('dashboard.courses.general.locale.inherited')}
+              </div>
+            )}
 
             {/* ── BASIC INFORMATION ── */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
@@ -259,196 +334,200 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
               </div>
             </div>
 
-            {/* ── PODCAST DETAILS ── */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-              <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
-                {t('common.sections.details')}
-              </h3>
-              <div className="space-y-4">
-                {/* Total Duration */}
-                <div className="grid mb-2.5">
-                  <label className="font-medium leading-[35px] text-black grow text-sm">
-                    {t('podcasts.dashboard.general.total_duration_label')}
-                  </label>
-                  <Input
-                    id="meta_total_duration"
-                    name="meta_total_duration"
-                    type="number"
-                    min="0"
-                    value={values.meta_total_duration}
-                    onChange={handleChange}
-                    placeholder={t('podcasts.dashboard.general.total_duration_placeholder')}
-                    className={fieldClassName}
-                  />
-                </div>
+            {/* ── PODCAST DETAILS (structural — shared across locales) ── */}
+            {isSourceLocale && (
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+                  {t('common.sections.details')}
+                </h3>
+                <div className="space-y-4">
+                  {/* Total Duration */}
+                  <div className="grid mb-2.5">
+                    <label className="font-medium leading-[35px] text-black grow text-sm">
+                      {t('podcasts.dashboard.general.total_duration_label')}
+                    </label>
+                    <Input
+                      id="meta_total_duration"
+                      name="meta_total_duration"
+                      type="number"
+                      min="0"
+                      value={values.meta_total_duration}
+                      onChange={handleChange}
+                      placeholder={t('podcasts.dashboard.general.total_duration_placeholder')}
+                      className={fieldClassName}
+                    />
+                  </div>
 
-                {/* Hosts */}
-                <div>
-                  <label className="font-medium leading-[35px] text-black grow text-sm block">
-                    {t('podcasts.dashboard.general.hosts_label')}
-                  </label>
-                  <div className="space-y-3">
-                    {values.meta_hosts.map((host: any, index: number) => {
-                      const isOpen = expandedHosts[index] ?? true
-                      return (
-                        <div
-                          key={index}
-                          className="bg-gray-50 rounded-xl overflow-hidden border border-gray-100"
-                        >
-                          {/* Header - clickable to expand/collapse */}
-                          <button
-                            type="button"
-                            onClick={() => setExpandedHosts(prev => ({ ...prev, [index]: !isOpen }))}
-                            className="w-full flex items-center justify-between px-4 py-3 text-start hover:bg-gray-100/50 transition-colors"
-                          >
-                            <div className="flex items-center gap-2.5">
-                              <span className="text-sm font-semibold text-gray-800">{t('podcasts.dashboard.general.host_label', { number: index + 1 })}</span>
-                              {!isOpen && host.name && (
-                                <span className="text-xs text-gray-400 truncate max-w-[120px]">{host.name}</span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              {values.meta_hosts.length > 1 && (
-                                <span
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    const updated = values.meta_hosts.filter((_: any, i: number) => i !== index)
-                                    setFieldValue('meta_hosts', updated)
-                                  }}
-                                  className="text-red-400 hover:text-red-600 transition-colors cursor-pointer p-0.5 inline-flex"
-                                >
-                                  <X size={14} />
-                                </span>
-                              )}
-                              <ChevronRight
-                                size={16}
-                                className={`text-gray-400 transition-transform duration-200 ${
-                                  isOpen ? 'rotate-90' : ''
-                                }`}
-                              />
-                            </div>
-                          </button>
-
-                          {/* Expanded content */}
+                  {/* Hosts */}
+                  <div>
+                    <label className="font-medium leading-[35px] text-black grow text-sm block">
+                      {t('podcasts.dashboard.general.hosts_label')}
+                    </label>
+                    <div className="space-y-3">
+                      {values.meta_hosts.map((host: any, index: number) => {
+                        const isOpen = expandedHosts[index] ?? true
+                        return (
                           <div
-                            className={`grid transition-all duration-300 ease-in-out ${
-                              isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-                            }`}
+                            key={index}
+                            className="bg-gray-50 rounded-xl overflow-hidden border border-gray-100"
                           >
-                            <div className="overflow-hidden">
-                              <div className="px-4 pb-4 space-y-3">
-                                {/* Name */}
-                                <div>
-                                  <label className="text-xs font-medium text-gray-500 mb-1 block">{t('podcasts.dashboard.general.name_label')}</label>
-                                  <Input
-                                    name={`meta_hosts.${index}.name`}
-                                    value={host.name}
-                                    onChange={(e) => {
-                                      const updated = [...values.meta_hosts]
-                                      updated[index] = { ...updated[index], name: e.target.value }
+                            {/* Header - clickable to expand/collapse */}
+                            <button
+                              type="button"
+                              onClick={() => setExpandedHosts(prev => ({ ...prev, [index]: !isOpen }))}
+                              className="w-full flex items-center justify-between px-4 py-3 text-start hover:bg-gray-100/50 transition-colors"
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <span className="text-sm font-semibold text-gray-800">{t('podcasts.dashboard.general.host_label', { number: index + 1 })}</span>
+                                {!isOpen && host.name && (
+                                  <span className="text-xs text-gray-400 truncate max-w-[120px]">{host.name}</span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                {values.meta_hosts.length > 1 && (
+                                  <span
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      const updated = values.meta_hosts.filter((_: any, i: number) => i !== index)
                                       setFieldValue('meta_hosts', updated)
                                     }}
-                                    placeholder={t('podcasts.dashboard.general.name_placeholder')}
-                                    className={`${fieldClassName} bg-white`}
-                                  />
-                                </div>
-                                {/* Title */}
-                                <div>
-                                  <label className="text-xs font-medium text-gray-500 mb-1 block">{t('podcasts.dashboard.general.title_label')}</label>
-                                  <Input
-                                    name={`meta_hosts.${index}.title`}
-                                    value={host.title}
-                                    onChange={(e) => {
-                                      const updated = [...values.meta_hosts]
-                                      updated[index] = { ...updated[index], title: e.target.value }
-                                      setFieldValue('meta_hosts', updated)
-                                    }}
-                                    placeholder={t('podcasts.dashboard.general.title_placeholder')}
-                                    className={`${fieldClassName} bg-white`}
-                                  />
-                                </div>
-                                {/* Photo - media section style row */}
-                                <div>
-                                  <label className="text-xs font-medium text-gray-500 mb-1 block">{t('podcasts.dashboard.general.photo_label')}</label>
-                                  {host.avatar ? (
-                                    <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-white">
-                                      <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden border border-gray-200">
-                                        <img src={host.avatar} alt={host.name || t('podcasts.dashboard.general.host_avatar_alt')} className="w-full h-full object-cover" />
-                                      </div>
-                                      <div className="flex-1">
-                                        <p className="text-sm font-medium text-gray-700">{t('podcasts.dashboard.general.photo_uploaded')}</p>
-                                      </div>
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          const updated = [...values.meta_hosts]
-                                          updated[index] = { ...updated[index], avatar: '' }
-                                          setFieldValue('meta_hosts', updated)
-                                        }}
-                                        className="text-red-400 hover:text-red-600 transition-colors cursor-pointer"
-                                        title={t('podcasts.dashboard.general.remove_photo')}
-                                      >
-                                        <Trash2 size={18} />
-                                      </button>
-                                    </div>
-                                  ) : (
-                                    <div className="flex items-center gap-4 p-4 border border-dashed border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors cursor-pointer"
-                                      onClick={() => {
-                                        const input = document.createElement('input')
-                                        input.type = 'file'
-                                        input.accept = '.jpg,.jpeg,.png,.webp'
-                                        input.onchange = (e: any) => {
-                                          const file = e.target?.files?.[0]
-                                          if (!file) return
-                                          const reader = new FileReader()
-                                          reader.onload = (event: any) => {
-                                            const dataUrl = event.target?.result as string
-                                            const updated = [...values.meta_hosts]
-                                            updated[index] = { ...updated[index], avatar: dataUrl }
-                                            setFieldValue('meta_hosts', updated)
-                                          }
-                                          reader.readAsDataURL(file)
-                                        }
-                                        input.click()
+                                    className="text-red-400 hover:text-red-600 transition-colors cursor-pointer p-0.5 inline-flex"
+                                  >
+                                    <X size={14} />
+                                  </span>
+                                )}
+                                <ChevronRight
+                                  size={16}
+                                  className={`text-gray-400 transition-transform duration-200 ${
+                                    isOpen ? 'rotate-90' : ''
+                                  }`}
+                                />
+                              </div>
+                            </button>
+
+                            {/* Expanded content */}
+                            <div
+                              className={`grid transition-all duration-300 ease-in-out ${
+                                isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                              }`}
+                            >
+                              <div className="overflow-hidden">
+                                <div className="px-4 pb-4 space-y-3">
+                                  {/* Name */}
+                                  <div>
+                                    <label className="text-xs font-medium text-gray-500 mb-1 block">{t('podcasts.dashboard.general.name_label')}</label>
+                                    <Input
+                                      name={`meta_hosts.${index}.name`}
+                                      value={host.name}
+                                      onChange={(e) => {
+                                        const updated = [...values.meta_hosts]
+                                        updated[index] = { ...updated[index], name: e.target.value }
+                                        setFieldValue('meta_hosts', updated)
                                       }}
-                                    >
-                                      <div className="flex-shrink-0">
-                                        <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
+                                      placeholder={t('podcasts.dashboard.general.name_placeholder')}
+                                      className={`${fieldClassName} bg-white`}
+                                    />
+                                  </div>
+                                  {/* Title */}
+                                  <div>
+                                    <label className="text-xs font-medium text-gray-500 mb-1 block">{t('podcasts.dashboard.general.title_label')}</label>
+                                    <Input
+                                      name={`meta_hosts.${index}.title`}
+                                      value={host.title}
+                                      onChange={(e) => {
+                                        const updated = [...values.meta_hosts]
+                                        updated[index] = { ...updated[index], title: e.target.value }
+                                        setFieldValue('meta_hosts', updated)
+                                      }}
+                                      placeholder={t('podcasts.dashboard.general.title_placeholder')}
+                                      className={`${fieldClassName} bg-white`}
+                                    />
+                                  </div>
+                                  {/* Photo - media section style row */}
+                                  <div>
+                                    <label className="text-xs font-medium text-gray-500 mb-1 block">{t('podcasts.dashboard.general.photo_label')}</label>
+                                    {host.avatar ? (
+                                      <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-white">
+                                        <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden border border-gray-200">
+                                          <img src={host.avatar} alt={host.name || t('podcasts.dashboard.general.host_avatar_alt')} className="w-full h-full object-cover" />
+                                        </div>
+                                        <div className="flex-1">
+                                          <p className="text-sm font-medium text-gray-700">{t('podcasts.dashboard.general.photo_uploaded')}</p>
+                                        </div>
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            const updated = [...values.meta_hosts]
+                                            updated[index] = { ...updated[index], avatar: '' }
+                                            setFieldValue('meta_hosts', updated)
+                                          }}
+                                          className="text-red-400 hover:text-red-600 transition-colors cursor-pointer"
+                                          title={t('podcasts.dashboard.general.remove_photo')}
+                                        >
+                                          <Trash2 size={18} />
+                                        </button>
                                       </div>
-                                      <div className="flex-1">
-                                        <p className="text-sm font-medium text-gray-700">{t('podcasts.dashboard.general.click_to_upload_photo')}</p>
+                                    ) : (
+                                      <div className="flex items-center gap-4 p-4 border border-dashed border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors cursor-pointer"
+                                        onClick={() => {
+                                          const input = document.createElement('input')
+                                          input.type = 'file'
+                                          input.accept = '.jpg,.jpeg,.png,.webp'
+                                          input.onchange = (e: any) => {
+                                            const file = e.target?.files?.[0]
+                                            if (!file) return
+                                            const reader = new FileReader()
+                                            reader.onload = (event: any) => {
+                                              const dataUrl = event.target?.result as string
+                                              const updated = [...values.meta_hosts]
+                                              updated[index] = { ...updated[index], avatar: dataUrl }
+                                              setFieldValue('meta_hosts', updated)
+                                            }
+                                            reader.readAsDataURL(file)
+                                          }
+                                          input.click()
+                                        }}
+                                      >
+                                        <div className="flex-shrink-0">
+                                          <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
+                                        </div>
+                                        <div className="flex-1">
+                                          <p className="text-sm font-medium text-gray-700">{t('podcasts.dashboard.general.click_to_upload_photo')}</p>
+                                        </div>
+                                        <UploadCloud size={18} className="text-gray-400" />
                                       </div>
-                                      <UploadCloud size={18} className="text-gray-400" />
-                                    </div>
-                                  )}
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      )
-                    })}
+                        )
+                      })}
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setFieldValue('meta_hosts', [...values.meta_hosts, { name: '', title: '', avatar: '' }])
-                      }}
-                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl border-2 border-dashed border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
-                    >
-                      <Plus size={16} />
-                      {t('podcasts.dashboard.general.add_host')}
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFieldValue('meta_hosts', [...values.meta_hosts, { name: '', title: '', avatar: '' }])
+                        }}
+                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl border-2 border-dashed border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+                      >
+                        <Plus size={16} />
+                        {t('podcasts.dashboard.general.add_host')}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
 
+            {/* ── MEDIA (shared across locales) ── */}
             <PodcastMediaSection />
 
           </div>
         </Form>
-      )}
+        )
+      }}
     </Formik>
   )
 }

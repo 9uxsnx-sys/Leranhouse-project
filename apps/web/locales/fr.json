@@ -873,6 +873,7 @@
     "no_podcasts_description": "Il n'y a pas de podcasts disponibles pour le moment",
     "no_search_results": "Aucun podcast trouvé",
     "try_different_search": "Essayez un autre terme de recherche",
+    "only_available_in": "Ce podcast n'est disponible qu'en {{language}}.",
     "episodes": "Épisodes",
     "no_episodes": "Pas encore d'épisodes",
     "hosted_by": "Animé par",

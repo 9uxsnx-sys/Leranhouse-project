@@ -40,6 +40,11 @@ export interface Podcast {
   update_date: string
   authors: PodcastAuthor[]
   seo?: Record<string, unknown>
+  extra_metadata?: Record<string, any> | null
+  // Localization state, filled by the API on reads.
+  source_locale?: string
+  content_locale?: string
+  is_fallback?: boolean
 }
 
 export interface PodcastWithEpisodeCount extends Podcast {
@@ -69,13 +74,26 @@ export interface PodcastEpisode {
   update_date: string
 }
 
+function localeQuery(params: Record<string, string | boolean | undefined>): string {
+  const search = new URLSearchParams()
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== '') search.set(key, String(value))
+  })
+  const query = search.toString()
+  return query ? `?${query}` : ''
+}
+
 export async function getOrgPodcasts(
   org_slug: string,
   next: any,
   access_token?: string,
-  include_unpublished: boolean = false
+  include_unpublished: boolean = false,
+  locale?: string
 ) {
-  const url = `${getAPIUrl()}podcasts/org_slug/${org_slug}/page/1/limit/100${include_unpublished ? '?include_unpublished=true' : ''}`
+  const url = `${getAPIUrl()}podcasts/org_slug/${org_slug}/page/1/limit/100${localeQuery({
+    include_unpublished: include_unpublished ? 'true' : undefined,
+    locale,
+  })}`
   const result: any = await fetch(
     url,
     RequestBodyWithAuthHeader('GET', null, next, access_token)
@@ -90,9 +108,13 @@ export async function getOrgPodcastsPaginated(
   limit: number,
   next: any,
   access_token?: string,
-  include_unpublished: boolean = false
+  include_unpublished: boolean = false,
+  locale?: string
 ) {
-  const url = `${getAPIUrl()}podcasts/org_slug/${org_slug}/page/${page}/limit/${limit}${include_unpublished ? '?include_unpublished=true' : ''}`
+  const url = `${getAPIUrl()}podcasts/org_slug/${org_slug}/page/${page}/limit/${limit}${localeQuery({
+    include_unpublished: include_unpublished ? 'true' : undefined,
+    locale,
+  })}`
   const result: any = await fetch(
     url,
     RequestBodyWithAuthHeader('GET', null, next, access_token)
@@ -117,10 +139,11 @@ export async function getOrgPodcastsCount(
 export async function getPodcast(
   podcast_uuid: string,
   next: any,
-  access_token?: string
+  access_token?: string,
+  locale?: string
 ) {
   const result: any = await fetch(
-    `${getAPIUrl()}podcasts/${podcast_uuid}`,
+    `${getAPIUrl()}podcasts/${podcast_uuid}${localeQuery({ locale })}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token)
   )
   const res = await errorHandling(result)
@@ -130,10 +153,11 @@ export async function getPodcast(
 export async function getPodcastMeta(
   podcast_uuid: string,
   next: any,
-  access_token?: string
+  access_token?: string,
+  locale?: string
 ): Promise<PodcastMeta> {
   const result: any = await fetch(
-    `${getAPIUrl()}podcasts/${podcast_uuid}/meta`,
+    `${getAPIUrl()}podcasts/${podcast_uuid}/meta${localeQuery({ locale })}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token)
   )
   const res = await errorHandling(result)

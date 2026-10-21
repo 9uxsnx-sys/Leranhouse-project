@@ -7,7 +7,7 @@ import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/Ge
 import EpisodeCard from '@components/Objects/Podcasts/EpisodeCard'
 import { Podcast, PodcastEpisode, PodcastMeta } from '@services/podcasts/podcasts'
 import { startPodcast } from '@services/podcasts/trail'
-import { Headphones, Loader2, Search, Clock, ArrowUpDown, SortAsc, RefreshCw, BookOpen, Award, User, Play } from 'lucide-react'
+import { Headphones, Loader2, Search, Clock, ArrowUpDown, SortAsc, RefreshCw, BookOpen, Award, User, Play, Info } from 'lucide-react'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { getPodcastThumbnailMediaDirectory, getPodcastBannerMediaDirectory } from '@services/media/media'
 import { useTranslation } from 'react-i18next'
@@ -15,6 +15,8 @@ import { useMediaQuery } from 'usehooks-ts'
 import { usePodcastPlayer } from '@components/Contexts/PodcastPlayerContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
+import { useContentLocale } from '@components/Hooks/useCourseTranslation'
+import { getCurrentLanguageNativeName } from '@/lib/languages'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { useRegisterBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
 import {
@@ -52,9 +54,11 @@ export default function PodcastClient({
   const org = useOrg() as any
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<'recent' | 'oldest' | 'duration'>('recent')
+  const contentLocale = useContentLocale()
 
-  // SWR key for fetching podcast meta
-  const swrKey = `${getAPIUrl()}podcasts/${podcastUuid}/meta`
+  // SWR key for fetching podcast meta — locale-aware so a language switch
+  // re-fetches the translated podcast and episode titles.
+  const swrKey = `${getAPIUrl()}podcasts/${podcastUuid}/meta?locale=${contentLocale}`
 
   // Use SWR for real-time updates
   const { data, error, isLoading, mutate } = useSWR<PodcastMeta>(
@@ -218,6 +222,16 @@ export default function PodcastClient({
             <div className="flex-1 min-w-0 max-w-3xl space-y-8">
               {/* ── PODCAST TITLE + STATS ── */}
               <div>
+                {podcast.is_fallback && (
+                  <div className="inline-flex items-center gap-2 mb-3 rounded-lg border border-amber-100 bg-amber-50 px-3 py-1.5 text-xs text-amber-800">
+                    <Info size={13} className="shrink-0" />
+                    <span>
+                      {t('podcasts.only_available_in', {
+                        language: getCurrentLanguageNativeName(podcast.content_locale || 'en'),
+                      })}
+                    </span>
+                  </div>
+                )}
                 <h1 dir="auto" className="text-2xl md:text-3xl font-semibold text-ui-fg-base leading-tight">{podcast.name}</h1>
                 {podcast.description && (
                   <p dir="auto" className="text-base text-ui-fg-subtle mt-2 leading-relaxed">

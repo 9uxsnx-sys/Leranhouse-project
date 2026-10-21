@@ -372,7 +372,7 @@ Course **settings** (this document) are complete: metadata, SEO, requirements, t
    - Auto-save is debounced (600 ms), flushes on unmount, and flushes into the language the edit was typed in before switching languages.
    - Lesson bodies (`content` TipTap docs) are not edited here and are not rendered on the learner lesson page — every block the learner sees is authored in this form.
 
-3. **Podcasts** — replicate the same model (`extra_metadata.translations` or a dedicated table once editing UI exists) and the same `locale` query parameter on read endpoints.
+3. **Podcasts — done.** Dedicated `podcast_translation` and `podcast_episode_translation` tables, `?locale=` on every read endpoint (including `/meta` and the episode list), locale-aware General/Episodes editors, a Translations tab, and localized learner listing/detail pages. See [podcasts-localization.md](./podcasts-localization.md).
 
 4. **Collections — done.** Same contract as courses with a dedicated `collection_translation` table (`name`, `description`, `about`, `learnings`, `tags`, `seo`), `?locale=` on every read endpoint, a locale-aware General/SEO editor, a Translations tab, and localized learner listing/detail pages. See [collections-localization.md](./collections-localization.md).
 

@@ -1131,6 +1131,7 @@
                      "create_podcasts_placeholder":  "Create podcasts to share audio content with your audience",
                      "no_search_results":  "No podcasts found",
                      "try_different_search":  "Try a different search term",
+                     "only_available_in":  "This podcast is only available in {{language}}.",
                      "search_results":  "Found {{count}} podcast(s) for \"{{query}}\"",
                      "podcast_name":  "Podcast Name",
                      "podcast_name_required":  "Podcast name is required",
@@ -1186,6 +1187,7 @@
                                                     "general":  "General",
                                                     "episodes":  "Episodes",
                                                     "access":  "Access",
+                                                    "translations":  "Translations",
                                                     "distribution":  "Distribution"
                                                 },
                                        "access":  {

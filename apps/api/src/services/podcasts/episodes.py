@@ -21,6 +21,11 @@ from src.security.rbac import check_resource_access, AccessAction
 from src.security.rbac.constants import ADMIN_OR_MAINTAINER_ROLE_IDS
 from src.services.webhooks.dispatch import dispatch_webhooks
 from src.security.superadmin import is_user_superadmin
+from src.services.podcasts.translations import (
+    apply_episode_overlay,
+    apply_episode_overlay_bulk,
+    podcast_source_locale,
+)
 
 
 async def _user_can_view_unpublished_episode(
@@ -72,6 +77,7 @@ async def get_episode(
     episode_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    locale: str | None = None,
 ) -> PodcastEpisodeRead:
     statement = select(PodcastEpisode).where(PodcastEpisode.episode_uuid == episode_uuid)
     episode = db_session.exec(statement).first()
@@ -106,7 +112,10 @@ async def get_episode(
                 detail="Episode not found",
             )
 
-    return PodcastEpisodeRead(**episode.model_dump())
+    read = PodcastEpisodeRead(**episode.model_dump())
+    return apply_episode_overlay(
+        read, episode, podcast_source_locale(podcast), locale, db_session
+    )
 
 
 async def get_episodes_by_podcast(
@@ -115,6 +124,7 @@ async def get_episodes_by_podcast(
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
     include_unpublished: bool = False,
+    locale: str | None = None,
 ) -> List[PodcastEpisodeRead]:
     # Get the podcast first
     podcast_statement = select(Podcast).where(Podcast.id == podcast_id)
@@ -161,7 +171,10 @@ async def get_episodes_by_podcast(
 
     episodes = db_session.exec(query).all()
 
-    return [PodcastEpisodeRead(**episode.model_dump()) for episode in episodes]
+    reads = [PodcastEpisodeRead(**episode.model_dump()) for episode in episodes]
+    return apply_episode_overlay_bulk(
+        reads, episodes, podcast_source_locale(podcast), locale, db_session
+    )
 
 
 async def create_episode(

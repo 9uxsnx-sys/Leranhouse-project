@@ -1,10 +1,19 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
+from fastapi import APIRouter, Depends, File, Form, Query, Request, UploadFile
 from sqlmodel import Session
 from src.db.podcasts.podcasts import (
     PodcastRead,
     PodcastUpdate,
     PodcastReadWithEpisodeCount,
+)
+from src.db.podcast_translations import (
+    PodcastTranslationRead,
+    PodcastTranslationUpsert,
+)
+from src.services.podcasts.translations import (
+    list_podcast_translations,
+    upsert_podcast_translation,
+    delete_podcast_translation,
 )
 from src.services.podcasts.podcasts import (
     get_podcast,
@@ -94,11 +103,12 @@ async def api_create_podcast(
 async def api_get_podcast(
     request: Request,
     podcast_uuid: str,
+    locale: Optional[str] = Query(default=None, description="Content locale (falls back to the source locale)"),
     current_user=Depends(get_current_user),
     db_session: Session = Depends(get_db_session),
 ):
     """Get a podcast by UUID"""
-    podcast = await get_podcast(request, podcast_uuid, current_user, db_session)
+    podcast = await get_podcast(request, podcast_uuid, current_user, db_session, locale=locale)
     return podcast
 
 
@@ -116,11 +126,12 @@ async def api_get_podcast(
 async def api_get_podcast_meta(
     request: Request,
     podcast_uuid: str,
+    locale: Optional[str] = Query(default=None, description="Content locale (falls back to the source locale)"),
     current_user=Depends(get_current_user),
     db_session: Session = Depends(get_db_session),
 ):
     """Get a podcast with its episodes"""
-    result = await get_podcast_meta(request, podcast_uuid, current_user, db_session)
+    result = await get_podcast_meta(request, podcast_uuid, current_user, db_session, locale=locale)
     return result
 
 
@@ -142,12 +153,13 @@ async def api_get_podcasts_orgslug(
     page: int,
     limit: int,
     include_unpublished: bool = False,
+    locale: Optional[str] = Query(default=None, description="Content locale (falls back to the source locale)"),
     current_user=Depends(get_current_user),
     db_session: Session = Depends(get_db_session),
 ):
     """Get paginated podcasts for an organization"""
     podcasts = await get_podcasts_orgslug(
-        request, current_user, org_slug, db_session, page, limit, include_unpublished
+        request, current_user, org_slug, db_session, page, limit, include_unpublished, locale
     )
     return podcasts
 
@@ -365,6 +377,7 @@ async def api_get_podcast_episodes(
     request: Request,
     podcast_uuid: str,
     include_unpublished: bool = False,
+    locale: Optional[str] = Query(default=None, description="Content locale (falls back to the source locale)"),
     current_user=Depends(get_current_user),
     db_session: Session = Depends(get_db_session),
 ):
@@ -381,7 +394,7 @@ async def api_get_podcast_episodes(
         raise HTTPException(status_code=404, detail="Podcast not found")
 
     episodes = await get_episodes_by_podcast(
-        request, podcast.id, db_session, current_user, include_unpublished
+        request, podcast.id, db_session, current_user, include_unpublished, locale
     )
     return episodes
 
@@ -454,3 +467,59 @@ async def api_reorder_episodes(
         request, podcast_uuid, episode_orders, current_user, db_session
     )
     return episodes
+
+
+# ── Content translations ──────────────────────────────────────────────────────
+
+
+@router.get(
+    "/{podcast_uuid}/translations",
+    response_model=List[PodcastTranslationRead],
+    summary="List podcast translations",
+    description="Return every locale stored for a podcast.",
+)
+async def api_list_podcast_translations(
+    request: Request,
+    podcast_uuid: str,
+    current_user=Depends(get_current_user),
+    db_session: Session = Depends(get_db_session),
+):
+    return await list_podcast_translations(
+        request, podcast_uuid, current_user, db_session
+    )
+
+
+@router.put(
+    "/{podcast_uuid}/translations/{locale}",
+    response_model=PodcastTranslationRead,
+    summary="Create or update a podcast translation",
+    description="Upsert the display fields of one locale. The source locale is rejected (update the podcast instead).",
+)
+async def api_upsert_podcast_translation(
+    request: Request,
+    podcast_uuid: str,
+    locale: str,
+    payload: PodcastTranslationUpsert,
+    current_user=Depends(get_current_user),
+    db_session: Session = Depends(get_db_session),
+):
+    return await upsert_podcast_translation(
+        request, podcast_uuid, locale, payload, current_user, db_session
+    )
+
+
+@router.delete(
+    "/{podcast_uuid}/translations/{locale}",
+    summary="Delete a podcast translation",
+    description="Remove the translation row for one locale; reads fall back to the source locale.",
+)
+async def api_delete_podcast_translation(
+    request: Request,
+    podcast_uuid: str,
+    locale: str,
+    current_user=Depends(get_current_user),
+    db_session: Session = Depends(get_db_session),
+):
+    return await delete_podcast_translation(
+        request, podcast_uuid, locale, current_user, db_session
+    )

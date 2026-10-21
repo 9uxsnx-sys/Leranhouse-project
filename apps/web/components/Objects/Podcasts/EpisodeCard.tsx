@@ -37,10 +37,8 @@ export default function EpisodeCard({ episode, podcast, savedProgress }: Episode
 
   return (
     <div
-      className={`rounded-xl bg-white border transition-all duration-200 cursor-pointer ${
-        isHovered
-          ? 'border-gray-300 shadow-sm'
-          : 'border-black/10'
+      className={`rounded-xl bg-white border shadow-sm transition-all duration-200 cursor-pointer ${
+        isHovered ? 'border-gray-200' : 'border-gray-100'
       }`}
       onClick={handlePlay}
       onMouseEnter={() => setIsHovered(true)}

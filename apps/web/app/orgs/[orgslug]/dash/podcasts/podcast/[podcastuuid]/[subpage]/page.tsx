@@ -5,6 +5,7 @@ import { motion } from 'motion/react'
 import EditPodcastGeneral from '@components/Dashboard/Pages/Podcast/EditPodcastGeneral/EditPodcastGeneral'
 import EditPodcastEpisodes from '@components/Dashboard/Pages/Podcast/EditPodcastEpisodes/EditPodcastEpisodes'
 import EditPodcastAccess from '@components/Dashboard/Pages/Podcast/EditPodcastAccess/EditPodcastAccess'
+import EditPodcastTranslations from '@components/Dashboard/Pages/Podcast/EditPodcastTranslations/EditPodcastTranslations'
 import PodcastDistribution from '@components/Dashboard/Pages/Podcast/PodcastDistribution/PodcastDistribution'
 import { usePodcastRights } from '@components/Hooks/usePodcastRights'
 import { getUriWithOrg } from '@services/config/config'
@@ -24,6 +25,18 @@ function PodcastPageTitle() {
     <h1 className="text-3xl md:text-4xl font-semibold text-ui-fg-base leading-tight">
       {isLoading ? '...' : podcast?.name || 'Podcast'}
     </h1>
+  )
+}
+
+function PodcastTranslationsTab({ orgslug }: { orgslug: string }) {
+  const { podcast, refreshPodcast } = usePodcast()
+  if (!podcast) return null
+  return (
+    <EditPodcastTranslations
+      podcast={podcast}
+      orgslug={orgslug}
+      onUpdated={refreshPodcast}
+    />
   )
 }
 
@@ -62,6 +75,12 @@ function PodcastOverviewPage(props: { params: Promise<PodcastOverviewParams> }) 
           },
         ]
       : []),
+    {
+      key: 'translations',
+      label: t('podcasts.dashboard.tabs.translations'),
+      icon: SectionIcon.translations,
+      href: `/dash/podcasts/podcast/${params.podcastuuid}/translations`,
+    },
     {
       key: 'distribution',
       label: t('podcasts.dashboard.tabs.distribution'),
@@ -111,6 +130,9 @@ function PodcastOverviewPage(props: { params: Promise<PodcastOverviewParams> }) 
               )}
               {params.subpage === 'access' && canManageAccess && (
                 <EditPodcastAccess orgslug={params.orgslug} />
+              )}
+              {params.subpage === 'translations' && (
+                <PodcastTranslationsTab orgslug={params.orgslug} />
               )}
               {params.subpage === 'distribution' && (
                 <PodcastDistribution orgslug={params.orgslug} podcastuuid={podcastuuid} />

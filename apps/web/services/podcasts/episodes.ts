@@ -27,9 +27,14 @@ export async function getEpisodes(
   podcast_uuid: string,
   next: any,
   access_token?: string,
-  include_unpublished: boolean = false
+  include_unpublished: boolean = false,
+  locale?: string
 ) {
-  const url = `${getAPIUrl()}podcasts/${podcast_uuid}/episodes${include_unpublished ? '?include_unpublished=true' : ''}`
+  const params = new URLSearchParams()
+  if (include_unpublished) params.set('include_unpublished', 'true')
+  if (locale) params.set('locale', locale)
+  const query = params.toString() ? `?${params.toString()}` : ''
+  const url = `${getAPIUrl()}podcasts/${podcast_uuid}/episodes${query}`
   const result: any = await fetch(
     url,
     RequestBodyWithAuthHeader('GET', null, next, access_token)
@@ -41,10 +46,11 @@ export async function getEpisodes(
 export async function getEpisode(
   episode_uuid: string,
   next: any,
-  access_token?: string
+  access_token?: string,
+  locale?: string
 ) {
   const result: any = await fetch(
-    `${getAPIUrl()}podcasts/episodes/${episode_uuid}`,
+    `${getAPIUrl()}podcasts/episodes/${episode_uuid}${locale ? `?locale=${encodeURIComponent(locale)}` : ''}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token)
   )
   const res = await errorHandling(result)

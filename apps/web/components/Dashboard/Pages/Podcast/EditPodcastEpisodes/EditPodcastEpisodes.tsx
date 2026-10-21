@@ -1,20 +1,26 @@
 'use client'
 import React, { useState, useEffect, useMemo } from 'react'
-import { mutate } from 'swr'
+import useSWR, { mutate } from 'swr'
 import { usePodcast } from '@components/Contexts/PodcastContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
+import { useContentLocale } from '@components/Hooks/useCourseTranslation'
+import { useEpisodeTranslation } from '@components/Hooks/usePodcastTranslation'
+import { getCurrentLanguageNativeName } from '@/lib/languages'
 import {
   createEpisode,
   deleteEpisode,
+  getEpisode,
   updateEpisode,
   uploadEpisodeAudio,
   reorderEpisodes,
   PodcastEpisode,
   formatDuration,
 } from '@services/podcasts/episodes'
+import { upsertEpisodeTranslation } from '@services/podcasts/podcastTranslations'
+import { getAPIUrl } from '@services/config/config'
 import { getEpisodeAudioMediaDirectory, getEpisodeThumbnailMediaDirectory } from '@services/media/media'
-import { revalidateTags } from '@services/utils/ts/requests'
+import { revalidateTags, swrFetcher } from '@services/utils/ts/requests'
 import { useTranslation } from 'react-i18next'
 import Link from 'next/link'
 import { getUriWithOrg } from '@services/config/config'
@@ -68,6 +74,21 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
   const org = useOrg() as any
   const accessToken = session?.data?.tokens?.access_token
 
+  // Episode titles follow the dashboard language. The context still holds the
+  // source rows (the General tab needs them), so the list re-fetches localized.
+  const contentLocale = useContentLocale()
+  const sourceLocale = (podcast?.source_locale || 'en').split('-')[0]
+
+  const { data: localizedEpisodes } = useSWR<PodcastEpisode[]>(
+    podcast?.podcast_uuid && accessToken
+      ? `${getAPIUrl()}podcasts/${podcast.podcast_uuid}/episodes?include_unpublished=true&locale=${contentLocale}`
+      : null,
+    (url: string) => swrFetcher(url, accessToken),
+    { revalidateOnFocus: false }
+  )
+
+  const episodesToShow = localizedEpisodes ?? episodes
+
   const [selectedEpisodeUuid, setSelectedEpisodeUuid] = useState<string | null>(null)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -91,7 +112,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
   }
 
   const selectedEpisode = selectedEpisodeUuid
-    ? episodes.find((e: PodcastEpisode) => e.episode_uuid === selectedEpisodeUuid) || null
+    ? episodesToShow.find((e: PodcastEpisode) => e.episode_uuid === selectedEpisodeUuid) || null
     : null
 
   const displayEpisodes = useMemo(() => {
@@ -100,7 +121,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
     if (episodeOrder) {
       // Use custom drag-and-drop order
       const orderedMap = new Map(episodeOrder.map((uuid, i) => [uuid, i]))
-      result = [...episodes].sort((a: PodcastEpisode, b: PodcastEpisode) => {
+      result = [...episodesToShow].sort((a: PodcastEpisode, b: PodcastEpisode) => {
         const aIdx = orderedMap.get(a.episode_uuid)
         const bIdx = orderedMap.get(b.episode_uuid)
         if (aIdx !== undefined && bIdx !== undefined) return aIdx - bIdx
@@ -109,7 +130,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
         return 0
       })
     } else {
-      result = [...episodes]
+      result = [...episodesToShow]
       result.sort((a: PodcastEpisode, b: PodcastEpisode) => {
         const nameA = (a.title || '').toLowerCase()
         const nameB = (b.title || '').toLowerCase()
@@ -126,7 +147,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
     }
 
     return result
-  }, [episodes, searchQuery, sortOrder, episodeOrder])
+  }, [episodesToShow, searchQuery, sortOrder, episodeOrder])
 
   const handleDragEnd = async (result: DropResult) => {
     const override = document.getElementById('dnd-cursor-override')
@@ -219,6 +240,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
           podcastuuid={podcastuuid}
           accessToken={accessToken}
           orgUuid={org?.org_uuid}
+          sourceLocale={sourceLocale}
           onBack={() => setSelectedEpisodeUuid(null)}
           onSuccess={refreshPodcast}
         />
@@ -324,7 +346,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
                             }}
                             role="button"
                             tabIndex={0}
-                            className={`w-full text-start px-5 py-4 rounded-xl bg-white shadow-borders-base transition-colors flex items-center justify-between group ${
+                            className={`w-full text-start px-5 py-4 rounded-xl bg-white border border-gray-100 shadow-sm transition-colors flex items-center justify-between group ${
                               isSelectMode
                                 ? isSelected
                                   ? 'ring-2 ring-blue-500/40 border-blue-200 cursor-pointer'
@@ -456,6 +478,7 @@ function EpisodeDetailForm({
   podcastuuid,
   accessToken,
   orgUuid,
+  sourceLocale,
   onBack,
   onSuccess,
 }: {
@@ -464,22 +487,34 @@ function EpisodeDetailForm({
   podcastuuid: string
   accessToken: string
   orgUuid: string
+  sourceLocale: string
   onBack: () => void
   onSuccess: () => Promise<void>
 }) {
   const { t } = useTranslation()
+  // ── Content locale ──
+  // The base episode row holds the podcast source locale; every other locale
+  // is a podcast_episode_translation row.
+  const { contentLocale, isSourceLocale, translation, reload } =
+    useEpisodeTranslation(episode.episode_uuid, sourceLocale)
+
   const [title, setTitle] = useState(episode.title)
   const [description, setDescription] = useState(episode.description || '')
   const [isSaving, setIsSaving] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
   const [isAudioUploading, setIsAudioUploading] = useState(false)
+  const [isCopying, setIsCopying] = useState(false)
   const [dirty, setDirty] = useState(false)
 
   useEffect(() => {
-    setTitle(episode.title)
-    setDescription(episode.description || '')
+    setTitle(!isSourceLocale && translation ? translation.title : episode.title)
+    setDescription(
+      !isSourceLocale && translation
+        ? translation.description || ''
+        : episode.description || ''
+    )
     setDirty(false)
-  }, [episode.episode_uuid, episode.title, episode.description])
+  }, [episode.episode_uuid, episode.title, episode.description, translation, isSourceLocale])
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value)
@@ -491,6 +526,21 @@ function EpisodeDetailForm({
     setDirty(true)
   }
 
+  const copyFromSource = async () => {
+    if (isCopying) return
+    setIsCopying(true)
+    try {
+      const source = await getEpisode(episode.episode_uuid, null, accessToken)
+      setTitle(source.title || '')
+      setDescription(source.description || '')
+      setDirty(true)
+    } catch {
+      toast.error(t('podcasts.dashboard.episodes.update_error'))
+    } finally {
+      setIsCopying(false)
+    }
+  }
+
   const isPublished = episode.published
 
   const handleSave = async () => {
@@ -498,7 +548,18 @@ function EpisodeDetailForm({
     setIsSaving(true)
     const toastId = toast.loading(t('podcasts.dashboard.episodes.updating'))
     try {
-      await updateEpisode(episode.episode_uuid, { title, description }, accessToken)
+      if (!isSourceLocale) {
+        // Translating never touches the base episode row.
+        await upsertEpisodeTranslation(
+          episode.episode_uuid,
+          contentLocale,
+          { title, description },
+          accessToken
+        )
+        await reload()
+      } else {
+        await updateEpisode(episode.episode_uuid, { title, description }, accessToken)
+      }
       await revalidateTags(['podcasts'], orgslug)
       await onSuccess()
       toast.success(t('podcasts.dashboard.episodes.updated'), { id: toastId })
@@ -570,6 +631,35 @@ function EpisodeDetailForm({
         </Link>
 
         <div className="flex items-center gap-2">
+          {!isSourceLocale && (
+            <button
+              type="button"
+              onClick={copyFromSource}
+              disabled={isCopying}
+              className="hidden sm:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
+            >
+              {isCopying ? <Loader2 size={14} className="animate-spin" /> : <Copy size={14} />}
+              <span>{t('dashboard.courses.general.locale.copy_from_source')}</span>
+            </button>
+          )}
+          <span
+            className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600"
+            title={
+              isSourceLocale
+                ? t('dashboard.courses.general.locale.source')
+                : t('dashboard.courses.general.locale.translation')
+            }
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${!dirty ? 'bg-teal-500' : 'bg-amber-400'}`} />
+            <span>{getCurrentLanguageNativeName(contentLocale)}</span>
+            <span className="text-gray-400">
+              {isSourceLocale
+                ? t('dashboard.courses.general.locale.source')
+                : translation
+                  ? t('dashboard.courses.general.locale.translation')
+                  : t('dashboard.courses.general.locale.missing')}
+            </span>
+          </span>
           <button
             type="button"
             onClick={handleSave}

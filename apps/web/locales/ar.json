@@ -887,6 +887,7 @@
     "no_podcasts_description": "لا يوجد بودكاست متاح حالياً",
     "no_search_results": "لم يتم العثور على بودكاست",
     "try_different_search": "جرب مصطلح بحث مختلف",
+    "only_available_in": "هذا البودكاست متاح فقط باللغة {{language}}.",
     "episodes": "الحلقات",
     "no_episodes": "لا يوجد حلقات بعد",
     "hosted_by": "يقدمه",

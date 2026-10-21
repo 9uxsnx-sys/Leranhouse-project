@@ -35,6 +35,10 @@ from src.security.rbac import (
 from src.security.rbac.constants import ADMIN_OR_MAINTAINER_ROLE_IDS
 from src.security.superadmin import is_user_superadmin
 from src.services.podcasts.thumbnails import upload_podcast_thumbnail
+from src.services.podcasts.translations import (
+    apply_podcast_overlay,
+    apply_podcast_overlay_bulk,
+)
 from fastapi import HTTPException, Request, UploadFile, status
 from datetime import datetime
 from src.db.organization_config import OrganizationConfig
@@ -124,6 +128,7 @@ async def get_podcast(
     podcast_uuid: str,
     current_user: PublicUser | AnonymousUser | APITokenUser,
     db_session: Session,
+    locale: str | None = None,
 ):
     statement = select(Podcast).where(Podcast.podcast_uuid == podcast_uuid)
     podcast = db_session.exec(statement).first()
@@ -176,9 +181,8 @@ async def get_podcast(
         for resource_author, user in author_results
     ]
 
-    podcast = PodcastRead(**podcast.model_dump(), authors=authors)
-
-    return podcast
+    podcast_read = PodcastRead(**podcast.model_dump(), authors=authors)
+    return apply_podcast_overlay(podcast_read, podcast, locale, db_session)
 
 
 async def get_podcast_meta(
@@ -186,6 +190,7 @@ async def get_podcast_meta(
     podcast_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    locale: str | None = None,
 ) -> dict:
     """Get podcast with episodes list."""
     from src.services.podcasts.episodes import get_episodes_by_podcast
@@ -234,7 +239,12 @@ async def get_podcast_meta(
 
     # Get podcast episodes (include unpublished for authorized users)
     episodes = await get_episodes_by_podcast(
-        request, podcast.id, db_session, current_user, include_unpublished=can_view_unpublished
+        request,
+        podcast.id,
+        db_session,
+        current_user,
+        include_unpublished=can_view_unpublished,
+        locale=locale,
     )
 
     # Convert to AuthorWithRole objects
@@ -254,6 +264,7 @@ async def get_podcast_meta(
         **podcast.model_dump(),
         authors=authors,
     )
+    podcast_read = apply_podcast_overlay(podcast_read, podcast, locale, db_session)
 
     return {
         "podcast": podcast_read,
@@ -269,6 +280,7 @@ async def get_podcasts_orgslug(
     page: int = 1,
     limit: int = 10,
     include_unpublished: bool = False,
+    locale: str | None = None,
 ) -> List[PodcastReadWithEpisodeCount]:
     offset = (page - 1) * limit
 
@@ -416,6 +428,8 @@ async def get_podcasts_orgslug(
             "price_amount": podcast.price_amount,
             "price_currency": podcast.price_currency,
             "podcast_uuid": podcast.podcast_uuid,
+            "source_locale": podcast.source_locale,
+            "seo": podcast.seo,
             "creation_date": podcast.creation_date,
             "update_date": podcast.update_date,
             "authors": podcast_authors.get(podcast.podcast_uuid, []),
@@ -424,7 +438,7 @@ async def get_podcasts_orgslug(
         })
         podcast_reads.append(podcast_read)
 
-    return podcast_reads
+    return apply_podcast_overlay_bulk(podcast_reads, locale, db_session)
 
 
 async def get_podcasts_count_orgslug(

@@ -59,6 +59,9 @@ class Podcast(PodcastBase, table=True):
         sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"))
     )
     podcast_uuid: str = ""
+    # The base row holds the source-locale content; other locales live in
+    # ``podcast_translation`` (see the podcast translations service).
+    source_locale: str = Field(default="en")
     creation_date: str = ""
     update_date: str = ""
     seo: Optional[dict] = Field(default=None, sa_column=Column(JSONB))
@@ -97,6 +100,10 @@ class PodcastRead(PodcastBase):
     thumbnail_image: Optional[str] = Field(default="")
     banner_image: Optional[str] = Field(default="")
     seo: Optional[dict] = None
+    # Localization state, filled by the translations service on read.
+    source_locale: str = "en"
+    content_locale: str = "en"
+    is_fallback: bool = False
 
 
 class PodcastReadWithEpisodeCount(PodcastRead):

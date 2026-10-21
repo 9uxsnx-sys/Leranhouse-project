@@ -14,6 +14,7 @@ from src.db.communities.discussions import Discussion, DiscussionRead
 from src.db.playgrounds import Playground, PlaygroundRead, PlaygroundAccessType
 from src.db.podcasts.podcasts import Podcast, PodcastRead
 from src.services.courses.collection_translations import apply_collection_overlay_bulk
+from src.services.podcasts.translations import apply_podcast_overlay_bulk
 from src.services.courses.courses import search_courses
 from src.services.search.normalization import (
     LIKE_ESCAPE_CHAR,
@@ -277,6 +278,7 @@ async def search_across_org(
         playground_reads.append(read)
 
     podcast_reads = [PodcastRead(**p.model_dump(), authors=[]) for p in podcasts]
+    podcast_reads = apply_podcast_overlay_bulk(podcast_reads, locale, db_session)
 
     return SearchResult(
         courses=courses,

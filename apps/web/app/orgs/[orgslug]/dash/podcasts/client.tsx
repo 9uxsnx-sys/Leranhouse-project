@@ -7,6 +7,7 @@ import { ActionRow, ActionRowSearch, ActionRowSpacer, ActionRowActions } from '@
 import { ConceptIcon } from '@components/ui/icons'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useContentLocale } from '@components/Hooks/useCourseTranslation'
 import { PodcastWithEpisodeCount, deletePodcast, removePodcastPrefix } from '@services/podcasts/podcasts'
 import { CreatePodcastModal } from '@components/Objects/Modals/Podcasts/CreatePodcastModal'
 import { PodcastCard } from '@components/Objects/Thumbnails/PodcastCard'
@@ -49,12 +50,13 @@ const PodcastsDashClient = ({
   const access_token = session?.data?.tokens?.access_token
   const currentPlan = usePlan()
 
-  // SWR refetch
-  const podcastsListUrl = `${getAPIUrl()}podcasts/org_slug/${orgslug}/page/1/limit/100?include_unpublished=true`
+  // SWR refetch — the locale is part of the key so the cards follow the UI language.
+  const contentLocale = useContentLocale()
+  const podcastsListUrl = `${getAPIUrl()}podcasts/org_slug/${orgslug}/page/1/limit/100?include_unpublished=true&locale=${contentLocale}`
   const { data: swrPodcasts, mutate: mutatePodcasts } = useSWR(
     podcastsListUrl,
     (url) => swrFetcher(url, access_token),
-    { fallbackData: podcasts, revalidateOnMount: false }
+    { fallbackData: podcasts, revalidateOnFocus: false, dedupingInterval: 30000 }
   )
   const effectivePodcasts = swrPodcasts || podcasts
 

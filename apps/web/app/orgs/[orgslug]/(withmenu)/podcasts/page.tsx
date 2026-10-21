@@ -1,8 +1,10 @@
 import { Metadata } from 'next'
+import { cookies } from 'next/headers'
 import { getOrgPodcasts } from '@services/podcasts/podcasts'
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
 import { getOrgThumbnailMediaDirectory, getOrgOgImageMediaDirectory } from '@services/media/media'
 import { getServerSession } from '@/lib/auth/server'
+import { localeCode } from '@/lib/direction'
 import { getCanonicalUrl, getOrgSeoConfig, buildPageTitle, buildBreadcrumbJsonLd } from '@/lib/seo/utils'
 import { getServerCanonicalUrl } from '@/lib/seo/utils.server'
 import { JsonLd } from '@components/SEO/JsonLd'
@@ -87,11 +89,14 @@ export default async function PodcastsPage({ params }: { params: PageParams }) {
 
   let initialPodcasts = []
   try {
+    const cookieStore = await cookies()
+    const locale = localeCode(cookieStore.get('i18next')?.value) || 'en'
     initialPodcasts = await getOrgPodcasts(
       orgslug,
       { revalidate: 120, tags: ['podcasts'] },
       access_token ? access_token : undefined,
-      access_token ? true : false  // include_unpublished for logged-in users
+      access_token ? true : false,  // include_unpublished for logged-in users
+      locale
     )
   } catch (error) {
     console.error('Error fetching podcasts:', error)

@@ -1,9 +1,11 @@
 import { Metadata } from 'next'
+import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { getPodcastMeta, PodcastMeta } from '@services/podcasts/podcasts'
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
 import { getPodcastThumbnailMediaDirectory, getOrgOgImageMediaDirectory } from '@services/media/media'
 import { getServerSession } from '@/lib/auth/server'
+import { localeCode } from '@/lib/direction'
 import { getCanonicalUrl, getOrgSeoConfig, buildPageTitle, buildBreadcrumbJsonLd } from '@/lib/seo/utils'
 import { getServerCanonicalUrl } from '@/lib/seo/utils.server'
 import { JsonLd } from '@components/SEO/JsonLd'
@@ -22,13 +24,16 @@ export async function generateMetadata({
   const { orgslug, podcastuuid } = await params
   const session = await getServerSession()
   const access_token = session?.tokens?.access_token
+  const cookieStore = await cookies()
+  const locale = localeCode(cookieStore.get('i18next')?.value) || 'en'
 
   let podcastMeta: PodcastMeta | null = null
   try {
     podcastMeta = await getPodcastMeta(
       `podcast_${podcastuuid}`,
       { revalidate: 120, tags: ['podcasts'] },
-      access_token
+      access_token,
+      locale
     )
   } catch (error) {
     console.error('Error fetching podcast metadata:', error)
@@ -101,6 +106,8 @@ export default async function PodcastPage({ params }: { params: PageParams }) {
   const { orgslug, podcastuuid } = await params
   const session = await getServerSession()
   const access_token = session?.tokens?.access_token
+  const cookieStore = await cookies()
+  const locale = localeCode(cookieStore.get('i18next')?.value) || 'en'
 
   const org = await getOrganizationContextInfo(orgslug, {
     revalidate: 120,
@@ -113,7 +120,8 @@ export default async function PodcastPage({ params }: { params: PageParams }) {
     podcastMeta = await getPodcastMeta(
       `podcast_${podcastuuid}`,
       { revalidate: 120, tags: ['podcasts'] },
-      access_token
+      access_token,
+      locale
     )
   } catch (error: any) {
     fetchError = { status: error?.status }
@@ -150,7 +158,7 @@ export default async function PodcastPage({ params }: { params: PageParams }) {
     },
     episode: (podcastMeta.episodes || []).map((ep: any) => ({
       '@type': 'PodcastEpisode',
-      name: ep.name,
+      name: ep.title,
       description: ep.description,
     })),
   }
