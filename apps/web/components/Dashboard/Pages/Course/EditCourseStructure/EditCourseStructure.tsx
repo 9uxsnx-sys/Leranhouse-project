@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import ModuleForm from './ModuleForm'
 import LessonDetailForm from './LessonDetailForm'
+import { useContentLocale, localizedName } from '@components/Hooks/useCourseTranslation'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 
@@ -53,6 +54,11 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
   const chapters = courseStructure?.chapters || []
   const course_uuid = course ? course.courseStructure.course_uuid : ''
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false
+
+  // Names come from the source-locale payload; resolve the active language here.
+  const contentLocale = useContentLocale()
+  const sourceLocale = (courseStructure?.source_locale || 'en').split('-')[0]
+  const chapterName = (chapter: any) => localizedName(chapter, contentLocale, sourceLocale)
 
   // 3-state navigation
   const [selectedChapterIndex, setSelectedChapterIndex] = useState<number | null>(null)
@@ -92,19 +98,19 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
     } else {
       result = [...chapters]
       result.sort((a: any, b: any) => {
-        const nameA = (a.name || '').toLowerCase()
-        const nameB = (b.name || '').toLowerCase()
+        const nameA = chapterName(a).toLowerCase()
+        const nameB = chapterName(b).toLowerCase()
         return sortOrder === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA)
       })
     }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase()
       result = result.filter((ch: any) =>
-        (ch.name || '').toLowerCase().includes(q)
+        chapterName(ch).toLowerCase().includes(q)
       )
     }
     return result
-  }, [chapters, searchQuery, sortOrder, chapterOrder])
+  }, [chapters, searchQuery, sortOrder, chapterOrder, contentLocale, sourceLocale])
 
   const handleDragEnd = async (result: DropResult) => {
     if (!result.destination || isReordering) return
@@ -379,7 +385,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
                           )}
                           <Folder size={18} className="text-gray-400 flex-shrink-0" />
                           <p className="text-sm font-medium text-gray-900 truncate">
-                            {chapter.name || t('dashboard.courses.structure.course_structure.untitled_module')}
+                            {chapterName(chapter) || t('dashboard.courses.structure.course_structure.untitled_module')}
                           </p>
                         </div>
                         <DropdownMenu>

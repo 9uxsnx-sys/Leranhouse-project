@@ -6,6 +6,18 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { CourseTranslation, getCourseTranslations } from '@services/courses/translations'
 
 /**
+ * Name of a chapter/activity in the dashboard's active language. Dashboard
+ * lists read names from the source-locale payload, so the translation is
+ * resolved here instead of re-fetching the course meta per language.
+ */
+export function localizedName(entity: any, contentLocale: string, sourceLocale: string): string {
+  if (!entity) return ''
+  if (contentLocale === sourceLocale) return entity.name || ''
+  const translation = entity.extra_metadata?.translations?.[contentLocale]
+  return translation?.name || entity.name || ''
+}
+
+/**
  * Tracks the locale selected in the platform language switcher. There is no
  * second content selector — the dashboard always edits the active language.
  */

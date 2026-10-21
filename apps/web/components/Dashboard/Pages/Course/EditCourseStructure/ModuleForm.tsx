@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useCourse, getCourseMetaCacheKey } from '@components/Contexts/CourseContext'
+import { useContentLocale, localizedName } from '@components/Hooks/useCourseTranslation'
 import { mutate } from 'swr'
 import {
   Trash2,
@@ -48,6 +49,10 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const course = useCourse() as any
+  // Lesson names come from the source-locale payload; resolve the active language.
+  const contentLocale = useContentLocale()
+  const sourceLocale = (course?.courseStructure?.source_locale || 'en').split('-')[0]
+  const lessonName = (activity: any) => localizedName(activity, contentLocale, sourceLocale)
   const [isDeletingActivity, setIsDeletingActivity] = useState<string | null>(null)
   const [isCreatingLesson, setIsCreatingLesson] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -89,19 +94,19 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
     } else {
       result = [...activities]
       result.sort((a: any, b: any) => {
-        const nameA = (a.name || '').toLowerCase()
-        const nameB = (b.name || '').toLowerCase()
+        const nameA = lessonName(a).toLowerCase()
+        const nameB = lessonName(b).toLowerCase()
         return sortOrder === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA)
       })
     }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase()
       result = result.filter((a: any) =>
-        (a.name || '').toLowerCase().includes(q)
+        lessonName(a).toLowerCase().includes(q)
       )
     }
     return result
-  }, [activities, searchQuery, sortOrder, activityOrder])
+  }, [activities, searchQuery, sortOrder, activityOrder, contentLocale, sourceLocale])
 
   const handleDragEnd = async (result: DropResult) => {
     if (!result.destination || isReordering) return
@@ -344,7 +349,7 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
                           )}
                           <FileText size={18} className="text-gray-400 flex-shrink-0" />
                           <p className="text-sm font-medium text-gray-900 truncate">
-                            {activity.name || t('dashboard.courses.structure.module_form.untitled_lesson')}
+                            {lessonName(activity) || t('dashboard.courses.structure.module_form.untitled_lesson')}
                           </p>
                         </div>
                         <DropdownMenu>
