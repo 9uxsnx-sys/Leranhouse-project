@@ -63,14 +63,12 @@ function clearActivityUuid(uuid?: string) {
 
 function ModuleCard({
   module,
-  index,
   isOpen,
   onToggle,
   orgslug,
   courseuuid,
 }: {
   module: Module
-  index: number
   isOpen: boolean
   onToggle: () => void
   orgslug: string
@@ -91,9 +89,6 @@ function ModuleCard({
         className="w-full flex items-center justify-between px-5 py-3 text-start transition-colors hover:bg-black/[0.02]"
       >
         <span className="flex flex-col min-w-0">
-          <span className="text-[11px] uppercase tracking-wide text-ui-fg-muted">
-            {t('course.page.curriculum_module', { number: index + 1 })}
-          </span>
           <Text weight="plus" size="base" className="text-ui-fg-base truncate">
             {module.name}
           </Text>
@@ -203,7 +198,6 @@ export default function CourseCurriculum({
           <ModuleCard
             key={module.id ?? idx}
             module={module}
-            index={idx}
             orgslug={orgslug}
             courseuuid={courseuuid}
             isOpen={openIndex === idx}
