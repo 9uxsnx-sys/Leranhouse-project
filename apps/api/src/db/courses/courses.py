@@ -75,6 +75,7 @@ class Course(CourseBase, table=True):
         sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"), index=True)
     )
     course_uuid: str = Field(default="", index=True)
+    source_locale: str = Field(default="en")
     creation_date: str = ""
     update_date: str = ""
     seo: Optional[dict] = Field(default=None, sa_column=Column(JSONB))
@@ -124,6 +125,11 @@ class CourseRead(CourseBase):
     banner_image: Optional[str] = Field(default="")
     seo: Optional[dict] = None
     extra_metadata: Optional[dict] = None
+    # Localization — content_locale is the locale actually served,
+    # is_fallback tells the client the requested locale had no translation.
+    source_locale: Optional[str] = None
+    content_locale: Optional[str] = None
+    is_fallback: bool = False
 
 
 class FullCourseRead(CourseBase):
@@ -139,6 +145,10 @@ class FullCourseRead(CourseBase):
     banner_image: Optional[str] = Field(default="")
     seo: Optional[dict] = None
     extra_metadata: Optional[dict] = None
+    # Localization
+    source_locale: Optional[str] = None
+    content_locale: Optional[str] = None
+    is_fallback: bool = False
     # Chapters, Activities
     chapters: List[ChapterRead]
     authors: List[AuthorWithRole]

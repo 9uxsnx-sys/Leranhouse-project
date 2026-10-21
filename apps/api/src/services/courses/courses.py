@@ -39,6 +39,7 @@ from src.security.rbac import (
 from src.security.rbac.constants import ADMIN_OR_MAINTAINER_ROLE_IDS
 from src.security.superadmin import is_user_superadmin
 from src.services.courses.thumbnails import upload_thumbnail
+from src.services.courses.translations import apply_overlay
 from src.services.search.normalization import LIKE_ESCAPE_CHAR, build_like_pattern
 from src.services.webhooks.dispatch import dispatch_webhooks
 from fastapi import HTTPException, Request, UploadFile, status
@@ -52,6 +53,7 @@ async def get_course(
     course_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    locale: str | None = None,
 ):
     statement = select(Course).where(Course.course_uuid == course_uuid)
     course = db_session.exec(statement).first()
@@ -96,9 +98,9 @@ async def get_course(
         for resource_author, user in author_results
     ]
 
-    course = CourseRead(**course.model_dump(), authors=authors)
+    course_read = CourseRead(**course.model_dump(), authors=authors)
 
-    return course
+    return apply_overlay(course_read, course, locale, db_session)
 
 
 async def get_course_by_id(
@@ -106,6 +108,7 @@ async def get_course_by_id(
     course_id: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    locale: str | None = None,
 ):
     statement = select(Course).where(Course.id == course_id)
     course = db_session.exec(statement).first()
@@ -142,9 +145,9 @@ async def get_course_by_id(
         for resource_author, user in author_results
     ]
 
-    course = CourseRead(**course.model_dump(), authors=authors)
+    course_read = CourseRead(**course.model_dump(), authors=authors)
 
-    return course
+    return apply_overlay(course_read, course, locale, db_session)
 
 
 async def get_course_meta(
@@ -154,6 +157,7 @@ async def get_course_meta(
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
     slim: bool = False,
+    locale: str | None = None,
 ) -> FullCourseRead:
     # Avoid circular import
     from src.services.courses.chapters import get_course_chapters
@@ -197,7 +201,9 @@ async def get_course_meta(
         from src.services.courses.cache import get_cached_course_meta
         cached = get_cached_course_meta(course_uuid, slim)
         if cached is not None:
-            return FullCourseRead.model_validate(cached)
+            return apply_overlay(
+                FullCourseRead.model_validate(cached), course, locale, db_session
+            )
 
     # Get course chapters — pass the already-loaded course to skip the
     # duplicate SELECT inside get_course_chapters.
@@ -233,12 +239,13 @@ async def get_course_meta(
         chapters=chapters
     )
 
-    # Cache for published courses (safe to share across users)
+    # Cache for published courses (safe to share across users) — always the
+    # source-locale payload; the translation overlay is applied per request.
     if course.published and not with_unpublished_activities:
         from src.services.courses.cache import set_cached_course_meta
         set_cached_course_meta(course_uuid, slim, course_read.model_dump())
 
-    return course_read
+    return apply_overlay(course_read, course, locale, db_session)
 
 
 async def get_courses_orgslug(

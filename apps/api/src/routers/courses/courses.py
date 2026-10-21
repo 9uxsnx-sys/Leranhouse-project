@@ -19,6 +19,10 @@ from src.db.courses.courses import (
     FullCourseRead,
     ThumbnailType,
 )
+from src.db.courses.course_translations import (
+    CourseTranslationRead,
+    CourseTranslationUpsert,
+)
 from src.security.auth import get_current_user
 from src.security.features_utils.dependencies import require_courses_feature
 from src.services.courses.courses import (
@@ -37,6 +41,11 @@ from src.services.courses.courses import (
     search_courses,
     get_course_user_rights,
     clone_course,
+)
+from src.services.courses.translations import (
+    delete_course_translation,
+    list_course_translations,
+    upsert_course_translation,
 )
 from src.services.courses.updates import (
     create_update,
@@ -445,6 +454,9 @@ async def api_delete_course_banner(
 async def api_get_course(
     request: Request,
     course_uuid: str,
+    locale: Optional[str] = Query(
+        None, description="Content locale, e.g. ar. Falls back to the source locale."
+    ),
     db_session: Session = Depends(get_db_session),
     current_user: PublicUser = Depends(get_current_user),
 ) -> CourseRead:
@@ -452,7 +464,7 @@ async def api_get_course(
     Get single Course by course_uuid
     """
     return await get_course(
-        request, course_uuid, current_user=current_user, db_session=db_session
+        request, course_uuid, current_user=current_user, db_session=db_session, locale=locale
     )
 
 
@@ -470,6 +482,7 @@ async def api_get_course(
 async def api_get_course_by_id(
     request: Request,
     course_id: str,
+    locale: Optional[str] = Query(None),
     db_session: Session = Depends(get_db_session),
     current_user: PublicUser = Depends(get_current_user),
 ) -> CourseRead:
@@ -477,7 +490,7 @@ async def api_get_course_by_id(
     Get single Course by id
     """
     return await get_course_by_id(
-        request, course_id, current_user=current_user, db_session=db_session
+        request, course_id, current_user=current_user, db_session=db_session, locale=locale
     )
 
 
@@ -501,6 +514,7 @@ async def api_get_course_meta(
     course_uuid: str,
     with_unpublished_activities: bool = False,
     slim: bool = False,
+    locale: Optional[str] = Query(None),
     db_session: Session = Depends(get_db_session),
     current_user: PublicUser = Depends(get_current_user),
 ) -> FullCourseRead:
@@ -509,7 +523,68 @@ async def api_get_course_meta(
     Use slim=true to exclude heavy activity content/details (useful for navigation).
     """
     return await get_course_meta(
-        request, course_uuid, with_unpublished_activities, current_user=current_user, db_session=db_session, slim=slim
+        request, course_uuid, with_unpublished_activities, current_user=current_user, db_session=db_session, slim=slim, locale=locale
+    )
+
+
+@router.get(
+    "/{course_uuid}/translations",
+    response_model=List[CourseTranslationRead],
+    summary="List course translations",
+    description="List every stored translation for a course. Requires update access.",
+)
+async def api_list_course_translations(
+    request: Request,
+    course_uuid: str,
+    db_session: Session = Depends(get_db_session),
+    current_user: PublicUser = Depends(get_current_user),
+) -> List[CourseTranslationRead]:
+    return await list_course_translations(
+        request, course_uuid, current_user=current_user, db_session=db_session
+    )
+
+
+@router.put(
+    "/{course_uuid}/translations/{locale}",
+    response_model=CourseTranslationRead,
+    summary="Create or update a course translation",
+    description=(
+        "Upsert the translatable fields for one locale. The course source locale "
+        "cannot be written here — update the course itself instead."
+    ),
+)
+async def api_upsert_course_translation(
+    request: Request,
+    course_uuid: str,
+    locale: str,
+    payload: CourseTranslationUpsert,
+    db_session: Session = Depends(get_db_session),
+    current_user: PublicUser = Depends(get_current_user),
+) -> CourseTranslationRead:
+    return await upsert_course_translation(
+        request,
+        course_uuid,
+        locale,
+        payload,
+        current_user=current_user,
+        db_session=db_session,
+    )
+
+
+@router.delete(
+    "/{course_uuid}/translations/{locale}",
+    summary="Delete a course translation",
+    description="Removes the locale row; reads fall back to the source locale again.",
+)
+async def api_delete_course_translation(
+    request: Request,
+    course_uuid: str,
+    locale: str,
+    db_session: Session = Depends(get_db_session),
+    current_user: PublicUser = Depends(get_current_user),
+):
+    return await delete_course_translation(
+        request, course_uuid, locale, current_user=current_user, db_session=db_session
     )
 
 
