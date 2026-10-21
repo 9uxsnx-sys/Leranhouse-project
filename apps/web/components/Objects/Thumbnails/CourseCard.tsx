@@ -6,14 +6,21 @@ export interface CourseCardProps {
   title: string
   description: string
   image: string
-  lessons: number
-  duration: string
-  difficulty: string
+  lessons?: number
+  duration?: string
+  difficulty?: string
   href?: string
   /** Noun for the count shown in the meta row (defaults to "lessons"). */
   lessonsLabel?: string
 }
 export function CourseCard({ id, title, description, image, lessons, duration, difficulty, href, lessonsLabel = 'lessons' }: CourseCardProps) {
+  // Only render the parts we actually have — list endpoints do not return a
+  // lesson count, and metadata can be empty for older courses.
+  const metaParts = [
+    typeof lessons === 'number' ? `${lessons} ${lessonsLabel}` : null,
+    duration,
+    difficulty,
+  ].filter(Boolean)
   return (
     <Link
       href={href || `/course/${id}`}
@@ -46,9 +53,11 @@ export function CourseCard({ id, title, description, image, lessons, duration, d
           </p>
         </div>
         {/* Metadata: directly below description */}
-        <p className="text-[12px] text-gray-400 mt-1.5">
-          {lessons} {lessonsLabel} &middot; {duration} &middot; {difficulty}
-        </p>
+        {metaParts.length > 0 && (
+          <p dir="auto" className="text-[12px] text-gray-400 mt-1.5">
+            {metaParts.join(' · ')}
+          </p>
+        )}
       </div>
     </Link>
   )

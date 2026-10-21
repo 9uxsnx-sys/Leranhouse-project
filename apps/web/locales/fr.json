@@ -2086,7 +2086,8 @@
           "translation": "Traduction",
           "missing": "Aucune traduction pour le moment",
           "inherited": "Le texte source est affiché. Modifiez un champ pour le traduire.",
-          "copy_from_source": "Copier depuis la source"
+          "copy_from_source": "Copier depuis la source",
+          "shared_fields": "Les heures de vidéo, les ressources et le certificat sont communs à toutes les langues."
         },
         "thumbnail": {
           "upload_image": "Télécharger une image",
@@ -3002,7 +3003,8 @@
           "description": "Description",
           "about": "À propos",
           "learnings": "Acquis",
-          "seo": "SEO"
+          "seo": "SEO",
+          "meta": "Détails"
         },
         "status": {
           "source": "Source",
@@ -6837,6 +6839,12 @@
     "page": {
       "banner": "Bannière du cours",
       "only_available_in": "Ce cours n'est disponible qu'en {{language}}.",
+      "learnings_title": "Ce que vous allez apprendre",
+      "learnings_subtitle": "À la fin de ce cours, vous saurez",
+      "requirements_title": "Les prérequis nécessaires",
+      "requirements_intro": "Avant de commencer ce cours, assurez-vous de disposer des outils et de l'état d'esprit suivants. Tout ce qui est listé ici est gratuit ou déjà disponible sur la plupart des ordinateurs.",
+      "requirements_card_title": "Prérequis",
+      "requirements_card_subtitle": "Ce qu'il vous faut avant de commencer",
       "about_title": "À propos de ce cours",
       "in_progress": "En cours",
       "progress_complete": "{{percent}} % complété",

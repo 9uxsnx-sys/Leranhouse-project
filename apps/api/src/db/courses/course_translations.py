@@ -27,6 +27,9 @@ class CourseTranslation(SQLModel, table=True):
     learnings: Optional[str] = Field(default=None, sa_column=Column(Text))
     tags: Optional[str] = Field(default=None, sa_column=Column(Text))
     seo: Optional[dict] = Field(default=None, sa_column=Column(JSONB))
+    # Display-text keys copied out of course.extra_metadata (difficulty,
+    # duration, requirements) — counts and booleans stay on the base row.
+    extra_metadata: Optional[dict] = Field(default=None, sa_column=Column(JSONB))
     # draft | machine | reviewed | published — v1 serves every row
     state: str = Field(
         default="draft", sa_column=Column(String(length=20), nullable=False)
@@ -49,6 +52,7 @@ class CourseTranslationUpsert(SQLModel):
     learnings: Optional[str] = None
     tags: Optional[str] = None
     seo: Optional[dict] = None
+    extra_metadata: Optional[dict] = None
     state: Optional[str] = None
 
 
@@ -62,6 +66,7 @@ class CourseTranslationRead(SQLModel):
     learnings: Optional[str] = None
     tags: Optional[str] = None
     seo: Optional[dict] = None
+    extra_metadata: Optional[dict] = None
     state: str
     source_updated_at: Optional[str] = None
     translated_by: Optional[int] = None
@@ -76,4 +81,5 @@ TRANSLATABLE_FIELDS = (
     "learnings",
     "tags",
     "seo",
+    "extra_metadata",
 )

@@ -51,7 +51,7 @@ type CourseProps = {
 }
 
 function CoursesHome(params: CourseProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const searchParams = useSearchParams()
   const isCreatingCourse = searchParams.get('new') ? true : false
   const [newCourseModal, setNewCourseModal] = React.useState(isCreatingCourse)
@@ -69,9 +69,11 @@ function CoursesHome(params: CourseProps) {
   // Check if courses feature is enabled
   const isCoursesEnabled = org?.config?.config?.resolved_features?.courses?.enabled ?? org?.config?.config?.features?.courses?.enabled !== false
 
-  // SWR for courses data - only fetch if feature is enabled
+  // SWR for courses data - only fetch if feature is enabled.
+  // The locale is part of the key so switching language refetches localized titles.
+  const contentLocale = (i18n.language || 'en').split('-')[0]
   const { data: coursesData, mutate: mutateCourses } = useSWR(
-    isCoursesEnabled && access_token ? `${getAPIUrl()}courses/org_slug/${orgslug}/page/1/limit/500?include_unpublished=true` : null,
+    isCoursesEnabled && access_token ? `${getAPIUrl()}courses/org_slug/${orgslug}/page/1/limit/500?include_unpublished=true&locale=${contentLocale}` : null,
     (url) => swrFetcher(url, access_token),
     { fallbackData: params.courses, revalidateOnFocus: false, dedupingInterval: 30000 }
   )
@@ -632,9 +634,8 @@ function CoursesHome(params: CourseProps) {
                 title={course.name}
                 description={course.description || ''}
                 image={imageUrl}
-                lessons={0}
-                duration="N/A"
-                difficulty="All levels"
+                duration={course.extra_metadata?.duration || ''}
+                difficulty={course.extra_metadata?.difficulty || ''}
                 href={`/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/general`}
               />
 

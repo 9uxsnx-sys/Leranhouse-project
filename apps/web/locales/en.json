@@ -2396,7 +2396,8 @@
                                                                    "translation":  "Translation",
                                                                    "missing":  "No translation yet",
                                                                    "inherited":  "Showing the source text. Edit a field to translate it.",
-                                                                   "copy_from_source":  "Copy from source"
+                                                                   "copy_from_source":  "Copy from source",
+                                                                   "shared_fields":  "Video hours, resources and the certificate are shared by every language."
                                                                },
                                                       "thumbnail":  {
                                                                         "upload_image":  "Upload Image",
@@ -2727,7 +2728,8 @@
                                                                  "description":  "Description",
                                                                  "about":  "About",
                                                                  "learnings":  "Learnings",
-                                                                 "seo":  "SEO"
+                                                                 "seo":  "SEO",
+                                                                 "meta":  "Details"
                                                              },
                                                   "status":  {
                                                                  "source":  "Source",
@@ -6766,6 +6768,12 @@
                    "page":  {
                                 "banner":  "Course banner",
                                 "only_available_in":  "This course is only available in {{language}}.",
+                                "learnings_title":  "What you'll learn",
+                                "learnings_subtitle":  "By the end of this course, you'll be able to",
+                                "requirements_title":  "What requirements you need",
+                                "requirements_intro":  "Before you start this course, make sure you have the following tools and mindset ready. Everything listed here is free or already available on most computers.",
+                                "requirements_card_title":  "Requirements",
+                                "requirements_card_subtitle":  "What you'll need before starting",
                                 "about_title":  "About This Course",
                                 "in_progress":  "In Progress",
                                 "progress_complete":  "{{percent}}% complete",

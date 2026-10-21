@@ -33,6 +33,25 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useAnalytics } from '@/hooks/useAnalytics'
 
+/**
+ * Requirements are stored as a JSON array by the dashboard, but older courses
+ * kept a newline-separated string. Support both so nothing renders as raw JSON.
+ */
+function parseRequirements(raw: any): string[] {
+  if (!raw) return []
+  try {
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed)) {
+      return parsed
+        .map((item: any) => (typeof item === 'string' ? item : item?.text))
+        .filter((text: any) => typeof text === 'string' && text.trim().length > 0)
+    }
+  } catch {
+    // plain-text fallback below
+  }
+  return String(raw).split('\n').filter((line: string) => line.trim())
+}
+
 const CourseClient = (props: any) => {
   const { t, i18n } = useTranslation()
   const [learnings, setLearnings] = useState<any>([])
@@ -133,7 +152,7 @@ const CourseClient = (props: any) => {
   const totalSteps = totalLessons || 0
   const progressPercent = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0
   const instructorData = meta.instructor?.name ? meta.instructor : null
-  const requirementsList = meta.requirements ? meta.requirements.split('\n').filter((r: string) => r.trim()) : []
+  const requirementsList = parseRequirements(meta.requirements)
 
   const [isStarting, setIsStarting] = useState(false)
 

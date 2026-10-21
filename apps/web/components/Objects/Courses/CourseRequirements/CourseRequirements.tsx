@@ -3,6 +3,7 @@
 import React from 'react'
 import { Heading } from '@/components/ui/heading'
 import { Text } from '@/components/ui/text'
+import { useTranslation } from 'react-i18next'
 
 interface CourseRequirementsProps {
   title?: string
@@ -18,20 +19,21 @@ const DEFAULT_ITEMS = [
 ]
 
 export default function CourseRequirements({
-  title = 'Requirements',
-  subtitle = 'What you\u2019ll need before starting',
+  title,
+  subtitle,
   items = DEFAULT_ITEMS,
 }: CourseRequirementsProps) {
+  const { t } = useTranslation()
   return (
     <div>
-      <Heading level="h1" className="!text-2xl mb-2">What requirements you need</Heading>
+      <Heading level="h1" className="!text-2xl mb-2">{t('course.page.requirements_title')}</Heading>
       <Text size="base" className="text-ui-fg-subtle leading-relaxed mb-4">
-        Before you start this course, make sure you have the following tools and mindset ready. Everything listed here is free or already available on most computers.
+        {t('course.page.requirements_intro')}
       </Text>
       <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] px-5 py-5">
         <div className="flex flex-col gap-0.5">
-          <Heading level="h2">{title}</Heading>
-          <Text size="base" className="text-ui-fg-muted">{subtitle}</Text>
+          <Heading level="h2">{title ?? t('course.page.requirements_card_title')}</Heading>
+          <Text size="base" className="text-ui-fg-muted">{subtitle ?? t('course.page.requirements_card_subtitle')}</Text>
         </div>
         <ul className="mt-3 space-y-2 ps-3">
           {items.map((item, idx) => (

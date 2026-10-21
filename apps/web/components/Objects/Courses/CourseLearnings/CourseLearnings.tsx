@@ -3,6 +3,7 @@
 import React from 'react'
 import { Heading } from '@/components/ui/heading'
 import { Text } from '@/components/ui/text'
+import { useTranslation } from 'react-i18next'
 
 interface CourseLearningsProps {
   title?: string
@@ -22,16 +23,17 @@ const DEFAULT_ITEMS = [
 ]
 
 export default function CourseLearnings({
-  title = "What you'll learn",
-  subtitle = 'By the end of this course, you\u2019ll be able to',
+  title,
+  subtitle,
   items = DEFAULT_ITEMS,
 }: CourseLearningsProps) {
+  const { t } = useTranslation()
   return (
     <div>
       <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] px-5 py-5">
         <div className="flex flex-col gap-0.5">
-          <Heading level="h2">{title}</Heading>
-          <Text size="base" className="text-ui-fg-muted">{subtitle}</Text>
+          <Heading level="h2">{title ?? t('course.page.learnings_title')}</Heading>
+          <Text size="base" className="text-ui-fg-muted">{subtitle ?? t('course.page.learnings_subtitle')}</Text>
         </div>
         <ul className="mt-3 space-y-2 ps-3">
           {items.map((item, idx) => (

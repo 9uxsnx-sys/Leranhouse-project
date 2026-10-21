@@ -2158,7 +2158,8 @@
           "translation": "الترجمة",
           "missing": "لا توجد ترجمة بعد",
           "inherited": "يتم عرض النص الأصلي. عدّل حقلاً لترجمته.",
-          "copy_from_source": "نسخ من المصدر"
+          "copy_from_source": "نسخ من المصدر",
+          "shared_fields": "ساعات الفيديو والموارد والشهادة مشتركة بين جميع اللغات."
         },
         "thumbnail": {
           "upload_image": "رفع صورة",
@@ -3085,7 +3086,8 @@
           "description": "الوصف",
           "about": "نبذة",
           "learnings": "المكتسبات",
-          "seo": "SEO"
+          "seo": "SEO",
+          "meta": "التفاصيل"
         },
         "status": {
           "source": "المصدر",
@@ -6980,6 +6982,12 @@
     "page": {
       "banner": "بانر الدورة",
       "only_available_in": "هذه الدورة متاحة فقط باللغة {{language}}.",
+      "learnings_title": "ما ستتعلّمه",
+      "learnings_subtitle": "في نهاية هذه الدورة ستكون قادراً على",
+      "requirements_title": "المتطلبات التي تحتاجها",
+      "requirements_intro": "قبل بدء هذه الدورة، تأكد من توفر الأدوات والعقلية التالية. كل ما هو مذكور هنا مجاني أو متوفر بالفعل على معظم الأجهزة.",
+      "requirements_card_title": "المتطلبات",
+      "requirements_card_subtitle": "ما تحتاجه قبل البدء",
       "about_title": "حول هذه الدورة",
       "in_progress": "قيد التقدّم",
       "progress_complete": "اكتمل {{percent}}٪",

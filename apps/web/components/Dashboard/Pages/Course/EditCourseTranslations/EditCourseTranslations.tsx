@@ -20,7 +20,7 @@ type Props = {
   course_uuid?: string
 }
 
-const CONTENT_FIELDS = ['name', 'description', 'about', 'learnings', 'seo'] as const
+const CONTENT_FIELDS = ['name', 'description', 'about', 'learnings', 'seo', 'meta'] as const
 type ContentField = (typeof CONTENT_FIELDS)[number]
 
 // Flat column set for the export/import file — translators work in a spreadsheet,
@@ -40,15 +40,24 @@ const CSV_FIELDS = [
   'seo.og_image',
   'seo.twitter_title',
   'seo.twitter_description',
+  'meta.difficulty',
+  'meta.duration',
+  'meta.requirements',
 ] as const
 
 function hasValue(row: any, field: ContentField): boolean {
   if (!row) return false
-  const value = row[field]
   if (field === 'seo') {
+    const value = row.seo
     if (!value || typeof value !== 'object') return false
     return Object.values(value).some(v => (typeof v === 'string' ? v.trim().length > 0 : v === true))
   }
+  if (field === 'meta') {
+    const value = row.extra_metadata
+    if (!value || typeof value !== 'object') return false
+    return Object.values(value).some(v => (typeof v === 'string' ? v.trim().length > 0 : v != null))
+  }
+  const value = row[field]
   return typeof value === 'string' ? value.trim().length > 0 : value != null
 }
 
@@ -166,6 +175,13 @@ function EditCourseTranslations(props: Props) {
           learnings: courseStructure?.learnings ?? null,
           tags: courseStructure?.tags ?? null,
           seo: courseStructure?.seo ?? null,
+          extra_metadata: courseStructure?.extra_metadata
+            ? {
+                difficulty: courseStructure.extra_metadata.difficulty ?? '',
+                duration: courseStructure.extra_metadata.duration ?? '',
+                requirements: courseStructure.extra_metadata.requirements ?? '',
+              }
+            : null,
         },
         access_token
       )
@@ -200,7 +216,9 @@ function EditCourseTranslations(props: Props) {
     CSV_FIELDS.forEach(field => {
       const value = field.startsWith('seo.')
         ? row?.seo?.[field.slice(4)]
-        : row?.[field]
+        : field.startsWith('meta.')
+          ? row?.extra_metadata?.[field.slice(5)]
+          : row?.[field]
       lines.push(`${field},${csvCell(value)}`)
     })
     const safeName = String(courseStructure?.name || 'course')
@@ -225,8 +243,10 @@ function EditCourseTranslations(props: Props) {
 
       const existing = translations.find(item => item.locale === locale)
       const seo: Record<string, any> = {}
+      const meta: Record<string, any> = {}
       Object.entries(values).forEach(([key, value]) => {
         if (key.startsWith('seo.')) seo[key.slice(4)] = value || null
+        if (key.startsWith('meta.')) meta[key.slice(5)] = value || null
       })
 
       const name = values.name || existing?.name || courseStructure?.name
@@ -245,6 +265,9 @@ function EditCourseTranslations(props: Props) {
           learnings: values.learnings ?? existing?.learnings ?? null,
           tags: values.tags ?? existing?.tags ?? null,
           seo: Object.keys(seo).length ? { ...(existing?.seo || {}), ...seo } : existing?.seo ?? null,
+          extra_metadata: Object.keys(meta).length
+            ? { ...(existing?.extra_metadata || {}), ...meta }
+            : existing?.extra_metadata ?? null,
         },
         access_token
       )

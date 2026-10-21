@@ -4,6 +4,8 @@ import React from 'react'
 import CoursesHome from './client'
 import { getServerSession } from '@/lib/auth/server'
 import { getOrgCourses } from '@services/courses/courses'
+import { cookies } from 'next/headers'
+import { localeCode } from '@/lib/direction'
 
 type MetadataProps = {
   params: Promise<{ orgslug: string }>
@@ -49,6 +51,8 @@ async function CoursesPage(params: any) {
   })
   const session = await getServerSession()
   const access_token = session?.tokens?.access_token
+  const cookieStore = await cookies()
+  const locale = localeCode(cookieStore.get('i18next')?.value) || 'en'
 
   let courses: any[] = []
   try {
@@ -56,7 +60,8 @@ async function CoursesPage(params: any) {
       orgslug,
       { revalidate: 120, tags: ['courses'] },
       access_token ?? undefined,
-      true // include_unpublished for dashboard
+      true, // include_unpublished for dashboard
+      locale
     )
   } catch (error: any) {
     // If feature is disabled (403), pass empty courses array

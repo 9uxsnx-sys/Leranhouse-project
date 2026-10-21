@@ -14,6 +14,7 @@ export type CourseTranslation = {
   learnings: string | null
   tags: string | null
   seo: Record<string, any> | null
+  extra_metadata: Record<string, any> | null
   state: string
   source_updated_at: string | null
   translated_by: number | null
@@ -28,6 +29,7 @@ export type CourseTranslationPayload = {
   learnings?: string | null
   tags?: string | null
   seo?: Record<string, any> | null
+  extra_metadata?: Record<string, any> | null
   state?: string
 }
 

@@ -52,7 +52,7 @@ def get_translation_row(
     ).first()
 
 
-def _overlay_from_translation(translation: CourseTranslation) -> dict:
+def _overlay_from_translation(translation: CourseTranslation, base_extra_metadata: dict | None = None) -> dict:
     overlay = {
         "name": translation.name,
         "description": translation.description,
@@ -62,6 +62,13 @@ def _overlay_from_translation(translation: CourseTranslation) -> dict:
     }
     if translation.seo:
         overlay["seo"] = translation.seo
+    if translation.extra_metadata:
+        # Only the display-text keys are translated; merge over the base row so
+        # counts, flags and the instructor block survive.
+        overlay["extra_metadata"] = {
+            **(base_extra_metadata or {}),
+            **translation.extra_metadata,
+        }
     return overlay
 
 
@@ -85,7 +92,11 @@ def build_translation_overlay(
     if not translation:
         return {}, source_locale, True
 
-    return _overlay_from_translation(translation), requested, False
+    return (
+        _overlay_from_translation(translation, getattr(course, "extra_metadata", None)),
+        requested,
+        False,
+    )
 
 
 def apply_overlay(model, course: Course, locale: Optional[str], db_session: Session):
@@ -154,7 +165,9 @@ def apply_overlay_bulk(course_reads, locale: Optional[str], db_session: Session)
         localized.append(
             read.model_copy(
                 update={
-                    **_overlay_from_translation(translation),
+                    **_overlay_from_translation(
+                        translation, getattr(read, "extra_metadata", None)
+                    ),
                     "content_locale": requested,
                     "is_fallback": False,
                 }
@@ -232,6 +245,7 @@ async def upsert_course_translation(
             learnings=payload.learnings,
             tags=payload.tags,
             seo=payload.seo,
+            extra_metadata=payload.extra_metadata,
             state=payload.state or "draft",
             source_updated_at=course.update_date,
             translated_by=getattr(current_user, "id", None),
@@ -247,6 +261,8 @@ async def upsert_course_translation(
         row.tags = payload.tags
         if payload.seo is not None:
             row.seo = payload.seo
+        if payload.extra_metadata is not None:
+            row.extra_metadata = payload.extra_metadata
         if payload.state:
             row.state = payload.state
         row.source_updated_at = course.update_date

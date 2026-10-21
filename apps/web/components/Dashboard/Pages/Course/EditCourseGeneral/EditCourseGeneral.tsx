@@ -199,6 +199,8 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
     // Non-source locales start from their translation when one exists, and from
     // the source text otherwise (so the author sees what they are translating).
     const localized = !isSourceLocale && translation ? translation : null;
+    // Only the display-text metadata is translated; counts stay shared.
+    const localizedMeta = (!isSourceLocale && translation?.extra_metadata) || null;
     return {
       name: localized?.name ?? courseStructure?.name ?? '',
       description: localized?.description ?? courseStructure?.description ?? '',
@@ -207,12 +209,12 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
       public: courseStructure?.public || false,
       thumbnail_type: thumbnailType,
       // extra_metadata fields
-      meta_difficulty: meta.difficulty || '',
-      meta_duration: meta.duration || '',
+      meta_difficulty: localizedMeta?.difficulty ?? meta.difficulty ?? '',
+      meta_duration: localizedMeta?.duration ?? meta.duration ?? '',
       meta_video_hours: meta.video_hours || '',
       meta_resources_count: meta.resources_count || '',
       meta_has_certificate: meta.has_certificate || false,
-      meta_requirements: initializeRequirements(meta.requirements),
+      meta_requirements: initializeRequirements(localizedMeta?.requirements ?? meta.requirements),
       meta_instructor_name: meta.instructor?.name || '',
       meta_instructor_title: meta.instructor?.title || '',
       meta_instructor_bio: meta.instructor?.bio || '',
@@ -349,7 +351,10 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
     (formik.values.name !== formik.initialValues.name ||
       formik.values.description !== formik.initialValues.description ||
       formik.values.about !== formik.initialValues.about ||
-      formik.values.learnings !== formik.initialValues.learnings)
+      formik.values.learnings !== formik.initialValues.learnings ||
+      formik.values.meta_difficulty !== formik.initialValues.meta_difficulty ||
+      formik.values.meta_duration !== formik.initialValues.meta_duration ||
+      formik.values.meta_requirements !== formik.initialValues.meta_requirements)
 
   const isSaved = isSourceLocale ? (course?.isSaved ?? true) : !hasTranslationChanges;
   const isActiveSaving = isSaving || isManualSaving || isSavingTranslation;
@@ -376,6 +381,11 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
             learnings: formik.values.learnings,
             tags: translation?.tags ?? null,
             seo: translation?.seo ?? null,
+            extra_metadata: {
+              difficulty: formik.values.meta_difficulty,
+              duration: formik.values.meta_duration,
+              requirements: formik.values.meta_requirements,
+            },
           },
           session.data?.tokens?.access_token
         );
@@ -417,14 +427,18 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
   // Seed the translation form with the source text so the author only rewrites
   // what actually differs. Nothing is persisted until Save is pressed.
   const copyFromSource = useCallback(() => {
+    const meta = courseStructure?.extra_metadata || {};
     formik.setValues({
       ...formik.values,
       name: courseStructure?.name ?? '',
       description: courseStructure?.description ?? '',
       about: courseStructure?.about ?? '',
       learnings: initializeLearnings(courseStructure?.learnings ?? ''),
+      meta_difficulty: meta.difficulty ?? '',
+      meta_duration: meta.duration ?? '',
+      meta_requirements: initializeRequirements(meta.requirements),
     });
-  }, [formik.values, courseStructure?.name, courseStructure?.description, courseStructure?.about, courseStructure?.learnings, initializeLearnings]);
+  }, [formik.values, courseStructure?.name, courseStructure?.description, courseStructure?.about, courseStructure?.learnings, courseStructure?.extra_metadata, initializeLearnings, initializeRequirements]);
 
   // useCourseFieldSync handles the unmount cleanup (flushing pending edits
   // instead of discarding them), so no local cleanup is needed here.
@@ -629,22 +643,36 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField name="meta_difficulty">
                       <FormLabelAndMessage label={t('dashboard.courses.general.details.difficulty_label')} />
-                      <Select
-                        value={formik.values.meta_difficulty || undefined}
-                        onValueChange={(value) => formik.setFieldValue('meta_difficulty', value)}
-                        disabled={isSaving}
-                      >
-                        <SelectTrigger className="h-9">
-                          <SelectValue placeholder={t('dashboard.courses.general.details.difficulty_placeholder')} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {['Beginner', 'Intermediate', 'Advanced'].map((option) => (
-                            <SelectItem key={option} value={option}>
-                              {t(`dashboard.courses.general.details.difficulty_${option.toLowerCase()}`)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      {isSourceLocale ? (
+                        <Select
+                          value={formik.values.meta_difficulty || undefined}
+                          onValueChange={(value) => formik.setFieldValue('meta_difficulty', value)}
+                          disabled={isSaving}
+                        >
+                          <SelectTrigger className="h-9">
+                            <SelectValue placeholder={t('dashboard.courses.general.details.difficulty_placeholder')} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {['Beginner', 'Intermediate', 'Advanced'].map((option) => (
+                              <SelectItem key={option} value={option}>
+                                {t(`dashboard.courses.general.details.difficulty_${option.toLowerCase()}`)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        // Free text in a translation: the label itself is content.
+                        <Form.Control asChild>
+                          <Input
+                            className={fieldClassName}
+                            onChange={formik.handleChange}
+                            value={formik.values.meta_difficulty}
+                            type="text"
+                            placeholder={t('dashboard.courses.general.details.difficulty_placeholder')}
+                            disabled={isSaving}
+                          />
+                        </Form.Control>
+                      )}
                     </FormField>
 
                     <FormField name="meta_duration">
@@ -668,7 +696,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                           onChange={formik.handleChange}
                           value={formik.values.meta_video_hours}
                           type="text"
-                          disabled={isSaving}
+                          disabled={isSaving || !isSourceLocale}
                         />
                       </Form.Control>
                     </FormField>
@@ -681,7 +709,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                           onChange={formik.handleChange}
                           value={formik.values.meta_resources_count}
                           type="text"
-                          disabled={isSaving}
+                          disabled={isSaving || !isSourceLocale}
                         />
                       </Form.Control>
                     </FormField>
@@ -690,19 +718,25 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                   <FormField name="meta_has_certificate">
                     <FormLabelAndMessage label={t('dashboard.courses.general.details.offers_certificate_label')} />
                     <label className="flex items-center gap-3 pt-1 cursor-pointer">
-                      <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${formik.values.meta_has_certificate ? 'bg-black' : 'bg-gray-300'} ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                      <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${formik.values.meta_has_certificate ? 'bg-black' : 'bg-gray-300'} ${isSaving || !isSourceLocale ? 'opacity-50 cursor-not-allowed' : ''}`}>
                         <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${formik.values.meta_has_certificate ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
                         <input
                           type="checkbox"
                           className="sr-only"
                           checked={formik.values.meta_has_certificate}
                           onChange={(e) => formik.setFieldValue('meta_has_certificate', e.target.checked)}
-                          disabled={isSaving}
+                          disabled={isSaving || !isSourceLocale}
                         />
                       </div>
                       <span className="text-sm text-gray-600 select-none">{t('dashboard.courses.general.details.offers_certificate_description')}</span>
                     </label>
                   </FormField>
+
+                  {!isSourceLocale && (
+                    <p className="text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
+                      {t('dashboard.courses.general.locale.shared_fields')}
+                    </p>
+                  )}
 
                 </div>
               </div>
@@ -720,7 +754,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                           onChange={formik.handleChange}
                           value={formik.values.meta_instructor_name}
                           type="text"
-                          disabled={isSaving}
+                          disabled={isSaving || !isSourceLocale}
                         />
                       </Form.Control>
                     </FormField>
@@ -733,7 +767,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                           onChange={formik.handleChange}
                           value={formik.values.meta_instructor_title}
                           type="text"
-                          disabled={isSaving}
+                          disabled={isSaving || !isSourceLocale}
                         />
                       </Form.Control>
                     </FormField>
@@ -746,7 +780,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                         className={`${fieldClassName} min-h-[100px]`}
                         onChange={formik.handleChange}
                         value={formik.values.meta_instructor_bio}
-                        disabled={isSaving}
+                        disabled={isSaving || !isSourceLocale}
                       />
                     </Form.Control>
                   </FormField>

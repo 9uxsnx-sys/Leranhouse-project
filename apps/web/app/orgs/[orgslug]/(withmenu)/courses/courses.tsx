@@ -260,9 +260,8 @@ function Courses(props: CourseProps) {
                 title={course.name}
                 description={course.description || ''}
                 image={imageUrl}
-                lessons={0}
-                duration="N/A"
-                difficulty="All levels"
+                duration={course.extra_metadata?.duration || ''}
+                difficulty={course.extra_metadata?.difficulty || ''}
               />
             </div>
           )
