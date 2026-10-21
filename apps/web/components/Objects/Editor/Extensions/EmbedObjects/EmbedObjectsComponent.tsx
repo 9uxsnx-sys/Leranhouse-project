@@ -246,7 +246,9 @@ function EmbedObjectsComponent(props: any) {
     const handleMouseMove = (e: MouseEvent) => {
       if (resizeRef.current) {
         if (direction === 'horizontal') {
-          const newWidth = startWidth + e.clientX - startX
+          // The handle sits on the inline-end edge, so it is on the left in RTL.
+          const dirSign = document.documentElement.dir === 'rtl' ? -1 : 1
+          const newWidth = startWidth + (e.clientX - startX) * dirSign
           const parentWidth = resizeRef.current.parentElement?.offsetWidth || 1
           const widthPercentage = Math.min(100, Math.max(10, (newWidth / parentWidth) * 100))
           const newWidthValue = `${widthPercentage}%`

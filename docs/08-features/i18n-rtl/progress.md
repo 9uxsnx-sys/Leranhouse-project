@@ -227,9 +227,13 @@ Extension chrome only — `EmbedObjectsComponent.tsx` (7), `WebPreviewComponent.
 1. ~~**`dir="auto"` on user-generated content**~~ — **done** in `7165ed0e` for: discussion titles/bodies/comments/replies, community names + descriptions, course/podcast/collection titles + descriptions + `about`, activity names, assignment task descriptions, profile bios, org name/description on the home picker, search result titles/subtitles, episode titles.
    Still uncovered (acceptable for now): certificate recipient/course names (blocked on the `CertificatePreview` decision), admin organization pages.
 2. ~~**Hardcoded locale formatting.**~~ — **done** in `7165ed0e`: 31 files now pass `i18n.language` to `Intl.*` / `toLocale*`. Only deliberate exception is `components/Analytics/chartTheme.ts` `formatCurrency` (`fr-FR` + `DZD` — Algeria-specific business logic).
-3. **Direction-aware JS coordinate math** — anything reading `getBoundingClientRect().left/right`, `offsetX`, or `pageX` for positioning (drag handles, resize handles, canvas, watermark).
-4. **Lint guard** — a rule that flags `ml-*/mr-*/pl-*/pr-*/left-*/right-*/text-left/text-right/rounded-l-*/rounded-r-*` so the refactor cannot regress.
-5. **`space-x-*` verification** — 521 occurrences. Confirm in the compiled CSS that Tailwind v4 emits `margin-inline-start` for `space-x-*`. If it does not, `space-x-*` joins the refactor list.
+3. **Direction-aware JS coordinate math** — audited every `clientX - rect.left` / `offsetX` site:
+   - `EmbedObjectsComponent.tsx` — **fixed**: the resize handle sits on `end-0`, so in RTL the horizontal delta is inverted (`dirSign`).
+   - `AudioBlockComponent`, `CloudflarePlayer`, `LearnHousePlayer` — **left as-is**: seek position is physical media geometry, not reading flow.
+   - `WelcomeGlobe`, `Dashboard/Boards/**` — out of scope.
+   - `Dashboard/Boards/Extensions/{useFrameDrag,useDragResize}.ts` — out of scope (Boards).
+4. **Lint guard** — a rule that flags `ml-*/mr-*/pl-*/pr-*/left-*/right-*/text-left/text-right/rounded-l-*/rounded-r-*` so the refactor cannot regress. Not implemented yet.
+5. ~~**`space-x-*` verification**~~ — **confirmed safe**. Tailwind v4.1.16 compiles `space-x-*` to `margin-inline-start` / `margin-inline-end` on `:where(& > :not(:last-child))`, so all 521 occurrences are already RTL-aware and need no changes.
 
 ---
 
