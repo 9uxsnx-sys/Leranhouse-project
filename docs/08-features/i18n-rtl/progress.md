@@ -1,8 +1,8 @@
 # i18n & RTL — Progress & Handoff
 
-> **Last updated:** 2026-10-20
+> **Last updated:** 2026-10-21
 > **Branch:** `feat/learnhouse-1.2.0-custom`
-> **Latest checkpoint:** `c49cd8de` — *i18n(rtl): mirror shared primitives, cards and course widgets for RTL*
+> **Latest checkpoint:** `7165ed0e` — *i18n(rtl): localize Intl formatting and set dir=auto on user content*
 > **Companion docs:** [RTL Plan](./rtl-plan.md) (research + strategy), [Dashboard Polish](../dashboard-polish/consistency-plan.md)
 
 This is the working log. Read this first when resuming; read `rtl-plan.md` for the reasoning behind the approach.
@@ -11,7 +11,7 @@ This is the working log. Read this first when resuming; read `rtl-plan.md` for t
 
 ## 1. Where we are, in one paragraph
 
-English is the master language. French and Arabic are fully translated (text only), and the hardcoded-JSX extraction pass for the **real UI** is done. The RTL layout refactor (Phase 4) is **in progress**: the shared primitives, all card surfaces, the assignments section, the copilot and the course-detail widgets are already bidirectional. What remains is the long tail — dashboard analytics/settings pages, the course player, the public pages and the rich-text editor. Phase 5 (polish) has not started.
+English is the master language. French and Arabic are fully translated (text only), and the hardcoded-JSX extraction pass for the **real UI** is done. **Phase 4 (RTL layout) is complete for every reachable screen** — 259/259 + 288/288 physical utilities converted in the final two sweeps. Phase 5 (polish) is in progress: locale-aware `Intl.*` formatting is done (31 files) and `dir="auto"` is applied to the main user-generated content surfaces; the drag/resize coordinate math and the lint guard remain.
 
 ---
 
@@ -91,12 +91,20 @@ This cycle:
 | `5774826d` | Sidebar, org menu, mobile menu, search modal |
 | `1dedd222` | Account purchases, community discussion filters, embed activity |
 
-### Phase 4 — RTL smart swap (in progress)
+### Phase 4 — RTL smart swap (done)
 
 | Commit | Scope | State |
 |---|---|---|
 | `a28639fb` | Assignments section + copilot | done |
 | `c49cd8de` | `components/ui` primitives, course/collection/podcast cards, course detail widgets, community components | done |
+| `ef41bd70` | Dashboard analytics, settings pages, dashboard listings (78 files) | done |
+| `0c3fc173` | Course player, public pages, rich-text editor, auth/embed/home (92 files) | done |
+
+### Phase 5 — polish (in progress)
+
+| Commit | Scope | State |
+|---|---|---|
+| `7165ed0e` | `Intl.*`/`toLocale*` locale args → `i18n.language` (31 files) + `dir="auto"` on user content | done |
 
 ---
 
@@ -142,11 +150,13 @@ Rule of thumb: **convert the inside of a component; leave the parent flex/grid a
 
 ## 6. What is left
 
-Measured at `c49cd8de` on `apps/web/**/*.tsx`:
+Measured after `0c3fc173` on `apps/web/**/*.tsx`:
 
 ```
-806 matches across 205 files for  (ml-|mr-|pl-|pr-|left-|right-|rounded-l-|rounded-r-|text-left|text-right)
+222 matches across 51 files for  (ml-|mr-|pl-|pr-|left-|right-|rounded-l-|rounded-r-|text-left|text-right)
 ```
+
+Down from 806 matches / 205 files. **The remainder is almost entirely out-of-scope or benign:** `CertificatePreview.tsx` (68), `Dashboard/Boards/**` (~40), `components/Admin/**` (~23), `app/admin/**` (8), Playgrounds (~12), `demo-header`/`test-dev` (~16), and ~15 Radix animation sides that must stay physical.
 
 **This number overstates the work.** A large share of matches are benign and should be left alone:
 
@@ -212,14 +222,11 @@ Extension chrome only — `EmbedObjectsComponent.tsx` (7), `WebPreviewComponent.
 
 ---
 
-## 7. Phase 5 — polish (not started)
+## 7. Phase 5 — polish (in progress)
 
-1. **`dir="auto"` on user-generated content** — course/podcast/collection titles and descriptions, discussion bodies, comments, profile bios, task titles, certificate names. Prevents an Arabic title inside an English UI from rendering with the wrong base direction.
-2. **Hardcoded locale formatting.** Replace remaining `'en-US'` / `'en-UK'` in `Intl.*` call sites with `i18n.language`. `AccountPurchases.tsx` is already clean; the rest still need a sweep:
-   ```powershell
-   cd apps/web
-   Get-ChildItem -Recurse -Include *.tsx,*.ts | Select-String -Pattern "'en-US'|'en-UK'|\"en-US\"|\"en-UK\""
-   ```
+1. ~~**`dir="auto"` on user-generated content**~~ — **done** in `7165ed0e` for: discussion titles/bodies/comments/replies, community names + descriptions, course/podcast/collection titles + descriptions + `about`, activity names, assignment task descriptions, profile bios, org name/description on the home picker, search result titles/subtitles, episode titles.
+   Still uncovered (acceptable for now): certificate recipient/course names (blocked on the `CertificatePreview` decision), admin organization pages.
+2. ~~**Hardcoded locale formatting.**~~ — **done** in `7165ed0e`: 31 files now pass `i18n.language` to `Intl.*` / `toLocale*`. Only deliberate exception is `components/Analytics/chartTheme.ts` `formatCurrency` (`fr-FR` + `DZD` — Algeria-specific business logic).
 3. **Direction-aware JS coordinate math** — anything reading `getBoundingClientRect().left/right`, `offsetX`, or `pageX` for positioning (drag handles, resize handles, canvas, watermark).
 4. **Lint guard** — a rule that flags `ml-*/mr-*/pl-*/pr-*/left-*/right-*/text-left/text-right/rounded-l-*/rounded-r-*` so the refactor cannot regress.
 5. **`space-x-*` verification** — 521 occurrences. Confirm in the compiled CSS that Tailwind v4 emits `margin-inline-start` for `space-x-*`. If it does not, `space-x-*` joins the refactor list.
