@@ -34,7 +34,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { useCommandPalette } from '@components/Dashboard/CommandPalette/CommandPaletteContext'
-import { useDashboardBreadcrumbTrail } from '@components/Objects/Breadcrumbs/DashboardBreadcrumbContext'
+import { useDashboardBreadcrumbTrail, useDashboardBreadcrumbReset } from '@components/Objects/Breadcrumbs/DashboardBreadcrumbContext'
 
 const LAST_READ_NOTIFICATION_KEY = 'notificationsLastReadAt'
 
@@ -144,6 +144,7 @@ function AdminBreadcrumbNav() {
   const access_token = session?.data?.tokens?.access_token
   // Pages that navigate in local state (module → lesson) push their trail here.
   const pageTrail = useDashboardBreadcrumbTrail()
+  const pageReset = useDashboardBreadcrumbReset()
 
   if (!pathname) return null
 
@@ -241,7 +242,13 @@ function AdminBreadcrumbNav() {
       crumbs.push({ label: sectionLabel, href: getUriWithOrg(orgslug, `/dash/${section}`) })
       crumbs.push({ label: entityName || '...' })
       if (subpage) {
-        crumbs.push({ label: getSubpageLabel(section, subpage, t) })
+        // When the page registered a deeper trail, the tab crumb becomes the
+        // way back to that tab's root view (e.g. Content → module list).
+        const reset = pageReset?.current
+        crumbs.push({
+          label: getSubpageLabel(section, subpage, t),
+          onClick: pageTrail?.length && reset ? () => reset() : undefined,
+        })
       }
     } else if (subpage) {
       // Section with subpage (settings, payments): section is a clickable link

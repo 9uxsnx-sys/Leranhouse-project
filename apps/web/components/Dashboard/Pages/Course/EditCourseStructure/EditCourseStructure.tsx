@@ -221,7 +221,8 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
           },
           ...(selectedActivity ? [{ label: lessonName(selectedActivity) }] : []),
         ]
-      : []
+      : [],
+    handleBackToModuleList
   )
 
   if (!course) return <PageLoading />

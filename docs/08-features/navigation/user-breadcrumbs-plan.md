@@ -372,6 +372,7 @@ useRegisterDashboardBreadcrumb([
 
 - Provider lives in `dash/ClientAdminLayout.tsx`, so the top bar and the page share it.
 - `EditCourseStructure` registers the module (clickable → back to the module's lesson list) and the lesson when one is open, giving `… > Content > {Module} > {Lesson}`.
+- The tab crumb (`Content`) is clickable whenever a deeper trail exists and returns to the tab's root view (module list) through the same registered handler.
 - Crumbs support `href` (route) or `onClick` (in-page state); the last crumb is never a link.
 - Mobile collapse is unified: `Home > … > Current` in both shells (previously the admin rendered one ellipsis per hidden crumb).
 - Labels truncate at `160px` (last crumb `220px`) so a long course + lesson name cannot push the top bar controls off-screen.
