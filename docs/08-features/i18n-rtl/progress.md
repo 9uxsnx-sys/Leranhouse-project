@@ -2,7 +2,7 @@
 
 > **Last updated:** 2026-10-21
 > **Branch:** `feat/learnhouse-1.2.0-custom`
-> **Latest checkpoint:** `228e30a9` — *i18n(rtl): keep certificate layout LTR but auto-direction its text*
+> **Latest checkpoint:** `714318f4` — *i18n(rtl): keep certificate layout LTR but auto-direction its text*
 > **Companion docs:** [RTL Plan](./rtl-plan.md) (research + strategy), [Dashboard Polish](../dashboard-polish/consistency-plan.md)
 
 This is the working log. Read this first when resuming; read `rtl-plan.md` for the reasoning behind the approach.
