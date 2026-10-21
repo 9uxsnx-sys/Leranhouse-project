@@ -487,10 +487,10 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
 
           {/* Certificate Content */}
           <div className="flex flex-col justify-center items-center flex-1 max-w-full">
-            <h4 className={`font-bold text-sm sm:text-base ${theme.primary} mb-2 text-center`}>
+            <h4 dir="auto" className={`font-bold text-sm sm:text-base ${theme.primary} mb-2 text-center`}>
               {certificationName || t('dashboard.courses.certification.preview.name_placeholder')}
             </h4>
-            <p className={`text-xs sm:text-sm ${theme.secondary} text-center leading-relaxed max-w-xs sm:max-w-sm`}>
+            <p dir="auto" className={`text-xs sm:text-sm ${theme.secondary} text-center leading-relaxed max-w-xs sm:max-w-sm`}>
               {certificationDescription || t('dashboard.courses.certification.preview.description_placeholder')}
             </p>
           </div>
@@ -528,7 +528,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
                 <User className={`w-2.5 h-2.5 sm:w-3 sm:h-3 ${theme.icon}`} />
                 <span className={`text-xs ${theme.secondary} font-medium`}>{t('dashboard.courses.certification.preview.instructor_label')}</span>
               </div>
-              <div className={`text-xs ${theme.primary} font-semibold`}>
+              <div dir="auto" className={`text-xs ${theme.primary} font-semibold`}>
                 {certificateInstructor || 'Dr. Jane Smith'}
               </div>
               <div className={`h-px w-10 sm:w-12 ${theme.secondary.replace('text-', 'bg-')} opacity-50`}></div>

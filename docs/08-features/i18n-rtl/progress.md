@@ -2,7 +2,7 @@
 
 > **Last updated:** 2026-10-21
 > **Branch:** `feat/learnhouse-1.2.0-custom`
-> **Latest checkpoint:** `7165ed0e` — *i18n(rtl): localize Intl formatting and set dir=auto on user content*
+> **Latest checkpoint:** `228e30a9` — *i18n(rtl): keep certificate layout LTR but auto-direction its text*
 > **Companion docs:** [RTL Plan](./rtl-plan.md) (research + strategy), [Dashboard Polish](../dashboard-polish/consistency-plan.md)
 
 This is the working log. Read this first when resuming; read `rtl-plan.md` for the reasoning behind the approach.
@@ -11,7 +11,7 @@ This is the working log. Read this first when resuming; read `rtl-plan.md` for t
 
 ## 1. Where we are, in one paragraph
 
-English is the master language. French and Arabic are fully translated (text only), and the hardcoded-JSX extraction pass for the **real UI** is done. **Phase 4 (RTL layout) is complete for every reachable screen** — 259/259 + 288/288 physical utilities converted in the final two sweeps. Phase 5 (polish) is in progress: locale-aware `Intl.*` formatting is done (31 files) and `dir="auto"` is applied to the main user-generated content surfaces; the drag/resize coordinate math and the lint guard remain.
+English is the master language. French and Arabic are fully translated (text only), and the hardcoded-JSX extraction pass for the **real UI** is done. **Phase 4 (RTL layout) is complete for every reachable screen** — 259/259 + 288/288 physical utilities converted in the final two sweeps. **Phase 5 (polish) is complete** except the lint guard, which is blocked by a broken ESLint pipeline in this repo (see §7.4): locale-aware `Intl.*` formatting, `dir="auto"` on user content, the embed resize delta and the logical CSS in discussion rich text are all in.
 
 ---
 
@@ -24,6 +24,7 @@ These came from the user and should not be re-litigated:
 3. **Boards and Playgrounds are out of scope.** They have no entry point in the shipped UI.
 4. **Every phase is its own commit + push**, so the user can roll back to a text-only checkpoint at any time.
 5. **No MCP, no browser** for the audit/translation passes.
+6. **Platform admin, boards, playgrounds and `CertificatePreview` stay LTR** — see §10 for the reasons.
 
 ---
 
@@ -225,7 +226,7 @@ Extension chrome only — `EmbedObjectsComponent.tsx` (7), `WebPreviewComponent.
 ## 7. Phase 5 — polish (in progress)
 
 1. ~~**`dir="auto"` on user-generated content**~~ — **done** in `7165ed0e` for: discussion titles/bodies/comments/replies, community names + descriptions, course/podcast/collection titles + descriptions + `about`, activity names, assignment task descriptions, profile bios, org name/description on the home picker, search result titles/subtitles, episode titles.
-   Still uncovered (acceptable for now): certificate recipient/course names (blocked on the `CertificatePreview` decision), admin organization pages.
+   Certificate names were added afterwards: `CertificatePreview.tsx` stays LTR by design but its title, description and instructor name carry `dir="auto"`. Admin organization pages are out of scope (see §10).
 2. ~~**Hardcoded locale formatting.**~~ — **done** in `7165ed0e`: 31 files now pass `i18n.language` to `Intl.*` / `toLocale*`. Only deliberate exception is `components/Analytics/chartTheme.ts` `formatCurrency` (`fr-FR` + `DZD` — Algeria-specific business logic).
 3. **Direction-aware JS coordinate math** — audited every `clientX - rect.left` / `offsetX` site:
    - `EmbedObjectsComponent.tsx` — **fixed**: the resize handle sits on `end-0`, so in RTL the horizontal delta is inverted (`dirSign`).
@@ -293,12 +294,12 @@ Any new error is a regression — fix it before committing.
 
 ---
 
-## 10. Open questions (need a decision)
+## 10. Decisions taken (was “open questions”)
 
-1. **Revert `474f05bd`?** It translated the playground listing/viewer/options, but playgrounds have no UI entry point. Leaving it means dead translation keys; reverting means one more commit. Not decided.
-2. **`CertificatePreview.tsx` (68 matches).** A certificate is a designed artifact — mirroring it may be wrong (logos, seals and signatures usually keep their position). Options: leave LTR entirely, mirror only the text blocks, or mirror fully. Not decided.
-3. **Platform admin (`/admin/**`, ~68 literals).** Internal tool, probably single-language. Translate or not? Not decided.
-4. **Media controls.** Current rule is "mirror the chrome, never the play/seek glyphs". Confirm that is what we want for the video player before touching `LearnHousePlayer` / `CloudflarePlayer`.
+1. **Playground i18n (`474f05bd`) — keep.** No UI entry point, so the keys are unused, but they are harmless and we don't plan to expose playgrounds. No revert.
+2. **`CertificatePreview.tsx` — stay LTR.** A certificate is a designed, printed artifact: logos, seals and signatures keep their positions. Its 64 physical utilities are therefore intentional and excluded from the refactor. Only the recipient/course name, the description and the instructor name got `dir="auto"` so Arabic text inside the fixed frame still renders with the correct base direction.
+3. **Platform admin (`/admin/**`, `components/Admin/**`) — stay English + LTR.** Internal-only tool, single operator.
+4. **Media controls — “mirror the chrome, never the play/seek glyphs”.** Confirmed. Seek math stays on `clientX - rect.left`.
 
 ---
 
