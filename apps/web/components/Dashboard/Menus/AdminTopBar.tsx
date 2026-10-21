@@ -34,6 +34,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { useCommandPalette } from '@components/Dashboard/CommandPalette/CommandPaletteContext'
+import { useDashboardBreadcrumbTrail } from '@components/Objects/Breadcrumbs/DashboardBreadcrumbContext'
 
 const LAST_READ_NOTIFICATION_KEY = 'notificationsLastReadAt'
 
@@ -133,6 +134,7 @@ function NotificationsBell() {
 interface Crumb {
   label: string
   href?: string
+  onClick?: () => void
 }
 
 function AdminBreadcrumbNav() {
@@ -140,6 +142,8 @@ function AdminBreadcrumbNav() {
   const { t } = useTranslation()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
+  // Pages that navigate in local state (module → lesson) push their trail here.
+  const pageTrail = useDashboardBreadcrumbTrail()
 
   if (!pathname) return null
 
@@ -250,6 +254,9 @@ function AdminBreadcrumbNav() {
   }
 
   // ── Render ──────────────────────────────────────────────────────────────
+  // Page-registered crumbs continue the trail past the tab name.
+  if (pageTrail?.length) crumbs.push(...pageTrail)
+
   const isSingle = crumbs.length === 1
 
   return (
@@ -266,6 +273,14 @@ function AdminBreadcrumbNav() {
                 >
                   {crumb.label}
                 </Link>
+              ) : !isLast && crumb.onClick ? (
+                <button
+                  type="button"
+                  onClick={crumb.onClick}
+                  className="transition-fg hover:text-ui-fg-subtle cursor-pointer"
+                >
+                  {crumb.label}
+                </button>
               ) : (
                 <div>
                   {!isSingle && <span className="block lg:hidden">...</span>}

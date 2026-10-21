@@ -7,6 +7,7 @@ import WelcomeModal from '@components/Dashboard/Onboarding/WelcomeModal';
 import AdminAuthorization from '@components/Security/AdminAuthorization'
 import { SessionGate } from '@components/Contexts/LHSessionContext'
 import { CommandPaletteProvider } from '@components/Dashboard/CommandPalette/CommandPaletteContext'
+import { DashboardBreadcrumbProvider } from '@components/Objects/Breadcrumbs/DashboardBreadcrumbContext'
 import CommandPalette from '@components/Dashboard/CommandPalette/CommandPalette'
 import React from 'react'
 import { useMediaQuery } from 'usehooks-ts';
@@ -24,6 +25,7 @@ function ClientAdminLayout({
         <SessionGate>
             <AdminAuthorization authorizationMode="page">
                 <CommandPaletteProvider>
+                  <DashboardBreadcrumbProvider>
                     <div className="flex flex-col md:flex-row">
                         {isMobile ? (
                             <DashMobileMenu />
@@ -38,6 +40,7 @@ function ClientAdminLayout({
                         <WelcomeModal />
                         <CommandPalette />
                     </div>
+                  </DashboardBreadcrumbProvider>
                 </CommandPaletteProvider>
             </AdminAuthorization>
         </SessionGate>

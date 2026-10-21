@@ -36,6 +36,7 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useTranslation } from 'react-i18next'
+import { useRegisterBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
 
 // ── Lazy-loaded activity components ──
 
@@ -532,6 +533,26 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
 
     return () => observer.disconnect()
   }, [])
+
+  // Trail: Courses > course name > module > lesson. Registered here because the
+  // route only carries the course UUID; the module and lesson are resolved from
+  // the course payload and the locally selected lesson.
+  useRegisterBreadcrumb([
+    { label: t('courses.courses'), href: '/courses' },
+    {
+      label: courseData?.name || t('navigation.breadcrumb.course_fallback'),
+      href: `/course/${courseuuid}`,
+    },
+    ...(currentActivity?.chapterName
+      ? [{ label: currentActivity.chapterName, mobileHidden: true }]
+      : []),
+    {
+      label:
+        renderedActivity?.name ||
+        currentActivity?.name ||
+        t('navigation.breadcrumb.lesson_fallback'),
+    },
+  ])
 
   // ── Loading / Error states (placed after all hooks so hook order is stable) ──
   if (isLoading) {

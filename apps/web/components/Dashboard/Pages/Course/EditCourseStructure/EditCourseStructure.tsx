@@ -23,6 +23,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import ModuleForm from './ModuleForm'
 import LessonDetailForm from './LessonDetailForm'
 import { useContentLocale, localizedName } from '@components/Hooks/useCourseTranslation'
+import { useRegisterDashboardBreadcrumb } from '@components/Objects/Breadcrumbs/DashboardBreadcrumbContext'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 
@@ -59,6 +60,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
   const contentLocale = useContentLocale()
   const sourceLocale = (courseStructure?.source_locale || 'en').split('-')[0]
   const chapterName = (chapter: any) => localizedName(chapter, contentLocale, sourceLocale)
+  const lessonName = (activity: any) => localizedName(activity, contentLocale, sourceLocale)
 
   // 3-state navigation
   const [selectedChapterIndex, setSelectedChapterIndex] = useState<number | null>(null)
@@ -207,6 +209,20 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
   const handleBackToLessonList = () => {
     setSelectedActivity(null)
   }
+
+  // Continue the admin breadcrumb past the tab name. Module and lesson are
+  // local state, not URL segments, so the page registers them itself.
+  useRegisterDashboardBreadcrumb(
+    selectedChapter
+      ? [
+          {
+            label: chapterName(selectedChapter),
+            onClick: selectedActivity ? handleBackToLessonList : undefined,
+          },
+          ...(selectedActivity ? [{ label: lessonName(selectedActivity) }] : []),
+        ]
+      : []
+  )
 
   if (!course) return <PageLoading />
 
