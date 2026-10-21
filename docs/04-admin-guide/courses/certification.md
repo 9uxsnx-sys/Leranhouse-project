@@ -2,6 +2,8 @@
 
 > Designing certificates and setting passing criteria for course completion.
 
+> **Removed from the course editor (2026-10).** The **Certification** tab no longer exists in the course settings. The certification API, certificate rendering and the "Offers certificate" toggle in the General tab are unchanged, but certificate design is not configurable from the dashboard UI. This page documents the previous behaviour for reference.
+
 ---
 
 ## Overview

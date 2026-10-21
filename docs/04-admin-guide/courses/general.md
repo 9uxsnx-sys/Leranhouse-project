@@ -16,12 +16,22 @@ A short description of the course. Displayed on the course detail page.
 
 ### Difficulty
 
-Three levels available:
+Three levels available in the source locale:
 - **Beginner** --- No prior knowledge required
 - **Intermediate** --- Some prior knowledge helpful
 - **Advanced** --- In-depth, expert-level content
 
-Selected via a dropdown with clean menu styling.
+Selected via the field-style select (`@/components/ui/select-field`), whose trigger matches the surrounding inputs (same background, border, height; one chevron; no blue open ring).
+
+In a **non-source locale** the difficulty is a free-text input instead: the label itself is translatable content, so translators are not limited to the three built-in levels.
+
+### Duration
+
+Free text describing the expected time commitment (e.g. `8 weeks`, `12 hours`). Shown next to the difficulty on course cards and on the course page, translated per locale.
+
+### Requirements
+
+A list of prerequisites, stored as JSON items (`{ id, text, emoji }`) inside `extra_metadata.requirements`. Rendered as a bullet list under the course page's "Requirements" section, translated per locale.
 
 ### Media Section
 
@@ -81,6 +91,21 @@ A toggle switch to enable/disable certificate issuance for course completion.
 ### Categories
 
 Optional categories for organizing courses on the platform.
+
+---
+
+## Editing a translation
+
+The General tab edits **one locale at a time**. A locale switcher at the top of the tab selects the language, and a chip shows whether the current locale is the **source** or a **translation** (or **missing**, when no translation row exists yet).
+
+| Field group | Source locale | Translation |
+|---|---|---|
+| Name, description, about, learnings | edit directly on the course row | stored in `course_translation` |
+| Difficulty | three-level select | free-text input |
+| Duration, requirements | edit directly | stored in `course_translation.extra_metadata` |
+| Video hours, resources, certificate toggle, instructor | editable | **read-only** — shared by every locale |
+
+The action row also exposes **Copy from source**, which creates/overwrites the translation with the source text in one click. Saving a translation revalidates the `courses` cache so learner pages pick up the change immediately.
 
 ---
 

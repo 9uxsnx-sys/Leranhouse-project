@@ -95,6 +95,9 @@ The only genuinely shared primitive is `AnalyticsToolbar` (`components/Analytics
 `@/components/ui/select` (shadcn) · native `<select>` · Radix `DropdownMenu`-as-select · bespoke `CustomSelect` / `SimpleDropdown`.
 Worst case: **Payments uses shadcn `Select` in `PaymentsOffersPage` and a native `<select>` in `PaymentsGroupsPage:213`.**
 
+**2026-10 update — two intentional trigger variants, one dropdown:**
+The stock `select.tsx` trigger is button-styled (borderless, `shadow-buttons-neutral`), so inside forms it looked empty next to `Input` fields. `@/components/ui/select-field` now re-exports the same `Select`/`Content`/`Item`/`Value` with a trigger that copies the Input field design (`bg-ui-bg-field`, `shadow-borders-base`, `h-8`, `rounded-md`, single `ChevronDown`, no blue open ring). Both export the same names, so a screen switches variants by changing the import path. The course editor (difficulty, Twitter card type) uses `select-field`; toolbars keep the button trigger. `CustomSelect.tsx` remains unused.
+
 ### 2.5 Tab bars: 5 copies + 3 variants + 1 stray
 
 - Pill style **copy-pasted 5×** (org, users, course, community, podcast settings pages) — identical markup, `layoutId="tab-indicator"`
@@ -195,6 +198,7 @@ Courses → Podcasts → Communities → Users/Groups/Roles → Payments → Org
 - [x] Every tab bar uses `<PageTabs>`.
 - [x] One icon per concept; no phosphor imports under `components/Dashboard/**`. *(exception: the `MarkdownLogo` brand mark; Boards/mobile are out of scope)*
 - [x] All selects are the shared `Select`. *(the unused `CustomSelect.tsx` duplicate still exists but has zero importers)*
+- [x] Form selects use `select-field` so the trigger matches `Input`; the course editor has no remaining button-style selects.
 - [ ] Chapter/Module and Lesson/Activity each resolve to one word everywhere.
 - [x] Every dashboard string goes through `t()` (verified by grep for bare JSX text). *Desktop-reachable areas; brand names and dev-only/dead-component text excluded.*
 - [x] The untranslatable glossary is applied identically in org and course settings.

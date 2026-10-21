@@ -2,13 +2,15 @@
 
 > Tracking student engagement, completion, and revenue for your course.
 
+> **Removed from the course editor (2026-10).** The per-course **Analytics** tab and its course-list chart shortcut were removed. Use the org-wide analytics area at `/orgs/[orgslug]/dash/analytics` instead. This page documents the previous behaviour for reference.
+
 ---
 
 ## Overview
 
-The **Analytics** view provides data-driven insights into how your course is performing. You can monitor enrollment, track learner progress, measure engagement, and — for paid courses — review revenue data.
+The **Analytics** view provided data-driven insights into how a course was performing: enrollment, learner progress, engagement, and — for paid courses — revenue data.
 
-Unlike the six editor tabs, Analytics is accessed from the **course list page** via the chart icon (📊) on each course row, not from within the course editor.
+It was the only editor entry point for per-course analytics; there is currently no course-scoped analytics screen in the dashboard.
 
 ---
 

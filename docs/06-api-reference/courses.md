@@ -34,6 +34,8 @@ GET /api/v1/courses/org_slug/{org_slug}/page/{page}/limit/{limit}
 |-----------|------|-------------|
 | `visibility` | string | Filter by visibility: `public`, `private`, or omit for all |
 | `sort` | string | Sort order (e.g., `newest`, `oldest`, `title`) |
+| `include_unpublished` | boolean | Include drafts (dashboard list); defaults to `false` |
+| `locale` | string | Content locale (e.g. `ar`, `fr`). Falls back to the course's source locale |
 
 ### Example Request
 
@@ -67,6 +69,18 @@ GET /api/v1/courses/org_slug/my-org/page/1/limit/10?visibility=public
   "pages": 5
 }
 ```
+
+### Localized responses
+
+Course read models carry three localization fields:
+
+| Field | Description |
+|---|---|
+| `source_locale` | Locale the base `course` row is written in |
+| `content_locale` | Locale actually served for this request |
+| `is_fallback` | `true` when `locale` had no translation, so the source content was returned |
+
+Translated fields are overlaid at read time (`name`, `description`, `about`, `learnings`, `tags`, `seo`) together with the display-text keys of `extra_metadata` (`difficulty`, `duration`, `requirements`). Counts, booleans, and the `instructor` block always come from the base row. List and search endpoints localize with one translation query per page.
 
 ---
 
@@ -148,6 +162,7 @@ GET /api/v1/courses/{course_uuid}/meta
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `slim` | boolean | `false` | If `true`, excludes heavy activity content (blocks) for faster loading |
+| `locale` | string | source locale | Locale used to overlay the course's translated content |
 
 ### Response Body (200 OK)
 
@@ -420,6 +435,10 @@ GET /api/v1/courses/org_slug/{org_slug}/search
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `q` | string | Yes | Search query string |
+| `limit` | integer | No | Max results (default `10`) |
+| `locale` | string | No | Locale used to localize the returned course names |
+
+> Search itself matches the **source-locale** text only; `locale` affects the result payload, not the matching.
 
 ### Response Body (200 OK)
 
@@ -600,6 +619,49 @@ GET /api/v1/courses/{course_uuid}/updates
   }
 ]
 ```
+
+---
+
+## Course Translations
+
+A course stores its source language on the base `course` row (`source_locale`). Every other language lives in `course_translation`, one row per locale. Reads overlay those rows on top of the base course (`locale` query parameter); writes go through these endpoints and require update access.
+
+### List Translations
+
+```
+GET /api/v1/courses/{course_uuid}/translations
+```
+
+Returns `CourseTranslationRead[]` — every stored locale for the course, including `state`, `source_updated_at` and `translated_by`.
+
+### Upsert Translation
+
+```
+PUT /api/v1/courses/{course_uuid}/translations/{locale}
+```
+
+| Body field | Type | Required | Notes |
+|---|---|---|---|
+| `name` | string | Yes | Translated course title |
+| `description` | string | No | Cards and course header |
+| `about` | string | No | "About this course" paragraphs (`\n\n` separated) |
+| `learnings` | string | No | JSON array of `{ id, text, emoji }` |
+| `tags` | string | No | Comma-separated (no editor in v1) |
+| `seo` | object | No | Same shape as the course `seo` object |
+| `extra_metadata` | object | No | Display-text keys only: `difficulty`, `duration`, `requirements` |
+| `state` | string | No | `draft` \| `machine` \| `reviewed` \| `published` (v1 serves every state) |
+
+`extra_metadata` is **merged** over the base row at read time, so counts (`video_hours`, `resources_count`), flags (`has_certificate`) and `instructor` are never lost by a translation.
+
+Writing the course's own `source_locale` here returns `422` — edit the course instead.
+
+### Delete Translation
+
+```
+DELETE /api/v1/courses/{course_uuid}/translations/{locale}
+```
+
+Removes the locale row; subsequent reads fall back to the source locale with `is_fallback: true`.
 
 ---
 

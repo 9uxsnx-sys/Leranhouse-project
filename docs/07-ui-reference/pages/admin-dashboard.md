@@ -68,16 +68,16 @@ Defined in `apps/web/components/Dashboard/Menus/AdminTopBar.tsx`.
 - **Create new course** action.
 - **Course migrate** tool at `/orgs/[orgslug]/dash/courses/migrate`.
 
-#### Course Editor (7 Tabs)
+#### Course Editor (6 Tabs)
 
 **Route**: `/orgs/[orgslug]/dash/courses/course/[courseuuid]/[subpage]` — File: `apps/web/app/orgs/[orgslug]/dash/courses/course/[courseuuid]/[subpage]/page.tsx`
 
-The course editor has 7 tabs, each guarded by permissions and plan requirements:
+The course editor has 6 tabs, each guarded by permissions and plan requirements:
 
 1. **General** (`/general`) — `Settings` icon
    - Required permission: `update`
    - Component: `EditCourseGeneral`
-   - Course name, description, thumbnail, category, difficulty, tags.
+   - Course name, description, thumbnail, difficulty, duration, requirements, learnings.
 
 2. **Content** (`/content`) — `BookOpen` icon
    - Required permission: `update_content`
@@ -94,25 +94,22 @@ The course editor has 7 tabs, each guarded by permissions and plan requirements:
    - Component: `EditCourseContributors`
    - Add/remove contributors via search, set roles (Creator, Maintainer, Contributor, Reporter), toggle active status, bulk remove.
 
-5. **Certification** (`/certification`) — `Award` icon (plan-restricted)
-   - Required permission: `update`
-   - Requires plan: `standard` or above
-   - Component: `EditCourseCertification`
-   - Enable/disable certification, certificate design (title, description, background color, logo), passing criteria.
-
-6. **SEO** (`/seo`) — `Search` icon (plan-restricted)
+5. **SEO** (`/seo`) — `Search` icon (plan-restricted)
    - Required permission: `update`
    - Requires plan: `standard` or above
    - Component: `EditCourseSEO`
    - Meta title, meta description, meta keywords, social preview (Twitter/X card type, title, description), URL slug.
 
-7. **Analytics** (`/analytics`) — `BarChart` icon
-   - Component: `CourseAnalyticsTab`
-   - Course-specific analytics (enrollments, completion rates, engagement).
+6. **Translations** (`/translations`) — `Languages` icon
+   - Required permission: `update`
+   - Component: `EditCourseTranslations`
+   - Per-locale coverage table, copy-from-source, two-step delete, CSV export/import.
+
+> The former **Certification** and **Analytics** tabs were removed (2026-10). `[subpage]` redirects unknown subpages to the first permitted tab.
 
 - **Context**: Wrapped in `CourseProvider` for shared course state.
 - **Rights checking**: `useCourseRights` hook verifies user permissions for each tab.
-- **Navigation**: Tab bar with icons and labels; active tab highlighted with bottom border or underline.
+- **Navigation**: Pill-style `PageTabs` bar with icons and labels.
 
 ### User Management
 

@@ -11,18 +11,22 @@
 The **Courses** page shows all available courses with:
 - Course thumbnail image
 - Course name and description
-- Difficulty level (Beginner, Intermediate, Advanced)
-- Module and lesson count
+- Duration and difficulty (e.g. `8 weeks · Beginner`), translated with the rest of the course content
 - Price (free or paid)
+
+Cards render in the language currently selected in the platform switcher. Courses without duration/difficulty still reserve the metadata row so the grid stays even.
 
 ### Course Detail Page
 
 Clicking a course opens its detail page with:
 - Full course description
+- What you'll learn and requirements sections
+- About this course
 - Module and lesson list (locked until purchase)
-- Learning objectives
 - Instructor information
 - Purchase button
+
+If a course only exists in another language, a hint above the title says which language it is shown in.
 
 ## Purchasing
 

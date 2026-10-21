@@ -20,6 +20,7 @@ This reference serves two audiences:
 | Understand the color palette, spacing, typography | [Design Tokens](./design-tokens.md) |
 | Build a button for a form or action | [Button](./components/button.md) |
 | Add a text field, textarea, or search input | [Input](./components/input.md) |
+| Choose a value from a list inside a form | [Select](./components/select.md) |
 | Create a toggle or switch control | [Switch](./components/switch.md) |
 | Build a context menu or dropdown | [Dropdown Menu](./components/dropdown-menu.md) |
 | Implement auto-save, drag-and-drop, or layout patterns | [Patterns](./patterns.md) |
@@ -52,7 +53,8 @@ The following table maps each documented UI element to its source file and locat
 | StatusBadge | `status-badge.tsx` | `apps/web/components/ui/status-badge.tsx` |
 | Badge | `badge.tsx` | `apps/web/components/ui/badge.tsx` |
 | Dialog/Modal | `dialog.tsx` | `apps/web/components/ui/dialog.tsx` |
-| Select | `select.tsx` | `apps/web/components/ui/select.tsx` |
+| Select (button-style trigger) | `select.tsx` | `apps/web/components/ui/select.tsx` |
+| Select (field-style trigger, matches Input) | `select-field.tsx` | `apps/web/components/ui/select-field.tsx` |
 | Checkbox | `checkbox.tsx` | `apps/web/components/ui/checkbox.tsx` |
 | Tabs | `tabs.tsx` | `apps/web/components/ui/tabs.tsx` |
 | Tooltip | `tooltip.tsx` | `apps/web/components/ui/tooltip.tsx` |

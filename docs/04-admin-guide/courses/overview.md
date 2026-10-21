@@ -13,23 +13,25 @@
 
 ## Course Editor Tabs
 
-The course editor has 7 tabs:
+The course editor has 6 tabs:
 
 | Tab | Purpose |
 |-----|---------|
-| **General** | Name, description, difficulty, thumbnail, certificate toggle |
+| **General** | Name, description, difficulty, duration, requirements, learnings, thumbnail |
 | **Content** | Module and lesson structure |
 | **Access** | Who can access the course (Free, Restricted, Paid) |
-| **Certification** | Certificate design and passing criteria |
 | **Contributors** | Adding co-authors and instructors |
 | **SEO** | SEO metadata and social preview |
-| **Analytics** | Course engagement and performance data |
+| **Translations** | Per-language content coverage, copy-from-source and CSV import/export |
+
+> **Removed (2026-10):** the **Analytics** and **Certification** tabs were removed from the course editor. Course analytics is no longer reachable from the course UI; org-wide analytics lives at `/dash/analytics`. The "Offers certificate" toggle in the General tab is unaffected, but per-course certificate design is not configurable from the editor anymore.
 
 ## Course List
 
 The dashboard course list shows all courses in your organization with:
 - Course thumbnail and name
-- Module and lesson counts
+- Description
+- Duration and difficulty from the course metadata, in the dashboard's language
 - Published/unpublished status
 - Search bar with live results count
 - Difficulty filter (All, Easy, Medium, Hard)
@@ -37,6 +39,8 @@ The dashboard course list shows all courses in your organization with:
 - **Bulk actions** (visible when courses are selected): Clone, Export, Delete
 - 3-dot menu per course with **Delete**, **Clone**, and **Export** options
 - Pagination (8 courses per page)
+
+The card metadata row is reserved on every card, even when a course has no duration/difficulty, so the grid keeps a uniform rhythm. Lesson counts are not shown because the course-list endpoint does not return them.
 
 ## Editor Layout
 

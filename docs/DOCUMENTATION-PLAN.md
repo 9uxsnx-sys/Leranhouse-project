@@ -134,10 +134,10 @@ docs/
 │   │   ├── general.md                 # General settings tab
 │   │   ├── content-structure.md       # Modules & lessons (Content tab)
 │   │   ├── access.md                  # Access control tab (Public / Users Only / Paid)
-│   │   ├── certification.md           # Certification tab
+│   │   ├── certification.md           # Certification tab (removed from editor 2026-10; kept as reference)
 │   │   ├── contributors.md            # Contributors tab
 │   │   ├── seo.md                     # SEO tab
-│   │   └── analytics.md              # Course analytics tab
+│   │   └── analytics.md              # Course analytics tab (removed from editor 2026-10; kept as reference)
 │   ├── org-settings/
 │   │   ├── general.md                 # Organization general settings
 │   │   ├── branding.md                # Custom branding & fonts

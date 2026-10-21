@@ -292,9 +292,11 @@ Done when: switch to Arabic → type an Arabic title → save → reload → the
 
 | Cookie | `content_locale` | `is_fallback` | Rendered name | `<html lang dir>` |
 |---|---|---|---|---|
-| `i18next=ar` | `ar` | `false` | Arabic title | `ar` / `rtl` |
+| `i18next=ar` | `ar` | `false` | `احتراف تصميم واجهات وتجربة المستخدم` | `ar` / `rtl` |
 | `i18next=en` | `en` | `false` | `UI/UX Design Masterclass` | `en` / `ltr` |
-| `i18next=fr` | `en` | `true` | English title (fallback) | `fr` / `ltr` |
+| `i18next=fr` | `fr` | `false` | `Maîtrisez le design UI/UX` | `fr` / `ltr` |
+
+Fallback is still exercised by any course without a translation row: it returns the source text with `is_fallback: true` and shows the "only available in …" hint above the title.
 
 Implementation notes carried forward:
 
@@ -348,6 +350,16 @@ Notes:
 
 - List endpoints (`/courses/org_slug/...`, search) localize with **one** translation query per page (`apply_overlay_bulk`), not one per course. The Redis cache still stores only the source-locale payload.
 - Search matches the **source** text only in v1; searching an Arabic title will not find the course until the query is run against `course_translation` too.
+
+### Next phase — content, then podcasts and collections
+
+Course **settings** (this document) are complete: metadata, SEO, requirements, translations tab and the learner surfaces listed above. The remaining content work is the lesson/chapter layer:
+
+1. **Course content tab** — chapter and activity titles/descriptions need their own translation rows and a locale selector in the editor; the learner sidebar and activity page must resolve them the same way the course header does.
+2. **Podcasts** — replicate the same model (`podcast_translation` / episode translations) and the same `locale` query parameter on read endpoints.
+3. **Collections** — same pattern for collection name/description.
+
+Validate each surface in all three languages before moving to the next one; the course content tab is the reference implementation.
 
 ### Out of scope for v1
 
