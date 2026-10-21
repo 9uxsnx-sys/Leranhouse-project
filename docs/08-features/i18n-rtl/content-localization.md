@@ -309,6 +309,7 @@ Implementation notes carried forward:
 | `name`, `description`, `about`, `learnings` | done in Phase A — they share the General form |
 | `seo` | done — the SEO tab reads/writes the translation's `seo` object with its own action row |
 | `tags` | **skipped** — no course-tags editor exists in the dashboard, and v1 only covers real UI |
+| `extra_metadata` | done — `difficulty`, `duration` and `requirements` are translated; counts, flags and the instructor block stay on the base row |
 | Copy from source | done — button in the General action row, visible only in a non-source locale |
 
 Notes:
@@ -336,6 +337,8 @@ New course tab (`/dash/courses/course/<uuid>/translations`) showing one row per 
 | Activity page | done — same cookie, so the lesson header/sidebar match the course |
 | Courses catalog (`/courses`) | done — server-rendered in the visitor's locale |
 | Landing page course cards | done — SWR key includes the locale |
+| Dashboard course list | done — the list request carries `locale`, so cards follow the UI language |
+| Card metadata | done — cards render the course's real `duration`/`difficulty` (the list has no lesson count, so that segment is omitted) |
 | Search | done — `?locale=` on both search endpoints; results show translated names |
 | Fallback hint | done — "This course is only available in {{language}}." above the title when `is_fallback` |
 | Trail lists (dashboard "continue learning", course progress) | **not done** — trail endpoints still return source names |
@@ -348,7 +351,7 @@ Notes:
 
 ### Out of scope for v1
 
-Listing badges, catalog page, machine translation, review workflow, stale detection, bulk actions, per-locale slugs/hreflang.
+Machine translation, review workflow, stale detection, bulk actions, per-locale slugs/hreflang.
 
 ### Operational notes
 
