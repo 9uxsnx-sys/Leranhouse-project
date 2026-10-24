@@ -13,6 +13,7 @@ from src.routers import dev, trail, users, auth, orgs, roles, search
 from src.routers import stream
 from src.routers import api_tokens
 from src.routers import webhooks
+from src.routers import notifications
 from src.routers.integrations import zapier as zapier_integration
 from src.routers.ai import ai, magicblocks, courseplanning, rag
 from src.routers.boards import boards_playground
@@ -329,6 +330,14 @@ v1_router.include_router(
     utils_router,
     prefix="/utils",
     tags=["utils"],
+    dependencies=[Depends(require_authenticated_user)]
+)
+
+# Notifications (in-app feed — no plan gate, every logged-in user gets it)
+# Routes already declare their own "/notifications" prefix, so no extra prefix here.
+v1_router.include_router(
+    notifications.router,
+    tags=["notifications"],
     dependencies=[Depends(require_authenticated_user)]
 )
 

@@ -197,4 +197,5 @@ For example:
 | [Organizations](./orgs.md) | Org management, branding, invites, feature config |
 | [Payments](./payments.md) | Chargily checkout, webhooks, purchase history |
 | [Webhooks](./webhooks.md) | Webhook endpoint management, delivery logs |
+| [Notifications](./notifications.md) | In-app feed, unread count, read state, event catalog, template overrides, announcements |
 | [Admin API](./admin.md) | Headless admin endpoints (API tokens required) |

@@ -11,6 +11,7 @@ from src.db.communities.communities import Community
 from src.services.analytics.analytics import track
 from src.services.analytics import events as analytics_events
 from src.services.webhooks.dispatch import dispatch_webhooks
+from src.services.notifications import notify
 from src.db.communities.discussions import (
     Discussion,
     DiscussionReadWithVoteStatus,
@@ -147,6 +148,15 @@ async def create_discussion(
     )
     await dispatch_webhooks(
         event_name=analytics_events.DISCUSSION_POSTED,
+        org_id=community.org_id,
+        data={
+            "user": {"user_uuid": current_user.user_uuid, "email": current_user.email, "username": current_user.username},
+            "discussion": {"discussion_uuid": discussion.discussion_uuid, "title": discussion.title},
+            "community": {"community_uuid": community_uuid},
+        },
+    )
+    notify(
+        event_name="discussion_posted",
         org_id=community.org_id,
         data={
             "user": {"user_uuid": current_user.user_uuid, "email": current_user.email, "username": current_user.username},
@@ -499,6 +509,16 @@ async def pin_discussion(
             "community_uuid": community.community_uuid,
         },
     )
+    notify(
+        event_name="discussion_pinned",
+        org_id=community.org_id,
+        data={
+            "discussion_uuid": discussion.discussion_uuid,
+            "title": discussion.title,
+            "is_pinned": is_pinned,
+            "community_uuid": community.community_uuid,
+        },
+    )
 
     # Get author info
     author_statement = select(User).where(User.id == discussion.author_id)
@@ -559,6 +579,16 @@ async def lock_discussion(
     db_session.refresh(discussion)
 
     await dispatch_webhooks(
+        event_name="discussion_locked",
+        org_id=community.org_id,
+        data={
+            "discussion_uuid": discussion.discussion_uuid,
+            "title": discussion.title,
+            "is_locked": is_locked,
+            "community_uuid": community.community_uuid,
+        },
+    )
+    notify(
         event_name="discussion_locked",
         org_id=community.org_id,
         data={

@@ -22,6 +22,7 @@ from src.security.rbac import AccessAction, check_resource_access
 from src.security.org_auth import require_org_membership
 from src.services.utils.upload_content import upload_file
 from src.services.webhooks.dispatch import dispatch_webhooks
+from src.services.notifications import notify
 
 
 async def create_board(
@@ -68,6 +69,16 @@ async def create_board(
     db_session.commit()
 
     await dispatch_webhooks(
+        event_name="board_created",
+        org_id=org_id,
+        data={
+            "board_uuid": board.board_uuid,
+            "name": board.name,
+            "created_by": current_user.id,
+        },
+    )
+
+    notify(
         event_name="board_created",
         org_id=org_id,
         data={
@@ -249,6 +260,16 @@ async def add_board_member(
     db_session.refresh(member)
 
     await dispatch_webhooks(
+        event_name="board_member_added",
+        org_id=board.org_id,
+        data={
+            "board_uuid": board.board_uuid,
+            "user_id": member_object.user_id,
+            "role": member_object.role.value,
+        },
+    )
+
+    notify(
         event_name="board_member_added",
         org_id=board.org_id,
         data={

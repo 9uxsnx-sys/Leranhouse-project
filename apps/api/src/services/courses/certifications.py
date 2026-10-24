@@ -21,6 +21,7 @@ from src.security.rbac import check_resource_access, AccessAction
 from src.services.analytics.analytics import track
 from src.services.analytics import events as analytics_events
 from src.services.webhooks.dispatch import dispatch_webhooks
+from src.services.notifications import notify
 
 logger = logging.getLogger(__name__)
 
@@ -341,6 +342,15 @@ async def create_certificate_user(
                     "certificate": {
                         "user_certification_uuid": certificate_user.user_certification_uuid,
                     },
+                },
+            )
+            notify(
+                event_name=analytics_events.CERTIFICATE_CLAIMED,
+                org_id=course.org_id,
+                data={
+                    "user_id": user_id,
+                    "course_uuid": course.course_uuid,
+                    "course_name": course.name,
                 },
             )
     except Exception as e:

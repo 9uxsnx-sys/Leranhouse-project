@@ -11,6 +11,7 @@ from src.security.features_utils.usage import (
     add_ai_credits,
 )
 from src.services.webhooks.dispatch import dispatch_webhooks, _background_tasks
+from src.services.notifications import notify
 
 logger = logging.getLogger(__name__)
 
@@ -148,6 +149,17 @@ def activate_pack(
     _background_tasks.add(_task)
     _task.add_done_callback(_background_tasks.discard)
 
+    notify(
+        event_name="pack_activated",
+        org_id=org_id,
+        data={
+            "pack_id": pack_id,
+            "pack_type": pack_def["type"],
+            "quantity": pack_def["quantity"],
+            "platform_subscription_id": platform_subscription_id,
+        },
+    )
+
     return org_pack
 
 
@@ -197,6 +209,16 @@ def deactivate_pack(
     ))
     _background_tasks.add(_task)
     _task.add_done_callback(_background_tasks.discard)
+
+    notify(
+        event_name="pack_deactivated",
+        org_id=org_id,
+        data={
+            "pack_id": org_pack.pack_id,
+            "pack_type": org_pack.pack_type.value,
+            "platform_subscription_id": platform_subscription_id,
+        },
+    )
 
     return org_pack
 

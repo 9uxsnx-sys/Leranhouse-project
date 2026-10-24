@@ -41,6 +41,7 @@ from src.services.email.utils import get_base_url_from_request
 from src.services.analytics.analytics import track
 from src.services.analytics import events as analytics_events
 from src.services.webhooks.dispatch import dispatch_webhooks
+from src.services.notifications.service import notify
 from src.security.auth import create_access_token, create_refresh_token
 from src.security.features_utils.plan_check import get_org_plan
 from src.security.features_utils.plans import plan_meets_requirement
@@ -1054,6 +1055,22 @@ async def provision_user(
             },
         )
 
+        notify(
+            event_name=analytics_events.USER_SIGNED_UP,
+            org_id=token_user.org_id,
+            data={
+                "user_id": existing_user.id,
+                "user": {
+                    "user_uuid": existing_user.user_uuid,
+                    "email": existing_user.email,
+                    "username": existing_user.username,
+                    "first_name": existing_user.first_name,
+                    "last_name": existing_user.last_name,
+                },
+            },
+            db_session=db_session,
+        )
+
         return UserRead.model_validate(existing_user)
 
     if db_session.exec(select(User).where(User.username == username)).first():
@@ -1110,6 +1127,22 @@ async def provision_user(
         },
     )
 
+    notify(
+        event_name=analytics_events.USER_SIGNED_UP,
+        org_id=token_user.org_id,
+        data={
+            "user_id": user.id,
+            "user": {
+                "user_uuid": user.user_uuid,
+                "email": user.email,
+                "username": user.username,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+            },
+        },
+        db_session=db_session,
+    )
+
     return UserRead.model_validate(user)
 
 
@@ -1161,6 +1194,16 @@ async def remove_user_from_org_admin(
         event_name=analytics_events.USER_REMOVED_FROM_ORG,
         org_id=token_user.org_id,
         data={"user_id": user_id, "org_id": token_user.org_id},
+    )
+
+    notify(
+        event_name=analytics_events.USER_REMOVED_FROM_ORG,
+        org_id=token_user.org_id,
+        data={
+            "user_id": user_id,
+            "org_id": token_user.org_id,
+        },
+        db_session=db_session,
     )
 
     return {"detail": "User removed from org"}
@@ -1630,6 +1673,16 @@ async def revoke_certificate(
             "user_certification_uuid": user_certification_uuid,
             "course_uuid": course.course_uuid,
         },
+    )
+
+    notify(
+        event_name="certificate_revoked",
+        org_id=token_user.org_id,
+        data={
+            "user_id": user_id,
+            "course_uuid": course.course_uuid,
+        },
+        db_session=db_session,
     )
 
     return {

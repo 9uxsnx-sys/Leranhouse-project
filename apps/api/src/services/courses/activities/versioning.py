@@ -11,6 +11,7 @@ from typing import List, Optional
 from src.security.rbac import check_resource_access, AccessAction
 from src.security.features_utils.usage import check_feature_access
 from src.services.webhooks.dispatch import dispatch_webhooks
+from src.services.notifications import notify
 
 # Maximum number of versions to keep per activity
 # Change this constant to adjust how many saves are stored
@@ -44,6 +45,15 @@ async def create_activity_version(
     await cleanup_old_versions(activity.id, db_session)
 
     await dispatch_webhooks(
+        event_name="activity_version_created",
+        org_id=activity.org_id,
+        data={
+            "activity_id": activity.id,
+            "version_number": version.version_number,
+            "created_by_id": user_id,
+        },
+    )
+    notify(
         event_name="activity_version_created",
         org_id=activity.org_id,
         data={
@@ -333,6 +343,15 @@ async def restore_activity_version(
     db_session.refresh(activity)
 
     await dispatch_webhooks(
+        event_name="activity_version_restored",
+        org_id=activity.org_id,
+        data={
+            "activity_uuid": activity.activity_uuid,
+            "restored_version_number": version_number,
+            "new_version_number": activity.current_version,
+        },
+    )
+    notify(
         event_name="activity_version_restored",
         org_id=activity.org_id,
         data={

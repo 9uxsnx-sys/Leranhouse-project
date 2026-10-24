@@ -21,6 +21,7 @@ from src.db.organizations import Organization
 from src.db.usergroups import UserGroup, UserGroupCreate, UserGroupRead, UserGroupUpdate
 from src.db.users import AnonymousUser, APITokenUser, InternalUser, PublicUser, User, UserRead
 from src.services.webhooks.dispatch import dispatch_webhooks
+from src.services.notifications import notify
 
 
 async def _validate_resource_exists_and_belongs_to_org(
@@ -146,6 +147,15 @@ async def create_usergroup(
     increase_feature_usage("usergroups", org.id, db_session)
 
     await dispatch_webhooks(
+        event_name="usergroup_created",
+        org_id=org.id,
+        data={
+            "usergroup_uuid": usergroup.usergroup_uuid,
+            "name": usergroup.name,
+        },
+    )
+
+    notify(
         event_name="usergroup_created",
         org_id=org.id,
         data={
@@ -432,6 +442,15 @@ async def delete_usergroup_by_id(
         },
     )
 
+    notify(
+        event_name="usergroup_deleted",
+        org_id=usergroup_org_id,
+        data={
+            "usergroup_uuid": usergroup_uuid_val,
+            "name": usergroup_name_val,
+        },
+    )
+
     return "UserGroup deleted successfully"
 
 
@@ -497,6 +516,16 @@ async def add_users_to_usergroup(
     db_session.commit()
 
     await dispatch_webhooks(
+        event_name="usergroup_users_added",
+        org_id=usergroup.org_id,
+        data={
+            "usergroup_id": usergroup_id,
+            "usergroup_uuid": usergroup.usergroup_uuid,
+            "user_ids": [int(uid) for uid in user_ids_array],
+        },
+    )
+
+    notify(
         event_name="usergroup_users_added",
         org_id=usergroup.org_id,
         data={
@@ -613,6 +642,16 @@ async def add_resources_to_usergroup(
     db_session.commit()
 
     await dispatch_webhooks(
+        event_name="usergroup_resources_added",
+        org_id=usergroup.org_id,
+        data={
+            "usergroup_id": usergroup_id,
+            "usergroup_uuid": usergroup.usergroup_uuid,
+            "resource_uuids": resources_uuids_array,
+        },
+    )
+
+    notify(
         event_name="usergroup_resources_added",
         org_id=usergroup.org_id,
         data={

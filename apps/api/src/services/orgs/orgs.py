@@ -27,6 +27,7 @@ from src.services.orgs.uploads import upload_org_logo, upload_org_preview, uploa
 from src.db.organization_config import AuthBrandingConfig, SeoOrgConfig
 from src.core.ee_hooks import is_multi_org_allowed
 from src.services.webhooks.dispatch import dispatch_webhooks
+from src.services.notifications import notify
 
 
 def _build_org_read_with_resolved(org, org_config) -> OrganizationRead:
@@ -822,6 +823,12 @@ async def update_org_signup_mechanism(
         data={"signup_mechanism": signup_mechanism},
     )
 
+    notify(
+        event_name="org_signup_method_changed",
+        org_id=org_id,
+        data={"signup_mechanism": signup_mechanism},
+    )
+
     return {"detail": "Signup mechanism updated"}
 
 
@@ -885,6 +892,12 @@ async def update_org_ai_config(
     db_session.refresh(org_config)
 
     await dispatch_webhooks(
+        event_name="org_ai_config_changed",
+        org_id=org_id,
+        data={"ai_enabled": ai_enabled, "copilot_enabled": copilot_enabled},
+    )
+
+    notify(
         event_name="org_ai_config_changed",
         org_id=org_id,
         data={"ai_enabled": ai_enabled, "copilot_enabled": copilot_enabled},
@@ -964,6 +977,12 @@ async def update_org_payments_config(
     )
 
     await dispatch_webhooks(
+        event_name="org_payments_config_changed",
+        org_id=org_id,
+        data={"payments_enabled": payments_enabled},
+    )
+
+    notify(
         event_name="org_payments_config_changed",
         org_id=org_id,
         data={"payments_enabled": payments_enabled},

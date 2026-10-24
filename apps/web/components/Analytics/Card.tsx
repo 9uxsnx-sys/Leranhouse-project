@@ -40,7 +40,7 @@ export function SectionCard({
       {(title || right) && (
         <div className={cn('flex items-center justify-between mb-5', bleed && 'px-6')}>
           {title ? (
-            <h3 className="text-[13px] font-semibold tracking-wide uppercase text-gray-500">{title}</h3>
+            <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500">{title}</h3>
           ) : (
             <span />
           )}
@@ -93,7 +93,7 @@ export function ChartCard({
   return (
     <div className={cn(CARD_SHELL, 'p-6', className)}>
       <div className="flex items-center justify-between mb-5">
-        <h3 className="text-[13px] font-semibold tracking-wide uppercase text-gray-500">{title}</h3>
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500">{title}</h3>
         {actions}
       </div>
       <div style={{ width: '100%', height }}>{children}</div>

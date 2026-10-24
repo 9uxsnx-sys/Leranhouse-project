@@ -37,6 +37,12 @@ The documents in this section describe cross-cutting feature areas that touch mu
 |----------|-------------|
 | [Overview](./communities/overview.md) | Community access control model (3 dimensions), publish/unpublish, public/restricted, course linking, moderation, discussions |
 
+### Notifications
+
+| Document | Description |
+|----------|-------------|
+| [Overview](./notifications/overview.md) | In-app notifications: 39 events across 10 categories, audience rules, per-org template overrides with EN/FR/AR defaults, snapshot rendering, dashboard Events/Announcements tabs, and the bell dropdown with its centered reading window |
+
 ### Video & Media
 
 | Document | Description |

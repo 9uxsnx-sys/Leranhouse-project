@@ -20,6 +20,7 @@ from src.services.users.emails import send_email_verification_email
 from src.services.email.utils import get_base_url_from_request
 from src.services.security.rate_limiting import check_verification_resend_rate_limit
 from src.services.webhooks.dispatch import dispatch_webhooks
+from src.services.notifications.service import notify
 
 
 # Token expiration time in seconds (1 hour)
@@ -228,6 +229,15 @@ async def verify_email_token(
                     "user_uuid": user.user_uuid,
                     "email": user.email,
                 },
+            )
+
+            notify(
+                event_name="user_email_verified",
+                org_id=org.id,
+                data={
+                    "user_id": user.id,
+                },
+                db_session=db_session,
             )
 
     return "Email verified successfully"

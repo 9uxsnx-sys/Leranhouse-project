@@ -39,6 +39,7 @@ from src.services.courses.collection_translations import (
 )
 from src.services.courses.translations import DEFAULT_LOCALE, normalize_locale
 from src.services.webhooks.dispatch import dispatch_webhooks
+from src.services.notifications import notify
 
 
 ####################################################
@@ -325,6 +326,14 @@ async def create_collection(
     result = _build_read(db_session, collection, include_unpublished=True)
 
     await dispatch_webhooks(
+        event_name="collection_created",
+        org_id=org_id,
+        data={
+            "collection_uuid": collection.collection_uuid,
+            "name": collection.name,
+        },
+    )
+    notify(
         event_name="collection_created",
         org_id=org_id,
         data={

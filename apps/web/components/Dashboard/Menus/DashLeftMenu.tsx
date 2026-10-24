@@ -16,6 +16,7 @@ import {
   MessageCircleMore,
   Headphones,
   BarChart3,
+  Bell,
   Search,
   Library,
 } from 'lucide-react'
@@ -332,6 +333,17 @@ function DashLeftMenu() {
                   label={t('common.organization')}
                   isCollapsed={isCollapsed}
                   active={isActivePath('/dash/org')}
+                />
+              </div>
+
+              {/* Notifications */}
+              <div data-nav-item>
+                <MenuLink
+                  href="/dash/notifications"
+                  icon={<Bell className="w-[18px] h-[18px]" />}
+                  label="Notifications"
+                  isCollapsed={isCollapsed}
+                  active={isActivePath('/dash/notifications')}
                 />
               </div>
 

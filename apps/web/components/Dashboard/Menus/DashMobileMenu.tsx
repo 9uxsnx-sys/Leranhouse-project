@@ -1,7 +1,7 @@
 'use client'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { signOut } from '@components/Contexts/AuthContext'
-import { Backpack, BookOpen, Buildings, ChatsCircle, CurrencyCircleDollar, Gear, Headphones, House, SignOut, Users } from '@phosphor-icons/react'
+import { Backpack, Bell, BookOpen, Buildings, ChatsCircle, CurrencyCircleDollar, Gear, Headphones, House, SignOut, Users } from '@phosphor-icons/react'
 import Link from 'next/link'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -71,6 +71,12 @@ function DashMobileMenu() {
             <Link href={`/dash/users/settings/users`} className="flex flex-col items-center p-2" aria-label={t('common.aria.manage_users')}>
               <Users size={20} weight="bold" />
               <span className="text-xs mt-1">{t('common.users')}</span>
+            </Link>
+          </ToolTip>
+          <ToolTip content="Notifications" slateBlack sideOffset={8} side="top">
+            <Link href={`/dash/notifications`} className="flex flex-col items-center p-2" aria-label="Notifications">
+              <Bell size={20} weight="bold" />
+              <span className="text-xs mt-1">Notifications</span>
             </Link>
           </ToolTip>
           <ToolTip content={t('common.organization')} slateBlack sideOffset={8} side="top">

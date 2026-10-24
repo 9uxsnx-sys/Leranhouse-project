@@ -43,6 +43,7 @@ from src.services.courses.translations import apply_overlay, apply_overlay_bulk
 from src.services.courses.content_locale import apply_course_content_locale
 from src.services.search.normalization import LIKE_ESCAPE_CHAR, build_like_pattern
 from src.services.webhooks.dispatch import dispatch_webhooks
+from src.services.notifications import notify
 from fastapi import HTTPException, Request, UploadFile, status
 from datetime import datetime
 
@@ -765,6 +766,15 @@ async def create_course(
             "org_id": course.org_id,
         },
     )
+    notify(
+        event_name="course_created",
+        org_id=course.org_id,
+        data={
+            "course_uuid": course.course_uuid,
+            "name": course.name,
+            "org_id": course.org_id,
+        },
+    )
 
     course_data = {key: getattr(course, key) for key in course.model_fields}
     return CourseRead.model_validate({**course_data, "authors": authors})
@@ -1213,6 +1223,15 @@ async def update_course(
                 "published": course.published,
             },
         )
+        notify(
+            event_name="course_published",
+            org_id=course.org_id,
+            data={
+                "course_uuid": course.course_uuid,
+                "name": course.name,
+                "published": course.published,
+            },
+        )
 
     # Get course authors with their roles
     authors_statement = (
@@ -1279,6 +1298,14 @@ async def delete_course(
     db_session.commit()
 
     await dispatch_webhooks(
+        event_name="course_deleted",
+        org_id=course_org_id,
+        data={
+            "course_uuid": course_uuid_val,
+            "name": course_name_val,
+        },
+    )
+    notify(
         event_name="course_deleted",
         org_id=course_org_id,
         data={

@@ -45,6 +45,7 @@ from src.services.security.password_validation import validate_password_complexi
 from src.services.analytics.analytics import track
 from src.services.analytics import events as analytics_events
 from src.services.webhooks.dispatch import dispatch_webhooks
+from src.services.notifications.service import notify
 
 
 async def create_user(
@@ -171,6 +172,22 @@ async def create_user(
             },
             "signup_method": signup_provider,
         },
+    )
+
+    notify(
+        event_name=analytics_events.USER_SIGNED_UP,
+        org_id=org_id,
+        data={
+            "user_id": user.id,
+            "user": {
+                "user_uuid": user.user_uuid,
+                "email": user.email,
+                "username": user.username,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+            },
+        },
+        db_session=db_session,
     )
 
     # Send verification email for non-OAuth users, account creation email for OAuth users

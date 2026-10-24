@@ -16,6 +16,7 @@ from src.services.communities.comment_votes import get_user_votes_for_comments
 from src.security.rbac import check_resource_access, AccessAction, authorization_verify_if_user_is_anon
 from src.services.communities.moderation import validate_comment_content, enforce_auto_lock
 from src.services.webhooks.dispatch import dispatch_webhooks
+from src.services.notifications import notify
 
 
 async def create_comment(
@@ -87,6 +88,16 @@ async def create_comment(
     author = db_session.exec(author_statement).first()
 
     await dispatch_webhooks(
+        event_name="comment_created",
+        org_id=community.org_id,
+        data={
+            "user": {"user_uuid": current_user.user_uuid, "email": current_user.email, "username": current_user.username},
+            "comment": {"comment_uuid": comment.comment_uuid},
+            "discussion": {"discussion_uuid": discussion.discussion_uuid, "title": discussion.title},
+            "community": {"community_uuid": community.community_uuid},
+        },
+    )
+    notify(
         event_name="comment_created",
         org_id=community.org_id,
         data={

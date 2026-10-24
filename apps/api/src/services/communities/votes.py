@@ -10,6 +10,7 @@ from src.db.communities.discussions import Discussion
 from src.db.communities.discussion_votes import DiscussionVote, DiscussionVoteRead
 from src.security.rbac import check_resource_access, AccessAction, authorization_verify_if_user_is_anon
 from src.services.webhooks.dispatch import dispatch_webhooks
+from src.services.notifications import notify
 
 
 async def upvote_discussion(
@@ -80,6 +81,15 @@ async def upvote_discussion(
     db_session.refresh(vote)
 
     await dispatch_webhooks(
+        event_name="discussion_vote_cast",
+        org_id=community.org_id,
+        data={
+            "discussion_uuid": discussion.discussion_uuid,
+            "user_id": current_user.id,
+            "upvote_count": discussion.upvote_count,
+        },
+    )
+    notify(
         event_name="discussion_vote_cast",
         org_id=community.org_id,
         data={

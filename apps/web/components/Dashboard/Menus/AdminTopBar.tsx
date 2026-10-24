@@ -6,8 +6,6 @@ import { useTranslation } from 'react-i18next'
 import useSWR from 'swr'
 import {
   Book,
-  BellAlert,
-  BellAlertDone,
   GlobeEurope,
   QuestionMark,
   TriangleRightMini,
@@ -31,12 +29,12 @@ import {
 } from '@components/ui/tooltip'
 import { cn } from '@/lib/utils'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useOrg } from '@components/Contexts/OrgContext'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
+import { NotificationBell } from '@components/Objects/Notifications/NotificationBell'
 import { useCommandPalette } from '@components/Dashboard/CommandPalette/CommandPaletteContext'
 import { useDashboardBreadcrumbTrail, useDashboardBreadcrumbReset } from '@components/Objects/Breadcrumbs/DashboardBreadcrumbContext'
-
-const LAST_READ_NOTIFICATION_KEY = 'notificationsLastReadAt'
 
 // ─── UUID detection ───────────────────────────────────────────────────────────
 // Matches standard UUID format: 8-4-4-4-12 hex chars, optionally with a
@@ -90,44 +88,6 @@ function extractEntityName(type: string, data: any): string {
     default:
       return '...'
   }
-}
-
-// ─── Notifications ────────────────────────────────────────────────────────────
-function NotificationsBell() {
-  const { t } = useTranslation()
-  const [hasUnread, setHasUnread] = useState(false)
-
-  useEffect(() => {
-    const lastRead = localStorage.getItem(LAST_READ_NOTIFICATION_KEY)
-    const lastReadTs = lastRead ? Date.parse(lastRead) : 0
-    setHasUnread(Date.now() > lastReadTs && !!lastRead)
-  }, [])
-
-  const handleOnOpen = () => {
-    setHasUnread(false)
-    localStorage.setItem(LAST_READ_NOTIFICATION_KEY, new Date().toISOString())
-  }
-
-  return (
-    <TooltipProvider delayDuration={0}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <IconButton
-            variant="transparent"
-            size="small"
-            className="text-ui-fg-muted hover:text-ui-fg-subtle"
-            aria-label={t('common.notifications', 'Notifications')}
-            onClick={handleOnOpen}
-          >
-            {hasUnread ? <BellAlertDone /> : <BellAlert />}
-          </IconButton>
-        </TooltipTrigger>
-        <TooltipContent side="bottom" className="text-xs">
-          {t('common.notifications', 'Notifications')}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  )
 }
 
 // ─── Breadcrumb ───────────────────────────────────────────────────────────────
@@ -352,7 +312,7 @@ export function AdminTopBar({ className }: { className?: string }) {
         </TooltipProvider>
 
         {/* Notifications bell */}
-        <NotificationsBell />
+        <NotificationBell />
 
         {/* Help Dropdown */}
         <div className="hidden md:flex">

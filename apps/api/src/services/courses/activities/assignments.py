@@ -53,6 +53,7 @@ from src.services.courses.certifications import check_course_completion_and_crea
 from src.services.analytics.analytics import track
 from src.services.analytics import events as analytics_events
 from src.services.webhooks.dispatch import dispatch_webhooks
+from src.services.notifications import notify
 
 logger = logging.getLogger(__name__)
 
@@ -1865,6 +1866,16 @@ async def create_assignment_submission(
             "attempt_number": submitted_attempt_number,
         },
     )
+    notify(
+        event_name=analytics_events.ASSIGNMENT_SUBMITTED,
+        org_id=course.org_id,
+        data={
+            "user_id": current_user.id,
+            "course_uuid": course.course_uuid,
+            "course_name": course.name,
+        },
+        db_session=db_session,
+    )
 
     # User
     statement = select(User).where(User.id == current_user.id)
@@ -2573,6 +2584,20 @@ async def _apply_grade_and_finalize(
             "grading_type": computed["grading_type"],
             "overall_feedback": computed["overall_feedback"],
             "auto_graded": auto_graded,
+        },
+    )
+    notify(
+        event_name="assignment_graded",
+        org_id=course.org_id,
+        data={
+            "user_id": int(user_id),
+            "assignment_uuid": assignment.assignment_uuid,
+            "course_uuid": course.course_uuid,
+            "grade": computed["grade"],
+            "max_grade": computed["max_grade"],
+            "percentage": computed["percentage"],
+            "passed": computed["passed"],
+            "grading_type": computed["grading_type"],
         },
     )
 

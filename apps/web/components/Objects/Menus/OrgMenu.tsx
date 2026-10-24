@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import useSWR from 'swr'
 import { getUriWithOrg } from '@services/config/config'
+import { swrFetcher } from '@services/utils/ts/requests'
 import { fetchRAGChatSessions, RAGChatSession } from '@services/ai/ai'
 import UserLeftMenu from './UserLeftMenu'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -16,8 +17,6 @@ import {
   BarsThree,
   Book,
   ChatBubble,
-  BellAlert,
-  BellAlertDone,
   GlobeEurope,
   QuestionMark,
   TriangleRightMini,
@@ -33,6 +32,7 @@ import {
   DropdownMenuTrigger,
 } from '@components/ui/dropdown-menu'
 import { IconButton } from '@components/ui/icon-button'
+import { NotificationBell } from '@components/Objects/Notifications/NotificationBell'
 import { FeedbackModal } from '@components/Objects/Modals/FeedbackModal'
 import { SearchModal } from '@components/Objects/Modals/SearchModal'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
@@ -133,46 +133,6 @@ const BreadcrumbNav = ({ orgslug }: { orgslug: string }) => {
         })}
       </ol>
     </nav>
-  )
-}
-
-// notifications.tsx — bell trigger (no feed yet; unread state kept for when one lands)
-const LAST_READ_NOTIFICATION_KEY = 'notificationsLastReadAt'
-
-function NotificationsBell() {
-  const { t } = useTranslation()
-  const [hasUnread, setHasUnread] = useState(false)
-
-  useEffect(() => {
-    const lastRead = localStorage.getItem(LAST_READ_NOTIFICATION_KEY)
-    const lastReadTs = lastRead ? Date.parse(lastRead) : 0
-    setHasUnread(Date.now() > lastReadTs && !!lastRead)
-  }, [])
-
-  const handleOnOpen = () => {
-    setHasUnread(false)
-    localStorage.setItem(LAST_READ_NOTIFICATION_KEY, new Date().toISOString())
-  }
-
-  return (
-    <TooltipProvider delayDuration={0}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <IconButton
-            variant="transparent"
-            size="small"
-            className="text-ui-fg-muted hover:text-ui-fg-subtle"
-            aria-label={t('common.notifications', 'Notifications')}
-            onClick={handleOnOpen}
-          >
-            {hasUnread ? <BellAlertDone /> : <BellAlert />}
-          </IconButton>
-        </TooltipTrigger>
-        <TooltipContent side="bottom" className="text-xs">
-          {t('common.notifications', 'Notifications')}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
   )
 }
 
@@ -346,7 +306,7 @@ export const OrgMenu = ({
               </IconButton>
 
               {/* Notifications bell */}
-              <NotificationsBell />
+              <NotificationBell />
 
               {/* AI Copilot */}
               {rf?.ai?.enabled && config?.admin_toggles?.ai?.copilot_enabled !== false && (

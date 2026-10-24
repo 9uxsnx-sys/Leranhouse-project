@@ -7,6 +7,7 @@ from src.db.resource_authors import ResourceAuthor, ResourceAuthorshipEnum, Reso
 from src.security.auth import resolve_acting_user_id
 from src.security.rbac import authorization_verify_if_user_is_anon, check_resource_access, AccessAction
 from src.services.webhooks.dispatch import dispatch_webhooks
+from src.services.notifications import notify
 from typing import List
 
 
@@ -302,6 +303,14 @@ async def add_bulk_course_contributors(
                 "contributors": results["successful"],
             },
         )
+        notify(
+            event_name="course_contributor_added",
+            org_id=course.org_id,
+            data={
+                "course_uuid": course_uuid,
+                "contributors": results["successful"],
+            },
+        )
 
     return results
 
@@ -410,6 +419,14 @@ async def remove_bulk_course_contributors(
 
     if results["successful"]:
         await dispatch_webhooks(
+            event_name="course_contributor_removed",
+            org_id=course.org_id,
+            data={
+                "course_uuid": course_uuid,
+                "contributors": results["successful"],
+            },
+        )
+        notify(
             event_name="course_contributor_removed",
             org_id=course.org_id,
             data={

@@ -20,6 +20,7 @@ from src.services.courses.certifications import (
 from src.services.analytics.analytics import track
 from src.services.analytics import events as analytics_events
 from src.services.webhooks.dispatch import dispatch_webhooks
+from src.services.notifications import notify
 
 
 class EpisodeProgressUpdate(BaseModel):
@@ -320,6 +321,15 @@ async def add_activity_to_trail(
                 "course": {"course_uuid": course.course_uuid, "name": course.name},
             },
         )
+        notify(
+            event_name=analytics_events.ACTIVITY_COMPLETED,
+            org_id=course.org_id,
+            data={
+                "user_id": user.id,
+                "course_uuid": course.course_uuid,
+                "course_name": course.name,
+            },
+        )
 
     # Fire COURSE_COMPLETED when this specific activity completion pushed the
     # course over the finish line. Two conditions:
@@ -360,6 +370,15 @@ async def add_activity_to_trail(
             data={
                 "user": {"user_uuid": user.user_uuid, "email": user.email, "username": user.username},
                 "course": {"course_uuid": course.course_uuid, "name": course.name},
+            },
+        )
+        notify(
+            event_name=analytics_events.COURSE_COMPLETED,
+            org_id=course.org_id,
+            data={
+                "user_id": user.id,
+                "course_uuid": course.course_uuid,
+                "course_name": course.name,
             },
         )
 
@@ -856,6 +875,15 @@ async def add_course_to_trail(
         data={
             "user": {"user_uuid": user.user_uuid, "email": user.email, "username": user.username},
             "course": {"course_uuid": course.course_uuid, "name": course.name},
+        },
+    )
+    notify(
+        event_name=analytics_events.COURSE_ENROLLED,
+        org_id=course.org_id,
+        data={
+            "user_id": user.id,
+            "course_uuid": course.course_uuid,
+            "course_name": course.name,
         },
     )
 
