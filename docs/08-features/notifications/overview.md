@@ -249,13 +249,11 @@ The bell (`components/Objects/Notifications/NotificationBell.tsx`) is mounted in
 - **Reading window** — selecting a row opens a centered dialog (480 × 560, capped at `85vh`) containing only the title and the body. Body paragraphs are split on blank lines with `space-y-4` and a hidden scrollbar; the title stays pinned while the body scrolls. No border, dividers, buttons, or close icon — dismiss with a click outside or `Esc`.
 - **Read state** — opening a notification marks it read immediately (optimistic, reverted on API failure).
 
-> **Mockup mode.** `MOCK_MODE` at the top of `NotificationBell.tsx` is currently `true`, which renders a fixed sample set (including long multi-paragraph bodies) for design review and skips all API calls. Set it to `false` to switch to live data — the fetch keys, read mutations and unread count then go through the real endpoints.
-
 ### Related frontend files
 
 | File | Role |
 |------|------|
-| `components/Objects/Notifications/NotificationBell.tsx` | Bell, dropdown, reading window, mockup data |
+| `components/Objects/Notifications/NotificationBell.tsx` | Bell, dropdown and reading window |
 | `components/Dashboard/Pages/Notifications/NotificationsManagement.tsx` | Events and Announcements tabs |
 | `services/notifications.ts` | Types plus feed, read, catalog, template and announcement calls |
 

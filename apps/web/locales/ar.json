@@ -7326,33 +7326,9 @@
   }
   ,
   "notifications": {
-    "categories": {
-      "learning": "تعلّم",
-      "achievement": "إنجاز",
-      "system": "النظام",
-      "other": "أخرى"
-    },
-    "messages": {
-      "course_completed": "لقد أكملت الدورة « {{course_name}} »",
-      "course_enrolled": "لقد سجّلت في الدورة « {{course_name}} »",
-      "assignment_graded": "تم تصحيح واجبك: {{grade}}/{{max_grade}}",
-      "certificate_claimed": "لقد حصلت على شهادة لدورة « {{course_name}} »",
-      "course_update_published": "توجد تحديثات جديدة في دورة أنت مسجّل فيها",
-      "generic": "إشعار جديد: {{event_type}}"
-    },
-    "groups": {
-      "today": "اليوم",
-      "yesterday": "أمس",
-      "daysAgo": "قبل {{days}} أيام"
-    },
     "page": {
       "title": "الإشعارات",
-      "mark_all_read": "تحديد الكل كمقروء",
-      "error": "تعذّر تحميل الإشعارات",
-      "empty_title": "لا توجد إشعارات بعد",
-      "empty_desc": "عند حدوث شيء ما، ستراه هنا.",
-      "page_info": "الصفحة {{page}} من {{total}}"
-    },
-    "mark_read": "تحديد كمقروء"
+      "empty_title": "لا توجد إشعارات بعد"
+    }
   }
 }

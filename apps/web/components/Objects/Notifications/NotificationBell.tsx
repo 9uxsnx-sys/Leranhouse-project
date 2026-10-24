@@ -34,114 +34,6 @@ import {
 } from '@services/notifications'
 import { cn } from '@/lib/utils'
 
-// ─── Mockup mode ──────────────────────────────────────────────────────────────
-// Design preview: renders hardcoded notifications instead of the live feed.
-// Flip to `false` to go back to dynamic data.
-
-const MOCK_MODE = true
-
-const minutesAgo = (minutes: number) => new Date(Date.now() - minutes * 60_000).toISOString()
-
-const MOCK_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: 1,
-    notification_id: 1,
-    event_type: 'assignment_graded',
-    category: 'learning',
-    title: 'Your assignment was graded',
-    body: 'Your submission for "Build a responsive navbar" received 18/20.\n\nFeedback from the instructor: the layout and spacing are solid, and the mobile breakpoint behaves as expected. The only note is to use semantic landmarks for the navigation region instead of generic containers.\n\nStructure and naming were clear, and the component split made the code easy to follow. Consider extracting the repeated button styles into a shared class or component.\n\nAccessibility is in good shape overall. Add a visible focus state on the mobile menu trigger and confirm the contrast on the secondary text.\n\nYou can review the full evaluation and the rubric breakdown on the assignment page. Regrading is available for seven days after the result is published.',
-    params: {},
-    link_url: '/courses',
-    created_at: minutesAgo(2),
-    read_at: null,
-  },
-  {
-    id: 2,
-    notification_id: 2,
-    event_type: 'certificate_claimed',
-    category: 'achievement',
-    title:
-      'Your certificate for Advanced Product Design and Prototyping Masterclass is ready to download',
-    body: 'Your certificate for "Advanced Product Design and Prototyping Masterclass" has been issued.\n\nThe certificate is available as a PDF from your certificates page and includes the course name, the completion date, and a verification link that employers can check.\n\nThe verification link does not expire. If your name is displayed incorrectly, update it in your profile and reissue the certificate from the same page.\n\nCertificates can be reissued at any time. Previous versions stay valid, so there is nothing to replace if you have already shared a copy.',
-    params: {},
-    link_url: '/courses',
-    created_at: minutesAgo(47),
-    read_at: null,
-  },
-  {
-    id: 3,
-    notification_id: 3,
-    event_type: 'course_enrolled',
-    category: 'learning',
-    title: 'You are now enrolled in UI Design Fundamentals',
-    body: 'You can start learning right away. Your progress is saved automatically, so you can pick up where you left off at any time.',
-    params: {},
-    link_url: '/courses',
-    created_at: minutesAgo(180),
-    read_at: minutesAgo(170),
-  },
-  {
-    id: 4,
-    notification_id: 4,
-    event_type: 'course_completed',
-    category: 'achievement',
-    title: 'You completed Design Systems 101',
-    body: 'Nice work. All lessons and activities in this course are marked as complete.',
-    params: {},
-    link_url: null,
-    created_at: minutesAgo(1560),
-    read_at: minutesAgo(1500),
-  },
-  {
-    id: 5,
-    notification_id: 5,
-    event_type: 'course_update_published',
-    category: 'learning',
-    title: 'New lesson added to Advanced TypeScript',
-    body: 'A new lesson, "Generics in Practice", has been published to a course you are enrolled in.\n\nThe lesson covers constrained generics, default type parameters, and when it is worth reaching for a generic instead of a union. It closes with a short exercise on typing a reusable API client.\n\nThe lesson is about forty minutes long and includes two knowledge checks. Your progress in the rest of the course is unchanged, and you can pick it up from the curriculum page whenever you are ready.',
-    params: {},
-    link_url: '/courses',
-    created_at: minutesAgo(6000),
-    read_at: null,
-  },
-  {
-    id: 6,
-    notification_id: 6,
-    event_type: 'system_maintenance',
-    category: 'system',
-    title: 'Scheduled maintenance this Sunday',
-    body: 'The platform will be briefly unavailable on Sunday between 02:00 and 03:00 UTC while we ship performance improvements.\n\nDuring this window, course pages, certificates, and the mobile apps may fail to load. Any work in progress is saved automatically and will be waiting for you once the maintenance is complete.\n\nLive sessions scheduled inside this window have been moved and their hosts have been notified. No action is needed on your side.\n\nWe will post an update here as soon as the platform is back.',
-    params: {},
-    link_url: null,
-    created_at: minutesAgo(30000),
-    read_at: minutesAgo(29000),
-  },
-  {
-    id: 7,
-    notification_id: 7,
-    event_type: 'discussion_posted',
-    category: 'system',
-    title: 'New reply in the Design community',
-    body: 'Someone replied to your question about spacing scales in the design community.',
-    params: {},
-    link_url: null,
-    created_at: minutesAgo(140000),
-    read_at: minutesAgo(139000),
-  },
-  {
-    id: 8,
-    notification_id: 8,
-    event_type: 'user_signed_up',
-    category: 'system',
-    title: 'Welcome to the platform',
-    body: 'Your account is ready. Browse the course catalog to find something to learn.',
-    params: {},
-    link_url: '/courses',
-    created_at: minutesAgo(600000),
-    read_at: minutesAgo(599000),
-  },
-]
-
 // ─── Category helpers (monochrome, matches the platform chrome) ───────────────
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -205,39 +97,33 @@ export function NotificationBell() {
   const [localReadIds, setLocalReadIds] = useState<Set<number>>(new Set())
   const [markingAll, setMarkingAll] = useState(false)
 
-  const unreadKey = MOCK_MODE ? null : getUnreadCountKey(access_token, org_id)
+  const unreadKey = getUnreadCountKey(access_token, org_id)
   const { data: unreadData, mutate: mutateUnread } = useSWR(
     unreadKey,
     (url: string) => swrFetcher(url, access_token),
     { revalidateOnFocus: true, refreshInterval: 30000 }
   )
 
-  const feedKey = MOCK_MODE ? null : getNotificationFeedKey(access_token, org_id, 1, 8)
+  const feedKey = getNotificationFeedKey(access_token, org_id, 1, 8)
   const { data: feed, mutate: mutateFeed } = useSWR<NotificationFeedResponse>(
     feedKey,
     (url: string) => swrFetcher(url, access_token),
     { revalidateOnFocus: true }
   )
 
-  const items = useMemo(
-    () => (MOCK_MODE ? MOCK_NOTIFICATIONS : feed?.notifications ?? []),
-    [feed]
-  )
+  const items = useMemo(() => feed?.notifications ?? [], [feed])
 
   const isRead = useCallback(
     (notif: NotificationItem) => Boolean(notif.read_at) || localReadIds.has(notif.id),
     [localReadIds]
   )
 
-  const unreadCount = MOCK_MODE
-    ? items.filter((n) => !isRead(n)).length
-    : Math.max(0, (unreadData?.count ?? 0) - localReadIds.size)
+  const unreadCount = Math.max(0, (unreadData?.count ?? 0) - localReadIds.size)
 
   const markRead = useCallback(
     async (notif: NotificationItem) => {
       if (isRead(notif)) return
       setLocalReadIds((prev) => new Set(prev).add(notif.id))
-      if (MOCK_MODE) return
       try {
         await markNotificationAsRead(notif.id, access_token)
       } catch {
@@ -261,10 +147,6 @@ export function NotificationBell() {
   )
 
   const handleMarkAllRead = useCallback(async () => {
-    if (MOCK_MODE) {
-      setLocalReadIds(new Set(items.map((n) => n.id)))
-      return
-    }
     if (!org_id) return
     setMarkingAll(true)
     try {
