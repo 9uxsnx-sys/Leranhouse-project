@@ -63,7 +63,7 @@ export default function PodcastsClient({
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 12
+  const itemsPerPage = 8
 
   // Reset to page 1 when search or filter changes
   React.useEffect(() => {

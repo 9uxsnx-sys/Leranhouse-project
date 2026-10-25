@@ -216,6 +216,9 @@ class AssignmentTaskSubmissionBase(SQLModel):
     grade: int = 0  # Task-local raw score; aggregated into AssignmentUserSubmission.grade
     task_submission_grade_feedback: str
     assignment_type: AssignmentTaskTypeEnum
+    # The column is NOT NULL in the database and was missing from the model,
+    # which made every task submission insert fail.
+    manually_graded: bool = False
 
     user_id: int
     activity_id: int

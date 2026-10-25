@@ -1,6 +1,6 @@
 # Demo Seed — Build Plan
 
-> **Status:** plan, not built. Blocked on sign off of [seed-manifest.md](./seed-manifest.md).
+> **Status:** built and seeded. The manifest in [seed-manifest.md](./seed-manifest.md) is the current contract.
 > **Goal:** one command fills a fresh `demo` org with believable data so every public page and every dashboard tab looks like a platform that has been running for months.
 > **Decision:** seed the database with real rows. We do not mock the UI.
 
@@ -24,7 +24,7 @@
 2. **Never touches another org.** Every insert carries the demo `org_id`, every delete is scoped to it.
 3. **No silent duplication.** If the `demo` org exists, the run aborts and tells you to pass `--reset`.
 4. **Full reset.** `--reset` deletes the demo org and every row that references it, in dependency order, then seeds again.
-5. **Assets are mandatory.** If `apps/api/seed-assets/` has no images, abort with a clear message instead of seeding broken cards.
+5. **Artwork is optional and niche aware.** Pictures in `pics/` are copied in. Each subfolder is a niche, matched to the subject of the course, collection or community. Files in `pics/avatars` are used only for user avatars. Without a folder the run continues and the slots stay empty.
 6. **Deterministic.** A fixed random seed so two runs produce the same numbers, which keeps screenshots and retakes consistent.
 
 ---
@@ -39,7 +39,7 @@ apps/api/src/services/seed/
   __main__.py          # python -m src.services.seed
   runner.py            # orchestration, guard, reset, summary report
   reset.py             # dependency ordered delete of the demo org
-  assets.py            # scan seed-assets, pick, copy, return filenames
+  assets.py            # niche pools, shuffled decks, avatars kept apart, copy files
   copy.py              # human sounding text fragments (English, French, Arabic)
   generators/
     org.py             # org, config, roles, groups, api tokens
@@ -50,21 +50,21 @@ apps/api/src/services/seed/
     community.py       # communities, discussions, comments, reactions, votes
     podcasts.py        # shows, episodes, translations, listens
     assignments.py     # assignments, tasks, submissions, code submissions
-    playgrounds.py     # playgrounds and boards
     payments.py        # config, orders, entitlements, payout costs, webhooks
     notifications.py   # templates, notifications, recipients
-    media.py           # folders, media rows and copied files
     analytics.py       # back dated events
 ```
+
+Playgrounds and boards are not seeded. The routes exist but no menu links to them, so they cannot be reached in the demo.
 
 Entry point:
 
 ```
 cd apps/api
-.venv/Scripts/python -m src.services.seed --demo --reset
+.venv/Scripts/python -m src.services.seed --demo --reset --assets-dir "c:\Projects\learnhouse-dev\learnhouse-dev\pics"
 ```
 
-Optional flags: `--students 150`, `--courses 16`, `--podcasts 16`, `--communities 16`, `--no-reset`.
+Required flag: `--demo`. Optional: `--reset`, `--assets-dir`.
 
 The Node CLI gets a thin `seed` command later only if we want it. Python module first, no wrapper.
 
@@ -80,35 +80,35 @@ Each step ends with the API still booting and the affected page rendering.
 ### Step 2 — Org and people
 Org, config, roles, 158 users, memberships, groups, tokens. Verify the admin Users page and the org switcher.
 
-### Step 3 — Assets and courses
-Asset scanner plus 19 courses. Covers and banners copied into `content/orgs/{org_uuid}/courses/{course_uuid}/`. Verify the course grid shows 2 full pages and every card has art.
+### Step 3 — Courses
+19 courses. Covers and banners are copied only when an asset folder is supplied, otherwise those fields stay empty. Verify the course grid shows 2 full pages.
 
 ### Step 4 — Flagship curriculum
 6 chapters with `coursechapter.order`, 26 activities with `chapteractivity.order`, YouTube URIs, translations, course updates. Verify the course page, lesson navigation and the video player.
 
 ### Step 5 — Progress and certificates
-Trails, 600 runs, 6,500 steps in quartiles, 60 certificates. Verify learner Progress and the course progress bars.
+Trails, 600 runs, 2,293 steps in quartiles, 60 certificates. Verify learner Progress and the course progress bars.
 
 ### Step 6 — Collections
 16 bundles with members and owners. Verify the Collections grid.
 
 ### Step 7 — Community
-16 communities, 105 discussions, 330 comments, reactions and votes. Verify the listing, community feed and a discussion thread.
+16 communities, 105 discussions, 239 comments, reactions and votes. Verify the listing, community feed and a discussion thread.
 
 ### Step 8 — Podcasts
-16 shows, 44 episodes, audio reuse. Verify the podcast grid at 8 per page and episode playback.
+16 shows, 44 episodes, optional audio reuse. Verify the podcast grid at 8 per page and episode lists.
 
-### Step 9 — Assignments, playgrounds, boards
+### Step 9 — Assignments
 Verify the Assignments page and the code block submission history.
 
 ### Step 10 — Payments
 Config, 140 orders, entitlements, payout costs, webhook log. Verify Overview, Transactions, Payouts and Offers.
 
 ### Step 11 — Notifications
-Templates, 26 notifications, 1,900 recipients with a 35 percent unread mix. Verify the bell badge, dropdown and reading window.
+Templates, 26 notifications, 2,369 deliveries with a 35 percent unread mix. Verify the bell badge, dropdown and reading window.
 
-### Step 12 — Media, webhooks, analytics
-Folders, media rows with real files, webhook deliveries, 12,000 events. Verify every Analytics tab.
+### Step 12 — Webhooks and analytics
+Webhook deliveries and 12,000 events. Verify every Analytics tab.
 
 ### Step 13 — Polish and verification
 Cache invalidation, full acceptance pass, twice run plus reset proof.
@@ -120,7 +120,7 @@ Cache invalidation, full acceptance pass, twice run plus reset proof.
 ### Courses
 - 16 published, 3 drafts.
 - Only the flagship gets chapters and lessons.
-- Every course has `thumbnail_image` and `banner_image` filenames pointing at copied files, plus description, about, learnings, tags and price.
+- Every course has a `thumbnail_image` filename pointing at a copied file, plus description, about, learnings, tags and price. Only the flagship also has a `banner_image`.
 - Mix of access types: mostly free public, a few paid, one users only. Paid ones are what the payment orders reference.
 - Creation and update dates spread across six months, not all on the same day.
 
@@ -216,11 +216,13 @@ Every step runs inside one transaction. If any step fails, nothing is deleted.
 
 - [ ] Seed refuses to run when development mode is off.
 - [ ] Seed refuses to run twice without `--reset`.
-- [ ] Courses page shows exactly 2 full pages of 8, every card has cover and banner.
+- [ ] Courses page shows exactly 2 full pages of 8.
+- [ ] Every card has a cover from the matching niche folder, or from the general pool when the niche has no folder.
+- [ ] Only the flagship course, its community and the first collection have banners. Episode covers and the org logo stay empty by choice.
 - [ ] Flagship course opens, shows 6 modules and 26 lessons, video plays.
 - [ ] The other 15 course pages render their landing content with an empty syllabus.
 - [ ] Communities page shows 2 full pages. The main community has 60 posts with replies, reactions and votes.
-- [ ] Podcasts page shows 2 full pages at 8 per page. The main show has 14 playable episodes.
+- [ ] Podcasts page shows 2 full pages at 8 per page. The main show has 14 episodes.
 - [ ] Collections page shows 2 full pages.
 - [ ] Progress page shows enrolled courses with varied percentages plus issued certificates.
 - [ ] Payments pages show orders, revenue, fees and a payout report with non zero numbers.
@@ -237,7 +239,7 @@ Every step runs inside one transaction. If any step fails, nothing is deleted.
 | Risk | Mitigation |
 |---|---|
 | Empty syllabus on the 15 supporting courses looks odd if clicked on camera | Presenter stays on the flagship. If that is not acceptable later, add one stub module per course, which is a small delta |
-| 158 avatars clashing in style | You control the assets folder. The seeder only rotates what is there |
+| 158 avatars clashing in style | You control the assets folder when you supply it. The seeder only rotates what is there |
 | Analytics numbers clamp or look synthetic | Volume curves and per entity variation are tuned and checked against the real chart queries before sign off |
 | Demo org polluting a real database | Guard plus org scoped reset. Safe to run on a local or staging database only |
 | Frontend caching showing old empty state after seeding | Redis invalidation in the runner plus a documented hard refresh before recording |

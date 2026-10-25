@@ -1,6 +1,6 @@
 # Demo Seed — Manifest
 
-> **Status:** awaiting sign off. Nothing is built yet.
+> **Status:** built and seeded. Counts below match the live `demo` org.
 > **Companion:** [seed-plan.md](./seed-plan.md) (how it gets built).
 > **Purpose:** an exact, countable list of what lands in the database so the platform can be recorded for a demo video.
 
@@ -13,9 +13,11 @@
 | 1 | Seed method | Real database rows, not UI mocks |
 | 2 | Target | **A new org, slug `demo`** — the existing `default` org stays untouched |
 | 3 | Curriculum | **Only the flagship course** gets modules and lessons. The other courses get a filled landing page: title, subtitle, description, about, learnings, tags, price, authors, cover, banner |
-| 4 | Listing density | Every public listing page shows **8 items per page**. Courses, communities, podcasts and collections each get **16 published items = exactly 2 full pages** |
-| 5 | Images | You drop one folder of pictures. The seeder picks at random and copies them into the content tree. No generated placeholders |
-| 6 | Copy | Written like real people. No AI tells, no hyphens, no underscores, no ellipses inside seeded text |
+| 4 | Flagship | **Backend Engineering with Python**. Six weeks from an empty folder to a deployed API: git, requests, database, auth, tests, deploy |
+| 5 | Community link | The first community is named after the flagship course and linked to it with `course_id`, so the course page shows its feed and the course filter on the communities page is not empty |
+| 6 | Listing density | Every public listing page shows **8 items per page**. Courses, communities, podcasts and collections each get **16 published items = exactly 2 full pages** |
+| 7 | Images | Supplied in `pics/` and copied on every run. Subfolders are niches, matched per course, collection and community. Section 5 lists every slot |
+| 8 | Copy | Written like real people. No AI tells, no hyphens, no underscores, no ellipses inside seeded text |
 
 ### Why the podcast count changed
 
@@ -59,9 +61,9 @@ Roughly **24,000 rows** in total.
 | Table | Rows | What it is |
 |---|---|---|
 | `course` | **19** | 16 published plus 3 drafts |
-| `chapter` + `coursechapter` | 6 + 6 | Modules of the flagship course only |
+| `chapter` + `coursechapter` | 7 + 7 | Intro chapter plus 6 modules, flagship only |
 | `chapteractivity` | 26 | Flagship only: 2 intro lessons plus 6 modules of 4 lessons |
-| `activity` | 26 | 18 video, 4 document, 2 dynamic, 2 assignment |
+| `activity` | 26 | 22 video lessons and 4 assignment activities |
 | `activityversion` | 8 | Version history panel has entries |
 | `resourceauthor` | 20 | Teachers credited on courses |
 | `courseupdate` | 25 | Course announcements written like a teacher posting |
@@ -77,7 +79,7 @@ The 15 supporting courses carry every landing page field but no chapters, so the
 |---|---|---|
 | `trail` | 32 | 16 course trails plus 16 podcast trails |
 | `trailrun` | **600** | 450 course enrollments spread over 150 students plus 150 podcast listens |
-| `trailstep` | **6,500** | Progress spread across quartiles: some learners at 95 percent, some stuck at the first lesson, some abandoned |
+| `trailstep` | **about 2,350** | Progress spread across quartiles: 60 learners finished the flagship, the rest sit anywhere between the first lesson and the last module |
 | `certifications` | 3 | Certificate templates |
 | `certificateuser` | 60 | Issued to students who completed the flagship course |
 
@@ -96,7 +98,7 @@ The 15 supporting courses carry every landing page field but no chapters, so the
 |---|---|---|
 | `community` | 18 | 16 published plus 2 drafts |
 | `discussion` | **105** | The main community gets 60 posts, the other 15 get 3 each |
-| `discussioncomment` | **330** | The main community gets 250, including nested replies from one line to three paragraphs |
+| `discussioncomment` | **239** | The main community gets most of them, including replies from one line to three paragraphs |
 | `discussionreaction` | 500 | Mixed reactions from real members |
 | `discussionvote` | 450 | Upvotes and downvotes |
 | `discussioncommentvote` | 250 | Same, on replies |
@@ -112,7 +114,7 @@ The 15 supporting courses carry every landing page field but no chapters, so the
 
 Audio: one short mp3 supplied in the assets folder is reused across all 44 episodes so every player works.
 
-### 3.7 Assignments, playgrounds and boards
+### 3.7 Assignments
 
 | Table | Rows | What it is |
 |---|---|---|
@@ -121,10 +123,8 @@ Audio: one short mp3 supplied in the assets folder is reused across all 44 episo
 | `assignmenttasksubmission` | 60 | Mixed graded, pending and late |
 | `assignmentusersubmission` | 45 | Student answers |
 | `code_submission` | 30 | Submission history in code blocks |
-| `playground` | 6 | Playgrounds listing is not empty |
-| `playgroundreaction` | 40 | |
-| `board` | 3 | |
-| `boardmember` | 12 | |
+
+Playgrounds and boards are not seeded. The routes exist but nothing in the public menu or the dashboard links to them, so they cannot be reached during the demo.
 
 ### 3.8 Payments
 
@@ -132,7 +132,7 @@ Audio: one short mp3 supplied in the assets folder is reused across all 44 episo
 |---|---|---|
 | `paymentconfig` | 1 | Chargily, DZD, test mode |
 | `paymentorder` | **140** | Six months of orders: paid, pending, failed, canceled, expired, refunded |
-| `resourceentitlement` | 110 | Who owns what |
+| `resourceentitlement` | 104 | Who owns what, one active entitlement per person and resource |
 | `payoutcost` | 6 | Monthly operating costs so the payout report has real numbers |
 | `paymentwebhookevent` | 140 | Webhook log matching the orders |
 
@@ -143,20 +143,16 @@ This fills the Payments Overview, Transactions, Payouts and Offers pages.
 | Table | Rows | What it is |
 |---|---|---|
 | `notification` | 26 | Announcements plus learning and system events, back dated |
-| `notification_recipient` | **1,900** | About 65 percent read and 35 percent unread, so the bell badge, dropdown and reading window all have content |
+| `notification_recipient` | **about 2,400** | About 65 percent read and 35 percent unread, so the bell badge, dropdown and reading window all have content |
 | `notification_template` | 12 | Org overrides in English, French and Arabic |
 
-### 3.10 Media and infrastructure
+### 3.10 Infrastructure
 
 | Table | Rows | What it is |
 |---|---|---|
-| `folder` | 6 | Media library folders |
-| `foldercontent` | 40 | |
-| `media` | 40 | Real files copied into the content directory |
-| `mediasharetoken` | 3 | |
 | `webhook_endpoint` | 1 | |
 | `webhook_delivery_log` | 60 | Successful and failed deliveries |
-| `analytics_events` | **12,000** | Six months of page views, activity views, time on activity, enrollments, completions, signups, discussion posts and podcast listens, with varied referrers, devices and countries |
+| `analytics_events` | **about 12,000** | Six months of page views, activity views, time on activity, enrollments, completions, signups, discussion posts and podcast listens, with varied referrers, devices and countries |
 
 Analytics reads directly from `analytics_events`, so all Analytics tabs render real curves without Tinybird.
 
@@ -185,49 +181,70 @@ These are hard rules for every generated string that a human will read.
 
 Course landing description:
 
-> Six weeks of drawing screens on paper before we open Figma. We start with wireframes and bad first drafts, then move into spacing, type and components. You finish with one full case study, not a folder of random screens. Bring a real idea you want to build.
+> Six weeks building one API from an empty folder to something running on a server. We start with git and a clean project layout, then move through requests, a real database, auth, tests and deployment. You finish with a service you can show and explain. Bring a laptop with Python installed.
 
 Community post:
 
-> been stuck on the pricing card all morning. everything looked off and i could not tell why. turned out the padding was 20 instead of 24. one number and the whole page fixed itself.
+> been stuck on the login screen all morning. everything returned 401 and i could not tell why. turned out the token was fine and the role check was reading the wrong field. one line and the whole flow worked.
 
 Reply:
 
-> same thing happened to me last week. check the gap on the container too, mine was off by 8 and it made the columns look drunk.
+> same thing happened to me last week. check the foreign key order too, mine was off and the migration ran twice.
 
 Announcement:
 
-> Module 4 is live. Two lessons on layout grids and one walkthrough where I rebuild a dashboard from scratch. Post your version in the community and I will review the first ten.
+> Module 4 is live. Three lessons on auth and one where we fix a broken login together. Push your version to the community and I will review the first ten.
 
 Notification title and body:
 
 > New lesson unlocked
 >
-> Module 4 is live now. Two lessons on layout grids and one case study walkthrough.
+> Module 4 is live now. Three lessons on auth and one walkthrough where we fix a broken login.
 
 ---
 
-## 5. Assets contract
+## 5. Artwork
 
-You drop one folder. The seeder walks it recursively, so subfolders are fine.
+Artwork lives in `pics/`. Subfolders are niches. Each course, collection and community pulls from the folder matching its subject, and anything without a folder pulls from the general pool. Files in `pics/avatars` are used only for user avatars and never for cards.
+
+| Slot | Filled | Source | Ratio | Size |
+|---|---|---|---|---|
+| Course covers | 19 | `coding/flagship course.jpg` for the flagship, niche folders for the rest | 16:9 | 1280 × 720 |
+| Course banners | 1 | `banner.png`, flagship only | 3:1 | 1920 × 640 |
+| Collection covers | 18 | `design/collection flasgship.jpg` for the first, niche folders for the rest | 16:9 | 1280 × 720 |
+| Collection banners | 1 | `collection banner.png`, first collection only | 3:1 | 1920 × 640 |
+| Community covers | 18 | flagship reuses the course cover, niche folders for the rest | 16:9 | 1280 × 720 |
+| Community banners | 1 | `banner.png`, flagship only | 3:1 | 1920 × 640 |
+| Podcast covers | 18 | general pool, no audio artwork folder yet | 16:9 | 1280 × 720 |
+| Podcast banners | 0 | last step, not now | 3:1 | 1920 × 640 |
+| Episode covers | 0 | left empty | 1:1 | 600 × 600 |
+| User avatars | 158 | `pics/avatars`, 100 unique faces | 1:1 | 400 × 400 |
+| Org logo | 0 | left empty | 1:1 | 512 × 512 |
+| Org cover | 0 | left empty | 16:9 | 1280 × 720 |
+
+**Total files copied: 234.**
+
+Only the flagship course, its community and the first collection get banners. Every other detail page is never opened on camera. The course page falls back to its cover when the banner is empty, so those pages still look filled. Community and collection pages show their gradient placeholder instead.
+
+The hero strip sits inside a 1280 px container and the image is `object-cover`, so anything off ratio gets cropped from the sides. Keep the focal point in the middle half of a banner.
+
+**Niche routing** lives in `COURSE_NICHES`, `COLLECTION_NICHES` and `COMMUNITY_NICHES` in `apps/api/src/services/seed/copy.py`. Video, writing and brand have no folder, so they fall back to the general pool.
+
+**Repeats.** The four niche folders hold 23 pictures while the cards need 73. Pictures are dealt from a shuffled deck per folder, so two neighbouring cards never share one, but a folder holding three pictures cannot cover eight slots. Add more art to `Business and career` and `coding` if the grids look repetitive.
+
+**How it is applied.**
 
 ```
-apps/api/seed-assets/
-  (any number of jpg, jpeg, png or webp files)
-  audio/            one mp3 used for all episodes
+.\.venv\Scripts\python.exe -m src.services.seed --demo --reset --assets-dir "c:\Projects\learnhouse-dev\learnhouse-dev\pics"
 ```
 
-| Asset use | Quantity needed | If the folder has fewer |
+The seeder copies each file into the content tree using the same layout the upload endpoints use, and stores only the filename. `--reset` removes the previous org and its files first, so nothing is orphaned.
+
+One audio file is still optional:
+
+| Asset | Count | Effect if missing |
 |---|---|---|
-| Course covers and banners | 19 courses, 2 images each | Images are reused in rotation |
-| Podcast covers | 18 | Reused |
-| Episode covers | 44 | Reused |
-| Community covers | 18 | Reused |
-| User avatars | 158 | Reused |
-| Org logo and banner | 2 | Reused |
-| Audio | 1 mp3 | Episodes are seeded without audio and players stay empty |
-
-If the folder is missing or empty the seeder **stops with a clear message**. It will not invent placeholders.
+| Sample mp3 | 1 | Episodes are seeded with no audio and the player stays empty |
 
 ---
 
@@ -241,17 +258,17 @@ If the folder is missing or empty the seeder **stops with a clear message**. It 
 | `usageevent` | SaaS plan metering only, not used in OSS mode |
 | `aigeneration` | No UI reads it |
 | `course_embedding` | Search embeddings need real vectors, faking them is worse than leaving empty |
+| `folder`, `foldercontent`, `media`, `mediasharetoken` | Legacy tables with no model and no UI in this build |
+| `playground`, `playgroundreaction`, `board`, `boardmember` | The routes exist but no public or dashboard menu links to them, so they are unreachable in the demo |
 
 ---
 
 ## 7. Sign off checklist
 
-- [ ] New `demo` org is the target
-- [ ] Only the flagship course has modules and lessons
-- [ ] All four listings at 8 per page and 16 published items
-- [ ] Podcasts moved from 12 to 8 per page
-- [ ] Counts above are the counts to build
-- [ ] Voice rules and sample copy are what you want
-- [ ] You will drop images and one mp3 into `apps/api/seed-assets/`
-
-Approve this and I start on [seed-plan.md](./seed-plan.md).
+- [x] New `demo` org is the target
+- [x] Only the flagship course has modules and lessons
+- [x] All four listings at 8 per page and 16 published items
+- [x] Podcasts moved from 12 to 8 per page
+- [x] Counts above match the live run
+- [x] Voice rules and sample copy are what you want
+- [x] Artwork is seeded from `pics/` with niche routing, as listed in section 5
