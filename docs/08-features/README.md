@@ -66,6 +66,7 @@ The documents in this section describe cross-cutting feature areas that touch mu
 
 | Document | Description |
 |----------|-------------|
+| [Seed Manifest](./demo-seed/seed-manifest.md) | Countable list of every table and row the demo seeder will create, plus the copy voice rules and the asset contract |
 | [Seed Plan](./demo-seed/seed-plan.md) | One-command demo seeder: fills a demo org with realistic courses, lessons, enrollments, podcasts, community and analytics so the platform can be demoed "fully alive" on demand |
 
 ### Dashboard Polish

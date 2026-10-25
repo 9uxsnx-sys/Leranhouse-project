@@ -1,186 +1,251 @@
-# Demo Seed — Plan
+# Demo Seed — Build Plan
 
-> **Status:** Plan (not built). This is the build contract for a one-command seeder that fills a LearnHouse instance with realistic fake data so the platform can be demoed "fully alive" on demand.
-> **Decision made:** we **seed the database** (real rows), not mock the UI.
-> **Companion docs:** [data-model.md](../../02-architecture/data-model.md), [development-setup.md](../../01-getting-started/development-setup.md), [cli.md](../../05-developer-guide/cli.md).
-
----
-
-## 1. Why seeding, not UI mocks
-
-The web app is already fully wired to real API endpoints. So the two ways to fake a "living" platform are:
-
-| | **DB seeding** (chosen) | UI mock data |
-|---|---|---|
-| What it is | A script inserts real rows into Postgres | Components swap API calls for hardcoded fixtures |
-| Pages that work | **Every page** — listing, detail, search, pagination, enrollments, analytics | Only the ones you hand-edit |
-| Analytics tabs | Populated with real numbers | Empty or fake |
-| Effort | One script | Touch dozens of components |
-| Reverting | `--reset` deletes exactly the demo data | Remove mock code from every file (risky leftovers) |
-| Risk | None if guarded to dev mode | Mock branches leak to production |
-
-Seeding wins: the owner sees the *actual* product, and every shipped feature (including the 7 Analytics tabs) is exercised. UI mocks would demo a fake shell that proves nothing.
+> **Status:** plan, not built. Blocked on sign off of [seed-manifest.md](./seed-manifest.md).
+> **Goal:** one command fills a fresh `demo` org with believable data so every public page and every dashboard tab looks like a platform that has been running for months.
+> **Decision:** seed the database with real rows. We do not mock the UI.
 
 ---
 
-## 2. Where the demo data lives
+## 1. Scope
 
-**Recommended default: a dedicated demo organization** (slug `demo`), seeded into the normal database.
-
-| Option | Pros | Cons |
-|---|---|---|
-| **Dedicated demo org (recommended)** | Proves real multi-tenant behavior; `--reset` deletes exactly that org; runs alongside real data | All demo data shares one DB (isolation is by `org_id`, which every table already carries) |
-| Separate demo database | Cleanest isolation — drop the DB to reset | Must point the API at it when demoing |
-| Fill an existing org | Fastest to view | Mixes fake with real data; hard to cleanly undo |
-
-> **TODO — confirm before building.** The script's reset logic depends on this. The plan below assumes the **dedicated demo org**; switching to a separate DB only changes the connection/reset step.
+| In | Out |
+|---|---|
+| A new org with slug `demo` | Touching the existing `default` org |
+| 16 published courses, 1 with full curriculum | Lessons on the other 15 |
+| 16 communities, 1 heavily active | Moderation queues and reports |
+| 16 podcasts, 1 with a full season | Real audio production |
+| 16 collections, payments, notifications, analytics | Email delivery, external webhooks actually firing |
 
 ---
 
-## 3. What the seeder must generate (the graph)
+## 2. Guardrails
 
-The demo must be a **connected graph**, not isolated rows, because every page joins across tables:
-
-```
-demo org
- ├─ roles        → reuse the existing global role IDs (1 admin, 2 maintainer, 3 instructor, 4 user)
- ├─ users        → ~4 teachers (instructor) + ~1 admin + ~150 students (user), faker names/emails
- ├─ courses      → ~2 listing pages worth (≈24; confirm listing page size when implementing)
- │    ├─ intro      → activities that appear BEFORE the first module
- │    ├─ modules    → ≥5 chapters per course
- │    │    └─ lessons → 3 activities each (mixed types: video / document / dynamic)
- │    ├─ thumbnail + banner  → random pick from the image folder
- │    └─ tags / description / about / learnings (faker prose)
- ├─ trails
- │    └─ trailrun + trailstep → enrollments with PARTIAL progress (spread across quartiles)
- ├─ podcasts     → ~6 shows → episodes → listens (podcast run_type)
- ├─ communities  → ~5 communities → discussions (varied labels/lengths)
- │    └─ comments → replies of different sizes (1 line … several paragraphs)
- │    └─ reactions → +1 / ❤ / 🎉 spread across members
- └─ analytics_events → page_view + time_on_activity, back-dated over the window
-```
-
-### Realism rules (these are what make it look real, not generated)
-
-1. **Spread the timestamps.** `creation_date` / `update_date` are ISO strings — back-date them across ~6 months. Flat timestamps are the #1 tell: charts won't curve, DAU won't vary, "recent activity" won't look alive.
-2. **Vary sizes.** Not every course is equal — some 3 lessons, some 12. Not every student is equal — some 90% through, some 5%, some abandoned after one lesson. Partial `trailstep` progress is what fills learner-progress buckets and drop-off curves.
-3. **Vary text.** Discussion titles/comment bodies should range from one-liners to multi-paragraph, mixing questions, ideas, and announcements (use the real `DISCUSSION_LABELS`).
-4. **Realistic referrers/devices** on `page_view` events (google.com, facebook.com, direct; desktop/mobile) so the Audience tab has a real distribution.
-5. **Some drafts.** Leave a few unpublished courses/podcasts/episodes so status filters have something to hide.
+1. **Development only.** The runner refuses to start unless `general_config.development_mode` is true. Local `.env` already sets `LEARNHOUSE_DEVELOPMENT_MODE=true`.
+2. **Never touches another org.** Every insert carries the demo `org_id`, every delete is scoped to it.
+3. **No silent duplication.** If the `demo` org exists, the run aborts and tells you to pass `--reset`.
+4. **Full reset.** `--reset` deletes the demo org and every row that references it, in dependency order, then seeds again.
+5. **Assets are mandatory.** If `apps/api/seed-assets/` has no images, abort with a clear message instead of seeding broken cards.
+6. **Deterministic.** A fixed random seed so two runs produce the same numbers, which keeps screenshots and retakes consistent.
 
 ---
 
-## 4. Images / banner folder
+## 3. Where the code lives
 
-Because the DB stores only a **filename** and the web builds the URL, the seeder does not need the upload API — it copies files the same way the real uploader does.
-
-**Expected layout (to be created by whoever runs it):**
-
-```
-apps/api/seed-assets/
- ├─ course-covers/     *.jpg / *.png   (picked randomly, one per course)
- ├─ course-banners/    *.jpg / *.png
- ├─ podcast-covers/    *.jpg / *.png
- └─ community-covers/  *.jpg / *.png
-```
-
-**What the seeder does per resource:**
-
-1. Pick a random file from the matching folder.
-2. Copy it to `content/orgs/{org_uuid}/{subdir}/{unique_filename}` (filesystem delivery, per `config.yaml`).
-3. Store **only the generated filename** in the DB column (`thumbnail_image`, `banner_image`, …).
-
-> If a folder is empty, fall back to a generated placeholder so the seed never fails on missing assets.
-
----
-
-## 5. Hard requirements (non-negotiable)
-
-1. **Production guard.** The seeder must **refuse to run** unless development mode is on (`LEARNHOUSE_DEVELOPMENT_MODE=true` / `general.development_mode`) — reuse the existing mode-bypass pattern. Accidentally seeding fake courses into a live tenant is a disaster.
-2. **Idempotent.** Re-running must not duplicate. Either every run starts by deleting the demo org's data (`--reset`), or use deterministic UUIDs/slugs so re-inserts upsert.
-3. **Reversible.** `--reset` (and ideally a plain run, if idempotent) must leave **zero residue** — count demo rows before and after to prove it.
-4. **Reuse real defaults.** Use the existing global roles (IDs 1–4) and the real feature/config rows — do not invent a parallel permission model.
-
----
-
-## 6. Technical gotchas to respect (learned the hard way)
-
-| # | Gotcha | What to do |
-|---|---|---|
-| 1 | `creation_date` / `update_date` are **VARCHAR** holding ISO-8601 **with time**; empty string is possible | Always write full ISO strings; never `''` |
-| 2 | `user` is a **reserved word** in Postgres | Quote it: `"user"` |
-| 3 | Enums in the live DB are **UPPERCASE** (`PUBLIC`, `STATUS_COMPLETED`, `RUN_TYPE_COURSE`) | Write labels, not Python enum *names* |
-| 4 | `userorganization.role_id` is **NOT NULL** | Always attach a real role |
-| 5 | `user.failed_login_attempts`, `user.is_superadmin`, `activity.current_version` are **NOT NULL** even though the model defaults them | Set them explicitly (`0`, `false`, `1`) |
-| 6 | `trailstep` needs a valid `trailrun_id` **and** `trail_id` | Create the `trail` first |
-| 7 | Progress is derived from `chapteractivity` rows (`COUNT(DISTINCT ca.id)`) | Link activities to chapters or progress reads 0% |
-| 8 | `analytics_events.created_at` is a real `timestamptz` (not a string) | Pass datetimes, not ISO strings |
-| 9 | Course chapter order lives on `coursechapter.order`, activity order on `chapteractivity.order` | Set both so ordering/drop-off work |
-
----
-
-## 7. Proposed structure
-
-**Location:** one Python package in the API app (not spread across the frontend), mirroring the test factories we just added.
+One Python package inside the API app, reusing the existing engine and session so there is no second database layer.
 
 ```
 apps/api/src/services/seed/
- ├─ __init__.py
- ├─ runner.py          # orchestrates: org → users → courses → podcasts → community → analytics
- ├─ generators/
- │    ├─ users.py
- │    ├─ courses.py    # courses, chapters, activities, intro lesson
- │    ├─ progress.py   # trail / trailrun / trailstep with partial completion
- │    ├─ podcasts.py
- │    ├─ community.py  # discussions, comments, reactions
- │    └─ events.py     # analytics_events (back-dated)
- └─ assets.py          # random image pick + copy into content/…
+  __init__.py          # public entry: run_demo_seed(reset: bool, ...)
+  __main__.py          # python -m src.services.seed
+  runner.py            # orchestration, guard, reset, summary report
+  reset.py             # dependency ordered delete of the demo org
+  assets.py            # scan seed-assets, pick, copy, return filenames
+  copy.py              # human sounding text fragments (English, French, Arabic)
+  generators/
+    org.py             # org, config, roles, groups, api tokens
+    users.py           # owner, teachers, moderators, students, avatars, bios
+    courses.py         # 19 courses, flagship curriculum, translations, updates
+    progress.py        # trail, trailrun, trailstep, certificates
+    collections.py     # bundles and membership
+    community.py       # communities, discussions, comments, reactions, votes
+    podcasts.py        # shows, episodes, translations, listens
+    assignments.py     # assignments, tasks, submissions, code submissions
+    playgrounds.py     # playgrounds and boards
+    payments.py        # config, orders, entitlements, payout costs, webhooks
+    notifications.py   # templates, notifications, recipients
+    media.py           # folders, media rows and copied files
+    analytics.py       # back dated events
 ```
 
-**Entry point — a CLI command** (consistent with `dev`, `setup`, etc.):
+Entry point:
 
 ```
-learnhouse seed --demo            # create/refresh the demo org
-learnhouse seed --demo --reset    # wipe demo data first, then reseed
-learnhouse seed --demo --courses 24 --students 150   # override counts
+cd apps/api
+.venv/Scripts/python -m src.services.seed --demo --reset
 ```
 
-> Implementation note: the CLI (`apps/cli`) is Node/TypeScript, so `learnhouse seed` would either call the Python script via the same mechanism `dev` uses to spawn the API, **or** be a thin wrapper that runs `python -m src.services.seed` inside the api container/env. Confirm the cleanest path at build time.
+Optional flags: `--students 150`, `--courses 16`, `--podcasts 16`, `--communities 16`, `--no-reset`.
 
-**How the seeder talks to the DB:** reuse the app's existing engine/session ([database.py](../../../apps/api/src/core/events/database.py)) — no new connection code.
+The Node CLI gets a thin `seed` command later only if we want it. Python module first, no wrapper.
 
 ---
 
-## 8. Acceptance checklist (how we'll know it's done)
+## 4. Build order
 
-- [ ] `learnhouse seed --demo` fills the platform; the course listing shows ~2 full pages.
-- [ ] Every course has ≥5 modules × 3 lessons, plus lessons before the first module.
-- [ ] Course covers/banners render (random picks from the folder).
-- [ ] Analytics tabs are **non-empty** with plausible, varied numbers (not flat lines).
-- [ ] Community shows discussions with replies of clearly different sizes, plus reactions.
-- [ ] Podcasts show episodes and listening numbers.
-- [ ] `--reset` leaves **zero** demo rows (verified by count) and the app still works.
-- [ ] Running it twice does **not** duplicate.
-- [ ] With development mode **off**, the command refuses to run.
+Each step ends with the API still booting and the affected page rendering.
+
+### Step 1 — Skeleton
+`runner.py`, guard, `reset.py`, summary output. Prove `--reset` on an empty org.
+
+### Step 2 — Org and people
+Org, config, roles, 158 users, memberships, groups, tokens. Verify the admin Users page and the org switcher.
+
+### Step 3 — Assets and courses
+Asset scanner plus 19 courses. Covers and banners copied into `content/orgs/{org_uuid}/courses/{course_uuid}/`. Verify the course grid shows 2 full pages and every card has art.
+
+### Step 4 — Flagship curriculum
+6 chapters with `coursechapter.order`, 26 activities with `chapteractivity.order`, YouTube URIs, translations, course updates. Verify the course page, lesson navigation and the video player.
+
+### Step 5 — Progress and certificates
+Trails, 600 runs, 6,500 steps in quartiles, 60 certificates. Verify learner Progress and the course progress bars.
+
+### Step 6 — Collections
+16 bundles with members and owners. Verify the Collections grid.
+
+### Step 7 — Community
+16 communities, 105 discussions, 330 comments, reactions and votes. Verify the listing, community feed and a discussion thread.
+
+### Step 8 — Podcasts
+16 shows, 44 episodes, audio reuse. Verify the podcast grid at 8 per page and episode playback.
+
+### Step 9 — Assignments, playgrounds, boards
+Verify the Assignments page and the code block submission history.
+
+### Step 10 — Payments
+Config, 140 orders, entitlements, payout costs, webhook log. Verify Overview, Transactions, Payouts and Offers.
+
+### Step 11 — Notifications
+Templates, 26 notifications, 1,900 recipients with a 35 percent unread mix. Verify the bell badge, dropdown and reading window.
+
+### Step 12 — Media, webhooks, analytics
+Folders, media rows with real files, webhook deliveries, 12,000 events. Verify every Analytics tab.
+
+### Step 13 — Polish and verification
+Cache invalidation, full acceptance pass, twice run plus reset proof.
 
 ---
 
-## 9. Build order (when we start)
+## 5. Data rules each generator follows
 
-1. `runner.py` + demo-org creation + production guard + `--reset`.
-2. Users + roles (reuse global roles).
-3. Courses → chapters → activities → intro, with image copying.
-4. Progress (`trail*`) with varied percentages.
-5. Community (discussions/comments/reactions).
-6. Podcasts + episodes + listens.
-7. `analytics_events` back-dated events.
-8. CLI wiring + the acceptance checklist.
+### Courses
+- 16 published, 3 drafts.
+- Only the flagship gets chapters and lessons.
+- Every course has `thumbnail_image` and `banner_image` filenames pointing at copied files, plus description, about, learnings, tags and price.
+- Mix of access types: mostly free public, a few paid, one users only. Paid ones are what the payment orders reference.
+- Creation and update dates spread across six months, not all on the same day.
+
+### Progress
+- Enrollment counts follow a power curve. A handful of courses are popular, the long tail has a few learners.
+- Completion quartiles: 15 percent near done, 35 percent mid, 30 percent early, 20 percent abandoned after one or two lessons.
+- Only the flagship can reach 100 percent, and only for the 60 certified students.
+
+### Community
+- The main community carries the weight. Posts written by named people with history, not by anonymous accounts.
+- Reply depth from one word to three paragraphs. Not every post has replies.
+- Reactions and votes uneven. Some posts get none.
+
+### Podcasts
+- The main show has 14 episodes with real titles and descriptions, sequential dates.
+- Other shows have 2 episodes so their detail page is not empty.
+- Listens attach to `trailrun` with `RUN_TYPE_PODCAST` plus matching analytics events.
+
+### Payments
+- Orders spread across six months with a realistic status mix: 78 percent paid, 8 percent pending, 6 percent failed, 4 percent expired, 4 percent refunded.
+- Fees vary with amount so the payout math is not a flat line.
+- Entitlements only exist for paid orders that succeeded.
+
+### Notifications
+- 26 notifications: announcements, learning events, system notices.
+- Delivery is targeted, not everyone gets everything.
+- Most read, a third unread, three of them recent enough to sit at the top of the bell.
+
+### Analytics
+- 12,000 events across roughly 180 days.
+- Daily volume follows weekdays and a slow growth curve. Weekends dip.
+- Referrers, devices and countries vary per event so the Audience tab is not three identical columns.
+- Every event carries a real `user_id`, `org_id`, `course_uuid` or `podcast_uuid` where the query expects one.
 
 ---
 
-## 10. Open decisions to confirm before building
+## 6. Copy rules (hard)
 
-1. **Placement** — dedicated demo org (assumed) vs separate database vs fill an existing org.
-2. **Counts** — the exact course/student/discussion numbers (rough targets above).
-3. **CLI integration** — `learnhouse seed` (Node wrapper) vs a direct `python -m` command.
-4. **Assets** — are you providing the image folder, or should the seeder generate placeholders when it's empty?
+Applies to course descriptions, about sections, learnings, tags, course updates, discussion titles and bodies, comments, podcast and episode descriptions, notification titles and bodies, media names, group names.
+
+- No hyphens or underscores as punctuation or separators.
+- No ellipses, no em dashes.
+- No marketing filler: delve, unlock, elevate, seamless, robust, journey, game changer, in today's world.
+- No uniform sentence length or repeated structures across items.
+- Community text reads like people typing: lowercase starts, short reactions, corrections, inside references.
+- French and Arabic written as native phrasing, not literal translation.
+- Names and situations stay consistent across generators. A student who posts in the community is enrolled in the course they mention.
+
+The manifest holds the sample strings we agree on before writing the generators.
+
+---
+
+## 7. Database gotchas
+
+| # | Gotcha | Handling |
+|---|---|---|
+| 1 | `creation_date` and `update_date` are VARCHAR holding full ISO timestamps | Always write ISO strings with time, never empty |
+| 2 | `user` is a reserved word | Quote it in raw SQL, use the model in ORM paths |
+| 3 | Enum columns store UPPERCASE labels | Write labels such as `PUBLIC`, `RUN_TYPE_COURSE`, not Python enum names |
+| 4 | `userorganization.role_id` is NOT NULL | Attach a real role id to every membership |
+| 5 | `user.failed_login_attempts`, `user.is_superadmin`, `activity.current_version` are NOT NULL despite defaults | Set them explicitly |
+| 6 | `trailstep` needs both `trailrun_id` and `trail_id` | Create the trail first |
+| 7 | Learner progress counts `chapteractivity` rows | Flagship lessons must all be linked to a chapter |
+| 8 | `analytics_events.created_at` is a real timestamptz | Pass datetimes |
+| 9 | Chapter order lives on `coursechapter.order`, activity order on `chapteractivity.order` | Set both |
+| 10 | Courses without activities divide by zero in progress math | Server already guards it, but avoid enrolling in empty courses beyond analytics needs |
+| 11 | Course listings are cached in Redis for 60 seconds | Call `invalidate_courses_cache(slug)` and clear `courses_cache:*` at the end of a run |
+| 12 | Next.js pages revalidate at 120 seconds | Hard refresh after seeding, or restart the web app before recording |
+
+---
+
+## 8. One UI change
+
+`apps/web/app/orgs/[orgslug]/(withmenu)/podcasts/podcasts.tsx` renders 12 cards per page. Change `itemsPerPage` to 8 so podcasts, courses, communities and collections all page identically. Nothing else in the file changes.
+
+---
+
+## 9. Reset strategy
+
+`--reset` deletes in this order, all scoped to the demo org:
+
+1. Rows with a direct `org_id` foreign key: analytics events, notifications and recipients, webhooks and deliveries, payment orders, entitlements, payout costs, usage, api tokens, media and folders.
+2. Content leaves: comments, reactions, votes, discussions, communities, episodes, podcasts, collection links, assignments and submissions, code submissions, playgrounds, boards.
+3. Learning: trail steps, runs, trails, certificates, chapter activities, activities and versions, chapters, course chapters, course translations and updates, courses.
+4. People: group memberships, groups, user organizations, non owner users created by the seed.
+5. Config, roles created by the seed, then the organization row last.
+
+Every step runs inside one transaction. If any step fails, nothing is deleted.
+
+---
+
+## 10. Acceptance checklist
+
+- [ ] Seed refuses to run when development mode is off.
+- [ ] Seed refuses to run twice without `--reset`.
+- [ ] Courses page shows exactly 2 full pages of 8, every card has cover and banner.
+- [ ] Flagship course opens, shows 6 modules and 26 lessons, video plays.
+- [ ] The other 15 course pages render their landing content with an empty syllabus.
+- [ ] Communities page shows 2 full pages. The main community has 60 posts with replies, reactions and votes.
+- [ ] Podcasts page shows 2 full pages at 8 per page. The main show has 14 playable episodes.
+- [ ] Collections page shows 2 full pages.
+- [ ] Progress page shows enrolled courses with varied percentages plus issued certificates.
+- [ ] Payments pages show orders, revenue, fees and a payout report with non zero numbers.
+- [ ] Notifications bell shows an unread badge, a populated dropdown and readable windows.
+- [ ] All Analytics tabs render charts with variation, no flat lines, no empty states.
+- [ ] No string in the UI violates the copy rules.
+- [ ] `--reset` leaves zero demo rows, verified by count, and the app still boots.
+- [ ] A second `--reset` run produces the same numbers.
+
+---
+
+## 11. Risks
+
+| Risk | Mitigation |
+|---|---|
+| Empty syllabus on the 15 supporting courses looks odd if clicked on camera | Presenter stays on the flagship. If that is not acceptable later, add one stub module per course, which is a small delta |
+| 158 avatars clashing in style | You control the assets folder. The seeder only rotates what is there |
+| Analytics numbers clamp or look synthetic | Volume curves and per entity variation are tuned and checked against the real chart queries before sign off |
+| Demo org polluting a real database | Guard plus org scoped reset. Safe to run on a local or staging database only |
+| Frontend caching showing old empty state after seeding | Redis invalidation in the runner plus a documented hard refresh before recording |
+
+---
+
+## 12. Open items before code
+
+1. Confirm the asset folder path and that you will drop images plus one mp3.
+2. Confirm the demo org display name, default "Koodook Academy" with slug `demo`.
+3. Confirm English as the main language with a few French and Arabic items for realism.
