@@ -634,6 +634,7 @@ function CoursesHome(params: CourseProps) {
                 title={course.name}
                 description={course.description || ''}
                 image={imageUrl}
+                lessons={course.extra_metadata?.lessons_count}
                 duration={course.extra_metadata?.duration || ''}
                 difficulty={course.extra_metadata?.difficulty || ''}
                 href={`/dash/courses/course/${removeCoursePrefix(course.course_uuid)}/general`}

@@ -1,11 +1,17 @@
 'use client'
 
-import { useEffect, useRef, useState, use, lazy, Suspense } from 'react'
+import { useEffect, useRef, useState, use, lazy, Suspense, Component } from 'react'
 import { getAPIUrl } from '@services/config/config'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useOrg } from '@components/Contexts/OrgContext'
 import { markActivityAsComplete } from '@services/courses/activity'
+import { getAssignmentFromActivityUUID } from '@services/courses/assignments'
 import { swrFetcher } from '@services/utils/ts/requests'
+import { CourseProvider } from '@components/Contexts/CourseContext'
+import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext'
+import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext'
+import AssignmentSubmissionProvider from '@components/Contexts/Assignments/AssignmentSubmissionContext'
 import useSWR from 'swr'
 import PageLoading from '@components/Objects/Loaders/PageLoading'
 import toast from 'react-hot-toast'
@@ -142,7 +148,7 @@ function ActivityIcon({ type, completed }: { type: string; completed?: boolean }
 
 // ── Course Outline Sidebar (accordion) ──
 
-function CourseOutlineSidebar({ currentActivityId, chapters, onNavigate }: { currentActivityId: string; chapters: any[]; onNavigate?: (activityId: string) => void }) {
+function CourseOutlineSidebar({ currentActivityId, chapters, completedIds, onNavigate }: { currentActivityId: string; chapters: any[]; completedIds: Set<number>; onNavigate?: (activityId: string) => void }) {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
 
@@ -213,6 +219,7 @@ function CourseOutlineSidebar({ currentActivityId, chapters, onNavigate }: { cur
                   {chapter.activities.map((act: any) => {
                     const actId = cleanId(act.activity_uuid || act.id)
                     const isCurrent = actId === cleanId(currentActivityId)
+                    const isDone = completedIds.has(Number(act.id))
                     const actType = act.activity_type || act.type
                     return (
                       <div
@@ -224,6 +231,8 @@ function CourseOutlineSidebar({ currentActivityId, chapters, onNavigate }: { cur
                           <div className="w-3.5 h-3.5 rounded-full bg-black flex items-center justify-center shrink-0">
                             <div className="w-1.5 h-1.5 rounded-full bg-white" />
                           </div>
+                        ) : isDone ? (
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                         ) : actType === 'TYPE_SCORM' ? (
                           <FileQuestion className="w-3.5 h-3.5 text-ui-fg-muted shrink-0" />
                         ) : (
@@ -232,7 +241,11 @@ function CourseOutlineSidebar({ currentActivityId, chapters, onNavigate }: { cur
                         <span
                           className={cn(
                             'truncate text-xs',
-                            isCurrent ? 'text-ui-fg-base font-medium' : 'text-ui-fg-subtle'
+                            isCurrent
+                              ? 'text-ui-fg-base font-medium'
+                              : isDone
+                                ? 'text-ui-fg-muted'
+                                : 'text-ui-fg-subtle'
                           )}
                         >
                           {act.name}
@@ -339,9 +352,77 @@ function KnowledgeCheckCard({ question, answer }: { question: string; answer: st
   )
 }
 
+// ── Error Boundary ──
+
+class ActivityErrorBoundary extends Component<
+  { children: React.ReactNode; t: (key: string) => string },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode; t: (key: string) => string }) {
+    super(props)
+    this.state = { hasError: false }
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+
+  componentDidCatch(error: Error) {
+    console.error('[LessonPreview] Activity render error:', error.message)
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="aspect-video bg-white rounded-xl flex items-center justify-center border border-gray-100 shadow-sm">
+          <div className="text-center">
+            <Play className="w-12 h-12 text-ui-fg-muted mx-auto mb-2" />
+            <Text size="small" className="text-ui-fg-muted">{this.props.t('lesson.preview.unsupported_activity')}</Text>
+          </div>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
+// ── Assignment Activity Wrapper ──
+
+function AssignmentActivityWrapper({ activity, courseuuid, access_token }: { activity: any; courseuuid: string; access_token: string }) {
+  const [assignmentData, setAssignmentData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (activity?.activity_uuid && access_token) {
+      setLoading(true)
+      getAssignmentFromActivityUUID(activity.activity_uuid, access_token).then((res) => {
+        setAssignmentData(res.data)
+        setLoading(false)
+      }).catch(() => {
+        setLoading(false)
+      })
+    }
+  }, [activity?.activity_uuid, access_token])
+
+  if (loading) return <LoadingFallback />
+  if (!assignmentData) return null
+
+  return (
+    <CourseProvider courseuuid={`course_${courseuuid}`}>
+      <AssignmentSubmissionProvider assignment_uuid={assignmentData?.assignment_uuid}>
+        <AssignmentProvider assignment_uuid={assignmentData?.assignment_uuid}>
+          <AssignmentsTaskProvider>
+            <AssignmentStudentActivity />
+          </AssignmentsTaskProvider>
+        </AssignmentProvider>
+      </AssignmentSubmissionProvider>
+    </CourseProvider>
+  )
+}
+
 // ── Activity Content Renderer ──
 
-function renderActivityContent(activity: any, courseuuid: string, t: (key: string) => string) {
+function renderActivityContent(activity: any, courseuuid: string, t: (key: string) => string, access_token?: string) {
   const activityType = activity.activity_type
 
   switch (activityType) {
@@ -350,7 +431,11 @@ function renderActivityContent(activity: any, courseuuid: string, t: (key: strin
     case 'TYPE_DOCUMENT':
       return <DocumentPdfActivity course={{ course_uuid: courseuuid }} activity={activity} />
     case 'TYPE_ASSIGNMENT':
-      return <AssignmentStudentActivity />
+      return (
+        <ActivityErrorBoundary t={t}>
+          <AssignmentActivityWrapper activity={activity} courseuuid={courseuuid} access_token={access_token || ''} />
+        </ActivityErrorBoundary>
+      )
     case 'TYPE_SCORM':
       return <ScormActivity course={{ course_uuid: courseuuid }} activity={activity} />
     default:
@@ -371,8 +456,20 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
   const { t, i18n } = useTranslation()
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
+  const org = useOrg() as any
+  const sessionStatus = session?.status
   // Follow the platform language switcher, like the course page does.
   const locale = (i18n.language || 'en').split('-')[0]
+
+  // Completion is stored on the trail, so read it from there rather than
+  // trusting a local click. The footer and the outline both use this list.
+  const { data: trailData, mutate: mutateTrail } = useSWR(
+    access_token && org?.id ? `${getAPIUrl()}trail/org/${org.id}/trail` : null,
+    (url: string) => swrFetcher(url, access_token),
+    { revalidateOnFocus: false }
+  )
+  // Optimistic ids so the check appears instantly, before the trail refetch.
+  const [optimisticCompleted, setOptimisticCompleted] = useState<number[]>([])
 
   // Fetch course data directly (not through CourseProvider) so we control
   // loading / error states instead of showing a blank white page.
@@ -459,6 +556,19 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
   const prevActivity = currentIndex > 0 ? allActivities[currentIndex - 1] : null
   const nextActivity = currentIndex < allActivities.length - 1 ? allActivities[currentIndex + 1] : null
 
+  // Completed activity ids for this course, taken from the trail and merged
+  // with the ones completed during this session.
+  const completedFromTrail = new Set<number>()
+  ;(trailData?.runs || []).forEach((run: any) => {
+    const runCourseUuid = run.course?.course_uuid || run.course_uuid || ''
+    if (runCourseUuid.replace('course_', '') !== courseuuid) return
+    ;(run.steps || []).forEach((step: any) => {
+      if (step.complete !== false) completedFromTrail.add(Number(step.activity_id))
+    })
+  })
+  const completedIds = new Set([...completedFromTrail, ...optimisticCompleted])
+  const isCompleted = currentActivity ? completedIds.has(Number(currentActivity.id)) : false
+
   const navigateTo = (act: any) => {
     if (!act) return
     setActiveActivityId(cleanId(act.activity_uuid))
@@ -476,8 +586,13 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
 
   const handleMarkComplete = async () => {
     if (!currentActivity || !access_token) return
+    const activityId = Number(currentActivity.id)
     try {
       await markActivityAsComplete(orgslug, courseuuid, currentActivity.activity_uuid, access_token)
+      setOptimisticCompleted((previous) =>
+        previous.includes(activityId) ? previous : [...previous, activityId]
+      )
+      mutateTrail()
       if (nextActivity) {
         navigateTo(nextActivity)
       }
@@ -486,6 +601,9 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
       toast.error(t('lesson.preview.mark_complete_error'))
     }
   }
+
+  // Completion is manual — the learner clicks the "Mark Complete" button
+  // in the footer. No auto-complete on scroll.
 
   const [activeSection, setActiveSection] = useState('what-youll-learn')
 
@@ -555,6 +673,32 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
   ])
 
   // ── Loading / Error states (placed after all hooks so hook order is stable) ──
+
+  // Wait for the session to resolve before rendering anything meaningful.
+  if (sessionStatus === 'loading') {
+    return (
+      <GeneralWrapperStyled>
+        <PageLoading />
+      </GeneralWrapperStyled>
+    )
+  }
+
+  // If the user is not logged in there is no access_token, so the
+  // completion button and the trail will both be broken. Show a clear
+  // message instead of a page with a non-functional button.
+  if (sessionStatus === 'unauthenticated' || !access_token) {
+    return (
+      <GeneralWrapperStyled>
+        <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+          <Text size="large" className="text-ui-fg-muted">{t('lesson.preview.login_required') || 'Sign in required'}</Text>
+          <Text size="small" className="text-ui-fg-subtle">
+            {t('lesson.preview.login_required_description') || 'Please sign in to track your progress in this course.'}
+          </Text>
+        </div>
+      </GeneralWrapperStyled>
+    )
+  }
+
   if (isLoading) {
     return (
       <GeneralWrapperStyled>
@@ -653,7 +797,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
                       </div>
                     </div>
                   ) : (
-                    renderActivityContent(renderedActivity, courseuuid, t)
+                    renderActivityContent(renderedActivity, courseuuid, t, access_token)
                   )}
                 </Suspense>
               ) : currentActivity ? (
@@ -776,7 +920,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
               )}
             </section>
 
-            {/* Navigation Buttons */}
+            {/* Footer: manual completion via the center button. */}
             <div className="flex items-center justify-between pt-4 border-t border-gray-200 scroll-mt-24">
               <Button
                 variant="ghost"
@@ -788,36 +932,48 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
                 <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
                 {t('lesson.preview.previous')}
               </Button>
-              <Button
-                variant="primary"
-                size="small"
-                onClick={handleMarkComplete}
-                disabled={!currentActivity || !access_token}
-              >
-                {t('lesson.preview.mark_complete')}
-              </Button>
-              <Button
-                variant="ghost"
-                size="small"
-                className="gap-1.5"
-                onClick={() => navigateTo(nextActivity)}
-                disabled={!nextActivity}
-              >
-                {t('lesson.preview.next')}
-                <ArrowRight className="w-4 h-4 rtl:rotate-180" />
-              </Button>
+
+              {isCompleted ? (
+                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600">
+                  <CheckCircle2 className="w-4 h-4" />
+                  {t('lesson.preview.completed')}
+                </span>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="small"
+                  className="gap-1.5"
+                  onClick={handleMarkComplete}
+                  disabled={!currentActivity || !access_token}
+                >
+                  {t('lesson.preview.mark_complete')}
+                </Button>
+              )}
+
+              {nextActivity ? (
+                <Button
+                  variant="ghost"
+                  size="small"
+                  className="gap-1.5"
+                  onClick={() => navigateTo(nextActivity)}
+                >
+                  {t('lesson.preview.next')}
+                  <ArrowRight className="w-4 h-4 rtl:rotate-180" />
+                </Button>
+              ) : (
+                <div />
+              )}
             </div>
 
-            {/* bottom sentinel for IntersectionObserver — tells the
-                "On This Page" sidebar to highlight the last section
-                when the user has scrolled to the bottom */}
+            {/* Sentinel for the "On This Page" sidebar — highlights the
+                last section when scrolled to the bottom. */}
             <div id="page-end-sentinel" className="h-1" />
           </div>
 
           {/* ═══ RIGHT SIDEBAR ═══ */}
           <div className="w-full lg:w-72 xl:w-80 shrink-0">
             <div className="lg:sticky lg:top-8 space-y-4">
-              <CourseOutlineSidebar currentActivityId={activeActivityId} chapters={chapters} onNavigate={(id) => setActiveActivityId(id)} />
+              <CourseOutlineSidebar currentActivityId={activeActivityId} chapters={chapters} completedIds={completedIds} onNavigate={(id) => setActiveActivityId(id)} />
               <OnThisPageSidebar activeSection={activeSection} sections={visibleSections} />
             </div>
           </div>

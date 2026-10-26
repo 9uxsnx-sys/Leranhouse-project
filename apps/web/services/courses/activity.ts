@@ -36,14 +36,29 @@ export async function removeCourse(course_uuid: string, org_slug: string,access_
 export async function markActivityAsComplete(
   org_slug: string,
   course_uuid: string,
-  activity_uuid: string,access_token:any
+  activity_uuid: string,
+  access_token: any
 ) {
-  const result: any = await fetch(
-    `${getAPIUrl()}trail/add_activity/${activity_uuid}`,
-    RequestBodyWithAuthHeader('POST', null, null,access_token)
-  )
-  const res = await errorHandling(result)
-  return res
+  const url = `${getAPIUrl()}trail/add_activity/${activity_uuid}`
+  console.log('[markActivityAsComplete] URL:', url)
+  console.log('[markActivityAsComplete] token present:', !!access_token)
+  try {
+    const result: any = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    })
+    console.log('[markActivityAsComplete] response status:', result.status)
+    const res = await errorHandling(result)
+    return res
+  } catch (e) {
+    console.error('[markActivityAsComplete] fetch error:', e)
+    console.error('[markActivityAsComplete] error name:', (e as any)?.name)
+    console.error('[markActivityAsComplete] error message:', (e as any)?.message)
+    console.error('[markActivityAsComplete] error cause:', (e as any)?.cause)
+    throw e
+  }
 }
 
 export async function unmarkActivityAsComplete(

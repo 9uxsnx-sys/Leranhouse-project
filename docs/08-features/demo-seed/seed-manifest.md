@@ -11,7 +11,7 @@
 | # | Decision | Value |
 |---|---|---|
 | 1 | Seed method | Real database rows, not UI mocks |
-| 2 | Target | **A new org, slug `demo`** — the existing `default` org stays untouched |
+| 2 | Target | **The org with slug `demo`**, named Koodook Academy. It is the only organization on the instance, so every slug-less route resolves to it and the old `default` org was removed |
 | 3 | Curriculum | **Only the flagship course** gets modules and lessons. The other courses get a filled landing page: title, subtitle, description, about, learnings, tags, price, authors, cover, banner |
 | 4 | Flagship | **Backend Engineering with Python**. Six weeks from an empty folder to a deployed API: git, requests, database, auth, tests, deploy |
 | 5 | Community link | The first community is named after the flagship course and linked to it with `course_id`, so the course page shows its feed and the course filter on the communities page is not empty |
@@ -50,7 +50,7 @@ Roughly **24,000 rows** in total.
 | `organizationconfig` | 1 | Every feature enabled, payments on, Chargily as provider |
 | `role` | 4 (reused) | Existing global roles, not new ones |
 | `user` | **158** | 1 owner, 4 teachers, 3 moderators, 150 students. Avatar, bio, links, back dated signup dates |
-| `userorganization` | 158 | Every user attached to the demo org with a role |
+| `userorganization` | 159 | Every seeded user attached to the demo org, plus the dev CLI admin so `admin@school.dev` keeps access after a reseed |
 | `usergroup` | 6 | Cohorts and teams, each with members and assigned content |
 | `usergroupuser` | 60 | Group membership |
 | `usergroupresource` | 20 | Courses and podcasts assigned to groups |
@@ -60,7 +60,7 @@ Roughly **24,000 rows** in total.
 
 | Table | Rows | What it is |
 |---|---|---|
-| `course` | **19** | 16 published plus 3 drafts |
+| `course` | **19** | 16 published plus 3 drafts. Every row carries `extra_metadata`: difficulty, duration, video hours, resources, certificate flag, requirements, instructor and lesson count, which is what the cards and the course page read |
 | `chapter` + `coursechapter` | 7 + 7 | Intro chapter plus 6 modules, flagship only |
 | `chapteractivity` | 26 | Flagship only: 2 intro lessons plus 6 modules of 4 lessons |
 | `activity` | 26 | 22 video lessons and 4 assignment activities |
@@ -176,6 +176,7 @@ These are hard rules for every generated string that a human will read.
 - Specific details: tool names, exact numbers, real situations
 - A mix of tone across authors. Some enthusiastic, some blunt, some asking for help
 - French and Arabic copy written by native phrasing, not translated word for word
+- Card descriptions long enough to fill three lines inside the card, which means roughly 150 characters or more. Courses, communities, collections and podcasts all follow this rule so no grid has a card that stops at one line
 
 **Samples so you can judge the voice**
 

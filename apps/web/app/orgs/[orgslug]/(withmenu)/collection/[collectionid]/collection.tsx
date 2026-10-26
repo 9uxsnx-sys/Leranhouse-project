@@ -375,12 +375,24 @@ const CollectionClient = ({
                         title={course.name}
                         description={course.description || ''}
                         image={imageUrl}
-                        lessons={course.lessons ?? 0}
+                        lessons={course.lessons ?? course.extra_metadata?.lessons_count ?? 0}
                         lessonsLabel={
                           podcast ? t('collections.episodes') : t('collections.lessons')
                         }
-                        duration={t('collections.self_paced')}
-                        difficulty={t('collections.all_levels')}
+                        duration={
+                          podcast
+                            ? t('collections.self_paced')
+                            : course.duration ||
+                              course.extra_metadata?.duration ||
+                              t('collections.self_paced')
+                        }
+                        difficulty={
+                          podcast
+                            ? t('collections.all_levels')
+                            : course.difficulty ||
+                              course.extra_metadata?.difficulty ||
+                              t('collections.all_levels')
+                        }
                         href={getUriWithOrg(
                           orgslug,
                           podcast

@@ -68,6 +68,28 @@ def create_courses(ctx: SeedContext) -> None:
             ]
         )
 
+        # Card metadata. The listing and detail pages read difficulty, duration
+        # and lessons_count from here, so leaving it null makes the cards look
+        # empty even though the courses are fully populated.
+        meta = C.COURSE_META.get(entry["name"], {})
+        instructor = ctx.owner if index == 0 else ctx.teachers[index % len(ctx.teachers)]
+        extra_metadata = {
+            "difficulty": meta.get("difficulty", ""),
+            "duration": meta.get("duration", ""),
+            "video_hours": meta.get("video_hours", 0),
+            "resources_count": meta.get("resources_count", 0),
+            "has_certificate": meta.get("has_certificate", False),
+            "requirements": json.dumps(
+                [{"text": text} for text in meta.get("requirements", [])]
+            ),
+            "instructor": {
+                "name": f"{instructor.first_name} {instructor.last_name}",
+                "title": meta.get("instructor_title", "Instructor"),
+                "bio": meta.get("instructor_bio", ""),
+            },
+            "lessons_count": meta.get("lessons_count", 0),
+        }
+
         created = ctx.date_between(175, 20)
         course = Course(
             name=entry["name"],
@@ -98,7 +120,7 @@ def create_courses(ctx: SeedContext) -> None:
                 "robots_nofollow": False,
                 "enable_jsonld": True,
             },
-            extra_metadata=None,
+            extra_metadata=extra_metadata,
         )
         ctx.session.add(course)
         ctx.session.commit()
@@ -117,7 +139,12 @@ def create_courses(ctx: SeedContext) -> None:
 
 
 def _add_authors(ctx: SeedContext, course: Course, index: int) -> None:
-    author = ctx.teachers[index % len(ctx.teachers)]
+    # The founder teaches the flagship, which keeps the instructor shown on the
+    # course page in line with the backend subject.
+    if index == 0 and ctx.owner is not None:
+        author = ctx.owner
+    else:
+        author = ctx.teachers[index % len(ctx.teachers)]
     if index % 5 == 0 and ctx.teachers:
         second = ctx.teachers[(index + 1) % len(ctx.teachers)]
     else:
@@ -180,7 +207,7 @@ def _create_curriculum(ctx: SeedContext) -> None:
 
     chapter_created = ctx.date_between(120, 90)
     intro_chapter = Chapter(
-        name="Start here",
+        name="Introduction",
         description="Two short videos before the weekly modules begin.",
         thumbnail_image=None,
         lock_type=ActivityLockType.PUBLIC,
@@ -223,7 +250,9 @@ def _create_curriculum(ctx: SeedContext) -> None:
             if is_assignment_slot:
                 assignment = next(assignments, None)
                 if assignment is not None:
-                    _create_assignment_activity(ctx, course, chapter, lesson_title, order)
+                    # Name the lesson after the assignment itself, otherwise the
+                    # curriculum shows a video title on an assignment card.
+                    _create_assignment_activity(ctx, course, chapter, assignment[0], order)
                     continue
             _create_video_activity(ctx, course, chapter, lesson_title, order)
 
@@ -257,6 +286,7 @@ def _create_video_activity(
             "activity_uuid": activity_uuid,
         },
         details={"startTime": 0, "endTime": None, "autoplay": False, "muted": False},
+        extra_metadata=_lesson_sections(name),
         published=True,
         lock_type=ActivityLockType.PUBLIC,
         org_id=ctx.org_id,
@@ -286,6 +316,36 @@ def _create_video_activity(
     ctx.session.commit()
 
 
+def _vary_takeaways(blocks: list[dict], name: str) -> list[dict]:
+    """Move one bullet between cards so the three blocks are not all the same size.
+
+    The source blocks are authored with three bullets each. Rotating one bullet
+    gives 2 / 4 / 3 on one lesson and 4 / 3 / 2 on the next, so a learner never
+    sees the same template repeated down the page.
+    """
+    varied = [
+        {**block, "items": list(block.get("items", []))} for block in blocks
+    ]
+    if len(varied) < 3 or any(len(block["items"]) < 3 for block in varied):
+        return varied
+
+    shift = sum(ord(character) for character in name) % 3
+    source, target = [(0, 1), (1, 2), (2, 0)][shift]
+    varied[target]["items"].append(varied[source]["items"].pop())
+    return varied
+
+
+def _lesson_sections(name: str) -> dict:
+    """Page sections for one lesson, shaped the way the lesson page reads them."""
+    sections = C.LESSON_SECTIONS.get(name, {})
+    return {
+        "learning_objectives": list(sections.get("objectives", [])),
+        "takeaways": _vary_takeaways(sections.get("takeaways", []), name),
+        "resources": list(sections.get("resources", [])),
+        "knowledge_checks": list(sections.get("checks", [])),
+    }
+
+
 def _create_assignment_activity(
     ctx: SeedContext, course: Course, chapter: Chapter, name: str, order: int
 ) -> None:
@@ -297,6 +357,7 @@ def _create_assignment_activity(
         activity_sub_type=ActivitySubTypeEnum.SUBTYPE_ASSIGNMENT_ANY,
         content={"activity_uuid": activity_uuid},
         details={},
+        extra_metadata=_lesson_sections(name),
         published=True,
         lock_type=ActivityLockType.PUBLIC,
         org_id=ctx.org_id,

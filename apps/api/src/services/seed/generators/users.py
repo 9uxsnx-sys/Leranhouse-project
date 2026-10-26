@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import secrets
+
+from sqlmodel import select
 
 from src.db.api_tokens import APIToken
 from src.db.user_organizations import UserOrganization
@@ -77,7 +80,7 @@ def create_people(ctx: SeedContext) -> None:
         ctx,
         "Yacine",
         "Benali",
-        bio="Founder of Koodook Academy. Designer for eleven years, teacher for four.",
+        bio="Founder of Koodook Academy. Backend developer for eleven years, teacher for four.",
         created_days_ago=420,
         email=OWNER_EMAIL,
     )
@@ -150,8 +153,32 @@ def create_people(ctx: SeedContext) -> None:
     ctx.session.add_all(memberships)
     ctx.session.commit()
 
+    _attach_bootstrap_admin(ctx)
     _create_groups(ctx)
     _create_tokens(ctx)
+
+
+def _attach_bootstrap_admin(ctx: SeedContext) -> None:
+    """Give the dev CLI admin account access to the demo org.
+
+    The CLI creates its admin on the first database setup, tied to whichever
+    org existed then. Once the demo org is the only org left, that account has
+    no membership anywhere, so we attach it here on every run.
+    """
+    email = os.environ.get("LEARNHOUSE_INITIAL_ADMIN_EMAIL", "admin@school.dev")
+    user = ctx.session.exec(select(User).where(User.email == email)).first()
+    if user is None:
+        return
+    existing = ctx.session.exec(
+        select(UserOrganization).where(
+            UserOrganization.user_id == user.id,
+            UserOrganization.org_id == ctx.org_id,
+        )
+    ).first()
+    if existing:
+        return
+    ctx.session.add(_link(user, ctx, ROLE_ADMIN))
+    ctx.session.commit()
 
 
 def _create_groups(ctx: SeedContext) -> None:

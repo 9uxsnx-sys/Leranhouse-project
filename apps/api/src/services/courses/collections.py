@@ -606,6 +606,12 @@ def _list_member_rows(
         )
         if query and query not in (display_name or "").lower():
             continue
+        course_meta = course.extra_metadata or {}
+        # Only the flagship course carries real chapters in the demo seed, so
+        # fall back to the stored count instead of showing "0 lessons".
+        course_lessons = int(lesson_counts.get(course.id, 0)) or int(
+            course_meta.get("lessons_count") or 0
+        )
         result.append(
             CollectionCourseRead(
                 id=int(course.id),  # type: ignore[arg-type]
@@ -619,7 +625,9 @@ def _list_member_rows(
                 published=course.published,
                 price_amount=course.price_amount,
                 price_currency=course.price_currency,
-                lessons=int(lesson_counts.get(course.id, 0)),
+                lessons=course_lessons,
+                duration=course_meta.get("duration") or None,
+                difficulty=course_meta.get("difficulty") or None,
                 creation_date=course.creation_date,
             )
         )
@@ -767,6 +775,10 @@ def _list_available_rows(
             )
             continue
         course = resource  # type: ignore[assignment]
+        course_meta = course.extra_metadata or {}
+        course_lessons = int(lesson_counts.get(course.id, 0)) or int(
+            course_meta.get("lessons_count") or 0
+        )
         rows.append(
             CollectionCourseRead(
                 id=int(course.id),  # type: ignore[arg-type]
@@ -780,7 +792,9 @@ def _list_available_rows(
                 published=course.published,
                 price_amount=course.price_amount,
                 price_currency=course.price_currency,
-                lessons=int(lesson_counts.get(course.id, 0)),
+                lessons=course_lessons,
+                duration=course_meta.get("duration") or None,
+                difficulty=course_meta.get("difficulty") or None,
                 creation_date=course.creation_date,
             )
         )

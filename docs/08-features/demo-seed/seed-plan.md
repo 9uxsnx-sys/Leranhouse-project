@@ -10,7 +10,7 @@
 
 | In | Out |
 |---|---|
-| A new org with slug `demo` | Touching the existing `default` org |
+| The org with slug `demo` | More than one organization on the instance |
 | 16 published courses, 1 with full curriculum | Lessons on the other 15 |
 | 16 communities, 1 heavily active | Moderation queues and reports |
 | 16 podcasts, 1 with a full season | Real audio production |
@@ -21,7 +21,7 @@
 ## 2. Guardrails
 
 1. **Development only.** The runner refuses to start unless `general_config.development_mode` is true. Local `.env` already sets `LEARNHOUSE_DEVELOPMENT_MODE=true`.
-2. **Never touches another org.** Every insert carries the demo `org_id`, every delete is scoped to it.
+2. **One org only.** Every insert carries the demo `org_id` and every delete is scoped to it. The old `default` org is gone, and `auto_install` now only runs when the database holds zero organizations, so a restart cannot recreate a second one.
 3. **No silent duplication.** If the `demo` org exists, the run aborts and tells you to pass `--reset`.
 4. **Full reset.** `--reset` deletes the demo org and every row that references it, in dependency order, then seeds again.
 5. **Artwork is optional and niche aware.** Pictures in `pics/` are copied in. Each subfolder is a niche, matched to the subject of the course, collection or community. Files in `pics/avatars` are used only for user avatars. Without a folder the run continues and the slots stay empty.
@@ -218,6 +218,9 @@ Every step runs inside one transaction. If any step fails, nothing is deleted.
 - [ ] Seed refuses to run twice without `--reset`.
 - [ ] Courses page shows exactly 2 full pages of 8.
 - [ ] Every card has a cover from the matching niche folder, or from the general pool when the niche has no folder.
+- [ ] Every course card shows lesson count, duration and difficulty. No card is missing metadata.
+- [ ] Every card description fills three lines in the grid, no card stops at one line.
+- [ ] Collection cards show a real level instead of "All levels".
 - [ ] Only the flagship course, its community and the first collection have banners. Episode covers and the org logo stay empty by choice.
 - [ ] Flagship course opens, shows 6 modules and 26 lessons, video plays.
 - [ ] The other 15 course pages render their landing content with an empty syllabus.

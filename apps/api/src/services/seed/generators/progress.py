@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+
 from sqlmodel import select
 
 from src.db.courses.chapter_activities import ChapterActivity
@@ -9,6 +11,7 @@ from src.db.courses.certifications import CertificateUser, Certifications
 from src.db.trail_runs import StatusEnum, TrailRun, TrailRunEnum
 from src.db.trail_steps import TrailStep
 from src.db.trails import Trail
+from src.db.users import User
 from src.services.seed.core import SeedContext, iso, new_uuid
 
 COURSE_ENROLLMENTS = 450
@@ -113,6 +116,8 @@ def create_progress(ctx: SeedContext) -> None:
                 )
     ctx.session.commit()
 
+    _enroll_demo_viewers(ctx, trail_for)
+
     for student in ctx.rng.sample(ctx.students, PODCAST_LISTENS):
         if not podcasts:
             break
@@ -136,6 +141,49 @@ def create_progress(ctx: SeedContext) -> None:
     ctx.session.commit()
 
     _create_certificates(ctx, completers)
+
+
+def _enroll_demo_viewers(ctx: SeedContext, trail_for) -> None:
+    """Enroll the people who walk the demo in the flagship course.
+
+    The owner and the CLI admin sign in on camera, and the sidebar only shows
+    "Continue learning" when a trail run exists. No completed steps, so the
+    button opens the first lesson of the first module.
+    """
+    if ctx.flagship is None:
+        return
+
+    email = os.environ.get("LEARNHOUSE_INITIAL_ADMIN_EMAIL", "admin@school.dev")
+    admin = ctx.session.exec(select(User).where(User.email == email)).first()
+
+    viewers = [user for user in (ctx.owner, admin) if user is not None]
+    flagship_id = int(ctx.flagship.id or 0)
+
+    for viewer in viewers:
+        user_id = int(viewer.id or 0)
+        existing = ctx.session.exec(
+            select(TrailRun).where(
+                TrailRun.user_id == user_id,
+                TrailRun.course_id == flagship_id,
+            )
+        ).first()
+        if existing:
+            continue
+        trail = trail_for(viewer)
+        ctx.session.add(
+            TrailRun(
+                data={},
+                status=StatusEnum.STATUS_IN_PROGRESS,
+                run_type=TrailRunEnum.RUN_TYPE_COURSE,
+                trail_id=int(trail.id or 0),
+                course_id=flagship_id,
+                org_id=ctx.org_id,
+                user_id=user_id,
+                creation_date=iso(ctx.date_back(20)),
+                update_date=iso(ctx.now),
+            )
+        )
+    ctx.session.commit()
 
 
 def _flagship_activity_ids(ctx: SeedContext) -> list[int]:

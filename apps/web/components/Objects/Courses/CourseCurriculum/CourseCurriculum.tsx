@@ -1,62 +1,38 @@
 'use client'
 
 import React, { useState } from 'react'
-import Link from 'next/link'
 import { Heading } from '@/components/ui/heading'
 import { Text } from '@/components/ui/text'
 import { ChevronDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
-import { getUriWithOrg } from '@services/config/config'
 
 // ── Types ──
 
 interface Lesson {
   id: number
-  uuid: string
   name: string
-  duration?: number
 }
 
 interface Module {
   id: number
   name: string
-  description?: string
   lessons: Lesson[]
 }
 
 interface CourseCurriculumProps {
   chapters?: any[]
-  orgslug?: string
-  courseuuid?: string
-}
-
-function cleanUuid(uuid?: string, prefix?: string) {
-  if (!uuid) return ''
-  return prefix ? uuid.replace(prefix, '') : uuid
 }
 
 function toModule(chapter: any): Module {
   return {
     id: chapter.id,
     name: chapter.name || '',
-    description: chapter.description || '',
     lessons: (chapter.activities || []).map((activity: any) => ({
       id: activity.id,
-      uuid: clearActivityUuid(activity.activity_uuid),
       name: activity.name || '',
-      duration:
-        typeof activity.extra_metadata?.duration === 'number'
-          ? activity.extra_metadata.duration
-          : typeof activity.details?.duration === 'number'
-            ? activity.details.duration
-            : undefined,
     })),
   }
-}
-
-function clearActivityUuid(uuid?: string) {
-  return cleanUuid(uuid, 'activity_')
 }
 
 // ── Sub-components ──
@@ -65,22 +41,11 @@ function ModuleCard({
   module,
   isOpen,
   onToggle,
-  orgslug,
-  courseuuid,
 }: {
   module: Module
   isOpen: boolean
   onToggle: () => void
-  orgslug: string
-  courseuuid: string
 }) {
-  const { t } = useTranslation()
-  const lessonCount = module.lessons.length
-  const totalMinutes = module.lessons.reduce(
-    (acc, lesson) => acc + (lesson.duration || 0),
-    0
-  )
-
   return (
     <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] overflow-hidden">
       {/* ── Header (always visible, clickable) ── */}
@@ -102,7 +67,7 @@ function ModuleCard({
         />
       </button>
 
-      {/* ── Expanded content ── */}
+      {/* ── Expanded content: the module's lesson titles, as plain stacked text ── */}
       <div
         className={cn(
           'grid transition-all duration-300 ease-in-out',
@@ -110,68 +75,29 @@ function ModuleCard({
         )}
       >
         <div className="overflow-hidden">
-          <div className="px-5 pb-5">
-          {/* Description */}
-          {module.description && (
-            <div className="mb-5">
-              <Text size="base" className="text-ui-fg-subtle leading-relaxed">
-                {module.description}
-              </Text>
-            </div>
-          )}
-
-          {/* Module info */}
-          <div className="flex items-center gap-2 mb-4">
-            <Text size="small" className="text-ui-fg-muted">
-              {t('course.page.lessons', { count: lessonCount })}
-            </Text>
-            {totalMinutes > 0 && (
-              <>
-                <span className="text-ui-fg-muted text-[10px]">&middot;</span>
-                <Text size="small" className="text-ui-fg-muted">
-                  {totalMinutes} min
-                </Text>
-              </>
-            )}
-          </div>
-
-          {/* Lessons */}
-          <div className="space-y-2">
+          <ul className="px-5 pb-4 pt-1">
             {module.lessons.map((lesson, idx) => (
-              <Link
+              <li
                 key={lesson.id ?? idx}
-                href={getUriWithOrg(
-                  orgslug,
-                  `/course/${courseuuid}/lesson-preview?activityid=${lesson.uuid}`
-                )}
-                prefetch={false}
-                className="flex items-center justify-between py-1.5 gap-3 rounded-md hover:bg-black/[0.02] transition-colors"
+                className="py-[3px] text-[13px] leading-relaxed text-ui-fg-base"
+                style={{ paddingInlineStart: '16px', textIndent: '-16px' }}
               >
-                <Text size="base" className="text-ui-fg-base truncate">
-                  {idx + 1}. {lesson.name}
-                </Text>
-                {lesson.duration ? (
-                  <Text size="small" className="text-ui-fg-muted shrink-0 ms-3">
-                    {lesson.duration} min
-                  </Text>
-                ) : null}
-              </Link>
+                <span className="text-[11px] font-medium tabular-nums text-ui-fg-muted">
+                  {idx + 1}.
+                </span>{' '}
+                {lesson.name}
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </div>
     </div>
-  </div>
   )
 }
 
 // ── Main component ──
 
-export default function CourseCurriculum({
-  chapters = [],
-  orgslug = '',
-  courseuuid = '',
-}: CourseCurriculumProps) {
+export default function CourseCurriculum({ chapters = [] }: CourseCurriculumProps) {
   const { t } = useTranslation()
   const [openIndex, setOpenIndex] = useState<number | null>(0)
 
@@ -198,8 +124,6 @@ export default function CourseCurriculum({
           <ModuleCard
             key={module.id ?? idx}
             module={module}
-            orgslug={orgslug}
-            courseuuid={courseuuid}
             isOpen={openIndex === idx}
             onToggle={() => setOpenIndex(openIndex === idx ? null : idx)}
           />

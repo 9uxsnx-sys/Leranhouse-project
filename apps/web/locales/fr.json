@@ -7017,13 +7017,16 @@
       "next": "Suivant",
       "mark_complete": "Marquer comme terminé",
       "mark_complete_error": "Impossible de marquer comme terminé",
+      "completed": "Terminé",
       "unsupported_activity": "Type d'activité non pris en charge",
       "no_activity_content": "Aucun contenu d'activité disponible",
       "course_not_found": "Cours introuvable",
       "course_not_found_description": "Ce cours n'existe peut-être pas ou vous n'y avez peut-être pas accès.",
       "failed_to_load": "Impossible de charger la leçon",
       "check_connection": "Vérifiez votre connexion et réessayez.",
-      "refresh_page": "Actualiser la page"
+      "refresh_page": "Actualiser la page",
+      "login_required": "Connexion requise",
+      "login_required_description": "Veuillez vous connecter pour suivre votre progression dans ce cours."
     }
   },
   "playground": {

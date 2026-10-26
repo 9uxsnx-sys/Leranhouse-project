@@ -20,12 +20,14 @@ def auto_install():
 
     db_session = Session(engine)
 
-    default_org = db_session.exec(
-        select(Organization).where(Organization.slug == 'default')
-    ).first()
+    # Only install when the database has no organization at all. Checking for
+    # the literal "default" slug used to create a second, empty organization
+    # whenever the first one had been renamed, which left the instance serving
+    # two orgs and routing most pages to the wrong one.
+    existing_org = db_session.exec(select(Organization).limit(1)).first()
 
-    if not default_org:
-        logger.info("No default organization found. Starting auto-installation 🏗️")
+    if not existing_org:
+        logger.info("No organization found. Starting auto-installation 🏗️")
         install(short=True)
     else:
         # Re-run the default-role upsert so existing installs pick up rights

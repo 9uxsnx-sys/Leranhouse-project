@@ -119,7 +119,7 @@ def _build_trail_read(
         for step in steps_by_run.get(tr.id, []):
             db_session.expunge(step)
             step_course = course_map.get(step.course_id) if step.course_id else None
-            step.data = dict(course=step_course)
+            step.data = dict(course=step_course.model_dump() if step_course else None)
             run.steps.append(step)
 
         trail_runs.append(run)

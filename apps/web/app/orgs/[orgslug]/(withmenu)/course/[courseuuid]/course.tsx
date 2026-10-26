@@ -454,11 +454,7 @@ const CourseClient = (props: any) => {
                   )}
 
                   {/* ── 5. COURSE CURRICULUM ── */}
-                  <CourseCurriculum
-                    chapters={course?.chapters || []}
-                    orgslug={orgslug}
-                    courseuuid={courseuuid}
-                  />
+                  <CourseCurriculum chapters={course?.chapters || []} />
 
                   {/* ── 5. COURSE REQUIREMENTS ── */}
                   {requirementsList.length > 0 && (
@@ -490,11 +486,6 @@ const CourseClient = (props: any) => {
                   ) : (
                     <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                       <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-4">{t('course.page.get_access_title')}</h3>
-                      <p className="text-sm text-gray-500 mb-2 leading-snug">
-                        {isPaidCourse
-                          ? t('course.page.purchase_hint')
-                          : t('course.page.add_hint')}
-                      </p>
                       {isPaidCourse && coursePrice !== null && coursePrice > 0 && (
                         <p className="text-2xl font-semibold text-gray-900 mb-4">
                           {coursePrice.toLocaleString()} <span className="text-sm font-normal text-gray-500">DZD</span>

@@ -102,6 +102,10 @@ class CollectionCourseRead(SQLModel):
     price_amount: Optional[int] = None
     price_currency: str = "DZD"
     lessons: int = 0
+    # Card metadata copied from the course so a member card can render the
+    # same "26 lessons · 6h 20m · Intermediate" row as the course listing.
+    duration: Optional[str] = None
+    difficulty: Optional[str] = None
     creation_date: str = ""
 
 

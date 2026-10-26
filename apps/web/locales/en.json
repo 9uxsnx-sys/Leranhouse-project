@@ -6958,13 +6958,16 @@
                                    "next":  "Next",
                                    "mark_complete":  "Mark as Complete",
                                    "mark_complete_error":  "Failed to mark as complete",
+                                   "completed":  "Completed",
                                    "unsupported_activity":  "Unsupported activity type",
                                    "no_activity_content":  "No activity content available",
                                    "course_not_found":  "Course not found",
                                    "course_not_found_description":  "This course may not exist or you may not have access to it.",
                                    "failed_to_load":  "Failed to load lesson",
                                    "check_connection":  "Please check your connection and try again.",
-                                   "refresh_page":  "Refresh Page"
+                                   "refresh_page":  "Refresh Page",
+                                   "login_required":  "Sign in required",
+                                   "login_required_description":  "Please sign in to track your progress in this course."
                                }
                },
     "podcast":  {

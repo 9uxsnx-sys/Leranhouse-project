@@ -93,8 +93,8 @@ const BreadcrumbNav = ({ orgslug }: { orgslug: string }) => {
   ]
 
   return (
-    <nav aria-label={t('common.aria.breadcrumb')}>
-      <ol className="text-ui-fg-muted txt-compact-small-plus flex select-none items-center">
+    <nav aria-label={t('common.aria.breadcrumb')} className="min-w-0">
+      <ol className="text-ui-fg-muted txt-compact-small-plus flex select-none items-center flex-nowrap min-w-0">
         {crumbs.map((crumb, index) => {
           const isFirst = index === 0
           const isLast = index === crumbs.length - 1
@@ -104,26 +104,37 @@ const BreadcrumbNav = ({ orgslug }: { orgslug: string }) => {
             <React.Fragment key={index}>
               {/* Mobile-only collapse: Home > ... > Current */}
               {isLast && crumbs.length > 2 && (
-                <li className="flex items-center lg:hidden">
+                <li className="flex items-center shrink-0 lg:hidden">
                   <span>...</span>
                   <span className="mx-2">
                     <TriangleRightMini className="rtl:rotate-180" />
                   </span>
                 </li>
               )}
-              <li className={`items-center ${isMiddle ? 'hidden lg:flex' : 'flex'}`}>
+              <li className={`min-w-0 items-center ${isMiddle ? 'hidden lg:flex' : 'flex'}`}>
                 {!isLast && crumb.href ? (
                   <Link
                     href={getUriWithOrg(orgslug, crumb.href)}
-                    className="transition-fg hover:text-ui-fg-subtle"
+                    title={crumb.label}
+                    className="truncate max-w-[110px] xl:max-w-[160px] transition-fg hover:text-ui-fg-subtle"
                   >
                     {crumb.label}
                   </Link>
                 ) : (
-                  <span aria-current={isLast ? 'page' : undefined}>{crumb.label}</span>
+                  <span
+                    aria-current={isLast ? 'page' : undefined}
+                    title={crumb.label}
+                    className={`truncate ${
+                      isLast
+                        ? 'max-w-[180px] xl:max-w-[280px] 2xl:max-w-[360px]'
+                        : 'max-w-[110px] xl:max-w-[160px]'
+                    }`}
+                  >
+                    {crumb.label}
+                  </span>
                 )}
                 {!isLast && (
-                  <span className="mx-2">
+                  <span className="mx-2 shrink-0">
                     <TriangleRightMini className="rtl:rotate-180" />
                   </span>
                 )}
@@ -253,7 +264,7 @@ export const OrgMenu = ({
   }
 
   // Pages that use a full-bleed layout (no footer/watermark)
-  const isFullBleedPage = pathname?.includes('copilot') || pathname?.includes('/courses') || pathname?.includes('/communities') || pathname?.includes('/podcasts') || pathname?.includes('/trail')
+  const isFullBleedPage = pathname?.includes('copilot') || pathname?.includes('/courses') || pathname?.includes('/communities') || pathname?.includes('/podcasts') || pathname?.includes('/collections') || pathname?.includes('/trail')
 
   // Focus mode: only render content, hide shell
   if (pathname?.includes('/activity/') && isFocusMode) {
@@ -278,8 +289,8 @@ export const OrgMenu = ({
         {/* Right column — shell.tsx (flex h-screen w-full flex-col overflow-auto) */}
         <div className="flex h-full w-full flex-col overflow-auto min-h-0">
           {/* Topbar — shell.tsx Topbar (grid w-full grid-cols-2 border-b p-3, canvas shows through) */}
-          <header className="grid w-full grid-cols-2 border-b p-3">
-            <div className="flex items-center gap-x-1.5">
+          <header className="grid w-full grid-cols-[minmax(0,1fr)_minmax(0,1fr)] border-b p-3">
+            <div className="flex min-w-0 items-center gap-x-1.5">
               {/* Mobile hamburger */}
               <IconButton
                 className="hidden max-lg:flex"

@@ -210,21 +210,22 @@ function CollectionsClient(props: CollectionsClientProps) {
       {/* Collection grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 content-start">
         {paginatedCollections.map((collection: any) => (
-          <CollectionCard
-            key={collection.collection_uuid}
-            id={collection.collection_uuid.replace('collection_', '')}
-            title={collection.name}
-            description={collection.description || ''}
-            courses={collection.courses || []}
-            org_uuid={org_uuid}
-            thumbnail_image={collection.thumbnail_image}
-            collection_uuid={collection.collection_uuid}
-            public={collection.public || false}
-            creation_date={collection.creation_date || collection.created_at || ''}
-            memberCount={collection.member_count}
-            owned={ownedUuids.has(collection.collection_uuid)}
-            href={`/orgs/${orgslug}/collection/${collection.collection_uuid.replace('collection_', '')}`}
-          />
+          <div key={collection.collection_uuid} className="relative group">
+            <CollectionCard
+              id={collection.collection_uuid.replace('collection_', '')}
+              title={collection.name}
+              description={collection.description || ''}
+              courses={collection.courses || []}
+              org_uuid={org_uuid}
+              thumbnail_image={collection.thumbnail_image}
+              collection_uuid={collection.collection_uuid}
+              public={collection.public || false}
+              creation_date={collection.creation_date || collection.created_at || ''}
+              memberCount={collection.member_count}
+              owned={ownedUuids.has(collection.collection_uuid)}
+              href={`/orgs/${orgslug}/collection/${collection.collection_uuid.replace('collection_', '')}`}
+            />
+          </div>
         ))}
 
         {/* Empty state — search or filter with no results */}

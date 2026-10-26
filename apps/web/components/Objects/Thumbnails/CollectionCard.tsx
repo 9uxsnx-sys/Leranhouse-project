@@ -54,7 +54,9 @@ export function CollectionCard({ id, title, description, courses, org_uuid, href
   // Derive difficulty from courses
   const difficulty = useMemo(() => {
     if (!courses || courses.length === 0) return null
-    const levels = courses.map((c: any) => c.difficulty || c.level || '').filter(Boolean)
+    const levels = courses
+      .map((c: any) => c.extra_metadata?.difficulty || c.difficulty || c.level || '')
+      .filter(Boolean)
     if (levels.length === 0) return null
     const counts: Record<string, number> = {}
     levels.forEach((l: string) => { counts[l] = (counts[l] || 0) + 1 })
