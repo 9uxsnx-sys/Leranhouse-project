@@ -224,7 +224,7 @@ function CourseOutlineSidebar({ currentActivityId, chapters, completedIds, onNav
                     return (
                       <div
                         key={act.activity_uuid || act.id}
-                        onClick={() => onNavigate?.(actId)}
+                        onClick={() => { onNavigate?.(actId); setIsOpen(false) }}
                         className="flex items-center gap-2.5 px-2 py-1.5 rounded text-sm cursor-pointer hover:bg-ui-bg-subtle"
                       >
                         {isCurrent ? (
@@ -572,6 +572,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
   const navigateTo = (act: any) => {
     if (!act) return
     setActiveActivityId(cleanId(act.activity_uuid))
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   // Auto-redirect to first real activity if current activityid doesn't match any
@@ -605,7 +606,9 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
   // Completion is manual — the learner clicks the "Mark Complete" button
   // in the footer. No auto-complete on scroll.
 
-  const [activeSection, setActiveSection] = useState('what-youll-learn')
+  const [activeSection, setActiveSection] = useState(
+    () => visibleSections.length > 0 ? visibleSections[0].id : 'lesson-content'
+  )
 
   useEffect(() => {
     const sectionIds = MOCK_SECTIONS.map(s => s.id)
@@ -650,7 +653,15 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
     if (sentinel) observer.observe(sentinel)
 
     return () => observer.disconnect()
-  }, [])
+  }, [renderedActivity])
+
+  // Reset active section when navigating to a new lesson, so the sidebar
+  // indicator always starts at the first visible section.
+  useEffect(() => {
+    if (visibleSections.length > 0) {
+      setActiveSection(visibleSections[0].id)
+    }
+  }, [renderedActivity])
 
   // Trail: Courses > course name > module > lesson. Registered here because the
   // route only carries the course UUID; the module and lesson are resolved from
@@ -677,7 +688,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
   // Wait for the session to resolve before rendering anything meaningful.
   if (sessionStatus === 'loading') {
     return (
-      <GeneralWrapperStyled>
+      <GeneralWrapperStyled className="pb-0">
         <PageLoading />
       </GeneralWrapperStyled>
     )
@@ -741,8 +752,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
   }
 
   return (
-    <GeneralWrapperStyled>
-      {/* ── PAGE TITLE ── */}
+    <GeneralWrapperStyled className="pb-0">
       <h1 className="text-3xl md:text-4xl font-semibold text-ui-fg-base leading-tight max-w-7xl mx-auto mt-4">
         {renderedActivity?.name || currentActivity?.name || t('lesson.preview.title')}
       </h1>
@@ -973,7 +983,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
           {/* ═══ RIGHT SIDEBAR ═══ */}
           <div className="w-full lg:w-72 xl:w-80 shrink-0">
             <div className="lg:sticky lg:top-8 space-y-4">
-              <CourseOutlineSidebar currentActivityId={activeActivityId} chapters={chapters} completedIds={completedIds} onNavigate={(id) => setActiveActivityId(id)} />
+              <CourseOutlineSidebar currentActivityId={activeActivityId} chapters={chapters} completedIds={completedIds} onNavigate={(id) => { setActiveActivityId(id); window.scrollTo({ top: 0, behavior: 'smooth' }) }} />
               <OnThisPageSidebar activeSection={activeSection} sections={visibleSections} />
             </div>
           </div>

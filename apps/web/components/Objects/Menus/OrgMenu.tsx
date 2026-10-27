@@ -39,7 +39,7 @@ import AuthenticatedClientElement from '@components/Security/AuthenticatedClient
 import { useJoinBannerVisible, JOIN_BANNER_HEIGHT } from '@components/Objects/Banners/OrgJoinBanner'
 import { useUserBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
 import { usePlan } from '@components/Hooks/usePlan'
-import Watermark from '@components/Objects/Watermark'
+
 import {
   Tooltip,
   TooltipContent,
@@ -148,36 +148,7 @@ const BreadcrumbNav = ({ orgslug }: { orgslug: string }) => {
 }
 
 function OrgFooter() {
-  const org = useOrg() as any
-  const footerText =
-    org?.config?.config?.customization?.general?.footer_text ||
-    org?.config?.config?.general?.footer_text ||
-    ''
-  const plan = usePlan()
-  const watermarkConfig =
-    org?.config?.config?.customization?.general?.watermark ??
-    org?.config?.config?.general?.watermark
-  const showWatermark = false
-
-  return (
-    <footer className="w-full py-0 mt-0">
-      <div className="flex flex-col items-center justify-center space-y-4">
-        {footerText && <p className="text-sm text-gray-500">{footerText}</p>}
-        {showWatermark && (
-          <Link href="https://learnhouse.app" target="_blank" rel="noopener noreferrer">
-            <Image
-              src="/lrn.svg"
-              alt="LearnHouse"
-              width={24}
-              height={24}
-              style={{ height: 'auto' }}
-              className="opacity-15 hover:opacity-40 transition-opacity duration-300 cursor-pointer"
-            />
-          </Link>
-        )}
-      </div>
-    </footer>
-  )
+  return null
 }
 
 export const OrgMenu = ({
@@ -418,7 +389,6 @@ export const OrgMenu = ({
                 {children}
               </div>
               {!isFullBleedPage && <OrgFooter />}
-              {!isFullBleedPage && <Watermark />}
             </div>
           </main>
         </div>

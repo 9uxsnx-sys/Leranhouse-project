@@ -37,8 +37,8 @@ export default function CourseLearnings({
         </div>
         <ul className="mt-3 space-y-2 ps-3">
           {items.map((item, idx) => (
-            <li key={idx} className="flex items-start gap-4">
-              <span className="text-ui-fg-muted shrink-0">&rsaquo;</span>
+            <li key={idx} className="flex items-start gap-3">
+              <span className="mt-[7px] block w-1.5 h-1.5 rounded-full bg-ui-fg-muted shrink-0" />
               <Text size="base" className="text-[15px]">{item}</Text>
             </li>
           ))}

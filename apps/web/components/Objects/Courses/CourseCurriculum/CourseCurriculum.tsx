@@ -79,12 +79,9 @@ function ModuleCard({
             {module.lessons.map((lesson, idx) => (
               <li
                 key={lesson.id ?? idx}
-                className="py-[3px] text-[13px] leading-relaxed text-ui-fg-base"
-                style={{ paddingInlineStart: '16px', textIndent: '-16px' }}
+                className="flex items-start gap-2 py-[3px] text-[13px] leading-relaxed text-ui-fg-base"
               >
-                <span className="text-[11px] font-medium tabular-nums text-ui-fg-muted">
-                  {idx + 1}.
-                </span>{' '}
+                <span className="mt-[7px] block w-1.5 h-1.5 rounded-full bg-ui-fg-muted shrink-0" />
                 {lesson.name}
               </li>
             ))}
