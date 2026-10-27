@@ -87,7 +87,7 @@ The 15 supporting courses carry every landing page field but no chapters, so the
 
 | Table | Rows | What it is |
 |---|---|---|
-| `collection` | 18 | 16 published plus 2 drafts. Each row carries `extra_metadata` with `target_audience` (`{ for: string[], not_for: string[] }`) |
+| `collection` | 18 | 16 published plus 2 drafts. Each row carries `extra_metadata` with `target_audience` (`{ for: string[], not_for: string[] }`). The flagship collection is `PAID` at **12,000 DZD**; the rest are `PUBLIC` |
 | `collectioncourse` | 70 | 3 to 6 items per bundle |
 | `collectionuser` | 80 | Owned badges appear in the grid |
 | `collection_translation` | 12 | 4 collections times 3 languages |

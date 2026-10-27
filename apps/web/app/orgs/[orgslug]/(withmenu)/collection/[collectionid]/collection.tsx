@@ -465,13 +465,10 @@ const CollectionClient = ({
 
                 {isOwned ? (
                   <>
-                    <p className="text-sm text-gray-500 mb-4 leading-snug">
-                      {t('collections.owned_description')}
-                    </p>
                     {hasCourseMembers ? (
                       <Link href={getUriWithOrg(orgslug, '/trail')}>
                         <Button variant="primary" size="large" className="w-full">
-                          {t('collections.go_to_progress')}
+                          Go to Courses
                         </Button>
                       </Link>
                     ) : (
@@ -493,11 +490,6 @@ const CollectionClient = ({
                   </>
                 ) : (
                   <>
-                    <p className="text-sm text-gray-500 mb-2 leading-snug">
-                      {isPaid
-                        ? t('collections.get_access_paid')
-                        : t('collections.get_access_free')}
-                    </p>
                     {isPaid && price !== null && price > 0 && (
                       <p className="text-2xl font-semibold text-gray-900 mb-4">
                         {price.toLocaleString()}{' '}
@@ -516,10 +508,8 @@ const CollectionClient = ({
                           <Loader2 size={16} className="animate-spin" />
                           {t('collections.processing')}
                         </span>
-                      ) : isPaid ? (
-                        t('collections.get_access')
                       ) : (
-                        t('collections.explore_courses')
+                        t('collections.get_access')
                       )}
                     </Button>
                   </>

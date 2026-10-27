@@ -1807,7 +1807,7 @@ COURSE_TRANSLATIONS = {
 }
 
 COLLECTIONS = [
-    ("Backend Starter Pack", "Start with the backend course, then the SQL and API courses that sit next to it. Four courses in the order we teach them, with the same project running through all of them. Buy once and keep access to every update.", "PUBLIC", None),
+    ("Backend Starter Pack", "Start with the backend course, then the SQL and API courses that sit next to it. Four courses in the order we teach them, with the same project running through all of them. Buy once and keep access to every update.", "PAID", 12000),
     ("Front End Track", "React, mobile and the API behind them. Buy the three together and save a little. The courses share one project, so the screens you build in the first course end up with real data from the last one.", "PAID", 12000),
     ("Data Track", "Pandas and SQL with the same messy shop data, so the two courses reinforce each other. You clean the tables in one course and query them in the other. Ends with one report you can show in an interview.", "PAID", 9000),
     ("Freelance Bundle", "Pricing, contracts and the design skills clients actually pay for. Written for people who already know the tools and now have to send an invoice without apologising for it.", "PAID", 8000),
