@@ -23,6 +23,8 @@ import toast from 'react-hot-toast'
 import PageLoading from '@components/Objects/Loaders/PageLoading'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
 import CourseLearnings from '@components/Objects/Courses/CourseLearnings/CourseLearnings'
+import CourseRequirements from '@components/Objects/Courses/CourseRequirements/CourseRequirements'
+import CourseAudience from '@components/Objects/Courses/CourseAudience/CourseAudience'
 import CourseShare from '@components/Objects/Courses/CourseShare/CourseShare'
 import { CourseCard } from '@components/Objects/Thumbnails/CourseCard'
 import { EmptyState } from '@components/Analytics/Feedback'
@@ -50,6 +52,25 @@ const removeCoursePrefix = (uuid: string) => uuid.replace('course_', '')
 const removePodcastPrefix = (uuid: string) => uuid.replace('podcast_', '')
 const memberUuid = (member: any) => member?.resource_uuid || member?.course_uuid || ''
 const isPodcastMember = (member: any) => member?.resource_type === 'podcast'
+
+/**
+ * Requirements are stored as a JSON array by the dashboard, but older courses
+ * kept a newline-separated string. Support both so nothing renders as raw JSON.
+ */
+function parseRequirements(raw: any): string[] {
+  if (!raw) return []
+  try {
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed)) {
+      return parsed
+        .map((item: any) => (typeof item === 'string' ? item : item?.text))
+        .filter((text: any) => typeof text === 'string' && text.trim().length > 0)
+    }
+  } catch {
+    // plain-text fallback below
+  }
+  return String(raw).split('\n').filter((line: string) => line.trim())
+}
 
 const CollectionClient = ({
   orgslug,
@@ -140,6 +161,8 @@ const CollectionClient = ({
   const isPaid = collection?.access_type === 'paid'
   const price =
     typeof collection?.price_amount === 'number' ? collection.price_amount : null
+  const requirementsList = parseRequirements(collection?.extra_metadata?.requirements)
+  const audienceData = collection?.extra_metadata?.target_audience as { for?: string[]; not_for?: string[] } | undefined
 
   const [isStarting, setIsStarting] = useState(false)
 
@@ -316,6 +339,13 @@ const CollectionClient = ({
               <CourseLearnings items={learnings.map((item: any) => item.text || item)} />
             )}
 
+            {audienceData && (
+              <CourseAudience
+                forItems={audienceData.for || []}
+                notForItems={audienceData.not_for || []}
+              />
+            )}
+
             {collection.about && (
               <div>
                 <Heading level="h1" className="!text-2xl mb-4">
@@ -323,6 +353,7 @@ const CollectionClient = ({
                 </Heading>
                 <div dir="auto" className="space-y-4">
                   {collection.about
+                    .replace(/\r\n/g, '\n')
                     .split('\n\n')
                     .filter((paragraph: string) => paragraph.trim())
                     .map((paragraph: string, index: number) => (
@@ -352,7 +383,7 @@ const CollectionClient = ({
                 />
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  {members.map((course: any) => {
+                  {members.map((course: any, index: number) => {
                     const uuid = memberUuid(course)
                     const podcast = isPodcastMember(course)
                     const imageUrl = course.thumbnail_image
@@ -369,39 +400,54 @@ const CollectionClient = ({
                           )
                       : ''
                     return (
-                      <CourseCard
-                        key={uuid}
-                        id={podcast ? removePodcastPrefix(uuid) : removeCoursePrefix(uuid)}
-                        title={course.name}
-                        description={course.description || ''}
-                        image={imageUrl}
-                        lessons={course.lessons ?? course.extra_metadata?.lessons_count ?? 0}
-                        lessonsLabel={
-                          podcast ? t('collections.episodes') : t('collections.lessons')
-                        }
-                        duration={
-                          podcast
-                            ? t('collections.self_paced')
-                            : course.duration ||
-                              course.extra_metadata?.duration ||
-                              t('collections.self_paced')
-                        }
-                        difficulty={
-                          podcast
-                            ? t('collections.all_levels')
-                            : course.difficulty ||
-                              course.extra_metadata?.difficulty ||
-                              t('collections.all_levels')
-                        }
-                        href={getUriWithOrg(
-                          orgslug,
-                          podcast
-                            ? `/podcast/${removePodcastPrefix(uuid)}`
-                            : `/course/${removeCoursePrefix(uuid)}`
+                      <div key={uuid} className="relative">
+                        <div className="absolute -top-2.5 -left-2.5 z-10 w-8 h-8 rounded-full bg-neutral-900 text-white text-xs font-bold flex items-center justify-center shadow-md ring-2 ring-white">
+                          {index + 1}
+                        </div>
+                        {index === 0 && (
+                          <div className="absolute -top-2.5 right-2 z-10 px-2.5 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-semibold shadow-sm">
+                            Start Here
+                          </div>
                         )}
-                      />
+                        <CourseCard
+                          id={podcast ? removePodcastPrefix(uuid) : removeCoursePrefix(uuid)}
+                          title={course.name}
+                          description={course.description || ''}
+                          image={imageUrl}
+                          lessons={course.lessons ?? course.extra_metadata?.lessons_count ?? 0}
+                          lessonsLabel={
+                            podcast ? t('collections.episodes') : t('collections.lessons')
+                          }
+                          duration={
+                            podcast
+                              ? t('collections.self_paced')
+                              : course.duration ||
+                                course.extra_metadata?.duration ||
+                                t('collections.self_paced')
+                          }
+                          difficulty={
+                            podcast
+                              ? t('collections.all_levels')
+                              : course.difficulty ||
+                                course.extra_metadata?.difficulty ||
+                                t('collections.all_levels')
+                          }
+                          href={getUriWithOrg(
+                            orgslug,
+                            podcast
+                              ? `/podcast/${removePodcastPrefix(uuid)}`
+                              : `/course/${removeCoursePrefix(uuid)}`
+                          )}
+                        />
+                      </div>
                     )
                   })}
+                </div>
+              )}
+
+              {requirementsList.length > 0 && (
+                <div className="mt-8">
+                  <CourseRequirements items={requirementsList} />
                 </div>
               )}
             </div>
@@ -522,6 +568,13 @@ const CollectionClient = ({
                     </span>
                   </div>
                 </div>
+              </div>
+
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('course.page.community_title')}</h3>
+                <p className="text-sm text-gray-600">
+                  {t('course.page.community_description')}
+                </p>
               </div>
 
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">

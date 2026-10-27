@@ -73,6 +73,12 @@ The organization always comes from the query string, never from the body.
   "access_type": "public",
   "price_amount": null,
   "price_currency": "DZD",
+  "extra_metadata": {
+    "target_audience": {
+      "for": ["Designers who want a structured path", "Career switchers"],
+      "not_for": ["Complete beginners to design"]
+    }
+  },
   "seo": {
     "title": "UI/UX Foundations bundle",
     "description": "Learn UI/UX foundations in one bundle.",
@@ -339,7 +345,7 @@ Thin wrapper around `DELETE /resources`. Returns the updated `CollectionRead`. A
 PUT /api/v1/collections/{collection_uuid}
 ```
 
-Partial update: only fields present in the JSON body are applied (used for name, description, about, learnings, tags, `seo`, `access_type`, `price_amount`, `published`, and full membership replacement via `courses`).
+Partial update: only fields present in the JSON body are applied (used for name, description, about, learnings, tags, `seo`, `extra_metadata`, `access_type`, `price_amount`, `published`, and full membership replacement via `courses`).
 
 - Omitting `courses` keeps the current membership untouched.
 - Sending `courses` replaces the whole membership and re-validates every course. Podcast members are not affected unless they are re-added through the `resources` endpoints.

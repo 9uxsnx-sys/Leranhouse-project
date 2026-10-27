@@ -1198,6 +1198,15 @@ COURSE_META = {
             "A code editor you already like — VS Code, PyCharm or Neovim, we genuinely do not care which",
             "About one hour a day for six weeks, on a laptop you are allowed to install packages on",
         ],
+        "audience_for": [
+            "Python beginners who have written a few scripts and want to build real backend projects",
+            "Self-taught developers looking for a structured path through backend engineering",
+            "Career switchers moving into web development with some coding experience",
+        ],
+        "audience_not_for": [
+            "Experienced backend engineers who already ship APIs in production",
+            "Complete programming beginners — take an intro to Python course first",
+        ],
         "instructor_title": "Founder and backend developer",
         "instructor_bio": "Builds APIs in Python and Postgres. Has broken a database in production twice and learned more from that than from any tutorial.",
     },

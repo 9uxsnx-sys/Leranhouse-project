@@ -27,6 +27,9 @@ components/
 │   ├── Activities/
 │   ├── Breadcrumbs/      # Learner breadcrumb context + trail resolver
 │   ├── Courses/
+│   │   ├── CourseAudience/   # "Who This Is For" section with check/cross indicators
+│   │   ├── CourseLearnings/  # "What You'll Learn" section (bullet list)
+│   │   └── CourseRequirements/ # Requirements section (bullet list)
 │   ├── Communities/
 │   ├── Menus/
 │   ├── Modals/

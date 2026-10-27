@@ -33,6 +33,7 @@ class CollectionBase(SQLModel):
     price_amount: Optional[int] = None
     price_currency: str = Field(default="DZD")
     seo: Optional[dict] = Field(default=None, sa_column=Column(JSONB, nullable=True))
+    extra_metadata: Optional[dict] = Field(default=None, sa_column=Column(JSONB, nullable=True))
 
 
 class Collection(CollectionBase, table=True):
@@ -71,6 +72,7 @@ class CollectionUpdate(SQLModel):
     price_amount: Optional[int] = None
     price_currency: Optional[str] = None
     seo: Optional[dict] = None
+    extra_metadata: Optional[dict] = None
     courses: Optional[list[int]] = None
 
 

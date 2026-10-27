@@ -116,7 +116,19 @@ GET /api/v1/courses/{course_uuid}
   "thumbnail_video": "",
   "thumbnail_type": "IMAGE",
   "banner_image": "",
-  "extra_metadata": {},
+  "extra_metadata": {
+    "difficulty": "Beginner",
+    "duration": "8 weeks",
+    "requirements": "Basic Python knowledge",
+    "video_hours": 12,
+    "resources_count": 8,
+    "has_certificate": true,
+    "instructor": { "name": "John Doe", "bio": "..." },
+    "target_audience": {
+      "for": ["Python beginners who want to build real projects", "Self-taught developers"],
+      "not_for": ["Experienced backend engineers", "Complete programming beginners"]
+    }
+  },
   "org_id": 1,
   "created_at": "2026-09-20T10:00:00Z",
   "updated_at": "2026-09-22T15:30:00Z"
@@ -227,7 +239,7 @@ POST /api/v1/courses/{org_id}
 | `thumbnail_type` | string | No | `"IMAGE"`, `"VIDEO"`, or `"BOTH"` |
 | `thumbnail_image` | string | No | Card cover image URL |
 | `banner_image` | string | No | Banner image URL |
-| `extra_metadata` | string (JSON) | No | Arbitrary JSON metadata string |
+| `extra_metadata` | string (JSON) | No | Arbitrary JSON metadata string. Supports `difficulty`, `duration`, `requirements`, `video_hours`, `resources_count`, `has_certificate`, `instructor`, and `target_audience` (`{ for: string[], not_for: string[] }`) |
 
 ### Example Request
 
@@ -685,6 +697,6 @@ Removes the locale row; subsequent reads fall back to the source locale with `is
 | `thumbnail_video` | string | Video thumbnail URL |
 | `thumbnail_type` | string | `IMAGE`, `VIDEO`, or `BOTH` |
 | `banner_image` | string | Hero banner image URL (course detail page) |
-| `extra_metadata` | JSON | Arbitrary metadata |
+| `extra_metadata` | JSON | Flexible metadata including `difficulty`, `duration`, `requirements` (display text), `video_hours`, `resources_count`, `has_certificate`, `instructor` (object), and `target_audience` (`{ for: string[], not_for: string[] }` — drives the "Who This Is For" section) |
 | `created_at` | datetime | Creation timestamp |
 | `updated_at` | datetime | Last update timestamp |

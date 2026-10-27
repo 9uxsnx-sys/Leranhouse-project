@@ -20,11 +20,14 @@ Cards render in the language currently selected in the platform switcher. Course
 
 Clicking a course opens its detail page with:
 - Full course description
-- What you'll learn and requirements sections
-- About this course
-- Module and lesson list (locked until purchase)
+- What you'll learn section
+- Who This Is For section with check (for you) and cross (not for you) indicators
+- About this course section
+- Course curriculum (expandable chapters with activities)
+- Requirements section
 - Instructor information
 - Purchase button
+- Sidebar (in order): Progress bar with **Continue Learning** button, **This Course Includes** stats card, **Community** card with link to the course's community, **Updates** card with recent announcements
 
 If a course only exists in another language, a hint above the title says which language it is shown in.
 

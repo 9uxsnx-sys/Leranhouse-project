@@ -20,9 +20,12 @@ Selecting a card opens the collection page:
 
 - Banner, title, description, and tags
 - `N items · M lessons · K episodes` plus an ownership badge when the learner owns the bundle
-- **What you'll learn** and **About this collection**
-- **What is included**: every member course and podcast as a standard card (podcasts show their episode count)
-- Sidebar with the bundle price and a **Get access** button. On a public bundle, pressing it claims the bundle: the learner is added to the dashboard Access roster and the bundle enters their inventory, with a confirmation toast and the sidebar switching to **Your bundle**. On a paid bundle it starts checkout.
+- **What you'll learn** section
+- **Who This Is For** section with check (for you) and cross (not for you) indicators
+- **About this collection** section
+- **Requirements** section (prerequisites and what you need to get started)
+- **What is included**: every member course and podcast as a standard card (podcasts show their episode count). Courses display numbered step badges (1, 2, 3...) as a learning path, with the first card showing a **Start Here** badge
+- Sidebar (in order): bundle price and **Get access** button, **This bundle includes** stats card, **Community** card with link to the collection's community, **Updates** card with recent announcements. On a public bundle, pressing **Get access** claims the bundle: the learner is added to the dashboard Access roster and the bundle enters their inventory, with a confirmation toast and the sidebar switching to **Your bundle**. On a paid bundle it starts checkout.
 
 ## Buying a Bundle
 

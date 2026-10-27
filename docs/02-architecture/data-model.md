@@ -65,7 +65,12 @@ Course
 - **Key fields**: name, description, difficulty, thumbnail_image, banner_image, thumbnail_video, price, access_type
 - **Access types**: `public`, `users_only`, `paid` (future)
 - **Relationships**: belongs to Organization, has many Chapters, Contributors
-- **Metadata**: extra_metadata JSONB for flexible attributes
+- **Metadata**: extra_metadata JSONB stores flexible attributes including:
+  - `difficulty`, `duration`, `requirements`: display-text keys for the course page
+  - `video_hours`, `resources_count`, `has_certificate`: course stats
+  - `instructor`: instructor information block
+  - `target_audience`: `{ for: string[], not_for: string[] }` — drives the "Who This Is For" section
+  - `translations[locale]`: chapter/activity content per locale
 
 ### Chapter (Module)
 
@@ -115,7 +120,7 @@ Course
 ### Collection
 
 - **Represents**: A sellable bundle of courses and podcasts, with the same editorial surface as a course
-- **Key fields**: name, description, about, learnings, tags, `thumbnail_type`, `thumbnail_image`, `thumbnail_video`, `banner_image`, `public`, `published`, `access_type` (`public` / `users_only` / `paid`), `price_amount`, `price_currency`, `seo` (JSONB), `collection_uuid`
+- **Key fields**: name, description, about, learnings, tags, `thumbnail_type`, `thumbnail_image`, `thumbnail_video`, `banner_image`, `public`, `published`, `access_type` (`public` / `users_only` / `paid`), `price_amount`, `price_currency`, `seo` (JSONB), `extra_metadata` (JSONB), `collection_uuid`
 - **Relationships**: belongs to Organization, has many members (through `collectioncourse`, cascade on delete) via polymorphic `resource_type` (`course` / `podcast`) + `resource_uuid`; the legacy nullable `course_id` is kept in sync for course members. Learner inventory claims live in `collectionuser` (`collection_id`, `user_id`, `org_id`, cascade on delete), mirroring the course `TrailRun` inventory without progress tracking.
 - **Constraints**: no `users_only` member resources; published bundles only contain published resources; paid bundles require a positive price and at least one member
 - **Purchase**: checkout snapshots every member UUID in `price_snapshot.resources` (and course-only members in `price_snapshot.courses`); the Chargily webhook grants one entitlement per member, plus one `TrailRun` per course member (podcasts are entitlement-only)

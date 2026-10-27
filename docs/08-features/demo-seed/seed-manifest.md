@@ -60,7 +60,7 @@ Roughly **24,000 rows** in total.
 
 | Table | Rows | What it is |
 |---|---|---|
-| `course` | **19** | 16 published plus 3 drafts. Every row carries `extra_metadata`: difficulty, duration, video hours, resources, certificate flag, requirements, instructor and lesson count, which is what the cards and the course page read |
+| `course` | **19** | 16 published plus 3 drafts. Every row carries `extra_metadata`: difficulty, duration, video hours, resources, certificate flag, requirements, instructor, lesson count, and `target_audience` (`{ for: string[], not_for: string[] }` for the "Who This Is For" section), which is what the cards and the course page read |
 | `chapter` + `coursechapter` | 7 + 7 | Intro chapter plus 6 modules, flagship only |
 | `chapteractivity` | 26 | Flagship only: 2 intro lessons plus 6 modules of 4 lessons |
 | `activity` | 26 | 22 video lessons and 4 assignment activities |
@@ -87,7 +87,7 @@ The 15 supporting courses carry every landing page field but no chapters, so the
 
 | Table | Rows | What it is |
 |---|---|---|
-| `collection` | 18 | 16 published plus 2 drafts |
+| `collection` | 18 | 16 published plus 2 drafts. Each row carries `extra_metadata` with `target_audience` (`{ for: string[], not_for: string[] }`) |
 | `collectioncourse` | 70 | 3 to 6 items per bundle |
 | `collectionuser` | 80 | Owned badges appear in the grid |
 | `collection_translation` | 12 | 4 collections times 3 languages |

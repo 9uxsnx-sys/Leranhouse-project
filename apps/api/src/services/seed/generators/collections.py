@@ -57,13 +57,83 @@ def create_collections(ctx: SeedContext) -> None:
                 for position, (text, emoji) in enumerate(COLLECTION_LEARNINGS)
             ]
         )
+        is_flagship = index == 0
+        extra_metadata = (
+            {
+                "requirements": json.dumps([
+                    {"text": "Python basics: functions, lists, dictionaries — enough to write and run a small script"},
+                    {"text": "A computer with a stable internet connection"},
+                    {"text": "Willingness to read error messages out loud"},
+                    {"text": "No backend or Docker experience required — we start from zero"},
+                ]),
+                "difficulty": "Intermediate",
+                "duration": "42h",
+                "lessons_count": 0,
+                "video_hours": 28,
+                "resources_count": 12,
+                "has_certificate": True,
+                "target_audience": {
+                    "for": [
+                        "Python beginners who have written a few scripts and want to build real backend projects",
+                        "Self-taught developers looking for a structured path through backend engineering",
+                        "Career switchers moving into web development with some coding experience",
+                    ],
+                    "not_for": [
+                        "Experienced backend engineers who already ship APIs in production",
+                        "Complete programming beginners — take an intro to Python first",
+                    ],
+                },
+            }
+            if is_flagship
+            else {
+                "requirements": json.dumps([
+                    {"text": "Basic computer skills and a stable internet connection"},
+                    {"text": "A desire to learn something new"},
+                ]),
+                "target_audience": {
+                    "for": [
+                        "Learners who want a curated path instead of picking random courses",
+                        "Students looking to save money compared to buying courses individually",
+                    ],
+                    "not_for": [
+                        "Learners who only need a single course from the bundle",
+                    ],
+                },
+            }
+        )
         collection = Collection(
             name=name,
             public=True,
             description=description,
             org_id=ctx.org_id,
             collection_uuid=collection_uuid,
+            extra_metadata=extra_metadata,
             about=(
+                "This bundle exists because people kept asking which course to start with and in what order. "
+                "We designed it as a single path through the four courses that matter most for backend work, "
+                "with the same project running through all of them so you never have to start from scratch twice.\n\n"
+                "The flagship course, Backend Engineering with Python, is the first and longest. It takes you from "
+                "an empty folder to a running API with a real database, authentication, tests and deployment. "
+                "The three courses that follow pick up where it leaves off. SQL That Answers Real Questions teaches "
+                "you to query that database without guessing, and Backend APIs with FastAPI adds endpoints, "
+                "middleware and the kind of error handling that survives a production deploy. The fourth course, "
+                "Python for Everyday Automation, is lighter and works as a breather between the heavy weeks.\n\n"
+                "We arranged the four courses in the order we teach them internally, which means each one assumes "
+                "you finished the previous one. The SQL course queries the database you built in the flagship. "
+                "The API course extends the same codebase. If you skip ahead, the exercises still work, but the "
+                "context of the project file will not be as clear as it should be. Stick to the order for the "
+                "first pass, then come back to any course individually later.\n\n"
+                "Buy once and keep access to every update. We add new lessons to these courses as we record them, "
+                "and the bundle price never changes after you purchase. If you already own one of the courses, "
+                "the bundle price adjusts automatically so you never pay twice for the same content. The community "
+                "channel stays open as long as you need it, and most people who finish the bundle stay to review "
+                "each other's work long after.\n\n"
+                "You need Python basics before you start: functions, lists, dictionaries, and the willingness to "
+                "read an error message out loud. You do not need backend experience, Docker or a cloud account. "
+                "If you have written a small script and were not entirely sure why it worked, you are exactly "
+                "who this bundle is for. The tools are FastAPI, Postgres, SQLModel and pytest, all of which you "
+                "will meet in most backend jobs around here."
+            ) if is_flagship else (
                 "A bundle we put together because people kept asking which courses to take first. "
                 "Start at the top and work down, or jump to the part you need."
             ),

@@ -87,6 +87,10 @@ def create_courses(ctx: SeedContext) -> None:
                 "title": meta.get("instructor_title", "Instructor"),
                 "bio": meta.get("instructor_bio", ""),
             },
+            "target_audience": {
+                "for": meta.get("audience_for", []),
+                "not_for": meta.get("audience_not_for", []),
+            },
             "lessons_count": meta.get("lessons_count", 0),
         }
 

@@ -27,6 +27,7 @@ import CourseShare from '@components/Objects/Courses/CourseShare/CourseShare'
 import CourseLearnings from '@components/Objects/Courses/CourseLearnings/CourseLearnings'
 import CourseCurriculum from '@components/Objects/Courses/CourseCurriculum/CourseCurriculum'
 import CourseRequirements from '@components/Objects/Courses/CourseRequirements/CourseRequirements'
+import CourseAudience from '@components/Objects/Courses/CourseAudience/CourseAudience'
 import { Heading } from '@/components/ui/heading'
 import { Text } from '@/components/ui/text'
 import { Badge } from '@/components/ui/badge'
@@ -153,6 +154,7 @@ const CourseClient = (props: any) => {
   const progressPercent = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0
   const instructorData = meta.instructor?.name ? meta.instructor : null
   const requirementsList = parseRequirements(meta.requirements)
+  const audienceData = meta.target_audience as { for?: string[]; not_for?: string[] } | undefined
 
   const [isStarting, setIsStarting] = useState(false)
 
@@ -439,12 +441,20 @@ const CourseClient = (props: any) => {
                     <CourseLearnings items={learnings.map((l: any) => l.text || l)} />
                   )}
 
-                  {/* ── 4. ABOUT THIS COURSE ── */}
+                  {/* ── 4. WHO THIS IS FOR ── */}
+                  {audienceData && (
+                    <CourseAudience
+                      forItems={audienceData.for || []}
+                      notForItems={audienceData.not_for || []}
+                    />
+                  )}
+
+                  {/* ── 5. ABOUT THIS COURSE ── */}
                   {course?.about && (
                     <div>
                       <Heading level="h1" className="!text-2xl mb-4">{t('course.page.about_title')}</Heading>
                       <div dir="auto" className="space-y-4">
-                        {course.about.split('\n\n').filter((p: string) => p.trim()).map((paragraph: string, idx: number) => (
+                        {course.about.replace(/\r\n/g, '\n').split('\n\n').filter((p: string) => p.trim()).map((paragraph: string, idx: number) => (
                           <Text key={idx} size="base" className="text-ui-fg-subtle leading-relaxed block">
                             {paragraph.trim()}
                           </Text>
@@ -453,10 +463,10 @@ const CourseClient = (props: any) => {
                     </div>
                   )}
 
-                  {/* ── 5. COURSE CURRICULUM ── */}
+                  {/* ── 6. COURSE CURRICULUM ── */}
                   <CourseCurriculum chapters={course?.chapters || []} />
 
-                  {/* ── 5. COURSE REQUIREMENTS ── */}
+                  {/* ── 7. COURSE REQUIREMENTS ── */}
                   {requirementsList.length > 0 && (
                     <CourseRequirements items={requirementsList} />
                   )}
@@ -535,7 +545,15 @@ const CourseClient = (props: any) => {
                     </div>
                   </div>
 
-                  {/* ── SIDEBAR 3: Updates ── */}
+                  {/* ── SIDEBAR 3: Community ── */}
+                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('course.page.community_title')}</h3>
+                    <p className="text-sm text-gray-600">
+                      {t('course.page.community_description')}
+                    </p>
+                  </div>
+
+                  {/* ── SIDEBAR 4: Updates ── */}
                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                     <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('course.page.updates_title')}</h3>
                     <div className="flex items-center gap-3">
@@ -548,14 +566,6 @@ const CourseClient = (props: any) => {
                         })}
                       </span>
                     </div>
-                  </div>
-
-                  {/* ── SIDEBAR 4: Community ── */}
-                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('course.page.community_title')}</h3>
-                    <p className="text-sm text-gray-600">
-                      {t('course.page.community_description')}
-                    </p>
                   </div>
 
                 </div>

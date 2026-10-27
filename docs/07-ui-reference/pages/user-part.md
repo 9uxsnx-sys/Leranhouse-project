@@ -83,12 +83,15 @@ Defined in `apps/web/components/Objects/Menus/UserLeftMenu.tsx`. The sidebar is 
     - Stats badges: Lessons count, duration, difficulty level
     - Share button
     - "What You'll Learn" section
+    - "Who This Is For" section (check and cross indicators for target audience)
     - "About This Course" description
     - Course curriculum (expandable chapters with activities)
     - Requirements section
   - **Sidebar** (right):
     - Progress bar with "Continue Learning" button
     - "This Course Includes" stats (video hours, lessons, resources, certificate)
+    - Community card (link to the course's community)
+    - Updates card (recent announcements)
 - **Error states**: 403 "No permission" page and generic load error with back link.
 - **Analytics**: Tracks `course_view` event on mount.
 - **Mobile**: `CourseActionsMobile` component replaces the sidebar on small screens.
@@ -263,7 +266,7 @@ Defined in `apps/web/components/Objects/Modals/SearchModal.tsx`. A command-palet
 - **Toolbar**: `ActionRow` + `ActionRowSearch` filtering by name and description (accent-insensitive), with a live result count.
 - **Collection grid**: 1–4 responsive columns of `CollectionCard`; the card prefers the collection's own cover and falls back to the first member course's cover. Paginated client-side at 8 per page.
 - **Empty states**: separate copy for "no collections yet" and "no search results".
-- **Collection detail**: `/orgs/[orgslug]/collection/[collectionid]` — course-page parity layout with hero banner (collection banner → cover → placeholder), title, stats badges (`N courses`, `M lessons`, owned badge), `CourseShare`, learnings, about, and a **What is included** grid of `CourseCard`s. The sidebar shows the bundle price and **Get access**, which starts a collection checkout; owned bundles link back to Progress instead.
+- **Collection detail**: `/orgs/[orgslug]/collection/[collectionid]` — course-page parity layout with hero banner (collection banner → cover → placeholder), title, stats badges (`N courses`, `M lessons`, owned badge), `CourseShare`, learnings, **Who This Is For** section (check and cross indicators), about, **Requirements** section, and a **What is included** grid of `CourseCard`s with numbered step badges (1, 2, 3...) as a learning path (first card shows **Start Here** badge). The sidebar shows the bundle price and **Get access** (which starts a collection checkout; owned bundles link to Progress instead), **This bundle includes** stats card, **Community** card, and **Updates** card.
 
 ### Dashboard Collections
 

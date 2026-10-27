@@ -81,7 +81,7 @@ Two existing defects must be fixed as part of this work:
 | `price_amount` | ✅ | integer DZD |
 | `price_currency` | ✅ | default `DZD` |
 | `seo` (JSONB) | ✅ | Phase 7 — course-parity SEO tab |
-| `extra_metadata` | ❌ | collection stats are computed from members |
+| `extra_metadata` | ✅ | stores `target_audience` (`{ for: string[], not_for: string[] }`) for the "Who This Is For" section; collection stats are computed from members |
 
 Deliberately excluded: contributors, certifications, analytics, `open_to_contributors`.
 
@@ -280,11 +280,13 @@ Course page → collection page mapping:
 | What you'll learn | same (`learnings`) |
 | About | same (`about`) |
 | Course curriculum | **replaced** by "What's included" — `CourseCard` list |
-| Requirements | omitted |
+| Requirements | ✅ — same card style as the course requirements section |
+| Who This Is For | ✅ — same card style as the course audience section, with check/cross indicators |
+| Learning path | ✅ — numbered step badges (1, 2, 3...) on course cards; first card shows **Start Here** badge |
 | Sidebar: In progress / Get Access | same card. Paid → price + Buy; Public → "Explore courses"; owned → "You own this bundle" |
-| Sidebar: This course includes | "This bundle includes" — courses, lessons, hours, certificate |
-| Sidebar: Updates | same |
-| Sidebar: Community | omitted |
+| Sidebar: This bundle includes | "This bundle includes" — courses, lessons, hours, certificate |
+| Sidebar: Community | ✅ — same card style as course Community sidebar |
+| Sidebar: Updates | same (now last in sidebar order) |
 
 Buy → `POST /payments/{org_id}/checkout` → Chargily → `/payment/success?resource=collection_…`.
 
