@@ -329,6 +329,7 @@ async def add_activity_to_trail(
                 "course_uuid": course.course_uuid,
                 "course_name": course.name,
             },
+            db_session=db_session,
         )
 
     # Fire COURSE_COMPLETED when this specific activity completion pushed the
@@ -380,6 +381,7 @@ async def add_activity_to_trail(
                 "course_uuid": course.course_uuid,
                 "course_name": course.name,
             },
+            db_session=db_session,
         )
 
     statement = select(TrailRun).where(TrailRun.trail_id == trail.id, TrailRun.user_id == user.id)
@@ -885,6 +887,7 @@ async def add_course_to_trail(
             "course_uuid": course.course_uuid,
             "course_name": course.name,
         },
+        db_session=db_session,
     )
 
     statement = select(TrailRun).where(TrailRun.trail_id == trail.id, TrailRun.user_id == user.id)
