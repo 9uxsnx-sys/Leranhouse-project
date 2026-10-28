@@ -51,7 +51,7 @@ function podcastPlayerReducer(
         ...state,
         currentEpisode: action.payload.episode,
         podcast: action.payload.podcast,
-        isPlaying: true,
+        isPlaying: false,
         currentTime: 0,
         isVisible: true,
         isMinimized: true,  // Start minimized by default
@@ -79,14 +79,14 @@ function podcastPlayerReducer(
         ...state,
         currentEpisode: action.payload,
         currentTime: 0,
-        isPlaying: true,
+        isPlaying: false,
       }
     case 'PREVIOUS_EPISODE':
       return {
         ...state,
         currentEpisode: action.payload,
         currentTime: 0,
-        isPlaying: true,
+        isPlaying: false,
       }
     default:
       return state
@@ -159,12 +159,10 @@ export function PodcastPlayerProvider({ children }: { children: React.ReactNode 
 
   const play = useCallback(() => {
     dispatch({ type: 'PLAY' })
-    audioRef.current?.play()
   }, [])
 
   const pause = useCallback(() => {
     dispatch({ type: 'PAUSE' })
-    audioRef.current?.pause()
     // Save progress on pause
     saveProgress()
     flushListening()
@@ -172,11 +170,8 @@ export function PodcastPlayerProvider({ children }: { children: React.ReactNode 
 
   const togglePlay = useCallback(() => {
     if (state.isPlaying) {
-      audioRef.current?.pause()
       saveProgress()
       flushListening()
-    } else {
-      audioRef.current?.play()
     }
     dispatch({ type: 'TOGGLE_PLAY' })
   }, [state.isPlaying, saveProgress, flushListening])
