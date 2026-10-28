@@ -6,6 +6,7 @@ import {
   MessageCircle,
   Calendar,
   RefreshCw,
+  Users,
 } from 'lucide-react'
 import { Community } from '@services/communities/communities'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
@@ -37,6 +38,14 @@ export function CommunitySidebar({
     { revalidateOnFocus: false }
   )
 
+  // Fetch member count
+  const { data: memberData } = useSWR(
+    `${getAPIUrl()}communities/${community.community_uuid}/member-count`,
+    (url: string) => swrFetcher(url, accessToken),
+    { revalidateOnFocus: false }
+  )
+
+  const memberCount = (memberData as { member_count?: number })?.member_count ?? 0
   const createdDate = dayjs(community.creation_date).format('MMM D, YYYY')
   const updatedDate = community.update_date
     ? dayjs(community.update_date).format('MMM D, YYYY')
@@ -48,9 +57,9 @@ export function CommunitySidebar({
       {/* ── CARD 1: Linked Course / Linked Podcast ── */}
       {linkedCourse ? (
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-4">Linked Course</h3>
-          <p className="text-sm text-gray-500 mb-2 leading-snug">
-            This community is linked to a course
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">Linked Course</h3>
+          <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+            This community is the discussion space for the course. Join the conversation, ask questions, and connect with fellow learners.
           </p>
           <Link
             href={getUriWithOrg(orgslug, `/course/${linkedCourse.course_uuid.replace('course_', '')}`)}
@@ -68,6 +77,12 @@ export function CommunitySidebar({
           This Community Includes
         </h3>
         <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <Users size={16} className="text-gray-400 shrink-0" />
+            <span className="text-sm text-gray-600">
+              {memberCount} {memberCount === 1 ? 'member' : 'members'}
+            </span>
+          </div>
           <div className="flex items-center gap-3">
             <MessageCircle size={16} className="text-gray-400 shrink-0" />
             <span className="text-sm text-gray-600">
@@ -96,10 +111,10 @@ export function CommunitySidebar({
 
       {/* ── CARD 4: Community Guidelines ── */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-4">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
           {t('communities.community_guidelines')}
         </h3>
-        <p className="text-xs text-gray-500 leading-relaxed">
+        <p className="text-sm text-gray-600 leading-relaxed">
           {t('communities.community_guidelines_text')}
         </p>
       </div>

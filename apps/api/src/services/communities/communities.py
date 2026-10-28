@@ -1,6 +1,7 @@
 from typing import List, Union
 from uuid import uuid4
 from datetime import datetime
+from sqlalchemy import text
 from sqlmodel import Session, select, and_, or_
 from fastapi import HTTPException, Request
 
@@ -571,3 +572,42 @@ async def get_community_user_rights(
         rights["permissions"]["delete"] = True
 
     return rights
+
+
+async def get_community_member_count(
+    community_uuid: str,
+    db_session: Session,
+) -> int:
+    """
+    Count unique users who have participated in a community
+    (discussion authors, comment authors, voters, reactors).
+    """
+    # Get community first
+    statement = select(Community).where(Community.community_uuid == community_uuid)
+    community = db_session.exec(statement).first()
+
+    if not community:
+        return 0
+
+    community_id = community.id
+
+    # Count distinct users across all participation tables via raw SQL
+    sql = text("""
+        SELECT count(*) FROM (
+            SELECT author_id FROM discussion WHERE community_id = :cid
+            UNION
+            SELECT dc.author_id FROM discussioncomment dc
+                JOIN discussion d ON dc.discussion_id = d.id
+                WHERE d.community_id = :cid
+            UNION
+            SELECT dv.user_id FROM discussionvote dv
+                JOIN discussion d ON dv.discussion_id = d.id
+                WHERE d.community_id = :cid
+            UNION
+            SELECT dr.user_id FROM discussionreaction dr
+                JOIN discussion d ON dr.discussion_id = d.id
+                WHERE d.community_id = :cid
+        ) AS members
+    """)
+    result = db_session.exec(sql, params={"cid": community_id}).one()
+    return result[0] or 0

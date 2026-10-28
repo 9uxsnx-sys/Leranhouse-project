@@ -17,6 +17,7 @@ from src.services.communities.communities import (
     link_community_to_course,
     unlink_community_from_course,
     get_community_user_rights,
+    get_community_member_count,
     update_community_banner,
     delete_community_banner,
 )
@@ -287,6 +288,28 @@ async def api_get_community_rights(
     return await get_community_user_rights(
         request, community_uuid, current_user, db_session
     )
+
+
+@router.get(
+    "/{community_uuid}/member-count",
+    summary="Get community member count",
+    description="Count unique users who have participated in a community (discussion authors, commenters, voters, reactors).",
+    responses={
+        200: {"description": "Member count for the community."},
+        401: {"description": "Authentication required"},
+        404: {"description": "Community not found"},
+    },
+)
+async def api_get_community_member_count(
+    community_uuid: str,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session: Session = Depends(get_db_session),
+) -> dict:
+    """
+    Get the number of unique members who have participated in a community.
+    """
+    count = await get_community_member_count(community_uuid, db_session)
+    return {"member_count": count}
 
 
 @router.put(
