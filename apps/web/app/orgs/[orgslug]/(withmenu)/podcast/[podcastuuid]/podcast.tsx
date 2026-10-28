@@ -19,6 +19,7 @@ import { useContentLocale } from '@components/Hooks/useCourseTranslation'
 import { getCurrentLanguageNativeName } from '@/lib/languages'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { useRegisterBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
+
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -69,6 +70,8 @@ export default function PodcastClient({
       revalidateOnFocus: true,
       revalidateOnReconnect: true,
       refreshInterval: 30000, // Refresh every 30 seconds
+      errorRetryCount: 0,     // Don't retry on AbortError (suppressed in swrFetcher)
+      shouldRetryOnError: false,
     }
   )
 

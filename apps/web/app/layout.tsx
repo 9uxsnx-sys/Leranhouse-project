@@ -49,6 +49,25 @@ export default async function RootLayout({
             Reads the optional ?bgcolor param (hex-validated) or defaults to dark. */}
         {/* eslint-disable-next-line @next/next/no-sync-scripts */}
         <script src="/embed-bg.js" />
+        {/* Suppress AbortErrors from the Next.js dev overlay.
+            Critical insight from Next.js 16 source:
+            - reportGlobalError captures the original window.reportError at MODULE LOAD TIME,
+              so patching window.reportError has NO EFFECT — Next.js already holds a reference
+              to the original function.
+            - Error boundaries (AbortErrorBoundary) route errors through onCaughtError →
+              handleClientError(error) DIRECTLY, bypassing both window.reportError and addEventListener.
+            - The ONLY reliable interception point is window.addEventListener for 'error' events,
+              because handleGlobalErrors() registers onUnhandledError via addEventListener('error', ...)
+              from a React component (after our sync script runs).
+            - Without explicit error boundaries, errors flow through:
+              onRecoverableError → reportGlobalError → window.reportError() → 'error' DOM event →
+              onUnhandledError (wrapped by our patched addEventListener) → handleClientError.
+            - Our addEventListener wrapper intercepts onUnhandledError and filters AbortErrors
+              before they reach handleClientError and the dev overlay. */}
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script dangerouslySetInnerHTML={{
+          __html: `(function(){var _ae=window.addEventListener.bind(window);window.addEventListener=function(t,l,o){if(t==='error'||t==='unhandledrejection'){var w=function(e){var err=e.error||e.reason||e.message;if(err&&(err.name==='AbortError'||(typeof DOMException!=='undefined'&&err instanceof DOMException&&err.name==='AbortError')||(typeof err==='string'&&err.indexOf('AbortError')>=0))){e.preventDefault();e.stopImmediatePropagation&&e.stopImmediatePropagation();return}return l.apply(this,arguments)};return _ae(t,w,o)}return _ae(t,l,o)}})();`,
+        }} />
       </head>
       <body suppressHydrationWarning>
         {

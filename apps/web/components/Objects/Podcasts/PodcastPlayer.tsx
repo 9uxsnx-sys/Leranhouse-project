@@ -34,8 +34,8 @@ export default function PodcastPlayer() {
 
   const { currentEpisode, podcast, isPlaying, currentTime, duration, volume, isMinimized, isVisible } = state
 
-  // Get audio URL
-  const audioUrl = currentEpisode && podcast && org
+  // Get audio URL — only when audio_file is present
+  const audioUrl = currentEpisode && podcast && org && currentEpisode.audio_file
     ? getPodcastAudioStreamUrl(
         org.org_uuid,
         podcast.podcast_uuid,
@@ -184,12 +184,14 @@ export default function PodcastPlayer() {
 
   return (
     <>
-      {/* Hidden audio element */}
-      <audio
-        ref={audioRef}
-        src={audioUrl}
-        preload="metadata"
-      />
+      {/* Hidden audio element — only render when there's an actual audio source */}
+      {audioUrl && (
+        <audio
+          ref={audioRef}
+          src={audioUrl}
+          preload="metadata"
+        />
+      )}
 
       {/* Player UI */}
       <div

@@ -116,6 +116,11 @@ export const swrFetcher = async (url: string, token?: string) => {
     // Return the data
     return res
   } catch (error: any) {
+    // Suppress AbortError — SWR aborts in-flight requests during revalidation,
+    // and Next.js dev overlay catches these at a level we can't suppress externally.
+    if (error?.name === 'AbortError') {
+      return undefined
+    }
     throw error
   }
 }
