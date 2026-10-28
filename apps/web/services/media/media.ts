@@ -315,5 +315,5 @@ export function getPodcastAudioStreamUrl(
   episodeUUID: string,
   filename: string
 ) {
-  return `${getApiUrl()}api/v1/stream/audio/${orgUUID}/${podcastUUID}/${episodeUUID}/${filename}`
+  return `${getApiUrl()}/api/v1/stream/audio/${orgUUID}/${podcastUUID}/${episodeUUID}/${filename}`
 }
