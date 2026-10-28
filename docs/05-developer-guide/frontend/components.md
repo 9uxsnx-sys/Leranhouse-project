@@ -19,6 +19,8 @@ components/
 │   ├── Onboarding/
 │   ├── Pages/            # Page-level components
 │   │   ├── Community/
+│   │   │   ├── `CommunityCard` — Community card for listing grids
+│   │   │   ├── `CommunitySidebar` — Right sidebar with Linked Course, stats, Updates, and Guidelines cards
 │   │   ├── Org/
 │   │   ├── Payments/
 │   │   └── Users/

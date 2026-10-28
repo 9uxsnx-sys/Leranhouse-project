@@ -172,7 +172,11 @@ The surface the dashboard **Preview** button opens; also the target of every les
 
 - **Two-column forum layout**:
   - **Left**: Discussion feed with search bar, "New Discussion" button, "Select mode" button (for managers), and filter dropdown (sort by Recent/Top/Hot, filter by labels).
-  - **Right**: Community info sidebar (description, members, stats).
+  - **Right**: Community sidebar with 4 cards:
+    - **Linked Course** (conditional) — "Go to Course" button if community is tied to a course
+    - **This Community Includes** — member count, discussion count, created date
+    - **Updates** — last updated date
+    - **Community Guidelines** — community rules and expectations
 
 ### Discussion Detail
 
