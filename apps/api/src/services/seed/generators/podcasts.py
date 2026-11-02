@@ -9,6 +9,93 @@ from src.db.podcasts.podcasts import Podcast
 from src.services.seed import copy as C
 from src.services.seed.core import SeedContext, iso, new_uuid, org_content_dir
 
+
+def _podcast_meta(name: str, host: str) -> dict:
+    """Return podcast extra_metadata based on the show's theme."""
+    pool = {
+        "The Pixel Hour": {
+            "learnings": [
+                "How design decisions are made behind the scenes",
+                "The real story behind finished projects",
+                "Why deadlines shift and how teams adapt",
+                "Balancing creativity with practical constraints",
+            ],
+            "target_audience": {
+                "for": ["Designers", "Design students", "Product people"],
+                "not_for": ["Anyone looking for step-by-step tutorials"],
+            },
+            "requirements": ["Basic familiarity with design tools"],
+        },
+        "Designers Who Ship": {
+            "learnings": [
+                "How to finish and release design projects",
+                "What makes a portfolio stand out",
+                "Handling imperfect work in production",
+                "Real post-launch lessons from working designers",
+            ],
+            "target_audience": {
+                "for": ["Working designers", "Design students", "Portfolio builders"],
+                "not_for": ["Complete beginners to design"],
+            },
+            "requirements": ["Some design experience"],
+        },
+        "Two Developers Arguing": {
+            "learnings": [
+                "Different approaches to software architecture",
+                "How to evaluate technical trade-offs",
+                "When to change your mind about a technical decision",
+                "Common architecture pitfalls and how to spot them",
+            ],
+            "target_audience": {
+                "for": ["Developers", "Tech leads", "Software architects"],
+                "not_for": ["Non-technical listeners"],
+            },
+            "requirements": ["Professional programming experience"],
+        },
+        "The Freelance Files": {
+            "learnings": [
+                "How to handle difficult clients",
+                "Setting rates and managing scope",
+                "Dealing with late payments professionally",
+                "Writing better client messages",
+            ],
+            "target_audience": {
+                "for": ["Freelancers", "Solo practitioners", "Agency owners"],
+                "not_for": ["Full-time employees not planning to freelance"],
+            },
+            "requirements": ["Some freelance or client work experience"],
+        },
+        "Data Without Drama": {
+            "learnings": [
+                "How to present data clearly to non-technical stakeholders",
+                "Choosing the right chart for your data",
+                "Common dashboard mistakes and fixes",
+                "Turning raw numbers into actionable insights",
+            ],
+            "target_audience": {
+                "for": ["Data analysts", "Product managers", "Anyone who presents data"],
+                "not_for": ["Hardcore data scientists looking for advanced math"],
+            },
+            "requirements": ["Basic spreadsheet literacy"],
+        },
+    }
+    return pool.get(
+        name,
+        {
+            "learnings": [
+                f"Insights from {host} and guests about {name.lower()}",
+                "Practical tips you can apply right away",
+                "Real stories from people working in the field",
+                "Common mistakes and how to avoid them",
+            ],
+            "target_audience": {
+                "for": ["Professionals in the field", "Students", "Curious learners"],
+                "not_for": ["Absolute beginners"],
+            },
+            "requirements": ["No prior knowledge required"],
+        },
+    )
+
 TRANSLATIONS = {
     "The Pixel Hour": {
         "fr": (
@@ -56,10 +143,8 @@ def create_podcasts(ctx: SeedContext) -> None:
             description=description,
             about=f"Hosted by {host}. Recorded in a small room with too many cables and not enough coffee.",
             tags="design, learning, interviews",
-            # No audio artwork folder exists yet, so podcast covers come from
-            # the general pool. Banners are the last step and stay empty.
             thumbnail_image=ctx.image(podcast_dir / "thumbnails", "thumb"),
-            banner_image="",
+            banner_image=ctx.image(podcast_dir / "banners", "banner"),
             public=True,
             published=index < 16,
             org_id=ctx.org_id,
@@ -72,7 +157,7 @@ def create_podcasts(ctx: SeedContext) -> None:
                 "robots_nofollow": False,
                 "enable_jsonld": True,
             },
-            extra_metadata=None,
+            extra_metadata=_podcast_meta(name, host),
             access_type=AccessTypeEnum.PUBLIC,
             price_amount=None,
             price_currency="DZD",
@@ -119,8 +204,7 @@ def _create_episode(
         / episode_uuid
     )
     audio = ctx.assets.copy_audio(podcast_dir / "audio")
-    # Episode covers are left empty for now, the same as the logo.
-    thumbnail = ""
+    thumbnail = ctx.image(podcast_dir / "thumbnails", f"ep{order + 1}")
 
     ctx.session.add(
         PodcastEpisode(
@@ -137,6 +221,13 @@ def _create_episode(
             episode_uuid=episode_uuid,
             creation_date=iso(created),
             update_date=iso(created),
+            extra_metadata={
+                "key_points": [
+                    {"title": "Opening", "items": ["Introduction to the topic", "Guest or host background"]},
+                    {"title": "Main Discussion", "items": ["Key argument or insight", "Real example or story"]},
+                    {"title": "Wrap Up", "items": ["Summary of key takeaways", "What to do next"]},
+                ],
+            },
         )
     )
     ctx.session.commit()

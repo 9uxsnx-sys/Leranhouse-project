@@ -36,7 +36,8 @@ def _mock_podcast(**overrides) -> PodcastRead:
     data = dict(
         id=1, org_id=1, name="Podcast", description="Desc", about="About", tags="tag",
         thumbnail_image="", public=True, published=True, authors=[], podcast_uuid="podcast_test",
-        creation_date="2024-01-01", update_date="2024-01-01", seo=None
+        creation_date="2024-01-01", update_date="2024-01-01", seo=None,
+        extra_metadata=None,
     )
     data.update(overrides)
     return PodcastRead(**data)
@@ -53,7 +54,8 @@ def _mock_episode(**overrides) -> PodcastEpisodeRead:
     data = dict(
         id=1, podcast_id=1, org_id=1, title="Episode", description="Desc", audio_file="",
         duration_seconds=0, episode_number=1, thumbnail_image="", published=True, order=0,
-        episode_uuid="episode_test", creation_date="2024-01-01", update_date="2024-01-01"
+        episode_uuid="episode_test", creation_date="2024-01-01", update_date="2024-01-01",
+        extra_metadata=None,
     )
     data.update(overrides)
     return PodcastEpisodeRead(**data)
@@ -86,9 +88,10 @@ class TestPodcastsRouter:
             response = await client.get("/api/v1/podcasts/podcast_test")
         assert response.status_code == 200
 
-        with patch("src.routers.podcasts.podcasts.get_podcast_meta", new_callable=AsyncMock, return_value={"podcast_uuid": "podcast_test"}):
+        with patch("src.routers.podcasts.podcasts.get_podcast_meta", new_callable=AsyncMock, return_value={"podcast_uuid": "podcast_test", "extra_metadata": None}):
             response = await client.get("/api/v1/podcasts/podcast_test/meta")
         assert response.status_code == 200
+        assert response.json().get("extra_metadata") is None
 
         with patch("src.routers.podcasts.podcasts.get_podcasts_orgslug", new_callable=AsyncMock, return_value=[_mock_podcast_count()]):
             response = await client.get("/api/v1/podcasts/org_slug/test-org/page/1/limit/10")

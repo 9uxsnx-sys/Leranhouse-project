@@ -72,6 +72,7 @@ export interface PodcastEpisode {
   order: number
   creation_date: string
   update_date: string
+  extra_metadata?: Record<string, any> | null
 }
 
 function localeQuery(params: Record<string, string | boolean | undefined>): string {

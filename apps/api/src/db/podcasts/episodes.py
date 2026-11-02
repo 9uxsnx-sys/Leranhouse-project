@@ -1,5 +1,6 @@
 from typing import Optional
 from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
 
@@ -12,6 +13,7 @@ class PodcastEpisodeBase(SQLModel):
     thumbnail_image: Optional[str] = Field(default="")
     published: bool = Field(default=False)
     order: int = Field(default=0)
+    extra_metadata: Optional[dict] = None
 
 
 class PodcastEpisode(PodcastEpisodeBase, table=True):
@@ -25,6 +27,7 @@ class PodcastEpisode(PodcastEpisodeBase, table=True):
     episode_uuid: str = ""
     creation_date: str = ""
     update_date: str = ""
+    extra_metadata: Optional[dict] = Field(default=None, sa_column=Column(JSONB))
 
 
 class PodcastEpisodeCreate(PodcastEpisodeBase):
@@ -42,6 +45,7 @@ class PodcastEpisodeUpdate(SQLModel):
     thumbnail_image: Optional[str] = None  # None means don't update, use upload endpoint to change
     published: Optional[bool] = None
     order: Optional[int] = None
+    extra_metadata: Optional[dict] = None
 
 
 class PodcastEpisodeRead(PodcastEpisodeBase):

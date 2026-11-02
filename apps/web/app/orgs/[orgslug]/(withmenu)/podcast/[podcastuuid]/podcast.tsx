@@ -4,10 +4,9 @@ import React, { useState, useMemo } from 'react'
 import Link from 'next/link'
 import useSWR from 'swr'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
-import EpisodeCard from '@components/Objects/Podcasts/EpisodeCard'
 import { Podcast, PodcastEpisode, PodcastMeta } from '@services/podcasts/podcasts'
 import { startPodcast } from '@services/podcasts/trail'
-import { Headphones, Loader2, Search, Clock, ArrowUpDown, SortAsc, RefreshCw, BookOpen, Award, User, Play, Info } from 'lucide-react'
+import { Headphones, Loader2, Clock, BookOpen, Award, User, Play, Info, RefreshCw } from 'lucide-react'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { getPodcastThumbnailMediaDirectory, getPodcastBannerMediaDirectory } from '@services/media/media'
 import { useTranslation } from 'react-i18next'
@@ -19,14 +18,11 @@ import { useContentLocale } from '@components/Hooks/useCourseTranslation'
 import { getCurrentLanguageNativeName } from '@/lib/languages'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { useRegisterBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
+import CourseLearnings from '@components/Objects/Courses/CourseLearnings/CourseLearnings'
+import EpisodeCard from '@components/Objects/Podcasts/EpisodeCard'
 
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from '@/components/ui/dropdown-menu'
-import { IconButton } from '@/components/ui/icon-button'
+import { Heading } from '@/components/ui/heading'
+import { Text } from '@/components/ui/text'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 
@@ -53,8 +49,6 @@ export default function PodcastClient({
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
-  const [searchQuery, setSearchQuery] = useState('')
-  const [sortBy, setSortBy] = useState<'recent' | 'oldest' | 'duration'>('recent')
   const contentLocale = useContentLocale()
 
   // SWR key for fetching podcast meta — locale-aware so a language switch
@@ -132,36 +126,6 @@ export default function PodcastClient({
     }
   }
 
-  // Filter and sort episodes
-  const filteredEpisodes = useMemo(() => {
-    let result = [...episodes]
-
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase()
-      result = result.filter(
-        (ep) =>
-          ep.title?.toLowerCase().includes(query) ||
-          ep.description?.toLowerCase().includes(query)
-      )
-    }
-
-    // Sort
-    switch (sortBy) {
-      case 'recent':
-        result.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
-        break
-      case 'oldest':
-        result.sort((a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime())
-        break
-      case 'duration':
-        result.sort((a, b) => (b.duration_seconds || 0) - (a.duration_seconds || 0))
-        break
-    }
-
-    return result
-  }, [episodes, searchQuery, sortBy])
-
   // Format duration from seconds to human-readable string
   const formatDuration = (seconds: number) => {
     if (!seconds || seconds <= 0) return t('podcast.page.duration_minutes', { minutes: 0 })
@@ -175,6 +139,11 @@ export default function PodcastClient({
 
   // Add padding at bottom when player is visible
   const bottomPadding = state.isVisible ? (state.isMinimized ? 'pb-20' : 'pb-28') : ''
+
+  // Derive learnings, audience, requirements from extra_metadata
+  const learnings = meta.learnings || []
+  const audienceData = meta.target_audience as { for?: string[]; not_for?: string[] } | undefined
+  const requirementsList = meta.requirements || []
 
   if (denied) {
     return (
@@ -221,7 +190,7 @@ export default function PodcastClient({
         {/* Layout - Content Left, Sidebar Right */}
         <div className="w-full mx-auto max-w-7xl mt-8 space-y-8">
           <div className="flex flex-col lg:flex-row gap-10 justify-between">
-            {/* Main Content - Episodes Feed */}
+            {/* ═══════════════ LEFT COLUMN ═══════════════ */}
             <div className="flex-1 min-w-0 max-w-3xl space-y-8">
               {/* ── PODCAST TITLE + STATS ── */}
               <div>
@@ -237,9 +206,9 @@ export default function PodcastClient({
                 )}
                 <h1 dir="auto" className="text-2xl md:text-3xl font-semibold text-ui-fg-base leading-tight">{podcast.name}</h1>
                 {podcast.description && (
-                  <p dir="auto" className="text-base text-ui-fg-subtle mt-2 leading-relaxed">
+                  <Text dir="auto" size="base" className="text-ui-fg-subtle mt-2 leading-relaxed">
                     {podcast.description}
-                  </p>
+                  </Text>
                 )}
                 {/* Stats row */}
                 <div className="flex flex-wrap items-center gap-2 mt-4">
@@ -266,86 +235,44 @@ export default function PodcastClient({
                 </div>
               </div>
 
-              {/* Search and Filter Bar */}
-              <div className="flex items-center gap-3">
-                {/* Search Bar */}
-                <div className="relative w-80">
-                  <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder={t('podcast.page.search_placeholder')}
-                    className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
-                  />
+              {/* ── WHAT YOU'LL LEARN ── */}
+              {learnings.length > 0 && (
+                <CourseLearnings items={learnings} />
+              )}
+
+              {/* ── ABOUT THIS PODCAST ── */}
+              {podcast?.about && (
+                <div>
+                  <Heading level="h1" className="!text-2xl mb-4">{t('podcast.page.about_title', 'About This Podcast')}</Heading>
+                  <div dir="auto" className="space-y-4">
+                    {podcast.about.replace(/\r\n/g, '\n').split('\n\n').filter((p: string) => p.trim()).map((paragraph: string, idx: number) => (
+                      <Text key={idx} size="base" className="text-ui-fg-subtle leading-relaxed block">
+                        {paragraph.trim()}
+                      </Text>
+                    ))}
+                  </div>
                 </div>
+              )}
 
-                {/* Results count */}
-                <span className="text-xs text-gray-400 whitespace-nowrap">
-                  {t('podcast.page.episode', { count: filteredEpisodes.length })}
-                </span>
-
-                {/* Spacer */}
-                <div className="flex-1" />
-
-                {/* Loading spinner */}
-                {isLoading && (
-                  <Loader2 size={16} className="animate-spin text-gray-400" />
-                )}
-
-                {/* Sort Dropdown */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label={t('podcast.page.sort_aria')}>
-                      <SortAsc size={15} />
-                    </IconButton>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-white min-w-0 w-40 p-2">
-                    <DropdownMenuItem onClick={() => setSortBy('recent')} className="flex items-center gap-2 text-sm cursor-pointer bg-white rounded-md">
-                      <Clock size={14} className="text-gray-500" />
-                      <span className="text-gray-700">{t('podcast.page.sort_latest')}</span>
-                      {sortBy === 'recent' && <span className="ms-auto text-gray-400">✓</span>}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setSortBy('oldest')} className="flex items-center gap-2 text-sm cursor-pointer bg-white rounded-md">
-                      <Clock size={14} className="text-gray-500" />
-                      <span className="text-gray-700">{t('podcast.page.sort_oldest')}</span>
-                      {sortBy === 'oldest' && <span className="ms-auto text-gray-400">✓</span>}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setSortBy('duration')} className="flex items-center gap-2 text-sm cursor-pointer bg-white rounded-md">
-                      <ArrowUpDown size={14} className="text-gray-500" />
-                      <span className="text-gray-700">{t('podcast.page.sort_duration')}</span>
-                      {sortBy === 'duration' && <span className="ms-auto text-gray-400">✓</span>}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-
-              {/* Episodes List */}
-              {filteredEpisodes.length > 0 ? (
-                <div className="space-y-3">
-                  {filteredEpisodes.map((episode) => (
-                    <EpisodeCard
-                      key={episode.episode_uuid}
-                      episode={episode}
-                      podcast={podcast}
-                      savedProgress={episodeProgressMap[episode.id]}
-                    />
-                  ))}
-                </div>
-              ) : episodes.length === 0 ? (
-                <div className="text-center py-12">
-                  <Headphones size={40} className="mx-auto text-gray-300 mb-3" />
-                  <p className="text-gray-500">{t('podcasts.no_episodes')}</p>
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <Search size={40} className="mx-auto text-gray-300 mb-3" />
-                  <p className="text-gray-500">{t('podcast.page.no_match')}</p>
+              {/* ── EPISODES ── */}
+              {episodes.length > 0 && (
+                <div>
+                  <Heading level="h1" className="!text-2xl mb-4">{t('podcast.page.episodes', 'Episodes')}</Heading>
+                  <div className="space-y-2.5">
+                    {episodes.map((ep) => (
+                      <EpisodeCard
+                        key={ep.id}
+                        episode={ep}
+                        podcast={podcast}
+                        orgslug={orgslug}
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Right Sidebar - Podcast Info (Desktop only) */}
+            {/* ═══════════════ RIGHT SIDEBAR ═══════════════ */}
             <div className="w-full lg:w-72 xl:w-80 shrink-0">
               <div className="lg:sticky lg:top-8 space-y-4">
 

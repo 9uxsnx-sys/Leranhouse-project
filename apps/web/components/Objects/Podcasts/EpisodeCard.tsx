@@ -1,23 +1,25 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
+import { useRouter } from 'next/navigation'
 import { PodcastEpisode, Podcast } from '@services/podcasts/podcasts'
 import { formatDuration } from '@services/podcasts/episodes'
+import { getUriWithOrg } from '@services/config/config'
 import { usePodcastPlayer } from '@components/Contexts/PodcastPlayerContext'
-import { Play, Pause } from 'lucide-react'
 
 interface EpisodeCardProps {
   episode: PodcastEpisode
   podcast: Podcast
+  orgslug: string
   savedProgress?: { playback_position: number; duration: number } | null
 }
 
-export default function EpisodeCard({ episode, podcast, savedProgress }: EpisodeCardProps) {
-  const { state, playEpisode, togglePlay } = usePodcastPlayer()
-  const [isHovered, setIsHovered] = useState(false)
+export default function EpisodeCard({ episode, podcast, orgslug, savedProgress }: EpisodeCardProps) {
+  const router = useRouter()
+  const { state } = usePodcastPlayer()
+  const [isHovered, setIsHovered] = React.useState(false)
 
   const isCurrentEpisode = state.currentEpisode?.episode_uuid === episode.episode_uuid
-  const isPlaying = isCurrentEpisode && state.isPlaying
 
   const progress = isCurrentEpisode && state.duration > 0
     ? Math.min(Math.round(state.currentTime / state.duration * 100), 100)
@@ -27,29 +29,28 @@ export default function EpisodeCard({ episode, podcast, savedProgress }: Episode
     ? Math.min(Math.round((savedProgress.playback_position / savedProgress.duration) * 100), 100)
     : 0
 
-  const handlePlay = () => {
-    if (isCurrentEpisode) {
-      togglePlay()
-    } else {
-      playEpisode(episode, podcast)
-    }
+  const cleanPodcastUuid = podcast.podcast_uuid.replace('podcast_', '')
+  const cleanEpisodeUuid = episode.episode_uuid.replace('episode_', '')
+
+  const handleClick = () => {
+    router.push(getUriWithOrg(orgslug, '') + `/podcast/${cleanPodcastUuid}/episode/${cleanEpisodeUuid}`)
   }
 
   return (
     <div
-      className={`rounded-xl bg-white border shadow-sm transition-all duration-200 cursor-pointer ${
-        isHovered ? 'border-gray-200' : 'border-gray-100'
+      className={`bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden transition-all duration-200 cursor-pointer ${
+        isHovered ? 'bg-black/[0.02]' : ''
       }`}
-      onClick={handlePlay}
+      onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Main row — always visible */}
-      <div className="flex items-center gap-2 px-4 py-4">
+      <div className="flex items-center gap-2 px-5 py-3">
         {/* Number */}
         <span
-          className={`flex-shrink-0 w-6 text-end text-[15px] font-semibold leading-none me-1.5 ${
-            isCurrentEpisode ? 'text-indigo-600' : 'text-gray-300'
+          className={`flex-shrink-0 w-6 text-end text-sm font-semibold leading-none me-1.5 ${
+            isCurrentEpisode ? 'text-indigo-600' : 'text-gray-400'
           }`}
         >
           {episode.episode_number}
@@ -58,51 +59,17 @@ export default function EpisodeCard({ episode, podcast, savedProgress }: Episode
         {/* Title */}
         <h4
           dir="auto"
-          className={`flex-1 min-w-0 text-[15px] font-medium truncate ${
-            isCurrentEpisode ? 'text-indigo-700' : 'text-gray-900'
+          className={`flex-1 min-w-0 text-sm font-medium truncate ${
+            isCurrentEpisode ? 'text-indigo-700' : 'text-ui-fg-base'
           }`}
         >
           {episode.title}
         </h4>
-
-        {/* Play / Pause button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            handlePlay()
-          }}
-          className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 active:scale-90 ${
-            isCurrentEpisode
-              ? 'bg-indigo-600 text-white shadow-sm'
-              : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600'
-          }`}
-        >
-          <div className="relative w-3.5 h-3.5 flex items-center justify-center">
-            <div
-              className={`absolute inset-0 flex items-center justify-center transition-all duration-200 ${
-                isPlaying
-                  ? 'opacity-0 rotate-90 scale-0'
-                  : 'opacity-100 rotate-0 scale-100'
-              }`}
-            >
-              <Play size={13} fill="currentColor" className="ms-0.5" />
-            </div>
-            <div
-              className={`absolute inset-0 flex items-center justify-center transition-all duration-200 ${
-                isPlaying
-                  ? 'opacity-100 rotate-0 scale-100'
-                  : 'opacity-0 -rotate-90 scale-0'
-              }`}
-            >
-              <Pause size={13} fill="currentColor" />
-            </div>
-          </div>
-        </button>
       </div>
 
       {/* Saved progress bar — shown for non-current episodes with saved progress */}
       {savedPercent > 0 && !isCurrentEpisode && (
-        <div className="px-4 pb-4">
+        <div className="px-5 pb-4">
           <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
             <div
               className="h-full bg-gray-400 rounded-full"
@@ -125,7 +92,7 @@ export default function EpisodeCard({ episode, podcast, savedProgress }: Episode
       >
         <div className="overflow-hidden">
           <div
-            className={`px-4 pb-4 transition-all duration-300 delay-75 ${
+            className={`px-5 pb-4 transition-all duration-300 delay-75 ${
               isCurrentEpisode ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1'
             }`}
           >

@@ -747,6 +747,126 @@ class TestPodcastsService:
         assert contributor_rights["ownership"]["is_contributor"] is True
         assert contributor_rights["ownership"]["is_owner"] is True
 
+    @pytest.mark.asyncio
+    async def test_create_and_get_podcast_with_extra_metadata(
+        self, db, org, admin_user, mock_request
+    ):
+        extra_metadata = {
+            "learnings": ["Design thinking basics", "Color theory"],
+            "target_audience": {
+                "for": ["Designers", "Students"],
+                "not_for": ["Engineers looking for code tutorials"],
+            },
+            "requirements": ["Basic design tools"],
+        }
+        with patch(
+            "src.services.podcasts.podcasts.check_resource_access",
+            new_callable=AsyncMock,
+        ), patch(
+            "src.services.podcasts.podcasts.check_feature_access"
+        ), patch(
+            "src.services.podcasts.podcasts.check_limits_with_usage"
+        ), patch(
+            "src.services.podcasts.podcasts.increase_feature_usage"
+        ):
+            created = await create_podcast(
+                mock_request,
+                org.id,
+                PodcastCreate(
+                    name="Podcast With Meta",
+                    description="Desc",
+                    about="About",
+                    tags="tag",
+                    public=True,
+                    published=False,
+                    org_id=org.id,
+                    extra_metadata=extra_metadata,
+                ),
+                admin_user,
+                db,
+            )
+
+        with patch(
+            "src.services.podcasts.podcasts._is_podcasts_feature_enabled",
+            return_value=True,
+        ), patch(
+            "src.services.podcasts.podcasts.check_resource_access",
+            new_callable=AsyncMock,
+        ), patch(
+            "src.services.podcasts.episodes.check_resource_access",
+            new_callable=AsyncMock,
+        ):
+            fetched = await get_podcast(mock_request, created.podcast_uuid, admin_user, db)
+            meta = await get_podcast_meta(mock_request, created.podcast_uuid, admin_user, db)
+
+        assert fetched.extra_metadata == extra_metadata
+        assert meta["podcast"].extra_metadata == extra_metadata
+
+    @pytest.mark.asyncio
+    async def test_update_podcast_extra_metadata(
+        self, db, org, admin_user, mock_request
+    ):
+        with patch(
+            "src.services.podcasts.podcasts.check_resource_access",
+            new_callable=AsyncMock,
+        ), patch(
+            "src.services.podcasts.podcasts.check_feature_access"
+        ), patch(
+            "src.services.podcasts.podcasts.check_limits_with_usage"
+        ), patch(
+            "src.services.podcasts.podcasts.increase_feature_usage"
+        ):
+            created = await create_podcast(
+                mock_request,
+                org.id,
+                PodcastCreate(
+                    name="Podcast No Meta",
+                    description="Desc",
+                    about="About",
+                    tags="tag",
+                    public=True,
+                    published=False,
+                    org_id=org.id,
+                ),
+                admin_user,
+                db,
+            )
+
+        new_meta = {
+            "learnings": ["Audio editing", "Interview techniques"],
+            "target_audience": {
+                "for": ["Podcasters", "Content creators"],
+                "not_for": ["Complete beginners"],
+            },
+            "requirements": ["Microphone", "Recording software"],
+        }
+        with patch(
+            "src.services.podcasts.podcasts.check_resource_access",
+            new_callable=AsyncMock,
+        ):
+            updated = await update_podcast(
+                mock_request,
+                PodcastUpdate(extra_metadata=new_meta),
+                created.podcast_uuid,
+                admin_user,
+                db,
+            )
+
+        with patch(
+            "src.services.podcasts.podcasts._is_podcasts_feature_enabled",
+            return_value=True,
+        ), patch(
+            "src.services.podcasts.podcasts.check_resource_access",
+            new_callable=AsyncMock,
+        ), patch(
+            "src.services.podcasts.episodes.check_resource_access",
+            new_callable=AsyncMock,
+        ):
+            fetched = await get_podcast(mock_request, created.podcast_uuid, admin_user, db)
+
+        assert updated.extra_metadata == new_meta
+        assert fetched.extra_metadata == new_meta
+
 
 class TestEpisodesService:
     @pytest.mark.asyncio
@@ -1121,3 +1241,92 @@ class TestEpisodesService:
         assert thumb_missing_file_exc.value.status_code == 400
         assert [item.episode_uuid for item in reordered][-1] == episode.episode_uuid
         assert missing_podcast_reorder_exc.value.status_code == 404
+
+    @pytest.mark.asyncio
+    async def test_create_and_get_episode_with_extra_metadata(
+        self, db, org, admin_user, mock_request
+    ):
+        podcast = _make_podcast(db, org)
+        _make_author(db, podcast.podcast_uuid, admin_user.id)
+
+        extra_metadata = {
+            "key_points": [
+                {"title": "Opening", "items": ["Introduction", "Guest background"]},
+                {"title": "Main Discussion", "items": ["Key insight", "Real example"]},
+            ],
+        }
+        with patch(
+            "src.services.podcasts.episodes.check_resource_access",
+            new_callable=AsyncMock,
+        ), patch(
+            "src.services.podcasts.episodes.dispatch_webhooks",
+            new_callable=AsyncMock,
+        ):
+            created = await create_episode(
+                mock_request,
+                podcast.podcast_uuid,
+                PodcastEpisodeCreate(
+                    title="Episode With Key Points",
+                    description="Desc",
+                    extra_metadata=extra_metadata,
+                ),
+                admin_user,
+                db,
+            )
+
+        with patch(
+            "src.services.podcasts.episodes.check_resource_access",
+            new_callable=AsyncMock,
+        ):
+            fetched = await get_episode(mock_request, created.episode_uuid, admin_user, db)
+
+        assert created.extra_metadata == extra_metadata
+        assert fetched.extra_metadata == extra_metadata
+
+    @pytest.mark.asyncio
+    async def test_update_episode_extra_metadata(
+        self, db, org, admin_user, mock_request
+    ):
+        podcast = _make_podcast(db, org)
+        _make_author(db, podcast.podcast_uuid, admin_user.id)
+
+        with patch(
+            "src.services.podcasts.episodes.check_resource_access",
+            new_callable=AsyncMock,
+        ), patch(
+            "src.services.podcasts.episodes.dispatch_webhooks",
+            new_callable=AsyncMock,
+        ):
+            created = await create_episode(
+                mock_request,
+                podcast.podcast_uuid,
+                PodcastEpisodeCreate(title="Episode No Meta", description="Desc"),
+                admin_user,
+                db,
+            )
+
+        new_meta = {
+            "key_points": [
+                {"title": "Wrap Up", "items": ["Summary", "Next steps"]},
+            ],
+        }
+        with patch(
+            "src.services.podcasts.episodes.check_resource_access",
+            new_callable=AsyncMock,
+        ):
+            updated = await update_episode(
+                mock_request,
+                created.episode_uuid,
+                PodcastEpisodeUpdate(extra_metadata=new_meta),
+                admin_user,
+                db,
+            )
+
+        with patch(
+            "src.services.podcasts.episodes.check_resource_access",
+            new_callable=AsyncMock,
+        ):
+            fetched = await get_episode(mock_request, created.episode_uuid, admin_user, db)
+
+        assert updated.extra_metadata == new_meta
+        assert fetched.extra_metadata == new_meta

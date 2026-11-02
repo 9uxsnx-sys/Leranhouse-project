@@ -22,7 +22,6 @@ export default function PodcastPlayer() {
 
   const { currentEpisode, podcast, isPlaying, currentTime, duration, volume, isVisible } = state
 
-  // Get audio URL — only when audio_file is present
   const audioUrl = currentEpisode && podcast && org && currentEpisode.audio_file
     ? getPodcastAudioStreamUrl(
         org.org_uuid,
@@ -32,7 +31,6 @@ export default function PodcastPlayer() {
       )
     : ''
 
-  // Sync audioUrl to the audio element's src
   useEffect(() => {
     const audio = audioRef.current
     if (!audio || !audioUrl) return
@@ -41,7 +39,6 @@ export default function PodcastPlayer() {
     }
   }, [audioUrl, audioRef])
 
-  // Sync isPlaying state to the audio element
   useEffect(() => {
     const audio = audioRef.current
     if (!audio || !audioUrl) return
@@ -52,7 +49,6 @@ export default function PodcastPlayer() {
     }
   }, [isPlaying, audioUrl, audioRef])
 
-  // Toggle mute
   const toggleMute = () => {
     if (isMuted) {
       setVolume(previousVolume)
@@ -64,10 +60,8 @@ export default function PodcastPlayer() {
     }
   }
 
-  // Progress percentage for the top timeline bar
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0
 
-  // Handle click/drag on the thin progress bar at the top
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
     const x = e.clientX - rect.left
@@ -80,7 +74,6 @@ export default function PodcastPlayer() {
     handleProgressClick(e)
   }
 
-  // Global mouse tracking while dragging — allows drag outside the bar
   useEffect(() => {
     if (!isDragging) return
 
@@ -113,79 +106,91 @@ export default function PodcastPlayer() {
   return (
     <>
       {audioUrl && (
-        <audio
-          ref={audioRef}
-          preload="metadata"
-        />
+        <audio ref={audioRef} preload="metadata" />
       )}
 
       <div className="fixed bottom-0 end-0 z-50 start-0 lg:start-[var(--sidebar-width)] bg-ui-bg-base border-t border-ui-border-base">
-        {/* Interactive thin progress bar at the top edge */}
-        <div
-          id="player-progress-bar"
-          className="absolute top-0 left-0 right-0 cursor-pointer group"
-          style={{ height: '3px' }}
-          onMouseDown={handleMouseDown}
-        >
-          {/* Track background */}
-          <div className="absolute inset-0 top-0 h-full">
-            <div
-              className="h-full bg-ui-fg-base transition-none"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-          {/* Hover area — expands hit target */}
-          <div className="absolute inset-0 top-0 transition-all -translate-y-1/2 group-hover:h-[6px]" style={{ height: '3px' }} />
-        </div>
-
-        <div className="h-16 px-5 flex items-center pt-0.5 gap-4">
-          {/* Play/Pause */}
-          <button
-            onClick={togglePlay}
-            className="flex-shrink-0 flex items-center justify-center h-9 w-9 rounded-full bg-ui-fg-base hover:opacity-80 transition-all"
-          >
-            {isPlaying ? (
-              <Pause size={18} className="text-ui-bg-base" fill="currentColor" />
-            ) : (
-              <Play size={18} className="text-ui-bg-base ms-0.5" fill="currentColor" />
-            )}
-          </button>
-
-          {/* Episode title + Podcast name */}
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-ui-fg-base truncate leading-tight">
-              {currentEpisode.title}
-            </p>
-            <p className="text-xs text-ui-fg-muted truncate leading-tight mt-0.5">
-              {podcast.name}
-            </p>
+        <div className="h-20 px-5 flex gap-4">
+          {/* ── Left column: Play button ── */}
+          <div className="flex-shrink-0 flex flex-col">
+            <div className="h-2" />
+            <button
+              onClick={togglePlay}
+              className="flex items-center justify-center h-9 w-9 rounded-full bg-ui-fg-base hover:opacity-80 transition-all"
+            >
+              {isPlaying ? (
+                <Pause size={18} className="text-ui-bg-base" fill="currentColor" />
+              ) : (
+                <Play size={18} className="text-ui-bg-base ms-0.5" fill="currentColor" />
+              )}
+            </button>
+            <div className="flex-1" />
           </div>
 
-          {/* Time */}
-          <span className="text-sm text-ui-fg-muted tabular-nums flex-shrink-0">
-            {formatDuration(Math.floor(currentTime))}
-          </span>
+          {/* ── Right column: Title block + Timeline + Controls ── */}
+          <div className="flex-1 min-w-0 flex flex-col">
+            {/* Top spacer: upper edge → title block */}
+            <div className="h-2" />
 
-          {/* Mute */}
-          <button
-            onClick={toggleMute}
-            className="flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-full hover:bg-ui-bg-base-hover transition-colors"
-          >
-            {isMuted || volume === 0 ? (
-              <VolumeX size={15} className="text-ui-fg-muted" />
-            ) : (
-              <Volume2 size={15} className="text-ui-fg-muted" />
-            )}
-          </button>
+            {/* ── Title block ── */}
+            <div>
+              <p className="text-sm font-medium text-ui-fg-base truncate leading-tight">
+                {currentEpisode.title}
+              </p>
+              <p className="text-xs text-ui-fg-muted truncate leading-tight mt-0.5">
+                {podcast.name}
+              </p>
+            </div>
 
-          {/* Close */}
-          <button
-            onClick={closePlayer}
-            className="flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-full hover:bg-ui-bg-base-hover transition-colors"
-            title="Close"
-          >
-            <X size={15} className="text-ui-fg-muted" />
-          </button>
+            {/* Middle spacer: title block → timeline */}
+            <div className="h-px" />
+
+            {/* ── Timeline + Controls row ── */}
+            <div className="flex-shrink-0 flex items-center gap-4">
+              <div
+                id="player-progress-bar"
+                className="flex-1 cursor-pointer group self-stretch flex flex-col justify-center"
+                onMouseDown={handleMouseDown}
+              >
+                <div className="relative w-full h-[5px] bg-ui-border-base rounded-full overflow-hidden">
+                  <div
+                    className="absolute inset-y-0 left-0 bg-ui-fg-base rounded-full transition-none"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                  <div className="absolute inset-0 -top-2 -bottom-2 group-hover:-top-3 group-hover:-bottom-3 transition-all" />
+                </div>
+              </div>
+
+              <span className="text-sm text-ui-fg-muted tabular-nums flex-shrink-0">
+                {formatDuration(Math.floor(currentTime))}
+              </span>
+
+              <button
+                onClick={toggleMute}
+                className="flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-full hover:bg-ui-bg-base-hover transition-colors"
+              >
+                {isMuted || volume === 0 ? (
+                  <VolumeX size={15} className="text-ui-fg-muted" />
+                ) : (
+                  <Volume2 size={15} className="text-ui-fg-muted" />
+                )}
+              </button>
+
+              <button
+                onClick={closePlayer}
+                className="flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-full hover:bg-ui-bg-base-hover transition-colors"
+                title="Close"
+              >
+                <X size={15} className="text-ui-fg-muted" />
+              </button>
+            </div>
+
+            {/* Bottom spacer: timeline → bottom edge */}
+            <div className="h-1" />
+
+            {/* Fills remaining container space */}
+            <div className="flex-1" />
+          </div>
         </div>
       </div>
     </>

@@ -30,7 +30,7 @@ export default function CourseLearnings({
   const { t } = useTranslation()
   return (
     <div>
-      <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] px-5 py-5">
+      <div className="rounded-xl bg-white border border-gray-100 shadow-sm px-5 py-5">
         <div className="flex flex-col gap-0.5">
           <Heading level="h2">{title ?? t('course.page.learnings_title')}</Heading>
           <Text size="base" className="text-ui-fg-muted">{subtitle ?? t('course.page.learnings_subtitle')}</Text>
