@@ -71,6 +71,12 @@ function UserLeftMenu() {
     }
   }, [])
 
+  // Sync sidebar width as a CSS variable so fixed-position elements (e.g. PodcastPlayer) can align after the sidebar
+  useEffect(() => {
+    const width = isCollapsed ? '72px' : '256px'
+    document.documentElement.style.setProperty('--sidebar-width', width)
+  }, [isCollapsed])
+
   const toggleCollapse = () => {
     const newState = !isCollapsed
     setIsCollapsed(newState)

@@ -1,34 +1,26 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { usePodcastPlayer } from '@components/Contexts/PodcastPlayerContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getPodcastAudioStreamUrl } from '@services/media/media'
 import {
   Play,
   Pause,
-  SkipBack,
-  SkipForward,
   Volume2,
   VolumeX,
   X,
-  Minimize2,
-  Maximize2,
 } from 'lucide-react'
 import { formatDuration } from '@services/podcasts/episodes'
-import WaveSurfer from 'wavesurfer.js'
 
 export default function PodcastPlayer() {
-  const { state, togglePlay, seekTo, setVolume, closePlayer, toggleMinimize, audioRef } = usePodcastPlayer()
+  const { state, togglePlay, setVolume, closePlayer, audioRef, seekTo } = usePodcastPlayer()
   const org = useOrg() as any
-  const waveformRef = useRef<HTMLDivElement>(null)
-  const miniWaveformRef = useRef<HTMLDivElement>(null)
-  const wavesurferRef = useRef<WaveSurfer | null>(null)
-  const miniWavesurferRef = useRef<WaveSurfer | null>(null)
   const [isMuted, setIsMuted] = useState(false)
   const [previousVolume, setPreviousVolume] = useState(1)
+  const [isDragging, setIsDragging] = useState(false)
 
-  const { currentEpisode, podcast, isPlaying, currentTime, duration, volume, isMinimized, isVisible } = state
+  const { currentEpisode, podcast, isPlaying, currentTime, duration, volume, isVisible } = state
 
   // Get audio URL — only when audio_file is present
   const audioUrl = currentEpisode && podcast && org && currentEpisode.audio_file
@@ -40,96 +32,25 @@ export default function PodcastPlayer() {
       )
     : ''
 
-  // Progress percentage for the top bar
-  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0
-
-  // Initialize WaveSurfer for expanded view
+  // Sync audioUrl to the audio element's src
   useEffect(() => {
-    if (!waveformRef.current || !audioUrl || isMinimized) return
-
-    if (wavesurferRef.current) {
-      wavesurferRef.current.destroy()
+    const audio = audioRef.current
+    if (!audio || !audioUrl) return
+    if (audio.src !== audioUrl) {
+      audio.src = audioUrl
     }
+  }, [audioUrl, audioRef])
 
-    const wavesurfer = WaveSurfer.create({
-      container: waveformRef.current,
-      waveColor: 'var(--color-ui-border-base)',
-      progressColor: 'var(--color-ui-fg-base)',
-      cursorColor: 'var(--color-ui-fg-base)',
-      barWidth: 2,
-      barGap: 1,
-      barRadius: 2,
-      height: 32,
-      normalize: true,
-      backend: 'MediaElement',
-      media: audioRef.current || undefined,
-    })
-
-    wavesurferRef.current = wavesurfer
-    wavesurfer.load(audioUrl)
-
-    wavesurfer.on('click', () => {
-      const time = wavesurfer.getCurrentTime()
-      seekTo(time)
-    })
-
-    return () => {
-      wavesurfer.destroy()
-    }
-  }, [audioUrl, isMinimized])
-
-  // Initialize mini WaveSurfer for minimized view
+  // Sync isPlaying state to the audio element
   useEffect(() => {
-    if (!miniWaveformRef.current || !audioUrl || !isMinimized) return
-
-    if (miniWavesurferRef.current) {
-      miniWavesurferRef.current.destroy()
+    const audio = audioRef.current
+    if (!audio || !audioUrl) return
+    if (isPlaying) {
+      audio.play().catch(() => {})
+    } else {
+      audio.pause()
     }
-
-    const wavesurfer = WaveSurfer.create({
-      container: miniWaveformRef.current,
-      waveColor: 'var(--color-ui-border-base)',
-      progressColor: 'var(--color-ui-fg-base)',
-      cursorColor: 'transparent',
-      barWidth: 2,
-      barGap: 1,
-      barRadius: 2,
-      height: 20,
-      normalize: true,
-      backend: 'MediaElement',
-      media: audioRef.current || undefined,
-    })
-
-    miniWavesurferRef.current = wavesurfer
-    wavesurfer.load(audioUrl)
-
-    wavesurfer.on('click', () => {
-      const time = wavesurfer.getCurrentTime()
-      seekTo(time)
-    })
-
-    return () => {
-      wavesurfer.destroy()
-    }
-  }, [audioUrl, isMinimized])
-
-  // Sync play/pause state with WaveSurfer
-  useEffect(() => {
-    if (wavesurferRef.current) {
-      if (isPlaying) {
-        wavesurferRef.current.play()
-      } else {
-        wavesurferRef.current.pause()
-      }
-    }
-    if (miniWavesurferRef.current) {
-      if (isPlaying) {
-        miniWavesurferRef.current.play()
-      } else {
-        miniWavesurferRef.current.pause()
-      }
-    }
-  }, [isPlaying])
+  }, [isPlaying, audioUrl, audioRef])
 
   // Toggle mute
   const toggleMute = () => {
@@ -143,13 +64,47 @@ export default function PodcastPlayer() {
     }
   }
 
-  const skipForward = () => {
-    seekTo(Math.min(currentTime + 15, duration))
+  // Progress percentage for the top timeline bar
+  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0
+
+  // Handle click/drag on the thin progress bar at the top
+  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const percent = Math.max(0, Math.min(1, x / rect.width))
+    seekTo(percent * duration)
   }
 
-  const skipBackward = () => {
-    seekTo(Math.max(currentTime - 15, 0))
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsDragging(true)
+    handleProgressClick(e)
   }
+
+  // Global mouse tracking while dragging — allows drag outside the bar
+  useEffect(() => {
+    if (!isDragging) return
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const bar = document.getElementById('player-progress-bar')
+      if (!bar) return
+      const rect = bar.getBoundingClientRect()
+      const x = e.clientX - rect.left
+      const percent = Math.max(0, Math.min(1, x / rect.width))
+      seekTo(percent * duration)
+    }
+
+    const handleMouseUp = () => {
+      setIsDragging(false)
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [isDragging, duration, seekTo])
 
   if (!isVisible || !currentEpisode || !podcast) {
     return null
@@ -160,169 +115,78 @@ export default function PodcastPlayer() {
       {audioUrl && (
         <audio
           ref={audioRef}
+          preload="metadata"
         />
       )}
 
-      <div className="fixed bottom-0 start-0 end-0 bg-ui-bg-base border-t border-ui-border-base shadow-elevation-flyout z-50">
-        {/* Full-width thin progress bar at the top */}
-        <div className="absolute top-0 start-0 end-0 h-[3px] bg-ui-border-base">
-          <div
-            className="h-full bg-ui-fg-base transition-[width] duration-300 ease-linear"
-            style={{ width: `${progressPercent}%` }}
-          />
+      <div className="fixed bottom-0 end-0 z-50 start-0 lg:start-[var(--sidebar-width)] bg-ui-bg-base border-t border-ui-border-base">
+        {/* Interactive thin progress bar at the top edge */}
+        <div
+          id="player-progress-bar"
+          className="absolute top-0 left-0 right-0 cursor-pointer group"
+          style={{ height: '3px' }}
+          onMouseDown={handleMouseDown}
+        >
+          {/* Track background */}
+          <div className="absolute inset-0 top-0 h-full">
+            <div
+              className="h-full bg-ui-fg-base transition-none"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+          {/* Hover area — expands hit target */}
+          <div className="absolute inset-0 top-0 transition-all -translate-y-1/2 group-hover:h-[6px]" style={{ height: '3px' }} />
         </div>
 
-        {isMinimized ? (
-          /* ── Minimized view ── */
-          <div className="h-14 max-w-7xl mx-auto px-4 flex items-center gap-3">
-            <button
-              onClick={togglePlay}
-              className="flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-full bg-ui-fg-base hover:opacity-80 transition-all"
-            >
-              {isPlaying ? (
-                <Pause size={16} className="text-ui-bg-base" fill="currentColor" />
-              ) : (
-                <Play size={16} className="text-ui-bg-base ms-0.5" fill="currentColor" />
-              )}
-            </button>
+        <div className="h-16 px-5 flex items-center pt-0.5 gap-4">
+          {/* Play/Pause */}
+          <button
+            onClick={togglePlay}
+            className="flex-shrink-0 flex items-center justify-center h-9 w-9 rounded-full bg-ui-fg-base hover:opacity-80 transition-all"
+          >
+            {isPlaying ? (
+              <Pause size={18} className="text-ui-bg-base" fill="currentColor" />
+            ) : (
+              <Play size={18} className="text-ui-bg-base ms-0.5" fill="currentColor" />
+            )}
+          </button>
 
-            <div ref={miniWaveformRef} className="flex-1 cursor-pointer min-w-[60px]" />
-
-            <span className="txt-compact-xsmall text-ui-fg-muted tabular-nums flex-shrink-0">
-              {formatDuration(Math.floor(currentTime))}
-            </span>
-
-            <button
-              onClick={toggleMute}
-              className="flex-shrink-0 flex items-center justify-center h-7 w-7 rounded-full hover:bg-ui-bg-base-hover transition-colors"
-            >
-              {isMuted || volume === 0 ? (
-                <VolumeX size={14} className="text-ui-fg-muted" />
-              ) : (
-                <Volume2 size={14} className="text-ui-fg-muted" />
-              )}
-            </button>
-
-            <button
-              onClick={toggleMinimize}
-              className="flex-shrink-0 flex items-center justify-center h-7 w-7 rounded-full hover:bg-ui-bg-base-hover transition-colors"
-              title="Expand"
-            >
-              <Maximize2 size={14} className="text-ui-fg-muted" />
-            </button>
-            <button
-              onClick={closePlayer}
-              className="flex-shrink-0 flex items-center justify-center h-7 w-7 rounded-full hover:bg-ui-bg-base-hover transition-colors"
-              title="Close"
-            >
-              <X size={14} className="text-ui-fg-muted" />
-            </button>
+          {/* Episode title + Podcast name */}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-ui-fg-base truncate leading-tight">
+              {currentEpisode.title}
+            </p>
+            <p className="text-xs text-ui-fg-muted truncate leading-tight mt-0.5">
+              {podcast.name}
+            </p>
           </div>
-        ) : (
-          /* ── Expanded view ── */
-          <div className="pt-1.5 pb-3">
-            <div className="max-w-7xl mx-auto px-5">
-              {/* Row 1: Controls + Episode info + Volume + Actions */}
-              <div className="flex items-center gap-1.5 py-2">
-                <button
-                  onClick={skipBackward}
-                  className="flex-shrink-0 flex items-center justify-center h-9 w-9 rounded-full hover:bg-ui-bg-base-hover transition-colors"
-                  title="Skip back 15s"
-                >
-                  <SkipBack size={18} className="text-ui-fg-subtle" />
-                </button>
 
-                <button
-                  onClick={togglePlay}
-                  className="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-ui-fg-base hover:opacity-80 transition-all"
-                >
-                  {isPlaying ? (
-                    <Pause size={20} className="text-ui-bg-base ms-0.5" fill="currentColor" />
-                  ) : (
-                    <Play size={20} className="text-ui-bg-base ms-0.5" fill="currentColor" />
-                  )}
-                </button>
+          {/* Time */}
+          <span className="text-sm text-ui-fg-muted tabular-nums flex-shrink-0">
+            {formatDuration(Math.floor(currentTime))}
+          </span>
 
-                <button
-                  onClick={skipForward}
-                  className="flex-shrink-0 flex items-center justify-center h-9 w-9 rounded-full hover:bg-ui-bg-base-hover transition-colors"
-                  title="Skip forward 15s"
-                >
-                  <SkipForward size={18} className="text-ui-fg-subtle" />
-                </button>
+          {/* Mute */}
+          <button
+            onClick={toggleMute}
+            className="flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-full hover:bg-ui-bg-base-hover transition-colors"
+          >
+            {isMuted || volume === 0 ? (
+              <VolumeX size={15} className="text-ui-fg-muted" />
+            ) : (
+              <Volume2 size={15} className="text-ui-fg-muted" />
+            )}
+          </button>
 
-                <span className="txt-compact-small-plus text-ui-fg-base truncate text-center flex-1 mx-2">
-                  {currentEpisode.title}
-                  <span className="text-ui-fg-muted mx-1.5 font-normal">·</span>
-                  <span className="text-ui-fg-muted font-normal">{podcast.name}</span>
-                </span>
-
-                <button
-                  onClick={toggleMute}
-                  className="flex-shrink-0 flex items-center justify-center h-9 w-9 rounded-full hover:bg-ui-bg-base-hover transition-colors"
-                >
-                  {isMuted || volume === 0 ? (
-                    <VolumeX size={18} className="text-ui-fg-subtle" />
-                  ) : (
-                    <Volume2 size={18} className="text-ui-fg-subtle" />
-                  )}
-                </button>
-
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.01"
-                  value={volume}
-                  onChange={(e) => {
-                    const newVolume = parseFloat(e.target.value)
-                    setVolume(newVolume)
-                    setIsMuted(newVolume === 0)
-                  }}
-                  className="w-20 h-1 bg-ui-border-base rounded-full appearance-none cursor-pointer accent-ui-fg-base flex-shrink-0
-                    [&::-webkit-slider-thumb]:appearance-none
-                    [&::-webkit-slider-thumb]:h-3
-                    [&::-webkit-slider-thumb]:w-3
-                    [&::-webkit-slider-thumb]:rounded-full
-                    [&::-webkit-slider-thumb]:bg-ui-fg-base
-                    [&::-webkit-slider-thumb]:shadow-elevation-card-rest
-                    [&::-moz-range-thumb]:h-3
-                    [&::-moz-range-thumb]:w-3
-                    [&::-moz-range-thumb]:rounded-full
-                    [&::-moz-range-thumb]:bg-ui-fg-base
-                    [&::-moz-range-thumb]:border-0
-                    [&::-moz-range-thumb]:shadow-elevation-card-rest"
-                />
-
-                <button
-                  onClick={toggleMinimize}
-                  className="flex-shrink-0 flex items-center justify-center h-9 w-9 rounded-full hover:bg-ui-bg-base-hover transition-colors"
-                  title="Minimize"
-                >
-                  <Minimize2 size={18} className="text-ui-fg-subtle" />
-                </button>
-                <button
-                  onClick={closePlayer}
-                  className="flex-shrink-0 flex items-center justify-center h-9 w-9 rounded-full hover:bg-ui-bg-base-hover transition-colors"
-                  title="Close"
-                >
-                  <X size={18} className="text-ui-fg-subtle" />
-                </button>
-              </div>
-
-              {/* Row 2: Time + Waveform + Total duration */}
-              <div className="flex items-center justify-between px-0.5">
-                <span className="txt-compact-xsmall text-ui-fg-muted tabular-nums w-12">
-                  {formatDuration(Math.floor(currentTime))}
-                </span>
-                <div ref={waveformRef} className="flex-1 cursor-pointer mx-2" />
-                <span className="txt-compact-xsmall text-ui-fg-muted tabular-nums w-12 text-end">
-                  {formatDuration(Math.floor(duration))}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
+          {/* Close */}
+          <button
+            onClick={closePlayer}
+            className="flex-shrink-0 flex items-center justify-center h-8 w-8 rounded-full hover:bg-ui-bg-base-hover transition-colors"
+            title="Close"
+          >
+            <X size={15} className="text-ui-fg-muted" />
+          </button>
+        </div>
       </div>
     </>
   )

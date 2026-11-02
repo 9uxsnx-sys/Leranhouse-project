@@ -13,7 +13,6 @@ interface PodcastPlayerState {
   currentTime: number
   duration: number
   volume: number
-  isMinimized: boolean
   isVisible: boolean
 }
 
@@ -25,7 +24,6 @@ type PodcastPlayerAction =
   | { type: 'SET_TIME'; payload: number }
   | { type: 'SET_DURATION'; payload: number }
   | { type: 'SET_VOLUME'; payload: number }
-  | { type: 'TOGGLE_MINIMIZE' }
   | { type: 'CLOSE_PLAYER' }
   | { type: 'NEXT_EPISODE'; payload: PodcastEpisode }
   | { type: 'PREVIOUS_EPISODE'; payload: PodcastEpisode }
@@ -37,7 +35,6 @@ const initialState: PodcastPlayerState = {
   currentTime: 0,
   duration: 0,
   volume: 1,
-  isMinimized: true,  // Default to minimized
   isVisible: false,
 }
 
@@ -54,7 +51,6 @@ function podcastPlayerReducer(
         isPlaying: false,
         currentTime: 0,
         isVisible: true,
-        isMinimized: true,  // Start minimized by default
       }
     case 'PLAY':
       return { ...state, isPlaying: true }
@@ -68,8 +64,6 @@ function podcastPlayerReducer(
       return { ...state, duration: action.payload }
     case 'SET_VOLUME':
       return { ...state, volume: action.payload }
-    case 'TOGGLE_MINIMIZE':
-      return { ...state, isMinimized: !state.isMinimized }
     case 'CLOSE_PLAYER':
       return {
         ...initialState,
@@ -102,7 +96,6 @@ interface PodcastPlayerContextValue {
   setTime: (time: number) => void
   setDuration: (duration: number) => void
   setVolume: (volume: number) => void
-  toggleMinimize: () => void
   closePlayer: () => void
   seekTo: (time: number) => void
   audioRef: React.RefObject<HTMLAudioElement | null>
@@ -189,10 +182,6 @@ export function PodcastPlayerProvider({ children }: { children: React.ReactNode 
     if (audioRef.current) {
       audioRef.current.volume = volume
     }
-  }, [])
-
-  const toggleMinimize = useCallback(() => {
-    dispatch({ type: 'TOGGLE_MINIMIZE' })
   }, [])
 
   const closePlayer = useCallback(() => {
@@ -328,11 +317,10 @@ export function PodcastPlayerProvider({ children }: { children: React.ReactNode 
     setTime,
     setDuration,
     setVolume,
-    toggleMinimize,
     closePlayer,
     seekTo,
     audioRef,
-  }), [state, playEpisode, play, pause, togglePlay, setTime, setDuration, setVolume, toggleMinimize, closePlayer, seekTo, audioRef])
+  }), [state, playEpisode, play, pause, togglePlay, setTime, setDuration, setVolume, closePlayer, seekTo, audioRef])
 
   return (
     <PodcastPlayerContext.Provider value={value}>
