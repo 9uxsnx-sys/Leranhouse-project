@@ -10,6 +10,7 @@ from src.core.events.database import get_db_session
 from src.db.podcasts.episodes import PodcastEpisodeRead
 from src.db.podcasts.podcasts import Podcast
 from src.db.podcasts.podcasts import PodcastRead, PodcastReadWithEpisodeCount
+from src.db.podcast_translations import PodcastEpisodeTranslationRead
 from src.routers.podcasts.episodes import router as episodes_router
 from src.routers.podcasts.podcasts import router as podcasts_router
 from src.security.auth import get_current_user
@@ -59,6 +60,17 @@ def _mock_episode(**overrides) -> PodcastEpisodeRead:
     )
     data.update(overrides)
     return PodcastEpisodeRead(**data)
+
+
+def _mock_episode_translation_read(**overrides) -> PodcastEpisodeTranslationRead:
+    data = dict(
+        id=1, episode_id=1, locale="fr", title="Episode FR",
+        description="Desc FR", extra_metadata=None, state="draft",
+        source_updated_at=None, translated_by=None,
+        creation_date="2024-01-01", update_date="2024-01-01",
+    )
+    data.update(overrides)
+    return PodcastEpisodeTranslationRead(**data)
 
 
 class TestPodcastsRouter:
@@ -157,3 +169,94 @@ class TestPodcastsRouter:
 
         assert response.status_code == 404
         assert response.json()["detail"] == "Podcast not found"
+
+    # ── Translation router tests for extra_metadata ─────────────────────────────
+
+    async def test_upsert_episode_translation_extra_metadata_endpoint(self, client):
+        """PUT /episodes/{uuid}/translations/{locale} accepts and returns extra_metadata."""
+        translation_meta = {
+            "learning_objectives": ["Obj FR 1"],
+            "takeaways": [{"title": "FR T1", "items": ["FR A"]}],
+        }
+        mock_result = _mock_episode_translation_read(
+            episode_id=1, locale="fr",
+            title="Episode FR", description="Desc FR",
+            extra_metadata=translation_meta,
+        )
+        patch_path = "src.routers.podcasts.episodes.upsert_episode_translation"
+        with patch(patch_path, new_callable=AsyncMock, return_value=mock_result):
+            response = await client.put(
+                "/api/v1/podcasts/episodes/episode_test/translations/fr",
+                json={
+                    "title": "Episode FR",
+                    "description": "Desc FR",
+                    "extra_metadata": translation_meta,
+                },
+            )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["extra_metadata"] == translation_meta
+        assert data["title"] == "Episode FR"
+
+    async def test_list_episode_translations_returns_extra_metadata(self, client):
+        """GET /episodes/{uuid}/translations includes extra_metadata in the response."""
+        translation_meta = {"learning_objectives": ["Obj 1"], "takeaways": []}
+        mock_list = [
+            _mock_episode_translation_read(
+                episode_id=1, locale="fr",
+                title="Episode FR", extra_metadata=translation_meta,
+            ),
+            _mock_episode_translation_read(
+                id=2, episode_id=1, locale="ar",
+                title="Episode AR", extra_metadata=None,
+            ),
+        ]
+        patch_path = "src.routers.podcasts.episodes.list_episode_translations"
+        with patch(patch_path, new_callable=AsyncMock, return_value=mock_list):
+            response = await client.get(
+                "/api/v1/podcasts/episodes/episode_test/translations"
+            )
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 2
+        assert data[0]["extra_metadata"] == translation_meta
+        assert data[1]["extra_metadata"] is None
+
+    async def test_get_episodes_with_locale_applies_overlay(self, client, db, org):
+        """GET /podcasts/{uuid}/episodes?locale={locale} returns episodes with merged extra_metadata."""
+        podcast_row = Podcast(
+            id=1,
+            org_id=org.id,
+            name="Podcast",
+            description="Desc",
+            about="About",
+            tags="tag",
+            thumbnail_image="",
+            public=True,
+            published=True,
+            podcast_uuid="podcast_test",
+            creation_date="2024-01-01",
+            update_date="2024-01-01",
+        )
+        db.add(podcast_row)
+        db.commit()
+
+        overlay_meta = {
+            "learning_objectives": ["Translated Obj"],
+            "takeaways": [{"title": "T", "items": ["A"]}],
+        }
+        mock_episodes = [
+            _mock_episode(
+                id=1, episode_uuid="ep_1",
+                extra_metadata=overlay_meta,
+            ),
+        ]
+        patch_path = "src.routers.podcasts.podcasts.get_episodes_by_podcast"
+        with patch(patch_path, new_callable=AsyncMock, return_value=mock_episodes):
+            response = await client.get(
+                "/api/v1/podcasts/podcast_test/episodes?locale=fr"
+            )
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 1
+        assert data[0]["extra_metadata"] == overlay_meta

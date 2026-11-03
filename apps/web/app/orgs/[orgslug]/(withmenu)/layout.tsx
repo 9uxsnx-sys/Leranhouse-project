@@ -8,8 +8,6 @@ import { OrgJoinBanner, OrgJoinBannerProvider } from '@components/Objects/Banner
 import { PodcastPlayerProvider } from '@components/Contexts/PodcastPlayerContext'
 import { UserBreadcrumbProvider } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
 
-import dynamic from 'next/dynamic'
-const PodcastPlayer = dynamic(() => import('@components/Objects/Podcasts/PodcastPlayer'), { ssr: false })
 import { PageViewTracker } from '@components/Analytics/PageViewTracker'
 import { getGoogleFontUrl, DEFAULT_FONT } from '@/lib/fonts'
 
@@ -91,7 +89,6 @@ export default function RootLayout(
             <LayoutContent orgslug={params?.orgslug}>
               {children}
             </LayoutContent>
-            <PodcastPlayer />
           </UserBreadcrumbProvider>
         </PodcastPlayerProvider>
       </OrgJoinBannerProvider>

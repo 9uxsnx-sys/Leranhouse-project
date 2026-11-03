@@ -56,3 +56,4 @@ class PodcastEpisodeRead(PodcastEpisodeBase):
     creation_date: str
     update_date: str
     thumbnail_image: Optional[str] = Field(default="")
+    extra_metadata: Optional[dict] = None

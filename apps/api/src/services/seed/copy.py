@@ -1578,20 +1578,127 @@ PODCASTS = [
 ]
 
 FLAGSHIP_EPISODES = [
-    ("Why we draw before we design", "A short argument for paper, and the story of a project that went wrong because we skipped it."),
-    ("The 8 point grid, honestly", "Where the rule comes from, when it helps, and the two cases where it gets in the way."),
-    ("Critiquing a pricing page live", "We open a real page, find eleven problems and fix six of them in forty minutes."),
-    ("Naming components with a stranger", "A recorded exercise where two people name the same component library without talking first."),
-    ("What clients actually see", "We show a design to five people who do not work in tech and record their first reactions."),
-    ("The case study problem", "Why portfolios full of screenshots fail, and what to write instead."),
-    ("On hiring juniors", "A hiring manager explains what makes a junior portfolio stand out in a stack of sixty."),
-    ("Arabic and Latin in one layout", "Two designers walk through a bilingual interface and the alignment issues that follow."),
-    ("Figma variables, slowly", "An hour on variables without the hype. Includes the parts that break."),
-    ("When to stop designing", "A conversation about diminishing returns and shipping something slightly ugly."),
-    ("Dark mode is not a filter", "Colour, contrast and the shortcuts that make dark themes look cheap."),
-    ("The feedback we ignore", "Why useful critique often sounds boring, and the exciting feedback that wastes a week."),
-    ("Working with developers who care", "A developer and a designer replay a handoff that went well and explain why."),
-    ("Season one questions", "Listener questions, including the ones about money."),
+    (
+        "Why we draw before we design",
+        "A short argument for paper, and the story of a project that went wrong because we skipped it.\n\n"
+        "In this episode we explore why sketching on paper remains one of the most underrated tools in a designer's workflow. "
+        "Our guest walks us through a real project where skipping the paper phase led to three weeks of unnecessary revisions, "
+        "and how going back to basics saved the entire timeline.\n\n"
+        "We also discuss the cognitive science behind why handwriting triggers different problem-solving pathways than digital tools, "
+        "and practical tips for integrating quick sketching into teams that have never tried it.",
+    ),
+    (
+        "The 8 point grid, honestly",
+        "Where the rule comes from, when it helps, and the two cases where it gets in the way.\n\n"
+        "The 8 point grid system has become a staple in modern UI design, but like any tool it has its limitations. "
+        "We sit down with a designer who has applied it across dozens of projects to hear what actually works and what doesn't.\n\n"
+        "From spacing systems to typography alignment, we cover the practical implementation details that are rarely discussed in tutorials. "
+        "Plus, the two specific scenarios where our guest recommends ignoring the grid entirely and trusting your eye instead.",
+    ),
+    (
+        "Critiquing a pricing page live",
+        "We open a real page, find eleven problems and fix six of them in forty minutes.\n\n"
+        "There is nothing quite like a live critique to expose how much we miss when we design in isolation. "
+        "In this episode we pick a real pricing page from a well-known SaaS product and walk through it section by section.\n\n"
+        "By the end of the session we have identified eleven usability issues, six of which we redesign on the fly. "
+        "The conversation covers hierarchy, pricing psychology, mobile responsiveness, and why most pricing tables confuse rather than convince.",
+    ),
+    (
+        "Naming components with a stranger",
+        "A recorded exercise where two people name the same component library without talking first.\n\n"
+        "Naming is one of the hardest problems in design systems, and this episode proves it experimentally. "
+        "Two designers are given the same set of components and asked to name them independently, with no communication allowed.\n\n"
+        "The results are surprising, sometimes hilarious, and deeply revealing about how different people interpret the same visual elements. "
+        "We discuss what this means for team collaboration and how to build naming conventions that actually stick.",
+    ),
+    (
+        "What clients actually see",
+        "We show a design to five people who do not work in tech and record their first reactions.\n\n"
+        "It is easy to forget that most people do not see interfaces the way designers do. "
+        "In this experiment we take a polished design and show it to five non-technical users, recording their unfiltered first reactions.\n\n"
+        "The gap between what we intended and what they perceived is both humbling and educational. "
+        "We break down each reaction, discuss what it reveals about our assumptions, and share practical ways to close this gap in your own work.",
+    ),
+    (
+        "The case study problem",
+        "Why portfolios full of screenshots fail, and what to write instead.\n\n"
+        "A portfolio case study should tell a story, not just display screenshots. Yet the vast majority of design portfolios fall into the same trap: "
+        "beautiful images with almost no context about the problem, the process, or the outcome.\n\n"
+        "In this episode we dissect what makes a case study memorable. We look at real examples, both good and bad, "
+        "and outline a simple structure that turns any project into a compelling narrative. "
+        "If you are updating your portfolio, this episode might save you hours of work.",
+    ),
+    (
+        "On hiring juniors",
+        "A hiring manager explains what makes a junior portfolio stand out in a stack of sixty.\n\n"
+        "Breaking into the industry is harder than ever, but the portfolios that get noticed share specific qualities. "
+        "A hiring manager with over a decade of experience joins us to explain exactly what they look for when reviewing junior applicants.\n\n"
+        "We cover the difference between showing process and showing personality, why side projects often matter more than coursework, "
+        "and the one thing that almost every rejected portfolio is missing. "
+        "If you are early in your career, this episode is worth taking notes.",
+    ),
+    (
+        "Arabic and Latin in one layout",
+        "Two designers walk through a bilingual interface and the alignment issues that follow.\n\n"
+        "Designing for bilingual interfaces that mix Arabic and Latin scripts presents unique challenges that most Western designers never encounter. "
+        "From baseline alignment to line height inconsistencies, the devil is in the details.\n\n"
+        "Two designers with experience in bilingual product design walk through a real interface and point out every alignment issue. "
+        "They share practical solutions and discuss why RTL support is more than just flipping the layout horizontally. "
+        "Essential listening for anyone working on multilingual products.",
+    ),
+    (
+        "Figma variables, slowly",
+        "An hour on variables without the hype. Includes the parts that break.\n\n"
+        "Figma variables were announced with a lot of excitement, but the reality of using them in production is more nuanced. "
+        "We spend an hour going through variables methodically, without the usual hype.\n\n"
+        "Our guest has been using variables daily since the beta and shares honest feedback about what works, what breaks, "
+        "and where the feature still falls short. We cover modes, typography tokens, colour management, and the edge cases that can trip up even experienced users.",
+    ),
+    (
+        "When to stop designing",
+        "A conversation about diminishing returns and shipping something slightly ugly.\n\n"
+        "Knowing when to stop designing is one of the most underrated skills in the industry. "
+        "In this episode we talk about diminishing returns, perfectionism, and the courage to ship something that is slightly ugly.\n\n"
+        "Our guest shares a framework for deciding when a design is good enough, based on years of shipping products under tight deadlines. "
+        "We discuss the difference between polish that matters and polish that nobody will ever notice, "
+        "and why the best designers are often the ones who know when to walk away.",
+    ),
+    (
+        "Dark mode is not a filter",
+        "Colour, contrast and the shortcuts that make dark themes look cheap.\n\n"
+        "Dark mode has become an expected feature, but most implementations rely on shortcuts that make the result look cheap. "
+        "Inverting colours, using pure black backgrounds, and ignoring contrast ratios are common mistakes.\n\n"
+        "We sit down with a designer who specialises in colour systems to understand what actually makes a dark theme feel premium. "
+        "Topics include colour palette construction, contrast hierarchies, semantic colour tokens, "
+        "and why the best dark modes are designed from the ground up rather than converted from light mode.",
+    ),
+    (
+        "The feedback we ignore",
+        "Why useful critique often sounds boring, and the exciting feedback that wastes a week.\n\n"
+        "Not all feedback is created equal. Some of the most valuable critique sounds boring at first, "
+        "while exciting feedback can send you down a rabbit hole that wastes a week.\n\n"
+        "In this episode we explore the psychology of design feedback, why we gravitate toward certain types of critique, "
+        "and how to train yourself to recognise the feedback that actually improves your work. "
+        "Our guest shares a simple filtering system for deciding which feedback to act on and which to thank politely and ignore.",
+    ),
+    (
+        "Working with developers who care",
+        "A developer and a designer replay a handoff that went well and explain why.\n\n"
+        "Good handoffs are rare, but when they work the results are magic. In this episode a designer and a developer "
+        "replay a real handoff that went exceptionally well and break down exactly why it succeeded.\n\n"
+        "They discuss the preparation, the communication, and the tools that made the difference. "
+        "Topics include component documentation, spacing specifications, interaction prototypes, "
+        "and the single most important question to ask before any handoff meeting.",
+    ),
+    (
+        "Season one questions",
+        "Listener questions, including the ones about money.\n\n"
+        "For the season finale we open the floor to listener questions. Topics range from pricing and negotiations "
+        "to career advice and the future of design tools.\n\n"
+        "We answer the questions we were asked honestly, including the uncomfortable ones about money. "
+        "How much should a junior designer charge? When is it time to leave a job? What skills matter most in 2026? "
+        "No fluff, just real answers from people who have been through it.",
+    ),
 ]
 
 DISCUSSION_POSTS = [

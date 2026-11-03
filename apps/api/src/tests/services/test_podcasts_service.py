@@ -88,6 +88,7 @@ def _make_episode(db, podcast, org, **overrides):
         published=overrides.pop("published", True),
         order=overrides.pop("order", 0),
         episode_uuid=overrides.pop("episode_uuid", "episode_test"),
+        extra_metadata=overrides.pop("extra_metadata", None),
         creation_date=overrides.pop("creation_date", "2024-01-01"),
         update_date=overrides.pop("update_date", "2024-01-01"),
     )
@@ -867,6 +868,227 @@ class TestPodcastsService:
         assert updated.extra_metadata == new_meta
         assert fetched.extra_metadata == new_meta
 
+    # ── extra_metadata + translations ─────────────────────────────────────────
+
+    @pytest.mark.asyncio
+    async def test_upsert_episode_translation_with_extra_metadata(
+        self, db, org, admin_user, mock_request
+    ):
+        """Creating a translation with extra_metadata persists and reads back."""
+        podcast = _make_podcast(db, org)
+        episode = _make_episode(
+            db, podcast, org,
+            extra_metadata={"learning_objectives": ["Source Obj"], "takeaways": []},
+        )
+        _make_author(db, podcast.podcast_uuid, admin_user.id)
+
+        from src.db.podcast_translations import PodcastEpisodeTranslationUpsert
+        from src.services.podcasts.translations import (
+            get_episode_translation_row,
+            upsert_episode_translation,
+        )
+
+        translation_meta = {
+            "learning_objectives": ["Obj FR 1", "Obj FR 2"],
+            "takeaways": [{"title": "FR T1", "items": ["FR A"]}],
+        }
+        with patch(
+            "src.services.podcasts.translations.check_resource_access",
+            new_callable=AsyncMock,
+        ):
+            result = await upsert_episode_translation(
+                mock_request,
+                episode.episode_uuid,
+                "fr",
+                PodcastEpisodeTranslationUpsert(
+                    title="Episode FR",
+                    description="Desc FR",
+                    extra_metadata=translation_meta,
+                ),
+                admin_user,
+                db,
+            )
+
+        assert result.title == "Episode FR"
+        assert result.extra_metadata == translation_meta
+
+        # Verify it persisted in the DB
+        row = get_episode_translation_row(db, episode.id, "fr")
+        assert row is not None
+        assert row.extra_metadata == translation_meta
+
+    @pytest.mark.asyncio
+    async def test_update_episode_translation_extra_metadata(
+        self, db, org, admin_user, mock_request
+    ):
+        """Updating extra_metadata on an existing translation doesn't clobber other fields."""
+        podcast = _make_podcast(db, org)
+        episode = _make_episode(db, podcast, org)
+        _make_author(db, podcast.podcast_uuid, admin_user.id)
+
+        from src.db.podcast_translations import PodcastEpisodeTranslationUpsert
+        from src.services.podcasts.translations import upsert_episode_translation
+
+        initial_meta = {"learning_objectives": ["Initial"]}
+        with patch(
+            "src.services.podcasts.translations.check_resource_access",
+            new_callable=AsyncMock,
+        ):
+            await upsert_episode_translation(
+                mock_request,
+                episode.episode_uuid,
+                "fr",
+                PodcastEpisodeTranslationUpsert(
+                    title="Episode FR",
+                    description="Desc FR",
+                    extra_metadata=initial_meta,
+                ),
+                admin_user,
+                db,
+            )
+
+        updated_meta = {
+            "learning_objectives": ["Updated"],
+            "takeaways": [{"title": "T", "items": ["A"]}],
+        }
+        with patch(
+            "src.services.podcasts.translations.check_resource_access",
+            new_callable=AsyncMock,
+        ):
+            result = await upsert_episode_translation(
+                mock_request,
+                episode.episode_uuid,
+                "fr",
+                PodcastEpisodeTranslationUpsert(
+                    title="Episode FR",
+                    description="Desc FR",
+                    extra_metadata=updated_meta,
+                ),
+                admin_user,
+                db,
+            )
+
+        assert result.extra_metadata == updated_meta
+        assert result.title == "Episode FR"  # unchanged
+
+    @pytest.mark.asyncio
+    async def test_apply_episode_overlay_merges_extra_metadata(
+        self, db, org, admin_user, mock_request
+    ):
+        """apply_episode_overlay merges translation extra_metadata onto episode source."""
+        podcast = _make_podcast(db, org, source_locale="en")
+        episode = _make_episode(
+            db, podcast, org,
+            extra_metadata={"learning_objectives": ["Source Obj"], "takeaways": []},
+        )
+        _make_author(db, podcast.podcast_uuid, admin_user.id)
+
+        from src.db.podcast_translations import PodcastEpisodeTranslationUpsert
+        from src.db.podcasts.episodes import PodcastEpisodeRead
+        from src.services.podcasts.translations import (
+            apply_episode_overlay,
+            upsert_episode_translation,
+        )
+
+        translation_meta = {
+            "learning_objectives": ["Translated Obj"],
+            "takeaways": [{"title": "T", "items": ["A"]}],
+        }
+        with patch(
+            "src.services.podcasts.translations.check_resource_access",
+            new_callable=AsyncMock,
+        ):
+            await upsert_episode_translation(
+                mock_request,
+                episode.episode_uuid,
+                "fr",
+                PodcastEpisodeTranslationUpsert(
+                    title="Episode FR",
+                    description="Desc FR",
+                    extra_metadata=translation_meta,
+                ),
+                admin_user,
+                db,
+            )
+
+        read = PodcastEpisodeRead.model_validate(episode)
+        localized = apply_episode_overlay(read, episode, "en", "fr", db)
+
+        assert localized.extra_metadata is not None
+        # Translated values take precedence
+        assert localized.extra_metadata["learning_objectives"] == ["Translated Obj"]
+        # Translation-only keys appear
+        assert localized.extra_metadata["takeaways"] == [{"title": "T", "items": ["A"]}]
+
+    @pytest.mark.asyncio
+    async def test_apply_episode_overlay_bulk_merges_extra_metadata(
+        self, db, org, admin_user, mock_request
+    ):
+        """apply_episode_overlay_bulk merges translation extra_metadata correctly."""
+        podcast = _make_podcast(db, org, source_locale="en")
+        episode = _make_episode(
+            db, podcast, org, episode_uuid="ep_bulk_test",
+            extra_metadata={"learning_objectives": ["Source Obj"]},
+        )
+        _make_author(db, podcast.podcast_uuid, admin_user.id)
+
+        from src.db.podcast_translations import PodcastEpisodeTranslationUpsert
+        from src.db.podcasts.episodes import PodcastEpisodeRead
+        from src.services.podcasts.translations import (
+            apply_episode_overlay_bulk,
+            upsert_episode_translation,
+        )
+
+        translation_meta = {
+            "learning_objectives": ["Bulk Translated"],
+            "takeaways": [{"title": "Bulk T", "items": ["B"]}],
+        }
+        with patch(
+            "src.services.podcasts.translations.check_resource_access",
+            new_callable=AsyncMock,
+        ):
+            await upsert_episode_translation(
+                mock_request,
+                episode.episode_uuid,
+                "fr",
+                PodcastEpisodeTranslationUpsert(
+                    title="Episode FR",
+                    description="Desc FR",
+                    extra_metadata=translation_meta,
+                ),
+                admin_user,
+                db,
+            )
+
+        read = PodcastEpisodeRead.model_validate(episode)
+        localized_list = apply_episode_overlay_bulk([read], [episode], "en", "fr", db)
+
+        assert len(localized_list) == 1
+        assert localized_list[0].extra_metadata is not None
+        assert localized_list[0].extra_metadata["learning_objectives"] == ["Bulk Translated"]
+        assert localized_list[0].extra_metadata["takeaways"] == [{"title": "Bulk T", "items": ["B"]}]
+
+    @pytest.mark.asyncio
+    async def test_apply_episode_overlay_fallback_no_translation(
+        self, db, org, admin_user, mock_request
+    ):
+        """When no translation exists, extra_metadata falls back to source episode value."""
+        podcast = _make_podcast(db, org, source_locale="en")
+        episode = _make_episode(
+            db, podcast, org,
+            extra_metadata={"learning_objectives": ["Fallback Obj"]},
+        )
+        _make_author(db, podcast.podcast_uuid, admin_user.id)
+
+        from src.db.podcasts.episodes import PodcastEpisodeRead
+        from src.services.podcasts.translations import apply_episode_overlay
+
+        read = PodcastEpisodeRead.model_validate(episode)
+        localized = apply_episode_overlay(read, episode, "en", "fr", db)
+
+        # Same model reference — no translation found, no copy made
+        assert localized is read
+        assert localized.extra_metadata == {"learning_objectives": ["Fallback Obj"]}
 
 class TestEpisodesService:
     @pytest.mark.asyncio

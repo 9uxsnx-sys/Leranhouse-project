@@ -1,9 +1,49 @@
-# Error Log
+## Error Type
+Console Error
 
-## Runtime AbortError — "signal is aborted without reason"
-- **Status**: ✅ Fixed
-- **Root cause**: Next.js 16 routes `onRecoverableError` → `reportGlobalError` → original `window.reportError()` → `error` DOM event → `onUnhandledError` (registered via `addEventListener`) → `handleClientError` → dev overlay. The `reportGlobalError` function captures `window.reportError` at **module load time**, so patching `window.reportError` has no effect. Additionally, explicit `AbortErrorBoundary` components made things **worse** by routing errors through `onCaughtError` → `handleClientError(error)` directly, bypassing both `window.reportError` and `addEventListener`.
-- **Fix** (see `apps/web/app/layout.tsx`):
-  1. **Removed `AbortErrorBoundary`** from `layout.tsx` and `podcast.tsx` — these routed errors through `handleClientError` directly, which our DOM-level patches cannot intercept.
-  2. **Patched `window.addEventListener`** in a synchronous `<head>` script to wrap all `error` and `unhandledrejection` listeners with AbortError filtering. Since `handleGlobalErrors()` registers `onUnhandledError` via `addEventListener('error', ...)` from a React component (after our sync script runs), our wrapper intercepts AbortErrors before they reach `handleClientError` and the dev overlay.
-- **Key insight**: The ONLY reliable interception point is `window.addEventListener` for `error` events. `window.reportError` patching is useless because Next.js captures it at module load time. Error boundaries are counterproductive because they route through `handleClientError` directly.
+## Error Message
+Podcast not found
+
+
+    at errorHandling (services\utils\ts\requests.ts:145:24)
+    at getPodcastMeta (services\podcasts\podcasts.ts:164:15)
+    at Module.generateMetadata$1 (app\orgs\[orgslug]\(withmenu)\podcast\[podcastuuid]\page.tsx:32:19)
+    at Next.MetadataOutlet (<anonymous>:null:null)
+
+## Code Frame
+  143 |       message = JSON.stringify(detail)
+  144 |     }
+> 145 |     const error: any = new Error(message)
+      |                        ^
+  146 |     error.status = res.status
+  147 |     error.detail = detail
+  148 |     throw error
+
+Next.js version: 16.2.6 (Webpack)
+
+
+error 2
+
+
+## Error Type
+Console Error
+
+## Error Message
+Podcast not found
+
+
+    at errorHandling (services\utils\ts\requests.ts:145:24)
+    at getPodcastMeta (services\podcasts\podcasts.ts:164:15)
+    at PodcastPage (app\orgs\[orgslug]\(withmenu)\podcast\[podcastuuid]\page.tsx:120:19)
+    at PodcastPage (<anonymous>:null:null)
+
+## Code Frame
+  143 |       message = JSON.stringify(detail)
+  144 |     }
+> 145 |     const error: any = new Error(message)
+      |                        ^
+  146 |     error.status = res.status
+  147 |     error.detail = detail
+  148 |     throw error
+
+Next.js version: 16.2.6 (Webpack)

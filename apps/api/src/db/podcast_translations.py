@@ -71,7 +71,7 @@ class PodcastTranslationRead(SQLModel):
 
 
 class PodcastEpisodeTranslation(SQLModel, table=True):
-    """One locale of a podcast episode (title + description)."""
+    """One locale of a podcast episode (title + description + extra_metadata)."""
 
     __tablename__ = "podcast_episode_translation"  # type: ignore[assignment]
 
@@ -86,6 +86,7 @@ class PodcastEpisodeTranslation(SQLModel, table=True):
     locale: str = Field(sa_column=Column(String(length=10), nullable=False))
     title: str = Field(sa_column=Column(Text, nullable=False))
     description: Optional[str] = Field(default=None, sa_column=Column(Text))
+    extra_metadata: Optional[dict] = Field(default=None, sa_column=Column(JSONB))
     state: str = Field(
         default="draft", sa_column=Column(String(length=20), nullable=False)
     )
@@ -103,6 +104,7 @@ class PodcastEpisodeTranslation(SQLModel, table=True):
 class PodcastEpisodeTranslationUpsert(SQLModel):
     title: str
     description: Optional[str] = None
+    extra_metadata: Optional[dict] = None
     state: Optional[str] = None
 
 
@@ -112,6 +114,7 @@ class PodcastEpisodeTranslationRead(SQLModel):
     locale: str
     title: str
     description: Optional[str] = None
+    extra_metadata: Optional[dict] = None
     state: str
     source_updated_at: Optional[str] = None
     translated_by: Optional[int] = None

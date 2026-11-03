@@ -1,9 +1,10 @@
 # Episode Admin Editing Plan
 
-> **Status:** planned — not yet implemented.
+> **Status:** Phase 5 (frontend form) implemented. Backend + migration complete (Phases 1-4).
 > **Goal:** match the lesson admin editing experience 1:1 for podcast episodes.
 > **Current gap:** the episode form only edits `title` + `description` + audio. The API response model (`PodcastEpisodeRead`) omits `extra_metadata`, so the frontend cannot read or write learning objectives or takeaways for episodes.
 > **Translation gap:** `podcast_episode_translation` only carries `title` and `description`. Fields in `extra_metadata` are always served in the source locale.
+> **Status note:** All backend models, locale overlay functions, migration, frontend interfaces, and the `EpisodeDetailForm` have been updated. The admin form now shows What You'll Learn and Key Takeaways sections using the same `LearningItemsList` and `TakeawayItemsList` components as the lesson form. Saving includes `extra_metadata` for both source and non-source locales.
 
 ## Goal
 

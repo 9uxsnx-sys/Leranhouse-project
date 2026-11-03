@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import useSWR, { mutate } from 'swr'
 import { usePodcast } from '@components/Contexts/PodcastContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -18,6 +18,8 @@ import {
   formatDuration,
 } from '@services/podcasts/episodes'
 import { upsertEpisodeTranslation } from '@services/podcasts/podcastTranslations'
+import LearningItemsList from '../../Course/EditCourseGeneral/LearningItemsList'
+import TakeawayItemsList from '../../Course/EditCourseGeneral/TakeawayItemsList'
 import { getAPIUrl } from '@services/config/config'
 import { getEpisodeAudioMediaDirectory, getEpisodeThumbnailMediaDirectory } from '@services/media/media'
 import { revalidateTags, swrFetcher } from '@services/utils/ts/requests'
@@ -472,6 +474,29 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
   )
 }
 
+// ── Helpers for extra_metadata list fields (same as LessonDetailForm) ──
+
+const toObjectivesStr = (items: string[]) =>
+  JSON.stringify(items.map((text: string, i: number) => ({ id: `obj_${i}`, text, emoji: '📝' })))
+
+const readObjectives = (jsonStr: string): string[] => {
+  try {
+    const parsed = JSON.parse(jsonStr)
+    return Array.isArray(parsed) ? parsed.map((it: any) => it?.text || '') : []
+  } catch {
+    return []
+  }
+}
+
+const readArray = (jsonStr: string): any[] => {
+  try {
+    const parsed = JSON.parse(jsonStr)
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
 function EpisodeDetailForm({
   episode,
   orgslug,
@@ -506,6 +531,16 @@ function EpisodeDetailForm({
   const [isCopying, setIsCopying] = useState(false)
   const [dirty, setDirty] = useState(false)
 
+  // ── Extra metadata (learning objectives + takeaways) ──
+  const [extraMeta, setExtraMeta] = useState<Record<string, any>>(episode.extra_metadata || {})
+  const extraMetaRef = useRef(extraMeta)
+  const [learningObjectives, setLearningObjectives] = useState(
+    toObjectivesStr(extraMeta.learning_objectives || [])
+  )
+  const [takeaways, setTakeaways] = useState(
+    JSON.stringify(extraMeta.takeaways || [])
+  )
+
   useEffect(() => {
     setTitle(!isSourceLocale && translation ? translation.title : episode.title)
     setDescription(
@@ -513,8 +548,16 @@ function EpisodeDetailForm({
         ? translation.description || ''
         : episode.description || ''
     )
+    // Reload extra_metadata from translation when locale switches
+    const translationMeta =
+      !isSourceLocale && translation?.extra_metadata
+        ? translation.extra_metadata
+        : episode.extra_metadata || {}
+    setExtraMeta(translationMeta)
+    setLearningObjectives(toObjectivesStr(translationMeta.learning_objectives || []))
+    setTakeaways(JSON.stringify(translationMeta.takeaways || []))
     setDirty(false)
-  }, [episode.episode_uuid, episode.title, episode.description, translation, isSourceLocale])
+  }, [episode.episode_uuid, episode.title, episode.description, episode.extra_metadata, translation, isSourceLocale])
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value)
@@ -523,6 +566,16 @@ function EpisodeDetailForm({
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setDescription(e.target.value)
+    setDirty(true)
+  }
+
+  const handleLearningObjectivesChange = (v: string) => {
+    setLearningObjectives(v)
+    setDirty(true)
+  }
+
+  const handleTakeawaysChange = (v: string) => {
+    setTakeaways(v)
     setDirty(true)
   }
 
@@ -547,18 +600,40 @@ function EpisodeDetailForm({
     if (!title.trim() || isSaving) return
     setIsSaving(true)
     const toastId = toast.loading(t('podcasts.dashboard.episodes.updating'))
+
+    // Build extra_metadata from current list state
+    const learningObjectivesParsed = readObjectives(learningObjectives)
+    const takeawaysParsed = readArray(takeaways)
+    const hasExtra = learningObjectivesParsed.length > 0 || takeawaysParsed.length > 0
+
     try {
       if (!isSourceLocale) {
         // Translating never touches the base episode row.
+        const payload: any = { title, description }
+        if (hasExtra) {
+          payload.extra_metadata = {
+            learning_objectives: learningObjectivesParsed,
+            takeaways: takeawaysParsed,
+          }
+        }
         await upsertEpisodeTranslation(
           episode.episode_uuid,
           contentLocale,
-          { title, description },
+          payload,
           accessToken
         )
         await reload()
       } else {
-        await updateEpisode(episode.episode_uuid, { title, description }, accessToken)
+        const updatedExtraMeta = {
+          ...extraMeta,
+          learning_objectives: learningObjectivesParsed,
+          takeaways: takeawaysParsed,
+        }
+        await updateEpisode(
+          episode.episode_uuid,
+          { title, description, extra_metadata: updatedExtraMeta },
+          accessToken
+        )
       }
       await revalidateTags(['podcasts'], orgslug)
       await onSuccess()
@@ -734,6 +809,28 @@ function EpisodeDetailForm({
             />
           </div>
         </div>
+      </div>
+
+      {/* What You'll Learn */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+          {t('common.sections.what_you_will_learn')}
+        </h3>
+        <LearningItemsList
+          value={learningObjectives}
+          onChange={handleLearningObjectivesChange}
+        />
+      </div>
+
+      {/* Key Takeaways */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+          {t('common.sections.key_takeaways')}
+        </h3>
+        <TakeawayItemsList
+          value={takeaways}
+          onChange={handleTakeawaysChange}
+        />
       </div>
 
       {/* Media */}

@@ -19,6 +19,7 @@ export interface PodcastEpisode {
   thumbnail_image: string
   published: boolean
   order: number
+  extra_metadata?: any
   creation_date: string
   update_date: string
 }

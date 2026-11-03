@@ -11,6 +11,7 @@
 
 import uvicorn
 import sentry_sdk
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.gzip import GZipMiddleware
 
@@ -36,22 +37,28 @@ if learnhouse_config.general_config.sentry_config.dsn:
         profile_lifecycle="trace",
     )
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Startup and shutdown lifecycle handler."""
+    await startup_app(app)()
+    yield
+    await shutdown_app(app)()
+
+
 app = FastAPI(
     title=learnhouse_config.site_name,
     description=learnhouse_config.site_description,
     docs_url="/docs" if learnhouse_config.general_config.development_mode else None,
     redoc_url="/redoc" if learnhouse_config.general_config.development_mode else None,
     version="1.2.0",
+    lifespan=lifespan,
 )
 
 # Middleware
 configure_cors(app)
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 register_ee_middlewares(app)
-
-# Lifecycle
-app.add_event_handler("startup", startup_app(app))
-app.add_event_handler("shutdown", shutdown_app(app))
 
 # Content delivery — S3-aware router when S3 is enabled, local otherwise.
 # Both paths enforce access control; neither serves raw StaticFiles.

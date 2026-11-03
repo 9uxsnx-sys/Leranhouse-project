@@ -124,7 +124,7 @@ export default function EpisodePlayer({ episode, podcast }: EpisodePlayerProps) 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0
 
   return (
-    <div className="bg-white border border-gray-200/80 rounded-xl overflow-hidden">
+    <div className="bg-white border border-gray-100 shadow-sm rounded-xl overflow-hidden">
       {/* Audio element */}
       {audioUrl && (
         <audio ref={audioRef} preload="metadata" />
@@ -149,18 +149,18 @@ export default function EpisodePlayer({ episode, podcast }: EpisodePlayerProps) 
           onMouseDown={handleMouseDown}
         >
           <div
-            className="absolute inset-y-0 start-0 bg-indigo-600 rounded-full transition-all duration-100"
+            className="absolute inset-y-0 start-0 bg-gray-900 rounded-full"
             style={{ width: `${progressPercent}%` }}
           />
           <div
-            className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-white border-2 border-indigo-600 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
-            style={{ left: `calc(${progressPercent}% - 7px)` }}
+            className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-gray-900 border-[3px] border-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+            style={{ left: `calc(${progressPercent}% - 8px)` }}
           />
         </div>
 
         {/* Time labels */}
         <div className="flex justify-between mb-4">
-          <span className="text-xs text-gray-400 tabular-nums">
+          <span className="text-xs text-gray-500 tabular-nums font-medium">
             {formatDuration(Math.floor(currentTime))}
           </span>
           <span className="text-xs text-gray-400 tabular-nums">

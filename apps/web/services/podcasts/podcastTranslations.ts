@@ -45,6 +45,7 @@ export type PodcastEpisodeTranslation = {
 export type PodcastEpisodeTranslationPayload = {
   title: string
   description?: string | null
+  extra_metadata?: Record<string, any> | null
   state?: string
 }
 

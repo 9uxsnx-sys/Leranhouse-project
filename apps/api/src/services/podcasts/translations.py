@@ -203,12 +203,15 @@ def apply_episode_overlay(
     if not translation:
         return model
 
-    return model.model_copy(
-        update={
-            "title": translation.title,
-            "description": translation.description,
-        }
-    )
+    update_dict = {
+        "title": translation.title,
+        "description": translation.description,
+    }
+    if translation.extra_metadata:
+        source_meta = episode.extra_metadata or {}
+        update_dict["extra_metadata"] = {**source_meta, **translation.extra_metadata}
+
+    return model.model_copy(update=update_dict)
 
 
 def apply_episode_overlay_bulk(
@@ -236,19 +239,19 @@ def apply_episode_overlay_bulk(
     rows = {row.episode_id: row for row in translations}
 
     localized = []
-    for read in episode_reads:
-        translation = rows.get(read.id)
+    for read, episode in zip(episode_reads, episodes):
+        translation = rows.get(episode.id) if episode.id else None
         if not translation:
             localized.append(read)
             continue
-        localized.append(
-            read.model_copy(
-                update={
-                    "title": translation.title,
-                    "description": translation.description,
-                }
-            )
-        )
+        update_dict = {
+            "title": translation.title,
+            "description": translation.description,
+        }
+        if translation.extra_metadata:
+            source_meta = episode.extra_metadata or {}
+            update_dict["extra_metadata"] = {**source_meta, **translation.extra_metadata}
+        localized.append(read.model_copy(update=update_dict))
 
     return localized
 
@@ -437,6 +440,7 @@ async def upsert_episode_translation(
             locale=code,
             title=payload.title,
             description=payload.description,
+            extra_metadata=payload.extra_metadata,
             state=payload.state or "draft",
             source_updated_at=episode.update_date,
             translated_by=getattr(current_user, "id", None),
@@ -447,6 +451,8 @@ async def upsert_episode_translation(
     else:
         row.title = payload.title
         row.description = payload.description
+        if payload.extra_metadata is not None:
+            row.extra_metadata = payload.extra_metadata
         if payload.state:
             row.state = payload.state
         row.source_updated_at = episode.update_date
