@@ -91,6 +91,12 @@ The documents in this section describe cross-cutting feature areas that touch mu
 | [Collections Localization](./i18n-rtl/collections-localization.md) | `collection_translation`, `?locale=` on every read, locale-aware General/SEO editors, Translations tab, learner listing and fallback notice |
 | [Podcasts Localization](./i18n-rtl/podcasts-localization.md) | `podcast_translation` + `podcast_episode_translation`, localized `/meta` and episode lists, locale-aware editors, Translations tab, card-surface unification |
 
+### Podcasts
+
+| Document | Description |
+|----------|-------------|
+| [Episode Admin Editing Plan](./episode-admin-editing-plan.md) | Plan to extend episode admin editing to match the lesson form: What You'll Learn, Key Takeaways, and full translation support for `extra_metadata` fields |
+
 ### Planned (Future)
 
 | Document | Description |

@@ -93,3 +93,5 @@ DELETE episode + podcast fr → both rows removed, reads fall back
 - Trail/progress, RSS feeds and receipts keep the source-locale names — same deliberate boundary as courses.
 - Podcast search matches the source text only in v1.
 - Machine translation, review workflow and stale detection remain out of scope.
+- **Episode `extra_metadata` is not translatable.** The `podcast_episode_translation` table only carries `title` and `description`. Fields stored in `extra_metadata` (`learning_objectives`, `takeaways`) are always served in the source locale regardless of the requested `?locale=`. See [episode-admin-editing-plan.md](../episode-admin-editing-plan.md) for the implementation to close this gap.
+- **`PodcastEpisodeRead` does not include `extra_metadata`.** The API response model omits this field, so the frontend cannot read `extra_metadata` for episodes. This affects both the episode page and the admin form.

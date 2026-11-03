@@ -114,6 +114,10 @@ The 15 supporting courses carry every landing page field but no chapters, so the
 
 Audio: one short mp3 supplied in the assets folder is reused across all 44 episodes so every player works.
 
+**Episode `extra_metadata`:** The flagship podcast's 14 episodes are seeded with `learning_objectives` and `takeaways` in `extra_metadata`. The remaining 30 episodes get generic defaults. This data is used by the episode page (What You'll Learn + Key Takeaways sections) and is editable from the admin episode form.
+
+**Translation gap:** `podcast_episode_translation` rows currently only carry `title` and `description`. The `learning_objectives` and `takeaways` fields in `extra_metadata` are **not** translatable via the translation table yet — see [episode-admin-editing-plan.md](../episode-admin-editing-plan.md) for the implementation to close this gap.
+
 ### 3.7 Assignments
 
 | Table | Rows | What it is |
