@@ -1,5 +1,5 @@
 from typing import List, Literal, Optional, Union
-from fastapi import APIRouter, Depends, Request, UploadFile, Query
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, Query
 from sqlmodel import Session
 from src.services.orgs.invites import (
     create_invite_code,
@@ -25,6 +25,9 @@ from src.db.organizations import (
     OrganizationRead,
     OrganizationUpdate,
 )
+from src.db.courses.courses import Course
+from src.db.podcasts.podcasts import Podcast
+from src.db.trail_runs import TrailRun, TrailRunEnum
 from src.core.events.database import get_db_session
 from src.security.auth import get_current_user, get_authenticated_user
 from src.security.features_utils.dependencies import require_org_admin
@@ -1333,6 +1336,95 @@ async def api_get_org_usage(
     """
     from src.services.orgs.usage import get_org_usage_and_limits
     return await get_org_usage_and_limits(request, org_id, current_user, db_session)
+
+
+@router.get(
+    "/{org_id}/home-trending",
+    summary="Get trending content for the org home page",
+    description=(
+        "Returns the top courses and top podcasts by enrollment/listener count "
+        "for the organization. Useful for populating 'Trending Courses' and "
+        "'Trending Podcasts' sections on the home page."
+    ),
+    responses={
+        200: {"description": "Trending courses and podcasts"},
+        401: {"description": "Not authenticated"},
+        403: {"description": "Caller is not a member of the organization"},
+    },
+)
+async def api_get_home_trending(
+    org_id: int,
+    limit: int = Query(8, description="Number of items per category"),
+    current_user: PublicUser = Depends(get_current_user),
+    db_session: Session = Depends(get_db_session),
+):
+    from src.db.user_organizations import UserOrganization
+    from sqlmodel import func, select
+
+    # Verify membership
+    membership = db_session.exec(
+        select(UserOrganization).where(
+            UserOrganization.user_id == current_user.id,
+            UserOrganization.org_id == org_id,
+        )
+    ).first()
+    if not membership:
+        raise HTTPException(status_code=403, detail="Not a member of this organization")
+
+    # Top courses by enrollment count
+    course_rows = db_session.exec(
+        select(
+            Course,
+            func.count(TrailRun.id).label("enrollment_count"),
+        )
+        .join(TrailRun, TrailRun.course_id == Course.id)
+        .where(TrailRun.org_id == org_id, TrailRun.run_type == TrailRunEnum.RUN_TYPE_COURSE)
+        .group_by(Course.id)
+        .order_by(func.count(TrailRun.id).desc())
+        .limit(limit)
+    ).all()
+
+    trending_courses = [
+        {
+            "course_uuid": course.course_uuid,
+            "name": course.name,
+            "description": course.description,
+            "thumbnail_image": course.thumbnail_image,
+            "extra_metadata": course.extra_metadata,
+            "enrollment_count": count,
+        }
+        for course, count in course_rows
+    ]
+
+    # Top podcasts by listener count
+    podcast_rows = db_session.exec(
+        select(
+            Podcast,
+            func.count(TrailRun.id).label("listener_count"),
+        )
+        .join(TrailRun, TrailRun.podcast_id == Podcast.id)
+        .where(TrailRun.org_id == org_id, TrailRun.run_type == TrailRunEnum.RUN_TYPE_PODCAST)
+        .group_by(Podcast.id)
+        .order_by(func.count(TrailRun.id).desc())
+        .limit(limit)
+    ).all()
+
+    trending_podcasts = [
+        {
+            "podcast_uuid": podcast.podcast_uuid,
+            "name": podcast.name,
+            "description": podcast.description,
+            "thumbnail_image": podcast.thumbnail_image,
+            "extra_metadata": podcast.extra_metadata,
+            "listener_count": count,
+        }
+        for podcast, count in podcast_rows
+    ]
+
+    return {
+        "trending_courses": trending_courses,
+        "trending_podcasts": trending_podcasts,
+    }
 
 
 # Include the feature config sub-router (admin-only endpoints)

@@ -31,6 +31,7 @@ export interface Community {
   moderation_words: string[]
   moderation_settings: CommunityModerationSettings | null
   thumbnail_image: string | null
+  banner_image: string | null
   creation_date: string
   update_date: string
 }

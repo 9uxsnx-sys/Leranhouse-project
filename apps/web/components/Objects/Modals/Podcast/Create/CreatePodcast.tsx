@@ -134,7 +134,7 @@ function CreatePodcastModal({ closeModal, orgslug }: any) {
       <FormField name="name">
         <FormLabelAndMessage
           label={t('podcasts.podcast_name')}
-          message={formik.errors.name}
+          message={formik.errors.name as string}
         />
         <Form.Control asChild>
           <Input
@@ -149,7 +149,7 @@ function CreatePodcastModal({ closeModal, orgslug }: any) {
       <FormField name="description">
         <FormLabelAndMessage
           label={t('collections.description')}
-          message={formik.errors.description}
+          message={formik.errors.description as string}
         />
         <Form.Control asChild>
           <Textarea

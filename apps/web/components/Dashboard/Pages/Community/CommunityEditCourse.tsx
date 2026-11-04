@@ -66,7 +66,7 @@ const CommunityEditCourse: React.FC = () => {
   // Determine which courses to show in the table
   const showSearchResults = searchQuery.trim().length > 0
   const tableCourses: Course[] = showSearchResults
-    ? courses.filter((c) =>
+    ? courses.filter((c: any) =>
         searchMatches(c.name, debouncedSearch) || (c.description && searchMatches(c.description, debouncedSearch))
       )
     : linkedCourse ? [linkedCourse] : []

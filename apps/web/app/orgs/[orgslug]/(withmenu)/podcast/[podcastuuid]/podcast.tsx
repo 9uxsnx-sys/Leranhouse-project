@@ -138,7 +138,7 @@ export default function PodcastClient({
   }
 
   // Add padding at bottom when player is visible
-  const bottomPadding = state.isVisible ? (state.isMinimized ? 'pb-20' : 'pb-28') : ''
+  const bottomPadding = state.isVisible ? 'pb-28' : ''
 
   // Derive learnings, audience, requirements from extra_metadata
   const learnings = meta.learnings || []

@@ -79,15 +79,15 @@ const PodcastsDashClient = ({
 
     switch (activeFilter) {
       case 'published':
-        items = items.filter((p) => p.published)
+        items = items.filter((p: any) => p.published)
         break
       case 'unpublished':
-        items = items.filter((p) => !p.published)
+        items = items.filter((p: any) => !p.published)
         break
     }
 
     if (searchQuery.trim()) {
-      items = items.filter((p) =>
+      items = items.filter((p: any) =>
         searchMatchesAny([p.name, p.description, p.tags], searchQuery)
       )
     }
@@ -286,7 +286,7 @@ const PodcastsDashClient = ({
 
       <div className="flex-1 flex flex-col">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {paginatedPodcasts.map((podcast) => {
+          {paginatedPodcasts.map((podcast: any) => {
             const isSelected = selectedPodcasts.has(podcast.podcast_uuid)
 
             return (

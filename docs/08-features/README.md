@@ -97,6 +97,12 @@ The documents in this section describe cross-cutting feature areas that touch mu
 |----------|-------------|
 | [Episode Admin Editing Plan](./episode-admin-editing-plan.md) | Plan to extend episode admin editing to match the lesson form: What You'll Learn, Key Takeaways, and full translation support for `extra_metadata` fields |
 
+### Home Page
+
+| Document | Description |
+|----------|-------------|
+| [Home Page Layout](./home-page/home-page.md) | Learner home page design: 4 sections (Trending Courses, Trending Podcasts, New Courses, New Podcasts) with `SectionRow` responsive grid, trending endpoint, and "See All" routing |
+
 ### Planned (Future)
 
 | Document | Description |

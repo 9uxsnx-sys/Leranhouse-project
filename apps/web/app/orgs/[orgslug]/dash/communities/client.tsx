@@ -90,10 +90,10 @@ const CommunitiesDashClient = ({
 
     switch (activeFilter) {
       case 'course':
-        items = items.filter((c) => c.course_id != null)
+        items = items.filter((c: any) => c.course_id != null)
         break
       case 'general':
-        items = items.filter((c) => c.course_id == null)
+        items = items.filter((c: any) => c.course_id == null)
         break
       case 'newest':
         items = [...items].sort((a, b) =>
@@ -103,7 +103,7 @@ const CommunitiesDashClient = ({
     }
 
     if (searchQuery.trim()) {
-      items = items.filter((c) =>
+      items = items.filter((c: any) =>
         searchMatchesAny([c.name, c.description], searchQuery)
       )
     }
@@ -168,7 +168,7 @@ const CommunitiesDashClient = ({
   }
 
   const selectAll = () => {
-    const allUuids = paginatedCommunities.map((c) => c.community_uuid)
+    const allUuids = paginatedCommunities.map((c: any) => c.community_uuid)
     setSelectedCommunities(new Set(allUuids))
   }
 
@@ -310,7 +310,7 @@ const CommunitiesDashClient = ({
 
       <div className="flex-1 flex flex-col">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {paginatedCommunities.map((community) => {
+          {paginatedCommunities.map((community: any) => {
             const communityId = removeCommunityPrefix(community.community_uuid)
             const isSelected = selectedCommunities.has(community.community_uuid)
 

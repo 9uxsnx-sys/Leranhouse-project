@@ -463,7 +463,7 @@ function AddRole(props: AddRoleProps) {
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
                     <div className="space-y-4 sm:space-y-6">
                         <FormField name="name">
-                            <FormLabelAndMessage label={t('dashboard.users.roles.modals.create.form.role_name')} message={formik.errors.name} />
+                            <FormLabelAndMessage label={t('dashboard.users.roles.modals.create.form.role_name')} message={formik.errors.name as string} />
                             <Form.Control asChild>
                                 <Input
                                     onChange={formik.handleChange}
@@ -477,7 +477,7 @@ function AddRole(props: AddRoleProps) {
                         </FormField>
 
                         <FormField name="description">
-                            <FormLabelAndMessage label={t('dashboard.users.roles.modals.create.form.description')} message={formik.errors.description} />
+                            <FormLabelAndMessage label={t('dashboard.users.roles.modals.create.form.description')} message={formik.errors.description as string} />
                             <Form.Control asChild>
                                 <Textarea
                                     onChange={formik.handleChange}

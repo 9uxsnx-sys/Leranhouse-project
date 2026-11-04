@@ -65,7 +65,7 @@ function AddUserGroup(props: AddUserGroupProps) {
             <FormField name="name">
                 <FormLabelAndMessage
                     label={t('dashboard.users.usergroups.modals.create.form.name')}
-                    message={formik.errors.name}
+                    message={formik.errors.name as string}
                 />
                 <Form.Control asChild>
                     <Input
@@ -79,7 +79,7 @@ function AddUserGroup(props: AddUserGroupProps) {
             <FormField name="description">
                 <FormLabelAndMessage
                     label={t('dashboard.users.usergroups.modals.create.form.description')}
-                    message={formik.errors.description}
+                    message={formik.errors.description as string}
                 />
                 <Form.Control asChild>
                     <Input

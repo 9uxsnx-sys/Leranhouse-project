@@ -66,7 +66,7 @@ function EditUserGroup(props: EditUserGroupProps) {
             <FormField name="name">
                 <FormLabelAndMessage
                     label={t('dashboard.users.usergroups.modals.edit.form.name')}
-                    message={formik.errors.name}
+                    message={formik.errors.name as string}
                 />
                 <Form.Control asChild>
                     <Input
@@ -80,7 +80,7 @@ function EditUserGroup(props: EditUserGroupProps) {
             <FormField name="description">
                 <FormLabelAndMessage
                     label={t('dashboard.users.usergroups.modals.edit.form.description')}
-                    message={formik.errors.description}
+                    message={formik.errors.description as string}
                 />
                 <Form.Control asChild>
                     <Input

@@ -35,6 +35,7 @@ export type PodcastEpisodeTranslation = {
   locale: string
   title: string
   description: string | null
+  extra_metadata: Record<string, any> | null
   state: string
   source_updated_at: string | null
   translated_by: number | null

@@ -322,7 +322,7 @@ function EditCourseSEO(props: EditCourseSEOProps) {
               <FormField name="description">
                 <FormLabelAndMessage
                   label={t('dashboard.courses.seo.form.description_label')}
-                  message={formik.errors.description}
+                  message={formik.errors.description as string}
                 />
                 <Form.Control asChild>
                   <Textarea

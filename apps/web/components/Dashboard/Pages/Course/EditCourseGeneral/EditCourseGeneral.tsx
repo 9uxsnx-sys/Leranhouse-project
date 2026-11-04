@@ -562,7 +562,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                 <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('common.sections.overview')}</h3>
                 <div className="space-y-4">
                   <FormField name="name">
-                    <FormLabelAndMessage label={t('dashboard.courses.general.form.name_label')} message={formik.errors.name} />
+                    <FormLabelAndMessage label={t('dashboard.courses.general.form.name_label')} message={formik.errors.name as string} />
                     <Form.Control asChild>
                       <Input
                         className={fieldClassName}
@@ -576,7 +576,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                   </FormField>
 
                   <FormField name="description">
-                    <FormLabelAndMessage label={t('dashboard.courses.general.form.description_label')} message={formik.errors.description} />
+                    <FormLabelAndMessage label={t('dashboard.courses.general.form.description_label')} message={formik.errors.description as string} />
                     <Form.Control asChild>
                       <Input
                         className={fieldClassName}

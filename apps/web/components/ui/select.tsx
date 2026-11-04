@@ -47,8 +47,8 @@ Group.displayName = "Select.Group"
 const Value = RadixSelect.Value
 Value.displayName = "Select.Value"
 
-const triggerVariants = cva({
-  base: cn(
+const triggerVariants = cva(
+  cn(
     "bg-ui-bg-field shadow-buttons-neutral transition-fg flex w-full select-none items-center justify-between rounded-md outline-none",
     "data-[placeholder]:text-ui-fg-muted text-ui-fg-base",
     "hover:bg-ui-bg-field-hover",
@@ -58,13 +58,15 @@ const triggerVariants = cva({
     "disabled:!bg-ui-bg-disabled disabled:!text-ui-fg-disabled",
     "group/trigger"
   ),
-  variants: {
-    size: {
-      base: "h-8 px-2 py-1.5 txt-compact-small",
-      small: "h-7 px-2 py-1 txt-compact-small",
+  {
+    variants: {
+      size: {
+        base: "h-8 px-2 py-1.5 txt-compact-small",
+        small: "h-7 px-2 py-1 txt-compact-small",
+      },
     },
-  },
-})
+  }
+)
 
 const Trigger = React.forwardRef<
   React.ElementRef<typeof RadixSelect.Trigger>,

@@ -90,7 +90,7 @@ export function CommentSection({ discussionUuid, communityUuid, isLocked = false
   }
 
   const handleCommentDeleted = useCallback((commentUuid: string) => {
-    setComments((prev) => prev.filter((c) => c.comment_uuid !== commentUuid))
+    setComments((prev) => prev.filter((c: any) => c.comment_uuid !== commentUuid))
   }, [])
 
   const handleCommentUpdated = useCallback((updatedComment: DiscussionCommentWithAuthor) => {

@@ -609,7 +609,7 @@ function OrgRoles() {
                             <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('common.sections.overview')}</h3>
                             <div className="space-y-4">
                                 <FormField name="name">
-                                    <FormLabelAndMessage label={t('dashboard.users.roles.modals.edit.form.role_name')} message={formik.errors.name} />
+                                    <FormLabelAndMessage label={t('dashboard.users.roles.modals.edit.form.role_name')} message={formik.errors.name as string} />
                                     <Form.Control asChild>
                                         <Input
                                             className={fieldClassName}
@@ -623,7 +623,7 @@ function OrgRoles() {
                                 </FormField>
 
                                 <FormField name="description">
-                                    <FormLabelAndMessage label={t('dashboard.users.roles.modals.edit.form.description')} message={formik.errors.description} />
+                                    <FormLabelAndMessage label={t('dashboard.users.roles.modals.edit.form.description')} message={formik.errors.description as string} />
                                     <Form.Control asChild>
                                         <Textarea
                                             className={fieldClassName}

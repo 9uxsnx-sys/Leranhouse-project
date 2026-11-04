@@ -161,7 +161,7 @@ function LearnHouseCourseImport({
   const handleImport = async () => {
     if (!analysisResult || !orgId) return
 
-    const selectedCourses = courseSelections.filter((c) => c.include)
+    const selectedCourses = courseSelections.filter((c: any) => c.include)
     if (selectedCourses.length === 0) {
       setImportError(t('courses.import.select_at_least_one'))
       return
@@ -223,7 +223,7 @@ function LearnHouseCourseImport({
     setImportResult(null)
   }
 
-  const selectedCount = courseSelections.filter((c) => c.include).length
+  const selectedCount = courseSelections.filter((c: any) => c.include).length
   const totalCount = courseSelections.length
 
   // Step indicator
