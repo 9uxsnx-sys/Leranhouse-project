@@ -20,7 +20,6 @@ import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import UserAvatar from '../../Objects/UserAvatar'
 import { HeaderProfileBox } from '@components/Security/HeaderProfileBox'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
@@ -422,19 +421,7 @@ function UserLeftMenu() {
           {!isCollapsed && <div className="border-t border-gray-200 mt-1 mb-3" />}
 
           {/* User Menu */}
-          {!isCollapsed && <HeaderProfileBox />}
-          {isCollapsed && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button className="flex items-center justify-center w-full h-10 rounded-lg text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover transition-all">
-                  <UserAvatar width={24} rounded="rounded-full" shadow="shadow-none" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="right" className="z-tooltip bg-ui-bg-base shadow-elevation-card-rest text-ui-fg-base text-xs px-2 py-1">
-                {session?.data?.user?.username || 'User'}
-              </TooltipContent>
-            </Tooltip>
-          )}
+          <HeaderProfileBox collapsed={isCollapsed} />
         </div>
       </div>
     </nav>

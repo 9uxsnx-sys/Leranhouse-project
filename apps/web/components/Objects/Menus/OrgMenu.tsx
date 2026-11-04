@@ -248,7 +248,7 @@ export const OrgMenu = ({
     <>
       <NavigationBar />
       <div
-        className="relative flex h-screen w-full flex-col items-start overflow-hidden lg:flex-row"
+        className="relative flex h-screen w-full flex-col items-start lg:flex-row"
         style={{
           ...(shellHeight ? { height: shellHeight } : {}),
           ['--brand' as string]: primaryColor || '#6366f1',
@@ -385,7 +385,7 @@ export const OrgMenu = ({
           {/* Content — shell.tsx main + Gutter (max-w-[1600px] p-3 gap-y-3) */}
           <main className="flex flex-1 w-full flex-col items-center">
             <div className={`flex w-full flex-col gap-y-3 flex-1 ${isFullBleedPage ? '' : 'max-w-[1600px] px-1 py-3'}`}>
-              <div className="flex-1 relative flex flex-col" style={{ zIndex: 'var(--z-content)' }}>
+              <div className="flex-1 relative flex flex-col isolate">
                 {children}
               </div>
               {!isFullBleedPage && <OrgFooter />}

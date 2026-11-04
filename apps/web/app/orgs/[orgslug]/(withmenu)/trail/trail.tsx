@@ -3,7 +3,6 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import PageLoading from '@components/Objects/Loaders/PageLoading'
 import TrailCourseCard from '@components/Pages/Trail/TrailCourseCard'
-import UserCertificates from '@components/Pages/Trail/UserCertificates'
 import { getAPIUrl } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
 import React, { useEffect, useState, useMemo } from 'react'
@@ -52,7 +51,7 @@ function Trail(params: any) {
     // Search
     if (searchQuery.trim()) {
       runs = runs.filter((run: any) =>
-        run.course.name.toLowerCase().includes(searchQuery.toLowerCase())
+        run.course?.name?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     }
 
@@ -209,14 +208,16 @@ function Trail(params: any) {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {paginatedRuns.map((run: any) => (
-                <TrailCourseCard
-                  key={run.course.course_uuid}
-                  run={run}
-                  course={run.course}
-                  orgslug={orgslug}
-                />
-              ))}
+              {paginatedRuns
+                .filter((run: any) => run.course?.course_uuid)
+                .map((run: any) => (
+                  <TrailCourseCard
+                    key={run.course.course_uuid}
+                    run={run}
+                    course={run.course}
+                    orgslug={orgslug}
+                  />
+                ))}
             </div>
           )}
         </div>
@@ -256,7 +257,6 @@ function Trail(params: any) {
         )}
       </div>
 
-      <UserCertificates orgslug={orgslug} />
     </FeatureDisabledView>
   )
 }

@@ -285,3 +285,52 @@ All standard Radix DropdownMenu props are forwarded.
 ## Related components
 
 - **[Button](./button.md)** — Alternative trigger for text-labeled menus.
+
+## HoverMenu
+
+A hover-based menu component used in both dashboard and user sidebars for Language switcher, Help menu, and User profile dropdowns. Defined in `apps/web/components/ui/hover-menu.tsx`.
+
+### Architecture
+
+- **Portal-based**: Renders menu content to `document.body` via `@radix-ui/react-portal` (`Portal.Root`), bypassing parent DOM stacking contexts.
+- **Z-index**: Uses inline `style={{ zIndex: 200 }}` to ensure menus always appear above all page content. Inline styles cannot be stripped by the CSS optimizer.
+- **Positioning**: `position: fixed` with coordinates from `getBoundingClientRect()`. Supports `align="start"`, `"center"`, and `"end"` for vertical alignment.
+- **RTL support**: Uses `@radix-ui/react-direction` (`useDirection()`) to apply `translateX(-100%)` for RTL layouts.
+- **Hover behavior**: 50ms enter delay, 100ms leave delay. An invisible bridge element prevents gap issues between trigger and menu.
+
+### Usage
+
+```tsx
+import { HoverMenu, HoverMenuContent, HoverMenuItem } from "@components/ui/hover-menu"
+
+<HoverMenu align="end" content={
+  <HoverMenuContent className="min-w-[220px]">
+    <HoverMenuItem asChild>
+      <Link href="/docs">Documentation</Link>
+    </HoverMenuItem>
+    <HoverMenuItem onClick={handleAction}>
+      Action Item
+    </HoverMenuItem>
+  </HoverMenuContent>
+}>
+  <button>Trigger</button>
+</HoverMenu>
+```
+
+### Props
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `align` | `"start" \| "center" \| "end"` | `"start"` | Vertical alignment of the menu relative to the trigger |
+| `content` | `React.ReactNode` | required | The menu content to render in the portal |
+| `contentClassName` | `string` | — | Additional classes for the portal wrapper |
+| `children` | `React.ReactNode` | required | The trigger element |
+
+### Key Differences from DropdownMenu
+
+| Feature | DropdownMenu | HoverMenu |
+|---|---|---|
+| Activation | Click | Hover |
+| DOM rendering | In-place (React tree) | Portal (`document.body`) |
+| Z-index | CSS class (`z-dropdown: 100`) | Inline style (`zIndex: 200`) |
+| Best for | Inline action menus (edit/delete) | Sidebar utility menus (lang/help/user) |

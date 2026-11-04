@@ -258,18 +258,40 @@ A `.scrollbar-hide` utility is also available for opt-in use on individual eleme
 
 ## Z-Index Layering System
 
-Defined as CSS custom properties on `:root`:
+Defined as CSS custom properties on `:root` with explicit utility classes in `globals.css`:
 
-| Variable | Value | Usage |
-|---|---|---|
-| `--z-behind` | -10 | Behind everything |
-| `--z-dropdown` | 100 | Dropdown menus |
-| `--z-popover` | 250 | Popovers |
-| `--z-tooltip` | 250 | Tooltips |
-| `--z-modal-backdrop` | 200 | Modal overlay |
-| `--z-modal` | 210 | Modal content |
-| `--z-toast` | 300 | Toast notifications |
-| `--z-max` | 9999 | Critical overlays |
+> **Note**: Tailwind v4 does NOT generate utility classes for named `z-index` values in the `@theme` block. Only numeric values (e.g., `z-10`, `z-50`) get auto-generated utilities. Named z-index values must have explicit utility classes defined in CSS. For critical elements like portal menus, inline `style={{ zIndex: 200 }}` is used to guarantee the value cannot be stripped by the CSS optimizer.
+
+| Variable | Value | Utility Class | Usage |
+|---|---|---|---|
+| `--z-behind` | -10 | `.z-behind` | Behind everything |
+| `--z-background` | -1 | `.z-background` | Background elements |
+| `--z-base` | 0 | `.z-base` | Default layer |
+| `--z-content` | 1 | `.z-content` | Page content (replaced with `isolate` for stacking context) |
+| `--z-elevated` | 5 | `.z-elevated` | Slightly elevated elements |
+| `--z-sticky` | 10 | `.z-sticky` | Sticky headers |
+| `--z-sticky-header` | 15 | `.z-sticky-header` | Top sticky headers |
+| `--z-interactive` | 20 | `.z-interactive` | Interactive overlays |
+| `--z-drag-overlay` | 30 | `.z-drag-overlay` | Drag-and-drop overlays |
+| `--z-nav` | 50 | `.z-nav` | Navigation bars |
+| `--z-nav-menu` | 51 | `.z-nav-menu` | Mobile navigation drawer |
+| `--z-dropdown` | 100 | `.z-dropdown` | Dropdown menus |
+| `--z-overlay` | 120 | `.z-overlay` | Sidebar overlays |
+| `--z-editor-toolbar` | 130 | `.z-editor-toolbar` | Editor toolbars |
+| `--z-editor-bubble` | 135 | `.z-editor-bubble` | Editor bubble menus |
+| `--z-modal-backdrop` | 200 | `.z-modal-backdrop` | Modal backdrop |
+| `--z-modal` | 210 | `.z-modal` | Modal content |
+| `--z-modal-content` | 220 | `.z-modal-content` | Modal inner content |
+| `--z-popover` | 250 | `.z-popover` | Popovers |
+| `--z-tooltip` | 250 | `.z-tooltip` | Tooltips |
+| `--z-toast` | 300 | `.z-toast` | Toast notifications |
+| `--z-notification` | 310 | `.z-notification` | Notification banners |
+| `--z-critical` | 400 | `.z-critical` | Critical overlays |
+| `--z-max` | 9999 | — | Maximum (inline style only) |
+
+### Portal-based Menus
+
+Sidebar menus (Language switcher, Help, User profile) use the `HoverMenu` component which renders menu content to `document.body` via `@radix-ui/react-portal` with inline `style={{ zIndex: 200 }}`. This ensures menus always render above all page content regardless of parent stacking contexts.
 
 ## Animations
 

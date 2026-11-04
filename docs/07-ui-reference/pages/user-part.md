@@ -7,11 +7,11 @@
 The entire user-facing section is wrapped by `apps/web/app/orgs/[orgslug]/(withmenu)/layout.tsx` and the `OrgMenu` component (`apps/web/components/Objects/Menus/OrgMenu.tsx`). The shell is a port of the Medusa v2.18.0 shell layout and consists of:
 
 - **NavigationBar**: A fixed top progress bar (`z-50`, height `0.25rem`) that animates on route changes.
-- **Flex row container**: `h-screen overflow-hidden` with two columns:
-  - **Desktop sidebar** (collapsible, `border-e`): Renders `UserLeftMenu` (an exact copy of the dashboard `DashLeftMenu`) with org logo mark/logo, navigation tabs, and user profile. The sidebar matches the dashboard sidebar in width, styling, and behavior.
+- **Flex row container**: `h-screen` with two columns:
+  - **Desktop sidebar** (collapsible, `border-e`): Renders `UserLeftMenu` with org logo mark/logo, navigation tabs, and user profile. The sidebar matches the dashboard sidebar in width, styling, and behavior.
   - **Right column**: A full-height scrollable column containing:
     - **Topbar**: A grid (`grid-cols-2`) with `ToggleSidebar` + `BreadcrumbNav` on the left, and search icon button, `NotificationsBell`, Copilot menu, and Help dropdown on the right.
-    - **Main content**: A vertically and horizontally centered container (`max-w-[1600px]`, `px-1 py-3`) with `flex-1` content area at `z-index: var(--z-content)`.
+    - **Main content**: A vertically and horizontally centered container (`max-w-[1600px]`, `px-1 py-3`) wrapped in an `isolate` div (creates stacking context via `isolation: isolate` instead of `z-index`).
     - **Footer**: Custom footer text from org config, plus a LearnHouse watermark.
 - **Mobile drawer**: Fixed overlay with slide-in sidebar (`max-w-[304px]`) when the hamburger menu is toggled.
 - **Focus mode**: When the path includes `/activity/` and `globalFocusMode` is `"true"` in localStorage, the entire shell (sidebar, topbar, footer) is hidden, rendering only the activity content.
@@ -20,7 +20,7 @@ The entire user-facing section is wrapped by `apps/web/app/orgs/[orgslug]/(withm
 
 ### Sidebar Navigation (UserLeftMenu)
 
-Defined in `apps/web/components/Objects/Menus/UserLeftMenu.tsx`. The sidebar is an exact copy of the dashboard `DashLeftMenu` and shares the same collapsible design, width, and behavior.
+Defined in `apps/web/components/Objects/Menus/UserLeftMenu.tsx`. The sidebar shares the same collapsible design, width, and behavior as the dashboard `DashLeftMenu`.
 
 - **Collapsed state**: Shows only icon buttons for each nav item, with a logo mark icon at the top.
 - **Expanded state**: Shows logo (mark + wordmark), navigation labels, and user profile section.
@@ -32,8 +32,10 @@ Defined in `apps/web/components/Objects/Menus/UserLeftMenu.tsx`. The sidebar is 
   - `/store` — Store (requires `payments` feature)
   - `/trail` — Learning progress
 - **Bottom section**:
+  - **Language switcher**: `HoverMenu` with `align="end"` — portal-based, renders to `document.body` via `@radix-ui/react-portal` with inline `zIndex: 200`.
+  - **Help menu**: `HoverMenu` with `align="end"` — same portal-based approach with links to Documentation, Website, Discord, and Feedback.
   - Dashboard link (for admin/maintainer/instructor roles): Links to `/dash`.
-  - `HeaderProfileBox`: User avatar, name, and logout.
+  - `HeaderProfileBox`: User avatar, name, and logout with `HoverMenu`. The three-dots icon is fixed at the right edge via `ml-auto shrink-0`.
 
 ## Pages
 

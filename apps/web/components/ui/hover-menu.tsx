@@ -94,6 +94,7 @@ const HoverMenu = React.forwardRef<HTMLDivElement, HoverMenuProps>(
                 position: 'fixed',
                 top: position.top,
                 left: position.left,
+                zIndex: 200,
                 // RTL anchors the menu by its right edge, so shift it back by its
                 // own width to keep it on-screen.
                 transform: [
@@ -102,7 +103,7 @@ const HoverMenu = React.forwardRef<HTMLDivElement, HoverMenuProps>(
                 ].filter(Boolean).join(" ") || undefined,
               }}
               className={cn(
-                "z-modal-backdrop pointer-events-none transition-opacity duration-150",
+                "pointer-events-none transition-opacity duration-150",
                 isHovered ? "opacity-100 pointer-events-auto" : "opacity-0",
                 contentClassName
               )}
@@ -130,7 +131,7 @@ const HoverMenuContent = React.forwardRef<HTMLDivElement, HoverMenuContentProps>
       <div
         ref={ref}
         className={cn(
-          "min-w-[200px] rounded-lg border border-ui-border-base bg-ui-bg-base shadow-elevation-card-rest py-1",
+          "min-w-[220px] rounded-xl bg-white border border-gray-100 shadow-sm p-1.5",
           className
         )}
       >
@@ -152,7 +153,7 @@ const HoverMenuItem = React.forwardRef<HTMLDivElement, HoverMenuItemProps>(
   ({ children, className, onClick, asChild }, ref) => {
     if (asChild) {
       return (
-        <div ref={ref} className={cn("flex items-center gap-2 px-3 py-2 text-sm text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover cursor-pointer transition-colors", className)}>
+        <div ref={ref} className={cn("flex items-center gap-2 px-3 py-2.5 text-sm text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover rounded-lg cursor-pointer transition-colors", className)}>
           {children}
         </div>
       )
@@ -163,7 +164,7 @@ const HoverMenuItem = React.forwardRef<HTMLDivElement, HoverMenuItemProps>(
         ref={ref}
         onClick={onClick}
         className={cn(
-          "flex items-center gap-2 px-3 py-2 text-sm text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover cursor-pointer transition-colors",
+          "flex items-center gap-2 px-3 py-2.5 text-sm text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover rounded-lg cursor-pointer transition-colors",
           className
         )}
       >

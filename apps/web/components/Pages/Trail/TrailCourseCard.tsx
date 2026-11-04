@@ -20,10 +20,10 @@ function TrailCourseCard(props: TrailCourseCardProps) {
   const org = useOrg() as any
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const courseid = props.course.course_uuid.replace('course_', '')
+  const courseid = props.course?.course_uuid?.replace('course_', '')
   const course = props.course
-  const course_total_steps = props.run.course_total_steps
-  const course_completed_steps = props.run.steps.length
+  const course_total_steps = props.run?.course_total_steps
+  const course_completed_steps = props.run?.steps?.length
   const orgID = org?.id
   const course_progress = course_total_steps > 0
     ? Math.round((course_completed_steps / course_total_steps) * 100)

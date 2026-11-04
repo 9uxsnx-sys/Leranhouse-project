@@ -30,7 +30,7 @@ Defined in `apps/web/components/Dashboard/Menus/DashLeftMenu.tsx`. Features:
   - **Administration**: Users (`/dash/users/settings/users`), Payments (`/dash/payments/overview`), Organization (`/dash/org/settings/general`), Analytics (`/dash/analytics`)
 - **User sub-navigation**: Animated sub-nav (framer-motion) with items: Users, UserGroups, Roles, Signups, Invite Members, Audit Logs. Only visible when the Users tab is active and sidebar is expanded.
 - **Floating active indicator**: A white pill (`shadow-elevation-card-rest`) positioned via `ResizeObserver` measurement of the active nav item.
-- **Bottom section**: Language switcher (hover menu with checkmark on current language), Help (hover menu with Documentation/Website/Discord/Feedback links), user avatar/profile.
+- **Bottom section**: Language switcher (HoverMenu with checkmark on current language, portal-based rendering to `document.body` with inline `zIndex: 200`), Help (HoverMenu with Documentation/Website/Discord/Feedback links), user avatar/profile with HoverMenu.
 - **Tooltips**: When collapsed, all nav items show tooltips on hover.
 
 ### AdminTopBar
