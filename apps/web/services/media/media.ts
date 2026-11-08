@@ -137,6 +137,11 @@ export function getUserAvatarMediaDirectory(userUUID: string, fileId: string) {
   return uri
 }
 
+export function getUserBannerMediaDirectory(userUUID: string, fileId: string) {
+  let uri = `${getMediaUrl()}content/users/${userUUID}/banners/${fileId}`
+  return uri
+}
+
 export function getActivityBlockMediaDirectory(
   orgUUID: string,
   courseId: string,

@@ -10,10 +10,11 @@ interface HoverMenuProps {
   content: React.ReactNode
   contentClassName?: string
   align?: "start" | "center" | "end"
+  className?: string
 }
 
 const HoverMenu = React.forwardRef<HTMLDivElement, HoverMenuProps>(
-  ({ children, content, contentClassName, align = "start" }, ref) => {
+  ({ children, content, contentClassName, align = "start", className }, ref) => {
     const triggerRef = React.useRef<HTMLDivElement>(null)
     const [isHovered, setIsHovered] = React.useState(false)
     const [position, setPosition] = React.useState<{ top: number; left: number } | null>(null)
@@ -81,6 +82,7 @@ const HoverMenu = React.forwardRef<HTMLDivElement, HoverMenuProps>(
           ref={triggerRef}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
+          className={className}
         >
           {children}
         </div>

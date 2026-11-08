@@ -20,6 +20,8 @@ from src.services.orgs.orgs import get_org_join_mechanism
 from src.security.auth import get_current_user, get_authenticated_user
 from src.core.events.database import get_db_session
 from src.db.courses.courses import CourseRead
+from src.db.podcasts.podcasts import PodcastRead
+from src.db.communities.communities import CommunityRead
 
 from src.db.users import (
     AnonymousUser,
@@ -33,19 +35,25 @@ from src.db.users import (
 )
 from src.services.users.users import (
     authorize_user_action,
+    check_username_availability,
     create_user,
     create_user_with_invite,
     create_user_without_org,
     delete_user_by_id,
+    delete_user_avatar,
+    delete_user_banner,
     get_user_session,
     read_user_by_id,
     read_user_by_uuid,
     read_user_by_username,
     update_user,
     update_user_avatar,
+    update_user_banner,
     update_user_password,
 )
 from src.services.courses.courses import get_user_courses
+from src.services.podcasts.podcasts import get_user_podcasts
+from src.services.communities.communities import get_user_communities
 
 
 logger = logging.getLogger(__name__)
@@ -369,6 +377,32 @@ async def api_get_user_by_username(
     return await read_user_by_username(request, db_session, current_user, username)
 
 
+@router.get(
+    "/check-username/{username}",
+    tags=["users"],
+    summary="Check username availability",
+    description="Check if a username is available (not taken by another user). Excludes the current user from the check so they can keep their own username.",
+    responses={
+        200: {"description": "Username availability status.", "content": {"application/json": {"example": {"available": True}}}},
+    },
+)
+async def api_check_username(
+    *,
+    request: Request,
+    db_session: Session = Depends(get_db_session),
+    current_user: PublicUser = Depends(get_current_user),
+    username: str,
+):
+    """
+    Check Username Availability
+
+    Returns {"available": true} if the username is free to use,
+    or {"available": false} if another user already has it.
+    The current user's own username is excluded from the check.
+    """
+    return await check_username_availability(request, db_session, current_user, username)
+
+
 @router.put(
     "/{user_id}",
     response_model=UserRead,
@@ -431,6 +465,106 @@ async def api_update_avatar_user(
         )
     result = await update_user_avatar(request, db_session, current_user, avatar_file)
     # Invalidate session cache so the next session fetch returns the new avatar
+    _invalidate_session_cache(user_id)
+    return result
+
+
+@router.delete(
+    "/delete_avatar/{user_id}",
+    response_model=UserRead,
+    tags=["users"],
+    summary="Delete user avatar",
+    description="Remove the avatar image for a user. Users can only delete their own avatar.",
+    responses={
+        200: {"description": "Avatar deleted; cached session is invalidated.", "model": UserRead},
+        403: {"description": "Attempted to delete another user's avatar"},
+    },
+)
+async def api_delete_avatar_user(
+    *,
+    request: Request,
+    db_session: Session = Depends(get_db_session),
+    current_user: PublicUser = Depends(get_current_user),
+    user_id: int,
+) -> UserRead:
+    """
+    Delete User Avatar
+
+    SECURITY: Users can only delete their own avatar.
+    """
+    if current_user.id != user_id:
+        raise HTTPException(
+            status_code=403,
+            detail="You can only delete your own avatar",
+        )
+    result = await delete_user_avatar(request, db_session, current_user)
+    _invalidate_session_cache(user_id)
+    return result
+
+
+@router.put(
+    "/update_banner/{user_id}",
+    response_model=UserRead,
+    tags=["users"],
+    summary="Update user banner",
+    description="Upload a new banner image for a user. Users can only update their own banner.",
+    responses={
+        200: {"description": "Banner updated; cached session is invalidated.", "model": UserRead},
+        403: {"description": "Attempted to update another user's banner"},
+    },
+)
+async def api_update_banner_user(
+    *,
+    request: Request,
+    db_session: Session = Depends(get_db_session),
+    current_user: PublicUser = Depends(get_current_user),
+    user_id: int,
+    banner_file: UploadFile | None = None,
+) -> UserRead:
+    """
+    Update User Banner
+
+    SECURITY: Users can only update their own banner.
+    """
+    if current_user.id != user_id:
+        raise HTTPException(
+            status_code=403,
+            detail="You can only update your own banner",
+        )
+    result = await update_user_banner(request, db_session, current_user, banner_file)
+    _invalidate_session_cache(user_id)
+    return result
+
+
+@router.delete(
+    "/delete_banner/{user_id}",
+    response_model=UserRead,
+    tags=["users"],
+    summary="Delete user banner",
+    description="Remove the banner image for a user. Users can only delete their own banner.",
+    responses={
+        200: {"description": "Banner deleted; cached session is invalidated.", "model": UserRead},
+        403: {"description": "Attempted to delete another user's banner"},
+    },
+)
+async def api_delete_banner_user(
+    *,
+    request: Request,
+    db_session: Session = Depends(get_db_session),
+    current_user: PublicUser = Depends(get_current_user),
+    user_id: int,
+) -> UserRead:
+    """
+    Delete User Banner
+
+    SECURITY: Users can only delete their own banner.
+    """
+    if current_user.id != user_id:
+        raise HTTPException(
+            status_code=403,
+            detail="You can only delete your own banner",
+        )
+    result = await delete_user_banner(request, db_session, current_user)
     _invalidate_session_cache(user_id)
     return result
 
@@ -778,6 +912,76 @@ async def api_get_user_courses(
     SECURITY: Maximum limit is 50 to prevent data dumping.
     """
     return await get_user_courses(
+        request=request,
+        current_user=current_user,
+        user_id=user_id,
+        db_session=db_session,
+        page=page,
+        limit=limit,
+    )
+
+
+@router.get(
+    "/{user_id}/podcasts",
+    response_model=List[PodcastRead],
+    tags=["users"],
+    summary="List podcasts for user",
+    description="List podcasts authored or contributed to by a user. Paginated; the maximum page size is 50 to prevent bulk data extraction.",
+    responses={
+        200: {"description": "Paginated list of the user's podcasts (max 50 per page)."},
+        404: {"description": "User not found"},
+    },
+)
+async def api_get_user_podcasts(
+    *,
+    request: Request,
+    db_session: Session = Depends(get_db_session),
+    current_user: PublicUser = Depends(get_current_user),
+    user_id: int,
+    page: int = Query(default=1, ge=1, description="Page number"),
+    limit: int = Query(default=10, ge=1, le=50, description="Items per page (max 50)"),
+) -> List[PodcastRead]:
+    """
+    Get podcasts made or contributed by a user.
+
+    SECURITY: Maximum limit is 50 to prevent data dumping.
+    """
+    return await get_user_podcasts(
+        request=request,
+        current_user=current_user,
+        user_id=user_id,
+        db_session=db_session,
+        page=page,
+        limit=limit,
+    )
+
+
+@router.get(
+    "/{user_id}/communities",
+    response_model=List[CommunityRead],
+    tags=["users"],
+    summary="List communities for user",
+    description="List communities accessible by a user via user group membership. Paginated; the maximum page size is 50 to prevent bulk data extraction.",
+    responses={
+        200: {"description": "Paginated list of the user's communities (max 50 per page)."},
+        404: {"description": "User not found"},
+    },
+)
+async def api_get_user_communities(
+    *,
+    request: Request,
+    db_session: Session = Depends(get_db_session),
+    current_user: PublicUser = Depends(get_current_user),
+    user_id: int,
+    page: int = Query(default=1, ge=1, description="Page number"),
+    limit: int = Query(default=10, ge=1, le=50, description="Items per page (max 50)"),
+) -> List[CommunityRead]:
+    """
+    Get communities accessible by a user.
+
+    SECURITY: Maximum limit is 50 to prevent data dumping.
+    """
+    return await get_user_communities(
         request=request,
         current_user=current_user,
         user_id=user_id,

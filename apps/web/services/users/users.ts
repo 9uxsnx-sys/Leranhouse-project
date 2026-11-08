@@ -44,12 +44,42 @@ export async function getUserByUsername(username: string, access_token: string) 
  */
 export async function getCoursesByUser(user_id: string, access_token: string) {
   const result = await fetch(
-    `${getAPIUrl()}users/${user_id}/courses`,
+    `${getAPIUrl()}users/${user_id}/courses?limit=50`,
     RequestBodyWithAuthHeader('GET', null, null, access_token)
   )
   const res = await getResponseMetadata(result)
   return res
 }
+/**
+ * Get podcasts created/contributed by a user.
+ *
+ * SECURITY: Requires authentication.
+ * The access_token parameter is required.
+ */
+export async function getPodcastsByUser(user_id: string, access_token: string) {
+  const result = await fetch(
+    `${getAPIUrl()}users/${user_id}/podcasts?limit=50`,
+    RequestBodyWithAuthHeader('GET', null, null, access_token)
+  )
+  const res = await getResponseMetadata(result)
+  return res
+}
+
+/**
+ * Get communities accessible by a user.
+ *
+ * SECURITY: Requires authentication.
+ * The access_token parameter is required.
+ */
+export async function getCommunitiesByUser(user_id: string, access_token: string) {
+  const result = await fetch(
+    `${getAPIUrl()}users/${user_id}/communities?limit=50`,
+    RequestBodyWithAuthHeader('GET', null, null, access_token)
+  )
+  const res = await getResponseMetadata(result)
+  return res
+}
+
 export async function updateUserAvatar(
   user_uuid: any,
   avatar_file: any,
@@ -62,5 +92,47 @@ export async function updateUserAvatar(
     RequestBodyFormWithAuthHeader('PUT', formData, null, access_token)
   )
   const res = await getResponseMetadata(result)
+  return res
+}
+
+export async function deleteUserAvatar(user_uuid: any, access_token: any) {
+  const result: any = await fetch(
+    `${getAPIUrl()}users/delete_avatar/${user_uuid}`,
+    RequestBodyWithAuthHeader('DELETE', null, null, access_token)
+  )
+  const res = await getResponseMetadata(result)
+  return res
+}
+
+export async function updateUserBanner(
+  user_uuid: any,
+  banner_file: any,
+  access_token: any
+) {
+  const formData = new FormData()
+  formData.append('banner_file', banner_file)
+  const result: any = await fetch(
+    `${getAPIUrl()}users/update_banner/${user_uuid}`,
+    RequestBodyFormWithAuthHeader('PUT', formData, null, access_token)
+  )
+  const res = await getResponseMetadata(result)
+  return res
+}
+
+export async function deleteUserBanner(user_uuid: any, access_token: any) {
+  const result: any = await fetch(
+    `${getAPIUrl()}users/delete_banner/${user_uuid}`,
+    RequestBodyWithAuthHeader('DELETE', null, null, access_token)
+  )
+  const res = await getResponseMetadata(result)
+  return res
+}
+
+export async function checkUsernameAvailability(username: string, access_token: string) {
+  const result = await fetch(
+    `${getAPIUrl()}users/check-username/${username}`,
+    RequestBodyWithAuthHeader('GET', null, null, access_token)
+  )
+  const res = await errorHandling(result)
   return res
 }

@@ -66,6 +66,7 @@ async function UserPage({ params }: UserPageProps) {
         <UserProfileClient
           userData={userData}
           profile={profile}
+          orgslug={orgslug}
         />
       </div>
     )

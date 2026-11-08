@@ -1569,7 +1569,12 @@
     "title": "Compte",
     "general": "Général",
     "profile": "Profil",
-    "security": "Sécurité",
+    "appearance": "Apparence",
+    "security_privacy": "Sécurité & Confidentialité",
+    "notifications": "Notifications",
+    "preferences": "Préférences",
+    "billing": "Facturation",
+    "privacy": "Confidentialité",
     "my_courses": "Mes Cours",
     "no_purchased_courses": "Aucun cours acheté",
     "purchased_courses_description": "Les cours que vous avez achetés ou auxquels vous êtes abonné apparaîtront ici",
@@ -1604,10 +1609,13 @@
       "general": {
         "title": "Paramètres du compte",
         "subtitle": "Gérez vos informations personnelles et vos préférences",
+        "account_details": "Détails du compte",
+        "profile_information": "Informations du profil",
         "email": "E-mail",
         "email_placeholder": "Votre adresse e-mail",
         "username": "Nom d'utilisateur",
         "username_placeholder": "Votre nom d'utilisateur",
+        "username_taken": "Ce nom d'utilisateur est déjà pris",
         "first_name": "Prénom",
         "first_name_placeholder": "Votre prénom",
         "last_name": "Nom",
@@ -1625,6 +1633,7 @@
         "change_avatar": "Modifier l'avatar",
         "recommended_size": "Taille recommandée 100x100",
         "save_changes": "Enregistrer les modifications",
+        "saved": "Enregistré",
         "saving": "Enregistrement...",
         "uploading": "Téléchargement",
         "avatar_updated": "Avatar mis à jour",
@@ -1677,6 +1686,37 @@
         "password_updated": "Mot de passe mis à jour avec succès",
         "relogin_message": "Veuillez vous reconnecter avec votre nouveau mot de passe",
         "logout_warning": "Vous serez déconnecté après avoir changé votre mot de passe"
+      },
+      "appearance": {
+        "profile_banner": "Bannière de profil"
+      },
+      "notifications": {
+        "title": "Notifications",
+        "coming_soon": "Préférences de notifications bientôt disponibles"
+      },
+      "preferences": {
+        "title": "Préférences",
+        "coming_soon": "Préférences bientôt disponibles"
+      },
+      "billing": {
+        "subscription": "Abonnement",
+        "manage_subscription": "Gérez votre abonnement et votre facturation",
+        "billing_portal": "Portail de facturation",
+        "enrollments": "Inscriptions et reçus",
+        "no_enrollments": "Aucune inscription pour le moment",
+        "view_invoices": "Voir les factures"
+      },
+      "privacy": {
+        "visibility": "Visibilité du profil",
+        "coming_soon": "Paramètres de confidentialité bientôt disponibles",
+        "delete_account": "Supprimer le compte",
+        "delete_warning_title": "Avertissement : Cette action est irréversible",
+        "delete_warning_description": "La suppression de votre compte supprimera définitivement toutes vos données, y compris les cours, les progrès et les informations personnelles.",
+        "delete_account_button": "Supprimer mon compte",
+        "delete_confirm_message": "Tapez DELETE pour confirmer que vous souhaitez supprimer définitivement votre compte.",
+        "type_delete": "Tapez DELETE pour confirmer",
+        "confirm_delete": "Confirmer la suppression",
+        "cancel": "Annuler"
       },
       "profile_builder": {
         "section_name": "Section {{name}}",

@@ -9,9 +9,8 @@ import { useMediaQuery } from 'usehooks-ts'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useTranslation } from 'react-i18next'
 import AccountGeneral from '@components/Objects/Account/subpages/AccountGeneral'
-import AccountProfile from '@components/Objects/Account/subpages/AccountProfile'
-import AccountSecurity from '@components/Objects/Account/subpages/AccountSecurity'
-import AccountPurchases from '@components/Objects/Account/subpages/AccountPurchases'
+import AccountSecurityPrivacy from '@components/Objects/Account/subpages/AccountSecurityPrivacy'
+import AccountPreferences from '@components/Objects/Account/subpages/AccountPreferences'
 
 interface AccountClientProps {
   orgslug: string
@@ -22,9 +21,8 @@ interface AccountClientProps {
 const getSubpageTitle = (subpage: string, t: (key: string) => string): string => {
   const titles: Record<string, string> = {
     'general': t('account.general'),
-    'profile': t('account.profile'),
-    'security': t('account.security'),
-    'purchases': t('account.purchases'),
+    'security-privacy': t('account.security_privacy'),
+    'preferences': t('account.preferences'),
   }
   return titles[subpage] || t('account.title')
 }
@@ -44,12 +42,10 @@ const AccountClient = ({ orgslug, org_id, subpage }: AccountClientProps) => {
     switch (subpage) {
       case 'general':
         return <AccountGeneral />
-      case 'profile':
-        return <AccountProfile />
-      case 'security':
-        return <AccountSecurity />
-      case 'purchases':
-        return <AccountPurchases orgId={org_id} orgslug={orgslug} />
+      case 'security-privacy':
+        return <AccountSecurityPrivacy />
+      case 'preferences':
+        return <AccountPreferences />
       default:
         return <AccountGeneral />
     }
@@ -59,9 +55,13 @@ const AccountClient = ({ orgslug, org_id, subpage }: AccountClientProps) => {
     <>
       <GeneralWrapperStyled>
         {/* Layout - Sidebar Left, Content Right */}
-        <div className="flex flex-col md:flex-row gap-6 pt-2">
-          {/* Left Sidebar - User Info (Desktop only) */}
-          <div className="hidden md:block w-full md:w-72 lg:w-80 flex-shrink-0">
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Left Sidebar (Desktop only) */}
+          <div className="hidden md:block w-full md:w-56 lg:w-64 flex-shrink-0">
+            {/* Page Title - Settings */}
+            <h1 className="text-[28px] font-semibold text-ui-fg-base mb-6">
+              {t('account.title')}
+            </h1>
             <div className="sticky top-24">
               <AccountSidebar orgslug={orgslug} currentSubpage={subpage} />
             </div>
@@ -69,6 +69,11 @@ const AccountClient = ({ orgslug, org_id, subpage }: AccountClientProps) => {
 
           {/* Main Content */}
           <div className="flex-1 min-w-0">
+            {/* Spacer to align content with first sidebar tab */}
+            <h1 className="text-[28px] font-semibold text-ui-fg-base mb-6 invisible hidden md:block" aria-hidden="true">
+              {t('account.title')}
+            </h1>
+
             {/* Mobile only shows user name */}
             <div className="md:hidden mb-4">
               <h1 className="text-xl font-bold text-gray-900">

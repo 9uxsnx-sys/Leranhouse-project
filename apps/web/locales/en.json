@@ -1879,7 +1879,12 @@
                     "title":  "Account",
                     "general":  "General",
                     "profile":  "Profile",
-                    "security":  "Security",
+                    "appearance":  "Appearance",
+                    "security_privacy":  "Security & Privacy",
+                    "notifications":  "Notifications",
+                    "preferences":  "Preferences",
+                    "billing":  "Billing",
+                    "privacy":  "Privacy",
                     "my_courses":  "My Courses",
                     "purchases":  "Purchases",
                     "no_purchased_courses":  "No purchased courses yet",
@@ -1903,7 +1908,7 @@
                     "load_purchases_error":  "Could not load purchases. Please refresh and try again."
                 },
     "user":  {
-                 "user_settings":  "User Settings",
+                 "user_settings":  "Settings",
                  "settings":  {
                                   "title":  "Account Settings",
                                   "tabs":  {
@@ -1914,10 +1919,13 @@
                                   "general":  {
                                                   "title":  "Account Settings",
                                                   "subtitle":  "Manage your personal information and preferences",
+                                                  "account_details":  "Account Details",
+                                                  "profile_information":  "Profile Information",
                                                   "email":  "Email",
                                                   "email_placeholder":  "Your email address",
                                                   "username":  "Username",
                                                   "username_placeholder":  "Your username",
+                                                  "username_taken":  "This username is already taken",
                                                   "first_name":  "First Name",
                                                   "first_name_placeholder":  "Your first name",
                                                   "last_name":  "Last Name",
@@ -1935,6 +1943,7 @@
                                                   "change_avatar":  "Change Avatar",
                                                   "recommended_size":  "Recommended size 100x100",
                                                   "save_changes":  "Save Changes",
+                                                  "saved":  "Saved",
                                                   "saving":  "Saving...",
                                                   "uploading":  "Uploading",
                                                   "avatar_updated":  "Avatar Updated",
@@ -1987,6 +1996,37 @@
                                                    "password_updated":  "Password updated successfully",
                                                    "relogin_message":  "Please login again with your new password",
                                                    "logout_warning":  "You will be logged out after changing your password"
+                                               },
+                                  "appearance":  {
+                                                     "profile_banner":  "Profile Banner"
+                                                 },
+                                  "notifications":  {
+                                                        "title":  "Notifications",
+                                                        "coming_soon":  "Notification preferences coming soon"
+                                                    },
+                                  "preferences":  {
+                                                       "title":  "Preferences",
+                                                       "coming_soon":  "Preferences coming soon"
+                                                   },
+                                  "billing":  {
+                                                   "subscription":  "Subscription",
+                                                   "manage_subscription":  "Manage your subscription and billing",
+                                                   "billing_portal":  "Billing Portal",
+                                                   "enrollments":  "Enrollments & Receipts",
+                                                   "no_enrollments":  "No enrollments yet",
+                                                   "view_invoices":  "View Invoices"
+                                               },
+                                  "privacy":  {
+                                                   "visibility":  "Profile Visibility",
+                                                   "coming_soon":  "Privacy settings coming soon",
+                                                   "delete_account":  "Delete Account",
+                                                   "delete_warning_title":  "Warning: This action cannot be undone",
+                                                   "delete_warning_description":  "Deleting your account will permanently remove all your data, including courses, progress, and personal information.",
+                                                   "delete_account_button":  "Delete My Account",
+                                                   "delete_confirm_message":  "Type DELETE to confirm you want to permanently delete your account.",
+                                                   "type_delete":  "Type DELETE to confirm",
+                                                   "confirm_delete":  "Confirm Delete",
+                                                   "cancel":  "Cancel"
                                                },
                                   "profile_builder":  {
                                                           "section_name":  "{{name}} section",

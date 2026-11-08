@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowRightOnRectangle,
-  CreditCard,
+  CogSixTooth,
   EllipsisHorizontal,
-  IdBadge,
+  Users,
 } from '@components/Objects/Icons/MedusaIcons'
 import { Avatar } from '@components/ui/avatar'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
@@ -61,15 +61,15 @@ export const HeaderProfileBox = ({ primaryColor = '', collapsed = false }: { pri
       </div>
 
       <HoverMenuItem asChild>
-        <Link href={getUriWithOrg(org?.slug, '/account/general')} className="flex items-center gap-2">
-          <IdBadge className="h-4 w-4" />
-          <span>{t('user.user_settings')}</span>
+        <Link href={getUriWithOrg(org?.slug, `/user/${session.data.user.username}`)} className="flex items-center gap-2">
+          <Users className="h-4 w-4" />
+          <span>{t('account.profile')}</span>
         </Link>
       </HoverMenuItem>
       <HoverMenuItem asChild>
-        <Link href={getUriWithOrg(org?.slug, '/account/purchases')} className="flex items-center gap-2">
-          <CreditCard className="h-4 w-4" />
-          <span>{t('account.purchases')}</span>
+        <Link href={getUriWithOrg(org?.slug, '/account/general')} className="flex items-center gap-2">
+          <CogSixTooth className="h-4 w-4" />
+          <span>{t('user.user_settings')}</span>
         </Link>
       </HoverMenuItem>
 
@@ -86,12 +86,13 @@ export const HeaderProfileBox = ({ primaryColor = '', collapsed = false }: { pri
   )
 
   return (
-    <div className="flex items-stretch items-center">
+    <div className="flex items-stretch items-center w-full">
       {session.status == 'unauthenticated' && null}
       {session.status == 'authenticated' && (
         <HoverMenu
           align="end"
           content={menuContent}
+          className="w-full"
         >
           {collapsed ? (
             <button className="flex items-center justify-center w-full h-10 rounded-lg text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover transition-all">

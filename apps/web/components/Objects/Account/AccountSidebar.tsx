@@ -1,11 +1,10 @@
 'use client'
-import React from 'react'
+import React, { useRef, useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
-import { User, Lock, ShoppingBag, Settings } from 'lucide-react'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-import UserAvatar from '@components/Objects/UserAvatar'
+import { Settings, Shield, Bell } from 'lucide-react'
 import { getUriWithOrg } from '@services/config/config'
+import { cn } from '@/lib/utils'
 
 interface AccountSidebarProps {
   orgslug: string
@@ -14,70 +13,76 @@ interface AccountSidebarProps {
 
 const NAV_ITEMS = [
   { id: 'general', icon: Settings, labelKey: 'account.general' },
-  { id: 'profile', icon: User, labelKey: 'account.profile' },
-  { id: 'security', icon: Lock, labelKey: 'account.security' },
-  { id: 'purchases', icon: ShoppingBag, labelKey: 'account.purchases' },
+  { id: 'security-privacy', icon: Shield, labelKey: 'account.security_privacy' },
+  { id: 'preferences', icon: Bell, labelKey: 'account.preferences' },
 ]
 
 export function AccountSidebar({ orgslug, currentSubpage }: AccountSidebarProps) {
   const { t } = useTranslation()
-  const session = useLHSession() as any
-  const user = session?.data?.user
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [indicatorTop, setIndicatorTop] = useState(-9999)
+  const [indicatorOpacity, setIndicatorOpacity] = useState(0)
+
+  const measureIndicator = useCallback(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    const activeLink = container.querySelector('[aria-current="page"]')
+    if (activeLink) {
+      const navItem = (activeLink as HTMLElement).closest('[data-nav-item]')
+      if (navItem) {
+        const containerRect = container.getBoundingClientRect()
+        const itemRect = navItem.getBoundingClientRect()
+        setIndicatorTop(itemRect.top - containerRect.top)
+        setIndicatorOpacity(1)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    measureIndicator()
+
+    const ro = new ResizeObserver(() => {
+      measureIndicator()
+    })
+    ro.observe(container)
+
+    return () => ro.disconnect()
+  }, [currentSubpage, measureIndicator])
 
   return (
-    <div className="space-y-4">
-      {/* User Info Card */}
-      <div className="bg-white nice-shadow rounded-lg overflow-hidden">
-        {/* User Profile Header */}
-        <div className="p-4 border-b border-gray-100">
-          <div className="flex flex-col items-center text-center">
-            <UserAvatar
-              border="border-4"
-              rounded="rounded-full"
-              width={80}
-            />
-            <div className="mt-3">
-              <h2 className="font-semibold text-gray-900">
-                {user?.first_name} {user?.last_name}
-              </h2>
-              <p className="text-sm text-gray-500">@{user?.username}</p>
+    <div className="relative" ref={containerRef}>
+      {/* Floating active indicator */}
+      <div
+        className="absolute left-0 right-0 bg-white border border-gray-100 rounded-xl shadow-sm transition-all duration-200 ease-out pointer-events-none"
+        style={{ top: indicatorTop, height: 40, opacity: indicatorOpacity }}
+      />
+      <nav className="flex flex-col gap-0.5">
+        {NAV_ITEMS.map((item) => {
+          const Icon = item.icon
+          const isActive = currentSubpage === item.id
+          return (
+            <div key={item.id} data-nav-item>
+              <Link
+                href={getUriWithOrg(orgslug, `/account/${item.id}`)}
+                aria-current={isActive ? 'page' : undefined}
+                className={cn(
+                  "relative flex items-center gap-x-2.5 h-10 px-4 rounded-xl transition-all",
+                  isActive
+                    ? "text-ui-fg-base"
+                    : "text-ui-fg-subtle hover:bg-ui-bg-subtle-hover hover:text-ui-fg-base"
+                )}
+              >
+                <Icon className="w-[18px] h-[18px]" />
+                <span className="text-sm font-medium">{t(item.labelKey)}</span>
+              </Link>
             </div>
-          </div>
-        </div>
-
-        {/* User Bio (truncated) */}
-        {user?.bio && (
-          <div className="px-4 py-3 border-b border-gray-100">
-            <p dir="auto" className="text-sm text-gray-600 leading-relaxed line-clamp-3">
-              {user.bio}
-            </p>
-          </div>
-        )}
-
-        {/* Navigation */}
-        <div className="p-2">
-          <nav className="space-y-1">
-            {NAV_ITEMS.map((item) => {
-              const Icon = item.icon
-              const isActive = currentSubpage === item.id
-              return (
-                <Link
-                  key={item.id}
-                  href={getUriWithOrg(orgslug, `/account/${item.id}`)}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                    isActive
-                      ? 'bg-gray-900 text-white'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  <Icon size={18} className={isActive ? 'text-white' : 'text-gray-500'} />
-                  <span className="text-sm font-medium">{t(item.labelKey)}</span>
-                </Link>
-              )
-            })}
-          </nav>
-        </div>
-      </div>
+          )
+        })}
+      </nav>
     </div>
   )
 }

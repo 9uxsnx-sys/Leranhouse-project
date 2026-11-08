@@ -17,7 +17,7 @@ from src.services.users.emails import (
     send_account_creation_email,
 )
 from src.services.orgs.invites import get_invite_code
-from src.services.users.avatars import upload_avatar
+from src.services.users.avatars import upload_avatar, upload_user_banner
 from src.db.roles import Role, RoleRead
 from src.security.rbac.rbac import (
     authorization_verify_based_on_roles_and_authorship,
@@ -473,6 +473,102 @@ async def update_user_avatar(
     return user
 
 
+async def delete_user_avatar(
+    request: Request,
+    db_session: Session,
+    current_user: PublicUser | AnonymousUser,
+):
+    """Delete user avatar by setting avatar_image to None."""
+    statement = select(User).where(User.id == current_user.id)
+    user = db_session.exec(statement).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=400,
+            detail="User does not exist",
+        )
+
+    # RBAC check
+    await rbac_check(request, current_user, "update", user.user_uuid, db_session)
+
+    # Remove avatar
+    user.avatar_image = None
+
+    # Update user in database
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+
+    user = UserRead.model_validate(user)
+
+    return user
+
+
+async def update_user_banner(
+    request: Request,
+    db_session: Session,
+    current_user: PublicUser | AnonymousUser,
+    banner_file: UploadFile | None = None,
+):
+    """Update user profile banner."""
+    statement = select(User).where(User.id == current_user.id)
+    user = db_session.exec(statement).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=400,
+            detail="User does not exist",
+        )
+
+    await rbac_check(request, current_user, "update", user.user_uuid, db_session)
+
+    if banner_file and banner_file.filename:
+        try:
+            name_in_disk = await upload_user_banner(banner_file, user.user_uuid)
+            user.banner_image = name_in_disk
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Banner upload failed: {str(e)}",
+            )
+
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+
+    user = UserRead.model_validate(user)
+
+    return user
+
+
+async def delete_user_banner(
+    request: Request,
+    db_session: Session,
+    current_user: PublicUser | AnonymousUser,
+):
+    """Delete user profile banner by setting banner_image to None."""
+    statement = select(User).where(User.id == current_user.id)
+    user = db_session.exec(statement).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=400,
+            detail="User does not exist",
+        )
+
+    await rbac_check(request, current_user, "update", user.user_uuid, db_session)
+
+    user.banner_image = None
+
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+
+    user = UserRead.model_validate(user)
+
+    return user
+
+
 async def update_user_password(
     request: Request,
     db_session: Session,
@@ -612,6 +708,24 @@ async def read_user_by_username(
         )
 
     return UserReadPublic.model_validate(user)
+
+
+async def check_username_availability(
+    request: Request,
+    db_session: Session,
+    current_user: PublicUser | AnonymousUser,
+    username: str,
+):
+    """
+    Check if a username is available (not taken by another user).
+    Returns {"available": true} if the username is free, or {"available": false} if taken.
+    """
+    statement = select(User).where(
+        User.username == username,
+        User.id != current_user.id
+    )
+    user = db_session.exec(statement).first()
+    return {"available": user is None}
 
 
 async def get_user_session(

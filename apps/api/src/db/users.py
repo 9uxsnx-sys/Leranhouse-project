@@ -17,6 +17,7 @@ class UserBase(SQLModel):
     last_name: str
     email: EmailStr
     avatar_image: Optional[str] = ""
+    banner_image: Optional[str] = ""
     bio: Optional[str] = ""
     details: Optional[dict] = Field(default_factory=dict, sa_column=Column(JSON))
     profile: Optional[dict] = Field(default_factory=dict, sa_column=Column(JSON))

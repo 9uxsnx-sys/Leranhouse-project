@@ -12,3 +12,15 @@ async def upload_avatar(avatar_file: UploadFile, user_uuid: str) -> str:
         allowed_types=["image"],
         filename_prefix="avatar"
     )
+
+
+async def upload_user_banner(banner_file: UploadFile, user_uuid: str) -> str:
+    """Upload user profile banner."""
+    return await upload_file(
+        file=banner_file,
+        directory="banners",
+        type_of_dir="users",
+        uuid=user_uuid,
+        allowed_types=["image"],
+        filename_prefix="banner"
+    )

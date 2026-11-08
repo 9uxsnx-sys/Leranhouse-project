@@ -3,77 +3,45 @@
 import React from 'react'
 import toast from 'react-hot-toast'
 import UserAvatar from '@components/Objects/UserAvatar'
-import { 
-  Briefcase, 
-  Building2, 
-  MapPin, 
-  Globe, 
-  Link as LinkIcon, 
-  GraduationCap,
-  Award,
-  BookOpen,
-  Laptop2,
-  Users,
-  Calendar,
-  Lightbulb,
-  X
-} from 'lucide-react'
-import { getUserAvatarMediaDirectory } from '@services/media/media'
-import { getCoursesByUser } from '@services/users/users'
+import { BookOpen, Mic, Users } from 'lucide-react'
+import { getUserAvatarMediaDirectory, getUserBannerMediaDirectory, getCourseThumbnailMediaDirectory, getPodcastThumbnailMediaDirectory, getCommunityThumbnailMediaDirectory } from '@services/media/media'
+import { getCoursesByUser, getPodcastsByUser, getCommunitiesByUser } from '@services/users/users'
+import { removePodcastPrefix } from '@services/podcasts/podcasts'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import CourseThumbnailLanding from '@components/Objects/Thumbnails/CourseThumbnailLanding'
 import { useRegisterBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
+import { useOrg } from '@components/Contexts/OrgContext'
 import { useTranslation } from 'react-i18next'
+import { CourseCard } from '@components/Objects/Thumbnails/CourseCard'
+import { PodcastCard } from '@components/Objects/Thumbnails/PodcastCard'
+import { CommunityCard } from '@components/Objects/Thumbnails/CommunityCard'
 
 interface UserProfileClientProps {
   userData: any;
   profile: any;
+  orgslug: string;
 }
 
-const ICON_MAP = {
-  'briefcase': Briefcase,
-  'graduation-cap': GraduationCap,
-  'map-pin': MapPin,
-  'building-2': Building2,
-  'speciality': Lightbulb,
-  'globe': Globe,
-  'laptop-2': Laptop2,
-  'award': Award,
-  'book-open': BookOpen,
-  'link': LinkIcon,
-  'users': Users,
-  'calendar': Calendar,
-} as const
+type TabType = 'courses' | 'podcasts' | 'communities';
 
-// Add Modal component
-const ImageModal: React.FC<{
-  image: { url: string; caption?: string };
-  onClose: () => void;
-}> = ({ image, onClose }) => {
-  return (
-    <div className="fixed inset-0 bg-black/80 z-modal flex items-center justify-center p-4">
-      <div className="relative max-w-4xl w-full">
-        <button
-          onClick={onClose}
-          className="absolute -top-10 end-0 text-white hover:text-gray-300 transition-colors"
-        >
-          <X className="w-6 h-6" />
-        </button>
-        <img
-          src={image.url}
-          alt={image.caption || ''}
-          className="w-full h-auto rounded-lg"
-        />
-        {image.caption && (
-          <p className="mt-4 text-white text-center text-lg">{image.caption}</p>
-        )}
-      </div>
-    </div>
-  );
-};
+const tabsConfig: { id: TabType; label: string; icon: React.ReactNode }[] = [
+  { id: 'courses', label: 'Courses', icon: <BookOpen className="w-4 h-4" /> },
+  { id: 'podcasts', label: 'Podcasts', icon: <Mic className="w-4 h-4" /> },
+  { id: 'communities', label: 'Communities', icon: <Users className="w-4 h-4" /> },
+]
 
-function UserProfileClient({ userData, profile }: UserProfileClientProps) {
+function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProps) {
   const { t } = useTranslation()
+  const session = useLHSession() as any
+  const org = useOrg() as any
+  const access_token = session?.data?.tokens?.access_token
+  const [activeTab, setActiveTab] = React.useState<TabType>('courses')
+
+  // Data states
+  const [userCourses, setUserCourses] = React.useState<any[]>([])
+  const [userPodcasts, setUserPodcasts] = React.useState<any[]>([])
+  const [userCommunities, setUserCommunities] = React.useState<any[]>([])
+  const [isLoading, setIsLoading] = React.useState(false)
+  const [fetchError, setFetchError] = React.useState(false)
 
   useRegisterBreadcrumb([
     {
@@ -83,291 +51,238 @@ function UserProfileClient({ userData, profile }: UserProfileClientProps) {
         t('navigation.breadcrumb.profile_fallback'),
     },
   ])
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-  const [selectedImage, setSelectedImage] = React.useState<{ url: string; caption?: string } | null>(null);
-  const [userCourses, setUserCourses] = React.useState<any[]>([]);
-  const [isLoadingCourses, setIsLoadingCourses] = React.useState(false);
-  const [coursesError, setCoursesError] = React.useState(false);
 
   React.useEffect(() => {
     let mounted = true
+    if (!userData.id || !access_token) return
 
-    const fetchUserCourses = async () => {
-      if (userData.id && access_token) {
-        try {
-          setIsLoadingCourses(true);
-          const coursesData = await getCoursesByUser(userData.id, access_token);
-          if (mounted && coursesData.data) {
-            setUserCourses(coursesData.data);
-          }
-        } catch (error) {
-          if (mounted) {
-            console.error('Error fetching user courses:', error);
-            setCoursesError(true);
-            toast.error('Failed to load courses')
-          }
-        } finally {
-          if (mounted) setIsLoadingCourses(false);
+    const fetchAllData = async () => {
+      setIsLoading(true)
+      setFetchError(false)
+      try {
+        const [coursesRes, podcastsRes, communitiesRes] = await Promise.allSettled([
+          getCoursesByUser(userData.id, access_token),
+          getPodcastsByUser(userData.id, access_token),
+          getCommunitiesByUser(userData.id, access_token),
+        ])
+
+        if (!mounted) return
+
+        if (coursesRes.status === 'fulfilled' && coursesRes.value.data) {
+          setUserCourses(coursesRes.value.data)
         }
+        if (podcastsRes.status === 'fulfilled' && podcastsRes.value.data) {
+          setUserPodcasts(podcastsRes.value.data)
+        }
+        if (communitiesRes.status === 'fulfilled' && communitiesRes.value.data) {
+          setUserCommunities(communitiesRes.value.data)
+        }
+
+        const allFailed = [coursesRes, podcastsRes, communitiesRes].every(r => r.status === 'rejected')
+        if (allFailed) {
+          setFetchError(true)
+          toast.error('Failed to load user data')
+        }
+      } catch (error) {
+        if (mounted) {
+          console.error('Error fetching user data:', error)
+          setFetchError(true)
+          toast.error('Failed to load user data')
+        }
+      } finally {
+        if (mounted) setIsLoading(false)
       }
-    };
+    }
 
-    fetchUserCourses();
+    fetchAllData()
     return () => { mounted = false }
-  }, [userData.id, access_token]);
+  }, [userData.id, access_token])
 
-  const IconComponent = ({ iconName }: { iconName: string }) => {
-    const IconElement = ICON_MAP[iconName as keyof typeof ICON_MAP]
-    if (!IconElement) return null
-    return <IconElement className="w-4 h-4 text-gray-600" />
-  }
+  const bannerUrl = userData.banner_image
+    ? getUserBannerMediaDirectory(userData.user_uuid, userData.banner_image)
+    : ''
+
+  const tabs = tabsConfig.map((tab) => ({
+    ...tab,
+    count:
+      tab.id === 'courses' ? userCourses.length :
+      tab.id === 'podcasts' ? userPodcasts.length :
+      userCommunities.length,
+  }))
+
+  const orgUuid = org?.org_uuid
 
   return (
-    <div className="container mx-auto py-8">
-      {/* Banner */}
-      <div className="h-48 w-full bg-gray-100 rounded-t-xl mb-0 relative overflow-hidden">
-        {/* Optional banner content */}
+    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* ── Banner ── */}
+      <div className="relative w-full aspect-[4/1] rounded-2xl overflow-hidden bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
+        {bannerUrl && (
+          <img
+            src={bannerUrl}
+            alt=""
+            className="w-full h-full object-cover"
+          />
+        )}
       </div>
-      
-      {/* Profile Content */}
-      <div className="bg-white rounded-b-xl nice-shadow p-8 relative">
-        {/* Avatar Positioned on the banner */}
-        <div className="absolute -top-24 start-8">
-          <div className="rounded-xl overflow-hidden shadow-lg border-4 border-white">
+
+      {/* ── Avatar + User Info ── */}
+      <div className="relative px-4 sm:px-8">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 -mt-6 mb-4">
+          <div className="rounded-full overflow-hidden shadow-lg flex-shrink-0">
             <UserAvatar
-              width={150}
+              width={130}
               avatar_url={userData.avatar_image ? getUserAvatarMediaDirectory(userData.user_uuid, userData.avatar_image) : ''}
               predefined_avatar={userData.avatar_image ? undefined : 'empty'}
               userId={userData.id}
               showProfilePopup
-              rounded="rounded-xl"
+              rounded="rounded-full"
             />
           </div>
-        </div>
-
-        {/* Affiliation Logos */}
-        <div className="absolute -top-12 end-8 flex items-center gap-4">
-          {profile.sections?.map((section: any) => (
-            section.type === 'affiliation' && section.affiliations?.map((affiliation: any, index: number) => (
-              affiliation.logoUrl && (
-                <div key={index} className="bg-white rounded-lg p-2 shadow-lg border-2 border-white">
-                  <img 
-                    src={affiliation.logoUrl} 
-                    alt={affiliation.name}
-                    className="w-16 h-16 object-contain"
-                    title={affiliation.name}
-                  />
-                </div>
-              )
-            ))
-          ))}
-        </div>
-
-        {/* Profile Content with right padding to avoid overlap */}
-        <div className="mt-20 md:mt-14">
-          <div className="flex flex-col md:flex-row gap-12">
-            {/* Left column with details - aligned with avatar */}
-            <div className="w-full md:w-1/6 ps-2">
-              {/* Name */}
-              <h1 className="text-[32px] font-bold mb-8">
-                {userData.first_name} {userData.last_name}
-              </h1>
-
-              {/* Details */}
-              <div className="flex flex-col space-y-3">
-                {userData.details && Object.values(userData.details).map((detail: any) => (
-                  <div key={detail.id} className="flex items-center gap-4">
-                    <div className="flex-shrink-0">
-                      <IconComponent iconName={detail.icon} />
-                    </div>
-                    <span className="text-gray-700 text-[15px] font-medium">{detail.text}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Right column with about and related content */}
-            <div className="w-full md:w-4/6">
-              <div className="mb-8">
-                <h2 className="text-xl font-semibold mb-4">{t('common.about')}</h2>
-                {userData.bio ? (
-                  <p dir="auto" className="text-gray-700">{userData.bio}</p>
-                ) : (
-                  <p className="text-gray-500 italic">{t('user.no_biography')}</p>
-                )}
-              </div>
-              
-              {/* Profile sections from profile builder */}
-              {profile.sections && profile.sections.length > 0 && (
-                <div>
-                  {profile.sections.map((section: any, index: number) => (
-                    <div key={index} className="mb-8">
-                      <h2 className="text-xl font-semibold mb-4">{section.title}</h2>
-                      
-                      {/* Add Image Gallery section */}
-                      {section.type === 'image-gallery' && (
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                          {section.images.map((image: any, imageIndex: number) => (
-                            <div
-                              key={imageIndex}
-                              className="relative group cursor-pointer"
-                              onClick={() => setSelectedImage(image)}
-                            >
-                              <img
-                                src={image.url}
-                                alt={image.caption || ''}
-                                className="w-full h-48 object-cover rounded-lg"
-                              />
-                              {image.caption && (
-                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-lg flex items-center justify-center p-4">
-                                  <p className="text-white text-center text-sm">{image.caption}</p>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      
-                      {section.type === 'text' && (
-                        <div className="prose max-w-none">{section.content}</div>
-                      )}
-                      
-                      {section.type === 'links' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {section.links.map((link: any, linkIndex: number) => (
-                            <a
-                              key={linkIndex}
-                              href={link.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
-                            >
-                              <LinkIcon className="w-4 h-4" />
-                              <span>{link.title}</span>
-                            </a>
-                          ))}
-                        </div>
-                      )}
-                      
-                      {section.type === 'skills' && (
-                        <div className="flex flex-wrap gap-2">
-                          {section.skills.map((skill: any, skillIndex: number) => (
-                            <span
-                              key={skillIndex}
-                              className="px-3 py-1 bg-gray-100 rounded-full text-sm"
-                            >
-                              {skill.name}
-                              {skill.level && ` • ${skill.level}`}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      
-                      {section.type === 'experience' && (
-                        <div className="space-y-4">
-                          {section.experiences.map((exp: any, expIndex: number) => (
-                            <div key={expIndex} className="border-s-2 border-gray-200 ps-4">
-                              <h3 className="font-medium">{exp.title}</h3>
-                              <p className="text-gray-600">{exp.organization}</p>
-                              <p className="text-sm text-gray-500">
-                                {exp.startDate} - {exp.current ? t('common.present') : exp.endDate}
-                              </p>
-                              {exp.description && (
-                                <p className="mt-2 text-gray-700">{exp.description}</p>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      
-                      {section.type === 'education' && (
-                        <div className="space-y-4">
-                          {section.education.map((edu: any, eduIndex: number) => (
-                            <div key={eduIndex} className="border-s-2 border-gray-200 ps-4">
-                              <h3 className="font-medium">{edu.institution}</h3>
-                              <p className="text-gray-600">{edu.degree} in {edu.field}</p>
-                              <p className="text-sm text-gray-500">
-                                {edu.startDate} - {edu.current ? t('common.present') : edu.endDate}
-                              </p>
-                              {edu.description && (
-                                <p className="mt-2 text-gray-700">{edu.description}</p>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {section.type === 'affiliation' && (
-                        <div className="space-y-4">
-                          {section.affiliations.map((affiliation: any, affIndex: number) => (
-                            <div key={affIndex} className="border-s-2 border-gray-200 ps-4">
-                              <div className="flex items-start gap-4">
-                                {affiliation.logoUrl && (
-                                  <img 
-                                    src={affiliation.logoUrl} 
-                                    alt={affiliation.name}
-                                    className="w-12 h-12 object-contain"
-                                  />
-                                )}
-                                <div>
-                                  <h3 className="font-medium">{affiliation.name}</h3>
-                                  {affiliation.description && (
-                                    <p className="mt-2 text-gray-700">{affiliation.description}</p>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {section.type === 'courses' && (
-                        <div>
-                          {isLoadingCourses ? (
-                            <div className="flex items-center justify-center py-8">
-                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-                            </div>
-                          ) : coursesError ? (
-                            <div className="text-center py-8 text-red-500">
-                              {t('courses.courses_load_error')}
-                            </div>
-                          ) : userCourses.length > 0 ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
-                              {userCourses.map((course) => (
-                                <div key={course.id} className="flex">
-                                  <CourseThumbnailLanding
-                                    course={course}
-                                    orgslug={userData.org_slug || course.org_slug}
-                                  />
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="text-center py-8 text-gray-500">
-                              {t('courses.no_courses_found')}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+          <div className="pt-8 sm:pt-10">
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 leading-snug tracking-tight">
+              {userData.first_name} {userData.last_name}
+            </h1>
+            {userData.username && (
+              <p className="text-sm text-gray-400 mt-0">@{userData.username}</p>
+            )}
+            {userData.bio && (
+              <p className="text-sm text-gray-600 mt-2 max-w-xl leading-relaxed">{userData.bio}</p>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Image Modal */}
-      {selectedImage && (
-        <ImageModal
-          image={selectedImage}
-          onClose={() => setSelectedImage(null)}
-        />
-      )}
+      {/* ── Stats Row ── */}
+      <div className="px-4 sm:px-8 mb-6">
+        <div className="flex items-center gap-5 text-sm text-gray-500 sm:ml-[146px]">
+          {tabs.map((tab) => (
+            <span key={tab.id}>
+              <span className="font-semibold text-gray-900">{tab.count}</span>
+              <span className="ml-1">{tab.label}</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Tab Switcher ── */}
+      <div className="border-b border-gray-200 px-4 sm:px-8 mb-6">
+        <div className="flex gap-0 -mb-px">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === tab.id
+                  ? 'border-gray-900 text-gray-900'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Content Grid ── */}
+      <div className="px-4 sm:px-8">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          </div>
+        ) : fetchError ? (
+          <div className="text-center py-16 text-red-500">
+            {t('courses.courses_load_error') || 'Failed to load data'}
+          </div>
+        ) : (
+          <>
+            {activeTab === 'courses' && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
+                {userCourses.length > 0 ? (
+                  userCourses.map((course: any) => {
+                    const imageUrl = course.thumbnail_image && orgUuid
+                      ? getCourseThumbnailMediaDirectory(orgUuid, course.course_uuid, course.thumbnail_image)
+                      : ''
+                    return (
+                      <CourseCard
+                        key={course.id}
+                        id={course.course_uuid || course.id}
+                        title={course.name}
+                        description={course.description || ''}
+                        image={imageUrl}
+                        href={`/orgs/${orgslug}/course/${course.course_uuid || course.id}`}
+                      />
+                    )
+                  })
+                ) : (
+                  <div className="col-span-full text-center py-16 text-gray-400">
+                    <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p className="text-lg font-medium">No courses yet</p>
+                    <p className="text-sm mt-1">Courses created by this user will appear here.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'podcasts' && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
+                {userPodcasts.length > 0 ? (
+                  userPodcasts.map((podcast: any) => (
+                    <PodcastCard
+                      key={podcast.id}
+                      id={removePodcastPrefix(podcast.podcast_uuid || podcast.id)}
+                      title={podcast.name}
+                      description={podcast.description || ''}
+                      thumbnailImage={podcast.thumbnail_image}
+                      episodeCount={0}
+                      totalDurationSeconds={0}
+                      creationDate={podcast.creation_date}
+                      org_uuid={orgUuid}
+                      href={`/orgs/${orgslug}/podcast/${removePodcastPrefix(podcast.podcast_uuid || podcast.id)}`}
+                    />
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-16 text-gray-400">
+                    <Mic className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p className="text-lg font-medium">No podcasts yet</p>
+                    <p className="text-sm mt-1">Podcasts created by this user will appear here.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'communities' && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
+                {userCommunities.length > 0 ? (
+                  userCommunities.map((community: any) => (
+                    <CommunityCard
+                      key={community.id}
+                      id={community.community_uuid || community.id}
+                      title={community.name}
+                      description={community.description || ''}
+                      org_uuid={orgUuid}
+                      community_uuid={community.community_uuid}
+                      course_id={community.course_id}
+                      public={community.public}
+                      creation_date={community.creation_date}
+                      thumbnail_image={community.thumbnail_image}
+                      href={`/orgs/${orgslug}/community/${community.community_uuid || community.id}`}
+                    />
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-16 text-gray-400">
+                    <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p className="text-lg font-medium">No communities yet</p>
+                    <p className="text-sm mt-1">Communities this user has access to will appear here.</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   )
 }
 
-export default UserProfileClient 
+export default UserProfileClient
