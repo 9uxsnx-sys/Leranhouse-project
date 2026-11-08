@@ -136,3 +136,12 @@ export async function checkUsernameAvailability(username: string, access_token: 
   const res = await errorHandling(result)
   return res
 }
+
+export async function deleteUser(user_id: number, access_token: string) {
+  const result: any = await fetch(
+    `${getAPIUrl()}users/user_id/${user_id}`,
+    RequestBodyWithAuthHeader('DELETE', null, null, access_token)
+  )
+  const res = await getResponseMetadata(result)
+  return res
+}

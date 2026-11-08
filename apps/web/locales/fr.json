@@ -1570,6 +1570,7 @@
     "general": "Général",
     "profile": "Profil",
     "appearance": "Apparence",
+    "security": "Sécurité",
     "security_privacy": "Sécurité & Confidentialité",
     "notifications": "Notifications",
     "preferences": "Préférences",
@@ -1675,6 +1676,17 @@
           "expertise": "Expertise",
           "community": "Communauté"
         }
+      },
+      "email": {
+        "title": "Changer l'e-mail",
+        "current_email": "E-mail actuel",
+        "new_email": "Nouvel e-mail",
+        "new_email_placeholder": "Entrez votre nouvelle adresse e-mail",
+        "change_email": "Changer l'e-mail",
+        "updating": "Mise à jour de l'e-mail...",
+        "email_updated": "E-mail mis à jour",
+        "relogin_message": "Veuillez vous reconnecter avec votre nouvel e-mail ({{email}})",
+        "logout_warning": "Vous serez déconnecté après avoir changé votre e-mail"
       },
       "password": {
         "title": "Changer le mot de passe",

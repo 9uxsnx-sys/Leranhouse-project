@@ -6,7 +6,6 @@ import { Formik, Form } from 'formik'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import {
   UploadCloud,
-  AlertTriangle,
   Image as ImageIcon,
   Trash2,
   Loader2,
@@ -20,8 +19,6 @@ import { Input } from "@components/ui/input"
 import { Textarea } from "@components/ui/textarea"
 import { Label } from "@components/ui/label"
 import { toast } from 'react-hot-toast'
-import { signOut } from '@components/Contexts/AuthContext'
-import { getUriWithoutOrg } from '@services/config/config';
 import { useTranslation } from 'react-i18next';
 
 const SUPPORTED_FILES = constructAcceptValue(['jpg', 'png', 'webp', 'gif'])
@@ -29,8 +26,6 @@ const SUPPORTED_FILES = constructAcceptValue(['jpg', 'png', 'webp', 'gif'])
 interface FormValues {
   username: string;
   first_name: string;
-  last_name: string;
-  email: string;
   bio: string;
 }
 
@@ -83,34 +78,12 @@ const UserEditForm = ({
   return (
     <Form>
       <div className="space-y-6">
-        {/* Card 1: Account Details */}
+        {/* Card 1: Profile Information */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
           <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
-            {t('user.settings.general.account_details')}
+            {t('user.settings.general.profile_information')}
           </h3>
           <div className="space-y-5">
-            <div>
-              <Label htmlFor="email" className="font-medium leading-[35px] text-black text-sm">{t('user.settings.general.email')}</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={values.email}
-                onChange={handleChange}
-                placeholder={t('user.settings.general.email_placeholder')}
-                className={fieldClassName}
-              />
-              {touched.email && errors.email && (
-                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-              )}
-              {values.email !== values.email && (
-                <div className="flex items-center space-x-2 mt-2 text-amber-600 bg-amber-50 p-2 rounded-md">
-                  <AlertTriangle size={16} />
-                  <span className="text-sm">{t('user.settings.general.logout_warning')}</span>
-                </div>
-              )}
-            </div>
-
             <div>
               <Label htmlFor="username" className="font-medium leading-[35px] text-black text-sm">{t('user.settings.general.username')}</Label>
               <Input
@@ -125,44 +98,20 @@ const UserEditForm = ({
                 <p className="text-red-500 text-sm mt-1">{errors.username}</p>
               )}
             </div>
-          </div>
-        </div>
 
-        {/* Card 2: Profile Information */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
-            {t('user.settings.general.profile_information')}
-          </h3>
-          <div className="space-y-5">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="first_name" className="font-medium leading-[35px] text-black text-sm">{t('user.settings.general.first_name')}</Label>
-                <Input
-                  id="first_name"
-                  name="first_name"
-                  value={values.first_name}
-                  onChange={handleChange}
-                  placeholder={t('user.settings.general.first_name_placeholder')}
-                  className={fieldClassName}
-                />
-                {touched.first_name && errors.first_name && (
-                  <p className="text-red-500 text-sm mt-1">{errors.first_name}</p>
-                )}
-              </div>
-              <div>
-                <Label htmlFor="last_name" className="font-medium leading-[35px] text-black text-sm">{t('user.settings.general.last_name')}</Label>
-                <Input
-                  id="last_name"
-                  name="last_name"
-                  value={values.last_name}
-                  onChange={handleChange}
-                  placeholder={t('user.settings.general.last_name_placeholder')}
-                  className={fieldClassName}
-                />
-                {touched.last_name && errors.last_name && (
-                  <p className="text-red-500 text-sm mt-1">{errors.last_name}</p>
-                )}
-              </div>
+            <div>
+              <Label htmlFor="first_name" className="font-medium leading-[35px] text-black text-sm">{t('user.settings.general.first_name')}</Label>
+              <Input
+                id="first_name"
+                name="first_name"
+                value={values.first_name}
+                onChange={handleChange}
+                placeholder={t('user.settings.general.first_name_placeholder')}
+                className={fieldClassName}
+              />
+              {touched.first_name && errors.first_name && (
+                <p className="text-red-500 text-sm mt-1">{errors.first_name}</p>
+              )}
             </div>
 
             <div>
@@ -188,14 +137,14 @@ const UserEditForm = ({
           </div>
         </div>
 
-        {/* Card 3: Profile Picture & Banner */}
+        {/* Card 2: Profile Picture & Banner */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
           <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
             {t('user.settings.general.profile_picture')}
           </h3>
           <div className="space-y-3">
             {/* Avatar Row */}
-            <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50">
+            <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-ui-bg-field">
               <div className="flex-shrink-0">
                 <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
               </div>
@@ -237,7 +186,7 @@ const UserEditForm = ({
             </div>
 
             {/* Banner Row */}
-            <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50">
+            <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-ui-bg-field">
               <div className="flex-shrink-0">
                 <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
               </div>
@@ -285,7 +234,7 @@ const UserEditForm = ({
           <button
             type="submit"
             disabled={isSubmitting}
-            className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg border transition-colors ${
+            className={`inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${
               isSubmitting
                 ? 'bg-black text-white border-black opacity-50 cursor-not-allowed'
                 : !dirty && isSaved
@@ -323,7 +272,6 @@ function AccountGeneral() {
   const pendingCheckRef = useRef<{ cancelled: boolean }>({ cancelled: false });
 
   const validationSchema = useMemo(() => Yup.object().shape({
-    email: Yup.string().email('Invalid email').required('Email is required'),
     username: Yup.string()
       .required('Username is required')
       .test('username-available', t('user.settings.general.username_taken'), async function(value) {
@@ -346,7 +294,6 @@ function AccountGeneral() {
         }
       }),
     first_name: Yup.string().required('First name is required'),
-    last_name: Yup.string().required('Last name is required'),
     bio: Yup.string().max(400, 'Bio must be 400 characters or less'),
   }), [userData?.username, access_token, t]);
 
@@ -468,21 +415,6 @@ function AccountGeneral() {
     }
   }
 
-  const handleEmailChange = async (newEmail: string) => {
-    toast.success(t('user.settings.general.profile_updated'), { duration: 4000 })
-
-    toast((t_toast: any) => (
-      <div className="flex items-center gap-2">
-        <span>{t('user.settings.general.relogin_message', { email: newEmail })}</span>
-      </div>
-    ), {
-      duration: 4000,
-      icon: '📧'
-    })
-
-    await new Promise(resolve => setTimeout(resolve, 4000))
-    signOut({ redirect: true, callbackUrl: getUriWithoutOrg('/') })
-  }
 
   if (!userData) {
     return (
@@ -499,14 +431,11 @@ function AccountGeneral() {
         initialValues={{
           username: userData.username,
           first_name: userData.first_name,
-          last_name: userData.last_name,
-          email: userData.email,
           bio: userData.bio || '',
 
         }}
         validationSchema={validationSchema}
         onSubmit={(values, { setSubmitting }) => {
-          const isEmailChanged = values.email !== userData.email
           const loadingToast = toast.loading(t('user.settings.general.saving'))
 
           setTimeout(() => {
@@ -514,11 +443,7 @@ function AccountGeneral() {
               .then(() => {
                 toast.dismiss(loadingToast)
                 setIsSaved(true)
-                if (isEmailChanged) {
-                  handleEmailChange(values.email)
-                } else {
-                  toast.success(t('user.settings.general.profile_updated'))
-                }
+                toast.success(t('user.settings.general.profile_updated'))
                 getUser(userData.id, access_token).then(setUserData);
               })
               .catch((error: any) => {

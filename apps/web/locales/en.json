@@ -1880,6 +1880,7 @@
                     "general":  "General",
                     "profile":  "Profile",
                     "appearance":  "Appearance",
+                    "security":  "Security",
                     "security_privacy":  "Security & Privacy",
                     "notifications":  "Notifications",
                     "preferences":  "Preferences",
@@ -1985,6 +1986,17 @@
                                                                  "expertise":  "Expertise",
                                                                  "community":  "Community"
                                                              }
+                                              },
+                              "email":  {
+                                                  "title":  "Change Email",
+                                                  "current_email":  "Current Email",
+                                                  "new_email":  "New Email",
+                                                  "new_email_placeholder":  "Enter your new email address",
+                                                  "change_email":  "Change Email",
+                                                  "updating":  "Updating email...",
+                                                  "email_updated":  "Email Updated",
+                                                  "relogin_message":  "Please login again with your new email ({{email}})",
+                                                  "logout_warning":  "You will be logged out after changing your email"
                                               },
                                   "password":  {
                                                    "title":  "Change Password",

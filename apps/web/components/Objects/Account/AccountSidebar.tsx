@@ -2,7 +2,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
-import { Settings, Shield, Bell } from 'lucide-react'
+import { Settings, Shield, Lock } from 'lucide-react'
 import { getUriWithOrg } from '@services/config/config'
 import { cn } from '@/lib/utils'
 
@@ -13,8 +13,8 @@ interface AccountSidebarProps {
 
 const NAV_ITEMS = [
   { id: 'general', icon: Settings, labelKey: 'account.general' },
-  { id: 'security-privacy', icon: Shield, labelKey: 'account.security_privacy' },
-  { id: 'preferences', icon: Bell, labelKey: 'account.preferences' },
+  { id: 'security', icon: Shield, labelKey: 'account.security' },
+  { id: 'privacy', icon: Lock, labelKey: 'account.privacy' },
 ]
 
 export function AccountSidebar({ orgslug, currentSubpage }: AccountSidebarProps) {

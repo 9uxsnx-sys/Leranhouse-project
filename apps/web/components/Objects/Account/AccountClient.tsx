@@ -9,8 +9,8 @@ import { useMediaQuery } from 'usehooks-ts'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useTranslation } from 'react-i18next'
 import AccountGeneral from '@components/Objects/Account/subpages/AccountGeneral'
-import AccountSecurityPrivacy from '@components/Objects/Account/subpages/AccountSecurityPrivacy'
-import AccountPreferences from '@components/Objects/Account/subpages/AccountPreferences'
+import AccountSecurity from '@components/Objects/Account/subpages/AccountSecurity'
+import AccountPrivacy from '@components/Objects/Account/subpages/AccountPrivacy'
 
 interface AccountClientProps {
   orgslug: string
@@ -21,8 +21,8 @@ interface AccountClientProps {
 const getSubpageTitle = (subpage: string, t: (key: string) => string): string => {
   const titles: Record<string, string> = {
     'general': t('account.general'),
-    'security-privacy': t('account.security_privacy'),
-    'preferences': t('account.preferences'),
+    'security': t('account.security'),
+    'privacy': t('account.privacy'),
   }
   return titles[subpage] || t('account.title')
 }
@@ -42,10 +42,10 @@ const AccountClient = ({ orgslug, org_id, subpage }: AccountClientProps) => {
     switch (subpage) {
       case 'general':
         return <AccountGeneral />
-      case 'security-privacy':
-        return <AccountSecurityPrivacy />
-      case 'preferences':
-        return <AccountPreferences />
+      case 'security':
+        return <AccountSecurity />
+      case 'privacy':
+        return <AccountPrivacy />
       default:
         return <AccountGeneral />
     }

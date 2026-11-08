@@ -53,6 +53,8 @@ from src.db.roles import (
 )
 from src.db.user_organizations import UserOrganization
 from src.db.users import AnonymousUser, PublicUser, User
+from src.db.podcasts.podcasts import Podcast
+from src.db.podcasts.episodes import PodcastEpisode
 
 
 # ---------------------------------------------------------------------------
