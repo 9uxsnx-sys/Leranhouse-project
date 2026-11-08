@@ -125,9 +125,9 @@ function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProp
         )}
       </div>
 
-      {/* ── Avatar + User Info ── */}
-      <div className="relative px-4 sm:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4 -mt-6 mb-4">
+      {/* ── Avatar + User Info + Stats ── */}
+      <div className="px-4 sm:px-8 mt-4 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-start gap-5">
           <div className="rounded-full overflow-hidden shadow-lg flex-shrink-0">
             <UserAvatar
               width={130}
@@ -138,29 +138,25 @@ function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProp
               rounded="rounded-full"
             />
           </div>
-          <div className="pt-8 sm:pt-10">
+          <div className="flex flex-col gap-1 pt-2">
             <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 leading-snug tracking-tight">
               {userData.first_name} {userData.last_name}
             </h1>
             {userData.username && (
-              <p className="text-sm text-gray-400 mt-0">@{userData.username}</p>
+              <p className="text-sm text-gray-400">@{userData.username}</p>
             )}
             {userData.bio && (
-              <p className="text-sm text-gray-600 mt-2 max-w-xl leading-relaxed">{userData.bio}</p>
+              <p className="text-sm text-gray-600 max-w-xl leading-relaxed">{userData.bio}</p>
             )}
+            <div className="flex items-center gap-5 text-sm text-gray-500 mt-1">
+              {tabs.map((tab) => (
+                <span key={tab.id}>
+                  <span className="font-semibold text-gray-900">{tab.count}</span>
+                  <span className="ml-1">{tab.label}</span>
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
-      </div>
-
-      {/* ── Stats Row ── */}
-      <div className="px-4 sm:px-8 mb-6">
-        <div className="flex items-center gap-5 text-sm text-gray-500 sm:ml-[146px]">
-          {tabs.map((tab) => (
-            <span key={tab.id}>
-              <span className="font-semibold text-gray-900">{tab.count}</span>
-              <span className="ml-1">{tab.label}</span>
-            </span>
-          ))}
         </div>
       </div>
 

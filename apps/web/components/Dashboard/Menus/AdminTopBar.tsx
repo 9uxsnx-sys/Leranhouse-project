@@ -10,6 +10,7 @@ import {
   QuestionMark,
   TriangleRightMini,
 } from '@components/Objects/Icons/MedusaIcons'
+import { Home } from 'lucide-react'
 import { ConceptIcon } from '@components/ui/icons'
 import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
 import {
@@ -247,7 +248,7 @@ function AdminBreadcrumbNav() {
                     href={crumb.href}
                     className="transition-fg hover:text-ui-fg-subtle inline-block max-w-[160px] truncate align-bottom"
                   >
-                    {crumb.label}
+                    {index === 0 ? <Home size={16} className="inline-block -mt-0.5" /> : crumb.label}
                   </Link>
                 ) : !isLast && crumb.onClick ? (
                   <button
@@ -262,7 +263,7 @@ function AdminBreadcrumbNav() {
                     aria-current={isLast ? 'page' : undefined}
                     className={`inline-block truncate align-bottom ${isLast ? 'max-w-[220px]' : 'max-w-[160px]'}`}
                   >
-                    {crumb.label}
+                    {index === 0 ? <Home size={16} className="inline-block -mt-0.5" /> : crumb.label}
                   </span>
                 )}
                 {!isLast && (

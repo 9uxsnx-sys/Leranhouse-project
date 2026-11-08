@@ -13,6 +13,7 @@ import { useOrg } from '@components/Contexts/OrgContext'
 import { usePathname } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
+import { Home } from 'lucide-react'
 import {
   BarsThree,
   Book,
@@ -115,22 +116,22 @@ const BreadcrumbNav = ({ orgslug }: { orgslug: string }) => {
                 {!isLast && crumb.href ? (
                   <Link
                     href={getUriWithOrg(orgslug, crumb.href)}
-                    title={crumb.label}
+                    title={isFirst ? t('common.home') : crumb.label}
                     className="truncate max-w-[110px] xl:max-w-[160px] transition-fg hover:text-ui-fg-subtle"
                   >
-                    {crumb.label}
+                    {isFirst ? <Home size={16} className="inline-block -mt-0.5" /> : crumb.label}
                   </Link>
                 ) : (
                   <span
                     aria-current={isLast ? 'page' : undefined}
-                    title={crumb.label}
+                    title={isFirst ? t('common.home') : crumb.label}
                     className={`truncate ${
                       isLast
                         ? 'max-w-[180px] xl:max-w-[280px] 2xl:max-w-[360px]'
                         : 'max-w-[110px] xl:max-w-[160px]'
                     }`}
                   >
-                    {crumb.label}
+                    {isFirst ? <Home size={16} className="inline-block -mt-0.5" /> : crumb.label}
                   </span>
                 )}
                 {!isLast && (
