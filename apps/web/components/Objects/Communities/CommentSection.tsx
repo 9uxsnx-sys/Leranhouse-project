@@ -14,6 +14,8 @@ import {
 import { CommentCard } from './CommentCard'
 import { Button } from '@/components/ui/button'
 import UserAvatar from '@components/Objects/UserAvatar'
+import { getUser } from '@services/users/users'
+import { getUserAvatarMediaDirectory } from '@services/media/media'
 
 interface CommentSectionProps {
   discussionUuid: string
@@ -36,7 +38,32 @@ export function CommentSection({ discussionUuid, communityUuid, isLocked = false
   const [newComment, setNewComment] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [currentUserAvatarUrl, setCurrentUserAvatarUrl] = useState<string | undefined>(() => {
+    // Initialize from session data synchronously — no async wait needed
+    if (currentUser?.avatar_image) {
+      const img = currentUser.avatar_image
+      return img.startsWith('http://') || img.startsWith('https://')
+        ? img
+        : getUserAvatarMediaDirectory(currentUser.user_uuid, img)
+    }
+    return undefined
+  })
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Fallback: fetch fresh avatar data from API if session doesn't have it (stale cache)
+  useEffect(() => {
+    if (currentUserAvatarUrl || !currentUser?.id || !accessToken) return
+    getUser(currentUser.id.toString(), accessToken).then((userData) => {
+      if (userData?.avatar_image) {
+        const img = userData.avatar_image
+        setCurrentUserAvatarUrl(
+          img.startsWith('http://') || img.startsWith('https://')
+            ? img
+            : getUserAvatarMediaDirectory(userData.user_uuid, img)
+        )
+      }
+    }).catch(() => {})
+  }, [])
 
   const fetchComments = async () => {
     setIsLoading(true)
@@ -156,8 +183,7 @@ export function CommentSection({ discussionUuid, communityUuid, isLocked = false
                 <UserAvatar
                   width={28}
                   rounded="rounded-full"
-                  avatar_url={undefined}
-                  predefined_avatar="empty"
+                  avatar_url={currentUserAvatarUrl}
                   showProfilePopup={false}
                   shadow="shadow-none"
                 />

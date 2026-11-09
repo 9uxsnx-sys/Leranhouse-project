@@ -170,6 +170,18 @@ export const OrgMenu = ({
   const [searchModalOpen, setSearchModalOpen] = useState(false)
   const { isVisible: isJoinBannerVisible } = useJoinBannerVisible()
 
+  // Global keyboard shortcut to open search modal: Ctrl+K / Cmd+K
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setSearchModalOpen(true)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
   // Copilot bubble state
   const [bubbleOpen, setBubbleOpen] = useState(false)
   const [bubbleSessionToLoad, setBubbleSessionToLoad] = useState<string | null>(null)

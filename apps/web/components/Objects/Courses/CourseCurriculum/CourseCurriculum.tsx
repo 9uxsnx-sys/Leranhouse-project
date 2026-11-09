@@ -47,7 +47,7 @@ function ModuleCard({
   onToggle: () => void
 }) {
   return (
-    <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] overflow-hidden">
+    <div className="rounded-xl bg-white border border-gray-100 shadow-sm overflow-hidden">
       {/* ── Header (always visible, clickable) ── */}
       <button
         onClick={onToggle}
@@ -106,13 +106,6 @@ export default function CourseCurriculum({ chapters = [] }: CourseCurriculumProp
       {/* Section header */}
       <div className="mb-5">
         <Heading level="h1" className="!text-2xl">{t('course.page.curriculum_title')}</Heading>
-      </div>
-
-      {/* Description */}
-      <div className="mb-7">
-        <Text size="base" className="text-ui-fg-subtle leading-relaxed">
-          {t('course.page.curriculum_description')}
-        </Text>
       </div>
 
       {/* Modules */}

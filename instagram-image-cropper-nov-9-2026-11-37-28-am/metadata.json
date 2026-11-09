@@ -1,0 +1,6 @@
+{
+  "name": "Instagram Image Cropper",
+  "description": "A clean React image cropper component featuring Instagram-style aspect ratios, interactive zoom, 3x3 rule-of-thirds grid, and high-fidelity canvas export.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

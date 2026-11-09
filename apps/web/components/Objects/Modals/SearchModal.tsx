@@ -255,6 +255,12 @@ export function SearchModal({ open, onClose, orgslug }: SearchModalProps) {
                 onValueChange={setQuery}
                 placeholder={t('search.modal_placeholder')}
                 onKeyDown={(e) => {
+                  if (e.key === 'Escape' && query.trim()) {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setQuery('')
+                    return
+                  }
                   if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
                     e.preventDefault()
                     e.stopPropagation()
@@ -269,9 +275,6 @@ export function SearchModal({ open, onClose, orgslug }: SearchModalProps) {
               {(isLoading || isWaiting) && (
                 <span className="shrink-0 text-[11px] text-ui-fg-muted/50">{t('search.loading')}</span>
               )}
-              <kbd className="hidden sm:inline-flex h-[20px] items-center rounded-md border border-ui-border-base bg-ui-bg-field px-1.5 font-sans text-[11px] font-medium leading-none text-ui-fg-muted shadow-sm">
-                Esc
-              </kbd>
             </div>
 
             {/* List — no dividers */}
@@ -294,23 +297,6 @@ export function SearchModal({ open, onClose, orgslug }: SearchModalProps) {
               )}
             </Command.List>
 
-            {/* Footer — minimal, no border */}
-            <div className="flex items-center gap-4 px-4 py-2.5 text-[11px] text-ui-fg-muted/40">
-              <span className="inline-flex items-center gap-1">
-                <span>{t('search.navigate')}</span>
-                <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">↑</kbd>
-                <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">↓</kbd>
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <span>{t('search.open')}</span>
-                <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">↵</kbd>
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <span>{t('search.new_tab')}</span>
-                <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">⌘</kbd>
-                <kbd className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded border border-ui-border-base bg-ui-bg-field px-1 font-sans text-[10px] font-medium leading-none text-ui-fg-muted/60">↵</kbd>
-              </span>
-            </div>
           </Command>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
