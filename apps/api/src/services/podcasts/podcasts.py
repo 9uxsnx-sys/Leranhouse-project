@@ -27,6 +27,7 @@ from src.db.podcasts.episodes import PodcastEpisode
 from src.db.payments.enums import AccessTypeEnum
 from src.security.rbac.rbac import (
     authorization_verify_based_on_org_admin_status,
+    authorization_verify_if_user_is_anon,
 )
 from src.security.rbac import (
     check_resource_access,
@@ -1148,3 +1149,66 @@ async def get_podcast_user_rights(
         rights["permissions"]["manage_access"] = True
 
     return rights
+
+
+async def get_user_podcasts(
+    request: Request,
+    current_user: PublicUser | AnonymousUser,
+    user_id: int,
+    db_session: Session,
+    page: int = 1,
+    limit: int = 10,
+) -> List[PodcastRead]:
+    # Verify user is not anonymous
+    await authorization_verify_if_user_is_anon(current_user.id)
+
+    # Fetch podcasts the user has authored using a single JOIN query with pagination
+    statement = (
+        select(Podcast)
+        .join(ResourceAuthor, ResourceAuthor.resource_uuid == Podcast.podcast_uuid)  # type: ignore
+        .where(
+            ResourceAuthor.user_id == user_id,
+            ResourceAuthor.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE,
+        )
+        .offset((page - 1) * limit)
+        .limit(limit)
+    )
+
+    podcasts = db_session.exec(statement).all()
+
+    if not podcasts:
+        return []
+
+    # Fetch all authors for all podcasts in a single query
+    podcast_uuids = [podcast.podcast_uuid for podcast in podcasts]
+    authors_query = (
+        select(ResourceAuthor, User)
+        .join(User, ResourceAuthor.user_id == User.id)  # type: ignore
+        .where(ResourceAuthor.resource_uuid.in_(podcast_uuids))  # type: ignore
+        .order_by(ResourceAuthor.id.asc())  # type: ignore
+    )
+    author_results = db_session.exec(authors_query).all()
+
+    # Group authors by podcast_uuid
+    podcast_authors: dict[str, list[AuthorWithRole]] = {}
+    for resource_author, user in author_results:
+        podcast_authors.setdefault(resource_author.resource_uuid, []).append(
+            AuthorWithRole(
+                user=UserRead.model_validate(user),
+                authorship=resource_author.authorship,
+                authorship_status=resource_author.authorship_status,
+                creation_date=resource_author.creation_date,
+                update_date=resource_author.update_date,
+            )
+        )
+
+    result = []
+    for podcast in podcasts:
+        podcast_read = PodcastRead.model_validate({
+            **podcast.model_dump(),
+            "id": podcast.id or 0,
+            "authors": podcast_authors.get(podcast.podcast_uuid, []),
+        })
+        result.append(podcast_read)
+
+    return result

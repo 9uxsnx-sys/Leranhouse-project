@@ -18,6 +18,7 @@ from src.db.communities.communities import (
 )
 from src.db.usergroup_resources import UserGroupResource
 from src.db.usergroup_user import UserGroupUser
+from src.db.resource_authors import ResourceAuthor
 from src.security.rbac import (
     check_resource_access,
     AccessAction,
@@ -611,3 +612,54 @@ async def get_community_member_count(
     """)
     result = db_session.exec(sql, params={"cid": community_id}).one()
     return result[0] or 0
+
+
+async def get_user_communities(
+    request: Request,
+    current_user: PublicUser | AnonymousUser,
+    user_id: int,
+    db_session: Session,
+    page: int = 1,
+    limit: int = 10,
+) -> List[CommunityRead]:
+    # Verify user is not anonymous
+    await authorization_verify_if_user_is_anon(current_user.id)
+
+    # Fetch communities the user has access to via user groups.
+    group_subquery = (
+        select(UserGroupResource.resource_uuid)
+        .join(UserGroupUser, UserGroupUser.usergroup_id == UserGroupResource.usergroup_id)
+        .where(UserGroupUser.user_id == user_id)
+        .distinct()
+        .subquery()
+    )
+
+    # Also fetch communities the user is an author of (via resourceauthor).
+    author_subquery = (
+        select(ResourceAuthor.resource_uuid)
+        .where(
+            ResourceAuthor.user_id == user_id,
+            ResourceAuthor.resource_uuid.like("community_%"),
+            ResourceAuthor.authorship_status == "ACTIVE",
+        )
+        .distinct()
+        .subquery()
+    )
+
+    # Combine both sources using UNION
+    combined = (
+        select(Community)
+        .where(
+            Community.community_uuid.in_(group_subquery)  # type: ignore
+            | Community.community_uuid.in_(author_subquery)  # type: ignore
+        )
+        .offset((page - 1) * limit)
+        .limit(limit)
+    )
+
+    communities = db_session.exec(combined).all()
+
+    if not communities:
+        return []
+
+    return [CommunityRead.model_validate(c.model_dump()) for c in communities]

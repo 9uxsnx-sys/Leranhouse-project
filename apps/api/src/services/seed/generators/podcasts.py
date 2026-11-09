@@ -138,13 +138,25 @@ def create_podcasts(ctx: SeedContext) -> None:
         created = ctx.date_between(170, 25)
         podcast_uuid = new_uuid("podcast")
         podcast_dir = base / podcast_uuid
+        if index == 0:
+            # The flagship podcast gets hand-picked card cover and banner artwork.
+            thumbnail = ctx.named_image(
+                podcast_dir / "thumbnails", "thumb", "flagship podcats card cover.jpg"
+            )
+            banner = ctx.named_image(
+                podcast_dir / "banners", "banner", "flagship podcats podcast banner.png"
+            )
+        else:
+            thumbnail = ctx.image(podcast_dir / "thumbnails", "thumb")
+            banner = ctx.image(podcast_dir / "banners", "banner")
+
         podcast = Podcast(
             name=name,
             description=description,
             about=f"Hosted by {host}. Recorded in a small room with too many cables and not enough coffee.",
             tags="design, learning, interviews",
-            thumbnail_image=ctx.image(podcast_dir / "thumbnails", "thumb"),
-            banner_image=ctx.image(podcast_dir / "banners", "banner"),
+            thumbnail_image=thumbnail,
+            banner_image=banner,
             public=True,
             published=index < 16,
             org_id=ctx.org_id,

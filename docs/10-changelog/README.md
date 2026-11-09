@@ -76,6 +76,11 @@ Each release provides a summary of changes organized by category:
 
 ### Improvements
 
+- **Instagram-style image cropper** — A clean pan/zoom image cropper for profile picture uploads (test page at `/orgs/{slug}/test`). Image pans behind a fixed crop window, scroll-to-zoom, dark matte overlay, 3x3 grid, and high-res canvas export at 1080px. Uses notification-window pattern (Dialog + DialogContent, `border-0 p-0`). Pending integration into real PFP/banner upload flow.
+- **Account settings restructured** — Security & Privacy tab split into 3 tabs: General, Security, Privacy. Preferences tab removed. Security tab has email change, password change (with strength indicator), and Delete Account (type-to-confirm modal). Privacy tab has 3 toggle switches (hide courses/podcasts/communities from public profile).
+- **Breadcrumb Home icon** — "Home" text replaced with `<Home size={16} />` icon in both user-side (OrgMenu.tsx) and admin-side (AdminTopBar.tsx) breadcrumbs.
+- **Profile page layout** — Profile picture moved below banner, in same row as name/username/bio/stats, with reduced spacing.
+- **Podcast seed images** — Added custom cover card and banner images for flagship podcast "The Pixel Hour" via `ctx.named_image()` in seed generator.
 - **Unified card surface** — Curriculum modules and lessons, lesson-page sections, podcast episode rows and learner episode cards now use the same surface as dashboard section cards (`bg-white rounded-xl border border-gray-100 shadow-sm`) instead of the black hairline (`shadow-borders-base`, `border-black/10`). The "MODULE N" label was removed from the curriculum header.
 - **Organization branding tab redesign** — The Branding settings tab now uses unified section cards (Logo & Favicon, Theme, Auth) with a row-based upload-container pattern for Logo, Favicon, Logomark, and Thumbnail. The Primary Color field is hex-only (the native OS color picker was removed) and saves through a single top Action Row button.
 - **Community discussions redesign** — Discussion cards now use an inline create card and inline replies with smoother animations.

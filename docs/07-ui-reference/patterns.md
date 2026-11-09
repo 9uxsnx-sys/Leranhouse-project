@@ -654,6 +654,85 @@ bg-ui-bg-field border border-ui-border-base rounded-md px-3 py-2 text-sm
 
 Used in `EditCourseStructure.tsx` (module list), `ModuleForm.tsx` (lesson list), `OrgEditAPIAccess.tsx` (API docs search), and similar list views.
 
+## Instagram-style image cropper
+
+Profile picture and banner uploads use an Instagram-style pan/zoom image cropper that opens as a floating dialog (notification window pattern).
+
+### Window pattern
+
+The cropper uses the same notification-window pattern as other floating modals:
+
+```tsx
+import { Dialog, DialogContent } from '@components/ui/dialog'
+
+<Dialog open={isOpen} onOpenChange={onClose}>
+  <DialogContent hideCloseButton aria-describedby={undefined}
+    className="flex flex-col w-[520px] max-w-[calc(100vw-2rem)] border-0 p-0 rounded-2xl overflow-hidden"
+  >
+    {/* Cropper content */}
+  </DialogContent>
+</Dialog>
+```
+
+The dialog has **no header, no title, no dividers** — just the cropper viewport and action buttons.
+
+### Cropper interaction
+
+- **Pan**: Drag the image with the mouse (image moves behind a fixed crop window)
+- **Zoom**: Scroll wheel to zoom in/out (1x -- 3x)
+- **Aspect ratio**: Locked to a preset (1:1 square for PFP, 4:5 for banner, etc.)
+- **Dark matte overlay**: The area outside the crop box is covered with `box-shadow: 0 0 0 9999px rgba(0,0,0,0.72)`
+- **3x3 grid**: Rule-of-thirds overlay lines appear while interacting, fade when idle
+- **Image transition**: Smooth `transform` transition on pan/zoom
+
+### Action buttons
+
+Two buttons appear below the viewport, left/right justified:
+
+| Button | Position | Style | Size |
+|--------|----------|-------|------|
+| Cancel | Left | Text, neutral hover | `px-3 py-1.5 text-sm` |
+| Save | Right | Filled blue `#0095F6` | `px-4 py-1.5 text-sm` |
+
+### Canvas export
+
+The cropped result is exported via a hidden `<canvas>` element that maps display coordinates back to original image pixels:
+
+```tsx
+const exportCanvas = document.createElement('canvas')
+const TARGET_SIZE = 1080
+exportCanvas.width = TARGET_SIZE
+exportCanvas.height = TARGET_SIZE
+const ctx = exportCanvas.getContext('2d')
+ctx.drawImage(
+  imgRef.current,
+  sourceX, sourceY,          // source rectangle (original image coords)
+  sourceW, sourceH,
+  0, 0,                      // destination (canvas coords)
+  TARGET_SIZE, TARGET_SIZE,
+)
+const dataUrl = exportCanvas.toDataURL('image/jpeg', 0.95)
+```
+
+### Math utilities
+
+Pure functions from `cropMath.ts` handle coordinate calculations:
+
+| Function | Purpose |
+|----------|---------|
+| `clamp(value, min, max)` | Basic value clamping |
+| `getNumericAspectRatio(aspect, w, h)` | Converts '1:1', '4:5', etc. to a number |
+| `calculateCropBoxDimensions(vw, vh, ratio, padding)` | Fits crop box in viewport |
+| `calculatePanBounds(imgW, imgH, boxW, boxH, zoom)` | Max pan offset limits |
+| `constrainPan(pan, bounds)` | Clamps pan within bounds |
+| `calculateSourceCropCoords(origW, origH, dispW, dispH, boxW, boxH, pan, zoom)` | Maps display coords to original image pixels |
+
+### Source
+
+- Test page implementation: [`test/page.tsx`](file:///c:/Projects/learnhouse-dev/learnhouse-dev/apps/web/app/orgs/%5Borgslug%5D/(withmenu)/test/page.tsx)
+- Reference project: `instagram-image-cropper-nov-9-2026-11-37-28-am/`
+- Dialog component: `@components/ui/dialog` (Radix-based)
+
 ## Related files
 
 - **[Design tokens](./design-tokens.md)** — All token values referenced by these patterns

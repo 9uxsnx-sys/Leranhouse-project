@@ -162,6 +162,34 @@ bun run apps/cli/bin/learnhouse.ts dev ...
 
 The repo CLI is already patched (see `apps/cli/src/commands/dev.ts`, `DEV_COMPOSE` template) to map **5434:5432**.
 
+### Seed command can wipe existing data and media files
+
+The `bun run seed` command (or similar seed/reset scripts) **destroys all existing data** and recreates it from scratch. This includes:
+
+- **All database records** (users, courses, podcasts, communities, etc.)
+- **Media files** stored in `content/` (avatars, thumbnails, banners, etc.)
+- Any manually uploaded images or data you added during development
+
+> **Warning:** Do NOT run any seed/reset command unless you are absolutely sure you want to start from a clean slate. If you only need to fix a missing column or update a single user field, use a targeted SQL `ALTER TABLE` or `UPDATE` instead (see example below).
+
+**Safer alternative — targeted SQL updates:**
+
+```bash
+# Fix a missing column (doesn't wipe anything)
+docker exec -i learnhouse-db-dev psql -U learnhouse -d learnhouse -c "ALTER TABLE \"user\" ADD COLUMN banner_image VARCHAR DEFAULT '';"
+
+# Update a single user field
+docker exec -i learnhouse-db-dev psql -U learnhouse -d learnhouse -c "UPDATE \"user\" SET avatar_image='OSLO-11.png' WHERE email='admin@school.dev';"
+```
+
+If you really must re-seed, back up any custom media first:
+
+```bash
+# Backup content directory before seeding
+Copy-Item -Recurse content content-backup
+# After seeding, restore what you need
+```
+
 ### Web loads but API calls fail in the browser
 
 Check that http://localhost:1338/docs loads. If not, restart the API: `Ctrl+C` the dev session and re-run the dev command, or press `ra` if you are in a real terminal.
