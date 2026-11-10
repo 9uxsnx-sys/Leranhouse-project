@@ -127,6 +127,156 @@ TRANSLATIONS = {
             "قصص عملاء، بعضها جيد وبعضها مؤلم، وكلها مفيدة.",
         ),
     },
+    "Two Developers Arguing": {
+        "fr": (
+            "Deux devs qui se disputent",
+            "Deux amis avec des opinions differentes sur l architecture. En general, l un d eux a tort. Chaque episode commence par une vraie decision et se termine par un changement d avis, ou l illusion.",
+        ),
+        "ar": (
+            "مطوران يتجادلان",
+            "صديقان بآراء مختلفة حول البنية البرمجية. عادة احدهما مخطئ. كل حلقة تبدأ بقرار حقيقي وتنتهي باحدهما يغير رأيه، او يتظاهر بذلك.",
+        ),
+    },
+    "Data Without Drama": {
+        "fr": (
+            "Donnees sans drame",
+            "Discussions franches sur les chiffres, les tableaux de bord et les questions qui se cachent derriere. On ouvre un vrai jeu de donnees, on debat du graphique et on termine par quelque chose que vous pourriez envoyer a un manager.",
+        ),
+        "ar": (
+            "بيانات بلا دراما",
+            "حديث صريح عن الارقام ولوحات البيانات والاسئلة التي تقف خلفها. نفتح مجموعة بيانات حقيقية ونتجادل حول الرسم البياني وننتهي بشيء يمكنك ارساله فعلا الى مدير.",
+        ),
+    },
+    "Screens and Coffee": {
+        "fr": (
+            "Ecrans et cafe",
+            "Discussions de vingt minutes sur l interface qui nous a agaces cette semaine. Pas de preparation, pas d invites, juste deux personnes qui decrivent un formulaire qui aurait du etre plus simple.",
+        ),
+        "ar": (
+            "شاشات وقهوة",
+            "محادثات عشرين دقيقة عن واجهة ازعجتنا هذا الاسبوع. لا تحضير ولا ضيوف، مجرد شخصين يصفان نموذجا كان يجب ان يكون ابسط.",
+        ),
+    },
+    "Studio Visits": {
+        "fr": (
+            "Visites de studios",
+            "Enregistre dans des petits studios. Bureaux, outils et comment le travail se fait. On pose des questions sur le loyer, l equipement et les systemes ennuyeux qui font tourner un studio a deux personnes.",
+        ),
+        "ar": (
+            "زيارات الاستوديوهات",
+            "مسجل داخل استوديوهات صغيرة. مكاتب وادوات وكيف يصنع العمل. نسال عن الايجار والمعدات والانظمة المملة التي تبقي استوديو شخصين قيد التشغيل.",
+        ),
+    },
+    "Learn in Public": {
+        "fr": (
+            "Apprendre en public",
+            "Des gens partagent ce qu ils apprennent en ce moment, erreurs comprises. Les invites ne sont pas encore des experts, et c est le but. Vous entendez la confusion avant l explication bien rangee.",
+        ),
+        "ar": (
+            "التعلم علنا",
+            "اناس يشاركون ما يتعلمونه الان، بما في ذلك الاخطاء. الضيوف ليسوا خبراء بعد، وهذه هي الفكرة. تسمع الحيرة قبل الشرح المرتب.",
+        ),
+    },
+    "The Product Lens": {
+        "fr": (
+            "La loupe produit",
+            "Chefs de produit et designers parlent de la meme decision de deux cotes. Un episode, une fonctionnalite, deux versions de pourquoi elle a ete livree ainsi.",
+        ),
+        "ar": (
+            "عدسة المنتج",
+            "مدراء منتجات ومصممون يتحدثون عن نفس القرار من جهتين. حلقة واحدة وميزة واحدة وروايتان لماذا خرجت بالشكل الذي خرجت به.",
+        ),
+    },
+    "Type Talk": {
+        "fr": (
+            "Paroles de typographie",
+            "Polices, espacement et les details que personne ne remarque jusqu a ce qu ils soient faux. On regarde de vrais ecrans et on explique ce que fait la typographie, et comment un petit changement la corrige.",
+        ),
+        "ar": (
+            "حديث الخطوط",
+            "الخطوط والمسافات والتفاصيل التي لا يلاحظها احد حتى تخطئ. ننظر في شاشات حقيقية ونشرح ما يفعله الخط، وكيف يصلحه تغيير صغير.",
+        ),
+    },
+    "Motion Sickness": {
+        "fr": (
+            "Vertige du mouvement",
+            "Critique d animation et la transition que tout le monde utilise trop. On regarde un clip, on le ralentit et on discute du easing. Parfois la reponse est de supprimer l animation completement.",
+        ),
+        "ar": (
+            "دوار الحركة",
+            "نقد الحركة والانتقال الذي يفرط الجميع في استخدامه. نشاهد مقطعا ونبطئه ونتجادل حول السلاسة. احيانا يكون الحل هو حذف الحركة بالكامل.",
+        ),
+    },
+    "Behind the Build": {
+        "fr": (
+            "Derriere la construction",
+            "Comment une fonctionnalite passe du croquis a la production. Developpeurs et designers parcourent un ticket, y compris les estimations erronees et la reunion qui aurait du etre un message.",
+        ),
+        "ar": (
+            "خلف البناء",
+            "كيف تنتقل ميزة من الرسم الى الانتاج. مطورون ومصممون يتتبعون طلب عمل واحدا، بما في ذلك التقديرات الخاطئة والاجتماع الذي كان يجب ان يكون رسالة.",
+        ),
+    },
+    "Career Switch": {
+        "fr": (
+            "Reconversion",
+            "Des gens qui ont change de domaine apres trente ans. Comment ils l ont fait et ce que ca a coute. Des chiffres honnetes sur les baisses de salaire, les heures d etude et la conversation en famille avant le premier cours.",
+        ),
+        "ar": (
+            "تغيير المسار",
+            "اناس غيروا مجالاتهم بعد الثلاثين. كيف فعلوها وماذا كلفتهم. ارقام صادقة عن انخفاض الرواتب وساعات الدراسة والمحادثة العائلية قبل اول دورة.",
+        ),
+    },
+    "Notes from Class": {
+        "fr": (
+            "Notes de cours",
+            "Enregistrements courts des sessions en direct et des questions posees. Pas de montage, donc vous entendez les digressions et les moments ou la salle se tait et quelqu un pose la question utile.",
+        ),
+        "ar": (
+            "ملاحظات من الصف",
+            "تسجيلات قصيرة من الجلسات المباشرة والاسئلة التي طرحت. بدون تحرير، فتسمع الاستطرادات واللحظات التي تسكت فيها القاعة ويسال احدهم السؤال المفيد.",
+        ),
+    },
+    "The Weekly Standup": {
+        "fr": (
+            "Le point hebdomadaire",
+            "Cinq minutes sur ce qui s est passe sur la plateforme cette semaine. Nouveaux cours, bugs corriges et une chose apprise d un message de support. Enregistre le vendredi, publie avant le dejeuner.",
+        ),
+        "ar": (
+            "الاجتماع الاسبوعي",
+            "خمس دقائق عما حدث على المنصة هذا الاسبوع. دورات جديدة واخطاء مصلحة وشيء واحد تعلمناه من رسالة دعم. يسجل يوم الجمعة وينشر قبل الغداء.",
+        ),
+    },
+    "Field Recordings": {
+        "fr": (
+            "Enregistrements terrain",
+            "Interviews lors de meetups, salles bruyantes et tout. Mauvais son, bonnes conversations. On apporte un microphone et on demande aux gens sur quoi ils travaillent en ce moment.",
+        ),
+        "ar": (
+            "تسجيلات ميدانية",
+            "مقابلات من لقاءات، غرف صاخبة وكل شيء. صوت رديء ومحادثات جيدة. نأتي بميكروفون واحد ونسال الناس عما يعملون عليه الان.",
+        ),
+    },
+    "Season Two Trailer": {
+        "fr": (
+            "Bande-annonce saison 2",
+            "Flux de travail pour la saison prochaine. Deux minutes d extraits et une idee approximative du calendrier.",
+        ),
+        "ar": (
+            "اعلان الموسم الثاني",
+            "مسودة للموسم القادم. دقيقتان من المقاطع وفكرة تقريبية عن الجدول.",
+        ),
+    },
+    "Test Feed": {
+        "fr": (
+            "Flux de test",
+            "Flux de travail utilise lors de la configuration du studio. Courts extraits, mauvais niveaux et un enregistrement d une porte qui se ferme.",
+        ),
+        "ar": (
+            "تغذية اختبارية",
+            "مسودة استخدمت اثناء تجهيز الاستوديو. مقاطع قصيرة ومستويات خاطئة وتسجيل صوت باب يغلق.",
+        ),
+    },
 }
 
 

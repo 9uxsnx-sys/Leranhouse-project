@@ -1856,11 +1856,21 @@ COURSE_TRANSLATIONS = {
             "name": "Developpement backend avec Python",
             "description": "Six semaines pour construire une API depuis un dossier vide jusqu a un service qui tourne sur un serveur. On commence par git et une structure de projet propre, puis on avance sur les requetes, une vraie base de donnees, l authentification, les tests et le deploiement.",
             "about": "Le cours que j aurais voulu trouver au debut. On passe le plus clair du temps a construire, pas a regarder des videos. Chaque semaine vous ajoutez une partie au projet que vous ecrivez deja.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"Python 3.11 ou superieur installe, et la confiance pour executer un fichier depuis le terminal\"}, {\"text\": \"Un editeur de code que vous aimez deja — VS Code, PyCharm ou Neovim, peu importe lequel\"}, {\"text\": \"Environ une heure par jour pendant six semaines, sur un ordinateur ou vous pouvez installer des paquets\"}]",
+                "instructor": {"name": "", "title": "Fondateur et developpeur backend", "bio": "Construit des API en Python et Postgres. A casse une base de donnees en production deux fois et en a appris plus que de n importe quel tutoriel."},
+                "target_audience": {"for": ["Debutants Python qui ont ecrit quelques scripts et veulent construire de vrais projets backend", "Developpeurs autodidactes cherchant un parcours structure en ingenierie backend", "Personnes en reconversion vers le developpement web avec un peu d experience en code"], "not_for": ["Ingenieurs backend experimentes qui deja deployent des API en production", "Debutants complets en programmation — suivez d abord un cours d introduction a Python"]},
+            },
         },
         "ar": {
             "name": "هندسة الواجهة الخلفية ببايثون",
             "description": "ستة اسابيع لبناء واجهة برمجة من مجلد فارغ الى خدمة تعمل على سيرفر. نبدا ب git وتنظيم المشروع ثم ننتقل الى الطلبات وقاعدة بيانات حقيقية والمصادقة والاختبارات والنشر.",
             "about": "هذه الدورة التي كنت اتمنى ان اجدها في البداية. معظم الوقت نعمل فعليا ولا نكتفي بالمشاهدة. كل اسبوع تضيف جزءا جديدا الى المشروع الذي تكتبه.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"Python 3.11 او احدث مثبت، والثقة لتشغيل ملف من الطرفية\"}, {\"text\": \"محرر اكواد تفضله — VS Code او PyCharm او Neovim، لا يهم اي\"}, {\"text\": \"حوالي ساعة يوميا لستة اسابيع، على حاسوب محمول مسموح لك تثبيت حزم عليه\"}]",
+                "instructor": {"name": "", "title": "المؤسس ومطور خلفي", "bio": "يبني واجهات برمجة ب Python و Postgres. عطل قاعدة بيانات في الانتاج مرتين وتعلم من ذلك اكثر من اي درس."},
+                "target_audience": {"for": ["مبتدئي بايثون كتبوا بعض السكربتات ويريدون بناء مشاريع خلفية حقيقية", "مطورون علموا انفسهم ويبحثون عن مسار منظم في الهندسة الخلفية", "محولون مهنيون يتجهون نحو تطوير الويب ولديهم بعض الخبرة البرمجية"], "not_for": ["مهندسون خلفيون متمرسون ينشرون واجهات برمجة في الانتاج بالفعل", "مبتدئون كاملون في البرمجة — خذ دورة مقدمة في بايثون اولا"]},
+            },
         },
     },
     "Figma for Absolute Beginners": {
@@ -1868,11 +1878,21 @@ COURSE_TRANSLATIONS = {
             "name": "Figma pour debutants",
             "description": "Une visite lente de l interface pour ceux qui n ont jamais ouvert Figma. Les cadres, les groupes, le layout automatique et les raccourcis qui font la moitie du travail.",
             "about": "Pas de theorie, juste l outil et beaucoup de fichiers d entrainement.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"Un compte Figma gratuit et un navigateur qui peut suivre — aucun abonnement payant necessaire a aucun moment\"}, {\"text\": \"Une souris ou un pavé tactile avec lequel vous etes a l'aise, car les raccourcis reposent sur des clics precis\"}]",
+                "instructor": {"name": "", "title": "Designer produit", "bio": "Enseigne Figma a des gens qui ne l'ont jamais ouvert. Dessine encore des wireframes sur papier d'abord."},
+                "target_audience": {"for": [], "not_for": []},
+            },
         },
         "ar": {
             "name": "فيجما للمبتدئين",
             "description": "جولة بطيئة في الواجهة لمن لم يفتح فيجما من قبل. الاطارات والمجموعات والتخطيط التلقائي والاختصارات التي تنجز نصف العمل.",
             "about": "لا نظريات ولا دراسات حالة، فقط الاداة وملفات تدريب كثيرة.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"حساب فيجما مجاني ومتصفح يستطيع المواكبة — لا حاجة لخطة مدفوعة في اي وقت\"}, {\"text\": \"فارة او لوحة لمس مريحة لك، لان الاختصارات تعتمد على نقر دقيق\"}]",
+                "instructor": {"name": "", "title": "مصمم منتجات", "bio": "يعلم فيجما لمن لم يفتحوه من قبل. لا يزال يرسم الاطارات السلكية على الورق اولا."},
+                "target_audience": {"for": [], "not_for": []},
+            },
         },
     },
     "Typography for Screens": {
@@ -1880,11 +1900,21 @@ COURSE_TRANSLATIONS = {
             "name": "Typographie pour ecrans",
             "description": "La typographie represente la majorite de votre interface. On regarde de vrais ecrans, on les casse et on les reconstruit avec deux graisses et une echelle saine.",
             "about": "Comprend une seance sur le texte arabe et francais dans la meme page.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"Un navigateur moderne et une page que vous avez le droit de reconcevoir, ou une capture d'ecran claire de celle-ci\"}, {\"text\": \"Aucune connaissance en creation de caracteres requise, mais un peu de CSS accelere les exercices\"}]",
+                "instructor": {"name": "", "title": "Typographe", "bio": "Compose du texte pour ecrans et imprimes, et a des opinions tranchees sur la hauteur de ligne qu'elle partagera."},
+                "target_audience": {"for": [], "not_for": []},
+            },
         },
         "ar": {
             "name": "الخطوط من اجل الشاشات",
             "description": "الخط يشكل معظم الواجهة. ننظر في شاشات حقيقية ونعيد بناءها بوزنين وخط متوازن.",
             "about": "تتضمن جلسة عن الجمع بين العربية والفرنسية في نفس الصفحة.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"اي متصفح حديث وصفحة مسموح لك باعادة تصميمها، او لقطة شاشة واضحة لها\"}, {\"text\": \"لا حاجة لخلفية في تصميم الخطوط، لكن القليل من CSS يسرع التمارين\"}]",
+                "instructor": {"name": "", "title": "مصمم خطوط", "bio": "يضبط النص للشاشات والطباعة، ولديه اراء قوية حول ارتفاع السطر سيشاركها."},
+                "target_audience": {"for": [], "not_for": []},
+            },
         },
     },
     "Python for Everyday Automation": {
@@ -1892,11 +1922,21 @@ COURSE_TRANSLATIONS = {
             "name": "Python pour automatiser le quotidien",
             "description": "Renommer cent fichiers, extraire des chiffres d un PDF, envoyer un resume hebdomadaire. De petits scripts qui font gagner une heure.",
             "about": "Le cours est construit a partir de taches qu on m a vraiment demandees au travail.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"Python installe et capable d'executer un seul fichier depuis le terminal, rien de plus avance que cela\"}, {\"text\": \"Un dossier de fichiers que vous aimeriez arreter de renommer a la main, et une tache repetitive que vous detestez vraiment\"}]",
+                "instructor": {"name": "", "title": "Professeur d'automatisation", "bio": "Transforme des taches de bureau repetitives en petits scripts et tient un carnet de chaque raccourci appris a la dure."},
+                "target_audience": {"for": [], "not_for": []},
+            },
         },
         "ar": {
             "name": "بايثون لاتمتة المهام اليومية",
             "description": "اعادة تسمية مئة ملف، استخراج ارقام من ملف، ارسال ملخص اسبوعي. سكربتات صغيرة توفر ساعة من وقتك.",
             "about": "بنيت الدورة من مهام طلب مني تنفيذها فعلا في العمل.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"Python مثبت وقادر على تشغيل ملف واحد من الطرفية، لا شيء اكثر تقدما من ذلك\"}, {\"text\": \"مجلد ملفات تود التوقف عن اعادة تسميتها يدويا، ومهمة متكررة تكرهها حقا\"}]",
+                "instructor": {"name": "", "title": "مدرس الاوتوماتة", "bio": "يحول مهام المكتب المتكررة الى سكربتات صغيرة ويحتفظ بدفتر لكل اختصار تعلمه بالطريقة الصعبة."},
+                "target_audience": {"for": [], "not_for": []},
+            },
         },
     },
     "Freelancing for Designers": {
@@ -1904,11 +1944,329 @@ COURSE_TRANSLATIONS = {
             "name": "Travailler en freelance",
             "description": "Les tarifs, les contrats, le perimetre qui s etend et le message genant quand le client ne repond plus.",
             "about": "La plupart du cours parle de methode, pas de design.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"Un peu de travail client derriere vous, meme un petit projet pour lequel vous avez ete paye\"}, {\"text\": \"Un moyen d'envoyer des factures, et le courage de regarder vos propres chiffres honnetement\"}]",
+                "instructor": {"name": "", "title": "Designer freelance", "bio": "Travaille en freelance a temps plein et conserve chaque contrat qui s'est bien passe, plus quelques-uns qui ne se sont pas bien passes."},
+                "target_audience": {"for": [], "not_for": []},
+            },
         },
         "ar": {
             "name": "العمل الحر للمصممين",
             "description": "الاسعار والعقود وتوسع نطاق العمل والرسالة المحرجة عندما يتوقف العميل عن الرد.",
             "about": "معظم الدورة عن الطريقة والتنظيم وليس عن التصميم.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"بعض العمل مع العملاء خلفك، حتى مشروع صغير واحد دفعت مقابله فعلا\"}, {\"text\": \"طريقة لارسال الفواتير، والشجاعة للنظر الى ارقامك بصدق\"}]",
+                "instructor": {"name": "", "title": "مصمم مستقل", "bio": "يعمل حرا بدوام كامل ويحتفظ بكل عقد سار على ما يرام، بالإضافة الى القليل الذي لم يسر."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+    },
+    "Design Systems That Survive a Team": {
+        "fr": {
+            "name": "Systemes de design qui tiennent dans une equipe",
+            "description": "La plupart des systemes de design meurent parce que personne ne les maintient. Ce cours couvre les parties ennuyeuses : nommer, versionner, decider, et dire non a une nouvelle variante de bouton. On reconstruit un petit systeme a partir d un desordre.",
+            "about": "Ecrit pour la personne qui herite d un fichier Figma avec quarante-deux styles de boutons et aucune documentation. On travaille les tokens, puis les composants, puis le processus qui le maintient en vie apres le lancement. Amenez votre pire fichier.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"Aisance avec Figma ou un outil de design similaire, y compris les composants, les variantes et la mise en page automatique\"}, {\"text\": \"Un fichier desordonne que vous avez le droit de corriger, ou la bibliotheque d'exemple fournie avec le cours\"}]",
+                "instructor": {"name": "", "title": "Responsable de systemes de design", "bio": "Passe la plupart de ses semaines a nettoyer des bibliotheques de composants que d'autres ont abandonnees."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+        "ar": {
+            "name": "انظمة التصميم التي تصمد في فريق",
+            "description": "معظم انظمة التصميم تموت لان لا احد يصونها. هذه الدورة تغطي الجوانب المملة: التسمية، ادارة الاصدارات، من يقرر، وكيف ترفض زراً جديداً. نعيد بناء نظام صغير من الفوضى.",
+            "about": "كتبت لمن يرث ملف فيجما باربعين نمط زر وبدون اي توثيق. نعمل على الرموز ثم المكونات ثم العملية التي تحفظه حيا بعد الاطلاق. احضر اسوا ملف عندك.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"الراحة مع فيجما او اداة تصميم مشابهة، بما في ذلك المكونات والمتغيرات والتخطيط التلقائي\"}, {\"text\": \"ملف فوضوي مسموح لك باصلاحه، او مكتبة النماذج التي نوفرها مع الدورة\"}]",
+                "instructor": {"name": "", "title": "قائد انظمة التصميم", "bio": "يقضي معظم اسابيعه في تنظيف مكتبات المكونات التي تركها اخرون."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+    },
+    "Motion Design Basics with After Effects": {
+        "fr": {
+            "name": "Bases du motion design avec After Effects",
+            "description": "Quatre week-ends de keyframes, d easing et d une petite video. On anime une icone, une carte et un etat de chargement, puis on exporte le tout pour le web a une taille qui ne tue pas la page.",
+            "about": "Ce n est pas un cours de showreel avec des transitions sophistiquees. Il s agit de creer de petites animations qui expliquent ce que fait l interface. Vous avez besoin d After Effects ou d une alternative gratuite, et d un peu de patience.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"After Effects ou une alternative gratuite comme Cavalry ou Rive, les concepts s'appliquent a tous\"}, {\"text\": \"Un court extrait ou une icone que vous voulez animer, et la patience de la regarder image par image\"}]",
+                "instructor": {"name": "", "title": "Motion designer", "bio": "Anime des interfaces pour des equipes produit. Pense que la plupart des animations devraient etre plus courtes."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+        "ar": {
+            "name": "اساسيات تصميم الحركة مع After Effects",
+            "description": "اربع عطل نهاية اسبوع من الاطارات المفتاحية والسلاسة وفيديو قصير. نحرك ايقونة وبطاقة وحالة تحميل، ثم نصدر كل شيء للويب بحجم لا يبطئ الصفحة.",
+            "about": "هذه ليست دورة عرض انتقالات ذكية. انها عن صنع حركات صغيرة تشرح ما تفعله الواجهة. تحتاج After Effects او بديل مجاني وقليل من الصبر.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"After Effects او بديل مجاني مثل Cavalry او Rive، الافكار تنطبق على جميعها\"}, {\"text\": \"مقطع قصير او ايقونة تريد تحريكها، والصبر لمشاهدتها اطارا باطار\"}]",
+                "instructor": {"name": "", "title": "مصمم حركة", "bio": "يحرك الواجهات لفرق المنتج. يعتقد ان معظم الرسوم المتحركة يجب ان تكون اقصر."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+    },
+    "Front End Foundations with React": {
+        "fr": {
+            "name": "Fondations du front end avec React",
+            "description": "Composants, etat et le peu de CSS dont vous avez reellement besoin. On construit un tableau de bord qui interroge une fausse API et gere les etats de chargement, vide et d erreur sans les ignorer.",
+            "about": "Si vous avez termine un tutoriel mais ne pouvez rien construire seul, c est le chainon manquant. On ecrit du vrai code a chaque seance et je revise les pull requests. Vous avez besoin de bases en HTML et d un peu de JavaScript.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"Les bases de JavaScript, y compris les tableaux, les objets et les fonctions — nous n'enseignons pas le langage a partir de zero\"}, {\"text\": \"Node et npm installes, ainsi qu'un navigateur avec des outils de developpement fonctionnels\"}]",
+                "instructor": {"name": "", "title": "Developpeur front end", "bio": "Ecris du React tous les jours et lit encore la documentation avant chaque version."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+        "ar": {
+            "name": "اساسيات الواجهات الامامية مع React",
+            "description": "المكونات والحالة والقليل من CSS الذي تحتاجه فعلا. نبني لوحة تحكم تسحب من واجهة برمجة وهمية وتتعامل مع حالات التحميل والفراغ والخطا دون تجاهلها.",
+            "about": "اذا انهيت درسا تعليميا ولا تستطيع بناء اي شيء بمفردك، فهذه هي الفجوة. نكتب كودا حقيقيا في كل جلسة واراجع طلبات السحب. تحتاج HTML اساسي وقليل من JavaScript.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"اساسيات JavaScript، بما في ذلك المصفوفات والكائنات والدوال — لن نعلم اللغة من الصفر\"}, {\"text\": \"Node و npm مثبتان، ومتصفح يحتوي على ادوات مطور تعمل\"}]",
+                "instructor": {"name": "", "title": "مطور واجهات امامية", "bio": "يكتب React كل يوم ولا يزال يقرأ الوثائق قبل كل اصدار."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+    },
+    "Data Analysis with Pandas": {
+        "fr": {
+            "name": "Analyse de donnees avec Pandas",
+            "description": "Chargez un CSV desordonne, nettoyez-le, regroupez-le et repondez a une question que votre chef a posee. On utilise un vrai export d une petite boutique avec des lignes en double et trois formats de date.",
+            "about": "La plupart des cours utilisent des donnees parfaites. Celui-ci commence avec le bazar que vous recevez un mardi. Vous avez besoin des bases de Python et de la volonte de lire un message d erreur a voix haute.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"Les bases de Python et Pandas installe, ou un environnement de notebook ou vous pouvez l'installer rapidement\"}, {\"text\": \"Un tableur que vous utilisez vraiment au travail, ou l'export desordonne que nous fournissons avec les lecons\"}]",
+                "instructor": {"name": "", "title": "Analyste de donnees", "bio": "Nettoie les tableurs des autres pour gagner sa vie et note chaque correction."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+        "ar": {
+            "name": "تحليل البيانات مع Pandas",
+            "description": "حمل ملف CSV فوضوي، نظفه، جمعه، واجب عن سؤال واحد طرحه مديرك. نستخدم تصديرا حقيقيا من متجر صغير بصفوف مكررة وثلاثة تنسيقات للتواريخ.",
+            "about": "معظم الدورات تستخدم بيانات مثالية. هذه الدورة تبدأ بالفوضى التي تستقبلك صباح الثلاثاء. تحتاج اساسيات بايثون والاستعداد لقراءة رسالة خطا بصوت عال.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"اساسيات بايثون و Pandas مثبتة، او بيئة دفتر يمكنك تثبيتها فيه بسرعة\"}, {\"text\": \"جدول بيانات تستخدمه فعلا في العمل، او التصدير الفوضوي الذي نوفر مع الدروس\"}]",
+                "instructor": {"name": "", "title": "محلل بيانات", "bio": "ينظف جداول بيانات الاخرين لكسب عيشه ويدون كل اصلاح."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+    },
+    "SQL That Answers Real Questions": {
+        "fr": {
+            "name": "SQL qui repond aux vraies questions",
+            "description": "Jointures, regroupement et la difference entre une requete qui s execute et une requete qui est correcte. On travaille sur une petite base de donnees de boutique et on repond aux questions que le proprietaire se pose vraiment.",
+            "about": "Vous ecrirez une quarantaine de requetes dans ce cours. Certaines seront fausses la premiere fois. C est ca, la lecon. Postgres est utilise partout mais les idees s adaptent.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"Acces a une base de donnees SQL — Postgres, MySQL ou SQLite fonctionnent tous avec les concepts abordes\"}, {\"text\": \"Une comprehension de base des tables, lignes et colonnes, meme si vos requetes s'arretent a select etoile\"}]",
+                "instructor": {"name": "", "title": "Ingenieur de donnees", "bio": "Ecris du SQL qui s'execute le lundi matin sans reveiller personne."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+        "ar": {
+            "name": "SQL الذي يجيب عن اسئلة حقيقية",
+            "description": "الضم والتجميع والفرق بين استعلام يعمل واستعلام صحيح. نعمل على قاعدة بيانات متجر صغير ونجيب عن اسئلة يطرحها صاحبه فعلا.",
+            "about": "ستكتب حوالي اربعين استعلاما في هذه الدورة. بعضها سيكون خاطئا في المرة الاولى. هذا هو الدرس. نستخدم Postgres طوال الوقت لكن الافكار تنتقل.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"الوصول الى قاعدة بيانات SQL — Postgres او MySQL او SQLite كلها تعمل مع الافكار هنا\"}, {\"text\": \"فهم اساسي للجداول والصفوف والاعمدة، حتى لو كانت استعلاماتك تتوقف عند select نجم\"}]",
+                "instructor": {"name": "", "title": "مهندس بيانات", "bio": "يكتب SQL يعمل صباح الاثنين دون ايقاظ احد."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+    },
+    "Mobile Apps with React Native": {
+        "fr": {
+            "name": "Applications mobiles avec React Native",
+            "description": "Une base de code, deux magasins, beaucoup de petits problemes d ecran. On construit un simple suivi d habitudes, on gere le stockage hors ligne et on le fait tourner sur un vrai telephone avant la derniere seance.",
+            "about": "Le cours suppose des bases de React. On passe du temps sur les parties que les tutoriels ignorent : les boutons de retour, le chevauchement du clavier et ce qui arrive quand le reseau meurt dans un ascenseur.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"Experience avec React, y compris les hooks, les composants et assez de JavaScript pour lire une trace de pile\"}, {\"text\": \"Un telephone pour tester, ainsi qu'Expo installe et un compte gratuit sur les deux magasins d'applications\"}]",
+                "instructor": {"name": "", "title": "Developpeur mobile", "bio": "Livres des applications React Native sur les deux magasins et se plaint des deux processus de revue de maniere egale."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+        "ar": {
+            "name": "تطبيقات الموبايل مع React Native",
+            "description": "قاعدة كود واحدة ومتجران والكثير من مشاكل الشاشات الصغيرة. نبني متتبع عادات بسيط ونتعامل مع التخزين دون اتصال ونشغله على هاتف حقيقي قبل الجلسة الاخيرة.",
+            "about": "الدورة تفترض اساسيات React. نقضي وقتا على الاجزاء التي تتخطاها الدروس التعليمية: ازرار العودة وتداخل لوحة المفاتيح وماذا يحدث عندما يموت الاتصال في المصعد.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"خبرة مع React، بما في ذلك hooks والمكونات وما يكفي من JavaScript لقراءة تتبع المكدس\"}, {\"text\": \"هاتف للاختبار، بالإضافة الى Expo مثبتة وحساب مجاني على كلا متجري التطبيقات\"}]",
+                "instructor": {"name": "", "title": "مطور تطبيقات موبايل", "bio": "ينشر تطبيقات React Native على كلا المتجرين ويشتكي من عملية المراجعة في كليهما بالتساوي."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+    },
+    "Backend APIs with FastAPI": {
+        "fr": {
+            "name": "API backend avec FastAPI",
+            "description": "Routes, validation, authentification et une base de donnees qui ne tombe pas en panne. On construit l API derriere une petite application de reservation et on la teste avec de vraies requetes.",
+            "about": "Destine aux personnes qui savent ecrire du Python mais n ont jamais deploye un endpoint. On couvre les erreurs que je vois dans les revues de code chaque mois, y compris les miennes.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"Les bases de Python et un terminal que vous n'avez pas peur d'utiliser, y compris ce qu'est un environnement virtuel\"}, {\"text\": \"Postgres ou un moyen de l'executer — Docker suffit, et nous vous montrons la commande exacte\"}]",
+                "instructor": {"name": "", "title": "Developpeur backend", "bio": "Concoit des API que d'autres equipes peuvent integrer sans coup de fil."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+        "ar": {
+            "name": "واجهات برمجة خلفية مع FastAPI",
+            "description": "المسارات والتحقق والمصادقة وقاعدة بيانات لا تتعطل. نبني واجهة البرمجة خلف تطبيق حجز صغير ونختبرها بطلبات حقيقية.",
+            "about": "موجهة لمن يعرفون كتابة بايثون لكنهم لم ينشروا نقطة نهاية من قبل. نغطي الاخطاء التي اراها في مراجعات الكود كل شهر، بما فيها اخطائي.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"اساسيات بايثون وطرفية لا تخاف منها، بما في ذلك ما هي البيئة الافتراضية\"}, {\"text\": \"Postgres او طريقة لتشغيله — Docker جيد، ونريك الامر بالضبط\"}]",
+                "instructor": {"name": "", "title": "مطور خلفي", "bio": "يصمم واجهات برمجة تستطيع فرق اخرى دمجها دون اتصال."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+    },
+    "Photography for Product Teams": {
+        "fr": {
+            "name": "Photographie pour equipes produit",
+            "description": "Comment photographier un produit sur une table avec une fenetre et une feuille de papier. On couvre la lumiere, les angles et les trois retouches qui rendent une photo utilisable sur une page de boutique.",
+            "about": "Pas de studio, pas d objectif couteux. La premiere lecon est tournee avec un telephone pour prouver le propos. Apportez n importe quel objet que vous pouvez porter.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"Un appareil photo ou un telephone recent, plus un produit que vous avez le droit de photographier pendant quelques heures\"}, {\"text\": \"Une table pres d'une fenetre, et une feuille de papier blanc que vous acceptez de decouper\"}]",
+                "instructor": {"name": "", "title": "Photographe produit", "bio": "Photographie des produits pour les petites boutiques et apprend aux equipes a le faire elles-memes."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+        "ar": {
+            "name": "التصوير الفوتوغرافي لفرق المنتج",
+            "description": "كيف تصور منتجا على طاولة بجانب نافذة وورقة واحدة. نغطي الاضاءة والزوايا والتعديلات الثلاث التي تجعل الصورة قابلة للاستخدام في صفحة متجر.",
+            "about": "لا استوديو ولا عدسة غالية. الدرس الاول مصور بهاتف لاثبات الفكرة. احضر اي شيء يمكنك حمله.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"كاميرا او هاتف حديث، بالإضافة الى منتج واحد مسموح لك بتصويره لبضع ساعات\"}, {\"text\": \"طاولة قرب نافذة، وورقة بيضاء لا تمانع في قصها\"}]",
+                "instructor": {"name": "", "title": "مصور منتجات", "bio": "يصور منتجات للمتاجر الصغيرة ويعلم الفرق كيفية القيام بذلك بانفسهم."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+    },
+    "Video Editing in DaVinci Resolve": {
+        "fr": {
+            "name": "Montage video avec DaVinci Resolve",
+            "description": "Transformez un entretien de cinq minutes en quelque chose que les gens regardent jusqu au bout. On travaille le rythme, le nettoyage audio et la couleur simple, puis on exporte pour YouTube et pour un ecran de telephone.",
+            "about": "La version gratuite de Resolve suffit pour tout ici. On utilise de vraies images d un petit tournage d entretien, y compris les parties genantes.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"DaVinci Resolve installe, la version gratuite suffit pour tout ce qui est dans ce cours\"}, {\"text\": \"Des images que vous avez le droit de monter, ou les extraits d'interview que nous fournissons pour suivre le cours\"}]",
+                "instructor": {"name": "", "title": "Monteur video", "bio": "Monte des courts-metrages et des videos produit. Dit que le montage consiste surtout a decider quoi enlever."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+        "ar": {
+            "name": "تحرير الفيديو مع DaVinci Resolve",
+            "description": "حول مقابلة مدتها خمس دقائق الى شيء يشاهده الناس حتى النهاية. نعمل على الايقاع وتنظيف الصوت والالوان البسيطة، ثم نصدر ليوتيوب ولشاشة الهاتف.",
+            "about": "النسخة المجانية من Resolve تكفي لكل شيء هنا. نستخدم لقطات حقيقية من تصوير مقابلة صغيرة، بما في ذلك الاجزاء المحرجة.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"DaVinci Resolve مثبت، النسخة المجانية تكفي لكل شيء في هذه الدورة\"}, {\"text\": \"لقطات مسموح لك بقصها، او مقاطع المقابلة التي نوفرها للمتابعة\"}]",
+                "instructor": {"name": "", "title": "محرر فيديو", "bio": "يقص الافلام القصيرة وفيديوهات المنتجات. يقول ان معظم التحرير هو تحديد ما يجب ازالته."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+    },
+    "Copywriting for Interfaces": {
+        "fr": {
+            "name": "Redaction pour interfaces",
+            "description": "Boutons, erreurs, etats vides et la phrase qui explique un produit complique. Cours court, beaucoup de reecriture. On travaille sur des ecrans reels, on garde l avant et l apres cote a cote et on termine avec une checklist reutilisable.",
+            "about": "On prend de vrais ecrans de produits locaux et on reecrit le texte ensemble. Vous detesterez vos premieres versions a la fin, c est le but.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"Rien de plus qu'un navigateur — un compte gratuit sur n'importe quel produit que vous trouvez deroutant est utile\"}, {\"text\": \"Une interface dont le texte vous ennuie, idealement une que vous avez le droit de recrire\"}]",
+                "instructor": {"name": "", "title": "UX writer", "bio": "Ecris le texte d'interface pour des produits qui n'ont pas les moyens de derouter quiconque."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+        "ar": {
+            "name": "كتابة المحتوى للواجهات",
+            "description": "الازرار والاخطاء والحالات الفارغة والجملة التي تشرح منتجا معقدا. دورة قصيرة وكثير من اعادة الكتابة. نعمل على شاشات حقيقية ونحتفظ بما قبل وبعد جنبا الى جنب وننهي بقائمة مراجعة تعيد استخدامها.",
+            "about": "ناخذ شاشات حقيقية من منتجات محلية ونعيد كتابة النص معا. ستكره مسوداتك الاولى في النهاية، وهذا هو الهدف.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"لا شيء سوى متصفح — حساب مجاني على اي منتج تجده مربكا مفيد\"}, {\"text\": \"واجهة واحدة يزعجك نصها، ويفضل ان تكون مسموحا لك باعادة كتابتها\"}]",
+                "instructor": {"name": "", "title": "كاتب تجربة مستخدم", "bio": "يكتب نصوص الواجهات لمنتجات لا تستطيع تحمل ارباك اي شخص."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+    },
+    "Accessibility in Practice": {
+        "fr": {
+            "name": "Accessibilite en pratique",
+            "description": "Navigation au clavier, etats de focus, contraste et bases du lecteur d ecran. On audite trois sites locaux et on corrige les pires problemes en direct. Vous repartez avec une courte checklist et les arguments a utiliser quand quelqu un demande pourquoi c est important avant le lancement.",
+            "about": "Pas de cours sur la conformite. On utilise un clavier et un lecteur d ecran et on voit ce qui casse. La plupart des correctifs sont petits et peu couteux, c est la partie que personne ne vous dit.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"Un navigateur et un site que vous avez le droit de tester, ou les pages d'exemple incluses avec le cours\"}, {\"text\": \"Un clavier et un lecteur d'ecran gratuit comme NVDA ou VoiceOver, les deux suffisent\"}]",
+                "instructor": {"name": "", "title": "Specialiste en accessibilite", "bio": "Audite des produits et corrige ce que l'audit trouve. Prefere les petits changements qui sont deployes aux longs rapports."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+        "ar": {
+            "name": "امكانية الوصول عمليا",
+            "description": "التنقل بلوحة المفاتيح وحالات التركيز والتباين واساسيات قارئ الشاشة. نراجع ثلاثة مواقع محلية ونصلح اسوا المشاكل مباشرة. تغادر بقائمة مراجعة قصيرة والحجج التي تستخدمها عندما يسال احدهم لماذا هذا مهم قبل الاطلاق.",
+            "about": "لا محاضرات امتثال. نستخدم لوحة مفاتيح وقارئ شاشة ونرى ما يتعطل. معظم الاصلاحات صغيرة ورخيصة، وهذا الجزء الذي لا يخبرك به احد.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"متصفح وموقع مسموح لك باختباره، او صفحات النماذج المرفقة مع الدورة\"}, {\"text\": \"لوحة مفاتيح وقارئ شاشة مجاني مثل NVDA او VoiceOver، كلاهما كاف\"}]",
+                "instructor": {"name": "", "title": "اختصاصي امكانية الوصول", "bio": "يدقق المنتجات ويصلح ما يجده التدقيق. يفضل التغييرات الصغيرة التي تنشر على التقارير الطويلة."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+    },
+    "Advanced Figma Prototyping": {
+        "fr": {
+            "name": "Prototypage avance avec Figma",
+            "description": "Variables, logique conditionnelle et prototypes qui se comportent comme le vrai produit. Pour ceux qui connaissent deja les bases et veulent les parties que personne ne documente.",
+            "about": "Cours en preparation. Les deux derniers modules sont encore en cours d enregistrement. Les quatre premiers sont prets et je cherche des personnes pour les tester.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"Des competences solides en Figma, y compris les composants, les variantes et la mise en page automatique sans avoir a chercher\"}, {\"text\": \"Un flux que vous voulez prototyper, ou l'un des deux exemples de produits que nous fournissons\"}]",
+                "instructor": {"name": "", "title": "Designer produit", "bio": "Cree des prototypes d'interactions avant d'ecrire une ligne de code, ce qui fait gagner un sprint a tout le monde."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+        "ar": {
+            "name": "النمذجة المتقدمة مع Figma",
+            "description": "المتغيرات والمنطق الشرطي ونماذج تتصرف مثل المنتج الحقيقي. لمن يعرفون الاساسيات ويريدون الاجزاء التي لا يوثقها احد.",
+            "about": "دورة قيد الاعداد. اخر وحدتين لا زالتا قيد التسجيل. الاربع الاول جاهزة وابحث عن اشخاص يختبرونها.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"مهارات قوية في فيجما، بما في ذلك المكونات والمتغيرات والتخطيط التلقائي دون الحاجة للبحث\"}, {\"text\": \"تدفق تريد نمذجته، او احد منتجين نموذجيين نقدمهما\"}]",
+                "instructor": {"name": "", "title": "مصمم منتجات", "bio": "ينمذج التفاعلات قبل كتابة سطر من الكود، مما يوفر سباقا للجميع."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+    },
+    "Design Leadership": {
+        "fr": {
+            "name": "Leadership en design",
+            "description": "Pour le designer qui se retrouve soudain avec trois personnes sous sa responsabilite et aucune idee de quoi faire lundi. Recrutement, feedback et proteger l equipe du chaos.",
+            "about": "En preparation. Les notes sont en place, les deux premieres lecons sont enregistrees. Celui-ci a besoin de plus d entretiens avant d etre honnete.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"Quelques annees d'experience en equipe, ou une equipe qui est sur le point de se former autour de vous\"}, {\"text\": \"Un probleme que vous evitez actuellement — apportez le vrai, pas un hypothetique\"}]",
+                "instructor": {"name": "", "title": "Responsable design", "bio": "Dirige une petite equipe de design et passe plus de temps sur le processus que sur les pixels."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+        "ar": {
+            "name": "القيادة في التصميم",
+            "description": "للمصمم الذي يجد فجاة ثلاثة اشخاص يتبعونه ولا يعرف ماذا يفعل يوم الاثنين. التوظيف والتغذية الراجعة وحماية الفريق من الفوضى.",
+            "about": "قيد الاعداد. الملاحظات جاهزة والدرس الاولين مسجلان. هذه الدورة تحتاج مقابلات اكثر قبل ان تكون صادقة.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"بضع سنوات من الخبرة في فريق، او فريق على وشك التكون حولك\"}, {\"text\": \"مشكلة تتجنبها حاليا — احضر الحقيقية، لا الافتراضية\"}]",
+                "instructor": {"name": "", "title": "مدير تصميم", "bio": "يدير فريق تصميم صغير ويقضي وقتا اكثر على العملية منه على البكسلات."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+    },
+    "Intro to 3D with Blender": {
+        "fr": {
+            "name": "Initiation a la 3D avec Blender",
+            "description": "Modelisation, eclairage et un rendu de produit. Rythme lent, pas d obsession des raccourcis, beaucoup de sauvegardes. On termine avec un rendu que vous pouvez mettre sur une page d accueil et les reglages notes pour le reproduire plus tard.",
+            "about": "En preparation. Je reconstruis les lecons de modelisation parce que la premiere version allait trop vite. Les retours sont les bienvenus de la part de ceux qui l essaient.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"Blender installe, version quatre ou plus recente, avec environ dix gigaoctets d'espace disque libre\"}, {\"text\": \"Une machine avec une vraie carte graphique si possible — les graphiques integres fonctionnent, juste plus lentement\"}]",
+                "instructor": {"name": "", "title": "Artiste 3D", "bio": "Cree des rendus 3D de produits pour les petits studios et enseigne les raccourcis qui comptent."},
+                "target_audience": {"for": [], "not_for": []},
+            },
+        },
+        "ar": {
+            "name": "مقدمة الى الثلاثي الابعاد مع Blender",
+            "description": "النمذجة والاضاءة وصورة منتج مظللة. وتيرة بطيئة ولا تقديس للاختصارات وكثير من حفظ الملف. ننتهي بصورة يمكنك وضعها على صفحة هبوط والاعدادات مدونة لتكررها لاحقا.",
+            "about": "قيد الاعداد. اعيد بناء دروس النمذجة لان النسخة الاولى كانت سريعة جدا. ارحب بالملاحظات من اي شخص يجربها.",
+            "extra_metadata": {
+                "requirements": "[{\"text\": \"Blender مثبت، الاصدار الرابع او احدث، مع حوالي عشرة غيغابايت من مساحة القرص الحرة\"}, {\"text\": \"جهاز ببطاقة رسوميات حقيقية اذا امكن — الرسوميات المدمجة تعمل، لكن بشكل ابطأ\"}]",
+                "instructor": {"name": "", "title": "فنان ثلاثي الابعاد", "bio": "ينتج صورا ثلاثية الابعاد للمنتجات للاستوديوهات الصغيرة ويعلم الاختصارات المهمة."},
+                "target_audience": {"for": [], "not_for": []},
+            },
         },
     },
 }

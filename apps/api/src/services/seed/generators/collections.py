@@ -32,9 +32,65 @@ TRANSLATIONS = {
         "fr": ("Parcours data", "Pandas et SQL sur les memes donnees, pour que les deux cours se repondent."),
         "ar": ("مسار البيانات", "بانداز و SQL على نفس البيانات حتى تتكامل الدورتان."),
     },
+    "Freelance Bundle": {
+        "fr": ("Pack freelance", "Tarifs, contrats et les competences design que les clients paient vraiment. Pour ceux qui maitrisent deja les outils et doivent maintenant envoyer une facture sans s excuser."),
+        "ar": ("حزمة العمل الحر", "التسعير والعقود والمهارات التصميمية التي يدفع العملاء ثمنها فعليا. لمن يتقنون الادوات ويحتاجون الان لاصدار فاتورة دون اعتذار."),
+    },
+    "Motion Pack": {
+        "fr": ("Pack motion", "Les bases de l animation et du montage video. Ideal pour les reels et les demos produits. Animez une interface, montez la avec des images reelles et exportez quelque chose de fluide sur mobile."),
+        "ar": ("حزمة الحركة", "اساسيات الرسوم المتحركة وتحرير الفيديو. مثالي للمقاطع الدعائية وعروض المنتجات. تحريك واجهة وقصها مع لقطات حقيقية وتصديرها بخفة على الهاتف."),
+    },
+    "Complete Design Path": {
+        "fr": ("Parcours design complet", "Tout ce que nous enseignons en design produit, dans l ordre. Papier d abord, puis mise en page, typographie, composants et une etude de cas complete. Si vous partez de zero, c est le chemin le plus court dans le catalogue."),
+        "ar": ("مسار التصميم الكامل", "كل ما ندرسه في تصميم المنتجات بالترتيب. الورق اولا ثم التخطيط والطباعة والمكونات ودراسة حالة كاملة. اذا كنت تبدأ من الصفر فهذا اقصر طريق عبر الكتالوج."),
+    },
+    "Backend Track": {
+        "fr": ("Parcours backend", "Automatisation Python et FastAPI. Pour ceux qui veulent construire l autre moitie. Deux cours qui vous emmenent d un script sur votre portable a une API que d autres peuvent appeler."),
+        "ar": ("مسار الواجهة الخلفية", "أتمتة بايثون و FastAPI. لمن يريدون بناء النصف الاخر. دورتان تأخذانك من نص برمجي على حاسوبك الى واجهة برمجة يمكن للاخرين استخدامها."),
+    },
+    "Mobile Track": {
+        "fr": ("Parcours mobile", "React Native et le cours API. Livrez quelque chose sur un telephone. Le premier cours vous donne les ecrans, le second un backend qui survive a un vrai utilisateur."),
+        "ar": ("مسار التطبيقات المحمولة", "رياكت نيتيف ودورة واجهات البرمجة. انشر تطبيقا على هاتف. الدورة الاولى تعطيك الشاشات والثانية تعطيك واجهة خلفية تتحمل مستخدما حقيقيا."),
+    },
+    "Portfolio Kit": {
+        "fr": ("Kit portfolio", "Redaction d etudes de cas, sessions de critique et deux revues de portfolio. Pas vraiment un cours, plutot un mois de retours. Vous apportez le travail, nous apportons les questions genantes et une deadline incompressible."),
+        "ar": ("حزمة المحفظة", "كتابة دراسات الحالة وجلسات النقد ومراجعتان للمحفظة. ليست دورة بقدر ما هي شهر من التغذية الراجعة. تاتي بالعمل وناتي بالاسئلة المحرجة والموعد النهائي الثابت."),
+    },
+    "Photography Pack": {
+        "fr": ("Pack photographie", "Photographie produit et le cours de retouche. Concu pour les proprietaires de boutiques. Apprenez la lumiere, les angles et les reglages d exportation qui gardent une photo nette sur une fiche marketplace."),
+        "ar": ("حزمة التصوير", "تصوير المنتجات ودورة التحرير. مصممة لاصحاب المتاجر. تعلم الضوء والزوايا واعدادات التصدير التي تحافظ على وضوح الصورة في قائمة المتجر."),
+    },
+    "Video Pack": {
+        "fr": ("Pack video", "Resolve et les bases du motion design. Coupez, etalonnez, exportez, termine. Deux cours et un petit reel a la fin, assez pour decrocher le prochain client ou la prochaine conversation."),
+        "ar": ("حزمة الفيديو", "ريسولف و اساسيات الرسوم المتحركة. قص وتلوين وتصدير وانتهى. دورتان ومقطع قصير في النهاية، غالبا ما يكفي للفوز بالعميل التالي او المحادثة التالية."),
+    },
+    "Copy and UX Writing": {
+        "fr": ("Copy et UX writing", "Le texte d interface et le cours freelance, pour ceux qui ecrivent plus qu ils ne dessinent. Commencez par les libelles de boutons et les messages d erreur, finissez avec un tarif que vous pouvez annoncer sans ciller."),
+        "ar": ("الكتابة التسويقية وتجربة المستخدم", "نصوص الواجهات ودورة العمل الحر لمن يكتبون اكثر مما يرسمون. ابدا بتسميات الازرار ورسائل الاخطاء وانتهي بسعر يمكنك قوله دون تردد."),
+    },
+    "Accessibility Pack": {
+        "fr": ("Pack accessibilite", "Auditez, corrigez, livrez. Deux cours et une checklist. Le premier vous apprend quoi tester, le second montre comment faire en sorte que les corrections tiennent dans une equipe qui livre chaque semaine."),
+        "ar": ("حزمة الوصول", "التدقيق والتصحيح والتسليم. دورتان وقائمة فحص. الاولى تعلمك ماذا تختبر والثانية تظهر كيف تجعل التصحيحات ثابتة في فريق ينشر كل اسبوع."),
+    },
+    "Career Switch Kit": {
+        "fr": ("Kit reconversion", "Pour ceux qui changent de domaine apres trente ans. Cours, talks et groupe d etude. Aucune promesse d emploi en quatre-vingt-dix jours, juste les competences et les mots pour expliquer ce que vous savez faire."),
+        "ar": ("حزمة تغيير المسار المهني", "لمن يغيرون مجال عملهم بعد الثلاثين. دورات ومحادثات ومجموعة دراسة. لا وعود بوظيفة في تسعين يوما، فقط المهارات والكلمات لشرح ما تستطيع فعله."),
+    },
+    "Creator Bundle": {
+        "fr": ("Pack createur", "Photographie, video et production de podcast. Tout pour un petit studio. Trois cours, un seul setup d enregistrement et un workflow qui tient en un apres-midi."),
+        "ar": ("حزمة المبدعين", "التصوير والفيديو وانتاج البودكاست. كل ما تحتاجه لاستوديو صغير. ثلاث دورات واعداد تسجيل واحد وسير عمل ينجز في بعد ظهر واحد."),
+    },
     "Everything Bundle": {
         "fr": ("Tout inclus", "Tous les cours et podcasts actuels. L option simple."),
         "ar": ("الحزمة الكاملة", "كل الدورات والبودكاست الحالية. الخيار الابسط."),
+    },
+    "2027 Preview Pack": {
+        "fr": ("Pack apercu 2027", "Bundle provisoire pour l annee prochaine. Ne pas publier encore. Texte provisoire pour que la grille ne soit pas vide pendant que nous decidons du contenu et du prix."),
+        "ar": ("حزمة معاينة 2027", "حزمة اولية للعام القادم. لا تنشر بعد. نص مؤقت حتى لا تكون الشبكة فارغة بينما نقرر المحتوى والسعر."),
+    },
+    "Team Training Pack": {
+        "fr": ("Pack formation equipe", "Bundle provisoire pour la formation en entreprise. En attente de validation tarifaire. Texte provisoire en attendant de regler la question de facturation et que les premieres entreprises se mettent d accord sur un format."),
+        "ar": ("حزمة تدريب الفرق", "حزمة اولية لتدريب الشركات. بانتظار اعتماد التسعير. نص مؤقت حتى يتم حسم مسالة الفواتير وتوافق اول شركتين على الصيغة."),
     },
 }
 

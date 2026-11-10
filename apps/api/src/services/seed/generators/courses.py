@@ -194,6 +194,7 @@ def _add_translation(ctx: SeedContext, course: Course, entry: dict) -> None:
                 learnings=course.learnings,
                 tags=entry["tags"],
                 seo=None,
+                extra_metadata=payload.get("extra_metadata"),
                 state="published",
                 source_updated_at=course.update_date,
                 translated_by=None,
