@@ -4,6 +4,7 @@ import React from 'react'
 import { Heading } from '@/components/ui/heading'
 import { Text } from '@/components/ui/text'
 import { Check, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface CourseAudienceProps {
   forItems: string[]
@@ -11,15 +12,16 @@ interface CourseAudienceProps {
 }
 
 export default function CourseAudience({ forItems, notForItems }: CourseAudienceProps) {
+  const { t } = useTranslation()
   if (forItems.length === 0 && notForItems.length === 0) return null
 
   return (
     <div>
-      <Heading level="h1" className="!text-2xl mb-4">Who This Is For</Heading>
+      <Heading level="h1" className="!text-2xl mb-4">{t('course.page.audience_title')}</Heading>
       <div className="rounded-xl bg-white border border-gray-100 shadow-sm px-5 py-5">
         <div className="flex flex-col gap-0.5">
-          <Heading level="h2">This course is for you if&hellip;</Heading>
-          <Text size="base" className="text-ui-fg-muted">You identify with any of these</Text>
+          <Heading level="h2">{t('course.page.audience_for_title')}</Heading>
+          <Text size="base" className="text-ui-fg-muted">{t('course.page.audience_for_subtitle')}</Text>
         </div>
         <ul className="mt-3 space-y-2 ps-3">
           {forItems.map((item, idx) => (
@@ -33,8 +35,8 @@ export default function CourseAudience({ forItems, notForItems }: CourseAudience
         {notForItems.length > 0 && (
           <>
             <div className="flex flex-col gap-0.5 mt-5">
-              <Heading level="h2">This course is NOT for you if&hellip;</Heading>
-              <Text size="base" className="text-ui-fg-muted">You might want to look elsewhere</Text>
+              <Heading level="h2">{t('course.page.audience_not_for_title')}</Heading>
+              <Text size="base" className="text-ui-fg-muted">{t('course.page.audience_not_for_subtitle')}</Text>
             </div>
             <ul className="mt-3 space-y-2 ps-3">
               {notForItems.map((item, idx) => (

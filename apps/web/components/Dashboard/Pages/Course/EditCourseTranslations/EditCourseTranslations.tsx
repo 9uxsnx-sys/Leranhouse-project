@@ -43,6 +43,11 @@ const CSV_FIELDS = [
   'meta.difficulty',
   'meta.duration',
   'meta.requirements',
+  'meta.instructor.name',
+  'meta.instructor.title',
+  'meta.instructor.bio',
+  'meta.target_audience.for',
+  'meta.target_audience.not_for',
 ] as const
 
 function hasValue(row: any, field: ContentField): boolean {
@@ -180,6 +185,8 @@ function EditCourseTranslations(props: Props) {
                 difficulty: courseStructure.extra_metadata.difficulty ?? '',
                 duration: courseStructure.extra_metadata.duration ?? '',
                 requirements: courseStructure.extra_metadata.requirements ?? '',
+                instructor: courseStructure.extra_metadata.instructor ?? null,
+                target_audience: courseStructure.extra_metadata.target_audience ?? null,
               }
             : null,
         },
@@ -214,11 +221,17 @@ function EditCourseTranslations(props: Props) {
   const handleExport = (locale: string, row: any) => {
     const lines = ['field,value']
     CSV_FIELDS.forEach(field => {
-      const value = field.startsWith('seo.')
-        ? row?.seo?.[field.slice(4)]
-        : field.startsWith('meta.')
-          ? row?.extra_metadata?.[field.slice(5)]
-          : row?.[field]
+      let value
+      if (field.startsWith('seo.')) {
+        value = row?.seo?.[field.slice(4)]
+      } else if (field.startsWith('meta.')) {
+        const parts = field.slice(5).split('.')
+        let obj = row?.extra_metadata
+        parts.forEach(p => { obj = obj?.[p] })
+        value = Array.isArray(obj) ? obj.join('\n') : obj
+      } else {
+        value = row?.[field]
+      }
       lines.push(`${field},${csvCell(value)}`)
     })
     const safeName = String(courseStructure?.name || 'course')
@@ -245,8 +258,23 @@ function EditCourseTranslations(props: Props) {
       const seo: Record<string, any> = {}
       const meta: Record<string, any> = {}
       Object.entries(values).forEach(([key, value]) => {
-        if (key.startsWith('seo.')) seo[key.slice(4)] = value || null
-        if (key.startsWith('meta.')) meta[key.slice(5)] = value || null
+        if (key.startsWith('seo.')) {
+          seo[key.slice(4)] = value || null
+        } else if (key.startsWith('meta.')) {
+          const parts = key.slice(5).split('.')
+          if (parts.length === 1) {
+            meta[parts[0]] = value || null
+          } else {
+            let obj = meta
+            parts.slice(0, -1).forEach(p => {
+              if (!obj[p] || typeof obj[p] !== 'object') obj[p] = {}
+              obj = obj[p]
+            })
+            // Arrays (target_audience.for/not_for) are stored as newline-separated text in CSV
+            const finalValue = value ? value.split('\n').filter((s: string) => s.trim()) : null
+            obj[parts[parts.length - 1]] = finalValue || null
+          }
+        }
       })
 
       const name = values.name || existing?.name || courseStructure?.name

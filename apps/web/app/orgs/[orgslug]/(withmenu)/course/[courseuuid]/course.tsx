@@ -231,7 +231,9 @@ const CourseClient = (props: any) => {
 
     try {
       // Try to parse as JSON (new format: array of objects with text/emoji)
-      const parsedLearnings = JSON.parse(courseData.learnings)
+      // Sanitize any Python-style \UXXXXXXXX escapes that aren't valid JSON
+      const sanitized = courseData.learnings.replace(/\\U[0-9a-fA-F]{8}/g, '""')
+      const parsedLearnings = JSON.parse(sanitized)
       if (Array.isArray(parsedLearnings)) {
         setLearnings(parsedLearnings)
         return
@@ -447,6 +449,35 @@ const CourseClient = (props: any) => {
                       forItems={audienceData.for || []}
                       notForItems={audienceData.not_for || []}
                     />
+                  )}
+
+                  {/* ── 4B. INSTRUCTOR ── */}
+                  {instructorData && (
+                    <div>
+                      <Heading level="h1" className="!text-2xl mb-4">{t('course.page.instructor_title')}</Heading>
+                      <div className="rounded-xl bg-white border border-gray-100 shadow-sm px-5 py-5">
+                        <div className="flex items-start gap-4">
+                          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center shrink-0 text-lg font-semibold text-indigo-700">
+                            {instructorData.name?.charAt(0)?.toUpperCase() || '?'}
+                          </div>
+                          <div className="min-w-0">
+                            <Text size="base" className="font-semibold text-gray-900">
+                              {instructorData.name}
+                            </Text>
+                            {instructorData.title && (
+                              <Text size="small" className="text-ui-fg-muted mt-0.5">
+                                {instructorData.title}
+                              </Text>
+                            )}
+                            {instructorData.bio && (
+                              <Text size="base" className="text-ui-fg-subtle mt-3 leading-relaxed">
+                                {instructorData.bio}
+                              </Text>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   )}
 
                   {/* ── 5. ABOUT THIS COURSE ── */}

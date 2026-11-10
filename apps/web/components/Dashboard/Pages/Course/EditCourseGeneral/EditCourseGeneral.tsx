@@ -170,6 +170,26 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
     try {
       const parsed = JSON.parse(requirements);
       if (Array.isArray(parsed)) {
+        // If items are plain strings (legacy format), convert to {id, text, emoji}
+        if (parsed.length > 0 && typeof parsed[0] === 'string') {
+          return JSON.stringify(
+            parsed.map((text: string, i: number) => ({
+              id: `req-${i}`,
+              text,
+              emoji: '📝',
+            }))
+          );
+        }
+        // If items are {text: ...} objects without id (legacy format), add id and emoji
+        if (parsed.length > 0 && typeof parsed[0] === 'object' && parsed[0].text && !parsed[0].id) {
+          return JSON.stringify(
+            parsed.map((item: any, i: number) => ({
+              id: `req-${i}`,
+              text: item.text,
+              emoji: item.emoji || '📝',
+            }))
+          );
+        }
         return requirements;
       }
       if (typeof requirements === 'string') {
@@ -190,6 +210,15 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
       }
       return JSON.stringify([{ id: 'default-1', text: '', emoji: '📝' }]);
     }
+  }, []);
+
+  const initializeAudienceItems = useCallback((items: string[] | undefined) => {
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return JSON.stringify([{ id: 'default-1', text: '' }]);
+    }
+    return JSON.stringify(
+      items.map((text, i) => ({ id: `af-${i}`, text }))
+    );
   }, []);
 
   // Memoize initial values to prevent unnecessary recalculations
@@ -215,13 +244,15 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
       meta_resources_count: meta.resources_count || '',
       meta_has_certificate: meta.has_certificate || false,
       meta_requirements: initializeRequirements(localizedMeta?.requirements ?? meta.requirements),
-      meta_instructor_name: meta.instructor?.name || '',
-      meta_instructor_title: meta.instructor?.title || '',
-      meta_instructor_bio: meta.instructor?.bio || '',
+      meta_instructor_name: localizedMeta?.instructor?.name ?? meta.instructor?.name ?? '',
+      meta_instructor_title: localizedMeta?.instructor?.title ?? meta.instructor?.title ?? '',
+      meta_instructor_bio: localizedMeta?.instructor?.bio ?? meta.instructor?.bio ?? '',
+      meta_audience_for: initializeAudienceItems(localizedMeta?.target_audience?.for ?? meta.target_audience?.for),
+      meta_audience_not_for: initializeAudienceItems(localizedMeta?.target_audience?.not_for ?? meta.target_audience?.not_for),
     };
   }, [courseStructure?.name, courseStructure?.description, courseStructure?.about,
       courseStructure?.learnings, courseStructure?.public,
-      courseStructure?.thumbnail_type, courseStructure?.extra_metadata, initializeLearnings, initializeRequirements,
+      courseStructure?.thumbnail_type, courseStructure?.extra_metadata, initializeLearnings, initializeRequirements, initializeAudienceItems,
       translation, isSourceLocale]);
 
   const formik = useFormik({
@@ -252,7 +283,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
     });
 
     // Build extra_metadata from prefixed meta_ fields
-    const metadataFields = ['meta_difficulty', 'meta_duration', 'meta_video_hours', 'meta_resources_count', 'meta_has_certificate', 'meta_requirements', 'meta_instructor_name', 'meta_instructor_title', 'meta_instructor_bio'];
+    const metadataFields = ['meta_difficulty', 'meta_duration', 'meta_video_hours', 'meta_resources_count', 'meta_has_certificate', 'meta_requirements', 'meta_instructor_name', 'meta_instructor_title', 'meta_instructor_bio', 'meta_audience_for', 'meta_audience_not_for'];
     const anyMetaChanged = metadataFields.some(f => formik.values[f] !== formik.initialValues[f]);
     if (anyMetaChanged) {
       changes.extra_metadata = {
@@ -266,6 +297,14 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
           name: formik.values.meta_instructor_name,
           title: formik.values.meta_instructor_title,
           bio: formik.values.meta_instructor_bio,
+        },
+        target_audience: {
+          for: formik.values.meta_audience_for
+            ? JSON.parse(formik.values.meta_audience_for).map((i: any) => i.text)
+            : [],
+          not_for: formik.values.meta_audience_not_for
+            ? JSON.parse(formik.values.meta_audience_not_for).map((i: any) => i.text)
+            : [],
         },
       };
       // Remove the individual meta fields from top-level changes
@@ -354,7 +393,9 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
       formik.values.learnings !== formik.initialValues.learnings ||
       formik.values.meta_difficulty !== formik.initialValues.meta_difficulty ||
       formik.values.meta_duration !== formik.initialValues.meta_duration ||
-      formik.values.meta_requirements !== formik.initialValues.meta_requirements)
+      formik.values.meta_requirements !== formik.initialValues.meta_requirements ||
+      formik.values.meta_audience_for !== formik.initialValues.meta_audience_for ||
+      formik.values.meta_audience_not_for !== formik.initialValues.meta_audience_not_for)
 
   const isSaved = isSourceLocale ? (course?.isSaved ?? true) : !hasTranslationChanges;
   const isActiveSaving = isSaving || isManualSaving || isSavingTranslation;
@@ -382,9 +423,25 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
             tags: translation?.tags ?? null,
             seo: translation?.seo ?? null,
             extra_metadata: {
+              ...(translation?.extra_metadata ?? {}),
               difficulty: formik.values.meta_difficulty,
               duration: formik.values.meta_duration,
               requirements: formik.values.meta_requirements,
+              instructor: formik.values.meta_instructor_name
+                ? {
+                    name: formik.values.meta_instructor_name,
+                    title: formik.values.meta_instructor_title,
+                    bio: formik.values.meta_instructor_bio,
+                  }
+                : (translation?.extra_metadata?.instructor ?? undefined),
+              target_audience: {
+                for: formik.values.meta_audience_for
+                  ? JSON.parse(formik.values.meta_audience_for).map((i: any) => i.text)
+                  : [],
+                not_for: formik.values.meta_audience_not_for
+                  ? JSON.parse(formik.values.meta_audience_not_for).map((i: any) => i.text)
+                  : [],
+              },
             },
           },
           session.data?.tokens?.access_token
@@ -437,8 +494,13 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
       meta_difficulty: meta.difficulty ?? '',
       meta_duration: meta.duration ?? '',
       meta_requirements: initializeRequirements(meta.requirements),
+      meta_instructor_name: meta.instructor?.name ?? '',
+      meta_instructor_title: meta.instructor?.title ?? '',
+      meta_instructor_bio: meta.instructor?.bio ?? '',
+      meta_audience_for: initializeAudienceItems(meta.target_audience?.for),
+      meta_audience_not_for: initializeAudienceItems(meta.target_audience?.not_for),
     });
-  }, [formik.values, courseStructure?.name, courseStructure?.description, courseStructure?.about, courseStructure?.learnings, courseStructure?.extra_metadata, initializeLearnings, initializeRequirements]);
+  }, [formik.values, courseStructure?.name, courseStructure?.description, courseStructure?.about, courseStructure?.learnings, courseStructure?.extra_metadata, initializeLearnings, initializeRequirements, initializeAudienceItems]);
 
   // useCourseFieldSync handles the unmount cleanup (flushing pending edits
   // instead of discarding them), so no local cleanup is needed here.
@@ -630,6 +692,32 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                     </Form.Control>
                   </FormField>
 
+                  <FormField name="meta_audience_for">
+                    <FormLabelAndMessage label={t('dashboard.courses.general.details.audience_for_label')} message={formik.touched.meta_audience_for ? formik.errors.meta_audience_for : undefined} />
+                    <Form.Control asChild>
+                      <LearningItemsList
+                        value={formik.values.meta_audience_for}
+                        onChange={(value) => {
+                          formik.setFieldTouched('meta_audience_for', true, false)
+                          formik.setFieldValue('meta_audience_for', value)
+                        }}
+                      />
+                    </Form.Control>
+                  </FormField>
+
+                  <FormField name="meta_audience_not_for">
+                    <FormLabelAndMessage label={t('dashboard.courses.general.details.audience_not_for_label')} message={formik.touched.meta_audience_not_for ? formik.errors.meta_audience_not_for : undefined} />
+                    <Form.Control asChild>
+                      <LearningItemsList
+                        value={formik.values.meta_audience_not_for}
+                        onChange={(value) => {
+                          formik.setFieldTouched('meta_audience_not_for', true, false)
+                          formik.setFieldValue('meta_audience_not_for', value)
+                        }}
+                      />
+                    </Form.Control>
+                  </FormField>
+
                 </div>
               </div>
 
@@ -754,7 +842,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                           onChange={formik.handleChange}
                           value={formik.values.meta_instructor_name}
                           type="text"
-                          disabled={isSaving || !isSourceLocale}
+                          disabled={isSaving}
                         />
                       </Form.Control>
                     </FormField>
@@ -767,7 +855,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                           onChange={formik.handleChange}
                           value={formik.values.meta_instructor_title}
                           type="text"
-                          disabled={isSaving || !isSourceLocale}
+                          disabled={isSaving}
                         />
                       </Form.Control>
                     </FormField>
@@ -780,12 +868,13 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                         className={`${fieldClassName} min-h-[100px]`}
                         onChange={formik.handleChange}
                         value={formik.values.meta_instructor_bio}
-                        disabled={isSaving || !isSourceLocale}
+                        disabled={isSaving}
                       />
                     </Form.Control>
                   </FormField>
                 </div>
               </div>
+
             </div>
           </FormLayout>
         </div>

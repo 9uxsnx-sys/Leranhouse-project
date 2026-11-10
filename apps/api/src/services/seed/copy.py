@@ -1854,8 +1854,10 @@ COURSE_TRANSLATIONS = {
     "Backend Engineering with Python": {
         "fr": {
             "name": "Developpement backend avec Python",
-            "description": "Six semaines pour construire une API depuis un dossier vide jusqu a un service qui tourne sur un serveur. On commence par git et une structure de projet propre, puis on avance sur les requetes, une vraie base de donnees, l authentification, les tests et le deploiement.",
-            "about": "Le cours que j aurais voulu trouver au debut. On passe le plus clair du temps a construire, pas a regarder des videos. Chaque semaine vous ajoutez une partie au projet que vous ecrivez deja.",
+            "description": "Six semaines pour construire une API depuis un dossier vide jusqu a un service qui tourne sur un serveur. On commence par git et une structure de projet propre, puis on avance sur les requetes, une vraie base de donnees, l authentification, les tests et le deploiement. Vous finissez avec un service que vous pouvez montrer et expliquer. Apportez un ordinateur portable avec Python installe.",
+            "about": "Ce cours existe parce que je n ai cesse de rencontrer des gens qui savaient ecrire du Python mais qui se figeaient des qu un projet devait quitter leur ordinateur. Six semaines, un seul projet, construit en public. Nous commencons avec un dossier vide la premiere semaine et terminons avec un service qui tourne sur un serveur que vous pouvez montrer aux autres. Il n y a pas de module theorique separe. Tout ce que nous couvrons apparait dans le code que vous etes deja en train d ecrire, c est pourquoi les lecons sont courtes et le projet ne l est pas.\n\nChaque semaine suit le meme rythme : une lecon a regarder, un exercice sur le projet, puis une revision. J enregistre le lundi, vous envoyez l exercice jeudi, et je lis chaque pull request le vendredi. Cette revision est ce que les gens disent avoir change leur facon de travailler, parce que je finis par commenter les trois memes choses que la plupart d entre vous font mal la premiere fois : la gestion des erreurs, le nommage, et la forme d une fonction. Ce n est pas un systeme de notation. C est un second regard pendant que le code est encore assez petit pour etre corrige en un apres-midi.\n\nApportez les bases de Python : les fonctions, les listes, les dictionnaires, et la volonte de lire un message d erreur a voix haute. Vous n avez pas besoin d experience en backend, de connaissances sur Docker ou d un compte cloud. La troisieme semaine est celle ou la plupart des gens ralentissent, parce que les bases de donnees punissent les suppositions, et je prefere vous le dire maintenant plutot que de pretendre que tout est facile. Si vous avez deja mis en ligne quelque chose de petit sans etre tout a fait sur de pourquoi ca a marche, vous etes exactement la personne a qui ce cours s adresse.\n\nNous utilisons FastAPI, Postgres, SQLModel et pytest, avec git des le premier commit. Aucun de ces choix n est un accident de mode. FastAPI garde les definitions de requete et de reponse a cote de la route, Postgres est ce que vous rencontrerez dans la plupart des emplois dans le secteur, et pytest vous donne un test qui echoue que vous pouvez reellement lire. Si votre equipe utilise autre chose, les idees se transferent. Les outils sont la chose la moins importante que vous retiendrez.\n\nA la fin, vous aurez un depot avec un historique reel, des tests qui detectent les regressions, un README qu un autre developpeur peut suivre, et un deploiement que vous pouvez expliquer sans avoir recours a des gestes vagues. Vous obtiendrez aussi les parties qui n apparaissent jamais dans un programme : comment revoir gentiment le travail de quelqu un d autre, comment poser une question qui obtient vraiment une reponse, et comment savoir si le bug est dans votre code ou dans vos hypotheses. La communaute reste ouverte un mois apres la fin du cours, et les personnes qui terminent ont tendance a continuer a revoir le travail des autres bien apres.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"Construire une API depuis un dossier vide jusqu a un deploiement en production\", \"emoji\": \"\\U0001f6e0\"}, {\"id\": \"learning-1\", \"text\": \"Ecrire des migrations qu on peut executer deux fois sans risque, et en annuler une\", \"emoji\": \"\\U0001f5c4\"}, {\"id\": \"learning-2\", \"text\": \"Ajouter l authentification et les controles de roles que vous pouvez expliquer ligne par ligne, afin qu aucun inconnu ne puisse lire les donnees d un autre utilisateur\", \"emoji\": \"\\U0001f510\"}, {\"id\": \"learning-3\", \"text\": \"Tester et deboguer votre propre code avant qu un utilisateur ne trouve un probleme, en utilisant les messages d erreur que vous rencontrerez a la troisieme semaine\", \"emoji\": \"\\U0001f9ea\"}]",
+            "tags": "python, backend, api, fastapi, postgres, git",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"Python 3.11 ou superieur installe, et la confiance pour executer un fichier depuis le terminal\"}, {\"text\": \"Un editeur de code que vous aimez deja — VS Code, PyCharm ou Neovim, peu importe lequel\"}, {\"text\": \"Environ une heure par jour pendant six semaines, sur un ordinateur ou vous pouvez installer des paquets\"}]",
                 "instructor": {"name": "", "title": "Fondateur et developpeur backend", "bio": "Construit des API en Python et Postgres. A casse une base de donnees en production deux fois et en a appris plus que de n importe quel tutoriel."},
@@ -1864,8 +1866,10 @@ COURSE_TRANSLATIONS = {
         },
         "ar": {
             "name": "هندسة الواجهة الخلفية ببايثون",
-            "description": "ستة اسابيع لبناء واجهة برمجة من مجلد فارغ الى خدمة تعمل على سيرفر. نبدا ب git وتنظيم المشروع ثم ننتقل الى الطلبات وقاعدة بيانات حقيقية والمصادقة والاختبارات والنشر.",
-            "about": "هذه الدورة التي كنت اتمنى ان اجدها في البداية. معظم الوقت نعمل فعليا ولا نكتفي بالمشاهدة. كل اسبوع تضيف جزءا جديدا الى المشروع الذي تكتبه.",
+            "description": "ستة اسابيع لبناء واجهة برمجة من مجلد فارغ الى خدمة تعمل على سيرفر. نبدا ب git وتنظيم المشروع ثم ننتقل الى الطلبات وقاعدة بيانات حقيقية والمصادقة والاختبارات والنشر. تنتهي مع خدمة يمكنك عرضها وشرحها. احضر حاسوبا محمولا مثبتا عليه بايثون.",
+            "about": "هذه الدورة موجودة لأنني كنت ألتقي دائما بأشخاص يعرفون كتابة بايثون لكنهم يتجمدون بمجرد أن يغادر المشروع أجهزتهم المحمولة. ستة أسابيع، مشروع واحد، نبنيها علنا. نبدأ بمجلد فارغ في الأسبوع الأول وننتهي بخدمة تعمل على سيرفر يمكنك توجيه الآخرين إليه. لا توجد وحدة نظرية منفصلة. كل ما نغطيه يظهر في الكود الذي تكتبه بالفعل، ولهذا الدروس قصيرة والمشروع ليس كذلك.\n\nكل أسبوع يتبع نفس الإيقاع: درس واحد للمشاهدة، تمرين واحد على المشروع، ثم مراجعة. أسجل يوم الاثنين، ترسل التمرين يوم الخميس، وأقرأ كل طلب سحب يوم الجمعة. تلك المراجعة هي الجزء الذي يقول الناس إنه غير طريقة عملهم، لأنني أنتهي بالتعليق على نفس الأشياء الثلاثة التي يخطئ فيها معظمكم في المرة الأولى: معالجة الأخطاء، التسمية، وشكل الدالة. إنه ليس نظام تقييم. إنها عين ثانية بينما الكود لا يزال صغيرا بما يكفي لإصلاحه في ظهر يوم واحد.\n\nاحضر أساسيات بايثون: الدوال، القوائم، القواميس، والاستعداد لقراءة رسالة خطأ بصوت عال. لا تحتاج خبرة في الواجهات الخلفية، أو معرفة ب Docker، أو حساب سحابي. الأسبوع الثالث هو حيث يبطئ معظم الناس، لأن قواعد البيانات تعاقب التخمين، وأفضل أن أخبرك بذلك الآن بدلا من أن أدعي أن كل شيء سهل. إذا كنت قد نشرت شيئا صغيرا ولم تكن متأكدا تماما لماذا نجح، فأنت بالضبط الشخص الذي صممت هذه الدورة من أجله.\n\nنستخدم FastAPI و Postgres و SQLModel و pytest، مع git من أول commit. ليست أي من هذه الاختيارات مجرد صدفة مواكبة للموضة. FastAPI يحفظ تعريفات الطلب والاستجابة بجانب المسار، Postgres هو ما ستقابله في معظم الوظائف هنا، و pytest يعطيك اختبارا فاشلا يمكنك قراءته فعلا. إذا كان فريقك يستخدم شيئا آخر، الأفكار تنتقل. الأدوات هي أقل شيء مهم ستأخذه معك.\n\nفي النهاية سيكون لديك مستودع بسجل حقيقي، واختبارات تكتشف الانتكاسات، و README يستطيع مطور آخر متابعته، ونشر يمكنك شرحه دون تمويه. ستحصل أيضا على الأجزاء التي لا تدخل أبدا في المنهج الدراسي: كيف تراجع عمل شخص آخر بلطف، كيف تطرح سؤالا يحصل على إجابة فعلا، وكيف تعرف ما إذا كان الخطأ في كودك أم في افتراضاتك. يبقى المجتمع مفتوحا لمدة شهر بعد انتهاء الدورة، والأشخاص الذين يكملون يميلون إلى الاستمرار في مراجعة عمل بعضهم البعض بعد ذلك بوقت طويل.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"ابن واجهة برمجة من مجلد فارغ وصولا الى نشر مباشر\", \"emoji\": \"\\U0001f6e0\"}, {\"id\": \"learning-1\", \"text\": \"اكتب ترحيلات آمنة للتشغيل مرتين، وتراجع عن واحدة\", \"emoji\": \"\\U0001f5c4\"}, {\"id\": \"learning-2\", \"text\": \"اضف المصادقة والتحقق من الادوار يمكنك شرحه سطرا بسطر، حتى لا يستطيع غريب قراءة بيانات مستخدم آخر\", \"emoji\": \"\\U0001f510\"}, {\"id\": \"learning-3\", \"text\": \"اختبر ونقح كودك قبل ان يكتشفه المستخدم، باستخدام رسائل الخطأ التي ستقابلها في الاسبوع الثالث\", \"emoji\": \"\\U0001f9ea\"}]",
+            "tags": "بايثون, واجهات خلفية, api, fastapi, postgres, git",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"Python 3.11 او احدث مثبت، والثقة لتشغيل ملف من الطرفية\"}, {\"text\": \"محرر اكواد تفضله — VS Code او PyCharm او Neovim، لا يهم اي\"}, {\"text\": \"حوالي ساعة يوميا لستة اسابيع، على حاسوب محمول مسموح لك تثبيت حزم عليه\"}]",
                 "instructor": {"name": "", "title": "المؤسس ومطور خلفي", "bio": "يبني واجهات برمجة ب Python و Postgres. عطل قاعدة بيانات في الانتاج مرتين وتعلم من ذلك اكثر من اي درس."},
@@ -1876,8 +1880,10 @@ COURSE_TRANSLATIONS = {
     "Figma for Absolute Beginners": {
         "fr": {
             "name": "Figma pour debutants",
-            "description": "Une visite lente de l interface pour ceux qui n ont jamais ouvert Figma. Les cadres, les groupes, le layout automatique et les raccourcis qui font la moitie du travail.",
-            "about": "Pas de theorie, juste l outil et beaucoup de fichiers d entrainement.",
+            "description": "Une visite lente de l interface pour ceux qui n ont jamais ouvert Figma. Les cadres, les groupes, le layout automatique et les raccourcis qui font la moitie du travail. Rien d autre. C est tout l interet.",
+            "about": "J ai fait ce cours pour ma tante qui tient une petite boulangerie et voulait maquetter un site. Il s est transforme en quelque chose d utile pour tout le monde. Pas de theorie, juste l outil et beaucoup de fichiers d entrainement.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"Naviguer dans Figma sans chercher les boutons, et savoir quel panneau contient le reglage que vous cherchez\", \"emoji\": \"\\U0001f5b1\"}, {\"id\": \"learning-1\", \"text\": \"Utiliser les cadres et les groupes correctement, pour que redimensionner un element ne casse pas silencieusement le reste de l ecran\", \"emoji\": \"\\U0001f4d0\"}, {\"id\": \"learning-2\", \"text\": \"Comprendre la mise en page automatique a un niveau de base et construire une carte qui grandit avec son contenu au lieu de le combattre\", \"emoji\": \"\\U0001f4cf\"}, {\"id\": \"learning-3\", \"text\": \"Partager un fichier avec quelqu un d autre, laisser un commentaire utile et transmettre un lien d edition sans donner votre compte\", \"emoji\": \"\\U0001f517\"}]",
+            "tags": "figma, debutant, bases",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"Un compte Figma gratuit et un navigateur qui peut suivre — aucun abonnement payant necessaire a aucun moment\"}, {\"text\": \"Une souris ou un pavé tactile avec lequel vous etes a l'aise, car les raccourcis reposent sur des clics precis\"}]",
                 "instructor": {"name": "", "title": "Designer produit", "bio": "Enseigne Figma a des gens qui ne l'ont jamais ouvert. Dessine encore des wireframes sur papier d'abord."},
@@ -1886,8 +1892,10 @@ COURSE_TRANSLATIONS = {
         },
         "ar": {
             "name": "فيجما للمبتدئين",
-            "description": "جولة بطيئة في الواجهة لمن لم يفتح فيجما من قبل. الاطارات والمجموعات والتخطيط التلقائي والاختصارات التي تنجز نصف العمل.",
-            "about": "لا نظريات ولا دراسات حالة، فقط الاداة وملفات تدريب كثيرة.",
+            "description": "جولة بطيئة في الواجهة لمن لم يفتح فيجما من قبل. الاطارات والمجموعات والتخطيط التلقائي والاختصارات التي تنجز نصف العمل. لا شيء غير ذلك. هذا هو الهدف كله.",
+            "about": "صنعت هذه الدورة لخالتي التي تدير مخبزا صغيرا وأرادت تصميم موقع تجريبي. تحولت الى شيء مفيد للجميع. لا نظريات ولا دراسات حالة، فقط الاداة وملفات تدريب كثيرة.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"تحرك داخل فيجما دون البحث عن الازرار، واعرف اي لوحة تحتوي على الاعداد الذي تبحث عنه\", \"emoji\": \"\\U0001f5b1\"}, {\"id\": \"learning-1\", \"text\": \"استخدم الاطارات والمجموعات بالطريقة الصحيحة، حتى لا يكسر تغيير حجم عنصر واحد بقية الشاشة بصمت\", \"emoji\": \"\\U0001f4d0\"}, {\"id\": \"learning-2\", \"text\": \"افهم التخطيط التلقائي على مستوى اساسي وابن بطاقة تنمو مع محتواها بدلا من ان تعاكسه\", \"emoji\": \"\\U0001f4cf\"}, {\"id\": \"learning-3\", \"text\": \"شارك ملفا مع شخص آخر، اترك تعليقا مفيدا وسلم رابط تحرير دون اعطاء حسابك\", \"emoji\": \"\\U0001f517\"}]",
+            "tags": "فيجما, مبتدئين, اساسيات",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"حساب فيجما مجاني ومتصفح يستطيع المواكبة — لا حاجة لخطة مدفوعة في اي وقت\"}, {\"text\": \"فارة او لوحة لمس مريحة لك، لان الاختصارات تعتمد على نقر دقيق\"}]",
                 "instructor": {"name": "", "title": "مصمم منتجات", "bio": "يعلم فيجما لمن لم يفتحوه من قبل. لا يزال يرسم الاطارات السلكية على الورق اولا."},
@@ -1899,7 +1907,9 @@ COURSE_TRANSLATIONS = {
         "fr": {
             "name": "Typographie pour ecrans",
             "description": "La typographie represente la majorite de votre interface. On regarde de vrais ecrans, on les casse et on les reconstruit avec deux graisses et une echelle saine.",
-            "about": "Comprend une seance sur le texte arabe et francais dans la meme page.",
+            "about": "Comprend une seance sur le texte arabe et francais dans la meme page, dont chaque projet local a besoin et que presque personne ne teste. Vous repartirez avec une petite checklist que vous pourrez appliquer a n importe quel ecran.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"Etablir une echelle typographique que vous pouvez defendre en revue, avec des tailles, des graisses et des hauteurs de ligne qui survivent aux ecrans reels\", \"emoji\": \"\\U0001f4cf\"}, {\"id\": \"learning-1\", \"text\": \"Corriger la longueur de ligne et la hauteur de ligne rapidement, en utilisant une courte checklist au lieu de deviner jusqu a ce que ca paraisse juste\", \"emoji\": \"\\U0001f4d6\"}, {\"id\": \"learning-2\", \"text\": \"Associer le texte arabe et latin sans que cela paraisse faux, y compris les chiffres, la ponctuation et l alignement droite-gauche\", \"emoji\": \"\\U0001f30d\"}, {\"id\": \"learning-3\", \"text\": \"Auditer une page reelle en dix minutes et nommer les trois changements qui l amelioreraient le plus\", \"emoji\": \"\\U0001f50d\"}]",
+            "tags": "typographie, mise en page, rtl",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"Un navigateur moderne et une page que vous avez le droit de reconcevoir, ou une capture d'ecran claire de celle-ci\"}, {\"text\": \"Aucune connaissance en creation de caracteres requise, mais un peu de CSS accelere les exercices\"}]",
                 "instructor": {"name": "", "title": "Typographe", "bio": "Compose du texte pour ecrans et imprimes, et a des opinions tranchees sur la hauteur de ligne qu'elle partagera."},
@@ -1909,7 +1919,9 @@ COURSE_TRANSLATIONS = {
         "ar": {
             "name": "الخطوط من اجل الشاشات",
             "description": "الخط يشكل معظم الواجهة. ننظر في شاشات حقيقية ونعيد بناءها بوزنين وخط متوازن.",
-            "about": "تتضمن جلسة عن الجمع بين العربية والفرنسية في نفس الصفحة.",
+            "about": "تتضمن جلسة عن الجمع بين العربية والفرنسية في نفس الصفحة، وهو ما يحتاجه كل مشروع محلي ولا يختبره احد تقريبا. ستغادر بقائمة صغيرة يمكنك تطبيقها على اي شاشة.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"اضبط سلم طباعي يمكنك الدفاع عنه في المراجعة، مع احجام واوزان وارتفاعات سطر تصمد امام الشاشات الحقيقية\", \"emoji\": \"\\U0001f4cf\"}, {\"id\": \"learning-1\", \"text\": \"اصلح طول السطر وارتفاع السطر بسرعة، باستخدام قائمة قصيرة بدلا من التخمين حتى يبدو صحيحا\", \"emoji\": \"\\U0001f4d6\"}, {\"id\": \"learning-2\", \"text\": \"ازن بين النص العربي واللاتيني دون ان يبدو خطا، بما في ذلك الارقام وعلامات الترقيم والمحاذاة من اليمين لليسار\", \"emoji\": \"\\U0001f30d\"}, {\"id\": \"learning-3\", \"text\": \"دقق صفحة حقيقية في عشر دقائق واذكر التغييرات الثلاث التي ستحسنها اكثر\", \"emoji\": \"\\U0001f50d\"}]",
+            "tags": "خطوط, تخطيط, rtl",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"اي متصفح حديث وصفحة مسموح لك باعادة تصميمها، او لقطة شاشة واضحة لها\"}, {\"text\": \"لا حاجة لخلفية في تصميم الخطوط، لكن القليل من CSS يسرع التمارين\"}]",
                 "instructor": {"name": "", "title": "مصمم خطوط", "bio": "يضبط النص للشاشات والطباعة، ولديه اراء قوية حول ارتفاع السطر سيشاركها."},
@@ -1920,8 +1932,10 @@ COURSE_TRANSLATIONS = {
     "Python for Everyday Automation": {
         "fr": {
             "name": "Python pour automatiser le quotidien",
-            "description": "Renommer cent fichiers, extraire des chiffres d un PDF, envoyer un resume hebdomadaire. De petits scripts qui font gagner une heure.",
-            "about": "Le cours est construit a partir de taches qu on m a vraiment demandees au travail.",
+            "description": "Renommer cent fichiers, extraire des chiffres d un PDF, envoyer un resume hebdomadaire. De petits scripts qui font gagner une heure chaque semaine, pas un projet de machine learning. Vous apportez un dossier que vous en avez assez de toucher a la main, nous le transformons en trois lignes que vous pourrez relancer demain.",
+            "about": "Le cours est construit a partir de taches qu on m a vraiment demandees au travail. Chaque lecon se termine par un script que vous pouvez copier et modifier. Pas besoin de diplome en informatique ni de sermon sur les environnements virtuels.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"Lire et ecrire des fichiers sans crainte, y compris CSV, JSON et la structure de dossiers que quelqu un d autre a faite\", \"emoji\": \"\\U0001f4c1\"}, {\"id\": \"learning-1\", \"text\": \"Scraper une page poliment, respecter les limites de taux et stocker ce que vous collectez dans un formulaire reutilisable\", \"emoji\": \"\\U0001f578\"}, {\"id\": \"learning-2\", \"text\": \"Automatiser une tache de tableur ennuyeuse et la relancer le mois prochain sans reecrire tout le script\", \"emoji\": \"\\U0001f4ca\"}, {\"id\": \"learning-3\", \"text\": \"Programmer un script sur votre propre machine pour qu il s execute pendant que vous dormez et vous prevene en cas d echec\", \"emoji\": \"\\u23f0\"}]",
+            "tags": "python, automatisation, scripting",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"Python installe et capable d'executer un seul fichier depuis le terminal, rien de plus avance que cela\"}, {\"text\": \"Un dossier de fichiers que vous aimeriez arreter de renommer a la main, et une tache repetitive que vous detestez vraiment\"}]",
                 "instructor": {"name": "", "title": "Professeur d'automatisation", "bio": "Transforme des taches de bureau repetitives en petits scripts et tient un carnet de chaque raccourci appris a la dure."},
@@ -1930,8 +1944,10 @@ COURSE_TRANSLATIONS = {
         },
         "ar": {
             "name": "بايثون لاتمتة المهام اليومية",
-            "description": "اعادة تسمية مئة ملف، استخراج ارقام من ملف، ارسال ملخص اسبوعي. سكربتات صغيرة توفر ساعة من وقتك.",
-            "about": "بنيت الدورة من مهام طلب مني تنفيذها فعلا في العمل.",
+            "description": "اعادة تسمية مئة ملف، استخراج ارقام من ملف، ارسال ملخص اسبوعي. سكربتات صغيرة توفر ساعة من وقتك كل اسبوع، ليس مشروع تعلم آلة. تحضر مجلد ملفات سئمت التعامل معه يدويا، ونحوله الى ثلاثة اسطر يمكنك تشغيلها مرة اخرى غدا.",
+            "about": "بنيت الدورة من مهام طلب مني تنفيذها فعلا في العمل. ينتهي كل درس بسكربت يمكنك نسخه وتغييره. لا حاجة لشهادة في علوم الحاسوب ولا لخطبة عن البيئات الافتراضية.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"اقرا واكتب ملفات دون خوف، بما في ذلك CSV و JSON وهيكل المجلدات الذي صنعه شخص آخر\", \"emoji\": \"\\U0001f4c1\"}, {\"id\": \"learning-1\", \"text\": \"اسحب بيانات من صفحة ويب بأدب، احترم حدود الطلبات وخزن ما تجمعه بشكل قابل لاعادة الاستخدام\", \"emoji\": \"\\U0001f578\"}, {\"id\": \"learning-2\", \"text\": \"اتمت مهمة جدول بيانات مملة وشغلها مرة اخرى الشهر القادم دون اعادة كتابة السكربت كله\", \"emoji\": \"\\U0001f4ca\"}, {\"id\": \"learning-3\", \"text\": \"جدول سكربت على جهازك ليعمل وانت نائم ويخبرك عندما يفشل شيء\", \"emoji\": \"\\u23f0\"}]",
+            "tags": "بايثون, اتمتة, سكربتات",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"Python مثبت وقادر على تشغيل ملف واحد من الطرفية، لا شيء اكثر تقدما من ذلك\"}, {\"text\": \"مجلد ملفات تود التوقف عن اعادة تسميتها يدويا، ومهمة متكررة تكرهها حقا\"}]",
                 "instructor": {"name": "", "title": "مدرس الاوتوماتة", "bio": "يحول مهام المكتب المتكررة الى سكربتات صغيرة ويحتفظ بدفتر لكل اختصار تعلمه بالطريقة الصعبة."},
@@ -1944,6 +1960,8 @@ COURSE_TRANSLATIONS = {
             "name": "Travailler en freelance",
             "description": "Les tarifs, les contrats, le perimetre qui s etend et le message genant quand le client ne repond plus.",
             "about": "La plupart du cours parle de methode, pas de design.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"Rediger un brief qui vous protege plus tard, avec le perimetre, les revisions et une clause d annulation equitable pour les deux parties\", \"emoji\": \"\\U0001f4dd\"}, {\"id\": \"learning-1\", \"text\": \"Tarifer le travail sans deviner, en utilisant des tarifs journaliers, des tarifs de projet et des retenues qui correspondent a la valeur que vous apportez\", \"emoji\": \"\\U0001f4b0\"}, {\"id\": \"learning-2\", \"text\": \"Gerer l expansion du perimetre sans bruler les ponts, en utilisant un processus de modification de commande que le client a deja signe\", \"emoji\": \"\\U0001f309\"}, {\"id\": \"learning-3\", \"text\": \"Demander des temoignages et des recommandations sans le silence gene, et construire un pipeline qui survit aux mois calmes\", \"emoji\": \"\\U0001f4c8\"}]",
+            "tags": "freelance, design, business",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"Un peu de travail client derriere vous, meme un petit projet pour lequel vous avez ete paye\"}, {\"text\": \"Un moyen d'envoyer des factures, et le courage de regarder vos propres chiffres honnetement\"}]",
                 "instructor": {"name": "", "title": "Designer freelance", "bio": "Travaille en freelance a temps plein et conserve chaque contrat qui s'est bien passe, plus quelques-uns qui ne se sont pas bien passes."},
@@ -1954,6 +1972,8 @@ COURSE_TRANSLATIONS = {
             "name": "العمل الحر للمصممين",
             "description": "الاسعار والعقود وتوسع نطاق العمل والرسالة المحرجة عندما يتوقف العميل عن الرد.",
             "about": "معظم الدورة عن الطريقة والتنظيم وليس عن التصميم.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"اكتب موجزا يحميك لاحقا، مع النطاق والمراجعات وشرط الالغاء العادل للطرفين\", \"emoji\": \"\\U0001f4dd\"}, {\"id\": \"learning-1\", \"text\": \"سعر العمل دون تخمين، باستخدام اسعار يومية واسعار مشاريع واتعاب تتناسب مع القيمة التي تقدمها\", \"emoji\": \"\\U0001f4b0\"}, {\"id\": \"learning-2\", \"text\": \"تعامل مع توسع النطاق دون حرق الجسور، باستخدام عملية تغيير الامر وقعها العميل بالفعل\", \"emoji\": \"\\U0001f309\"}, {\"id\": \"learning-3\", \"text\": \"اطلب الشهادات والتوصيات دون الصمت المحرج، وابن خط انتاج ينجو من الاشهر البطيئة\", \"emoji\": \"\\U0001f4c8\"}]",
+            "tags": "عمل حر, تصميم, اعمال",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"بعض العمل مع العملاء خلفك، حتى مشروع صغير واحد دفعت مقابله فعلا\"}, {\"text\": \"طريقة لارسال الفواتير، والشجاعة للنظر الى ارقامك بصدق\"}]",
                 "instructor": {"name": "", "title": "مصمم مستقل", "bio": "يعمل حرا بدوام كامل ويحتفظ بكل عقد سار على ما يرام، بالإضافة الى القليل الذي لم يسر."},
@@ -1966,6 +1986,8 @@ COURSE_TRANSLATIONS = {
             "name": "Systemes de design qui tiennent dans une equipe",
             "description": "La plupart des systemes de design meurent parce que personne ne les maintient. Ce cours couvre les parties ennuyeuses : nommer, versionner, decider, et dire non a une nouvelle variante de bouton. On reconstruit un petit systeme a partir d un desordre.",
             "about": "Ecrit pour la personne qui herite d un fichier Figma avec quarante-deux styles de boutons et aucune documentation. On travaille les tokens, puis les composants, puis le processus qui le maintient en vie apres le lancement. Amenez votre pire fichier.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"Transformer un fichier desordonne en un systeme nomme, avec un proprietaire clair, un journal des modifications et un seul endroit ou les decisions vivent\", \"emoji\": \"\\U0001f5c2\"}, {\"id\": \"learning-1\", \"text\": \"Choisir des tokens au lieu de styles infinis, pour qu un changement de couleur se fasse une fois au lieu de dans quarante cadres\", \"emoji\": \"\\U0001f3a8\"}, {\"id\": \"learning-2\", \"text\": \"Documenter les decisions que les gens liront vraiment, dans des notes courtes attachees au composant qu elles expliquent\", \"emoji\": \"\\U0001f4d8\"}, {\"id\": \"learning-3\", \"text\": \"Gerer les demandes de nouvelles variantes sans perdre le controle, en utilisant un processus que toute l equipe a deja approuve\", \"emoji\": \"\\U0001f6e1\"}]",
+            "tags": "design systems, tokens, processus",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"Aisance avec Figma ou un outil de design similaire, y compris les composants, les variantes et la mise en page automatique\"}, {\"text\": \"Un fichier desordonne que vous avez le droit de corriger, ou la bibliotheque d'exemple fournie avec le cours\"}]",
                 "instructor": {"name": "", "title": "Responsable de systemes de design", "bio": "Passe la plupart de ses semaines a nettoyer des bibliotheques de composants que d'autres ont abandonnees."},
@@ -1976,6 +1998,8 @@ COURSE_TRANSLATIONS = {
             "name": "انظمة التصميم التي تصمد في فريق",
             "description": "معظم انظمة التصميم تموت لان لا احد يصونها. هذه الدورة تغطي الجوانب المملة: التسمية، ادارة الاصدارات، من يقرر، وكيف ترفض زراً جديداً. نعيد بناء نظام صغير من الفوضى.",
             "about": "كتبت لمن يرث ملف فيجما باربعين نمط زر وبدون اي توثيق. نعمل على الرموز ثم المكونات ثم العملية التي تحفظه حيا بعد الاطلاق. احضر اسوا ملف عندك.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"حول ملفا فوضويا الى نظام مسمى، مع مالك واضح وسجل تغييرات ومكان واحد تعيش فيه القرارات\", \"emoji\": \"\\U0001f5c2\"}, {\"id\": \"learning-1\", \"text\": \"اختر الرموز بدلا من الانماط التي لا تنتهي، بحيث يحدث تغيير اللون مرة واحدة بدلا من في اربعين اطارا\", \"emoji\": \"\\U0001f3a8\"}, {\"id\": \"learning-2\", \"text\": \"وثق القرارات التي سيقرأها الناس فعلا، في ملاحظات قصيرة مرفقة بالمكون الذي تشرحه\", \"emoji\": \"\\U0001f4d8\"}, {\"id\": \"learning-3\", \"text\": \"تعامل مع طلبات المتغيرات الجديدة دون فقدان السيطرة، باستخدام عملية وافقت عليها الفرق بأكملها بالفعل\", \"emoji\": \"\\U0001f6e1\"}]",
+            "tags": "انظمة تصميم, رموز, عمليات",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"الراحة مع فيجما او اداة تصميم مشابهة، بما في ذلك المكونات والمتغيرات والتخطيط التلقائي\"}, {\"text\": \"ملف فوضوي مسموح لك باصلاحه، او مكتبة النماذج التي نوفرها مع الدورة\"}]",
                 "instructor": {"name": "", "title": "قائد انظمة التصميم", "bio": "يقضي معظم اسابيعه في تنظيف مكتبات المكونات التي تركها اخرون."},
@@ -1988,6 +2012,8 @@ COURSE_TRANSLATIONS = {
             "name": "Bases du motion design avec After Effects",
             "description": "Quatre week-ends de keyframes, d easing et d une petite video. On anime une icone, une carte et un etat de chargement, puis on exporte le tout pour le web a une taille qui ne tue pas la page.",
             "about": "Ce n est pas un cours de showreel avec des transitions sophistiquees. Il s agit de creer de petites animations qui expliquent ce que fait l interface. Vous avez besoin d After Effects ou d une alternative gratuite, et d un peu de patience.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"Animer avec des keyframes sans lutter contre la timeline, et comprendre pourquoi une animation saute ou derive soudainement\", \"emoji\": \"\\U0001f39e\"}, {\"id\": \"learning-1\", \"text\": \"Choisir un easing qui correspond a l interaction au lieu de la courbe par defaut que tout le monde laisse en place\", \"emoji\": \"\\U0001f3af\"}, {\"id\": \"learning-2\", \"text\": \"Exporter des fichiers legers pour le web qui se chargent rapidement sur un telephone avec une connexion lente\", \"emoji\": \"\\U0001f4e6\"}, {\"id\": \"learning-3\", \"text\": \"Monter un reel de trente secondes a partir de votre propre travail, avec un debut, une fin et rien de superflu entre les deux\", \"emoji\": \"\\U0001f3ac\"}]",
+            "tags": "motion, after effects, animation",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"After Effects ou une alternative gratuite comme Cavalry ou Rive, les concepts s'appliquent a tous\"}, {\"text\": \"Un court extrait ou une icone que vous voulez animer, et la patience de la regarder image par image\"}]",
                 "instructor": {"name": "", "title": "Motion designer", "bio": "Anime des interfaces pour des equipes produit. Pense que la plupart des animations devraient etre plus courtes."},
@@ -1998,6 +2024,8 @@ COURSE_TRANSLATIONS = {
             "name": "اساسيات تصميم الحركة مع After Effects",
             "description": "اربع عطل نهاية اسبوع من الاطارات المفتاحية والسلاسة وفيديو قصير. نحرك ايقونة وبطاقة وحالة تحميل، ثم نصدر كل شيء للويب بحجم لا يبطئ الصفحة.",
             "about": "هذه ليست دورة عرض انتقالات ذكية. انها عن صنع حركات صغيرة تشرح ما تفعله الواجهة. تحتاج After Effects او بديل مجاني وقليل من الصبر.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"حرك الاطارات المفتاحية دون محاربة الخط الزمني، وافهم لماذا تقفز الحركة فجاة او تنحرف\", \"emoji\": \"\\U0001f39e\"}, {\"id\": \"learning-1\", \"text\": \"اختر تسهيلا يتناسب مع التفاعل بدلا من المنحنى الافتراضي الذي يتركه الجميع في مكانه\", \"emoji\": \"\\U0001f3af\"}, {\"id\": \"learning-2\", \"text\": \"صدر ملفات صغيرة للويب تظل سريعة التحميل على هاتف ذي اتصال بطيء\", \"emoji\": \"\\U0001f4e6\"}, {\"id\": \"learning-3\", \"text\": \"اقطع مقطعا مدته ثلاثون ثانية من عملك الخاص، مع بداية ونهاية ولا حشو بينهما\", \"emoji\": \"\\U0001f3ac\"}]",
+            "tags": "حركة, after effects, رسوم متحركة",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"After Effects او بديل مجاني مثل Cavalry او Rive، الافكار تنطبق على جميعها\"}, {\"text\": \"مقطع قصير او ايقونة تريد تحريكها، والصبر لمشاهدتها اطارا باطار\"}]",
                 "instructor": {"name": "", "title": "مصمم حركة", "bio": "يحرك الواجهات لفرق المنتج. يعتقد ان معظم الرسوم المتحركة يجب ان تكون اقصر."},
@@ -2010,6 +2038,8 @@ COURSE_TRANSLATIONS = {
             "name": "Fondations du front end avec React",
             "description": "Composants, etat et le peu de CSS dont vous avez reellement besoin. On construit un tableau de bord qui interroge une fausse API et gere les etats de chargement, vide et d erreur sans les ignorer.",
             "about": "Si vous avez termine un tutoriel mais ne pouvez rien construire seul, c est le chainon manquant. On ecrit du vrai code a chaque seance et je revise les pull requests. Vous avez besoin de bases en HTML et d un peu de JavaScript.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"Ecrire des composants faciles a supprimer, avec des props qui decrivent l intention au lieu de ce que le parent a transmis\", \"emoji\": \"\\U0001f9e9\"}, {\"id\": \"learning-1\", \"text\": \"Gerer l etat sans recourir a une bibliotheque des le premier jour, et savoir quand une bibliotheque en vaut vraiment la peine\", \"emoji\": \"\\U0001f504\"}, {\"id\": \"learning-2\", \"text\": \"Gerer les vues de chargement, vides et d erreur pour qu un reseau lent ne laisse jamais l ecran vide ou l utilisateur dans le doute\", \"emoji\": \"\\U0001f6a7\"}, {\"id\": \"learning-3\", \"text\": \"Livrer une petite application sur une vraie URL et la deboguer en production quand quelque chose fonctionne en local mais pas la bas\", \"emoji\": \"\\U0001f680\"}]",
+            "tags": "react, javascript, frontend",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"Les bases de JavaScript, y compris les tableaux, les objets et les fonctions — nous n'enseignons pas le langage a partir de zero\"}, {\"text\": \"Node et npm installes, ainsi qu'un navigateur avec des outils de developpement fonctionnels\"}]",
                 "instructor": {"name": "", "title": "Developpeur front end", "bio": "Ecris du React tous les jours et lit encore la documentation avant chaque version."},
@@ -2020,6 +2050,8 @@ COURSE_TRANSLATIONS = {
             "name": "اساسيات الواجهات الامامية مع React",
             "description": "المكونات والحالة والقليل من CSS الذي تحتاجه فعلا. نبني لوحة تحكم تسحب من واجهة برمجة وهمية وتتعامل مع حالات التحميل والفراغ والخطا دون تجاهلها.",
             "about": "اذا انهيت درسا تعليميا ولا تستطيع بناء اي شيء بمفردك، فهذه هي الفجوة. نكتب كودا حقيقيا في كل جلسة واراجع طلبات السحب. تحتاج HTML اساسي وقليل من JavaScript.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"اكتب مكونات سهلة الحذف، مع خصائص تصف القصد بدلا من ما مرره المكون الاب\", \"emoji\": \"\\U0001f9e9\"}, {\"id\": \"learning-1\", \"text\": \"ادر الحالة دون اللجوء الى مكتبة من اليوم الاول، واعرف متى تستحق المكتبة العناء فعلا\", \"emoji\": \"\\U0001f504\"}, {\"id\": \"learning-2\", \"text\": \"تعامل مع حالات التحميل والفراغ والخطا حتى لا يترك الاتصال البطيء الشاشة فارغة او المستخدم في حيرة\", \"emoji\": \"\\U0001f6a7\"}, {\"id\": \"learning-3\", \"text\": \"شحن تطبيق صغير الى رابط حقيقي واصلحه في الانتاج عندما يعمل شيء محليا ولكن ليس هناك\", \"emoji\": \"\\U0001f680\"}]",
+            "tags": "react, جافاسكريبت, واجهات امامية",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"اساسيات JavaScript، بما في ذلك المصفوفات والكائنات والدوال — لن نعلم اللغة من الصفر\"}, {\"text\": \"Node و npm مثبتان، ومتصفح يحتوي على ادوات مطور تعمل\"}]",
                 "instructor": {"name": "", "title": "مطور واجهات امامية", "bio": "يكتب React كل يوم ولا يزال يقرأ الوثائق قبل كل اصدار."},
@@ -2032,6 +2064,8 @@ COURSE_TRANSLATIONS = {
             "name": "Analyse de donnees avec Pandas",
             "description": "Chargez un CSV desordonne, nettoyez-le, regroupez-le et repondez a une question que votre chef a posee. On utilise un vrai export d une petite boutique avec des lignes en double et trois formats de date.",
             "about": "La plupart des cours utilisent des donnees parfaites. Celui-ci commence avec le bazar que vous recevez un mardi. Vous avez besoin des bases de Python et de la volonte de lire un message d erreur a voix haute.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"Inspecter un dataframe avant de lui faire confiance, en verifiant la forme, les types et les lignes qui ont discretement disparu\", \"emoji\": \"\\U0001f50e\"}, {\"id\": \"learning-1\", \"text\": \"Nettoyer les doublons et les dates cassees sans perdre les lignes dont vous avez reellement besoin pour la reponse\", \"emoji\": \"\\U0001f9f9\"}, {\"id\": \"learning-2\", \"text\": \"Grouper et resumer pour une vraie question, puis expliquer le chiffre a quelqu un qui le contestera\", \"emoji\": \"\\U0001f4c8\"}, {\"id\": \"learning-3\", \"text\": \"Sauvegarder un graphique que quelqu un peut lire d un coup d oeil, avec un titre qui dit ce qu il montre et aucune decoration\", \"emoji\": \"\\U0001f4c9\"}]",
+            "tags": "pandas, donnees, python",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"Les bases de Python et Pandas installe, ou un environnement de notebook ou vous pouvez l'installer rapidement\"}, {\"text\": \"Un tableur que vous utilisez vraiment au travail, ou l'export desordonne que nous fournissons avec les lecons\"}]",
                 "instructor": {"name": "", "title": "Analyste de donnees", "bio": "Nettoie les tableurs des autres pour gagner sa vie et note chaque correction."},
@@ -2042,6 +2076,8 @@ COURSE_TRANSLATIONS = {
             "name": "تحليل البيانات مع Pandas",
             "description": "حمل ملف CSV فوضوي، نظفه، جمعه، واجب عن سؤال واحد طرحه مديرك. نستخدم تصديرا حقيقيا من متجر صغير بصفوف مكررة وثلاثة تنسيقات للتواريخ.",
             "about": "معظم الدورات تستخدم بيانات مثالية. هذه الدورة تبدأ بالفوضى التي تستقبلك صباح الثلاثاء. تحتاج اساسيات بايثون والاستعداد لقراءة رسالة خطا بصوت عال.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"افحص اطار البيانات قبل الوثوق به، وتأكد من الشكل والانواع والصفوف التي اختفت بهدوء\", \"emoji\": \"\\U0001f50e\"}, {\"id\": \"learning-1\", \"text\": \"نظف المكررات والتواريخ المكسورة دون فقدان الصفوف التي تحتاجها فعلا للاجابة\", \"emoji\": \"\\U0001f9f9\"}, {\"id\": \"learning-2\", \"text\": \"جمع ولخص لاجل سؤال حقيقي، ثم اشرح الرقم لشخص سيعترض عليه\", \"emoji\": \"\\U0001f4c8\"}, {\"id\": \"learning-3\", \"text\": \"احفظ رسما بيانيا يمكن لشخص قراءته بنظرة واحدة، مع عنوان يوضح ما يعرضه ولا زخرفة\", \"emoji\": \"\\U0001f4c9\"}]",
+            "tags": "pandas, بيانات, بايثون",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"اساسيات بايثون و Pandas مثبتة، او بيئة دفتر يمكنك تثبيتها فيه بسرعة\"}, {\"text\": \"جدول بيانات تستخدمه فعلا في العمل، او التصدير الفوضوي الذي نوفر مع الدروس\"}]",
                 "instructor": {"name": "", "title": "محلل بيانات", "bio": "ينظف جداول بيانات الاخرين لكسب عيشه ويدون كل اصلاح."},
@@ -2054,6 +2090,8 @@ COURSE_TRANSLATIONS = {
             "name": "SQL qui repond aux vraies questions",
             "description": "Jointures, regroupement et la difference entre une requete qui s execute et une requete qui est correcte. On travaille sur une petite base de donnees de boutique et on repond aux questions que le proprietaire se pose vraiment.",
             "about": "Vous ecrirez une quarantaine de requetes dans ce cours. Certaines seront fausses la premiere fois. C est ca, la lecon. Postgres est utilise partout mais les idees s adaptent.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"Joindre des tables sans multiplier les lignes par accident, et reperer une jointure qui semble correcte mais renvoie des nombres faux\", \"emoji\": \"\\U0001f517\"}, {\"id\": \"learning-1\", \"text\": \"Utiliser group by et having pour un vrai reporting, y compris les totaux que les gens demandent le lundi matin\", \"emoji\": \"\\U0001f4ca\"}, {\"id\": \"learning-2\", \"text\": \"Lire un plan d execution de requete a un niveau basique et dire quelle partie de votre requete fait tout le travail\", \"emoji\": \"\\U0001f9ee\"}, {\"id\": \"learning-3\", \"text\": \"Deboguer un nombre faux avant de l envoyer a quiconque, en construisant la requete par petites etapes verifiables\", \"emoji\": \"\\U0001f6a8\"}]",
+            "tags": "sql, postgres, donnees",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"Acces a une base de donnees SQL — Postgres, MySQL ou SQLite fonctionnent tous avec les concepts abordes\"}, {\"text\": \"Une comprehension de base des tables, lignes et colonnes, meme si vos requetes s'arretent a select etoile\"}]",
                 "instructor": {"name": "", "title": "Ingenieur de donnees", "bio": "Ecris du SQL qui s'execute le lundi matin sans reveiller personne."},
@@ -2064,6 +2102,8 @@ COURSE_TRANSLATIONS = {
             "name": "SQL الذي يجيب عن اسئلة حقيقية",
             "description": "الضم والتجميع والفرق بين استعلام يعمل واستعلام صحيح. نعمل على قاعدة بيانات متجر صغير ونجيب عن اسئلة يطرحها صاحبه فعلا.",
             "about": "ستكتب حوالي اربعين استعلاما في هذه الدورة. بعضها سيكون خاطئا في المرة الاولى. هذا هو الدرس. نستخدم Postgres طوال الوقت لكن الافكار تنتقل.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"اضم الجداول دون مضاعفة الصفوف عن طريق الخطأ، واكتشف ضما يبدو صحيحا لكنه يعيد ارقاما خاطئة\", \"emoji\": \"\\U0001f517\"}, {\"id\": \"learning-1\", \"text\": \"استخدم group by و having للتقارير الحقيقية، بما في ذلك المجاميع التي يطلبها الناس صباح الاثنين\", \"emoji\": \"\\U0001f4ca\"}, {\"id\": \"learning-2\", \"text\": \"اقرأ خطة الاستعلام على مستوى اساسي واخبر اي جزء من استعلامك يقوم بكل العمل\", \"emoji\": \"\\U0001f9ee\"}, {\"id\": \"learning-3\", \"text\": \"اصلح رقما خاطئا قبل ارساله لاحد، ببناء الاستعلام في خطوات صغيرة قابلة للتحقق\", \"emoji\": \"\\U0001f6a8\"}]",
+            "tags": "sql, postgres, بيانات",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"الوصول الى قاعدة بيانات SQL — Postgres او MySQL او SQLite كلها تعمل مع الافكار هنا\"}, {\"text\": \"فهم اساسي للجداول والصفوف والاعمدة، حتى لو كانت استعلاماتك تتوقف عند select نجم\"}]",
                 "instructor": {"name": "", "title": "مهندس بيانات", "bio": "يكتب SQL يعمل صباح الاثنين دون ايقاظ احد."},
@@ -2076,6 +2116,8 @@ COURSE_TRANSLATIONS = {
             "name": "Applications mobiles avec React Native",
             "description": "Une base de code, deux magasins, beaucoup de petits problemes d ecran. On construit un simple suivi d habitudes, on gere le stockage hors ligne et on le fait tourner sur un vrai telephone avant la derniere seance.",
             "about": "Le cours suppose des bases de React. On passe du temps sur les parties que les tutoriels ignorent : les boutons de retour, le chevauchement du clavier et ce qui arrive quand le reseau meurt dans un ascenseur.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"Configurer un projet qui se compile sur les deux plateformes sans une semaine de configuration et de supposition de versions\", \"emoji\": \"\\U0001f4f1\"}, {\"id\": \"learning-1\", \"text\": \"Gerer la navigation et les gestes de retour pour que le bouton natif du telephone ne ferme jamais l application sur l utilisateur\", \"emoji\": \"\\U0001f500\"}, {\"id\": \"learning-2\", \"text\": \"Stocker des donnees hors ligne et synchroniser plus tard, y compris quoi faire quand deux appareils modifient le meme enregistrement\", \"emoji\": \"\\U0001f4be\"}, {\"id\": \"learning-3\", \"text\": \"Preparer un build pour les tests sur un appareil reel et le mettre entre les mains de quelqu un d autre le meme jour\", \"emoji\": \"\\U0001f527\"}]",
+            "tags": "react native, mobile, hors ligne",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"Experience avec React, y compris les hooks, les composants et assez de JavaScript pour lire une trace de pile\"}, {\"text\": \"Un telephone pour tester, ainsi qu'Expo installe et un compte gratuit sur les deux magasins d'applications\"}]",
                 "instructor": {"name": "", "title": "Developpeur mobile", "bio": "Livres des applications React Native sur les deux magasins et se plaint des deux processus de revue de maniere egale."},
@@ -2086,6 +2128,8 @@ COURSE_TRANSLATIONS = {
             "name": "تطبيقات الموبايل مع React Native",
             "description": "قاعدة كود واحدة ومتجران والكثير من مشاكل الشاشات الصغيرة. نبني متتبع عادات بسيط ونتعامل مع التخزين دون اتصال ونشغله على هاتف حقيقي قبل الجلسة الاخيرة.",
             "about": "الدورة تفترض اساسيات React. نقضي وقتا على الاجزاء التي تتخطاها الدروس التعليمية: ازرار العودة وتداخل لوحة المفاتيح وماذا يحدث عندما يموت الاتصال في المصعد.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"اعد مشروعا يبني على كلا المنصتين دون اسبوع من الاعداد وتخمين الاصدارات\", \"emoji\": \"\\U0001f4f1\"}, {\"id\": \"learning-1\", \"text\": \"تعامل مع التنقل وحركات العودة حتى لا يغلق زر الهاتف التطبيق على المستخدم\", \"emoji\": \"\\U0001f500\"}, {\"id\": \"learning-2\", \"text\": \"خزن البيانات دون اتصال وزامن لاحقا، بما في ذلك ماذا تفعل عندما يعدل جهازان نفس السجل\", \"emoji\": \"\\U0001f4be\"}, {\"id\": \"learning-3\", \"text\": \"جهز بناء للاختبار على جهاز حقيقي وضعه في ايدي شخص آخر في نفس اليوم\", \"emoji\": \"\\U0001f527\"}]",
+            "tags": "react native, موبايل, دون اتصال",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"خبرة مع React، بما في ذلك hooks والمكونات وما يكفي من JavaScript لقراءة تتبع المكدس\"}, {\"text\": \"هاتف للاختبار، بالإضافة الى Expo مثبتة وحساب مجاني على كلا متجري التطبيقات\"}]",
                 "instructor": {"name": "", "title": "مطور تطبيقات موبايل", "bio": "ينشر تطبيقات React Native على كلا المتجرين ويشتكي من عملية المراجعة في كليهما بالتساوي."},
@@ -2098,6 +2142,8 @@ COURSE_TRANSLATIONS = {
             "name": "API backend avec FastAPI",
             "description": "Routes, validation, authentification et une base de donnees qui ne tombe pas en panne. On construit l API derriere une petite application de reservation et on la teste avec de vraies requetes.",
             "about": "Destine aux personnes qui savent ecrire du Python mais n ont jamais deploye un endpoint. On couvre les erreurs que je vois dans les revues de code chaque mois, y compris les miennes.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"Concevoir des routes que les gens peuvent deviner, avec des noms, des codes de statut et des erreurs qui ont du sens sans documentation\", \"emoji\": \"\\U0001f3e4\"}, {\"id\": \"learning-1\", \"text\": \"Valider les entrees a la peripherie pour que les mauvaises donnees n atteignent jamais la base de donnees ni la boite de reception d un collegue\", \"emoji\": \"\\u2705\"}, {\"id\": \"learning-2\", \"text\": \"Ajouter l authentification sans inventer votre propre systeme, en utilisant les modeles qui ont deja survecu aux audits\", \"emoji\": \"\\U0001f510\"}, {\"id\": \"learning-3\", \"text\": \"Ecrire des tests qui detectent les regressions, couvrant les endpoints que vos utilisateurs appellent chaque jour\", \"emoji\": \"\\U0001f9ea\"}]",
+            "tags": "fastapi, python, backend",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"Les bases de Python et un terminal que vous n'avez pas peur d'utiliser, y compris ce qu'est un environnement virtuel\"}, {\"text\": \"Postgres ou un moyen de l'executer — Docker suffit, et nous vous montrons la commande exacte\"}]",
                 "instructor": {"name": "", "title": "Developpeur backend", "bio": "Concoit des API que d'autres equipes peuvent integrer sans coup de fil."},
@@ -2108,6 +2154,8 @@ COURSE_TRANSLATIONS = {
             "name": "واجهات برمجة خلفية مع FastAPI",
             "description": "المسارات والتحقق والمصادقة وقاعدة بيانات لا تتعطل. نبني واجهة البرمجة خلف تطبيق حجز صغير ونختبرها بطلبات حقيقية.",
             "about": "موجهة لمن يعرفون كتابة بايثون لكنهم لم ينشروا نقطة نهاية من قبل. نغطي الاخطاء التي اراها في مراجعات الكود كل شهر، بما فيها اخطائي.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"صمم مسارات يمكن للناس تخمينها، مع اسماء ورموز حالة واخطاء مفهومة دون توثيق\", \"emoji\": \"\\U0001f3e4\"}, {\"id\": \"learning-1\", \"text\": \"تحقق من المدخلات عند الحافة حتى لا تصل البيانات السيئة الى قاعدة البيانات او صندوق بريد زميل\", \"emoji\": \"\\u2705\"}, {\"id\": \"learning-2\", \"text\": \"اضف المصادقة دون اختراع نظامك الخاص، باستخدام الانماط التي نجت من التدقيقات بالفعل\", \"emoji\": \"\\U0001f510\"}, {\"id\": \"learning-3\", \"text\": \"اكتب اختبارات تكتشف الانتكاسات، تغطي نقاط النهاية التي يستدعيها مستخدمونك كل يوم\", \"emoji\": \"\\U0001f9ea\"}]",
+            "tags": "fastapi, بايثون, واجهات خلفية",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"اساسيات بايثون وطرفية لا تخاف منها، بما في ذلك ما هي البيئة الافتراضية\"}, {\"text\": \"Postgres او طريقة لتشغيله — Docker جيد، ونريك الامر بالضبط\"}]",
                 "instructor": {"name": "", "title": "مطور خلفي", "bio": "يصمم واجهات برمجة تستطيع فرق اخرى دمجها دون اتصال."},
@@ -2120,6 +2168,8 @@ COURSE_TRANSLATIONS = {
             "name": "Photographie pour equipes produit",
             "description": "Comment photographier un produit sur une table avec une fenetre et une feuille de papier. On couvre la lumiere, les angles et les trois retouches qui rendent une photo utilisable sur une page de boutique.",
             "about": "Pas de studio, pas d objectif couteux. La premiere lecon est tournee avec un telephone pour prouver le propos. Apportez n importe quel objet que vous pouvez porter.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"Utiliser la lumiere d une fenetre au lieu d acheter une softbox, et savoir quelle heure de la journee donne l ombre la plus nette\", \"emoji\": \"\\U0001f4a1\"}, {\"id\": \"learning-1\", \"text\": \"Cadrer un produit de maniere coherente dans tout un catalogue, pour que quarante photos semblent avoir ete prises par la meme personne\", \"emoji\": \"\\U0001f4f7\"}, {\"id\": \"learning-2\", \"text\": \"Retoucher une photo sans la rendre fausse, en gardant la texture et la couleur proches de ce que l acheteur recoit\", \"emoji\": \"\\U0001f5bc\"}, {\"id\": \"learning-3\", \"text\": \"Exporter aux tailles adaptees pour le web et les places de marche, avec les bonnes dimensions et le bon poids pour chacun\", \"emoji\": \"\\U0001f4e4\"}]",
+            "tags": "photographie, produit, ecommerce",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"Un appareil photo ou un telephone recent, plus un produit que vous avez le droit de photographier pendant quelques heures\"}, {\"text\": \"Une table pres d'une fenetre, et une feuille de papier blanc que vous acceptez de decouper\"}]",
                 "instructor": {"name": "", "title": "Photographe produit", "bio": "Photographie des produits pour les petites boutiques et apprend aux equipes a le faire elles-memes."},
@@ -2130,6 +2180,8 @@ COURSE_TRANSLATIONS = {
             "name": "التصوير الفوتوغرافي لفرق المنتج",
             "description": "كيف تصور منتجا على طاولة بجانب نافذة وورقة واحدة. نغطي الاضاءة والزوايا والتعديلات الثلاث التي تجعل الصورة قابلة للاستخدام في صفحة متجر.",
             "about": "لا استوديو ولا عدسة غالية. الدرس الاول مصور بهاتف لاثبات الفكرة. احضر اي شيء يمكنك حمله.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"استخدم ضوء النافذة بدلا من شراء صندوق ضوئي، واعرف اي ساعة من اليوم تعطي اظل انقى\", \"emoji\": \"\\U0001f4a1\"}, {\"id\": \"learning-1\", \"text\": \"التقط المنتج بشكل متناسق عبر الكتالوج، حتى تبدو اربعون صورة وكأن شخصا واحدا التقطها\", \"emoji\": \"\\U0001f4f7\"}, {\"id\": \"learning-2\", \"text\": \"نظف الصورة دون جعلها مزيفة، محافظا على الملمس واللون قريبين مما يستلمه المشتري\", \"emoji\": \"\\U0001f5bc\"}, {\"id\": \"learning-3\", \"text\": \"صدر باحجام مناسبة للويب والاسواق الالكترونية، بالابعاد والوزن المناسبين لكل منها\", \"emoji\": \"\\U0001f4e4\"}]",
+            "tags": "تصوير فوتوغرافي, منتجات, تجارة الكترونية",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"كاميرا او هاتف حديث، بالإضافة الى منتج واحد مسموح لك بتصويره لبضع ساعات\"}, {\"text\": \"طاولة قرب نافذة، وورقة بيضاء لا تمانع في قصها\"}]",
                 "instructor": {"name": "", "title": "مصور منتجات", "bio": "يصور منتجات للمتاجر الصغيرة ويعلم الفرق كيفية القيام بذلك بانفسهم."},
@@ -2142,6 +2194,8 @@ COURSE_TRANSLATIONS = {
             "name": "Montage video avec DaVinci Resolve",
             "description": "Transformez un entretien de cinq minutes en quelque chose que les gens regardent jusqu au bout. On travaille le rythme, le nettoyage audio et la couleur simple, puis on exporte pour YouTube et pour un ecran de telephone.",
             "about": "La version gratuite de Resolve suffit pour tout ici. On utilise de vraies images d un petit tournage d entretien, y compris les parties genantes.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"Couper pour le rythme au lieu de couper pour couper, et savoir quand le silence fait plus de travail qu une transition\", \"emoji\": \"\\u2702\"}, {\"id\": \"learning-1\", \"text\": \"Corriger un mauvais son sans plugins, en utilisant les trois reglages qui resolvent la plupart des problemes de piece bruyante\", \"emoji\": \"\\U0001f3a7\"}, {\"id\": \"learning-2\", \"text\": \"Equilibrer les couleurs entre deux cameras pour qu un entretien ne change pas de teinte a chaque coupe\", \"emoji\": \"\\U0001f3a8\"}, {\"id\": \"learning-3\", \"text\": \"Reglages d export pour chaque plateforme, dimensionnes pour que le fichier ne paraisse pas mou apres le telechargement\", \"emoji\": \"\\U0001f4e4\"}]",
+            "tags": "video, resolve, montage",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"DaVinci Resolve installe, la version gratuite suffit pour tout ce qui est dans ce cours\"}, {\"text\": \"Des images que vous avez le droit de monter, ou les extraits d'interview que nous fournissons pour suivre le cours\"}]",
                 "instructor": {"name": "", "title": "Monteur video", "bio": "Monte des courts-metrages et des videos produit. Dit que le montage consiste surtout a decider quoi enlever."},
@@ -2152,6 +2206,8 @@ COURSE_TRANSLATIONS = {
             "name": "تحرير الفيديو مع DaVinci Resolve",
             "description": "حول مقابلة مدتها خمس دقائق الى شيء يشاهده الناس حتى النهاية. نعمل على الايقاع وتنظيف الصوت والالوان البسيطة، ثم نصدر ليوتيوب ولشاشة الهاتف.",
             "about": "النسخة المجانية من Resolve تكفي لكل شيء هنا. نستخدم لقطات حقيقية من تصوير مقابلة صغيرة، بما في ذلك الاجزاء المحرجة.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"اقطع للايقاع بدلا من القطع من اجل القطع، واعرف متى يعمل الصمت اكثر من الانتقال\", \"emoji\": \"\\u2702\"}, {\"id\": \"learning-1\", \"text\": \"اصلح الصوت الرديء دون اضافات، باستخدام ثلاثة عناصر تحكم تحل معظم مشاكل الغرفة المزعجة\", \"emoji\": \"\\U0001f3a7\"}, {\"id\": \"learning-2\", \"text\": \"وازن الالوان بين كاميرتين حتى لا يتغير لون المقابلة كل مرة يقطع فيها\", \"emoji\": \"\\U0001f3a8\"}, {\"id\": \"learning-3\", \"text\": \"اعدادات التصدير لكل منصة، بحجم لا يجعل الملف يبدو ناعما بعد التحميل\", \"emoji\": \"\\U0001f4e4\"}]",
+            "tags": "فيديو, resolve, تحرير",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"DaVinci Resolve مثبت، النسخة المجانية تكفي لكل شيء في هذه الدورة\"}, {\"text\": \"لقطات مسموح لك بقصها، او مقاطع المقابلة التي نوفرها للمتابعة\"}]",
                 "instructor": {"name": "", "title": "محرر فيديو", "bio": "يقص الافلام القصيرة وفيديوهات المنتجات. يقول ان معظم التحرير هو تحديد ما يجب ازالته."},
@@ -2164,6 +2220,8 @@ COURSE_TRANSLATIONS = {
             "name": "Redaction pour interfaces",
             "description": "Boutons, erreurs, etats vides et la phrase qui explique un produit complique. Cours court, beaucoup de reecriture. On travaille sur des ecrans reels, on garde l avant et l apres cote a cote et on termine avec une checklist reutilisable.",
             "about": "On prend de vrais ecrans de produits locaux et on reecrit le texte ensemble. Vous detesterez vos premieres versions a la fin, c est le but.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"Ecrire des boutons que les gens comprennent a la premiere lecture, en utilisant des verbes que l utilisateur dirait lui-meme a voix haute\", \"emoji\": \"\\U0001f518\"}, {\"id\": \"learning-1\", \"text\": \"Rendre les messages d erreur utiles au lieu d etre polis, en disant a l utilisateur ce qui s est passe et quoi faire ensuite\", \"emoji\": \"\\u26a0\"}, {\"id\": \"learning-2\", \"text\": \"Remplir un etat vide avec quelque chose d utile, pour qu un nouveau compte ne soit pas une impasse des le premier jour\", \"emoji\": \"\\U0001f4ed\"}, {\"id\": \"learning-3\", \"text\": \"Reduire un paragraphe a une seule phrase sans perdre la partie qui compte vraiment\", \"emoji\": \"\\u2702\"}]",
+            "tags": "copywriting, ux writing, contenu",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"Rien de plus qu'un navigateur — un compte gratuit sur n'importe quel produit que vous trouvez deroutant est utile\"}, {\"text\": \"Une interface dont le texte vous ennuie, idealement une que vous avez le droit de recrire\"}]",
                 "instructor": {"name": "", "title": "UX writer", "bio": "Ecris le texte d'interface pour des produits qui n'ont pas les moyens de derouter quiconque."},
@@ -2174,6 +2232,8 @@ COURSE_TRANSLATIONS = {
             "name": "كتابة المحتوى للواجهات",
             "description": "الازرار والاخطاء والحالات الفارغة والجملة التي تشرح منتجا معقدا. دورة قصيرة وكثير من اعادة الكتابة. نعمل على شاشات حقيقية ونحتفظ بما قبل وبعد جنبا الى جنب وننهي بقائمة مراجعة تعيد استخدامها.",
             "about": "ناخذ شاشات حقيقية من منتجات محلية ونعيد كتابة النص معا. ستكره مسوداتك الاولى في النهاية، وهذا هو الهدف.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"اكتب ازرارا يفهمها الناس من اول قراءة، باستخدام افعال قد يقولها المستخدم بصوت عال\", \"emoji\": \"\\U0001f518\"}, {\"id\": \"learning-1\", \"text\": \"اجعل رسائل الخطا مفيدة بدلا من مهذبة، اخبر المستخدم بما حدث وماذا يفعل بعد ذلك\", \"emoji\": \"\\u26a0\"}, {\"id\": \"learning-2\", \"text\": \"املأ الحالة الفارغة بشيء مفيد، حتى لا يكون الحساب الجديد طريقا مسدودا من اليوم الاول\", \"emoji\": \"\\U0001f4ed\"}, {\"id\": \"learning-3\", \"text\": \"اختزل فقرة الى جملة واحدة دون فقدان الجزء المهم فعلا\", \"emoji\": \"\\u2702\"}]",
+            "tags": "كتابة اعلانية, كتابة تجربة مستخدم, محتوى",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"لا شيء سوى متصفح — حساب مجاني على اي منتج تجده مربكا مفيد\"}, {\"text\": \"واجهة واحدة يزعجك نصها، ويفضل ان تكون مسموحا لك باعادة كتابتها\"}]",
                 "instructor": {"name": "", "title": "كاتب تجربة مستخدم", "bio": "يكتب نصوص الواجهات لمنتجات لا تستطيع تحمل ارباك اي شخص."},
@@ -2186,6 +2246,8 @@ COURSE_TRANSLATIONS = {
             "name": "Accessibilite en pratique",
             "description": "Navigation au clavier, etats de focus, contraste et bases du lecteur d ecran. On audite trois sites locaux et on corrige les pires problemes en direct. Vous repartez avec une courte checklist et les arguments a utiliser quand quelqu un demande pourquoi c est important avant le lancement.",
             "about": "Pas de cours sur la conformite. On utilise un clavier et un lecteur d ecran et on voit ce qui casse. La plupart des correctifs sont petits et peu couteux, c est la partie que personne ne vous dit.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"Naviguer dans chaque element interactif avec un clavier seul, et voir exactement ou va le focus\", \"emoji\": \"\\u2328\"}, {\"id\": \"learning-1\", \"text\": \"Corriger les rapports de contraste qui echouent au WCAG, sans donner au design l air d un gilet de haute visibilite\", \"emoji\": \"\\U0001f441\"}, {\"id\": \"learning-2\", \"text\": \"Ajouter des libelles que les lecteurs d ecran peuvent vraiment lire, pas des espaces reserves qui disparaissent des qu on tape\", \"emoji\": \"\\U0001f50a\"}, {\"id\": \"learning-3\", \"text\": \"Ecrire un texte alternatif qui aide au lieu de repeter, decrivant ce que l image montre, pas ce qu elle est\", \"emoji\": \"\\U0001f5bc\"}]",
+            "tags": "accessibilite, a11y, design inclusif",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"Un navigateur et un site que vous avez le droit de tester, ou les pages d'exemple incluses avec le cours\"}, {\"text\": \"Un clavier et un lecteur d'ecran gratuit comme NVDA ou VoiceOver, les deux suffisent\"}]",
                 "instructor": {"name": "", "title": "Specialiste en accessibilite", "bio": "Audite des produits et corrige ce que l'audit trouve. Prefere les petits changements qui sont deployes aux longs rapports."},
@@ -2196,6 +2258,8 @@ COURSE_TRANSLATIONS = {
             "name": "امكانية الوصول عمليا",
             "description": "التنقل بلوحة المفاتيح وحالات التركيز والتباين واساسيات قارئ الشاشة. نراجع ثلاثة مواقع محلية ونصلح اسوا المشاكل مباشرة. تغادر بقائمة مراجعة قصيرة والحجج التي تستخدمها عندما يسال احدهم لماذا هذا مهم قبل الاطلاق.",
             "about": "لا محاضرات امتثال. نستخدم لوحة مفاتيح وقارئ شاشة ونرى ما يتعطل. معظم الاصلاحات صغيرة ورخيصة، وهذا الجزء الذي لا يخبرك به احد.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"تصفح كل عنصر تفاعلي بلوحة المفاتيح وحدها، وانظر اين يذهب التركيز بالضبط\", \"emoji\": \"\\u2328\"}, {\"id\": \"learning-1\", \"text\": \"اصلح نسب التباين التي تفشل في WCAG، دون جعل التصميم يبدو كسترة عالية الوضوح\", \"emoji\": \"\\U0001f441\"}, {\"id\": \"learning-2\", \"text\": \"اضف تسميات تستطيع قارئات الشاشة قراءتها فعلا، ليست نصوصا مؤقتة تختفي بمجرد الكتابة\", \"emoji\": \"\\U0001f50a\"}, {\"id\": \"learning-3\", \"text\": \"اكتب نصا بديلا يساعد بدلا من ان يكرر، يصف ما تظهره الصورة، ليس ما هي\", \"emoji\": \"\\U0001f5bc\"}]",
+            "tags": "امكانية الوصول, a11y, تصميم شامل",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"متصفح وموقع مسموح لك باختباره، او صفحات النماذج المرفقة مع الدورة\"}, {\"text\": \"لوحة مفاتيح وقارئ شاشة مجاني مثل NVDA او VoiceOver، كلاهما كاف\"}]",
                 "instructor": {"name": "", "title": "اختصاصي امكانية الوصول", "bio": "يدقق المنتجات ويصلح ما يجده التدقيق. يفضل التغييرات الصغيرة التي تنشر على التقارير الطويلة."},
@@ -2208,6 +2272,8 @@ COURSE_TRANSLATIONS = {
             "name": "Prototypage avance avec Figma",
             "description": "Variables, logique conditionnelle et prototypes qui se comportent comme le vrai produit. Pour ceux qui connaissent deja les bases et veulent les parties que personne ne documente.",
             "about": "Cours en preparation. Les deux derniers modules sont encore en cours d enregistrement. Les quatre premiers sont prets et je cherche des personnes pour les tester.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"Utiliser des variables pour les themes et les etats, afin qu un prototype change de mode sans quarante ecrans en double\", \"emoji\": \"\\U0001F9EA\"}, {\"id\": \"learning-1\", \"text\": \"Construire un prototype avec des conditions reelles, y compris les chemins vides et d erreur que personne ne prend la peine de montrer\", \"emoji\": \"\\U0001F500\"}, {\"id\": \"learning-2\", \"text\": \"Garder un fichier complexe rapide, et savoir quel calque est responsable quand l editeur commence a ralentir\", \"emoji\": \"\\u26A1\"}, {\"id\": \"learning-3\", \"text\": \"Transmettre la logique aux developpeurs clairement, avec des flux annotes au lieu d un appel qui pourrait etre un email\", \"emoji\": \"\\U0001F91D\"}]",
+            "tags": "figma, prototypage, variables",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"Des competences solides en Figma, y compris les composants, les variantes et la mise en page automatique sans avoir a chercher\"}, {\"text\": \"Un flux que vous voulez prototyper, ou l'un des deux exemples de produits que nous fournissons\"}]",
                 "instructor": {"name": "", "title": "Designer produit", "bio": "Cree des prototypes d'interactions avant d'ecrire une ligne de code, ce qui fait gagner un sprint a tout le monde."},
@@ -2218,6 +2284,8 @@ COURSE_TRANSLATIONS = {
             "name": "النمذجة المتقدمة مع Figma",
             "description": "المتغيرات والمنطق الشرطي ونماذج تتصرف مثل المنتج الحقيقي. لمن يعرفون الاساسيات ويريدون الاجزاء التي لا يوثقها احد.",
             "about": "دورة قيد الاعداد. اخر وحدتين لا زالتا قيد التسجيل. الاربع الاول جاهزة وابحث عن اشخاص يختبرونها.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"استخدم المتغيرات للمظاهر والحالات، حتى يغير النموذج الاولي وضعه دون اربعين اطارا مكررا\", \"emoji\": \"\\U0001F9EA\"}, {\"id\": \"learning-1\", \"text\": \"ابن نموذجا اوليا بشروط حقيقية، بما في ذلك المسارات الفارغة ومسارات الخطا التي لا يهتم احد باظهارها\", \"emoji\": \"\\U0001F500\"}, {\"id\": \"learning-2\", \"text\": \"حافظ على سرعة ملف معقد، واعرف اي طبقة مسؤولة عندما يبدا المحرر في التباطؤ\", \"emoji\": \"\\u26A1\"}, {\"id\": \"learning-3\", \"text\": \"سلم المنطق للمطورين بوضوح، مع تدفقات مشروحة بدلا من مكالمة يمكن ان تكون بريدا الكترونيا\", \"emoji\": \"\\U0001F91D\"}]",
+            "tags": "figma, نمذجة اولية, متغيرات",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"مهارات قوية في فيجما، بما في ذلك المكونات والمتغيرات والتخطيط التلقائي دون الحاجة للبحث\"}, {\"text\": \"تدفق تريد نمذجته، او احد منتجين نموذجيين نقدمهما\"}]",
                 "instructor": {"name": "", "title": "مصمم منتجات", "bio": "ينمذج التفاعلات قبل كتابة سطر من الكود، مما يوفر سباقا للجميع."},
@@ -2230,6 +2298,8 @@ COURSE_TRANSLATIONS = {
             "name": "Leadership en design",
             "description": "Pour le designer qui se retrouve soudain avec trois personnes sous sa responsabilite et aucune idee de quoi faire lundi. Recrutement, feedback et proteger l equipe du chaos.",
             "about": "En preparation. Les notes sont en place, les deux premieres lecons sont enregistrees. Celui-ci a besoin de plus d entretiens avant d etre honnete.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"Mener un processus de recrutement equitable, avec une grille d evaluation, les memes questions et une decision fondee sur des preuves\", \"emoji\": \"\\U0001F91D\"}, {\"id\": \"learning-1\", \"text\": \"Donner un feedback que les gens peuvent utiliser, d une maniere qui change le travail sans changer leur sentiment a votre egard\", \"emoji\": \"\\U0001F4AC\"}, {\"id\": \"learning-2\", \"text\": \"Dire non aux parties prenantes sans se battre, en utilisant des compromis qu elles peuvent apporter a leur propre responsable\", \"emoji\": \"\\U0001F6E1\"}, {\"id\": \"learning-3\", \"text\": \"Planifier un trimestre qui survit au contact avec la realite, et replanifier sans appeler cela un echec\", \"emoji\": \"\\U0001F4C5\"}]",
+            "tags": "leadership, gestion, equipes",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"Quelques annees d'experience en equipe, ou une equipe qui est sur le point de se former autour de vous\"}, {\"text\": \"Un probleme que vous evitez actuellement — apportez le vrai, pas un hypothetique\"}]",
                 "instructor": {"name": "", "title": "Responsable design", "bio": "Dirige une petite equipe de design et passe plus de temps sur le processus que sur les pixels."},
@@ -2240,6 +2310,8 @@ COURSE_TRANSLATIONS = {
             "name": "القيادة في التصميم",
             "description": "للمصمم الذي يجد فجاة ثلاثة اشخاص يتبعونه ولا يعرف ماذا يفعل يوم الاثنين. التوظيف والتغذية الراجعة وحماية الفريق من الفوضى.",
             "about": "قيد الاعداد. الملاحظات جاهزة والدرس الاولين مسجلان. هذه الدورة تحتاج مقابلات اكثر قبل ان تكون صادقة.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"ادر عملية توظيف عادلة، مع بطاقة تقييم، نفس الاسئلة وقرار مبني على الادلة\", \"emoji\": \"\\U0001F91D\"}, {\"id\": \"learning-1\", \"text\": \"قدم تغذية راجعة يستطيع الناس استخدامها، بطريقة تغير العمل دون تغيير شعورهم تجاهك\", \"emoji\": \"\\U0001F4AC\"}, {\"id\": \"learning-2\", \"text\": \"قل لا لاصحاب المصلحة دون معركة، باستخدام مقايضات يمكنهم اخذها الى مديرهم الخاص\", \"emoji\": \"\\U0001F6E1\"}, {\"id\": \"learning-3\", \"text\": \"خطط لربع سنة يصمد عند ملامسة الواقع، واعد التخطيط دون تسميته فشلا\", \"emoji\": \"\\U0001F4C5\"}]",
+            "tags": "قيادة, ادارة, فرق",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"بضع سنوات من الخبرة في فريق، او فريق على وشك التكون حولك\"}, {\"text\": \"مشكلة تتجنبها حاليا — احضر الحقيقية، لا الافتراضية\"}]",
                 "instructor": {"name": "", "title": "مدير تصميم", "bio": "يدير فريق تصميم صغير ويقضي وقتا اكثر على العملية منه على البكسلات."},
@@ -2252,6 +2324,8 @@ COURSE_TRANSLATIONS = {
             "name": "Initiation a la 3D avec Blender",
             "description": "Modelisation, eclairage et un rendu de produit. Rythme lent, pas d obsession des raccourcis, beaucoup de sauvegardes. On termine avec un rendu que vous pouvez mettre sur une page d accueil et les reglages notes pour le reproduire plus tard.",
             "about": "En preparation. Je reconstruis les lecons de modelisation parce que la premiere version allait trop vite. Les retours sont les bienvenus de la part de ceux qui l essaient.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"Modeliser un objet simple proprement, avec une topologie qui tient quand quelqu un d autre ouvre le fichier\", \"emoji\": \"\\U0001F9F1\"}, {\"id\": \"learning-1\", \"text\": \"Eclairer une scene avec trois lumieres et comprendre ce que chacune apporte au produit\", \"emoji\": \"\\U0001F4A1\"}, {\"id\": \"learning-2\", \"text\": \"Rendre sans attendre toute la nuit, en utilisant les reglages qui comptent et en ignorant le reste\", \"emoji\": \"\\U0001F5A5\"}, {\"id\": \"learning-3\", \"text\": \"Exporter un plateau tournant pour un portfolio qui se charge sur une page sans bloquer le navigateur\", \"emoji\": \"\\U0001F3AC\"}]",
+            "tags": "blender, 3d, rendu",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"Blender installe, version quatre ou plus recente, avec environ dix gigaoctets d'espace disque libre\"}, {\"text\": \"Une machine avec une vraie carte graphique si possible — les graphiques integres fonctionnent, juste plus lentement\"}]",
                 "instructor": {"name": "", "title": "Artiste 3D", "bio": "Cree des rendus 3D de produits pour les petits studios et enseigne les raccourcis qui comptent."},
@@ -2262,6 +2336,8 @@ COURSE_TRANSLATIONS = {
             "name": "مقدمة الى الثلاثي الابعاد مع Blender",
             "description": "النمذجة والاضاءة وصورة منتج مظللة. وتيرة بطيئة ولا تقديس للاختصارات وكثير من حفظ الملف. ننتهي بصورة يمكنك وضعها على صفحة هبوط والاعدادات مدونة لتكررها لاحقا.",
             "about": "قيد الاعداد. اعيد بناء دروس النمذجة لان النسخة الاولى كانت سريعة جدا. ارحب بالملاحظات من اي شخص يجربها.",
+            "learnings": "[{\"id\": \"learning-0\", \"text\": \"صمم كائنا بسيطا ونظيفا، بطوبولوجيا تصمد عندما يفتح شخص اخر الملف\", \"emoji\": \"\\U0001F9F1\"}, {\"id\": \"learning-1\", \"text\": \"اضئ مشهدا بثلاثة اضواء وافهم ما يفعله كل منها بالمنتج\", \"emoji\": \"\\U0001F4A1\"}, {\"id\": \"learning-2\", \"text\": \"اعرض دون انتظار طوال الليل، باستخدام الاعدادات المهمة وتجاهل الباقي\", \"emoji\": \"\\U0001F5A5\"}, {\"id\": \"learning-3\", \"text\": \"صدر قرصا دوارا لمحفظة اعمال يتم تحميلها على صفحة دون تعطيل المتصفح\", \"emoji\": \"\\U0001F3AC\"}]",
+            "tags": "blender, 3d, عرض",
             "extra_metadata": {
                 "requirements": "[{\"text\": \"Blender مثبت، الاصدار الرابع او احدث، مع حوالي عشرة غيغابايت من مساحة القرص الحرة\"}, {\"text\": \"جهاز ببطاقة رسوميات حقيقية اذا امكن — الرسوميات المدمجة تعمل، لكن بشكل ابطأ\"}]",
                 "instructor": {"name": "", "title": "فنان ثلاثي الابعاد", "bio": "ينتج صورا ثلاثية الابعاد للمنتجات للاستوديوهات الصغيرة ويعلم الاختصارات المهمة."},

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 
 from src.db.courses.activities import (
     Activity,
@@ -179,6 +180,13 @@ def _add_authors(ctx: SeedContext, course: Course, index: int) -> None:
     ctx.session.commit()
 
 
+def _fix_emoji_escapes(value: str | None) -> str | None:
+    """Convert \\UXXXXXXXX Python unicode escapes to actual characters in a JSON string."""
+    if not value:
+        return value
+    return re.sub(r'\\U([0-9a-fA-F]{8})', lambda m: chr(int(m.group(1), 16)), value)
+
+
 def _add_translation(ctx: SeedContext, course: Course, entry: dict) -> None:
     translations = C.COURSE_TRANSLATIONS.get(entry["name"])
     if not translations:
@@ -191,8 +199,8 @@ def _add_translation(ctx: SeedContext, course: Course, entry: dict) -> None:
                 name=payload["name"],
                 description=payload["description"],
                 about=payload["about"],
-                learnings=course.learnings,
-                tags=entry["tags"],
+                learnings=_fix_emoji_escapes(payload.get("learnings", course.learnings)),
+                tags=payload.get("tags", entry["tags"]),
                 seo=None,
                 extra_metadata=payload.get("extra_metadata"),
                 state="published",
