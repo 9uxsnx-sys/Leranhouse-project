@@ -109,7 +109,7 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
   const [selectedBoards, setSelectedBoards] = useState<Set<string>>(new Set())
   const itemsPerPage = 12
 
-  const boardsKey = isBoardsEnabled && access_token ? `${getAPIUrl()}boards/org/${org_id}` : null
+  const boardsKey = isBoardsEnabled && access_token ? `${getAPIUrl()}boards/org/${org_id}?limit=500` : null
   const { data: boards, isLoading } = useSWR(
     boardsKey,
     (url) => swrFetcher(url, access_token),

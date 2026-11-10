@@ -47,6 +47,8 @@ function formatDate(dateStr: string | null | undefined): string {
   }
 }
 
+const MEMBERS_PER_PAGE = 25
+
 function OrgUserGroups() {
     const { t } = useTranslation()
     const org = useOrg() as any
@@ -73,6 +75,7 @@ function OrgUserGroups() {
     const [selectedMemberIds, setSelectedMemberIds] = useState<Set<number>>(new Set())
     const [membersSortBy, setMembersSortBy] = useState<'name-asc' | 'name-desc'>('name-asc')
     const [membersStatusFilter, setMembersStatusFilter] = useState<string>('')
+    const [membersPage, setMembersPage] = useState(1)
     const [detailUser, setDetailUser] = useState<any>(null)
 
     // Close detail panel on Escape
@@ -157,7 +160,16 @@ function OrgUserGroups() {
         return result
     }, [usersData, membersGroupId, membersStatusFilter, membersSortBy])
 
-    const paginatedMembers = processedMembers // server already paginated
+    // Reset to page 1 when search/filter/sort changes
+    React.useEffect(() => {
+      setMembersPage(1)
+    }, [membersSearch, membersStatusFilter, membersSortBy])
+
+    const totalMemberPages = Math.ceil(processedMembers.length / MEMBERS_PER_PAGE)
+    const paginatedMembers = processedMembers.slice(
+      (membersPage - 1) * MEMBERS_PER_PAGE,
+      membersPage * MEMBERS_PER_PAGE
+    )
 
     // Determine action type: searching → Add, not searching → Remove
     const hasSelectedMembers = selectedMemberIds.size > 0
@@ -474,6 +486,33 @@ function OrgUserGroups() {
                                     getRowId={(u) => u.id}
                                     selectedIds={selectedMemberIds as Set<string | number>}
                                     onSelectionChange={handleMembersSelectionChange}
+                                    footer={
+                                      totalMemberPages > 1 ? (
+                                        <div className="flex items-center justify-between">
+                                          <span className="text-xs text-gray-500">
+                                            Page {membersPage} of {totalMemberPages}
+                                          </span>
+                                          <div className="flex items-center gap-1">
+                                            <button
+                                              type="button"
+                                              onClick={() => setMembersPage((p) => Math.max(1, p - 1))}
+                                              disabled={membersPage === 1}
+                                              className="px-2 py-1 text-xs font-medium rounded border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                            >
+                                              Previous
+                                            </button>
+                                            <button
+                                              type="button"
+                                              onClick={() => setMembersPage((p) => Math.min(totalMemberPages, p + 1))}
+                                              disabled={membersPage === totalMemberPages}
+                                              className="px-2 py-1 text-xs font-medium rounded border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                            >
+                                              Next
+                                            </button>
+                                          </div>
+                                        </div>
+                                      ) : undefined
+                                    }
                                 />
                             </div>
                         </TableCard>

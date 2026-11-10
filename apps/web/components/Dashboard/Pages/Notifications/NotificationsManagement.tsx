@@ -516,6 +516,8 @@ function EventsSection() {
 
 // ─── Announcements ───────────────────────────────────────────────────────────
 
+const ANNOUNCEMENTS_PER_PAGE = 25
+
 function AnnouncementsSection() {
   const session = useLHSession() as any
   const accessToken = session?.data?.tokens?.access_token
@@ -530,6 +532,9 @@ function AnnouncementsSection() {
   const [linkUrl, setLinkUrl] = useState('')
   const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([])
   const [isSending, setIsSending] = useState(false)
+
+  // History pagination
+  const [announcementPage, setAnnouncementPage] = useState(1)
 
   const handleSend = useCallback(async () => {
     if (!orgId || isSending) return
@@ -600,6 +605,17 @@ function AnnouncementsSection() {
     { revalidateOnFocus: false }
   )
   const announcements: AnnouncementItem[] = history?.announcements || []
+
+  // Reset to page 1 when history data reloads
+  React.useEffect(() => {
+    setAnnouncementPage(1)
+  }, [announcements.length])
+
+  const totalAnnouncementPages = Math.ceil(announcements.length / ANNOUNCEMENTS_PER_PAGE)
+  const paginatedAnnouncements = announcements.slice(
+    (announcementPage - 1) * ANNOUNCEMENTS_PER_PAGE,
+    announcementPage * ANNOUNCEMENTS_PER_PAGE
+  )
 
   const hasAnyRecipients = selectedGroupIds.length > 0
 
@@ -703,26 +719,55 @@ function AnnouncementsSection() {
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-gray-100">
-                {announcements.map((announcement) => (
-                  <div key={announcement.id} className="py-3">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <span className="text-sm font-medium text-ui-fg-base truncate block">
-                          {announcement.title || '(no title)'}
+              <div>
+                <div className="divide-y divide-gray-100">
+                  {paginatedAnnouncements.map((announcement) => (
+                    <div key={announcement.id} className="py-3">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <span className="text-sm font-medium text-ui-fg-base truncate block">
+                            {announcement.title || '(no title)'}
+                          </span>
+                          {announcement.body && (
+                            <p className="txt-compact-small text-ui-fg-muted mt-1 line-clamp-2">
+                              {announcement.body}
+                            </p>
+                          )}
+                        </div>
+                        <span className="text-xs text-ui-fg-muted shrink-0">
+                          {formatDate(announcement.created_at)}
                         </span>
-                        {announcement.body && (
-                          <p className="txt-compact-small text-ui-fg-muted mt-1 line-clamp-2">
-                            {announcement.body}
-                          </p>
-                        )}
                       </div>
-                      <span className="text-xs text-ui-fg-muted shrink-0">
-                        {formatDate(announcement.created_at)}
-                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                {totalAnnouncementPages > 1 && (
+                  <div className="flex items-center justify-between border-t border-gray-100 pt-3 mt-1">
+                    <span className="text-xs text-ui-fg-muted">
+                      Page {announcementPage} of {totalAnnouncementPages}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setAnnouncementPage((p) => Math.max(1, p - 1))}
+                        disabled={announcementPage === 1}
+                        className="px-2 py-1 text-xs font-medium rounded border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      >
+                        Previous
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAnnouncementPage((p) => Math.min(totalAnnouncementPages, p + 1))}
+                        disabled={announcementPage === totalAnnouncementPages}
+                        className="px-2 py-1 text-xs font-medium rounded border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      >
+                        Next
+                      </button>
                     </div>
                   </div>
-                ))}
+                )}
               </div>
             )}
           </SectionCard>

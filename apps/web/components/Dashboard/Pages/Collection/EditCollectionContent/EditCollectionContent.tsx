@@ -54,6 +54,8 @@ function formatDate(dateStr: string | null | undefined): string {
   })
 }
 
+const CONTENT_PER_PAGE = 25
+
 function EditCollectionContent({ collection, onUpdated }: EditCollectionContentProps) {
   const { t } = useTranslation()
   const session = useLHSession() as any
@@ -67,6 +69,7 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
   const [isBulkWorking, setIsBulkWorking] = useState(false)
   const [kindFilter, setKindFilter] = useState<'' | 'course' | 'podcast'>('')
   const [statusFilter, setStatusFilter] = useState<'' | 'published' | 'draft'>('')
+  const [contentPage, setContentPage] = useState(1)
 
   const debouncedSearch = useDebounce(searchValue, 300)
   const isSearching = debouncedSearch.trim().length > 0
@@ -88,6 +91,17 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
 
   const rows: any[] = data?.items || []
   const isInitialLoading = !data && isValidating
+
+  // Reset to page 1 when search/filters change
+  React.useEffect(() => {
+    setContentPage(1)
+  }, [debouncedSearch, kindFilter, statusFilter])
+
+  const totalContentPages = Math.ceil(rows.length / CONTENT_PER_PAGE)
+  const paginatedRows = rows.slice(
+    (contentPage - 1) * CONTENT_PER_PAGE,
+    contentPage * CONTENT_PER_PAGE
+  )
 
   const refresh = useCallback(async () => {
     await mutate()
@@ -451,11 +465,38 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
         <TableCard>
           <DataTable
             columns={columns}
-            rows={rows}
+            rows={paginatedRows}
             selectable
             getRowId={(row) => row.resource_uuid}
             selectedIds={selectedIds}
             onSelectionChange={setSelectedIds}
+            footer={
+              totalContentPages > 1 ? (
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-500">
+                    Page {contentPage} of {totalContentPages}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setContentPage((p) => Math.max(1, p - 1))}
+                      disabled={contentPage === 1}
+                      className="px-2 py-1 text-xs font-medium rounded border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setContentPage((p) => Math.min(totalContentPages, p + 1))}
+                      disabled={contentPage === totalContentPages}
+                      className="px-2 py-1 text-xs font-medium rounded border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              ) : undefined
+            }
           />
         </TableCard>
       )}

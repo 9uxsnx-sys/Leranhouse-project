@@ -60,7 +60,7 @@ export default function PlaygroundsListClient({ org_id, orgslug }: PlaygroundsLi
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const itemsPerPage = 12
 
-  const playgroundsKey = access_token ? `${getAPIUrl()}playgrounds/org/${org_id}` : null
+  const playgroundsKey = access_token ? `${getAPIUrl()}playgrounds/org/${org_id}?limit=500` : null
 
   const { data: playgrounds, isLoading } = useSWR(
     playgroundsKey,
