@@ -9,7 +9,7 @@ import { getAPIUrl } from '@services/config/config'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { removeUserFromOrg, removeUsersFromOrg, updateUserRole } from '@services/organizations/orgs'
 import { swrFetcher } from '@services/utils/ts/requests'
-import { Check, Search, LogOut, ChevronLeft, ChevronRight, MoreHorizontal, X } from 'lucide-react'
+import { Check, Search, LogOut, MoreHorizontal, X } from 'lucide-react'
 import { ConceptIcon } from '@components/ui/icons'
 import React, { useState, useCallback, useEffect } from 'react'
 import toast from 'react-hot-toast'
@@ -26,8 +26,6 @@ import { IconButton } from '@/components/ui/icon-button'
 import { TableCard } from '@components/Analytics/Card'
 import { Column, DataTable } from '@components/Analytics/DataTable'
 import { EmptyState } from '@components/Analytics/Feedback'
-
-const ITEMS_PER_PAGE = 10
 
 function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr) return '—'
@@ -50,7 +48,6 @@ function OrgUsers() {
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token;
 
-  const [page, setPage] = useState(1)
   const [searchValue, setSearchValue] = useState('')
   const [selectedUserIds, setSelectedUserIds] = useState<Set<number>>(new Set())
   const [sortBy, setSortBy] = useState<'name-asc' | 'name-desc'>('name-asc')
@@ -72,9 +69,8 @@ function OrgUsers() {
 
   const buildQuery = () => {
     const params = new URLSearchParams()
-    params.append('page', page.toString())
-    params.append('limit', ITEMS_PER_PAGE.toString())
     if (searchValue) params.append('search', searchValue)
+    params.append('limit', '10000')
     return params.toString()
   }
 
@@ -95,9 +91,7 @@ function OrgUsers() {
   )
 
   const orgUsers = data?.items || []
-  const total = data?.total || 0
   const isInitialLoading = !data && isValidating
-  const isPageTransitioning = !!data && isValidating
 
   const handleSelectionChange = useCallback((next: Set<string | number>) => {
     setSelectedUserIds(new Set(Array.from(next).map(Number)))
@@ -127,14 +121,8 @@ function OrgUsers() {
     }
   }
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage)
-    setSelectedUserIds(new Set())
-  }
-
   const handleSearchChange = (value: string) => {
     setSearchValue(value)
-    setPage(1)
     setSelectedUserIds(new Set())
   }
 
@@ -320,37 +308,6 @@ function OrgUsers() {
     },
   ]
 
-  const pagination = (
-    <div className="flex items-center justify-between">
-      <span className="text-xs text-gray-500">
-        {t('dashboard.users.active_users.pagination.showing', {
-          start: (page - 1) * ITEMS_PER_PAGE + 1,
-          end: Math.min(page * ITEMS_PER_PAGE, total),
-          total
-        })}
-      </span>
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => handlePageChange(page - 1)}
-          disabled={page === 1}
-          className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-        >
-          <ChevronLeft className="w-4 h-4 text-gray-600" />
-        </button>
-        <span className="text-xs text-gray-600 font-medium min-w-[64px] text-center">
-          {t('dashboard.users.active_users.pagination.page', { current: page, total: Math.ceil(total / ITEMS_PER_PAGE) })}
-        </span>
-        <button
-          onClick={() => handlePageChange(page + 1)}
-          disabled={page * ITEMS_PER_PAGE >= total}
-          className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-        >
-          <ChevronRight className="w-4 h-4 text-gray-600" />
-        </button>
-      </div>
-    </div>
-  )
-
   return (
     <div>
       <Toast></Toast>
@@ -483,15 +440,8 @@ function OrgUsers() {
           />
         </TableCard>
       ) : (
-        <TableCard footer={total > ITEMS_PER_PAGE ? pagination : undefined}>
+        <TableCard>
           <div className="relative">
-            {/* Loading overlay for page transitions */}
-            {isPageTransitioning && (
-              <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center">
-                <LearnHouseSpinner size={28} />
-              </div>
-            )}
-
             <DataTable
               columns={columns}
               rows={sortUsers(filteredUsers)}

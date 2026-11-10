@@ -1,14 +1,12 @@
 'use client'
 import i18n from '@/lib/i18n'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import useSWR from 'swr'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 import {
   BookOpen,
   Check,
-  ChevronLeft,
-  ChevronRight,
   Headphones,
   Loader2,
   MoreHorizontal,
@@ -39,8 +37,6 @@ import {
 import { getAPIUrl } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
 
-const ITEMS_PER_PAGE = 10
-
 type EditCollectionContentProps = {
   collection: any
   orgslug: string
@@ -67,7 +63,6 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
   const contentLocale = useContentLocale()
 
   const [searchValue, setSearchValue] = useState('')
-  const [page, setPage] = useState(1)
   const [selectedIds, setSelectedIds] = useState<Set<string | number>>(new Set())
   const [isBulkWorking, setIsBulkWorking] = useState(false)
   const [kindFilter, setKindFilter] = useState<'' | 'course' | 'podcast'>('')
@@ -76,18 +71,13 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
   const debouncedSearch = useDebounce(searchValue, 300)
   const isSearching = debouncedSearch.trim().length > 0
 
-  useEffect(() => {
-    setPage(1)
-    setSelectedIds(new Set())
-  }, [debouncedSearch, kindFilter, statusFilter])
-
   // Linked mode lists the collection members; searching switches the same
   // table to the organization resources that can still be added.
   const membersKey =
     collectionUuid && accessToken
       ? `${getAPIUrl()}collections/${collectionUuid}/members?filter=${
           isSearching ? 'available' : 'linked'
-        }&search=${encodeURIComponent(debouncedSearch)}&kind=${kindFilter}&status=${statusFilter}&page=${page}&limit=${ITEMS_PER_PAGE}&locale=${contentLocale}`
+        }&search=${encodeURIComponent(debouncedSearch)}&kind=${kindFilter}&status=${statusFilter}&limit=10000&locale=${contentLocale}`
       : null
 
   const { data, error, isValidating, mutate } = useSWR(
@@ -97,19 +87,12 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
   )
 
   const rows: any[] = data?.items || []
-  const total: number = data?.total || 0
   const isInitialLoading = !data && isValidating
-  const isPageTransitioning = !!data && isValidating
 
   const refresh = useCallback(async () => {
     await mutate()
     await onUpdated()
   }, [mutate, onUpdated])
-
-  const changePage = useCallback((nextPage: number) => {
-    setPage(nextPage)
-    setSelectedIds(new Set())
-  }, [])
 
   const handleBulkAction = useCallback(async () => {
     const ids = Array.from(selectedIds).map(String)
@@ -317,40 +300,6 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
     })
   }
 
-  const pagination = (
-    <div className="flex items-center justify-between">
-      <span className="text-xs text-gray-500">
-        {t('dashboard.users.active_users.pagination.showing', {
-          start: (page - 1) * ITEMS_PER_PAGE + 1,
-          end: Math.min(page * ITEMS_PER_PAGE, total),
-          total,
-        })}
-      </span>
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => changePage(page - 1)}
-          disabled={page === 1}
-          className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-        >
-          <ChevronLeft className="w-4 h-4 text-gray-600" />
-        </button>
-        <span className="text-xs text-gray-600 font-medium min-w-[64px] text-center">
-          {t('dashboard.users.active_users.pagination.page', {
-            current: page,
-            total: Math.ceil(total / ITEMS_PER_PAGE),
-          })}
-        </span>
-        <button
-          onClick={() => changePage(page + 1)}
-          disabled={page * ITEMS_PER_PAGE >= total}
-          className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-        >
-          <ChevronRight className="w-4 h-4 text-gray-600" />
-        </button>
-      </div>
-    </div>
-  )
-
   return (
     <div>
       {/* Toolbar — same pattern as the Users tab and course Access tab */}
@@ -499,22 +448,15 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
           />
         </TableCard>
       ) : (
-        <TableCard footer={total > ITEMS_PER_PAGE ? pagination : undefined}>
-          <div className="relative">
-            {isPageTransitioning && (
-              <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center">
-                <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
-              </div>
-            )}
-            <DataTable
-              columns={columns}
-              rows={rows}
-              selectable
-              getRowId={(row) => row.resource_uuid}
-              selectedIds={selectedIds}
-              onSelectionChange={setSelectedIds}
-            />
-          </div>
+        <TableCard>
+          <DataTable
+            columns={columns}
+            rows={rows}
+            selectable
+            getRowId={(row) => row.resource_uuid}
+            selectedIds={selectedIds}
+            onSelectionChange={setSelectedIds}
+          />
         </TableCard>
       )}
     </div>

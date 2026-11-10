@@ -7,7 +7,7 @@ import { swrFetcher } from '@services/utils/ts/requests'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import Link from 'next/link'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
-import { Buildings, Globe, User, CaretLeft, CaretRight, BookOpen, MagnifyingGlass, ArrowSquareOut } from '@phosphor-icons/react'
+import { Buildings, Globe, User, BookOpen, MagnifyingGlass, ArrowSquareOut } from '@phosphor-icons/react'
 
 /** Ensure a URL only uses http/https — returns '#' for anything else. */
 function safeHref(url: string): string {
@@ -78,7 +78,6 @@ function getFrontendDomain(): string {
 }
 
 const PLANS = ['all', 'free', 'paid', 'standard', 'pro', 'enterprise'] as const
-const PAGE_SIZE = 20
 
 function Sparkline({ data, max }: { data: number[]; max: number }) {
   if (data.length === 0) return <span className="text-white/20 text-xs">—</span>
@@ -201,7 +200,6 @@ export default function OrganizationList() {
 
   // Read initial values from URL search params
   const [planFilter, setPlanFilter] = useState<string>(searchParams.get('plan') || 'all')
-  const [page, setPage] = useState(Number(searchParams.get('page')) || 1)
   const [sortBy, setSortBy] = useState<string>(searchParams.get('sort') || 'id')
   const [search, setSearch] = useState(searchParams.get('search') || '')
   const [debouncedSearch, setDebouncedSearch] = useState(searchParams.get('search') || '')
@@ -213,7 +211,6 @@ export default function OrganizationList() {
       const strVal = String(value)
       // Remove default values from URL to keep it clean
       if (
-        (key === 'page' && strVal === '1') ||
         (key === 'sort' && strVal === 'id') ||
         (key === 'plan' && strVal === 'all') ||
         (key === 'search' && strVal === '')
@@ -231,26 +228,25 @@ export default function OrganizationList() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search)
-      updateUrl({ search, page: 1 })
+      updateUrl({ search })
     }, 300)
     return () => clearTimeout(timer)
   }, [search])
 
   const queryParams = useMemo(() => {
     const params = new URLSearchParams({
-      page: String(page),
-      limit: String(PAGE_SIZE),
       sort: sortBy,
+      limit: '10000',
     })
     if (debouncedSearch) params.set('search', debouncedSearch)
     if (planFilter !== 'all') params.set('plan', planFilter)
     return params.toString()
-  }, [page, sortBy, debouncedSearch, planFilter])
+  }, [sortBy, debouncedSearch, planFilter])
 
   const { data: orgData, isLoading, isValidating } = useSWR<PaginatedOrgResponse>(
     accessToken ? `${getAPIUrl()}ee/superadmin/organizations?${queryParams}` : null,
     (url: string) => swrFetcher(url, accessToken),
-    { revalidateOnFocus: true, keepPreviousData: true }
+    { revalidateOnFocus: true }
   )
 
   const orgs = orgData?.items
@@ -290,26 +286,18 @@ export default function OrganizationList() {
     return { map, globalMax }
   }, [visitsData])
 
-  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
   const paged = orgs || []
 
   const handleFilterChange = (plan: string) => {
     setPlanFilter(plan)
-    setPage(1)
-    updateUrl({ plan, page: 1 })
+    updateUrl({ plan })
   }
   const handleSortChange = (sort: string) => {
     setSortBy(sort)
-    setPage(1)
-    updateUrl({ sort, page: 1 })
-  }
-  const handlePageChange = (p: number) => {
-    setPage(p)
-    updateUrl({ page: p })
+    updateUrl({ sort })
   }
   const handleSearch = (value: string) => {
     setSearch(value)
-    setPage(1)
   }
 
   const domain = getFrontendDomain()
@@ -510,49 +498,6 @@ export default function OrganizationList() {
         </tbody>
       </table>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-4 px-4">
-          <span className="text-xs text-white/30">
-            Page {page} of {totalPages}
-          </span>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => handlePageChange(Math.max(1, page - 1))}
-              disabled={page === 1}
-              className="p-1.5 rounded text-white/40 hover:text-white hover:bg-white/[0.08] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
-            >
-              <CaretLeft size={14} weight="bold" />
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1)
-              .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
-              .map((p, idx, arr) => (
-                <React.Fragment key={p}>
-                  {idx > 0 && arr[idx - 1] !== p - 1 && (
-                    <span className="text-white/20 text-xs px-1">...</span>
-                  )}
-                  <button
-                    onClick={() => handlePageChange(p)}
-                    className={`text-xs min-w-[28px] h-7 rounded transition-colors ${
-                      p === page
-                        ? 'bg-white/10 text-white'
-                        : 'text-white/40 hover:text-white hover:bg-white/[0.05]'
-                    }`}
-                  >
-                    {p}
-                  </button>
-                </React.Fragment>
-              ))}
-            <button
-              onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
-              disabled={page === totalPages}
-              className="p-1.5 rounded text-white/40 hover:text-white hover:bg-white/[0.08] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
-            >
-              <CaretRight size={14} weight="bold" />
-            </button>
-          </div>
-        </div>
-      )}
           </>
         )}
       </div>

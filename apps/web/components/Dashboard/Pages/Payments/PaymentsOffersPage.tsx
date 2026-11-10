@@ -7,8 +7,6 @@ import toast from 'react-hot-toast'
 import {
     BookOpen,
     Check,
-    ChevronLeft,
-    ChevronRight,
     Headphones,
     Layers,
     Loader2,
@@ -33,8 +31,6 @@ import { updateCourse } from '@services/courses/courses'
 import { updateCollection } from '@services/courses/collections'
 import { updatePodcast } from '@services/podcasts/podcasts'
 import { swrFetcher } from '@services/utils/ts/requests'
-
-const ITEMS_PER_PAGE = 10
 
 type ResourceKind = 'course' | 'podcast' | 'collection'
 type AccessMode = 'public' | 'users_only' | 'paid'
@@ -85,7 +81,6 @@ export default function PaymentsOffersPage() {
     const access_token = session?.data?.tokens?.access_token
 
     const [search, setSearch] = useState('')
-    const [page, setPage] = useState(1)
     const [drafts, setDrafts] = useState<Record<string, string>>({})
     const [saving, setSaving] = useState(false)
     const [justSaved, setJustSaved] = useState(false)
@@ -218,22 +213,13 @@ export default function PaymentsOffersPage() {
     }, [resources, search, kindFilter, accessFilter, statusFilter, priceFilter, sortBy])
 
     const total = filtered.length
-    const totalPages = Math.max(1, Math.ceil(total / ITEMS_PER_PAGE))
-    const currentPage = Math.min(page, totalPages)
-    const paged = filtered.slice(
-        (currentPage - 1) * ITEMS_PER_PAGE,
-        currentPage * ITEMS_PER_PAGE
-    )
+    const paged = filtered
 
     const isInitialLoading =
         (!coursesData && coursesValidating) ||
         (!podcastsData && podcastsValidating) ||
         (!collectionsData && collectionsValidating)
     const loadError = coursesError || podcastsError || collectionsError
-
-    useEffect(() => {
-        setPage(1)
-    }, [search, kindFilter, accessFilter, priceFilter, statusFilter, sortBy])
 
     const priceValue = useCallback(
         (row: OfferRow) => {
@@ -413,40 +399,6 @@ export default function PaymentsOffersPage() {
             ),
         },
     ]
-
-    const pagination = (
-        <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-500">
-                {t('dashboard.users.active_users.pagination.showing', {
-                    start: (currentPage - 1) * ITEMS_PER_PAGE + 1,
-                    end: Math.min(currentPage * ITEMS_PER_PAGE, total),
-                    total,
-                })}
-            </span>
-            <div className="flex items-center gap-2">
-                <button
-                    onClick={() => setPage(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                >
-                    <ChevronLeft className="w-4 h-4 text-gray-600" />
-                </button>
-                <span className="text-xs text-gray-600 font-medium min-w-[64px] text-center">
-                    {t('dashboard.users.active_users.pagination.page', {
-                        current: currentPage,
-                        total: totalPages,
-                    })}
-                </span>
-                <button
-                    onClick={() => setPage(currentPage + 1)}
-                    disabled={currentPage >= totalPages}
-                    className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                >
-                    <ChevronRight className="w-4 h-4 text-gray-600" />
-                </button>
-            </div>
-        </div>
-    )
 
     return (
         <div>
@@ -647,7 +599,7 @@ export default function PaymentsOffersPage() {
                     />
                 </TableCard>
             ) : (
-                <TableCard footer={total > ITEMS_PER_PAGE ? pagination : undefined}>
+                <TableCard>
                     <DataTable columns={columns} rows={paged} />
                 </TableCard>
             )}

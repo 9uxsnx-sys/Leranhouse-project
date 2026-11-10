@@ -5,8 +5,6 @@ import useSWR from 'swr'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 import {
-  ChevronLeft,
-  ChevronRight,
   CreditCard,
   Globe,
   GlobeLock,
@@ -65,8 +63,6 @@ const MODE_DOT: Record<AccessMode, string> = {
   paid: 'bg-indigo-500',
 }
 
-const USERS_PER_PAGE = 10
-
 function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr) return '—'
   try {
@@ -98,7 +94,6 @@ function EditCollectionAccess({ collection, orgslug, onUpdated }: EditCollection
   const [isSwitchingPublish, setIsSwitchingPublish] = useState(false)
   const [isBulkWorking, setIsBulkWorking] = useState(false)
   const [searchValue, setSearchValue] = useState('')
-  const [page, setPage] = useState(1)
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string | number>>(new Set())
   const [selectedGroupIds, setSelectedGroupIds] = useState<Set<string | number>>(new Set())
   const [detailUser, setDetailUser] = useState<any>(null)
@@ -107,7 +102,6 @@ function EditCollectionAccess({ collection, orgslug, onUpdated }: EditCollection
   const isSearching = debouncedSearch.trim().length > 0
 
   useEffect(() => {
-    setPage(1)
     setSelectedUserIds(new Set())
     setSelectedGroupIds(new Set())
   }, [debouncedSearch, mode])
@@ -125,7 +119,7 @@ function EditCollectionAccess({ collection, orgslug, onUpdated }: EditCollection
   }, [onUpdated, orgslug])
 
   // ── Users linked to the collection (Public / Paid modes) ─────────────────
-  const accessQuery = `search=${encodeURIComponent(debouncedSearch)}&page=${page}&limit=${USERS_PER_PAGE}`
+  const accessQuery = `search=${encodeURIComponent(debouncedSearch)}&limit=10000`
   const accessKey =
     (mode === 'public' || mode === 'paid') && collectionUuid && org?.id && access_token
       ? mode === 'public'
@@ -149,7 +143,6 @@ function EditCollectionAccess({ collection, orgslug, onUpdated }: EditCollection
   const accessRows = accessData?.items || []
   const accessTotal = accessData?.total || 0
   const isInitialAccessLoading = !accessData && accessValidating
-  const isAccessPageTransitioning = !!accessData && accessValidating
 
   // ── User groups (Private mode) ──────────────────────────────────────────
   const linkedKey =
@@ -365,11 +358,6 @@ function EditCollectionAccess({ collection, orgslug, onUpdated }: EditCollection
     },
     [collectionUuid, org?.id, selectedGroupIds, isBulkWorking, access_token, mutateLinkedGroups, refreshAll, t]
   )
-
-  const changePage = useCallback((nextPage: number) => {
-    setPage(nextPage)
-    setSelectedUserIds(new Set())
-  }, [])
 
   const handleRemoveUserRow = useCallback(
     async (row: any) => {
@@ -629,40 +617,6 @@ function EditCollectionAccess({ collection, orgslug, onUpdated }: EditCollection
     },
   ]
 
-  const pagination = (
-    <div className="flex items-center justify-between">
-      <span className="text-xs text-gray-500">
-        {t('dashboard.users.active_users.pagination.showing', {
-          start: (page - 1) * USERS_PER_PAGE + 1,
-          end: Math.min(page * USERS_PER_PAGE, accessTotal),
-          total: accessTotal,
-        })}
-      </span>
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => changePage(page - 1)}
-          disabled={page === 1}
-          className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-        >
-          <ChevronLeft className="w-4 h-4 text-gray-600" />
-        </button>
-        <span className="text-xs text-gray-600 font-medium min-w-[64px] text-center">
-          {t('dashboard.users.active_users.pagination.page', {
-            current: page,
-            total: Math.ceil(accessTotal / USERS_PER_PAGE),
-          })}
-        </span>
-        <button
-          onClick={() => changePage(page + 1)}
-          disabled={page * USERS_PER_PAGE >= accessTotal}
-          className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-        >
-          <ChevronRight className="w-4 h-4 text-gray-600" />
-        </button>
-      </div>
-    </div>
-  )
-
   const selectedCount =
     mode === 'users_only' ? selectedGroupIds.size : selectedUserIds.size
 
@@ -786,14 +740,8 @@ function EditCollectionAccess({ collection, orgslug, onUpdated }: EditCollection
             />
           </TableCard>
         ) : (
-          <TableCard footer={accessTotal > USERS_PER_PAGE ? pagination : undefined}>
-            <div className="relative">
-              {isAccessPageTransitioning && (
-                <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center">
-                  <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
-                </div>
-              )}
-              <DataTable
+          <TableCard>
+            <DataTable
                 columns={userColumns}
                 rows={accessRows}
                 selectable
@@ -801,7 +749,6 @@ function EditCollectionAccess({ collection, orgslug, onUpdated }: EditCollection
                 selectedIds={selectedUserIds}
                 onSelectionChange={setSelectedUserIds}
               />
-            </div>
           </TableCard>
         )
       )}

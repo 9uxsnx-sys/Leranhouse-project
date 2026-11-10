@@ -1,7 +1,7 @@
 'use client'
 import i18n from '@/lib/i18n'
 import React, { useEffect, useState } from 'react'
-import { ChevronLeft, ChevronRight, MoreHorizontal, X } from 'lucide-react'
+import { MoreHorizontal, X } from 'lucide-react'
 import { SectionCard } from '@components/Analytics/Card'
 import { TabCard } from '@components/Analytics/TabCard'
 import { useAnalyticsTab, useLearnerDetail } from '@services/analytics/tabs'
@@ -110,18 +110,11 @@ function LearnerDetailDialog({ userId, onClose }: { userId: number; onClose: () 
  */
 export function LearnersTab({ range = '30d', query = '' }: { range?: string; query?: string }) {
   const { t } = useTranslation()
-  const [page, setPage] = useState(1)
   const [detailUserId, setDetailUserId] = useState<number | null>(null)
 
-  // A new search always starts from the first page.
-  useEffect(() => setPage(1), [query])
-
-  const { data, isLoading } = useAnalyticsTab('learners', range, 'all', { q: query, page })
+  const { data, isLoading } = useAnalyticsTab('learners', range, 'all', { q: query })
   const card = data?.cards?.learners_table
   const rows = card?.rows ?? []
-  const total = card?.total ?? 0
-  const pageSize = card?.pageSize ?? 50
-  const lastPage = Math.max(1, Math.ceil(total / pageSize))
 
   return (
     <div className="space-y-4">
@@ -147,37 +140,6 @@ export function LearnersTab({ range = '30d', query = '' }: { range?: string; que
         />
       )}
 
-      {/* Pagination */}
-      {total > pageSize && (
-        <div className="flex items-center justify-between px-6 py-4 border border-gray-200 rounded-xl bg-gray-50/50">
-          <div className="text-xs text-gray-500 font-medium">
-            {t('analytics.learners_tab.showing', {
-              from: (page - 1) * pageSize + 1,
-              to: Math.min(page * pageSize, total),
-              total,
-            })}
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-            >
-              <ChevronLeft className="w-4 h-4 text-gray-600" />
-            </button>
-            <span className="text-sm text-gray-600 font-medium min-w-[80px] text-center bg-white px-3 py-2 rounded-lg border border-gray-200">
-              {t('analytics.learners_tab.page_of', { page, total: lastPage })}
-            </span>
-            <button
-              onClick={() => setPage((p) => Math.min(lastPage, p + 1))}
-              disabled={page >= lastPage}
-              className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-            >
-              <ChevronRight className="w-4 h-4 text-gray-600" />
-            </button>
-          </div>
-        </div>
-      )}
 
       {detailUserId != null && (
         <LearnerDetailDialog userId={detailUserId} onClose={() => setDetailUserId(null)} />

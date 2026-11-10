@@ -10,7 +10,7 @@ import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { searchMatchesAny } from '@/lib/search/normalize'
 import { createUserGroup, updateUserGroup, deleteUserGroup, linkUsersToUserGroup, unlinkUsersFromUserGroup } from '@services/usergroups/usergroups'
 import { swrFetcher } from '@services/utils/ts/requests'
-import { Search, ArrowUpDown, CheckSquare, MoreVertical, Copy, Trash2, Users, Loader2, Check, SaveAllIcon, LogOut, ArrowLeft, ChevronLeft, ChevronRight, MoreHorizontal, X } from 'lucide-react'
+import { Search, ArrowUpDown, CheckSquare, MoreVertical, Copy, Trash2, Users, Loader2, Check, SaveAllIcon, LogOut, ArrowLeft, MoreHorizontal, X } from 'lucide-react'
 import { ConceptIcon } from '@components/ui/icons'
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import toast from 'react-hot-toast'
@@ -68,12 +68,9 @@ function OrgUserGroups() {
     const [isSelectMode, setIsSelectMode] = useState(false)
     const [selectedGroupIds, setSelectedGroupIds] = useState<Set<number>>(new Set())
 
-    const ITEMS_PER_PAGE = 10
-
     // Members view states
     const [membersSearch, setMembersSearch] = useState('')
     const [selectedMemberIds, setSelectedMemberIds] = useState<Set<number>>(new Set())
-    const [membersPage, setMembersPage] = useState(1)
     const [membersSortBy, setMembersSortBy] = useState<'name-asc' | 'name-desc'>('name-asc')
     const [membersStatusFilter, setMembersStatusFilter] = useState<string>('')
     const [detailUser, setDetailUser] = useState<any>(null)
@@ -101,8 +98,7 @@ function OrgUserGroups() {
     const buildMembersQuery = () => {
         const params = new URLSearchParams()
         params.append('usergroup_id', membersGroupId!.toString())
-        params.append('page', membersPage.toString())
-        params.append('limit', ITEMS_PER_PAGE.toString())
+        params.append('limit', '10000')
         if (membersSearch.trim()) {
             params.append('search', membersSearch.trim())
             params.append('usergroup_filter', 'not_in_group')
@@ -120,7 +116,6 @@ function OrgUserGroups() {
         { keepPreviousData: true }
     )
     const isMembersLoading = !usersData && isMembersValidating
-    const isMembersPageTransitioning = !!usersData && isMembersValidating
 
     const currentGroup = useMemo(() => {
         if (!usergroups || !membersGroupId) return null
@@ -162,8 +157,6 @@ function OrgUserGroups() {
         return result
     }, [usersData, membersGroupId, membersStatusFilter, membersSortBy])
 
-    const totalMembers = usersData?.total || 0
-    const totalMembersPages = Math.ceil(totalMembers / ITEMS_PER_PAGE)
     const paginatedMembers = processedMembers // server already paginated
 
     // Determine action type: searching → Add, not searching → Remove
@@ -174,14 +167,8 @@ function OrgUserGroups() {
         setSelectedMemberIds(new Set(Array.from(next).map(Number)))
     }, [])
 
-    const handleMembersPageChange = (newPage: number) => {
-        setMembersPage(newPage)
-        setSelectedMemberIds(new Set())
-    }
-
     const handleMembersSearchChange = (value: string) => {
         setMembersSearch(value)
-        setMembersPage(1)
         setSelectedMemberIds(new Set())
     }
 
@@ -372,37 +359,6 @@ function OrgUserGroups() {
         },
     ]
 
-    const membersPagination = (
-        <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-500">
-                {t('dashboard.users.usergroups.members.pagination.showing', {
-                    start: (membersPage - 1) * ITEMS_PER_PAGE + 1,
-                    end: Math.min(membersPage * ITEMS_PER_PAGE, totalMembers),
-                    total: totalMembers,
-                })}
-            </span>
-            <div className="flex items-center gap-2">
-                <button
-                    onClick={() => handleMembersPageChange(membersPage - 1)}
-                    disabled={membersPage === 1}
-                    className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                >
-                    <ChevronLeft className="w-4 h-4 text-gray-600" />
-                </button>
-                <span className="text-xs text-gray-600 font-medium min-w-[64px] text-center">
-                    {t('dashboard.users.usergroups.members.pagination.page', { current: membersPage, total: totalMembersPages })}
-                </span>
-                <button
-                    onClick={() => handleMembersPageChange(membersPage + 1)}
-                    disabled={membersPage * ITEMS_PER_PAGE >= totalMembers}
-                    className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                >
-                    <ChevronRight className="w-4 h-4 text-gray-600" />
-                </button>
-            </div>
-        </div>
-    )
-
     // ── State 3: Members Table ──
     if (membersGroupId) {
         return (
@@ -423,7 +379,6 @@ function OrgUserGroups() {
                             value={membersSearch}
                             onChange={(e) => {
                                 setMembersSearch(e.target.value)
-                                setMembersPage(1)
                                 setSelectedMemberIds(new Set())
                             }}
                             placeholder={t('dashboard.users.usergroups.members.search_placeholder')}
@@ -464,7 +419,7 @@ function OrgUserGroups() {
                                 ].map((option) => (
                                     <DropdownMenuItem
                                         key={option.value}
-                                        onClick={() => { setMembersStatusFilter(option.value); setMembersPage(1) }}
+                                        onClick={() => { setMembersStatusFilter(option.value) }}
                                         className="justify-between text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
                                     >
                                         <span className="text-gray-700 text-xs">{option.label}</span>
@@ -510,15 +465,8 @@ function OrgUserGroups() {
                             />
                         </TableCard>
                     ) : (
-                        <TableCard footer={totalMembers > ITEMS_PER_PAGE ? membersPagination : undefined}>
+                        <TableCard>
                             <div className="relative">
-                                {/* Loading overlay for page transitions */}
-                                {isMembersPageTransitioning && (
-                                    <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center">
-                                        <LearnHouseSpinner size={28} />
-                                    </div>
-                                )}
-
                                 <DataTable
                                     columns={memberColumns}
                                     rows={paginatedMembers}

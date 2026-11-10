@@ -5,7 +5,6 @@ import {
   Check,
   ChevronDown,
   ChevronLeft,
-  ChevronRight,
   History,
   Loader2,
   MoreHorizontal,
@@ -593,16 +592,14 @@ function AnnouncementsSection() {
   }, [orgId, isSending, title, body, linkUrl, selectedGroupIds, accessToken])
 
   // History
-  const [page, setPage] = useState(1)
   const { data: history, isLoading: historyLoading } = useSWR<AnnouncementListResponse>(
     orgId && view === 'history'
-      ? `${getAPIUrl()}notifications/announcements?org_id=${orgId}&page=${page}&limit=20`
+      ? `${getAPIUrl()}notifications/announcements?org_id=${orgId}&limit=10000`
       : null,
     (url: string) => swrFetcher(url, accessToken),
     { revalidateOnFocus: false }
   )
   const announcements: AnnouncementItem[] = history?.announcements || []
-  const pages = history?.pages || 1
 
   const hasAnyRecipients = selectedGroupIds.length > 0
 
@@ -730,7 +727,6 @@ function AnnouncementsSection() {
             )}
           </SectionCard>
 
-          {pages > 1 && <Pagination page={page} pages={pages} onChange={setPage} />}
         </div>
       )}
     </div>
@@ -872,75 +868,4 @@ function formatDate(value: string | null) {
     hour: '2-digit',
     minute: '2-digit',
   })
-}
-
-function getVisiblePageNumbers(page: number, pages: number): (number | '...')[] {
-  const maxVisible = 5
-  if (pages <= maxVisible) {
-    return Array.from({ length: pages }, (_, i) => i + 1)
-  }
-  if (page <= 3) {
-    return [1, 2, 3, 4, '...', pages]
-  }
-  if (page >= pages - 2) {
-    return [1, '...', pages - 3, pages - 2, pages - 1, pages]
-  }
-  return [1, '...', page - 1, page, page + 1, '...', pages]
-}
-
-function Pagination({
-  page,
-  pages,
-  onChange,
-}: {
-  page: number
-  pages: number
-  onChange: (page: number) => void
-}) {
-  return (
-    <div className="flex items-center justify-center gap-1 pt-6 pb-8">
-      <Button
-        variant="transparent"
-        size="small"
-        onClick={() => onChange(page - 1)}
-        disabled={page === 1}
-      >
-        <ChevronLeft className="w-4 h-4 rtl:rotate-180" />
-        <span className="hidden sm:inline ms-1">Previous</span>
-      </Button>
-
-      <div className="flex items-center gap-1 mx-2">
-        {getVisiblePageNumbers(page, pages).map((item, index) =>
-          item === '...' ? (
-            <span key={`ellipsis-${index}`} className="px-2 py-1 txt-compact-small text-ui-fg-muted">
-              …
-            </span>
-          ) : (
-            <button
-              key={item}
-              type="button"
-              onClick={() => onChange(item)}
-              className={`w-7 h-7 txt-compact-small-plus rounded-md transition-colors ${
-                page === item
-                  ? 'bg-ui-bg-base shadow-borders-base text-ui-fg-base'
-                  : 'text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-base-hover'
-              }`}
-            >
-              {item}
-            </button>
-          )
-        )}
-      </div>
-
-      <Button
-        variant="transparent"
-        size="small"
-        onClick={() => onChange(page + 1)}
-        disabled={page === pages}
-      >
-        <span className="hidden sm:inline me-1">Next</span>
-        <ChevronRight className="w-4 h-4 rtl:rotate-180" />
-      </Button>
-    </div>
-  )
 }

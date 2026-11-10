@@ -18,8 +18,6 @@ import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { linkResourcesToUserGroup, unLinkResourcesToUserGroup } from '@services/usergroups/usergroups'
 import { swrFetcher } from '@services/utils/ts/requests'
 import {
-    ChevronLeft,
-    ChevronRight,
     CreditCard,
     Globe,
     GlobeLock,
@@ -59,8 +57,6 @@ const MODE_DOT: Record<AccessMode, string> = {
     paid: 'bg-indigo-500',
 }
 
-const USERS_PER_PAGE = 10
-
 function formatDate(dateStr: string | null | undefined): string {
     if (!dateStr) return '—'
     try {
@@ -93,7 +89,6 @@ function EditPodcastAccess(props: EditPodcastAccessProps) {
     const [isSwitchingPublish, setIsSwitchingPublish] = useState(false)
     const [isBulkWorking, setIsBulkWorking] = useState(false)
     const [searchValue, setSearchValue] = useState('')
-    const [page, setPage] = useState(1)
     const [selectedUserIds, setSelectedUserIds] = useState<Set<string | number>>(new Set())
     const [selectedGroupIds, setSelectedGroupIds] = useState<Set<string | number>>(new Set())
     const [detailUser, setDetailUser] = useState<any>(null)
@@ -103,7 +98,6 @@ function EditPodcastAccess(props: EditPodcastAccessProps) {
     const isPublished = podcast?.published ?? false
 
     useEffect(() => {
-        setPage(1)
         setSelectedUserIds(new Set())
         setSelectedGroupIds(new Set())
     }, [debouncedSearch, mode])
@@ -117,7 +111,7 @@ function EditPodcastAccess(props: EditPodcastAccessProps) {
     }, [detailUser])
 
     // ── Users with access (Paid mode) ───────────────────────────────────────
-    const accessQuery = `search=${encodeURIComponent(debouncedSearch)}&page=${page}&limit=${USERS_PER_PAGE}`
+    const accessQuery = `search=${encodeURIComponent(debouncedSearch)}&limit=10000`
     const accessKey =
         mode === 'paid' && podcastUuid && org?.id && access_token
             ? `${getAPIUrl()}payments/${org.id}/entitlements${
@@ -137,7 +131,6 @@ function EditPodcastAccess(props: EditPodcastAccessProps) {
     const accessRows = accessData?.items || []
     const accessTotal = accessData?.total || 0
     const isInitialAccessLoading = !accessData && accessValidating
-    const isAccessPageTransitioning = !!accessData && accessValidating
 
     // ── User groups (Private mode) ──────────────────────────────────────────
     const linkedKey =
@@ -318,11 +311,6 @@ function EditPodcastAccess(props: EditPodcastAccessProps) {
             setIsBulkWorking(false)
         }
     }, [podcastUuid, org?.id, selectedGroupIds, isBulkWorking, access_token, mutateLinkedGroups, t])
-
-    const changePage = useCallback((nextPage: number) => {
-        setPage(nextPage)
-        setSelectedUserIds(new Set())
-    }, [])
 
     const handleRemoveUserRow = useCallback(async (row: any) => {
         if (!podcastUuid || !org?.id || isBulkWorking || !row?.user?.id) return
@@ -570,40 +558,6 @@ function EditPodcastAccess(props: EditPodcastAccessProps) {
         },
     ]
 
-    const pagination = (
-        <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-500">
-                {t('dashboard.users.active_users.pagination.showing', {
-                    start: (page - 1) * USERS_PER_PAGE + 1,
-                    end: Math.min(page * USERS_PER_PAGE, accessTotal),
-                    total: accessTotal,
-                })}
-            </span>
-            <div className="flex items-center gap-2">
-                <button
-                    onClick={() => changePage(page - 1)}
-                    disabled={page === 1}
-                    className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                >
-                    <ChevronLeft className="w-4 h-4 text-gray-600" />
-                </button>
-                <span className="text-xs text-gray-600 font-medium min-w-[64px] text-center">
-                    {t('dashboard.users.active_users.pagination.page', {
-                        current: page,
-                        total: Math.ceil(accessTotal / USERS_PER_PAGE),
-                    })}
-                </span>
-                <button
-                    onClick={() => changePage(page + 1)}
-                    disabled={page * USERS_PER_PAGE >= accessTotal}
-                    className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                >
-                    <ChevronRight className="w-4 h-4 text-gray-600" />
-                </button>
-            </div>
-        </div>
-    )
-
     const selectedCount = mode === 'users_only' ? selectedGroupIds.size : selectedUserIds.size
 
     const handleToolbarAction = () => {
@@ -737,14 +691,8 @@ function EditPodcastAccess(props: EditPodcastAccessProps) {
                         />
                     </TableCard>
                 ) : (
-                    <TableCard footer={accessTotal > USERS_PER_PAGE ? pagination : undefined}>
-                        <div className="relative">
-                            {isAccessPageTransitioning && (
-                                <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center">
-                                    <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
-                                </div>
-                            )}
-                            <DataTable
+                    <TableCard>
+                        <DataTable
                                 columns={userColumns}
                                 rows={accessRows}
                                 selectable
@@ -752,7 +700,6 @@ function EditPodcastAccess(props: EditPodcastAccessProps) {
                                 selectedIds={selectedUserIds}
                                 onSelectionChange={setSelectedUserIds}
                             />
-                        </div>
                     </TableCard>
                 )
             )}

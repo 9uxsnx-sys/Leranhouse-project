@@ -8,8 +8,6 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import {
   User,
-  CaretLeft,
-  CaretRight,
   MagnifyingGlass,
   Buildings,
   ShieldStar,
@@ -51,7 +49,6 @@ function getAvatarUrl(userUuid: string, avatarImage: string): string {
 }
 
 const SUPERADMIN_FILTERS = ['all', 'yes', 'no'] as const
-const PAGE_SIZE = 20
 
 function OrgListTooltip({ orgs }: { orgs: OrgMembership[] }) {
   const [open, setOpen] = useState(false)
@@ -123,7 +120,6 @@ export default function UserList() {
   const [debouncedSearch, setDebouncedSearch] = useState(
     searchParams.get('search') || ''
   )
-  const [page, setPage] = useState(Number(searchParams.get('page')) || 1)
   const [sortBy, setSortBy] = useState<string>(
     searchParams.get('sort') || 'id'
   )
@@ -140,7 +136,6 @@ export default function UserList() {
       for (const [key, value] of Object.entries(updates)) {
         const strVal = String(value)
         if (
-          (key === 'page' && strVal === '1') ||
           (key === 'sort' && strVal === 'id') ||
           (key === 'superadmin' && strVal === 'all') ||
           (key === 'search' && strVal === '') ||
@@ -160,23 +155,22 @@ export default function UserList() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search)
-      updateUrl({ search, page: 1 })
+      updateUrl({ search })
     }, 300)
     return () => clearTimeout(timer)
   }, [search])
 
   const queryParams = useMemo(() => {
     const params = new URLSearchParams({
-      page: String(page),
-      limit: String(PAGE_SIZE),
       sort: sortBy,
+      limit: '10000',
     })
     if (debouncedSearch) params.set('search', debouncedSearch)
     if (superadminFilter !== 'all')
       params.set('superadmin', superadminFilter)
     if (minOrgs > 0) params.set('min_orgs', String(minOrgs))
     return params.toString()
-  }, [page, sortBy, debouncedSearch, superadminFilter, minOrgs])
+  }, [sortBy, debouncedSearch, superadminFilter, minOrgs])
 
   const {
     data: userData,
@@ -187,36 +181,27 @@ export default function UserList() {
       ? `${getAPIUrl()}ee/superadmin/users?${queryParams}`
       : null,
     (url: string) => swrFetcher(url, accessToken),
-    { revalidateOnFocus: true, keepPreviousData: true }
+    { revalidateOnFocus: true }
   )
 
   const users = userData?.items
   const totalCount = userData?.total ?? 0
-  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
   const paged = users || []
 
   const handleSortChange = (sort: string) => {
     setSortBy(sort)
-    setPage(1)
-    updateUrl({ sort, page: 1 })
-  }
-  const handlePageChange = (p: number) => {
-    setPage(p)
-    updateUrl({ page: p })
+    updateUrl({ sort })
   }
   const handleSearch = (value: string) => {
     setSearch(value)
-    setPage(1)
   }
   const handleSuperadminFilter = (val: string) => {
     setSuperadminFilter(val)
-    setPage(1)
-    updateUrl({ superadmin: val, page: 1 })
+    updateUrl({ superadmin: val })
   }
   const handleMinOrgsChange = (val: number) => {
     setMinOrgs(val)
-    setPage(1)
-    updateUrl({ min_orgs: val, page: 1 })
+    updateUrl({ min_orgs: val })
   }
 
   const avatarFallback = (
@@ -441,58 +426,6 @@ export default function UserList() {
               </tbody>
             </table>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between mt-4 px-4">
-                <span className="text-xs text-white/30">
-                  Page {page} of {totalPages}
-                </span>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => handlePageChange(Math.max(1, page - 1))}
-                    disabled={page === 1}
-                    className="p-1.5 rounded text-white/40 hover:text-white hover:bg-white/[0.08] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
-                  >
-                    <CaretLeft size={14} weight="bold" />
-                  </button>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1)
-                    .filter(
-                      (p) =>
-                        p === 1 ||
-                        p === totalPages ||
-                        Math.abs(p - page) <= 1
-                    )
-                    .map((p, idx, arr) => (
-                      <React.Fragment key={p}>
-                        {idx > 0 && arr[idx - 1] !== p - 1 && (
-                          <span className="text-white/20 text-xs px-1">
-                            ...
-                          </span>
-                        )}
-                        <button
-                          onClick={() => handlePageChange(p)}
-                          className={`text-xs min-w-[28px] h-7 rounded transition-colors ${
-                            p === page
-                              ? 'bg-white/10 text-white'
-                              : 'text-white/40 hover:text-white hover:bg-white/[0.05]'
-                          }`}
-                        >
-                          {p}
-                        </button>
-                      </React.Fragment>
-                    ))}
-                  <button
-                    onClick={() =>
-                      handlePageChange(Math.min(totalPages, page + 1))
-                    }
-                    disabled={page === totalPages}
-                    className="p-1.5 rounded text-white/40 hover:text-white hover:bg-white/[0.08] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
-                  >
-                    <CaretRight size={14} weight="bold" />
-                  </button>
-                </div>
-              </div>
-            )}
           </>
         )}
       </div>

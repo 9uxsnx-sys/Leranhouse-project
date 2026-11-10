@@ -4,7 +4,7 @@ import { getAPIUrl } from '@services/config/config'
 import { linkUsersToUserGroup, unlinkUsersFromUserGroup } from '@services/usergroups/usergroups'
 import { swrFetcher } from '@services/utils/ts/requests'
 import LearnHouseSpinner from '@components/Objects/Loaders/LearnHouseSpinner'
-import { Search, Check, Plus, Minus, ChevronLeft, ChevronRight, Users } from 'lucide-react'
+import { Search, Check, Plus, Minus, Users } from 'lucide-react'
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import toast from 'react-hot-toast'
 import useSWR, { mutate } from 'swr'
@@ -13,8 +13,6 @@ import { Checkbox } from '@components/ui/checkbox'
 import { Badge } from '@components/ui/badge'
 import { Tabs, TabsList, TabsTrigger } from '@components/ui/tabs'
 import UserAvatar from '@components/Objects/UserAvatar'
-
-const ITEMS_PER_PAGE = 20
 
 type ManageUsersProps = {
   usergroup_id: any
@@ -32,22 +30,19 @@ function ManageUsers(props: ManageUsersProps) {
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [activeTab, setActiveTab] = useState<FilterTab>('all')
   const [selectedUserIds, setSelectedUserIds] = useState<Set<number>>(new Set())
-  const [page, setPage] = useState(1)
 
   // Debounce search input
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchValue)
-      setPage(1) // Reset to first page on search
     }, 300)
     return () => clearTimeout(timer)
   }, [searchValue])
 
-  // Build query for paginated org users with server-side usergroup filtering
+  // Build query for org users with server-side usergroup filtering
   const buildQuery = useCallback(() => {
     const params = new URLSearchParams()
-    params.append('page', page.toString())
-    params.append('limit', ITEMS_PER_PAGE.toString())
+    params.append('limit', '10000')
     if (debouncedSearch) {
       params.append('search', debouncedSearch)
     }
@@ -60,13 +55,12 @@ function ManageUsers(props: ManageUsersProps) {
       params.append('usergroup_filter', activeTab)
     }
     return params.toString()
-  }, [page, debouncedSearch, activeTab, props.usergroup_id])
+  }, [debouncedSearch, activeTab, props.usergroup_id])
 
   const usersUrl = org && access_token ? `${getAPIUrl()}orgs/${org?.id}/users?${buildQuery()}` : null
   const { data: usersData, isValidating } = useSWR(
     usersUrl,
     (url) => swrFetcher(url, access_token),
-    { keepPreviousData: true }
   )
 
   const orgUsers = usersData?.items || []
@@ -74,12 +68,8 @@ function ManageUsers(props: ManageUsersProps) {
   const inGroupTotal: number | undefined = usersData?.in_group_total
   const allTotal: number | undefined = usersData?.all_total
   const isInitialLoading = !usersData && isValidating
-  const isPageTransitioning = !!usersData && isValidating
 
   // Compute tab counts from API response.
-  // `all_total` = total org users matching search (always provided when usergroup_id is set)
-  // `in_group_total` = in-group users matching search (always provided when usergroup_id is set)
-  // `total` = count for the currently active filter tab
   const tabCounts = useMemo(() => {
     if (allTotal == null || inGroupTotal == null) {
       return { all: total, in_group: 0, not_in_group: 0 }
@@ -190,18 +180,10 @@ function ManageUsers(props: ManageUsersProps) {
     }
   }
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage)
-    setSelectedUserIds(new Set()) // Clear selection on page change
-  }
-
   const handleTabChange = (tab: string) => {
     setActiveTab(tab as FilterTab)
-    setPage(1) // Reset to first page on tab change
     setSelectedUserIds(new Set()) // Clear selection on tab change
   }
-
-  const totalPages = Math.ceil(total / ITEMS_PER_PAGE)
 
   return (
     <div className="py-3 space-y-4">
@@ -310,11 +292,6 @@ function ManageUsers(props: ManageUsersProps) {
           </div>
         ) : (
           <>
-          {isPageTransitioning && (
-            <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center rounded-lg">
-              <LearnHouseSpinner size={24} />
-            </div>
-          )}
           {orgUsers.map((user: any) => {
             const inGroup = isUserPartOfGroup(user)
             const isSelected = selectedUserIds.has(user.user.id)
@@ -363,38 +340,6 @@ function ManageUsers(props: ManageUsersProps) {
           </>
         )}
       </div>
-
-      {/* Pagination */}
-      {total > ITEMS_PER_PAGE && (
-        <div className="flex items-center justify-between px-2 pt-3 border-t border-gray-100">
-          <div className="text-xs text-gray-500 font-medium">
-            {t('dashboard.users.usergroups.modals.manage_users.pagination.showing', {
-              start: (page - 1) * ITEMS_PER_PAGE + 1,
-              end: Math.min(page * ITEMS_PER_PAGE, total),
-              total
-            })}
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handlePageChange(page - 1)}
-              disabled={page === 1}
-              className="p-1.5 rounded-md border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-            >
-              <ChevronLeft className="w-4 h-4 text-gray-600" />
-            </button>
-            <span className="text-xs text-gray-600 font-medium min-w-[60px] text-center">
-              {t('dashboard.users.usergroups.modals.manage_users.pagination.page', { current: page, total: totalPages })}
-            </span>
-            <button
-              onClick={() => handlePageChange(page + 1)}
-              disabled={page >= totalPages}
-              className="p-1.5 rounded-md border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-            >
-              <ChevronRight className="w-4 h-4 text-gray-600" />
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

@@ -5,7 +5,7 @@ import UserAvatar from '@components/Objects/UserAvatar'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import { getAPIUrl } from '@services/config/config'
 import { swrFetcher } from '@services/utils/ts/requests'
-import { Search, Activity, ShieldCheck, RefreshCw, Eye, Globe, Terminal, ChevronLeft, ChevronRight, Calendar, Download } from 'lucide-react'
+import { Search, Activity, ShieldCheck, RefreshCw, Eye, Globe, Terminal, Calendar, Download } from 'lucide-react'
 import React, { useState } from 'react'
 import useSWR, { mutate } from 'swr'
 import dayjs from 'dayjs'
@@ -25,15 +25,12 @@ import { usePlan } from '@components/Hooks/usePlan'
 import { Column, DataTable } from '@components/Analytics/DataTable'
 import { EmptyState } from '@components/Analytics/Feedback'
 
-const ITEMS_PER_PAGE = 20
-
 const OrgAuditLogs = () => {
   const { t } = useTranslation()
   const org = useOrg() as any
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
 
-  const [offset, setOffset] = useState(0)
   const [searchField, setSearchField] = useState('action')
   const [openModalId, setOpenModalId] = useState<string | null>(null)
   const [filters, setFilters] = useState({
@@ -49,8 +46,7 @@ const OrgAuditLogs = () => {
   const buildQuery = () => {
     const params = new URLSearchParams()
     if (org?.id) params.append('org_id', org.id.toString())
-    params.append('limit', ITEMS_PER_PAGE.toString())
-    params.append('offset', offset.toString())
+    params.append('limit', '10000')
     
     // Search logic based on selected field
     if (filters.searchValue) {
@@ -96,7 +92,6 @@ const OrgAuditLogs = () => {
   )
 
   const logs = data?.items || []
-  const total = data?.total || 0
   const currentPlan = usePlan()
   const rf = org?.config?.config?.resolved_features
 
@@ -157,10 +152,6 @@ const OrgAuditLogs = () => {
       console.error('Export error:', error)
       toast.error(t('dashboard.organization.audit_logs.export_toasts.error'), { id: toastId })
     }
-  }
-
-  const handlePageChange = (newOffset: number) => {
-    setOffset(newOffset)
   }
 
   const auditColumns: Column<any>[] = [
@@ -360,7 +351,6 @@ const OrgAuditLogs = () => {
                     value={filters.searchValue}
                     onChange={(e) => {
                       setFilters({ ...filters, searchValue: e.target.value })
-                      setOffset(0)
                     }}
                   />
                 </div>
@@ -370,7 +360,6 @@ const OrgAuditLogs = () => {
                 value={filters.resource}
                 onValueChange={(val) => {
                     setFilters({ ...filters, resource: val })
-                    setOffset(0)
                 }}
               >
                 <SelectTrigger className="w-[120px] h-9 text-sm">
@@ -388,7 +377,6 @@ const OrgAuditLogs = () => {
                 value={filters.status_code}
                 onValueChange={(val) => {
                     setFilters({ ...filters, status_code: val })
-                    setOffset(0)
                 }}
               >
                 <SelectTrigger className="w-[100px] h-9 text-sm">
@@ -407,7 +395,6 @@ const OrgAuditLogs = () => {
                 value={filters.date_range}
                 onValueChange={(val) => {
                     setFilters({ ...filters, date_range: val, start_date: '', end_date: '' })
-                    setOffset(0)
                 }}
               >
                 <SelectTrigger className="w-[130px] h-9 text-sm">
@@ -434,7 +421,6 @@ const OrgAuditLogs = () => {
                     onChange={(e) => {
                       const date = e.target.value ? dayjs(e.target.value).startOf('day').toISOString() : ''
                       setFilters({ ...filters, start_date: date })
-                      setOffset(0)
                     }}
                   />
                   <span className="text-gray-400 text-xs">{t('dashboard.organization.audit_logs.date_ranges.to')}</span>
@@ -445,7 +431,6 @@ const OrgAuditLogs = () => {
                     onChange={(e) => {
                       const date = e.target.value ? dayjs(e.target.value).endOf('day').toISOString() : ''
                       setFilters({ ...filters, end_date: date })
-                      setOffset(0)
                     }}
                   />
                 </div>
@@ -470,34 +455,6 @@ const OrgAuditLogs = () => {
           )}
         </div>
 
-        {/* Pagination Controls */}
-        {total > ITEMS_PER_PAGE && (
-          <div className="mt-4 flex items-center justify-between px-2">
-            <div className="text-xs text-gray-500">
-              {t('dashboard.organization.audit_logs.pagination.showing', { 
-                start: offset + 1, 
-                end: Math.min(offset + ITEMS_PER_PAGE, total), 
-                total 
-              })}
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => handlePageChange(Math.max(0, offset - ITEMS_PER_PAGE))}
-                disabled={offset === 0}
-                className="p-1.5 rounded-md border border-gray-200 hover:bg-gray-50 disabled:opacity-50 transition-colors"
-              >
-                <ChevronLeft className="w-4 h-4 text-gray-600" />
-              </button>
-              <button
-                onClick={() => handlePageChange(offset + ITEMS_PER_PAGE)}
-                disabled={offset + ITEMS_PER_PAGE >= total}
-                className="p-1.5 rounded-md border border-gray-200 hover:bg-gray-50 disabled:opacity-50 transition-colors"
-              >
-                <ChevronRight className="w-4 h-4 text-gray-600" />
-              </button>
-            </div>
-          </div>
-        )}
         </div>
       </>
     </PlanRestrictedFeature>

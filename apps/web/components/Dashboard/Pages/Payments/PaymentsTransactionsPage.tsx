@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import useSWR from 'swr'
-import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { SectionCard } from '@components/Analytics/Card'
 import { DataTable, Column } from '@components/Analytics/DataTable'
 import { EmptyState } from '@components/Analytics/Feedback'
@@ -11,8 +11,6 @@ import { PaymentStatusDot, mapOrderStatus, type PaymentStatus } from './PaymentS
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getOrgOrders } from '@services/payments/orders'
-
-const PAGE_SIZE = 20
 
 interface TransactionRow {
   id: string
@@ -71,20 +69,15 @@ export default function PaymentsTransactionsPage() {
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [status, setStatus] = useState('all')
-  const [page, setPage] = useState(1)
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedQuery(query.trim()), 300)
     return () => clearTimeout(timer)
   }, [query])
 
-  useEffect(() => {
-    setPage(1)
-  }, [debouncedQuery, status])
-
   const swrKey =
     org?.id && access_token
-      ? ['/payments/orders', org.id, access_token, debouncedQuery, status, page]
+      ? ['/payments/orders', org.id, access_token, debouncedQuery, status]
       : null
 
   const { data, error, isLoading } = useSWR(
@@ -95,12 +88,11 @@ export default function PaymentsTransactionsPage() {
         {
           search: debouncedQuery,
           status: status === 'all' ? '' : status,
-          page,
-          limit: PAGE_SIZE,
+          limit: 10000,
         },
         access_token
       ),
-    { revalidateOnFocus: false, keepPreviousData: true }
+    { revalidateOnFocus: false }
   )
 
   const rows: TransactionRow[] = useMemo(() => {
@@ -125,9 +117,6 @@ export default function PaymentsTransactionsPage() {
       }
     })
   }, [data, t])
-
-  const total: number = data?.total || 0
-  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   const columns: Column<TransactionRow>[] = [
     {
@@ -182,43 +171,6 @@ export default function PaymentsTransactionsPage() {
     },
   ]
 
-  const pagination =
-    total > PAGE_SIZE ? (
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-gray-500">
-          {t('dashboard.payments.transactions.pagination.showing', {
-            defaultValue: 'Showing {{start}}–{{end}} of {{total}}',
-            start: (page - 1) * PAGE_SIZE + 1,
-            end: Math.min(page * PAGE_SIZE, total),
-            total,
-          })}
-        </span>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-          >
-            <ChevronLeft className="w-4 h-4 text-gray-600" />
-          </button>
-          <span className="text-xs text-gray-600 font-medium min-w-[64px] text-center">
-            {t('dashboard.payments.transactions.pagination.page', {
-              defaultValue: 'Page {{current}} of {{total}}',
-              current: page,
-              total: pages,
-            })}
-          </span>
-          <button
-            onClick={() => setPage((p) => Math.min(pages, p + 1))}
-            disabled={page >= pages}
-            className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-          >
-            <ChevronRight className="w-4 h-4 text-gray-600" />
-          </button>
-        </div>
-      </div>
-    ) : undefined
-
   return (
     <div className="space-y-6">
       {/* Action row */}
@@ -257,7 +209,7 @@ export default function PaymentsTransactionsPage() {
               {t('common.loading')}
             </div>
           ) : rows.length ? (
-            <DataTable columns={columns} rows={rows} footer={pagination} />
+            <DataTable columns={columns} rows={rows} />
           ) : (
             <EmptyState
               title={t('dashboard.payments.transactions.empty_title')}
