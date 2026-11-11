@@ -30,10 +30,11 @@ const tabsConfig: { id: TabType; label: string; icon: React.ReactNode }[] = [
 ]
 
 function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const session = useLHSession() as any
   const org = useOrg() as any
   const access_token = session?.data?.tokens?.access_token
+  const contentLocale = (i18n.language || 'en').split('-')[0]
   const [activeTab, setActiveTab] = React.useState<TabType>('courses')
 
   // Data states
@@ -61,7 +62,7 @@ function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProp
       setFetchError(false)
       try {
         const [coursesRes, podcastsRes, communitiesRes] = await Promise.allSettled([
-          getCoursesByUser(userData.id, access_token),
+          getCoursesByUser(userData.id, access_token, contentLocale),
           getPodcastsByUser(userData.id, access_token),
           getCommunitiesByUser(userData.id, access_token),
         ])
@@ -96,7 +97,7 @@ function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProp
 
     fetchAllData()
     return () => { mounted = false }
-  }, [userData.id, access_token])
+  }, [userData.id, access_token, contentLocale])
 
   const bannerUrl = userData.banner_image
     ? getUserBannerMediaDirectory(userData.user_uuid, userData.banner_image)

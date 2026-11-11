@@ -74,6 +74,11 @@ Each release provides a summary of changes organized by category:
 - **Redesigned authentication experience** — Sign in, Sign up, Forgot password, Reset password, and Verify email now share a unified split layout (image panel + card-styled form). Adds inline success/error alerts, a reusable "Check your email" state with a mail-provider shortcut (e.g. "Open Gmail" when the address is a known webmail domain), and a dev-only preview route at `/test-dev/auth`.
 - **Organization branding — Auth page branding** — Organizations can brand their sign-in page with a welcome message, a background (gradient / uploaded image / Unsplash), and a light/dark text color, with a live preview panel next to the settings.
 
+### Bug Fixes
+
+- **SWR stale data on locale switch** — The home page, course catalog, user profile, and assignments listing now re-fetch data when the content locale changes. Previously, course/podcast names and descriptions remained in the old locale until a full page reload. Fix: added `useSWR` hooks with locale-aware URLs (`?locale=${contentLocale}`) and a `useEffect` that calls `mutate()` on locale change.
+- **Course card RTL support** — Added `dir="auto"` to course card title and description for correct rendering of Arabic text inside an LTR card layout.
+
 ### Improvements
 
 - **Instagram-style image cropper** — A clean pan/zoom image cropper for profile picture uploads (test page at `/orgs/{slug}/test`). Image pans behind a fixed crop window, scroll-to-zoom, dark matte overlay, 3x3 grid, and high-res canvas export at 1080px. Uses notification-window pattern (Dialog + DialogContent, `border-0 p-0`). Pending integration into real PFP/banner upload flow.

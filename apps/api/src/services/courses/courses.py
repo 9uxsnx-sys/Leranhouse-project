@@ -1324,6 +1324,7 @@ async def get_user_courses(
     db_session: Session,
     page: int = 1,
     limit: int = 10,
+    locale: str | None = None,
 ) -> List[CourseRead]:
     # Verify user is not anonymous
     await authorization_verify_if_user_is_anon(current_user.id)
@@ -1376,6 +1377,9 @@ async def get_user_courses(
             "authors": course_authors.get(course.course_uuid, []),
         })
         result.append(course_read)
+
+    if locale:
+        result = apply_overlay_bulk(result, locale, db_session)
 
     return result
 

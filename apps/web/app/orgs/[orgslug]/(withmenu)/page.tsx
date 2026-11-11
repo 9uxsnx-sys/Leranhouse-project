@@ -45,6 +45,7 @@ const OrgHomePage = async ({ params }: any) => {
 
   return (
     <OrgHomeClient
+      orgslug={orgslug}
       courses={courses || []}
       podcasts={podcasts || []}
       trendingCourses={trending?.trending_courses || []}

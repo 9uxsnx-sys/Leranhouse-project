@@ -32,6 +32,8 @@ LESSON_NAMES = [
     "Docker without copying a tutorial",
     "Environment variables and secrets",
     "Deploying behind a reverse proxy",
+    "One router per resource",
+    "Protecting an endpoint end to end",
 ]
 
 

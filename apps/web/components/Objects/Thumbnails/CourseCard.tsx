@@ -44,11 +44,11 @@ export function CourseCard({ id, title, description, image, lessons, duration, d
         {/* Top section: title + description */}
         <div className="flex flex-col gap-1">
           {/* Title: 15px, 600 weight, 2-line clamp */}
-          <h3 className="text-[15px] font-semibold leading-snug line-clamp-2 text-gray-900">
+          <h3 dir="auto" className="text-[15px] font-semibold leading-snug truncate text-gray-900">
             {title}
           </h3>
           {/* Description: 13px, 400 weight, 3-line clamp — always rendered to keep spacing consistent */}
-          <p className={`text-[13px] font-normal leading-relaxed line-clamp-3 ${description ? 'text-[#6B7280]' : 'invisible'}`}>
+          <p dir="auto" className={`text-[13px] font-normal leading-relaxed line-clamp-3 ${description ? 'text-[#6B7280]' : 'invisible'}`}>
             {description || 'placeholder'}
           </p>
         </div>

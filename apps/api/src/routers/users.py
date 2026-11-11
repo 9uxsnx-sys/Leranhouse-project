@@ -905,6 +905,7 @@ async def api_get_user_courses(
     user_id: int,
     page: int = Query(default=1, ge=1, description="Page number"),
     limit: int = Query(default=10, ge=1, le=50, description="Items per page (max 50)"),
+    locale: str = Query(None, description="Locale code for course translation"),
 ) -> List[CourseRead]:
     """
     Get courses made or contributed by a user.
@@ -918,6 +919,7 @@ async def api_get_user_courses(
         db_session=db_session,
         page=page,
         limit=limit,
+        locale=locale,
     )
 
 

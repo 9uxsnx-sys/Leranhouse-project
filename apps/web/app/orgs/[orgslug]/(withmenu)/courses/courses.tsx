@@ -9,6 +9,9 @@ import { searchMatchesAny } from '@/lib/search/normalize'
 import { getUserGroups, getUserGroupResources } from '@services/usergroups/usergroups'
 import { usePlan } from '@components/Hooks/usePlan'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
+import useSWR from 'swr'
+import { swrFetcher } from '@services/utils/ts/requests'
+import { getAPIUrl } from '@services/config/config'
 
 // Medusa components
 import {
@@ -28,13 +31,29 @@ interface CourseProps {
 }
 
 function Courses(props: CourseProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const orgslug = props.orgslug
-  const allCourses = props.courses
   const org = useOrg() as any
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const currentPlan = usePlan()
+
+  // SWR: re-fetch courses when locale changes on the client
+  const contentLocale = (i18n.language || 'en').split('-')[0]
+  const { data: swrCourses, mutate } = useSWR(
+    `${getAPIUrl()}courses/org_slug/${orgslug}/page/1/limit/100?locale=${contentLocale}`,
+    (url: string) => swrFetcher(url, access_token),
+    { fallbackData: props.courses, revalidateOnFocus: false, dedupingInterval: 30000 }
+  )
+
+  // Force re-fetch when locale changes
+  useEffect(() => {
+    if (contentLocale) {
+      mutate()
+    }
+  }, [contentLocale, mutate])
+
+  const allCourses = swrCourses || props.courses
 
   // Usergroup filter — only shown on personal/family plans
   const usergroupsAvailable = currentPlan === 'personal' || currentPlan === 'family'
@@ -261,6 +280,7 @@ function Courses(props: CourseProps) {
                 description={course.description || ''}
                 image={imageUrl}
                 lessons={course.extra_metadata?.lessons_count}
+                lessonsLabel={t('collections.lessons')}
                 duration={course.extra_metadata?.duration || ''}
                 difficulty={course.extra_metadata?.difficulty || ''}
               />

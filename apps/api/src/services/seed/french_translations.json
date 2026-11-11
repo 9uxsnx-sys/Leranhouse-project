@@ -1478,5 +1478,153 @@
         "answer": "proxy_pass."
       }
     ]
+  },
+  "One router per resource": {
+    "name": "Un routeur par ressource",
+    "learning_objectives": [
+      "Répartir les routes dans des fichiers avant que le fichier principal devienne illisible",
+      "Monter les routeurs avec un préfixe pour que les chemins restent cohérents",
+      "Trouver le code d'une endpoint en moins de dix secondes"
+    ],
+    "takeaways": [
+      {
+        "title": "Un fichier par ressource",
+        "items": [
+          "Les réservations dans bookings.py, les utilisateurs dans users.py.",
+          "Le nom du fichier est le nom de la ressource.",
+          "Le fichier main enregistre uniquement les routeurs.",
+          "Un relecteur peut trouver une endpoint en lisant les tags."
+        ]
+      },
+      {
+        "title": "Les préfixes appartiennent au routeur",
+        "items": [
+          "Définir le préfixe une fois lors de l'inclusion.",
+          "Les routes à l'intérieur restent courtes.",
+          "Changer un préfixe est une ligne, pas quarante."
+        ]
+      },
+      {
+        "title": "Les tags rendent la documentation utilisable",
+        "items": [
+          "Grouper les endpoints avec un tag.",
+          "La page de documentation reflète votre structure de fichiers."
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "name": "Applications FastAPI plus grandes",
+        "url": "https://fastapi.tiangolo.com/tutorial/bigger-applications/"
+      },
+      {
+        "name": "Référence APIRouter",
+        "url": "https://fastapi.tiangolo.com/reference/apirouter/"
+      },
+      {
+        "name": "Modules Python",
+        "url": "https://docs.python.org/3/tutorial/modules.html"
+      }
+    ],
+    "knowledge_checks": [
+      {
+        "question": "Combien de ressources un fichier routeur doit-il gérer ?",
+        "answer": "Une, nommée d'après la ressource."
+      },
+      {
+        "question": "Où le préfixe /bookings doit-il être déclaré ?",
+        "answer": "Sur le routeur lors de son inclusion, pas sur chaque route."
+      },
+      {
+        "question": "Que fait le fichier principal après la séparation ?",
+        "answer": "Crée l'application et enregistre les routeurs."
+      },
+      {
+        "question": "Que changent les tags ?",
+        "answer": "Comment les endpoints sont regroupées sur la page de documentation."
+      },
+      {
+        "question": "Pourquoi garder les routes courtes dans un routeur ?",
+        "answer": "Le préfixe porte déjà le chemin de la ressource."
+      },
+      {
+        "question": "Quel est le signe que la séparation est nécessaire ?",
+        "answer": "Vous devez faire défiler pour trouver une endpoint."
+      }
+    ]
+  },
+  "Protecting an endpoint end to end": {
+    "name": "Protéger une endpoint de bout en bout",
+    "learning_objectives": [
+      "Câbler une dépendance qui rejette les tokens manquants ou expirés",
+      "Retourner 401 et 403 pour les bonnes raisons",
+      "Le prouver avec deux requêtes, une avec un token et une sans"
+    ],
+    "takeaways": [
+      {
+        "title": "Une dépendance, pas un if",
+        "items": [
+          "Attacher la vérification à la route.",
+          "Le handler ne s'exécute jamais sans elle.",
+          "Copier la vérification dans chaque route invite à l'oubli."
+        ]
+      },
+      {
+        "title": "Savoir quel refus vous envoyez",
+        "items": [
+          "Pas de token ou un mauvais token donne 401.",
+          "Un token valide sans permission donne 403."
+        ]
+      },
+      {
+        "title": "Prouver les trois cas",
+        "items": [
+          "Requête sans token.",
+          "Requête avec un token expiré.",
+          "Requête avec un token valide.",
+          "Une ligne manquante est 404, pas 403."
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "name": "Sécurité FastAPI",
+        "url": "https://fastapi.tiangolo.com/tutorial/security/"
+      },
+      {
+        "name": "Dépendances FastAPI",
+        "url": "https://fastapi.tiangolo.com/tutorial/dependencies/"
+      },
+      {
+        "name": "Authentification OWASP",
+        "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html"
+      }
+    ],
+    "knowledge_checks": [
+      {
+        "question": "Où doit vivre la vérification du token ?",
+        "answer": "Dans une dépendance attachée à la route."
+      },
+      {
+        "question": "Quel code pour une requête sans token ?",
+        "answer": "401 Non autorisé."
+      },
+      {
+        "question": "Quel code pour un token valide sans permission ?",
+        "answer": "403 Interdit."
+      },
+      {
+        "question": "Quel code quand la ligne n'existe pas ?",
+        "answer": "404 Introuvable."
+      },
+      {
+        "question": "Combien de cas devez-vous tester ?",
+        "answer": "Trois : pas de token, token expiré, token valide."
+      },
+      {
+        "question": "Pourquoi éviter de copier la vérification dans chaque handler ?",
+        "answer": "Une route oubliée est une faille, et les dépendances ne peuvent pas être oubliées."
+      }
+    ]
   }
 }

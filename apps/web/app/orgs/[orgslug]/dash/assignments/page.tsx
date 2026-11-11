@@ -63,12 +63,13 @@ const GRADING_TYPE_BADGE: Record<string, { icon: React.ReactNode; labelKey: stri
 };
 
 function AssignmentsHome() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const org = useOrg() as any;
+  const contentLocale = (i18n.language || 'en').split('-')[0]
   const { data: courses } = useSWR(
-    org?.slug && access_token ? `${getAPIUrl()}courses/org_slug/${org.slug}/page/1/limit/50` : null,
+    org?.slug && access_token ? `${getAPIUrl()}courses/org_slug/${org.slug}/page/1/limit/50?locale=${contentLocale}` : null,
     (url) => swrFetcher(url, access_token),
     { revalidateOnFocus: false }
   )

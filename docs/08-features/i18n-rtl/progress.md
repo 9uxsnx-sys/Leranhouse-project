@@ -1,8 +1,8 @@
 # i18n & RTL — Progress & Handoff
 
-> **Last updated:** 2026-10-21
+> **Last updated:** 2026-11-11
 > **Branch:** `feat/learnhouse-1.2.0-custom`
-> **Latest checkpoint:** `504335af` — *feat(podcasts): localize podcasts and episodes, unify episode cards*
+> **Latest checkpoint:** `0b488024` — *fix: add ACTIVITY_TRANSLATIONS with French (fr) locale keys for all 20 lessons*
 > **Companion docs:** [RTL Plan](./rtl-plan.md) (research + strategy), [Content Localization](./content-localization.md), [Collections Localization](./collections-localization.md), [Podcasts Localization](./podcasts-localization.md), [Dashboard Polish](../dashboard-polish/consistency-plan.md)
 
 This is the working log. Read this first when resuming; read `rtl-plan.md` for the reasoning behind the approach.
@@ -113,6 +113,8 @@ This cycle:
 |---|---|---|
 | `cb598e54` | Collections: `collection_translation`, `?locale=` on every read, locale-aware General/SEO, Translations tab, learner listing/detail | done |
 | `504335af` | Podcasts: `podcast_translation` + `podcast_episode_translation`, localized `/meta` and episode list, locale-aware General/Episodes, Translations tab, learner pages, episode card surface | done |
+| `fe324eba` | **Checkpoint:** i18n infrastructure for activity translations, locale-aware module editing (ModuleDetailForm rewrite), activity translation seed builder | done |
+| `0b488024` | **Fix:** add `ACTIVITY_TRANSLATIONS` with French (fr) locale keys for all 20 lessons in seed data | done |
 
 Lesson-page and breadcrumb work from the same cycle (reference for future surfaces):
 
@@ -418,3 +420,59 @@ GET /podcasts/{uuid}/meta?locale=ar       → source podcast, is_fallback=true, 
 | Web service | `services/courses/translations.ts` | `services/courses/collectionTranslations.ts` | `services/podcasts/podcastTranslations.ts` |
 | Hook | `Hooks/useCourseTranslation.ts` | `Hooks/useCollectionTranslation.ts` | `Hooks/usePodcastTranslation.ts` |
 | Translations tab | `EditCourseTranslations.tsx` | `EditCollectionTranslations.tsx` | `EditPodcastTranslations.tsx` |
+
+---
+
+## 13. Latest fixes — SWR stale data and locale-aware re-fetching
+
+### Problem
+
+The home page (`OrgHomeClient`), user profile page (`UserProfileClient`), and course listing page (`courses.tsx`) displayed course/podcast names and descriptions only from the **initial server-rendered props**. Switching the content locale via the language switcher did **not** trigger a client-side re-fetch, so the displayed text remained in the old locale until a full page reload.
+
+Root cause: SWR was configured with `fallbackData` from SSR but had no reactive trigger on locale change. The data was fetched once and never refreshed.
+
+### Fixes applied (uncommitted, on top of `0b488024`)
+
+| File | Change |
+|---|---|
+| `apps/web/components/Objects/Home/OrgHomeClient.tsx` | Added `useSWR` hooks with locale-aware URLs (`?locale=${contentLocale}`) for courses and podcasts. A `useEffect` calls `mutateCourses()` / `mutatePodcasts()` whenever `contentLocale` changes, so the cards update immediately on language switch. |
+| `apps/web/app/orgs/[orgslug]/(withmenu)/courses/courses.tsx` | Added locale-aware SWR re-fetching for the course catalog listing, matching the home page pattern. |
+| `apps/web/app/orgs/[orgslug]/(withmenu)/page.tsx` | Passes `orgslug` prop down to `OrgHomeClient` so it can construct SWR URLs. |
+| `apps/web/app/orgs/[orgslug]/(withmenu)/user/[username]/UserProfileClient.tsx` | Added locale-aware SWR re-fetching for user profile course/podcast lists. |
+| `apps/web/app/orgs/[orgslug]/dash/assignments/page.tsx` | Added locale-aware SWR re-fetching for assignments listing. |
+| `apps/web/services/users/users.ts` | `getCoursesByUser()` now accepts an optional `locale` parameter and appends `&locale=` to the API call. |
+
+**Pattern used (repeat for any future locale-aware list):**
+
+```tsx
+const contentLocale = (i18n.language || 'en').split('-')[0]
+const { data, mutate } = useSWR(
+  `${url}?locale=${contentLocale}`,
+  fetcher,
+  { fallbackData: initialData, revalidateOnFocus: false, dedupingInterval: 30000 }
+)
+useEffect(() => { mutate() }, [contentLocale, mutate])
+```
+
+### Supporting changes
+
+| File | Change |
+|---|---|
+| `apps/web/components/Objects/Thumbnails/CourseCard.tsx` | Added `dir="auto"` to course title and description for correct RTL rendering when the card content is in Arabic while the surrounding UI stays LTR. |
+
+### Activity translation seed data
+
+| File | Change |
+|---|---|
+| `apps/api/src/services/seed/build_activity_translations.py` | Updated to include `ACTIVITY_TRANSLATIONS` in the seed output, mapping French locale keys for all 20 lessons. |
+| `apps/api/src/services/seed/french_translations.json` | French translation strings for all 20 lesson activities (name, description, learning objectives, takeaways, resources, knowledge checks). |
+| `apps/api/src/services/seed/copy.py` | Seed copy logic extended to handle activity translation rows during the seeding process. |
+| `apps/api/src/services/courses/courses.py` | Minor adjustments to course service for activity translation overlay. |
+| `apps/api/src/routers/users.py` | Minor adjustments to user routes for locale-aware course listing. |
+
+### Verification
+
+- Switch language from English to Arabic/French on the home page — course/podcast cards update immediately without page reload.
+- Course card titles and descriptions render with correct base direction (`dir="auto"`) for Arabic content.
+- User profile page shows localized course names when switching locale.
+- Activity translations seed runs cleanly and produces French names/descriptions for all 20 demo lessons.

@@ -67,3 +67,13 @@ apps/api/ee
 
 # Local Medusa v2.18.0 reference source (read-only copy, never committed)
 /medusa/
+
+# Debug / scratch files
+cookies.txt
+*.m4a
+*_report.md
+test_*.ps1
+check_*.py
+debug_*.py
+verify_*.py
+fix-plan.md
