@@ -1,11 +1,12 @@
 import os
-from typing import Annotated
+from typing import Annotated, Optional
 from sqlalchemy import create_engine
-from sqlmodel import SQLModel, Session
+from sqlmodel import SQLModel, Session, select
 import typer
 from config.config import get_learnhouse_config
 from src.db.organizations import OrganizationCreate
 from src.db.users import UserCreate
+from src.db.courses.chapters import Chapter
 from src.services.setup.setup import (
     install_create_organization,
     install_create_organization_user,
@@ -13,6 +14,79 @@ from src.services.setup.setup import (
 )
 
 cli = typer.Typer()
+
+CHAPTER_TRANSLATIONS = {
+    "Introduction": {
+        "fr": {"name": "Introduction", "description": "Deux courtes vidéos avant le début des modules hebdomadaires."},
+        "ar": {"name": "مقدمة", "description": "فيديوين قصيرين قبل بدء الوحدات الأسبوعية."},
+    },
+    "Week 1: A project that starts clean": {
+        "fr": {"name": "Semaine 1 : Un projet qui démarre proprement", "description": "Ce que nous couvrons dans la semaine 1."},
+        "ar": {"name": "الأسبوع 1: مشروع يبدأ بشكل نظيف", "description": "ما نغطيه في الأسبوع 1."},
+    },
+    "Week 2: Requests and responses": {
+        "fr": {"name": "Semaine 2 : Requêtes et réponses", "description": "Ce que nous couvrons dans la semaine 2."},
+        "ar": {"name": "الأسبوع 2: الطلبات والاستجابات", "description": "ما نغطيه في الأسبوع 2."},
+    },
+    "Week 3: Database and migrations": {
+        "fr": {"name": "Semaine 3 : Base de données et migrations", "description": "Ce que nous couvrons dans la semaine 3."},
+        "ar": {"name": "الأسبوع 3: قاعدة البيانات والترحيل", "description": "ما نغطيه في الأسبوع 3."},
+    },
+    "Week 4: Auth and permissions": {
+        "fr": {"name": "Semaine 4 : Authentification et autorisations", "description": "Ce que nous couvrons dans la semaine 4."},
+        "ar": {"name": "الأسبوع 4: المصادقة والأذونات", "description": "ما نغطيه في الأسبوع 4."},
+    },
+    "Week 5: Tests and debugging": {
+        "fr": {"name": "Semaine 5 : Tests et débogage", "description": "Ce que nous couvrons dans la semaine 5."},
+        "ar": {"name": "الأسبوع 5: الاختبارات وتصحيح الأخطاء", "description": "ما نغطيه في الأسبوع 5."},
+    },
+    "Week 6: Deploy and operate": {
+        "fr": {"name": "Semaine 6 : Déploiement et exploitation", "description": "Ce que nous couvrons dans la semaine 6."},
+        "ar": {"name": "الأسبوع 6: النشر والتشغيل", "description": "ما نغطيه في الأسبوع 6."},
+    },
+}
+
+@cli.command()
+def seed_chapter_translations():
+    """Populate extra_metadata.translations for all existing chapters."""
+    learnhouse_config = get_learnhouse_config()
+    engine = create_engine(
+        learnhouse_config.database_config.sql_connection_string, echo=False, pool_pre_ping=True
+    )
+    db_session = Session(engine)
+
+    statement = select(Chapter)
+    chapters = db_session.exec(statement).all()
+
+    updated = 0
+    for chapter in chapters:
+        translations = CHAPTER_TRANSLATIONS.get(chapter.name)
+        if not translations:
+            print(f"  ⏭️  '{chapter.name}' — no translation mapping found, skipping")
+            continue
+
+        meta = chapter.extra_metadata or {}
+        existing = meta.get("translations", {})
+
+        # Only add if not already present
+        changed = False
+        for locale in ("fr", "ar"):
+            if locale not in existing:
+                existing[locale] = translations[locale]
+                changed = True
+
+        if changed:
+            meta["translations"] = existing
+            chapter.extra_metadata = meta
+            db_session.add(chapter)
+            updated += 1
+            print(f"  ✅ '{chapter.name}' — added fr + ar translations")
+        else:
+            print(f"  ⏭️  '{chapter.name}' — translations already exist, skipping")
+
+    db_session.commit()
+    db_session.close()
+    print(f"\nDone. Updated {updated} chapters.")
 
 @cli.command()
 def install(

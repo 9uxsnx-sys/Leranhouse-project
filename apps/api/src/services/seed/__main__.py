@@ -1,4 +1,6 @@
-"""python -m src.services.seed --demo --reset"""
+"""python -m src.services.seed --demo --reset
+   python -m src.services.seed --seed-activity-translations
+"""
 
 from __future__ import annotations
 
@@ -7,6 +9,7 @@ import sys
 from pathlib import Path
 
 from src.services.seed.runner import SeedError, run_demo_seed
+from src.services.seed.seed_activity_translations import seed_activity_translations
 
 
 def main() -> int:
@@ -30,8 +33,18 @@ def main() -> int:
         default=None,
         help="Folder holding your images and optional mp3. Defaults to apps/api/seed-assets.",
     )
+    parser.add_argument(
+        "--seed-activity-translations",
+        action="store_true",
+        help="Inject Arabic translations into existing flagship video activities.",
+    )
     args = parser.parse_args()
 
+    # ── Activity translation migration ──
+    if args.seed_activity_translations:
+        return seed_activity_translations()
+
+    # ── Full demo seed ──
     if not args.demo:
         parser.error("pass --demo to confirm the target")
 

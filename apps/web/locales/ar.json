@@ -3048,6 +3048,7 @@
           "untitled_module": "وحدة بلا عنوان",
           "duplicate_soon": "ميزة التكرار قريباً",
           "duplicate": "تكرار",
+          "edit": "تعديل",
           "no_modules_match": "لا توجد وحدات تطابق بحثك",
           "no_modules": "لا توجد وحدات بعد",
           "try_different_search": "جرّب مصطلح بحث آخر",
@@ -3077,6 +3078,12 @@
           "description_label": "الوصف",
           "description_placeholder": "وصف موجز لمحتوى هذا الدرس",
           "save_error": "فشل حفظ الدرس"
+        },
+        "module_detail": {
+          "name_label": "اسم الوحدة",
+          "description_label": "الوصف",
+          "description_placeholder": "وصف موجز لمحتوى هذه الوحدة",
+          "save_error": "فشل حفظ الوحدة"
         }
       },
       "translations": {

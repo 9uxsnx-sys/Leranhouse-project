@@ -3020,6 +3020,7 @@
           "untitled_module": "Module sans titre",
           "duplicate_soon": "Fonction de duplication bientôt disponible",
           "duplicate": "Dupliquer",
+          "edit": "Modifier",
           "no_modules_match": "Aucun module ne correspond à votre recherche",
           "no_modules": "Aucun module pour le moment",
           "try_different_search": "Essayez un autre terme de recherche",
@@ -3045,6 +3046,12 @@
           "description_label": "Description",
           "description_placeholder": "Brève description du contenu de cette leçon",
           "save_error": "Échec de l'enregistrement de la leçon"
+        },
+        "module_detail": {
+          "name_label": "Nom du module",
+          "description_label": "Description",
+          "description_placeholder": "Brève description du contenu de ce module",
+          "save_error": "Échec de l'enregistrement du module"
         }
       },
       "limit_reached": "Limite de cours atteinte ({{limit}})",

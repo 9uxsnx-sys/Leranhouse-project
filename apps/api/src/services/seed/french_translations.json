@@ -1,0 +1,1482 @@
+{
+  "How this course works": {
+    "name": "Comment fonctionne ce cours",
+    "learning_objectives": [
+      "Voir à quoi ressemblent les six semaines avant de s'engager",
+      "Savoir ce que chaque semaine exige et combien de temps cela prend",
+      "Comprendre à quoi ressemble le résultat final avant de commencer"
+    ],
+    "takeaways": [
+      {
+        "title": "Rythme d'une semaine",
+        "items": [
+          "Vidéo le lundi",
+          "Exercice sur le projet pendant la semaine",
+          "Revue de pull request le vendredi"
+        ]
+      },
+      {
+        "title": "Le projet est le programme",
+        "items": [
+          "Pas d'exercices déconnectés de la réalité",
+          "Chaque concept appris apparaît immédiatement dans le code",
+          "À la fin du cours, vous avez un vrai service à montrer"
+        ]
+      },
+      {
+        "title": "Comment obtenir de l'aide",
+        "items": [
+          "Lisez le message d'erreur à voix haute d'abord",
+          "Posez votre question avec le code que vous avez essayé",
+          "Répondez à quelqu'un d'autre — expliquer approfondit la compréhension"
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "name": "Guide du cours et programme",
+        "url": "https://docs.google.com/document/d/example"
+      },
+      {
+        "name": "Lien vers le dépôt template",
+        "url": "https://github.com/example/backend-starter"
+      },
+      {
+        "name": "Communauté de discussion",
+        "url": "https://community.example.com/course-intro"
+      }
+    ],
+    "knowledge_checks": [
+      {
+        "question": "Combien de semaines dure ce cours ?",
+        "answer": "Six semaines."
+      },
+      {
+        "question": "Quand l'exercice doit-il être envoyé chaque semaine ?",
+        "answer": "Avant jeudi."
+      },
+      {
+        "question": "Que se passe-t-il le vendredi ?",
+        "answer": "Revue des pull requests."
+      },
+      {
+        "question": "Que construisez-vous à la fin du cours ?",
+        "answer": "Un vrai service backend qui tourne sur un serveur."
+      },
+      {
+        "question": "Y a-t-il des cours théoriques séparés ?",
+        "answer": "Non, tout ce que vous apprenez apparaît dans le code que vous écrivez."
+      },
+      {
+        "question": "Quelle est la première chose à faire quand on est bloqué ?",
+        "answer": "Lire le message d'erreur à voix haute."
+      }
+    ]
+  },
+  "What you need before we start": {
+    "name": "Ce qu'il vous faut avant de commencer",
+    "learning_objectives": [
+      "Installer Python et créer un dossier de projet propre",
+      "Configurer git et un dépôt distant avant la première leçon",
+      "Vérifier que tout fonctionne avec une seule commande dans le terminal"
+    ],
+    "takeaways": [
+      {
+        "title": "Les logiciels nécessaires",
+        "items": [
+          "Python 3.11 ou plus récent",
+          "Un éditeur de code — VS Code, PyCharm ou Neovim",
+          "git et de préférence un compte GitHub ou GitLab"
+        ]
+      },
+      {
+        "title": "Structure de dossier avant de commencer",
+        "items": [
+          "Un dossier de projet vide nommé backend-course",
+          "Un fichier README.md avec une phrase décrivant le cours",
+          "Un fichier .gitignore pour éviter de versionner les fichiers inutiles"
+        ]
+      },
+      {
+        "title": "Vérification de l'installation",
+        "items": [
+          "Exécutez python --version dans le terminal",
+          "Exécutez git --version pour vérifier git",
+          "Créez un dépôt vide et poussez un premier commit"
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "name": "Lien de téléchargement Python",
+        "url": "https://www.python.org/downloads/"
+      },
+      {
+        "name": "Lien de téléchargement git",
+        "url": "https://git-scm.com/downloads"
+      },
+      {
+        "name": "Modèle .gitignore pour Python",
+        "url": "https://github.com/github/gitignore/blob/main/Python.gitignore"
+      }
+    ],
+    "knowledge_checks": [
+      {
+        "question": "Quelle est la version minimale de Python requise ?",
+        "answer": "3.11."
+      },
+      {
+        "question": "Pourquoi avez-vous besoin d'un README.md ?",
+        "answer": "Pour expliquer ce que fait le projet à quiconque ouvre le dépôt."
+      },
+      {
+        "question": "À quoi sert un fichier .gitignore ?",
+        "answer": "Il empêche les fichiers temporaires et sensibles d'être versionnés."
+      },
+      {
+        "question": "Quel éditeur de texte est recommandé ?",
+        "answer": "N'importe lequel — VS Code, PyCharm ou Neovim."
+      },
+      {
+        "question": "Comment vérifier que Python est correctement installé ?",
+        "answer": "En exécutant python --version dans le terminal."
+      },
+      {
+        "question": "Que faire si le terminal ne reconnaît pas python ?",
+        "answer": "Vérifiez la variable PATH et redémarrez le terminal."
+      }
+    ]
+  },
+  "Python, dependencies and a folder layout you can live with": {
+    "name": "Python, dépendances et une structure de dossiers durable",
+    "learning_objectives": [
+      "Structurer un projet pour qu'il reste lisible à 10 000 lignes",
+      "Isoler les dépendances avec un environnement virtuel et pyproject.toml",
+      "Écrire un fichier main.py qui se lance et s'arrête proprement"
+    ],
+    "takeaways": [
+      {
+        "title": "Structure de projet",
+        "items": [
+          "Un dossier src/ pour le code, pas des fichiers à la racine",
+          "Un dossier tests/ à côté de src/",
+          "README.md, pyproject.toml et .gitignore à la racine"
+        ]
+      },
+      {
+        "title": "Gestion des dépendances",
+        "items": [
+          "pyproject.toml est le standard moderne",
+          "Un environnement virtuel par projet",
+          "Ne jamais installer de dépendances en global avec pip"
+        ]
+      },
+      {
+        "title": "Point d'entrée",
+        "items": [
+          "main.py est le fichier de démarrage",
+          "Il contient le minimum pour lancer l'application",
+          "if __name__ == '__main__' protège le code contre les imports"
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "name": "Documentation pyproject.toml",
+        "url": "https://packaging.python.org/en/latest/tutorials/packaging-projects/"
+      },
+      {
+        "name": "Guide des environnements virtuels",
+        "url": "https://docs.python.org/3/tutorial/venv.html"
+      },
+      {
+        "name": "Modèle de structure de projet",
+        "url": "https://github.com/cookiecutter/cookiecutter"
+      }
+    ],
+    "knowledge_checks": [
+      {
+        "question": "Où doit se trouver le code source ?",
+        "answer": "Dans un dossier src/."
+      },
+      {
+        "question": "Où placer les tests ?",
+        "answer": "Dans un dossier tests/ à côté de src/."
+      },
+      {
+        "question": "Pourquoi pyproject.toml plutôt que requirements.txt ?",
+        "answer": "C'est le standard moderne qui gère à la fois les dépendances et la configuration."
+      },
+      {
+        "question": "Quel est l'intérêt d'un environnement virtuel ?",
+        "answer": "Isoler les dépendances de chaque projet pour éviter les conflits."
+      },
+      {
+        "question": "Quel bloc protège le code d'exécution lors d'un import ?",
+        "answer": "if __name__ == '__main__'."
+      },
+      {
+        "question": "Comment gérer les secrets dans la configuration ?",
+        "answer": "Variables d'environnement, pas de valeurs en dur."
+      }
+    ]
+  },
+  "Git commits that tell the truth": {
+    "name": "Les commits git qui disent la vérité",
+    "learning_objectives": [
+      "Faire des commits atomiques dont chaque message explique le pourquoi",
+      "Travailler avec des branches sans paniquer",
+      "Écrire un README qui aide le prochain développeur"
+    ],
+    "takeaways": [
+      {
+        "title": "Un bon commit",
+        "items": [
+          "Un commit = un changement logique",
+          "Le message explique pourquoi, pas quoi",
+          "Moins de 50 caractères pour le titre, un corps si nécessaire"
+        ]
+      },
+      {
+        "title": "Stratégie de branches",
+        "items": [
+          "main est toujours déployable",
+          "Une branche par fonctionnalité ou correctif",
+          "Rebase avant de merger pour garder un historique linéaire"
+        ]
+      },
+      {
+        "title": "Pull requests utiles",
+        "items": [
+          "Un titre clair et une description du changement",
+          "Référencez l'issue si elle existe",
+          "Revue par quelqu'un d'autre avant de merger"
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "name": "Conventions de commit",
+        "url": "https://www.conventionalcommits.org/"
+      },
+      {
+        "name": "Guide des stratégies de branches",
+        "url": "https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow"
+      },
+      {
+        "name": "Documentation git",
+        "url": "https://git-scm.com/doc"
+      }
+    ],
+    "knowledge_checks": [
+      {
+        "question": "Quelle est la bonne taille pour un commit ?",
+        "answer": "Un seul changement logique par commit."
+      },
+      {
+        "question": "Que doit expliquer le message de commit ?",
+        "answer": "Le pourquoi du changement, pas le quoi."
+      },
+      {
+        "question": "Pourquoi une branche par fonctionnalité ?",
+        "answer": "Pour isoler le travail et faciliter la revue."
+      },
+      {
+        "question": "Qu'est-ce qu'un historique linéaire ?",
+        "answer": "Un historique sans merges superflus, obtenu par rebase."
+      },
+      {
+        "question": "Pourquoi faire une revue avant de merger ?",
+        "answer": "Pour détecter les erreurs et partager la connaissance."
+      },
+      {
+        "question": "Quand utiliser git rebase ?",
+        "answer": "Pour intégrer les derniers changements de main dans votre branche."
+      }
+    ]
+  },
+  "Writing your first endpoint": {
+    "name": "Écrire votre première endpoint",
+    "learning_objectives": [
+      "Créer une endpoint GET qui renvoie une réponse JSON",
+      "Lancer le serveur et tester l'endpoint avec le navigateur ou curl",
+      "Relier une route à une fonction Python qui fait quelque chose d'utile"
+    ],
+    "takeaways": [
+      {
+        "title": "La plus petite endpoint",
+        "items": [
+          "from fastapi import FastAPI puis app = FastAPI()",
+          "Le décorateur @app.get('/health') définit la route",
+          "La fonction retourne un dictionnaire converti automatiquement en JSON"
+        ]
+      },
+      {
+        "title": "Lancez-la et testez-la",
+        "items": [
+          "uvicorn main:app --reload démarre le serveur",
+          "curl http://localhost:8000/health teste l'endpoint",
+          "La documentation automatique est disponible sur /docs"
+        ]
+      },
+      {
+        "title": "Des routes qui ont du sens",
+        "items": [
+          "Chaque route exprime une ressource unique",
+          "Noms au pluriel pour les ressources : /items, /users",
+          "Routes imbriquées pour les relations : /users/{id}/orders"
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "name": "Documentation FastAPI - Premiers pas",
+        "url": "https://fastapi.tiangolo.com/tutorial/first-steps/"
+      },
+      {
+        "name": "Documentation uvicorn",
+        "url": "https://www.uvicorn.org/"
+      },
+      {
+        "name": "Tester les endpoints avec curl",
+        "url": "https://curl.se/docs/manual.html"
+      }
+    ],
+    "knowledge_checks": [
+      {
+        "question": "Quel décorateur crée une endpoint GET ?",
+        "answer": "@app.get('/path')"
+      },
+      {
+        "question": "Quelle commande lance le serveur FastAPI ?",
+        "answer": "uvicorn main:app --reload"
+      },
+      {
+        "question": "Où trouver la documentation automatique de l'API ?",
+        "answer": "Sur /docs."
+      },
+      {
+        "question": "Que retourne une fonction de route par défaut ?",
+        "answer": "Un dictionnaire Python converti en JSON."
+      },
+      {
+        "question": "Pourquoi utiliser des noms au pluriel pour les ressources ?",
+        "answer": "Pour exprimer un ensemble de ressources plutôt qu'une seule."
+      },
+      {
+        "question": "Quand faut-il redémarrer le serveur ?",
+        "answer": "Quand le code change, mais --reload le fait automatiquement."
+      }
+    ]
+  },
+  "Paths, query strings and request bodies": {
+    "name": "Chemins, paramètres de requête et corps de requête",
+    "learning_objectives": [
+      "Gérer les variables de chemin et les paramètres optionnels dans la requête",
+      "Lire et valider un corps de requête JSON à l'entrée",
+      "Distinguer les données qui vont dans le chemin de celles qui vont dans le corps"
+    ],
+    "takeaways": [
+      {
+        "title": "Variables de chemin",
+        "items": [
+          "/{id} dans le chemin devient un paramètre de fonction",
+          "FastAPI déduit le type des annotations",
+          "Validation automatique — id doit être un entier"
+        ]
+      },
+      {
+        "title": "Paramètres de requête",
+        "items": [
+          "Ils suivent le ? dans l'URL",
+          "Valeurs optionnelles avec valeur par défaut",
+          "Idéaux pour le filtrage et la pagination"
+        ]
+      },
+      {
+        "title": "Corps de la requête",
+        "items": [
+          "Envoyé avec les requêtes POST, PUT et PATCH",
+          "Analysé via un modèle Pydantic",
+          "La validation a lieu avant qu'il n'atteigne votre fonction"
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "name": "Documentation FastAPI - Paramètres de chemin",
+        "url": "https://fastapi.tiangolo.com/tutorial/path-params/"
+      },
+      {
+        "name": "Documentation FastAPI - Paramètres de requête",
+        "url": "https://fastapi.tiangolo.com/tutorial/query-params/"
+      },
+      {
+        "name": "Documentation FastAPI - Corps de requête",
+        "url": "https://fastapi.tiangolo.com/tutorial/body/"
+      }
+    ],
+    "knowledge_checks": [
+      {
+        "question": "Comment définir une variable de chemin dans FastAPI ?",
+        "answer": "En l'ajoutant entre accolades dans le chemin : /items/{id}"
+      },
+      {
+        "question": "Les paramètres de requête sont-ils obligatoires ou optionnels ?",
+        "answer": "Optionnels avec une valeur par défaut."
+      },
+      {
+        "question": "Où placer les données lors de la création d'une ressource ?",
+        "answer": "Dans le corps de la requête (request body)."
+      },
+      {
+        "question": "Que se passe-t-il si on envoie un corps de requête invalide ?",
+        "answer": "FastAPI retourne automatiquement une erreur de validation."
+      },
+      {
+        "question": "Comment FastAPI déduit-il le type d'un paramètre de chemin ?",
+        "answer": "Grâce aux annotations de type dans la fonction de route."
+      },
+      {
+        "question": "Quelle est la différence entre paramètres de chemin et de requête ?",
+        "answer": "Le chemin identifie la ressource, la requête spécifie des options supplémentaires."
+      }
+    ]
+  },
+  "Pydantic models that do not lie": {
+    "name": "Les modèles Pydantic qui ne mentent pas",
+    "learning_objectives": [
+      "Définir un modèle Pydantic avec des champs et types explicites",
+      "Valider les données entrantes à la frontière de l'application",
+      "Utiliser le même modèle comme schéma de réponse pour garantir la cohérence"
+    ],
+    "takeaways": [
+      {
+        "title": "Définition du modèle",
+        "items": [
+          "class Item(BaseModel): puis les champs",
+          "Chaque champ a un type explicite",
+          "Valeurs par défaut pour les champs optionnels"
+        ]
+      },
+      {
+        "title": "Validation à la frontière",
+        "items": [
+          "Les mauvaises données sont rejetées avant la logique métier",
+          "Messages d'erreur clairs et utiles",
+          "Pas besoin de vérification manuelle dans votre fonction"
+        ]
+      },
+      {
+        "title": "Un modèle, deux usages",
+        "items": [
+          "Il accepte et valide les données de la requête",
+          "Il formate la structure de la réponse",
+          "Il garantit une API cohérente sur chaque endpoint"
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "name": "Documentation Pydantic",
+        "url": "https://docs.pydantic.dev/latest/"
+      },
+      {
+        "name": "Documentation FastAPI - Modèles",
+        "url": "https://fastapi.tiangolo.com/tutorial/body/"
+      },
+      {
+        "name": "Types de champs Pydantic",
+        "url": "https://docs.pydantic.dev/latest/concepts/fields/"
+      }
+    ],
+    "knowledge_checks": [
+      {
+        "question": "De quelle classe héritent les modèles Pydantic ?",
+        "answer": "BaseModel."
+      },
+      {
+        "question": "Que se passe-t-il quand on envoie des données qui ne correspondent pas au modèle ?",
+        "answer": "FastAPI retourne une erreur de validation avec les détails du problème."
+      },
+      {
+        "question": "Peut-on utiliser le même modèle pour la requête et la réponse ?",
+        "answer": "Oui, ou on peut définir des modèles séparés pour chaque cas."
+      },
+      {
+        "question": "Comment rendre un champ optionnel dans Pydantic ?",
+        "answer": "En lui donnant une valeur par défaut ou en utilisant Optional avec None."
+      },
+      {
+        "question": "Pourquoi valider à la frontière de l'application ?",
+        "answer": "Pour garantir que les mauvaises données n'atteignent pas la base de données ou la logique métier."
+      },
+      {
+        "question": "Que signifie 'les modèles Pydantic ne mentent pas' ?",
+        "answer": "Le modèle reflète exactement la forme des données et ne cache rien."
+      }
+    ]
+  },
+  "Error responses people can act on": {
+    "name": "Des réponses d'erreur exploitables",
+    "learning_objectives": [
+      "Retourner des codes HTTP pertinents pour chaque situation",
+      "Construire un corps d'erreur cohérent que le client peut analyser",
+      "Gérer les erreurs courantes : introuvable, non autorisé, mauvaise requête"
+    ],
+    "takeaways": [
+      {
+        "title": "Les bons codes de statut",
+        "items": [
+          "404 pour les ressources introuvables",
+          "400 pour les mauvaises requêtes",
+          "401 et 403 pour les problèmes d'autorisation"
+        ]
+      },
+      {
+        "title": "Corps d'erreur cohérent",
+        "items": [
+          "detail décrit le problème en langage humain",
+          "Même structure sur chaque endpoint",
+          "Le client sait où chercher le message"
+        ]
+      },
+      {
+        "title": "Gestion centralisée des erreurs",
+        "items": [
+          "Un seul gestionnaire pour le 404 au niveau de l'application",
+          "Un gestionnaire pour la validation Pydantic",
+          "Ne laissez pas FastAPI retourner l'erreur par défaut sans personnalisation"
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "name": "Codes de statut HTTP",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status"
+      },
+      {
+        "name": "Documentation FastAPI - Gestion des erreurs",
+        "url": "https://fastapi.tiangolo.com/tutorial/handling-errors/"
+      },
+      {
+        "name": "Bonnes pratiques pour les erreurs REST API",
+        "url": "https://www.rfc-editor.org/rfc/rfc7807"
+      }
+    ],
+    "knowledge_checks": [
+      {
+        "question": "Quel code de statut pour une ressource introuvable ?",
+        "answer": "404."
+      },
+      {
+        "question": "Quelle est la différence entre 401 et 403 ?",
+        "answer": "401 non authentifié, 403 non autorisé."
+      },
+      {
+        "question": "Où placer la description de l'erreur dans la réponse ?",
+        "answer": "Dans le champ detail."
+      },
+      {
+        "question": "Pourquoi vouloir un corps d'erreur cohérent ?",
+        "answer": "Pour que le client puisse traiter les erreurs de manière uniforme."
+      },
+      {
+        "question": "Quel code de statut pour des données de requête invalides ?",
+        "answer": "400."
+      },
+      {
+        "question": "Que faire quand l'application ne trouve pas une ressource ?",
+        "answer": "Lever une HTTPException avec le code 404."
+      }
+    ]
+  },
+  "Tables, keys and the shape of a user": {
+    "name": "Tables, clés et la forme d'un utilisateur",
+    "learning_objectives": [
+      "Concevoir une table utilisateur avec des champs et types appropriés",
+      "Choisir une clé primaire et des clés étrangères pour les relations",
+      "Écrire une requête INSERT et retourner la ligne créée"
+    ],
+    "takeaways": [
+      {
+        "title": "Bases d'une table",
+        "items": [
+          "Chaque table représente une entité unique",
+          "id comme clé primaire de type UUID",
+          "created_at et updated_at dans chaque table"
+        ]
+      },
+      {
+        "title": "Les clés étrangères relient les tables",
+        "items": [
+          "user_id dans la table commandes référence users(id)",
+          "L'intégrité est appliquée au niveau de la base de données",
+          "ON DELETE CASCADE ou SET NULL selon le besoin"
+        ]
+      },
+      {
+        "title": "La forme d'un utilisateur",
+        "items": [
+          "email doit être unique",
+          "password_hash — jamais le mot de passe en clair",
+          "is_active pour désactiver les comptes plutôt que les supprimer"
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "name": "Types de données Postgres",
+        "url": "https://www.postgresql.org/docs/current/datatype.html"
+      },
+      {
+        "name": "Clés étrangères",
+        "url": "https://www.postgresql.org/docs/current/tutorial-fk.html"
+      },
+      {
+        "name": "UUID dans Postgres",
+        "url": "https://www.postgresql.org/docs/current/datatype-uuid.html"
+      }
+    ],
+    "knowledge_checks": [
+      {
+        "question": "Pourquoi utiliser UUID plutôt que integer pour les clés primaires ?",
+        "answer": "Pour éviter la devinette des identifiants et faciliter la fusion de données."
+      },
+      {
+        "question": "Quelles colonnes trouve-t-on généralement dans chaque table ?",
+        "answer": "created_at et updated_at."
+      },
+      {
+        "question": "Comment reliez-vous une table de commandes à une table d'utilisateurs ?",
+        "answer": "Avec une clé étrangère user_id qui référence users(id)."
+      },
+      {
+        "question": "Que stockez-vous à la place du mot de passe en clair ?",
+        "answer": "Un hash crypté du mot de passe."
+      },
+      {
+        "question": "Pourquoi rendre l'email unique ?",
+        "answer": "Pour garantir qu'il n'y a pas deux comptes avec le même email."
+      },
+      {
+        "question": "À quoi sert ON DELETE CASCADE ?",
+        "answer": "Quand un utilisateur est supprimé, toutes ses données associées sont automatiquement supprimées."
+      }
+    ]
+  },
+  "Queries without guessing": {
+    "name": "Des requêtes sans supposition",
+    "learning_objectives": [
+      "Écrire une requête SELECT qui ne retourne que ce dont vous avez besoin",
+      "Utiliser les paramètres liés pour prévenir les injections SQL",
+      "Comprendre la différence entre un JOIN et deux requêtes séparées"
+    ],
+    "takeaways": [
+      {
+        "title": "SELECT précis",
+        "items": [
+          "Ne faites pas SELECT * — nommez les colonnes",
+          "LIMIT et OFFSET pour la pagination",
+          "WHERE filtre au niveau de la base, pas dans votre code"
+        ]
+      },
+      {
+        "title": "Paramètres liés",
+        "items": [
+          "Ne concaténez jamais de chaînes dans une requête",
+          "Utilisez :param ou %s selon la bibliothèque",
+          "La base de données échappe automatiquement les valeurs"
+        ]
+      },
+      {
+        "title": "JOIN vs requêtes séparées",
+        "items": [
+          "JOIN est une seule opération, deux requêtes sont deux allers-retours",
+          "Les JOINs peuvent être lents si les tables sont grandes",
+          "Parfois deux requêtes simples sont plus rapides qu'un JOIN complexe"
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "name": "Documentation SQL SELECT",
+        "url": "https://www.postgresql.org/docs/current/sql-select.html"
+      },
+      {
+        "name": "Prévention des injections SQL",
+        "url": "https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html"
+      },
+      {
+        "name": "Guide des JOINs",
+        "url": "https://www.postgresql.org/docs/current/tutorial-join.html"
+      }
+    ],
+    "knowledge_checks": [
+      {
+        "question": "Pourquoi éviter SELECT * ?",
+        "answer": "Pour ne retourner que les colonnes nécessaires et éviter les surprises."
+      },
+      {
+        "question": "Comment empêcher les injections SQL ?",
+        "answer": "Avec des paramètres liés, jamais de concaténation."
+      },
+      {
+        "question": "Quelle est la différence entre JOIN et deux requêtes ?",
+        "answer": "Un JOIN est un seul aller-retour, deux requêtes en font deux."
+      },
+      {
+        "question": "Quand utiliser LIMIT et OFFSET ?",
+        "answer": "Pour la pagination des résultats."
+      },
+      {
+        "question": "Où doit se faire le filtrage des données ?",
+        "answer": "Dans la base de données avec WHERE, pas dans le code applicatif."
+      },
+      {
+        "question": "Quand deux requêtes simples sont-elles préférables ?",
+        "answer": "Quand un JOIN complexe ralentit la requête."
+      }
+    ]
+  },
+  "Migrations you can run twice": {
+    "name": "Des migrations exécutables deux fois",
+    "learning_objectives": [
+      "Écrire une migration qui ajoute une table ou une colonne en toute sécurité",
+      "Rendre la migration réexécutable — si on la lance deux fois, elle ne casse rien",
+      "Comprendre le rollback d'une migration avant d'en avoir besoin"
+    ],
+    "takeaways": [
+      {
+        "title": "Migrations sûres",
+        "items": [
+          "Utilisez IF NOT EXISTS pour ajouter des tables",
+          "Utilisez IF EXISTS pour les suppressions",
+          "Chaque migration a un rollback correspondant"
+        ]
+      },
+      {
+        "title": "Réexécutabilité",
+        "items": [
+          "Lancer la migration deux fois ne doit pas changer le résultat",
+          "Vérifiez que la colonne n'existe pas avant de l'ajouter",
+          "Testez la migration sur une copie de la base"
+        ]
+      },
+      {
+        "title": "Rollback",
+        "items": [
+          "Testez le rollback avant d'en avoir besoin",
+          "Assurez-vous que le rollback restaure les données nécessaires",
+          "Le rollback n'est pas une sauvegarde — vous avez une sauvegarde séparée"
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "name": "Documentation Alembic",
+        "url": "https://alembic.sqlalchemy.org/"
+      },
+      {
+        "name": "Modèles de migration",
+        "url": "https://www.postgresql.org/docs/current/ddl.html"
+      },
+      {
+        "name": "Migrations sécurisées",
+        "url": "https://medium.com/@rbranson/10-tips-for-writing-database-migrations"
+      }
+    ],
+    "knowledge_checks": [
+      {
+        "question": "Pourquoi utiliser IF NOT EXISTS ?",
+        "answer": "Pour garantir que la migration n'échoue pas si elle est exécutée deux fois."
+      },
+      {
+        "question": "Que doit contenir chaque migration ?",
+        "answer": "Les instructions d'application et les instructions de rollback."
+      },
+      {
+        "question": "Le rollback remplace-t-il la sauvegarde ?",
+        "answer": "Non, le rollback et la sauvegarde sont deux choses différentes."
+      },
+      {
+        "question": "Comment tester une migration avant de l'appliquer en production ?",
+        "answer": "En l'exécutant sur une copie de la base de production."
+      },
+      {
+        "question": "Quand faut-il écrire une migration ?",
+        "answer": "Quand on ajoute une table, une colonne ou qu'on modifie le schéma de la base."
+      },
+      {
+        "question": "Quel est le risque de supprimer une colonne sans migration ?",
+        "answer": "L'application peut planter si elle référence encore cette colonne."
+      }
+    ]
+  },
+  "Passwords, hashing and what never goes in a log": {
+    "name": "Mots de passe, hachage et ce qui ne va jamais dans un log",
+    "learning_objectives": [
+      "Hacher les mots de passe au lieu de les stocker en clair",
+      "Vérifier le mot de passe à la connexion de manière sécurisée",
+      "Empêcher les données sensibles de fuiter dans les logs"
+    ],
+    "takeaways": [
+      {
+        "title": "Hachage, pas chiffrement",
+        "items": [
+          "Utilisez bcrypt ou Argon2",
+          "Jamais SHA ou MD5 pour les mots de passe",
+          "Chaque mot de passe a un salt unique"
+        ]
+      },
+      {
+        "title": "Vérification de connexion",
+        "items": [
+          "Cherchez l'utilisateur par email",
+          "Vérifiez le hash avec une bibliothèque spécialisée",
+          "Utilisez une réponse uniforme pour ne pas révéler l'existence de l'utilisateur"
+        ]
+      },
+      {
+        "title": "Ce qui ne va jamais dans un log",
+        "items": [
+          "Les mots de passe, même erronés",
+          "Les tokens JWT ou clés d'API",
+          "Les données de carte de crédit ou informations personnelles sensibles"
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "name": "bcrypt en Python",
+        "url": "https://pypi.org/project/bcrypt/"
+      },
+      {
+        "name": "OWASP - Stockage des mots de passe",
+        "url": "https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html"
+      },
+      {
+        "name": "Argon2 en Python",
+        "url": "https://pypi.org/project/argon2-cffi/"
+      }
+    ],
+    "knowledge_checks": [
+      {
+        "question": "Quelle bibliothèque est recommandée pour hacher les mots de passe ?",
+        "answer": "bcrypt ou Argon2."
+      },
+      {
+        "question": "Pourquoi ne pas utiliser SHA pour les mots de passe ?",
+        "answer": "Parce que c'est trop rapide et donc facile à casser."
+      },
+      {
+        "question": "Faut-il journaliser le mot de passe erroné en cas d'échec de connexion ?",
+        "answer": "Non, jamais."
+      },
+      {
+        "question": "Qu'est-ce qu'un salt dans le hachage de mot de passe ?",
+        "answer": "Une valeur aléatoire ajoutée à chaque mot de passe pour rendre chaque hash unique."
+      },
+      {
+        "question": "Pourquoi utiliser une réponse uniforme en cas d'échec de connexion ?",
+        "answer": "Pour ne pas révéler si l'utilisateur existe ou non."
+      },
+      {
+        "question": "Que faire si vous trouvez un mot de passe dans les logs ?",
+        "answer": "Faire tourner la clé immédiatement et corriger la cause de la fuite."
+      }
+    ]
+  },
+  "Tokens and refresh without confusion": {
+    "name": "Tokens et refresh sans confusion",
+    "learning_objectives": [
+      "Créer un token JWT avec une expiration courte et une signature valide",
+      "Implémenter un endpoint de refresh qui délivre un nouveau token",
+      "Protéger les routes avec une dépendance qui vérifie le token"
+    ],
+    "takeaways": [
+      {
+        "title": "Structure d'un JWT",
+        "items": [
+          "Header + payload + signature",
+          "Le payload contient l'identité et les claims",
+          "La signature prouve que le token n'a pas été modifié"
+        ]
+      },
+      {
+        "title": "Access et refresh tokens",
+        "items": [
+          "Access token : courte durée (15 minutes)",
+          "Refresh token : longue durée (7 jours)",
+          "Le refresh token est révocable, pas l'access token"
+        ]
+      },
+      {
+        "title": "Protection des routes",
+        "items": [
+          "Une dépendance FastAPI vérifie le token",
+          "Elle extrait l'utilisateur actuel de la requête",
+          "Si le token est invalide, la route n'est jamais appelée"
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "name": "Introduction à JWT",
+        "url": "https://jwt.io/introduction"
+      },
+      {
+        "name": "Documentation PyJWT",
+        "url": "https://pyjwt.readthedocs.io/"
+      },
+      {
+        "name": "Bonnes pratiques JWT",
+        "url": "https://auth0.com/blog/refresh-tokens-what-are-they-and-when-to-use-them/"
+      }
+    ],
+    "knowledge_checks": [
+      {
+        "question": "De quelles parties se compose un JWT ?",
+        "answer": "Header + payload + signature."
+      },
+      {
+        "question": "Quelle est la durée de vie typique d'un access token ?",
+        "answer": "15 minutes."
+      },
+      {
+        "question": "Quelle est la durée de vie typique d'un refresh token ?",
+        "answer": "7 jours."
+      },
+      {
+        "question": "Le refresh token est-il révocable ?",
+        "answer": "Oui, contrairement à l'access token."
+      },
+      {
+        "question": "Comment protéger une route avec FastAPI ?",
+        "answer": "Avec une dépendance qui vérifie le token."
+      },
+      {
+        "question": "Que se passe-t-il si le token est invalide ?",
+        "answer": "La route n'est jamais appelée et une erreur 401 est retournée."
+      }
+    ]
+  },
+  "Roles and the checks people forget": {
+    "name": "Rôles et vérifications qu'on oublie",
+    "learning_objectives": [
+      "Ajouter un champ rôle à la table utilisateur",
+      "Écrire une dépendance de vérification de rôle réutilisable",
+      "Vérifier le rôle dans les routes qui le nécessitent"
+    ],
+    "takeaways": [
+      {
+        "title": "Modèle de rôles",
+        "items": [
+          "Un champ role dans la table utilisateur",
+          "Rôles simples : admin, editor, viewer",
+          "Évitez les rôles trop nombreux — trois suffisent souvent"
+        ]
+      },
+      {
+        "title": "Vérification en dépendance",
+        "items": [
+          "Créez une dépendance require_role('admin')",
+          "Elle vérifie le rôle après l'authentification",
+          "Réutilisable sur toutes les routes qui en ont besoin"
+        ]
+      },
+      {
+        "title": "Pièges courants",
+        "items": [
+          "Oublier de vérifier le rôle sur une route sensible",
+          "Vérifier le rôle après avoir déjà traité les données",
+          "Hardcoder les noms de rôles au lieu d'utiliser des constantes"
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "name": "FastAPI - Dépendances",
+        "url": "https://fastapi.tiangolo.com/tutorial/dependencies/"
+      },
+      {
+        "name": "Contrôle d'accès par rôle",
+        "url": "https://en.wikipedia.org/wiki/Role-based_access_control"
+      },
+      {
+        "name": "Sécurité des API",
+        "url": "https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html"
+      }
+    ],
+    "knowledge_checks": [
+      {
+        "question": "Où stocker le rôle d'un utilisateur ?",
+        "answer": "Dans un champ role de la table utilisateur."
+      },
+      {
+        "question": "Combien de rôles sont généralement suffisants ?",
+        "answer": "Trois : admin, editor, viewer."
+      },
+      {
+        "question": "Comment vérifier le rôle dans FastAPI ?",
+        "answer": "Avec une dépendance require_role('admin') réutilisable."
+      },
+      {
+        "question": "Quand doit-on vérifier le rôle ?",
+        "answer": "Après l'authentification, avant de traiter les données."
+      },
+      {
+        "question": "Quel est le piège le plus courant avec les rôles ?",
+        "answer": "Oublier de vérifier le rôle sur une route sensible."
+      },
+      {
+        "question": "Pourquoi utiliser des constantes pour les noms de rôles ?",
+        "answer": "Pour éviter les fautes de frappe et faciliter la maintenance."
+      }
+    ]
+  },
+  "Your first test that catches a real bug": {
+    "name": "Votre premier test qui attrape un vrai bug",
+    "learning_objectives": [
+      "Écrire un test qui échoue d'abord, puis le faire passer",
+      "Utiliser le client de test FastAPI pour simuler des requêtes HTTP",
+      "Tester une endpoint entière, de la requête à la réponse"
+    ],
+    "takeaways": [
+      {
+        "title": "Test qui échoue d'abord",
+        "items": [
+          "Écrivez le test avant le correctif",
+          "Voyez-le échouer — vous savez qu'il teste quelque chose",
+          "Faites-le passer avec le minimum de code"
+        ]
+      },
+      {
+        "title": "Client de test FastAPI",
+        "items": [
+          "from fastapi.testclient import TestClient",
+          "Simule des requêtes HTTP sans lancer de serveur",
+          "Accès à la requête et à la réponse pour les assertions"
+        ]
+      },
+      {
+        "title": "Ce qu'il faut tester",
+        "items": [
+          "Le code de statut",
+          "La structure de la réponse",
+          "Le contenu quand il est déterministe"
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "name": "Documentation FastAPI - Tests",
+        "url": "https://fastapi.tiangolo.com/tutorial/testing/"
+      },
+      {
+        "name": "Documentation pytest",
+        "url": "https://docs.pytest.org/"
+      },
+      {
+        "name": "Client HTTP pytest",
+        "url": "https://httpx.readthedocs.io/"
+      }
+    ],
+    "knowledge_checks": [
+      {
+        "question": "Quelle est la première étape pour écrire un test ?",
+        "answer": "Écrire un test qui échoue."
+      },
+      {
+        "question": "Quelle classe de FastAPI permet de tester sans serveur ?",
+        "answer": "TestClient."
+      },
+      {
+        "question": "Que devez-vous vérifier dans une réponse d'API ?",
+        "answer": "Le code de statut, la structure et le contenu."
+      },
+      {
+        "question": "Pourquoi voir le test échouer d'abord ?",
+        "answer": "Pour être sûr qu'il teste vraiment quelque chose."
+      },
+      {
+        "question": "Quel outil de test est recommandé avec FastAPI ?",
+        "answer": "pytest."
+      },
+      {
+        "question": "Quand le test est-il suffisant ?",
+        "answer": "Quand il échoue sur le bug et passe après le correctif."
+      }
+    ]
+  },
+  "Fixtures and a separate test database": {
+    "name": "Fixtures et une base de données de test séparée",
+    "learning_objectives": [
+      "Configurer une base de données de test qui se crée et se détruit à chaque session",
+      "Écrire des fixtures pytest réutilisables pour les modèles fréquents",
+      "Comprendre l'isolation des tests — un test qui en influence un autre est un test cassé"
+    ],
+    "takeaways": [
+      {
+        "title": "Base de test séparée",
+        "items": [
+          "Une base dédiée aux tests, jamais la base de développement",
+          "Créez les tables au début, supprimez-les à la fin",
+          "Chaque test commence avec des données propres"
+        ]
+      },
+      {
+        "title": "Fixtures réutilisables",
+        "items": [
+          "@pytest.fixture crée une fixture",
+          "Les fixtures peuvent dépendre d'autres fixtures",
+          "Une fixture user_session vous évite de recréer l'utilisateur partout"
+        ]
+      },
+      {
+        "title": "Isolation des tests",
+        "items": [
+          "Un test ne doit pas dépendre d'un autre test",
+          "Chaque test crée ses propres données",
+          "Si l'ordre d'exécution change les résultats, vos tests sont fragiles"
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "name": "Documentation pytest fixtures",
+        "url": "https://docs.pytest.org/en/stable/fixture.html"
+      },
+      {
+        "name": "Configuration d'une base de test",
+        "url": "https://docs.sqlalchemy.org/en/20/orm/session_basics.html"
+      },
+      {
+        "name": "Tests avec base de données",
+        "url": "https://madewithml.com/courses/mlops/testing/#database-testing"
+      }
+    ],
+    "knowledge_checks": [
+      {
+        "question": "Où les tests doivent-ils s'exécuter ?",
+        "answer": "Sur une base de données dédiée aux tests."
+      },
+      {
+        "question": "Que crée une fonction décorée par @pytest.fixture ?",
+        "answer": "Une fixture réutilisable."
+      },
+      {
+        "question": "Un test peut-il dépendre d'un autre test ?",
+        "answer": "Non, chaque test doit être indépendant."
+      },
+      {
+        "question": "Comment s'assurer que les tests sont isolés ?",
+        "answer": "Chaque test crée ses propres données."
+      },
+      {
+        "question": "Quand les tables doivent-elles être créées ?",
+        "answer": "Au début de la session de test."
+      },
+      {
+        "question": "Pourquoi une fixture user_session est-elle utile ?",
+        "answer": "Pour éviter de recréer un utilisateur et une session dans chaque test."
+      }
+    ]
+  },
+  "Reading a stack trace calmly": {
+    "name": "Lire une trace de pile calmement",
+    "learning_objectives": [
+      "Lire une trace de pile du bas vers le haut pour trouver l'origine",
+      "Distinguer l'erreur réelle de ses symptômes",
+      "Utiliser un débogueur ou des impressions stratégiques sans paniquer"
+    ],
+    "takeaways": [
+      {
+        "title": "Lire la trace",
+        "items": [
+          "Commencez par le bas de la trace",
+          "Le haut est le symptôme, le bas est la cause",
+          "Cherchez votre fichier dans la pile — c'est là que se trouve votre bug"
+        ]
+      },
+      {
+        "title": "Erreur vs symptôme",
+        "items": [
+          "AttributeError: NoneType has no attribute X signifie que quelque chose était None",
+          "KeyError signifie que la clé n'existe pas dans le dictionnaire",
+          "L'erreur réelle est souvent quelques lignes plus bas que la dernière ligne"
+        ]
+      },
+      {
+        "title": "Déboguer sans stress",
+        "items": [
+          "Ajoutez des print() ou utilisez logging",
+          "Un point d'arrêt avec un débogueur est plus efficace que 50 print()",
+          "Expliquez le problème à voix haute ou à un canard en caoutchouc"
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "name": "Guide de débogage Python",
+        "url": "https://realpython.com/python-debugging/"
+      },
+      {
+        "name": "Documentation pdb",
+        "url": "https://docs.python.org/3/library/pdb.html"
+      },
+      {
+        "name": "Techniques de débogage",
+        "url": "https://stackoverflow.com/questions/1623039/python-debugging-tips"
+      }
+    ],
+    "knowledge_checks": [
+      {
+        "question": "Par où commencer la lecture d'une trace de pile ?",
+        "answer": "Par le bas de la trace."
+      },
+      {
+        "question": "Où se trouve l'erreur réelle dans la trace ?",
+        "answer": "Souvent quelques lignes plus bas que la dernière ligne."
+      },
+      {
+        "question": "Que signifie AttributeError: NoneType has no attribute X ?",
+        "answer": "Que quelque chose était None là où on attendait un objet."
+      },
+      {
+        "question": "Quelle est la différence entre un print et un point d'arrêt ?",
+        "answer": "Un point d'arrêt permet d'inspecter l'état à ce moment précis."
+      },
+      {
+        "question": "Pourquoi expliquer le problème à voix haute ?",
+        "answer": "Ça force à formuler clairement le problème et souvent la solution apparaît."
+      },
+      {
+        "question": "Quel est le premier réflexe face à une erreur ?",
+        "answer": "Lire le message d'erreur complètement avant de modifier le code."
+      }
+    ]
+  },
+  "Docker without copying a tutorial": {
+    "name": "Docker sans copier un tutoriel",
+    "learning_objectives": [
+      "Écrire un Dockerfile qui construit et exécute l'application",
+      "Comprendre la mise en cache des couches pour des builds rapides",
+      "Lancer l'application dans un conteneur et exposer le port"
+    ],
+    "takeaways": [
+      {
+        "title": "Dockerfile minimal",
+        "items": [
+          "FROM python:3.11-slim comme base légère",
+          "COPY pyproject.toml puis les dépendances d'abord",
+          "COPY le reste du code ensuite"
+        ]
+      },
+      {
+        "title": "Mise en cache des couches",
+        "items": [
+          "Chaque instruction crée une couche",
+          "Les couches sont mises en cache et réutilisées",
+          "Copiez les fichiers qui changent le moins d'abord"
+        ]
+      },
+      {
+        "title": "Exécution du conteneur",
+        "items": [
+          "docker build -t mon-app . construit l'image",
+          "docker run -p 8000:8000 mon-app lance le conteneur",
+          "Le port hôte doit correspondre au port du conteneur"
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "name": "Documentation Docker",
+        "url": "https://docs.docker.com/"
+      },
+      {
+        "name": "Bonnes pratiques Dockerfile",
+        "url": "https://docs.docker.com/develop/develop-images/dockerfile_best-practices/"
+      },
+      {
+        "name": "Docker pour Python",
+        "url": "https://realpython.com/dockerizing-python-applications/"
+      }
+    ],
+    "knowledge_checks": [
+      {
+        "question": "Quelle image de base est recommandée pour Python ?",
+        "answer": "python:3.11-slim."
+      },
+      {
+        "question": "Qu'est-ce qu'une couche dans Docker ?",
+        "answer": "Chaque instruction du Dockerfile crée une couche."
+      },
+      {
+        "question": "Comment optimiser les builds Docker ?",
+        "answer": "Copier les fichiers qui changent le moins en premier."
+      },
+      {
+        "question": "Quelle commande construit l'image Docker ?",
+        "answer": "docker build -t mon-app ."
+      },
+      {
+        "question": "Quelle commande lance le conteneur ?",
+        "answer": "docker run -p 8000:8000 mon-app"
+      },
+      {
+        "question": "Que faire si le port hôte est déjà utilisé ?",
+        "answer": "Utiliser un autre port : docker run -p 8001:8000 mon-app"
+      }
+    ]
+  },
+  "Environment variables and secrets": {
+    "name": "Variables d'environnement et secrets",
+    "learning_objectives": [
+      "Lire les variables d'environnement dans l'application",
+      "Distinguer les secrets des simples configurations",
+      "Ne jamais commit un fichier .env dans le dépôt"
+    ],
+    "takeaways": [
+      {
+        "title": "Variables d'environnement",
+        "items": [
+          "os.getenv('KEY', 'default') lit une variable",
+          "Un fichier .env pour le développement local",
+          "Les vrais secrets vont dans un gestionnaire de secrets en production"
+        ]
+      },
+      {
+        "title": "Secrets vs configuration",
+        "items": [
+          "Un secret : clé d'API, mot de passe DB, JWT secret",
+          "Une configuration : port, niveau de log, URL publique",
+          "Tous les deux passent par l'environnement"
+        ]
+      },
+      {
+        "title": "Sécurité des .env",
+        "items": [
+          "Ajoutez .env à .gitignore",
+          "Créez un fichier .env.example avec des valeurs fictives",
+          "Ne partagez jamais .env par email ou messagerie"
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "name": "python-dotenv",
+        "url": "https://pypi.org/project/python-dotenv/"
+      },
+      {
+        "name": "Gestion des secrets",
+        "url": "https://www.vaultproject.io/"
+      },
+      {
+        "name": "Documentation os.getenv",
+        "url": "https://docs.python.org/3/library/os.html#os.getenv"
+      }
+    ],
+    "knowledge_checks": [
+      {
+        "question": "Quelle fonction Python lit une variable d'environnement ?",
+        "answer": "os.getenv('KEY', 'default')"
+      },
+      {
+        "question": "Où mettre les secrets en production ?",
+        "answer": "Dans un gestionnaire de secrets comme Vault."
+      },
+      {
+        "question": "Quelle est la différence entre un secret et une configuration ?",
+        "answer": "Un secret est sensible (clé API, mot de passe), une configuration est publique (port, URL)."
+      },
+      {
+        "question": "Pourquoi ne pas commit .env ?",
+        "answer": "Parce qu'il contient des secrets qui ne doivent pas être dans le dépôt."
+      },
+      {
+        "question": "Que doit contenir .env.example ?",
+        "answer": "Les mêmes clés que .env mais avec des valeurs fictives."
+      },
+      {
+        "question": "Comment partager les secrets avec l'équipe ?",
+        "answer": "Via un gestionnaire de secrets, pas par email ou messagerie."
+      }
+    ]
+  },
+  "Deploying behind a reverse proxy": {
+    "name": "Déploiement derrière un reverse proxy",
+    "learning_objectives": [
+      "Configurer un reverse proxy (Nginx ou Caddy) devant l'application",
+      "Comprendre le rôle du proxy : TLS, routage, buffering",
+      "Déployer la stack complète avec Docker Compose"
+    ],
+    "takeaways": [
+      {
+        "title": "Pourquoi un reverse proxy",
+        "items": [
+          "Il gère le TLS (HTTPS) à votre place",
+          "Il route les requêtes vers le bon service",
+          "Il bufferise les requêtes et réponses"
+        ]
+      },
+      {
+        "title": "Configuration minimale",
+        "items": [
+          "proxy_pass http://localhost:8000 envoie le trafic vers l'app",
+          "Le proxy écoute sur le port 80/443, l'app sur un port interne",
+          "Les en-têtes X-Forwarded-* informent l'app de l'URL d'origine"
+        ]
+      },
+      {
+        "title": "Docker Compose pour le déploiement",
+        "items": [
+          "Un service pour l'API, un pour le proxy",
+          "Le réseau interne isole les services",
+          "Les volumes persistent les données"
+        ]
+      }
+    ],
+    "resources": [
+      {
+        "name": "Documentation Nginx",
+        "url": "https://nginx.org/en/docs/"
+      },
+      {
+        "name": "Documentation Caddy",
+        "url": "https://caddyserver.com/docs/"
+      },
+      {
+        "name": "Documentation Docker Compose",
+        "url": "https://docs.docker.com/compose/"
+      }
+    ],
+    "knowledge_checks": [
+      {
+        "question": "Quel est le rôle principal d'un reverse proxy ?",
+        "answer": "Gérer le TLS, router les requêtes et bufferiser."
+      },
+      {
+        "question": "Sur quel port le reverse proxy écoute-t-il généralement ?",
+        "answer": "80 (HTTP) ou 443 (HTTPS)."
+      },
+      {
+        "question": "Sur quel port l'application écoute-t-elle derrière le proxy ?",
+        "answer": "Un port interne, par exemple 8000."
+      },
+      {
+        "question": "Quel en-tête indique l'URL d'origine au serveur ?",
+        "answer": "X-Forwarded-* (X-Forwarded-For, X-Forwarded-Proto, etc.)."
+      },
+      {
+        "question": "À quoi sert le réseau interne dans Docker Compose ?",
+        "answer": "À isoler les services entre eux."
+      },
+      {
+        "question": "Quelle directive Nginx envoie le trafic vers l'application ?",
+        "answer": "proxy_pass."
+      }
+    ]
+  }
+}

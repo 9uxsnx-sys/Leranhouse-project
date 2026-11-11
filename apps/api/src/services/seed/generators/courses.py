@@ -218,7 +218,91 @@ def _create_curriculum(ctx: SeedContext) -> None:
     if course is None:
         return
 
+    # Translations for chapter names and descriptions
+    CHAPTER_TRANSLATIONS = {
+        "Introduction": {
+            "fr": {
+                "name": "Introduction",
+                "description": "Deux courtes vidéos avant le début des modules hebdomadaires.",
+            },
+            "ar": {
+                "name": "مقدمة",
+                "description": "فيديوين قصيرين قبل بدء الوحدات الأسبوعية.",
+            },
+        },
+        "Week 1: A project that starts clean": {
+            "fr": {
+                "name": "Semaine 1 : Un projet qui démarre proprement",
+                "description": "Ce que nous couvrons dans la semaine 1.",
+            },
+            "ar": {
+                "name": "الأسبوع 1: مشروع يبدأ بشكل نظيف",
+                "description": "ما نغطيه في الأسبوع 1.",
+            },
+        },
+        "Week 2: Requests and responses": {
+            "fr": {
+                "name": "Semaine 2 : Requêtes et réponses",
+                "description": "Ce que nous couvrons dans la semaine 2.",
+            },
+            "ar": {
+                "name": "الأسبوع 2: الطلبات والاستجابات",
+                "description": "ما نغطيه في الأسبوع 2.",
+            },
+        },
+        "Week 3: Database and migrations": {
+            "fr": {
+                "name": "Semaine 3 : Base de données et migrations",
+                "description": "Ce que nous couvrons dans la semaine 3.",
+            },
+            "ar": {
+                "name": "الأسبوع 3: قاعدة البيانات والترحيل",
+                "description": "ما نغطيه في الأسبوع 3.",
+            },
+        },
+        "Week 4: Auth and permissions": {
+            "fr": {
+                "name": "Semaine 4 : Authentification et autorisations",
+                "description": "Ce que nous couvrons dans la semaine 4.",
+            },
+            "ar": {
+                "name": "الأسبوع 4: المصادقة والأذونات",
+                "description": "ما نغطيه في الأسبوع 4.",
+            },
+        },
+        "Week 5: Tests and debugging": {
+            "fr": {
+                "name": "Semaine 5 : Tests et débogage",
+                "description": "Ce que nous couvrons dans la semaine 5.",
+            },
+            "ar": {
+                "name": "الأسبوع 5: الاختبارات وتصحيح الأخطاء",
+                "description": "ما نغطيه في الأسبوع 5.",
+            },
+        },
+        "Week 6: Deploy and operate": {
+            "fr": {
+                "name": "Semaine 6 : Déploiement et exploitation",
+                "description": "Ce que nous couvrons dans la semaine 6.",
+            },
+            "ar": {
+                "name": "الأسبوع 6: النشر والتشغيل",
+                "description": "ما نغطيه في الأسبوع 6.",
+            },
+        },
+    }
+
     chapter_created = ctx.date_between(120, 90)
+
+    def build_translations(name: str) -> dict:
+        t = CHAPTER_TRANSLATIONS.get(name, {})
+        return {
+            "translations": {
+                "fr": {"name": t["fr"]["name"], "description": t["fr"]["description"]},
+                "ar": {"name": t["ar"]["name"], "description": t["ar"]["description"]},
+            }
+        }
+
     intro_chapter = Chapter(
         name="Introduction",
         description="Two short videos before the weekly modules begin.",
@@ -229,6 +313,7 @@ def _create_curriculum(ctx: SeedContext) -> None:
         chapter_uuid=new_uuid("chapter"),
         creation_date=iso(chapter_created),
         update_date=iso(chapter_created),
+        extra_metadata=build_translations("Introduction"),
     )
     ctx.session.add(intro_chapter)
     ctx.session.commit()
@@ -238,7 +323,6 @@ def _create_curriculum(ctx: SeedContext) -> None:
     for order, title in enumerate(INTRO_LESSONS):
         _create_video_activity(ctx, course, intro_chapter, title, order)
 
-    assignments = iter(C.ASSIGNMENTS)
     for module_order, (module_name, lessons) in enumerate(C.MODULES):
         chapter = Chapter(
             name=module_name,
@@ -250,6 +334,7 @@ def _create_curriculum(ctx: SeedContext) -> None:
             chapter_uuid=new_uuid("chapter"),
             creation_date=iso(chapter_created),
             update_date=iso(chapter_created),
+            extra_metadata=build_translations(module_name),
         )
         ctx.session.add(chapter)
         ctx.session.commit()
@@ -259,14 +344,6 @@ def _create_curriculum(ctx: SeedContext) -> None:
         _link_chapter(ctx, course, chapter, module_order + 1)
 
         for order, lesson_title in enumerate(lessons):
-            is_assignment_slot = order == 3 and module_order % 2 == 0
-            if is_assignment_slot:
-                assignment = next(assignments, None)
-                if assignment is not None:
-                    # Name the lesson after the assignment itself, otherwise the
-                    # curriculum shows a video title on an assignment card.
-                    _create_assignment_activity(ctx, course, chapter, assignment[0], order)
-                    continue
             _create_video_activity(ctx, course, chapter, lesson_title, order)
 
 
@@ -351,53 +428,19 @@ def _vary_takeaways(blocks: list[dict], name: str) -> list[dict]:
 def _lesson_sections(name: str) -> dict:
     """Page sections for one lesson, shaped the way the lesson page reads them."""
     sections = C.LESSON_SECTIONS.get(name, {})
-    return {
+    result = {
         "learning_objectives": list(sections.get("objectives", [])),
         "takeaways": _vary_takeaways(sections.get("takeaways", []), name),
         "resources": list(sections.get("resources", [])),
         "knowledge_checks": list(sections.get("checks", [])),
     }
 
+    # Inject translations for French and Arabic
+    activity_translations = C.ACTIVITY_TRANSLATIONS.get(name)
+    if activity_translations:
+        result["translations"] = activity_translations
 
-def _create_assignment_activity(
-    ctx: SeedContext, course: Course, chapter: Chapter, name: str, order: int
-) -> None:
-    activity_uuid = new_uuid("activity")
-    created = ctx.date_between(100, 10)
-    activity = Activity(
-        name=name,
-        activity_type=ActivityTypeEnum.TYPE_ASSIGNMENT,
-        activity_sub_type=ActivitySubTypeEnum.SUBTYPE_ASSIGNMENT_ANY,
-        content={"activity_uuid": activity_uuid},
-        details={},
-        extra_metadata=_lesson_sections(name),
-        published=True,
-        lock_type=ActivityLockType.PUBLIC,
-        org_id=ctx.org_id,
-        course_id=int(course.id or 0),
-        activity_uuid=activity_uuid,
-        creation_date=iso(created),
-        update_date=iso(created),
-        current_version=1,
-        last_modified_by_id=None,
-    )
-    ctx.session.add(activity)
-    ctx.session.commit()
-    ctx.session.refresh(activity)
-    ctx.activities.append(activity)
-
-    ctx.session.add(
-        ChapterActivity(
-            order=order,
-            chapter_id=int(chapter.id or 0),
-            activity_id=int(activity.id or 0),
-            course_id=int(course.id or 0),
-            org_id=ctx.org_id,
-            creation_date=iso(created),
-            update_date=iso(created),
-        )
-    )
-    ctx.session.commit()
+    return result
 
 
 def _create_updates(ctx: SeedContext) -> None:

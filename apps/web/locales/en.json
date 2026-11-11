@@ -3446,6 +3446,7 @@
                                                                                  "untitled_module":  "Untitled Module",
                                                                                  "duplicate_soon":  "Duplicate feature coming soon",
                                                                                  "duplicate":  "Duplicate",
+                                                                                 "edit":  "Edit",
                                                                                  "no_modules_match":  "No modules match your search",
                                                                                  "no_modules":  "No modules yet",
                                                                                  "try_different_search":  "Try a different search term",
@@ -3471,6 +3472,12 @@
                                                                               "description_label":  "Description",
                                                                               "description_placeholder":  "Brief description of what this lesson covers",
                                                                               "save_error":  "Failed to save lesson"
+                                                                          },
+                                                        "module_detail":  {
+                                                                              "name_label":  "Module Name",
+                                                                              "description_label":  "Description",
+                                                                              "description_placeholder":  "Brief description of what this module covers",
+                                                                              "save_error":  "Failed to save module"
                                                                           }
                                                     }
                                   },

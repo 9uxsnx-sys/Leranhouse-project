@@ -9,7 +9,7 @@ import {
   getCourseMetaCacheKey,
 } from '@components/Contexts/CourseContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { Trash2, Folder, Loader2, Search, ArrowUpDown, CheckSquare, MoreVertical, Copy, GripVertical } from 'lucide-react'
+import { Trash2, Folder, Loader2, Search, ArrowUpDown, CheckSquare, MoreVertical, Copy, GripVertical, FileText } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import ModuleForm from './ModuleForm'
 import LessonDetailForm from './LessonDetailForm'
+import ModuleDetailForm from './ModuleDetailForm'
 import { useContentLocale, localizedName } from '@components/Hooks/useCourseTranslation'
 import { useRegisterDashboardBreadcrumb } from '@components/Objects/Breadcrumbs/DashboardBreadcrumbContext'
 import toast from 'react-hot-toast'
@@ -65,6 +66,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
   // 3-state navigation
   const [selectedChapterIndex, setSelectedChapterIndex] = useState<number | null>(null)
   const [selectedActivity, setSelectedActivity] = useState<any | null>(null)
+  const [editingModuleIndex, setEditingModuleIndex] = useState<number | null>(null)
   const [isCreating, setIsCreating] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
@@ -226,6 +228,22 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
   )
 
   if (!course) return <PageLoading />
+
+  // ── State 1.5: Module Edit Card ──
+  const editingChapter = editingModuleIndex !== null ? chapters[editingModuleIndex] : null
+  if (editingChapter) {
+    return (
+      <div className="mt-6">
+        <ModuleDetailForm
+          key={editingChapter.chapter_uuid}
+          chapter={editingChapter}
+          orgslug={props.orgslug}
+          course_uuid={course_uuid}
+          onBack={() => setEditingModuleIndex(null)}
+        />
+      </div>
+    )
+  }
 
   // ── State 3: Lesson Detail Form ──
   if (selectedActivity && selectedChapter) {
@@ -415,6 +433,16 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
                             </button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-28">
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setEditingModuleIndex(actualIndex)
+                              }}
+                              className="gap-2"
+                            >
+                              <FileText size={14} />
+                              {t('dashboard.courses.structure.course_structure.edit')}
+                            </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={(e) => {
                                 e.stopPropagation()
