@@ -46,6 +46,22 @@ export function OrgHomeClient({
     (url: string) => swrFetcher(url, access_token),
     { fallbackData: podcasts, revalidateOnFocus: false, dedupingInterval: 30000 }
   )
+  // Trending is computed server-side, so it has to be refetched with the locale
+  // too — otherwise its cards keep the source-language titles.
+  const { data: swrTrending } = useSWR(
+    org?.id
+      ? `${getAPIUrl()}orgs/${org.id}/home-trending?limit=8&locale=${contentLocale}`
+      : null,
+    (url: string) => swrFetcher(url, access_token),
+    {
+      fallbackData: {
+        trending_courses: trendingCourses,
+        trending_podcasts: trendingPodcasts,
+      },
+      revalidateOnFocus: false,
+      dedupingInterval: 30000,
+    }
+  )
 
   // Force re-fetch when locale changes
   useEffect(() => {
@@ -57,18 +73,20 @@ export function OrgHomeClient({
 
   const resolvedCourses = swrCourses || courses
   const resolvedPodcasts = swrPodcasts || podcasts
+  const resolvedTrendingCourses = swrTrending?.trending_courses || trendingCourses
+  const resolvedTrendingPodcasts = swrTrending?.trending_podcasts || trendingPodcasts
 
   return (
     <div className="w-full px-6 pt-8 pb-0 space-y-10">
 
       {/* Trending Courses */}
-      {trendingCourses.length > 0 && (
+      {resolvedTrendingCourses.length > 0 && (
         <SectionRow
           title={t('home.trending_courses', { defaultValue: 'Trending Courses' })}
           seeAllHref="/courses"
           seeAllLabel={t('home.see_all', { defaultValue: 'See All' })}
         >
-          {trendingCourses.slice(0, 4).map((course: any) => {
+          {resolvedTrendingCourses.slice(0, 4).map((course: any) => {
             const imageUrl = course.thumbnail_image
               ? getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)
               : ''
@@ -89,13 +107,13 @@ export function OrgHomeClient({
       )}
 
       {/* Trending Podcasts */}
-      {trendingPodcasts.length > 0 && (
+      {resolvedTrendingPodcasts.length > 0 && (
         <SectionRow
           title={t('home.trending_podcasts', { defaultValue: 'Trending Podcasts' })}
           seeAllHref="/podcasts"
           seeAllLabel={t('home.see_all', { defaultValue: 'See All' })}
         >
-          {trendingPodcasts.slice(0, 4).map((podcast: any) => (
+          {resolvedTrendingPodcasts.slice(0, 4).map((podcast: any) => (
             <PodcastCard
               key={podcast.podcast_uuid}
               id={removePodcastPrefix(podcast.podcast_uuid)}
@@ -162,7 +180,7 @@ export function OrgHomeClient({
       )}
 
       {/* Empty state */}
-      {resolvedCourses.length === 0 && resolvedPodcasts.length === 0 && trendingCourses.length === 0 && trendingPodcasts.length === 0 && (
+      {resolvedCourses.length === 0 && resolvedPodcasts.length === 0 && resolvedTrendingCourses.length === 0 && resolvedTrendingPodcasts.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16">
           <p className="text-gray-400 text-sm">
             {t('home.no_content', { defaultValue: 'No content available yet' })}

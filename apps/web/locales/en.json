@@ -7168,6 +7168,14 @@
                                 "instant_access":  "Instant access after payment"
                             }
               },
+    "home":  {
+                 "trending_courses":  "Trending Courses",
+                 "trending_podcasts":  "Trending Podcasts",
+                 "new_courses":  "New Courses",
+                 "new_podcasts":  "New Podcasts",
+                 "see_all":  "See All",
+                 "no_content":  "No content available yet"
+             },
     "pagination":  {
                        "next":  "Next",
                        "previous":  "Previous",

@@ -6964,6 +6964,14 @@
       "community_description": "Ce cours donne accès à une communauté dédiée où vous pouvez discuter, poser vos questions et apprendre aux côtés des autres étudiants."
     }
   },
+  "home": {
+    "trending_courses": "Cours tendance",
+    "trending_podcasts": "Podcasts tendance",
+    "new_courses": "Nouveaux cours",
+    "new_podcasts": "Nouveaux podcasts",
+    "see_all": "Voir tout",
+    "no_content": "Aucun contenu disponible pour le moment"
+  },
   "pagination": {
     "next": "Suivant",
     "previous": "Précédent",

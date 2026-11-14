@@ -37,7 +37,7 @@ const OrgHomePage = async ({ params }: any) => {
       false,
       locale
     ).catch(() => []),
-    getOrgHomeTrending(org?.id, access_token ?? undefined).catch(() => ({
+    getOrgHomeTrending(org?.id, access_token ?? undefined, 8, locale).catch(() => ({
       trending_courses: [],
       trending_podcasts: [],
     })),

@@ -1355,10 +1355,15 @@ async def api_get_org_usage(
 async def api_get_home_trending(
     org_id: int,
     limit: int = Query(8, description="Number of items per category"),
+    locale: Optional[str] = Query(
+        default=None, description="Content locale for course/podcast metadata"
+    ),
     current_user: PublicUser = Depends(get_current_user),
     db_session: Session = Depends(get_db_session),
 ):
     from src.db.user_organizations import UserOrganization
+    from src.services.courses.translations import build_translation_overlay
+    from src.services.podcasts.translations import build_podcast_overlay
     from sqlmodel import func, select
 
     # Verify membership
@@ -1384,17 +1389,23 @@ async def api_get_home_trending(
         .limit(limit)
     ).all()
 
-    trending_courses = [
-        {
-            "course_uuid": course.course_uuid,
-            "name": course.name,
-            "description": course.description,
-            "thumbnail_image": course.thumbnail_image,
-            "extra_metadata": course.extra_metadata,
-            "enrollment_count": count,
-        }
-        for course, count in course_rows
-    ]
+    trending_courses = []
+    for course, count in course_rows:
+        overlay, content_locale, is_fallback = build_translation_overlay(
+            course, locale, db_session
+        )
+        trending_courses.append(
+            {
+                "course_uuid": course.course_uuid,
+                "name": overlay.get("name") or course.name,
+                "description": overlay.get("description") or course.description,
+                "thumbnail_image": course.thumbnail_image,
+                "extra_metadata": overlay.get("extra_metadata") or course.extra_metadata,
+                "enrollment_count": count,
+                "content_locale": content_locale,
+                "is_fallback": is_fallback,
+            }
+        )
 
     # Top podcasts by listener count
     podcast_rows = db_session.exec(
@@ -1409,17 +1420,53 @@ async def api_get_home_trending(
         .limit(limit)
     ).all()
 
-    trending_podcasts = [
-        {
-            "podcast_uuid": podcast.podcast_uuid,
-            "name": podcast.name,
-            "description": podcast.description,
-            "thumbnail_image": podcast.thumbnail_image,
-            "extra_metadata": podcast.extra_metadata,
-            "listener_count": count,
+    # Episode stats — the listing service computes these, so the home cards
+    # need them too or their meta row renders empty.
+    podcast_ids = [podcast.id for podcast, _ in podcast_rows if podcast.id]
+    episode_stats: dict[int, tuple[int, int]] = {}
+    if podcast_ids:
+        from src.db.podcasts.episodes import PodcastEpisode
+
+        stats_rows = db_session.exec(
+            select(
+                PodcastEpisode.podcast_id,
+                func.count(PodcastEpisode.id),
+                func.coalesce(func.sum(PodcastEpisode.duration_seconds), 0),
+            )
+            .where(PodcastEpisode.podcast_id.in_(podcast_ids))
+            .group_by(PodcastEpisode.podcast_id)
+        ).all()
+        episode_stats = {
+            podcast_id: (episode_count, total_duration)
+            for podcast_id, episode_count, total_duration in stats_rows
         }
-        for podcast, count in podcast_rows
-    ]
+
+    trending_podcasts = []
+    for podcast, count in podcast_rows:
+        overlay, content_locale, is_fallback = build_podcast_overlay(
+            podcast, locale, db_session
+        )
+        extra_metadata = podcast.extra_metadata
+        if overlay.get("extra_metadata"):
+            extra_metadata = {**(extra_metadata or {}), **overlay["extra_metadata"]}
+        episode_count, total_duration_seconds = episode_stats.get(
+            podcast.id, (0, 0)
+        )
+        trending_podcasts.append(
+            {
+                "podcast_uuid": podcast.podcast_uuid,
+                "name": overlay.get("name") or podcast.name,
+                "description": overlay.get("description") or podcast.description,
+                "thumbnail_image": podcast.thumbnail_image,
+                "extra_metadata": extra_metadata,
+                "episode_count": episode_count,
+                "total_duration_seconds": total_duration_seconds,
+                "creation_date": podcast.creation_date,
+                "listener_count": count,
+                "content_locale": content_locale,
+                "is_fallback": is_fallback,
+            }
+        )
 
     return {
         "trending_courses": trending_courses,
