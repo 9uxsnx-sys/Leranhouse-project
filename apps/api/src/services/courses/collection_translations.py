@@ -43,7 +43,9 @@ def get_collection_translation_row(
     ).first()
 
 
-def _overlay_from_translation(translation: CollectionTranslation) -> dict:
+def _overlay_from_translation(
+    translation: CollectionTranslation, base_extra_metadata: dict | None = None
+) -> dict:
     overlay = {
         "name": translation.name,
         "description": translation.description,
@@ -53,6 +55,13 @@ def _overlay_from_translation(translation: CollectionTranslation) -> dict:
     }
     if translation.seo:
         overlay["seo"] = translation.seo
+    if translation.extra_metadata:
+        # Only the display-text keys are translated; merge over the base row so
+        # counts, flags and any other shared key survive.
+        overlay["extra_metadata"] = {
+            **(base_extra_metadata or {}),
+            **translation.extra_metadata,
+        }
     return overlay
 
 
@@ -75,7 +84,13 @@ def build_collection_overlay(
     if not translation:
         return {}, source_locale, True
 
-    return _overlay_from_translation(translation), requested, False
+    return (
+        _overlay_from_translation(
+            translation, getattr(collection, "extra_metadata", None)
+        ),
+        requested,
+        False,
+    )
 
 
 def apply_collection_overlay(
@@ -142,7 +157,9 @@ def apply_collection_overlay_bulk(collection_reads, locale: Optional[str], db_se
         localized.append(
             read.model_copy(
                 update={
-                    **_overlay_from_translation(translation),
+                    **_overlay_from_translation(
+                        translation, getattr(read, "extra_metadata", None)
+                    ),
                     "content_locale": requested,
                     "is_fallback": False,
                 }
@@ -220,6 +237,7 @@ async def upsert_collection_translation(
             learnings=payload.learnings,
             tags=payload.tags,
             seo=payload.seo,
+            extra_metadata=payload.extra_metadata,
             state=payload.state or "draft",
             source_updated_at=collection.update_date,
             translated_by=getattr(current_user, "id", None),
@@ -235,6 +253,8 @@ async def upsert_collection_translation(
         row.tags = payload.tags
         if payload.seo is not None:
             row.seo = payload.seo
+        if payload.extra_metadata is not None:
+            row.extra_metadata = payload.extra_metadata
         if payload.state:
             row.state = payload.state
         row.source_updated_at = collection.update_date

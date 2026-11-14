@@ -30,6 +30,7 @@ import {
 } from '@services/courses/translations';
 import { useCourseTranslation } from '@components/Hooks/useCourseTranslation';
 import { getCurrentLanguageNativeName } from '@/lib/languages';
+import { DIFFICULTY_OPTIONS, difficultyTranslationKey } from '@/lib/difficulty';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { mutate } from 'swr';
 import toast from 'react-hot-toast';
@@ -741,11 +742,14 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                             <SelectValue placeholder={t('dashboard.courses.general.details.difficulty_placeholder')} />
                           </SelectTrigger>
                           <SelectContent>
-                            {['Beginner', 'Intermediate', 'Advanced'].map((option) => (
-                              <SelectItem key={option} value={option}>
-                                {t(`dashboard.courses.general.details.difficulty_${option.toLowerCase()}`)}
-                              </SelectItem>
-                            ))}
+                            {DIFFICULTY_OPTIONS.map((option) => {
+                              const key = difficultyTranslationKey(option)
+                              return (
+                                <SelectItem key={option} value={option}>
+                                  {key ? t(key) : option}
+                                </SelectItem>
+                              )
+                            })}
                           </SelectContent>
                         </Select>
                       ) : (

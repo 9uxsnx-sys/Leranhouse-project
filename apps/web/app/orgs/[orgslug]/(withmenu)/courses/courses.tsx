@@ -280,7 +280,6 @@ function Courses(props: CourseProps) {
                 description={course.description || ''}
                 image={imageUrl}
                 lessons={course.extra_metadata?.lessons_count}
-                lessonsLabel={t('collections.lessons')}
                 duration={course.extra_metadata?.duration || ''}
                 difficulty={course.extra_metadata?.difficulty || ''}
               />

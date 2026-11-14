@@ -1133,6 +1133,8 @@
     "no_courses": "Aucun élément dans cette collection",
     "no_courses_description": "Les cours et podcasts apparaîtront ici une fois ajoutés à la collection.",
     "self_paced": "À votre rythme",
+    "start_here": "Commencez ici",
+    "go_to_courses": "Aller aux cours",
     "owned": "Vous possédez ce pack",
     "owned_title": "Votre pack",
     "owned_description": "Tous les éléments de ce pack sont déjà dans votre progression.",

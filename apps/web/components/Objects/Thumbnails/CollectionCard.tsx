@@ -6,6 +6,8 @@ import {
   getCollectionThumbnailMediaDirectory,
   getCourseThumbnailMediaDirectory,
 } from '@services/media/media'
+import { canonicalDifficulty, difficultyTranslationKey } from '@/lib/difficulty'
+import { CardMetaRow } from './CardMetaRow'
 
 export interface CollectionCardProps {
   id: string
@@ -51,11 +53,16 @@ export function CollectionCard({ id, title, description, courses, org_uuid, href
       ? getCourseThumbnailMediaDirectory(org_uuid, firstCourse.course_uuid, firstCourse.thumbnail_image)
       : ''
 
-  // Derive difficulty from courses
+  // Derive difficulty from courses. Canonicalise first, otherwise a bundle
+  // mixing an authored Arabic label with "Beginner" splits the tally and the
+  // "majority" is arbitrary.
   const difficulty = useMemo(() => {
     if (!courses || courses.length === 0) return null
     const levels = courses
-      .map((c: any) => c.extra_metadata?.difficulty || c.difficulty || c.level || '')
+      .map((c: any) => {
+        const raw = c.extra_metadata?.difficulty || c.difficulty || c.level || ''
+        return canonicalDifficulty(raw) ?? raw
+      })
       .filter(Boolean)
     if (levels.length === 0) return null
     const counts: Record<string, number> = {}
@@ -63,10 +70,16 @@ export function CollectionCard({ id, title, description, courses, org_uuid, href
     return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0]
   }, [courses])
 
+  // Canonical difficulty values are translated; authored labels pass through.
+  const difficultyKey = difficultyTranslationKey(difficulty)
+  const difficultyLabel = difficulty
+    ? (difficultyKey ? t(difficultyKey) : difficulty)
+    : t('collections.all_levels')
+
   const itemCount = memberCount ?? courses?.length ?? 0
   const meta = [
     t('collections.item_count', { count: itemCount }),
-    difficulty || t('collections.all_levels'),
+    difficultyLabel,
     formatRelativeDate(props.creation_date, i18n.language),
   ].filter(Boolean)
 
@@ -99,14 +112,14 @@ export function CollectionCard({ id, title, description, courses, org_uuid, href
       {/* Content */}
       <div className="px-4 pt-3 pb-4 flex flex-col flex-1">
         <div className="flex flex-col gap-1">
-          <h3 className="text-[15px] font-semibold leading-snug line-clamp-2 text-gray-900">
+          <h3 dir="auto" className="text-[15px] font-semibold leading-snug line-clamp-2 text-gray-900">
             {title}
           </h3>
-          <p className={`text-[13px] font-normal leading-relaxed line-clamp-3 ${description ? 'text-[#6B7280]' : 'invisible'}`}>
+          <p dir="auto" className={`text-[13px] font-normal leading-relaxed line-clamp-3 ${description ? 'text-[#6B7280]' : 'invisible'}`}>
             {description || 'placeholder'}
           </p>
         </div>
-        <p className="text-[12px] text-gray-400 mt-1.5">{meta.join(' · ')}</p>
+        <CardMetaRow parts={meta} />
       </div>
     </Link>
   )

@@ -18,14 +18,27 @@ collection
     ├── name             TEXT NOT NULL
     ├── description, about, learnings, tags
     ├── seo              JSONB
+    ├── extra_metadata   JSONB (display-text keys only)
     ├── state            draft | machine | reviewed | published
     ├── source_updated_at, translated_by, creation_date, update_date
     └── UNIQUE (collection_id, locale)
 ```
 
-Migration: `apps/api/migrations/versions/y0f1a2b3c4d5_add_collection_translations.py`.
+Migrations: `y0f1a2b3c4d5_add_collection_translations.py`, then `b2c3d4e5f6a7_add_collection_translation_metadata.py` for `extra_metadata`.
 
 **Never localized:** thumbnail, banner, price, access type, publish state, membership. A bundle is one record with one structure.
+
+### Translatable metadata
+
+`collection.extra_metadata` mixes display text with derived values. Only the display-text keys are copied into a translation row:
+
+| Translated | Stays on the base row |
+|---|---|
+| `difficulty`, `duration`, `requirements`, `target_audience.for`, `target_audience.not_for` | `lessons_count`, `video_hours`, `resources_count`, `has_certificate` |
+
+The overlay merges the translation over the base object (`{**base, **translation}`), so a locale row can translate four keys and still inherit every count. Note `requirements` is a JSON **string** in the object; the editor parses it, assigns ids to older rows that only carry `{text}`, and re-serializes on save.
+
+`difficulty` is authored as free text in a translation and as one of `Beginner | Intermediate | Advanced` in the source locale. Learner surfaces canonicalise the value and emit the localized label at render time, so a translated row may also keep the English word.
 
 ## 2. API
 
@@ -51,10 +64,10 @@ The platform language switcher is the only content-locale control — there is n
 | Surface | Behaviour |
 |---|---|
 | Collections list (`/dash/collections`) | SWR key carries `locale`, so cards/search follow the UI language |
-| General tab | Reads/writes the translation row for non-source locales; source locale keeps writing the base row. Action row shows the language chip (Source / Translation / Missing), **Copy from source** and the Save state |
+| General tab | Reads/writes the translation row for non-source locales; source locale keeps writing the base row. Action row shows the language chip (Source / Translation / Missing), **Copy from source** and the Save state. Requirements, audience (for / not for), difficulty and duration are editable in both locales; the certificate toggle is read-only outside the source locale because the flag is shared |
 | SEO tab | Same rule for the `seo` object. Read-only until the locale has a translation row (the API needs a `name`), with an "inherited" hint |
 | Content tab | Member course names come back localized through `?locale=` |
-| Translations tab | Coverage matrix per language (name, description, about, learnings, tags, SEO), copy-from-source, delete, CSV export/import |
+| Translations tab | Coverage matrix per language (name, description, about, learnings, tags, SEO, metadata), copy-from-source, delete, CSV export/import |
 
 Dashboard fetches of the collection itself deliberately omit `locale`: the editor needs the **source row** as its baseline, exactly like the course editor.
 

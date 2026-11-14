@@ -21,7 +21,7 @@ type EditCollectionTranslationsProps = {
   onUpdated: () => void | Promise<void>
 }
 
-const CONTENT_FIELDS = ['name', 'description', 'about', 'learnings', 'tags', 'seo'] as const
+const CONTENT_FIELDS = ['name', 'description', 'about', 'learnings', 'tags', 'seo', 'meta'] as const
 type ContentField = (typeof CONTENT_FIELDS)[number]
 
 // Flat column set for the export/import file — translators work in a spreadsheet,
@@ -41,6 +41,11 @@ const CSV_FIELDS = [
   'seo.og_image',
   'seo.twitter_title',
   'seo.twitter_description',
+  'meta.difficulty',
+  'meta.duration',
+  'meta.requirements',
+  'meta.target_audience.for',
+  'meta.target_audience.not_for',
 ] as const
 
 function hasValue(row: any, field: ContentField): boolean {
@@ -50,6 +55,13 @@ function hasValue(row: any, field: ContentField): boolean {
     if (!value || typeof value !== 'object') return false
     return Object.values(value).some((v) =>
       typeof v === 'string' ? v.trim().length > 0 : v === true
+    )
+  }
+  if (field === 'meta') {
+    const value = row.extra_metadata
+    if (!value || typeof value !== 'object') return false
+    return Object.values(value).some((v) =>
+      typeof v === 'string' ? v.trim().length > 0 : v != null
     )
   }
   const value = row[field]
@@ -153,6 +165,8 @@ function EditCollectionTranslations({
         return t('collections.dashboard.general.learnings_title')
       case 'tags':
         return t('collections.dashboard.general.tags_label')
+      case 'meta':
+        return t('dashboard.courses.translations.fields.meta')
       default:
         return t('dashboard.courses.translations.fields.seo')
     }
@@ -192,6 +206,7 @@ function EditCollectionTranslations({
           learnings: collection?.learnings ?? null,
           tags: collection?.tags ?? null,
           seo: collection?.seo ?? null,
+          extra_metadata: collection?.extra_metadata ?? null,
         },
         access_token
       )
@@ -226,9 +241,18 @@ function EditCollectionTranslations({
   const handleExport = (locale: string, row: any) => {
     const lines = ['field,value']
     CSV_FIELDS.forEach((field) => {
-      const value = field.startsWith('seo.')
-        ? row?.seo?.[field.slice(4)]
-        : row?.[field]
+      let value
+      if (field.startsWith('seo.')) {
+        value = row?.seo?.[field.slice(4)]
+      } else if (field.startsWith('meta.')) {
+        const parts = field.slice(5).split('.')
+        let obj = row?.extra_metadata
+        parts.forEach((part) => { obj = obj?.[part] })
+        // Arrays (target_audience.for/not_for) are stored as one item per line.
+        value = Array.isArray(obj) ? obj.join('\n') : obj
+      } else {
+        value = row?.[field]
+      }
       lines.push(`${field},${csvCell(value)}`)
     })
     const safeName = String(collection?.name || 'collection')
@@ -255,8 +279,27 @@ function EditCollectionTranslations({
 
       const existing = translations.find((item) => item.locale === locale)
       const seo: Record<string, any> = {}
+      const meta: Record<string, any> = {}
       Object.entries(values).forEach(([key, value]) => {
-        if (key.startsWith('seo.')) seo[key.slice(4)] = value || null
+        if (key.startsWith('seo.')) {
+          seo[key.slice(4)] = value || null
+        } else if (key.startsWith('meta.')) {
+          const parts = key.slice(5).split('.')
+          if (parts.length === 1) {
+            meta[parts[0]] = value || null
+          } else {
+            let obj = meta
+            parts.slice(0, -1).forEach((part) => {
+              if (!obj[part] || typeof obj[part] !== 'object') obj[part] = {}
+              obj = obj[part]
+            })
+            // Arrays (target_audience.for/not_for) come back one item per line.
+            const finalValue = value
+              ? value.split('\n').filter((item: string) => item.trim())
+              : null
+            obj[parts[parts.length - 1]] = finalValue || null
+          }
+        }
       })
 
       const name = values.name || existing?.name || collection?.name
@@ -277,6 +320,9 @@ function EditCollectionTranslations({
           seo: Object.keys(seo).length
             ? { ...(existing?.seo || {}), ...seo }
             : existing?.seo ?? null,
+          extra_metadata: Object.keys(meta).length
+            ? { ...(existing?.extra_metadata || {}), ...meta }
+            : existing?.extra_metadata ?? null,
         },
         access_token
       )

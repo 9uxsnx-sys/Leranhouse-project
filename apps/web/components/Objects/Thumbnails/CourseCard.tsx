@@ -1,5 +1,8 @@
 'use client'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
+import { difficultyTranslationKey } from '@/lib/difficulty'
+import { CardMetaRow } from './CardMetaRow'
 
 export interface CourseCardProps {
   id: string
@@ -10,16 +13,24 @@ export interface CourseCardProps {
   duration?: string
   difficulty?: string
   href?: string
-  /** Noun for the count shown in the meta row (defaults to "lessons"). */
+  /** Noun for the count shown in the meta row. Defaults to the localized "lessons". */
   lessonsLabel?: string
 }
-export function CourseCard({ id, title, description, image, lessons, duration, difficulty, href, lessonsLabel = 'lessons' }: CourseCardProps) {
+export function CourseCard({ id, title, description, image, lessons, duration, difficulty, href, lessonsLabel }: CourseCardProps) {
+  const { t } = useTranslation()
+
+  // Canonical difficulty values are translated; authored labels pass through.
+  const difficultyKey = difficultyTranslationKey(difficulty)
+  const difficultyLabel = difficulty ? (difficultyKey ? t(difficultyKey) : difficulty) : ''
+
   // Only render the parts we actually have — list endpoints do not return a
   // lesson count, and metadata can be empty for older courses.
   const metaParts = [
-    typeof lessons === 'number' ? `${lessons} ${lessonsLabel}` : null,
+    typeof lessons === 'number'
+      ? `${lessons} ${lessonsLabel ?? t('collections.lessons')}`
+      : null,
     duration,
-    difficulty,
+    difficultyLabel,
   ].filter(Boolean)
   return (
     <Link
@@ -52,12 +63,8 @@ export function CourseCard({ id, title, description, image, lessons, duration, d
             {description || 'placeholder'}
           </p>
         </div>
-        {/* Metadata: directly below description. The row is always rendered
-            (invisible when empty) so every card in a grid keeps the same
-            height — older courses often have no duration/difficulty set. */}
-        <p dir="auto" className={`text-[12px] text-gray-400 mt-1.5 ${metaParts.length === 0 ? 'invisible' : ''}`}>
-          {metaParts.length > 0 ? metaParts.join(' · ') : '\u00A0'}
-        </p>
+        {/* Metadata: directly below description. */}
+        <CardMetaRow parts={metaParts} />
       </div>
     </Link>
   )

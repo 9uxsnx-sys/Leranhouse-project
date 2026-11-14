@@ -8,10 +8,11 @@ import useSWR from 'swr'
 import { useTranslation } from 'react-i18next'
 import {
   Award,
+  BarChart3,
   BookCopy,
   BookOpen,
   Check,
-  Download,
+  Clock,
   Info,
   Layers,
   Loader2,
@@ -32,6 +33,7 @@ import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useContentLocale } from '@components/Hooks/useCourseTranslation'
 import { getCurrentLanguageNativeName } from '@/lib/languages'
+import { difficultyTranslationKey } from '@/lib/difficulty'
 import { useRegisterBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -163,6 +165,17 @@ const CollectionClient = ({
     typeof collection?.price_amount === 'number' ? collection.price_amount : null
   const requirementsList = parseRequirements(collection?.extra_metadata?.requirements)
   const audienceData = collection?.extra_metadata?.target_audience as { for?: string[]; not_for?: string[] } | undefined
+
+  const stats = {
+    difficulty: collection?.extra_metadata?.difficulty || '',
+    duration: collection?.extra_metadata?.duration || '',
+    hasCertificate: collection?.extra_metadata?.has_certificate ?? false,
+  }
+  // Canonical difficulty values are translated; authored labels pass through.
+  const difficultyKey = difficultyTranslationKey(stats.difficulty)
+  const difficultyLabel = stats.difficulty
+    ? (difficultyKey ? t(difficultyKey) : stats.difficulty)
+    : ''
 
   const [isStarting, setIsStarting] = useState(false)
 
@@ -308,6 +321,18 @@ const CollectionClient = ({
                     count: members.length,
                   })}
                 </Badge>
+                {stats.duration && (
+                  <Badge variant="grey" className="flex items-center gap-1">
+                    <Clock size={12} />
+                    {stats.duration}
+                  </Badge>
+                )}
+                {difficultyLabel && (
+                  <Badge variant="grey" className="flex items-center gap-1">
+                    <BarChart3 size={12} />
+                    {difficultyLabel}
+                  </Badge>
+                )}
                 {totalLessons > 0 && (
                   <Badge variant="grey" className="flex items-center gap-1">
                     <BookOpen size={12} />
@@ -401,12 +426,12 @@ const CollectionClient = ({
                       : ''
                     return (
                       <div key={uuid} className="relative">
-                        <div className="absolute -top-2.5 -left-2.5 z-10 w-8 h-8 rounded-full bg-neutral-900 text-white text-xs font-bold flex items-center justify-center shadow-md ring-2 ring-white">
+                        <div className="absolute -top-2.5 -start-2.5 z-10 w-8 h-8 rounded-full bg-neutral-900 text-white text-xs font-bold flex items-center justify-center shadow-md ring-2 ring-white">
                           {index + 1}
                         </div>
                         {index === 0 && (
-                          <div className="absolute -top-2.5 right-2 z-10 px-2.5 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-semibold shadow-sm">
-                            Start Here
+                          <div className="absolute -top-2.5 end-2 z-10 px-2.5 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-semibold shadow-sm">
+                            {t('collections.start_here')}
                           </div>
                         )}
                         <CourseCard
@@ -468,7 +493,7 @@ const CollectionClient = ({
                     {hasCourseMembers ? (
                       <Link href={getUriWithOrg(orgslug, '/trail')}>
                         <Button variant="primary" size="large" className="w-full">
-                          Go to Courses
+                          {t('collections.go_to_courses')}
                         </Button>
                       </Link>
                     ) : (
@@ -546,17 +571,19 @@ const CollectionClient = ({
                     </div>
                   )}
                   <div className="flex items-center gap-3">
-                    <Download size={16} className="text-gray-400 shrink-0" />
+                    <Clock size={16} className="text-gray-400 shrink-0" />
                     <span className="text-sm text-gray-600">
-                      {t('collections.self_paced')}
+                      {stats.duration || t('collections.self_paced')}
                     </span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Award size={16} className="text-gray-400 shrink-0" />
-                    <span className="text-sm text-gray-600">
-                      {t('collections.certificate')}
-                    </span>
-                  </div>
+                  {stats.hasCertificate && (
+                    <div className="flex items-center gap-3">
+                      <Award size={16} className="text-gray-400 shrink-0" />
+                      <span className="text-sm text-gray-600">
+                        {t('collections.certificate')}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 

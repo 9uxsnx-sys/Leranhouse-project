@@ -1,8 +1,8 @@
 # i18n & RTL — Progress & Handoff
 
-> **Last updated:** 2026-11-11
+> **Last updated:** 2026-11-14
 > **Branch:** `feat/learnhouse-1.2.0-custom`
-> **Latest checkpoint:** `0b488024` — *fix: add ACTIVITY_TRANSLATIONS with French (fr) locale keys for all 20 lessons*
+> **Latest checkpoint:** `0b488024` — *fix: add ACTIVITY_TRANSLATIONS with French (fr) locale keys for all 20 lessons* (collection-editor and metadata changes below are uncommitted)
 > **Companion docs:** [RTL Plan](./rtl-plan.md) (research + strategy), [Content Localization](./content-localization.md), [Collections Localization](./collections-localization.md), [Podcasts Localization](./podcasts-localization.md), [Dashboard Polish](../dashboard-polish/consistency-plan.md)
 
 This is the working log. Read this first when resuming; read `rtl-plan.md` for the reasoning behind the approach.
@@ -476,3 +476,39 @@ useEffect(() => { mutate() }, [contentLocale, mutate])
 - Course card titles and descriptions render with correct base direction (`dir="auto"`) for Arabic content.
 - User profile page shows localized course names when switching locale.
 - Activity translations seed runs cleanly and produces French names/descriptions for all 20 demo lessons.
+
+---
+
+## 14. Collection editor wiring + translatable `extra_metadata`
+
+### Problem
+
+The collection General tab could edit name/description/about/learnings/tags, but the metadata the seed writes — requirements, target audience, difficulty, duration, certificate — had no editor at all, in any locale. The learner page already rendered those values, so they could only be changed by re-seeding. A translation row also had nowhere to put a translated requirement or duration.
+
+### Changes
+
+| Layer | File | Change |
+|---|---|---|
+| DB | `migrations/versions/b2c3d4e5f6a7_add_collection_translation_metadata.py` | `collection_translation.extra_metadata JSONB NULL` |
+| Model | `src/db/collection_translations.py` | `extra_metadata` on the table model, `CollectionTranslationUpsert` and `CollectionTranslationRead` |
+| Service | `src/services/courses/collection_translations.py` | `_overlay_from_translation(translation, base_extra_metadata)` merges the locale keys over the base object; both bulk and single readers pass the base object; upsert persists the column |
+| Web service | `services/courses/collectionTranslations.ts` | `extra_metadata` on the read/payload types |
+| Editor | `EditCollectionGeneral.tsx` | Requirements, audience (for / not for) in the Overview card; new **Details** card with difficulty, duration and certificate. Translation locale reads `translation.extra_metadata` with a base fallback; saves send `buildExtraMetadata()`. Source-locale saves merge over the stored object so `lessons_count`/`video_hours`/`resources_count` survive |
+| Translations tab | `EditCollectionTranslations.tsx` | New `meta` column, `meta.*` rows in CSV export/import (arrays newline-joined), `extra_metadata` included in copy-from-source |
+
+Seeded `requirements` rows only carry `{text}`; `LearningItemsList` drops objects without an `id`, so the editor assigns `req-{i}` ids on load — otherwise the four requirements rendered as an empty list.
+
+`difficulty` is a `Select` limited to `Beginner | Intermediate | Advanced` in the source locale and a free-text `Input` in a translation, because the label itself is content there. The certificate toggle is disabled outside the source locale: the flag is shared, not translated.
+
+### Verification (live, `admin@school.dev`, collection `collection_fc94dffd…`)
+
+- AR editor at `/orgs/demo/dash/collections/collection/fc94dffd…/general`: `dir=rtl`, sections Overview / Learnings / Details / Tags, requirements (4), audience (3 for / 2 not for), duration `42h`, certificate toggle checked but disabled.
+- Changed duration to `45h` and saved. `PUT …/translations/ar` stored `{difficulty, duration, requirements, target_audience}` only; `has_certificate`/`video_hours`/`lessons_count` were absent from the row.
+- `GET /collections/{uuid}?locale=ar` returned `duration=45h`, `video_hours=28`, `resources_count=12`, `has_certificate=true` — locale overlay, base counts.
+- Learner page rendered `45h`, the localized difficulty, the certificate row and "ابدأ من هنا". Reverted to `42h` through the editor; the translation row's `extra_metadata` was then reset to `NULL` to match the seed.
+- EN editor: `dir=ltr`, difficulty renders as a combobox, certificate editable.
+- `alembic upgrade head` clean (`a1b2c3d4e5f1 → b2c3d4e5f6a7`); `tsc --noEmit` reports 0 errors.
+
+### Still open
+
+Seed content is English-only for `about`, `learnings`, `tags` and every `extra_metadata` string in `generators/collections.py` (`TRANSLATIONS` only carries name + description). The Arabic learner page therefore shows Arabic title/description with English body sections until the seed generator is extended.

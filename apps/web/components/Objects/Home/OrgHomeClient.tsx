@@ -80,7 +80,6 @@ export function OrgHomeClient({
                 description={course.description || ''}
                 image={imageUrl}
                 lessons={course.extra_metadata?.lessons_count}
-                lessonsLabel={t('collections.lessons')}
                 duration={course.extra_metadata?.duration || ''}
                 difficulty={course.extra_metadata?.difficulty || ''}
               />
@@ -131,7 +130,6 @@ export function OrgHomeClient({
                 description={course.description || ''}
                 image={imageUrl}
                 lessons={course.extra_metadata?.lessons_count}
-                lessonsLabel={t('collections.lessons')}
                 duration={course.extra_metadata?.duration || ''}
                 difficulty={course.extra_metadata?.difficulty || ''}
               />
