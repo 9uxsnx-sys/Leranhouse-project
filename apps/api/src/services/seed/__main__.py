@@ -2,6 +2,7 @@
    python -m src.services.seed --seed-activity-translations
    python -m src.services.seed --seed-collection-translations
    python -m src.services.seed --seed-community-translations
+   python -m src.services.seed --seed-podcast-translations
 """
 
 from __future__ import annotations
@@ -17,6 +18,9 @@ from src.services.seed.seed_collection_translations import (
 )
 from src.services.seed.seed_community_translations import (
     seed_community_translations,
+)
+from src.services.seed.seed_podcast_translations import (
+    seed_podcast_translations,
 )
 
 
@@ -59,6 +63,11 @@ def main() -> int:
         action="store_true",
         help="Backfill fr/ar name and description on the community rows.",
     )
+    parser.add_argument(
+        "--seed-podcast-translations",
+        action="store_true",
+        help="Backfill fr/ar about/tags on podcasts and translate all episodes.",
+    )
     args = parser.parse_args()
 
     # ── Activity translation migration ──
@@ -72,6 +81,10 @@ def main() -> int:
     # ── Community translation backfill ──
     if args.seed_community_translations:
         return seed_community_translations()
+
+    # ── Podcast translation backfill ──
+    if args.seed_podcast_translations:
+        return seed_podcast_translations()
 
     # ── Full demo seed ──
     if not args.demo:

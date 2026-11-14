@@ -13,6 +13,8 @@ interface PodcastPlayerState {
   currentTime: number
   duration: number
   volume: number
+  rate: number
+  isLooping: boolean
   isVisible: boolean
 }
 
@@ -24,6 +26,8 @@ type PodcastPlayerAction =
   | { type: 'SET_TIME'; payload: number }
   | { type: 'SET_DURATION'; payload: number }
   | { type: 'SET_VOLUME'; payload: number }
+  | { type: 'SET_RATE'; payload: number }
+  | { type: 'TOGGLE_LOOP' }
   | { type: 'CLOSE_PLAYER' }
   | { type: 'NEXT_EPISODE'; payload: PodcastEpisode }
   | { type: 'PREVIOUS_EPISODE'; payload: PodcastEpisode }
@@ -35,6 +39,8 @@ const initialState: PodcastPlayerState = {
   currentTime: 0,
   duration: 0,
   volume: 1,
+  rate: 1,
+  isLooping: false,
   isVisible: false,
 }
 
@@ -64,6 +70,10 @@ function podcastPlayerReducer(
       return { ...state, duration: action.payload }
     case 'SET_VOLUME':
       return { ...state, volume: action.payload }
+    case 'SET_RATE':
+      return { ...state, rate: action.payload }
+    case 'TOGGLE_LOOP':
+      return { ...state, isLooping: !state.isLooping }
     case 'CLOSE_PLAYER':
       return {
         ...initialState,
@@ -96,6 +106,8 @@ interface PodcastPlayerContextValue {
   setTime: (time: number) => void
   setDuration: (duration: number) => void
   setVolume: (volume: number) => void
+  setRate: (rate: number) => void
+  toggleLoop: () => void
   closePlayer: () => void
   seekTo: (time: number) => void
   audioRef: React.RefObject<HTMLAudioElement | null>
@@ -183,6 +195,26 @@ export function PodcastPlayerProvider({ children }: { children: React.ReactNode 
       audioRef.current.volume = volume
     }
   }, [])
+
+  const setRate = useCallback((rate: number) => {
+    dispatch({ type: 'SET_RATE', payload: rate })
+    if (audioRef.current) {
+      audioRef.current.playbackRate = rate
+    }
+  }, [])
+
+  const toggleLoop = useCallback(() => {
+    dispatch({ type: 'TOGGLE_LOOP' })
+  }, [])
+
+  // Keep the audio element in sync with speed / loop, including after the
+  // element is (re)mounted for a new episode.
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+    audio.playbackRate = state.rate
+    audio.loop = state.isLooping
+  }, [state.rate, state.isLooping, state.currentEpisode?.episode_uuid, state.isVisible])
 
   const closePlayer = useCallback(() => {
     // Save progress before closing
@@ -317,10 +349,12 @@ export function PodcastPlayerProvider({ children }: { children: React.ReactNode 
     setTime,
     setDuration,
     setVolume,
+    setRate,
+    toggleLoop,
     closePlayer,
     seekTo,
     audioRef,
-  }), [state, playEpisode, play, pause, togglePlay, setTime, setDuration, setVolume, closePlayer, seekTo, audioRef])
+  }), [state, playEpisode, play, pause, togglePlay, setTime, setDuration, setVolume, setRate, toggleLoop, closePlayer, seekTo, audioRef])
 
   return (
     <PodcastPlayerContext.Provider value={value}>

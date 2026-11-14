@@ -92,6 +92,8 @@ def _overlay_from_podcast_translation(translation: PodcastTranslation) -> dict:
     }
     if translation.seo:
         overlay["seo"] = translation.seo
+    if translation.extra_metadata:
+        overlay["extra_metadata"] = translation.extra_metadata
     return overlay
 
 
@@ -121,6 +123,11 @@ def apply_podcast_overlay(
     overlay, content_locale, is_fallback = build_podcast_overlay(
         podcast, locale, db_session
     )
+    if overlay.get("extra_metadata"):
+        overlay["extra_metadata"] = {
+            **(getattr(model, "extra_metadata", None) or {}),
+            **overlay["extra_metadata"],
+        }
     return model.model_copy(
         update={
             **overlay,
@@ -176,6 +183,10 @@ def apply_podcast_overlay_bulk(podcast_reads, locale: Optional[str], db_session:
             read.model_copy(
                 update={
                     **_overlay_from_podcast_translation(translation),
+                    "extra_metadata": {
+                        **(getattr(read, "extra_metadata", None) or {}),
+                        **(translation.extra_metadata or {}),
+                    },
                     "content_locale": requested,
                     "is_fallback": False,
                 }
@@ -320,6 +331,7 @@ async def upsert_podcast_translation(
             description=payload.description,
             about=payload.about,
             tags=payload.tags,
+            extra_metadata=payload.extra_metadata,
             seo=payload.seo,
             state=payload.state or "draft",
             source_updated_at=podcast.update_date,
@@ -333,6 +345,8 @@ async def upsert_podcast_translation(
         row.description = payload.description
         row.about = payload.about
         row.tags = payload.tags
+        if payload.extra_metadata is not None:
+            row.extra_metadata = payload.extra_metadata
         if payload.seo is not None:
             row.seo = payload.seo
         if payload.state:

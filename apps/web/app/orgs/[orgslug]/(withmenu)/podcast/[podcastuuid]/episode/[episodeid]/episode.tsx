@@ -14,6 +14,7 @@ import EpisodePlayer from '@components/Objects/Podcasts/EpisodePlayer'
 import EpisodeOutlineSidebar from '@components/Objects/Podcasts/EpisodeOutlineSidebar'
 import { ChevronDown, ArrowLeft, ArrowRight, BookOpen } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useContentLocale } from '@components/Hooks/useCourseTranslation'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { Heading } from '@/components/ui/heading'
 import { Text } from '@/components/ui/text'
@@ -118,9 +119,11 @@ export default function EpisodeClient({
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
   const org = useOrg() as any
+  const contentLocale = useContentLocale()
 
-  // SWR for real-time data
-  const swrKey = `${getAPIUrl()}podcasts/${podcastUuid}/meta?locale=en`
+  // SWR for real-time data — locale-aware so a language switch re-fetches
+  // the translated podcast, episode list and episode content.
+  const swrKey = `${getAPIUrl()}podcasts/${podcastUuid}/meta?locale=${contentLocale}`
   const { data, error } = useSWR(
     swrKey,
     (url) => swrFetcher(url, access_token),
@@ -134,9 +137,23 @@ export default function EpisodeClient({
     }
   )
 
+  const { data: swrEpisode } = useSWR(
+    () => episodeId
+      ? `${getAPIUrl()}podcasts/episodes/${episodeId}?locale=${contentLocale}`
+      : null,
+    (url: string) => swrFetcher(url, access_token),
+    {
+      fallbackData: initialEpisode,
+      revalidateOnFocus: false,
+      dedupingInterval: 30000,
+      errorRetryCount: 0,
+      shouldRetryOnError: false,
+    }
+  )
+
   const podcast = data?.podcast || initialPodcast
   const episodes = data?.episodes || initialEpisodes
-  const episode = initialEpisode
+  const episode = swrEpisode || initialEpisode
 
   // Trail data for progress tracking
   const { data: trailData } = useSWR(
@@ -307,7 +324,7 @@ export default function EpisodeClient({
   return (
     <GeneralWrapperStyled className="pb-0">
       {/* ── Page Title ── */}
-      <h1 className="text-3xl md:text-4xl font-semibold text-ui-fg-base leading-tight max-w-7xl mx-auto mt-4">
+      <h1 dir="auto" className="text-3xl md:text-4xl font-semibold text-ui-fg-base leading-tight max-w-7xl mx-auto mt-4">
         {episode.title}
       </h1>
 

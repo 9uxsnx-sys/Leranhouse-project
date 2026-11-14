@@ -10,7 +10,6 @@ import {
   BookOpen,
   Users,
   Headphones,
-  ShoppingCart,
   Path,
   MagnifyingGlass,
   Stack,
@@ -18,6 +17,8 @@ import {
 
 import { getUriWithOrg } from '@services/config/config'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useOrg } from '@components/Contexts/OrgContext'
+import { useContentLocale } from '@components/Hooks/useCourseTranslation'
 import { useDebounce } from '@/hooks/useDebounce'
 import { searchOrgContent } from '@services/search/search'
 import { normalizeForSearch } from '@/lib/search/normalize'
@@ -39,64 +40,89 @@ interface ContentResult {
   href: string
 }
 
-const userPages: SearchMeta[] = [
-  {
-    id: 'user.home',
-    titleKey: 'Home',
-    descriptionKey: 'Organization home page',
-    icon: House,
-    href: '',
-    group: 'navigation',
-  },
-  {
-    id: 'user.courses',
-    titleKey: 'Courses',
-    descriptionKey: 'Browse courses',
-    icon: BookOpen,
-    href: '/courses',
-    group: 'navigation',
-  },
-  {
-    id: 'user.communities',
-    titleKey: 'Communities',
-    descriptionKey: 'Browse communities',
-    icon: Users,
-    href: '/communities',
-    group: 'navigation',
-  },
-  {
-    id: 'user.podcasts',
-    titleKey: 'Podcasts',
-    descriptionKey: 'Browse podcasts',
-    icon: Headphones,
-    href: '/podcasts',
-    group: 'navigation',
-  },
-  {
-    id: 'user.store',
-    titleKey: 'Store',
-    descriptionKey: 'Browse store',
-    icon: ShoppingCart,
-    href: '/store',
-    group: 'navigation',
-  },
-  {
-    id: 'user.trail',
-    titleKey: 'Trail',
-    descriptionKey: 'Your learning progress',
-    icon: Path,
-    href: '/trail',
-    group: 'navigation',
-  },
-]
-
 export function SearchModal({ open, onClose, orgslug }: SearchModalProps) {
   const { t } = useTranslation()
   const router = useRouter()
+  const org = useOrg() as any
+  const contentLocale = useContentLocale()
   const [query, setQuery] = useState('')
   const debouncedQuery = useDebounce(query, 250)
   const session = useLHSession() as any
   const accessToken = session?.data?.tokens?.access_token
+
+  // Mirror the user sidebar so the palette never lists a tab the org doesn't show.
+  const rf = org?.config?.config?.resolved_features
+  const isEnabled = (feature: string) => rf?.[feature]?.enabled === true
+
+  const userPages: SearchMeta[] = [
+    {
+      id: 'user.home',
+      titleKey: 'common.home',
+      descriptionKey: 'search.page_home',
+      icon: House,
+      href: '',
+      group: 'navigation',
+    },
+    {
+      id: 'user.courses',
+      titleKey: 'courses.courses',
+      descriptionKey: 'search.page_courses',
+      icon: BookOpen,
+      href: '/courses',
+      group: 'navigation',
+    },
+    ...(rf?.collections?.enabled !== false
+      ? [{
+          id: 'user.collections',
+          titleKey: 'collections.collections',
+          descriptionKey: 'search.page_collections',
+          icon: Stack,
+          href: '/collections',
+          group: 'navigation' as const,
+        }]
+      : []),
+    ...(isEnabled('communities')
+      ? [{
+          id: 'user.communities',
+          titleKey: 'communities.title',
+          descriptionKey: 'search.page_communities',
+          icon: Users,
+          href: '/communities',
+          group: 'navigation' as const,
+        }]
+      : []),
+    ...(isEnabled('podcasts')
+      ? [{
+          id: 'user.podcasts',
+          titleKey: 'podcasts.podcasts',
+          descriptionKey: 'search.page_podcasts',
+          icon: Headphones,
+          href: '/podcasts',
+          group: 'navigation' as const,
+        }]
+      : []),
+    {
+      id: 'user.trail',
+      titleKey: 'courses.progress',
+      descriptionKey: 'search.page_trail',
+      icon: Path,
+      href: '/trail',
+      group: 'navigation',
+    },
+  ]
+
+  // Content is already filtered server-side (against every translation), so the
+  // only local filtering left is the static page list.
+  const pageNeedle = normalizeForSearch(query)
+  const visiblePages = userPages.filter((p) => {
+    if (!pageNeedle) return true
+    const haystack = normalizeForSearch(
+      `${t(p.titleKey)} ${p.descriptionKey ? t(p.descriptionKey) : ''}`,
+    )
+    if (haystack.includes(pageNeedle)) return true
+    const tokens = pageNeedle.split(/\s+/u).filter(Boolean)
+    return tokens.every((tok) => haystack.includes(tok))
+  })
 
   // Reset state when modal closes
   useEffect(() => {
@@ -122,9 +148,9 @@ export function SearchModal({ open, onClose, orgslug }: SearchModalProps) {
   const searchEnabled = trimmed.length >= 2 && !!orgslug
 
   const { data: contentResults, isLoading } = useSWR(
-    searchEnabled ? ['user-search', orgslug, trimmed, accessToken ?? null] : null,
+    searchEnabled ? ['user-search', orgslug, trimmed, contentLocale, accessToken ?? null] : null,
     async () => {
-      const res = await searchOrgContent(orgslug, trimmed, 1, 5, null, accessToken)
+      const res = await searchOrgContent(orgslug, trimmed, 1, 5, null, accessToken, contentLocale)
       if (!res?.success || !res?.data) return []
       const data = res.data as any
       const results: ContentResult[] = []
@@ -224,7 +250,7 @@ export function SearchModal({ open, onClose, orgslug }: SearchModalProps) {
         />
         <DialogPrimitive.Content
           aria-label={t('search.search_title')}
-          className="fixed start-1/2 top-[12%] flex w-[94vw] max-w-[640px] -translate-x-1/2 flex-col overflow-hidden rounded-2xl border border-ui-border-base bg-ui-bg-base shadow-elevation-card-rest data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:slide-in-from-top-2 data-[state=closed]:slide-out-to-top-2 data-[state=open]:duration-150 data-[state=closed]:duration-100 ease-out"
+          className="fixed left-1/2 top-[12%] flex w-[94vw] max-w-[640px] -translate-x-1/2 flex-col overflow-hidden rounded-2xl border border-ui-border-base bg-ui-bg-base shadow-elevation-card-rest data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95 data-[state=open]:slide-in-from-top-2 data-[state=closed]:slide-out-to-top-2 data-[state=open]:duration-150 data-[state=closed]:duration-100 ease-out"
           style={{ zIndex: 'var(--z-modal)' as any }}
           onOpenAutoFocus={(e) => {
             e.preventDefault()
@@ -236,15 +262,7 @@ export function SearchModal({ open, onClose, orgslug }: SearchModalProps) {
 
           <Command
             label={t('search.search_title')}
-            shouldFilter={true}
-            filter={(value: string, search: string) => {
-              const haystack = normalizeForSearch(value)
-              const needle = normalizeForSearch(search)
-              if (!needle) return 1
-              if (haystack.includes(needle)) return 1
-              const tokens = needle.split(/\s+/u).filter(Boolean)
-              return tokens.every((tok: string) => haystack.includes(tok)) ? 0.8 : 0
-            }}
+            shouldFilter={false}
             className="flex flex-col [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:pt-4 [&_[cmdk-group-heading]]:pb-1 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-ui-fg-muted/50"
           >
             {/* Header with search input */}
@@ -287,7 +305,7 @@ export function SearchModal({ open, onClose, orgslug }: SearchModalProps) {
               </Command.Empty>
 
               <Command.Group heading={t('search.pages')}>
-                {userPages.map(renderPageItem)}
+                {visiblePages.map(renderPageItem)}
               </Command.Group>
 
               {contentResults && contentResults.length > 0 && (

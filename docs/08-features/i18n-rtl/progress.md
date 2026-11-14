@@ -530,7 +530,7 @@ A community only authors two display fields: `name` and `description`. Discussio
 | Web data | `services/communities/communities.ts`, `services/communities/communityTranslations.ts`, `components/Hooks/useCommunityTranslation.ts` | Locale query params, translation CRUD, hook resolving the editor's content row |
 | Web reads | Communities listing/client, community detail, discussion page, dashboard list/client, course community section, user profile | `locale` from the `i18next` cookie; SWR keys include the locale and revalidate on switch |
 | Card | `components/Objects/Thumbnails/CommunityCard.tsx` | Labels via `t()`, `Intl.RelativeTimeFormat` dates, `dir="auto"`, `min-h-[63px]` |
-| Detail UI | `community.tsx`, `CommunitySidebar.tsx`, `CommunityActionsMobile.tsx`, locales | New button, Public/Private and discussion-count badges, sidebar cards (linked course, includes, members, created, updates) and dates localized |
+| Detail UI | `community.tsx`, `CommunitySidebar.tsx`, `CommunityActionsMobile.tsx`, locales | New button, Public/Private and discussion-count badges, sidebar cards (linked course, includes, members, created, updates) and dates localized. The detail client re-fetches `?locale=` through SWR when the language changes, so title, description, stats and sidebar update without a page reload |
 | Discussions | `DiscussionCard.tsx` | Card keeps the English `dir="ltr"` layout, but the relative time, label chip (`Announcement`…) and See more / See less / Show less / Close buttons follow the platform language. Votes, reply placeholder and empty states stay English |
 | Editor | `CommunityEditGeneral.tsx`, `CommunityEditTranslations.tsx`, dashboard `[subpage]/page.tsx` | General tab edits the current content locale; new **Translations** tab (name + description, copy-from-source, delete) |
 | Seed | `generators/community.py`, `seed_community_translations.py`, `__main__.py`, `reset.py` | `COMMUNITY_TRANSLATIONS` fr/ar copy for all 18 communities; `--seed-community-translations`; reset deletes the rows |
@@ -544,7 +544,84 @@ A community only authors two display fields: `name` and `description`. Discussio
 - `GET /communities/{uuid}?locale=fr` → translated detail.
 - SSR `/orgs/demo/communities` with `Cookie: i18next=ar` → `<html lang="ar" dir="rtl">`, Arabic card title present, English absent; `fr` and `en` likewise.
 - `/orgs/demo/community/{uuid}` with `i18next=ar` → Arabic title, English absent.
-- Browser check on the detail page: AR shows `+ جديد`, `نقاشات`/`عام` badges and the sidebar in Arabic (`يشمل هذا المجتمع`, `153 أعضاء`, `أُنشئ في 4 أكتوبر 2026`, `آخر تحديث …`); FR shows `+ Nouveau`, `10 discussions`, `Aller au cours`, `153 membres`, `Créée le 4 oct. 2026`, `Dernière mise à jour …`.
+- Browser check on the detail page: AR shows `+ نشر`, `نقاشات`/`عام` badges and the sidebar in Arabic (`يشمل هذا المجتمع`, `153 أعضاء`, `أُنشئ في 4 أكتوبر 2026`, `آخر تحديث …`); FR shows `+ Publier`, `10 discussions`, `Aller au cours`, `153 membres`, `Créée le 4 oct. 2026`, `Dernière mise à jour …`.
 - With the platform in Arabic (`lang=ar`, `dir=rtl`), all 50 discussion cards keep `direction: ltr` while the time and label are localized (`قبل شهرين`, `إعلان`, `عرض المزيد`).
+- Language switch without reload on the detail page: AR → FR updates the community title/description, the stats row, the sidebar (`153 membres`, `Créée le 4 oct. 2026`) and the discussion cards (`il y a 2 mois`, `Annonce`); FR → AR switches everything back.
 - `tsc --noEmit` / editor diagnostics: 0 errors.
+
+## 16. Podcasts — localized show + episode content
+
+### Scope
+
+Podcasts carry two content layers: the show (`name`, `description`, `about`, `tags`, `extra_metadata.learnings`) and its episodes (`title`, `description`, `extra_metadata.learning_objectives` / `key_points`). Both are now localized end to end for fr/ar; audio is untouched. Episode `extra_metadata` was already part of the translation contract, the show `extra_metadata` was added here.
+
+### Changes
+
+| Layer | File | Change |
+|---|---|---|
+| DB | `migrations/versions/e6f7a8b9c0d1_add_extra_metadata_to_podcast_translation.py` | `podcast_translation.extra_metadata JSONB` |
+| Model | `src/db/podcast_translations.py` | `extra_metadata` on `PodcastTranslation`, `PodcastTranslationUpsert`, `PodcastTranslationRead` |
+| Service | `src/services/podcasts/translations.py` | Show overlay merges `extra_metadata` with the base row (single + bulk); upsert persists it |
+| Seed | `generators/podcasts.py` | Faithful fr/ar copy for all 18 shows; localized `about` (host template) + `tags`; `PODCAST_META_TRANSLATIONS` + generic template for the "What you'll learn" bullets; hand-written fr/ar descriptions for the 14 flagship episodes; `FLAGSHIP_EPISODE_META_TRANSLATIONS` + `GENERIC_EPISODE_META` for episode objectives / key points |
+| Backfill | `src/services/seed/seed_podcast_translations.py`, `seed/__main__.py` | `--seed-podcast-translations` updates show rows and creates/updates every episode translation (title, description, extra_metadata) |
+| Web reads | `podcast/[podcastuuid]/podcast.tsx`, `episode/[episodeid]/episode.tsx` | Locale-keyed SWR; the episode page now re-fetches the episode (`?locale=`) instead of holding the SSR row, and loads the episode list with the content locale (was hardcoded `locale=en`) |
+| Duration | `podcast.tsx`, `PodcastCard.tsx` | English short form in every locale (`7h 32min`, `45min`) — same convention as course cards |
+| UI copy | locales en/fr/ar | `podcast.page.about_title`, `podcast.page.episodes`, `podcast.episode.{about_this_episode,now_playing,episode_of,continue_listening,all_caught_up,no_more_episodes}`, `activities.whats_next` (the episode "On this page" sidebar used to render the raw key) |
+| Player | `components/Objects/Podcasts/EpisodePlayer.tsx`, `components/Contexts/PodcastPlayerContext.tsx` | Episode title de-emphasized (`font-bold` → `font-medium`, 700 → 500); playback speed (0.75x–2x) and loop added; `rate` / `isLooping` live in the shared context so the inline and sticky players agree and survive remounts (volume control already existed); keyboard shortcuts (Space/K play-pause, ←/→ seek 5s, ↑/↓ volume, M mute) that ignore typing fields and focused controls |
+| Player volume | `components/Objects/Podcasts/EpisodePlayer.tsx` | Native `<input type="range">` popover replaced by a hover-revealed track that slides out of the speaker icon (a themed track + fill + 8px black thumb, no OS widget). The reveal box overlaps the icon by 4px and carries the gap as padding, so the hover target is contiguous and the track can't collapse while reaching for it. Drag-to-adjust uses pointer capture, RTL-aware math and `insetInlineStart`, arrow-key support, and the icon click mutes / restores the last audible level |
+
+### Verification (live, demo org 463, The Pixel Hour)
+
+- `alembic upgrade head` clean (`d5e6f7a8b9c0 → e6f7a8b9c0d1`).
+- `python -m src.services.seed --seed-podcast-translations` → `36 podcast rows updated, 88 episode rows updated`.
+- `GET /podcasts/{uuid}/meta?locale=fr` → `L'heure du pixel`, full French description/about/tags, `extra_metadata.learnings` French, all 14 episode titles French, `learning_objectives` / `key_points` French.
+- `?locale=ar` → `ساعة البكسل`, Arabic description/about/tags, learnings, 14 episode titles and episode meta.
+- Non-flagship show (`Motion Sickness`) and its generic episodes → `Vertige du mouvement` / `دوار الحركة`, generic objectives localized.
+- Browser: FR detail page shows `7h 32min`, `À propos de ce podcast`, `Épisodes`; switching FR → AR without reload updates title, description, learnings, about and all episode titles (`7h 32min` stays English), `dir=rtl` applied.
+- Browser: episode page AR → EN → FR updates title, "What you'll learn", description, key takeaways and headings (`عن هذه الحلقة`, `About This Episode`, `À propos de cet épisode`; `NOW PLAYING` / `LECTURE EN COURS`) without a reload.
+- Podcast listing keeps localized names/descriptions and English-format durations.
+- Arabic show descriptions were doubled (~120 → ~270 chars) to fill the 3-line card clamp; verified on the listing (`line-clamp-3`, 63px tall, `overflow: hidden`) and the full copy renders on the show page.
+- The Pixel Hour `about` now matches the flagship course page: 5 paragraphs in en/fr/ar (2,355 / 2,533 / 1,812 chars, vs 2,380 chars for the flagship course) instead of the one-line host template.
+- Player: episode title computed `font-weight: 500`; speed trigger shows `1x` and opens `0.75x / 1x / 1.25x / 1.5x / 2x` (RTL-safe `end-0`); picking `1.5x` sets `audio.playbackRate = 1.5`; loop toggle sets `audio.loop = true`; button titles are localized (`سرعة التشغيل`, `تكرار الحلقة`).
+- Volume: collapsed track is `width: 16px; opacity: 0; pointer-events: none`; hovering the icon expands it to 96px (opacity 1) on the inline-end side in both directions, with the reveal box overlapping the icon by 4px so there is no dead zone (FR/LTR icon 313–349 → box 345–441; AR/RTL icon 931–967 → box 839–935). Hovering the track itself keeps it expanded. Thumb is 8×8, `gray-900`, no border. Dragging to 30% / 70% set `audio.volume` 0.30 / 0.70 with the fill and thumb landing on the inline-start edge; icon click muted to 0 and restored 0.7; slider is exposed as `role="slider"` with localized `aria-label` (`مستوى الصوت`).
+
+## 17. Progress tab — localized course cards
+
+The trail/progress page rendered the enrolled course row from `/trail/org/{id}/trail`, which returned raw `Course` rows (source locale only) and a hardcoded English "`1 of 25 lessons completed`" line.
+
+| Layer | File | Change |
+|---|---|---|
+| Endpoint | `src/routers/trail.py` | `/trail/org/{org_id}/trail` accepts `?locale=` |
+| Service | `src/services/trail/trail.py` | `_build_trail_read(..., locale=)` localizes every embedded course dict (main run + step data) through `build_translation_overlay`, so `name` / `description` / `about` / `learnings` / `tags` / `extra_metadata` follow the requested locale and `content_locale` is returned |
+| Web | `trail/trail.tsx` | SWR key is locale-keyed (`useContentLocale()`), so a language switch refetches |
+| Web | `components/Pages/Trail/TrailCourseCard.tsx` | `{{completed}} of {{total}} lessons completed` replaced by `trail.lessons_completed` |
+| Copy | locales en/fr/ar | `trail.lessons_completed_{one,other}` + full Arabic plural set (`zero/one/two/few/many/other`) |
+
+Verification: `?locale=fr` → `Developpement backend avec Python` (`content_locale: fr`); `?locale=ar` → `هندسة الواجهة الخلفية ببايثون` (`content_locale: ar`). Browser: FR renders `Progression`, French course name and `1 sur 25 leçons terminées`; AR renders `1 من 25 درسًا مكتملًا` under `dir=rtl`.
+
+## 18. Search palette — sidebar parity + localization
+
+`components/Objects/Modals/SearchModal.tsx` listed a hardcoded English page list (using plain English words as i18n keys, so it never translated) and included a `Store` tab the org doesn't have, while missing `Collections`.
+
+- The page list now mirrors `UserLeftMenu`: Home, Courses, Collections (`resolved_features.collections`), Communities / Podcasts (feature-flagged), Progress — Store removed.
+- Titles reuse the sidebar keys (`common.home`, `courses.courses`, `collections.collections`, `communities.title`, `podcasts.podcasts`, `courses.progress`); subtitles are new `search.page_*` keys in en/fr/ar.
+- Content results are fetched with `?locale=` (`useContentLocale()` in the SWR key and `searchOrgContent` call), so result titles/descriptions follow the UI language.
+
+Verified: FR → `Pages` + `Accueil / Cours / Collections / Communautés / Podcasts / Progression`, no Store; typing `python` hits `/search/org_slug/demo?...&locale=fr` and shows French excerpts under `Contenu`. AR → the same list in Arabic under `dir=rtl` (`الصفحات`, `فتح`).
+
+The dialog itself was off-screen in RTL: it used `start-1/2` (= `right: 50%` in Arabic) together with a physical `-translate-x-1/2`, which pushed it half a width further left. Both palettes (`SearchModal`, `Dashboard/CommandPalette`) now use `left-1/2` so the inset and the transform share a physical axis. AR: dialog 320–960 of a 1280 viewport (was −320–320); FR unchanged.
+
+**Search is now language-agnostic.** Two sides were involved:
+
+| Layer | File | Change |
+|---|---|---|
+| API | `services/courses/courses.py` (`search_courses`) | Match also against every `course_translation` row (name / description / about / learnings / tags) |
+| API | `services/search/search.py` | Same treatment for collections, communities and podcasts via `_translated_parent_ids` |
+| Web | `components/Objects/Modals/SearchModal.tsx` | `shouldFilter={false}` — cmdk was re-filtering on the *localized* label, so an Arabic result titled `هندسة … ببايثون` was hidden from a `python` query. Static pages are filtered locally instead |
+
+Verified in the palette: AR UI + `python` → 6 Arabic-titled results; AR UI + `بايثون` and `developpement` → same; EN UI + `بايثون` → English-titled courses; EN UI + `حزمة` → 5 English-titled collections. Note: accented French queries (`développement`) still miss because the seeded French copy is written without accents — the base data needs fixing, the search path itself is fine.
+
+
+
+
 

@@ -15,9 +15,14 @@ import { IconButton } from '@/components/ui/icon-button'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useCommunityRights } from '@components/Hooks/useCommunityRights'
+import { useContentLocale } from '@components/Hooks/useCourseTranslation'
 import { useOrgMembership } from '@components/Contexts/OrgContext'
 import { useOrg } from '@components/Contexts/OrgContext'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { getCommunityBannerMediaDirectory } from '@services/media/media'
+import { getAPIUrl } from '@services/config/config'
+import { swrFetcher } from '@services/utils/ts/requests'
+import useSWR from 'swr'
 import { useRegisterBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
 import {
   DropdownMenu,
@@ -40,6 +45,27 @@ const CommunityClient = ({
   org_id,
 }: CommunityClientProps) => {
   const { t } = useTranslation()
+  const session = useLHSession() as any
+  const accessToken = session?.data?.tokens?.access_token
+  const contentLocale = useContentLocale()
+
+  // Title, description and the stats row live in community_translation rows,
+  // so a client-side language switch has to re-fetch instead of reusing props.
+  const { data: swrCommunity, mutate: mutateCommunity } = useSWR(
+    () =>
+      contentLocale
+        ? `${getAPIUrl()}communities/${community.community_uuid}?locale=${contentLocale}`
+        : null,
+    (url: string) => swrFetcher(url, accessToken),
+    { fallbackData: community, revalidateOnFocus: false, dedupingInterval: 30000 }
+  )
+
+  React.useEffect(() => {
+    if (contentLocale) mutateCommunity()
+  }, [contentLocale, mutateCommunity])
+
+  const activeCommunity = (swrCommunity || community) as Community
+
   const [isCreatingDiscussion, setIsCreatingDiscussion] = useState(false)
   const [isSelectMode, setIsSelectMode] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -47,7 +73,7 @@ const CommunityClient = ({
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null)
   const [discussionCount, setDiscussionCount] = useState(0)
   const isMobile = useMediaQuery('(max-width: 768px)')
-  const { canManageCommunity, canCreateDiscussion: hasCreatePermission } = useCommunityRights(community.community_uuid)
+  const { canManageCommunity, canCreateDiscussion: hasCreatePermission } = useCommunityRights(activeCommunity.community_uuid)
   const { isUserPartOfTheOrg } = useOrgMembership()
   const canCreateDiscussion = hasCreatePermission && isUserPartOfTheOrg
   const org = useOrg() as any
@@ -55,7 +81,7 @@ const CommunityClient = ({
   // The feed is inline (cards expand in place), so the trail stops at the community.
   useRegisterBreadcrumb([
     { label: t('communities.title'), href: '/communities' },
-    { label: community.name },
+    { label: activeCommunity.name },
   ])
 
   return (
@@ -63,10 +89,10 @@ const CommunityClient = ({
       <GeneralWrapperStyled>
         {/* ── HERO BANNER IMAGE (centered, constrained) ── */}
         <div className="relative w-full mx-auto max-w-7xl aspect-[3/1] rounded-xl overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-gray-100 ring-1 ring-inset ring-black/5">
-          {community.banner_image ? (
+          {activeCommunity.banner_image ? (
             <img
-              src={getCommunityBannerMediaDirectory(org?.org_uuid, community?.community_uuid, community?.banner_image)}
-              alt={community.name}
+              src={getCommunityBannerMediaDirectory(org?.org_uuid, activeCommunity?.community_uuid, activeCommunity?.banner_image)}
+              alt={activeCommunity.name}
               className="w-full h-full object-cover"
             />
           ) : (
@@ -82,10 +108,10 @@ const CommunityClient = ({
 
         {/* ── COMMUNITY TITLE + DESCRIPTION ── */}
         <div className="w-full mx-auto max-w-7xl mt-8 space-y-2">
-          <h1 dir="auto" className="text-2xl md:text-3xl font-semibold text-ui-fg-base leading-tight">{community.name}</h1>
-          {community.description && (
+          <h1 dir="auto" className="text-2xl md:text-3xl font-semibold text-ui-fg-base leading-tight">{activeCommunity.name}</h1>
+          {activeCommunity.description && (
             <p dir="auto" className="text-base text-ui-fg-subtle leading-relaxed">
-              {community.description}
+              {activeCommunity.description}
             </p>
           )}
           <div className="flex flex-wrap items-center gap-2 mt-4">
@@ -96,7 +122,7 @@ const CommunityClient = ({
                 ? t('communities.discussion')
                 : t('communities.discussions')}
             </Badge>
-            {community.public ? (
+            {activeCommunity.public ? (
               <Badge variant="grey" className="flex items-center gap-1">
                 <MessageCircle size={12} />
                 {t('communities.public')}
@@ -117,10 +143,10 @@ const CommunityClient = ({
           <div className="flex-1 min-w-0 max-w-3xl space-y-8">
             {/* Mobile only shows community name */}
             <div className="md:hidden mb-4">
-              <h1 dir="auto" className="text-xl font-bold text-gray-900">{community.name}</h1>
-              {community.description && (
+              <h1 dir="auto" className="text-xl font-bold text-gray-900">{activeCommunity.name}</h1>
+              {activeCommunity.description && (
                 <p dir="auto" className="mt-1 text-sm text-gray-500 line-clamp-2">
-                  {community.description}
+                  {activeCommunity.description}
                 </p>
               )}
             </div>
@@ -228,13 +254,13 @@ const CommunityClient = ({
             {/* Create Discussion Card (replaces list) */}
             {isCreatingDiscussion ? (
               <CreateDiscussionCard
-                communityUuid={community.community_uuid}
+                communityUuid={activeCommunity.community_uuid}
                 orgSlug={orgslug}
                 onClose={() => setIsCreatingDiscussion(false)}
               />
             ) : (
               <DiscussionList
-                communityUuid={community.community_uuid}
+                communityUuid={activeCommunity.community_uuid}
                 orgslug={orgslug}
                 onCreateClick={() => setIsCreatingDiscussion(true)}
                 initialDiscussions={initialDiscussions}
@@ -255,7 +281,7 @@ const CommunityClient = ({
           <div className="w-full lg:w-72 xl:w-80 shrink-0">
             <div className="lg:sticky lg:top-8 space-y-4">
               <CommunitySidebar
-                community={community}
+                community={activeCommunity}
                 discussionCount={initialDiscussions.length}
                 orgslug={orgslug}
               />
@@ -271,7 +297,7 @@ const CommunityClient = ({
       {/* Mobile Actions Bar */}
       {isMobile && (
         <CommunityActionsMobile
-          community={community}
+          community={activeCommunity}
           orgslug={orgslug}
           onCreateDiscussion={() => setIsCreatingDiscussion(true)}
         />

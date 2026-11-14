@@ -1357,6 +1357,7 @@
     "next_activity": "Suivant",
     "no_previous_activity": "Aucune activité précédente",
     "no_next_activity": "Aucune activité suivante",
+    "whats_next": "Et ensuite ?",
     "mark_as_complete": "Marquer comme terminé",
     "unmark_activity": "Démarquer",
     "unmark_activity_confirm": "Voulez-vous retirer le statut terminé ? Cela modifiera votre progression.",
@@ -1516,6 +1517,12 @@
     "modal_placeholder": "Rechercher des pages, des cours...",
     "loading": "Chargement",
     "pages": "Pages",
+    "page_home": "Page d'accueil de l'organisation",
+    "page_courses": "Parcourir les cours",
+    "page_collections": "Parcourir les collections",
+    "page_communities": "Parcourir les communautés",
+    "page_podcasts": "Parcourir les podcasts",
+    "page_trail": "Votre progression d'apprentissage",
     "content": "Contenu",
     "navigate": "Naviguer",
     "new_tab": "Nouvel onglet",
@@ -6975,7 +6982,9 @@
     "no_results": "Aucun résultat",
     "try_different": "Essayez une autre recherche ou un autre filtre",
     "previous": "Précédent",
-    "next": "Suivant"
+    "next": "Suivant",
+    "lessons_completed_one": "{{completed}} sur {{total}} leçon terminée",
+    "lessons_completed_other": "{{completed}} sur {{total}} leçons terminées"
   },
   "store": {
     "title": "Boutique",
@@ -7043,6 +7052,8 @@
       "get_access": "Accéder",
       "get_access_hint": "Accédez à tous les épisodes et aux mises à jour",
       "includes_title": "Ce podcast comprend",
+      "about_title": "À propos de ce podcast",
+      "episodes": "Épisodes",
       "duration_hours": "{{hours}} h {{minutes}} min",
       "duration_minutes": "{{minutes}} min",
       "duration_minutes_total": "{{minutes}} min au total",
@@ -7066,6 +7077,21 @@
       "months_ago_other": "il y a {{count}} mois",
       "years_ago_one": "il y a {{count}} an",
       "years_ago_other": "il y a {{count}} ans"
+    },
+    "episode": {
+      "about_this_episode": "À propos de cet épisode",
+      "now_playing": "Lecture en cours",
+      "episode_of": "Épisode {{current}} sur {{total}}",
+      "playback_speed": "Vitesse de lecture",
+      "loop": "Répéter l'épisode",
+      "mute": "Couper le son",
+      "unmute": "Rétablir le son",
+      "volume": "Volume",
+      "skip_back": "Reculer de 15 s",
+      "skip_forward": "Avancer de 15 s",
+      "continue_listening": "Continuer l'écoute",
+      "all_caught_up": "Vous avez tout écouté !",
+      "no_more_episodes": "Il n'y a plus d'épisodes dans ce podcast."
     }
   },
   "lesson": {

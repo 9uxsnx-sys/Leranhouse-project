@@ -1615,6 +1615,7 @@
                        "next_activity":  "Next activity",
                        "no_previous_activity":  "No previous activity",
                        "no_next_activity":  "No next activity",
+                       "whats_next":  "What's Next",
                        "mark_as_complete":  "Mark as complete",
                        "unmark_activity":  "Unmark Activity",
                        "unmark_activity_confirm":  "Are you sure you want to unmark this activity as complete? This will affect your course progress.",
@@ -1826,6 +1827,12 @@
                    "modal_placeholder":  "Search pages, courses...",
                    "loading":  "Loading",
                    "pages":  "Pages",
+                   "page_home":  "Organization home page",
+                   "page_courses":  "Browse courses",
+                   "page_collections":  "Browse collections",
+                   "page_communities":  "Browse communities",
+                   "page_podcasts":  "Browse podcasts",
+                   "page_trail":  "Your learning progress",
                    "content":  "Content",
                    "navigate":  "Navigate",
                    "new_tab":  "New tab",
@@ -6900,7 +6907,9 @@
                   "no_results":  "No results found",
                   "try_different":  "Try a different search or filter",
                   "previous":  "Previous",
-                  "next":  "Next"
+                  "next":  "Next",
+                  "lessons_completed_one":  "{{completed}} of {{total}} lesson completed",
+                  "lessons_completed_other":  "{{completed}} of {{total}} lessons completed"
               },
     "playground":  {
                        "title":  "Playgrounds",
@@ -7072,6 +7081,8 @@
                                  "get_access":  "Get Access",
                                  "get_access_hint":  "Get access to all episodes and updates",
                                  "includes_title":  "This Podcast Includes",
+                                 "about_title":  "About This Podcast",
+                                 "episodes":  "Episodes",
                                  "duration_hours":  "{{hours}}h {{minutes}}min",
                                  "duration_minutes":  "{{minutes}}min",
                                  "duration_minutes_total":  "{{minutes}} min total",
@@ -7095,6 +7106,21 @@
                                  "months_ago_other":  "{{count}} months ago",
                                  "years_ago_one":  "{{count}} year ago",
                                  "years_ago_other":  "{{count}} years ago"
+                             },
+                    "episode":  {
+                                 "about_this_episode":  "About This Episode",
+                                 "now_playing":  "Now Playing",
+                                 "episode_of":  "Episode {{current}} of {{total}}",
+                                 "playback_speed":  "Playback speed",
+                                 "loop":  "Loop episode",
+                                 "mute":  "Mute",
+                                 "unmute":  "Unmute",
+                                 "volume":  "Volume",
+                                 "skip_back":  "Skip back 15s",
+                                 "skip_forward":  "Skip forward 15s",
+                                 "continue_listening":  "Continue listening",
+                                 "all_caught_up":  "You're all caught up!",
+                                 "no_more_episodes":  "No more episodes in this podcast."
                              }
                 },
     "store":  {

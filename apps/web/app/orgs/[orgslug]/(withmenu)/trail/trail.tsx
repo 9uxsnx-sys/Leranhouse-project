@@ -9,6 +9,7 @@ import React, { useEffect, useState, useMemo } from 'react'
 import useSWR from 'swr'
 import { BookOpen, Signpost, Search, ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useContentLocale } from '@components/Hooks/useCourseTranslation'
 import FeatureDisabledView from '@components/Dashboard/Shared/FeatureDisabled/FeatureDisabledView'
 import { IconButton } from '@/components/ui/icon-button'
 import {
@@ -29,9 +30,12 @@ function Trail(params: any) {
   // Check if courses feature is enabled
   const isCoursesEnabled = org?.config?.config?.resolved_features?.courses?.enabled ?? org?.config?.config?.features?.courses?.enabled !== false
 
+  // Locale-aware so enrolled course names/descriptions follow the UI language.
+  const contentLocale = useContentLocale()
+
   // Only fetch trail data if courses feature is enabled
   const { data: trail, error: error, mutate } = useSWR(
-    isCoursesEnabled && orgID ? `${getAPIUrl()}trail/org/${orgID}/trail` : null,
+    isCoursesEnabled && orgID ? `${getAPIUrl()}trail/org/${orgID}/trail?locale=${contentLocale}` : null,
     (url) => swrFetcher(url, access_token)
   )
 

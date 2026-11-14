@@ -17,6 +17,7 @@ from src.services.courses.certifications import (
     check_course_completion_and_create_certificate,
     is_course_fully_completed,
 )
+from src.services.courses.translations import build_translation_overlay
 from src.services.analytics.analytics import track
 from src.services.analytics import events as analytics_events
 from src.services.webhooks.dispatch import dispatch_webhooks
@@ -34,6 +35,7 @@ def _build_trail_read(
     db_session: Session,
     user_id: Optional[int] = None,
     with_course_info: bool = True,
+    locale: Optional[str] = None,
 ) -> TrailRead:
     """Build a TrailRead with all nested data using batch queries instead of N+1 loops."""
     if not trail_runs_raw:
@@ -101,6 +103,20 @@ def _build_trail_read(
         for c in extra_courses:
             course_map[c.id] = c
 
+    # ── Localize course metadata for the requested content locale ──
+    course_payload_map: dict[int, dict] = {}
+    for course in course_map.values():
+        payload = course.model_dump()
+        if locale and course.id is not None:
+            overlay, content_locale, is_fallback = build_translation_overlay(
+                course, locale, db_session
+            )
+            if overlay:
+                payload.update(overlay)
+                payload["content_locale"] = content_locale
+                payload["is_fallback"] = is_fallback
+        course_payload_map[course.id] = payload
+
     # Build trail runs
     trail_runs = []
     for tr in trail_runs_raw:
@@ -108,7 +124,7 @@ def _build_trail_read(
         podcast = podcast_map.get(tr.podcast_id) if tr.podcast_id else None
         run = TrailRunRead(
             **tr.model_dump(),
-            course=course.model_dump() if course else {},
+            course=course_payload_map.get(course.id, {}) if course else {},
             podcast=podcast.model_dump() if podcast else {},
             steps=[],
             course_total_steps=course_total_steps_map.get(tr.course_id, 0) if with_course_info and tr.course_id else 0,
@@ -119,7 +135,9 @@ def _build_trail_read(
         for step in steps_by_run.get(tr.id, []):
             db_session.expunge(step)
             step_course = course_map.get(step.course_id) if step.course_id else None
-            step.data = dict(course=step_course.model_dump() if step_course else None)
+            step.data = dict(
+                course=course_payload_map.get(step_course.id) if step_course else None
+            )
             run.steps.append(step)
 
         trail_runs.append(run)
@@ -204,7 +222,11 @@ async def check_trail_presence(
 
 
 async def get_user_trail_with_orgid(
-    request: Request, user: PublicUser | AnonymousUser, org_id: int, db_session: Session
+    request: Request,
+    user: PublicUser | AnonymousUser,
+    org_id: int,
+    db_session: Session,
+    locale: Optional[str] = None,
 ) -> TrailRead:
 
     if isinstance(user, AnonymousUser):
@@ -224,7 +246,9 @@ async def get_user_trail_with_orgid(
     statement = select(TrailRun).where(TrailRun.trail_id == trail.id)
     trail_runs_raw = db_session.exec(statement).all()
 
-    return _build_trail_read(trail, list(trail_runs_raw), db_session)
+    return _build_trail_read(
+        trail, list(trail_runs_raw), db_session, locale=locale
+    )
 
 
 async def add_activity_to_trail(

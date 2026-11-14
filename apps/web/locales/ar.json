@@ -1429,6 +1429,7 @@
     "next_activity": "النشاط التالي",
     "no_previous_activity": "لا يوجد نشاط سابق",
     "no_next_activity": "لا يوجد نشاط تالي",
+    "whats_next": "ما التالي؟",
     "mark_as_complete": "تحديد كمكتمل",
     "unmark_activity": "إلغاء تحديد النشاط",
     "unmark_activity_confirm": "هل أنت متأكد أنك تريد إلغاء تحديد اكتمال هذا النشاط؟ هذا سيؤثر على تقدمك في الدورة.",
@@ -1588,6 +1589,12 @@
     "modal_placeholder": "ابحث في الصفحات والدورات...",
     "loading": "جاري التحميل",
     "pages": "الصفحات",
+    "page_home": "الصفحة الرئيسية للمؤسسة",
+    "page_courses": "تصفح الدورات",
+    "page_collections": "تصفح المجموعات",
+    "page_communities": "تصفح المجتمعات",
+    "page_podcasts": "تصفح البودكاست",
+    "page_trail": "تقدمك في التعلم",
     "content": "المحتوى",
     "navigate": "تنقل",
     "new_tab": "تبويب جديد",
@@ -7082,7 +7089,13 @@
     "no_results": "لا توجد نتائج",
     "try_different": "جرّب بحثًا أو تصفية مختلفة",
     "previous": "السابق",
-    "next": "التالي"
+    "next": "التالي",
+    "lessons_completed_zero": "لم يكتمل أي درس من {{total}}",
+    "lessons_completed_one": "{{completed}} من درس واحد مكتمل",
+    "lessons_completed_two": "{{completed}} من درسين مكتملين",
+    "lessons_completed_few": "{{completed}} من {{total}} دروس مكتملة",
+    "lessons_completed_many": "{{completed}} من {{total}} درسًا مكتملًا",
+    "lessons_completed_other": "{{completed}} من {{total}} درس مكتمل"
   },
   "store": {
     "title": "المتجر",
@@ -7166,6 +7179,8 @@
       "get_access": "احصل على الوصول",
       "get_access_hint": "احصل على الوصول إلى جميع الحلقات والتحديثات",
       "includes_title": "يشمل هذا البودكاست",
+      "about_title": "عن هذا البودكاست",
+      "episodes": "الحلقات",
       "duration_hours": "{{hours}} س {{minutes}} د",
       "duration_minutes": "{{minutes}} د",
       "duration_minutes_total": "{{minutes}} د إجمالًا",
@@ -7201,6 +7216,21 @@
       "years_ago_few": "قبل {{count}} سنوات",
       "years_ago_many": "قبل {{count}} سنة",
       "years_ago_other": "قبل {{count}} سنة"
+    },
+    "episode": {
+      "about_this_episode": "عن هذه الحلقة",
+      "now_playing": "قيد التشغيل",
+      "episode_of": "الحلقة {{current}} من {{total}}",
+      "playback_speed": "سرعة التشغيل",
+      "loop": "تكرار الحلقة",
+      "mute": "كتم الصوت",
+      "unmute": "إلغاء كتم الصوت",
+      "volume": "مستوى الصوت",
+      "skip_back": "رجوع 15 ثانية",
+      "skip_forward": "تقدّم 15 ثانية",
+      "continue_listening": "متابعة الاستماع",
+      "all_caught_up": "لقد استمعت إلى كل شيء!",
+      "no_more_episodes": "لا توجد حلقات أخرى في هذا البودكاست."
     }
   },
   "lesson": {

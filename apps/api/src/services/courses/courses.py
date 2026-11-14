@@ -26,6 +26,7 @@ from src.db.courses.courses import (
     AuthorWithRole,
     ThumbnailType,
 )
+from src.db.courses.course_translations import CourseTranslation
 from src.security.auth import resolve_acting_user_id
 from src.security.rbac.rbac import (
     authorization_verify_if_user_is_anon,
@@ -533,6 +534,22 @@ async def search_courses(
 
     pattern = build_like_pattern(search_query)
 
+    # Match the query against the source row *and* every translation, so a
+    # course titled in Arabic is still found by an English or French query
+    # (and vice versa), whatever the UI locale is.
+    translated_course_ids = (
+        select(CourseTranslation.course_id)
+        .where(
+            or_(
+                CourseTranslation.name.ilike(pattern, escape=LIKE_ESCAPE_CHAR),
+                CourseTranslation.description.ilike(pattern, escape=LIKE_ESCAPE_CHAR),
+                CourseTranslation.about.ilike(pattern, escape=LIKE_ESCAPE_CHAR),
+                CourseTranslation.learnings.ilike(pattern, escape=LIKE_ESCAPE_CHAR),
+                CourseTranslation.tags.ilike(pattern, escape=LIKE_ESCAPE_CHAR),
+            )
+        )
+    )
+
     needs_distinct = False
     query = (
         select(Course)
@@ -545,6 +562,7 @@ async def search_courses(
                 Course.about.ilike(pattern, escape=LIKE_ESCAPE_CHAR),  # type: ignore[attr-defined]
                 Course.learnings.ilike(pattern, escape=LIKE_ESCAPE_CHAR),  # type: ignore[attr-defined]
                 Course.tags.ilike(pattern, escape=LIKE_ESCAPE_CHAR),  # type: ignore[attr-defined]
+                Course.id.in_(translated_course_ids),  # type: ignore[attr-defined]
             )
         )
     )

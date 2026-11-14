@@ -102,7 +102,12 @@ function TrailCourseCard(props: TrailCourseCardProps) {
             </h3>
           </Link>
           <p className="text-[13px] font-normal leading-relaxed line-clamp-1 text-[#6B7280]">
-            {course_completed_steps} of {course_total_steps} lessons completed
+            {t('trail.lessons_completed', {
+              completed: course_completed_steps,
+              total: course_total_steps,
+              count: course_total_steps,
+              defaultValue: '{{completed}} of {{total}} lessons completed',
+            })}
           </p>
         </div>
 

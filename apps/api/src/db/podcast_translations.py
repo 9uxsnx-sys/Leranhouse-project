@@ -29,6 +29,7 @@ class PodcastTranslation(SQLModel, table=True):
     description: Optional[str] = Field(default=None, sa_column=Column(Text))
     about: Optional[str] = Field(default=None, sa_column=Column(Text))
     tags: Optional[str] = Field(default=None, sa_column=Column(Text))
+    extra_metadata: Optional[dict] = Field(default=None, sa_column=Column(JSONB))
     seo: Optional[dict] = Field(default=None, sa_column=Column(JSONB))
     # draft | machine | reviewed | published — v1 serves every row
     state: str = Field(
@@ -50,6 +51,7 @@ class PodcastTranslationUpsert(SQLModel):
     description: Optional[str] = None
     about: Optional[str] = None
     tags: Optional[str] = None
+    extra_metadata: Optional[dict] = None
     seo: Optional[dict] = None
     state: Optional[str] = None
 
@@ -62,6 +64,7 @@ class PodcastTranslationRead(SQLModel):
     description: Optional[str] = None
     about: Optional[str] = None
     tags: Optional[str] = None
+    extra_metadata: Optional[dict] = None
     seo: Optional[dict] = None
     state: str
     source_updated_at: Optional[str] = None

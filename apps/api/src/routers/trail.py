@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 from src.core.events.database import get_db_session
 from src.db.trails import TrailCreate, TrailRead
 from src.security.auth import get_current_user
@@ -86,6 +86,7 @@ async def api_get_user_trail(
 async def api_get_trail_by_org_id(
     request: Request,
     org_id: int,
+    locale: str | None = Query(default=None, description="Content locale for course metadata"),
     user=Depends(get_current_user),
     db_session=Depends(get_db_session),
 ) -> TrailRead:
@@ -93,7 +94,7 @@ async def api_get_trail_by_org_id(
     Get a user trails using org slug
     """
     return await get_user_trail_with_orgid(
-        request, user, org_id=org_id, db_session=db_session
+        request, user, org_id=org_id, db_session=db_session, locale=locale
     )
 
 

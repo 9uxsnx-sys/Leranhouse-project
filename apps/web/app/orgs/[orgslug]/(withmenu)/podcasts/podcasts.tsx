@@ -1,11 +1,16 @@
 'use client'
 import React, { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import useSWR from 'swr'
 import { Search, Headphones, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useOrg } from '@components/Contexts/OrgContext'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useContentLocale } from '@components/Hooks/useCourseTranslation'
 import { PodcastCard } from '@components/Objects/Thumbnails/PodcastCard'
 import { searchMatchesAny } from '@/lib/search/normalize'
 import { PodcastWithEpisodeCount } from '@services/podcasts/podcasts'
+import { getAPIUrl } from '@services/config/config'
+import { swrFetcher } from '@services/utils/ts/requests'
 import FeatureDisabledView from '@components/Dashboard/Shared/FeatureDisabled/FeatureDisabledView'
 
 // Medusa components
@@ -31,8 +36,29 @@ export default function PodcastsClient({
   initialPodcasts,
 }: PodcastsClientProps) {
   const { t } = useTranslation()
-  const allPodcasts = initialPodcasts
   const org = useOrg() as any
+  const session = useLHSession() as any
+  const accessToken = session?.data?.tokens?.access_token
+  const contentLocale = useContentLocale()
+
+  // Titles and descriptions live in podcast_translation rows, so a client-side
+  // language switch has to re-fetch instead of reusing the SSR props.
+  const { data: swrPodcasts, mutate: mutatePodcasts } = useSWR(
+    () =>
+      contentLocale
+        ? `${getAPIUrl()}podcasts/org_slug/${orgslug}/page/1/limit/100?locale=${contentLocale}${
+            accessToken ? '&include_unpublished=true' : ''
+          }`
+        : null,
+    (url: string) => swrFetcher(url, accessToken),
+    { fallbackData: initialPodcasts, revalidateOnFocus: false, dedupingInterval: 30000 }
+  )
+
+  React.useEffect(() => {
+    if (contentLocale) mutatePodcasts()
+  }, [contentLocale, mutatePodcasts])
+
+  const allPodcasts = swrPodcasts || initialPodcasts
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('')

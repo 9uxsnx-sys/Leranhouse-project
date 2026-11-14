@@ -13,6 +13,9 @@ from src.db.communities.communities import Community, CommunityRead
 from src.db.communities.discussions import Discussion, DiscussionRead
 from src.db.playgrounds import Playground, PlaygroundRead, PlaygroundAccessType
 from src.db.podcasts.podcasts import Podcast, PodcastRead
+from src.db.collection_translations import CollectionTranslation
+from src.db.communities.community_translations import CommunityTranslation
+from src.db.podcast_translations import PodcastTranslation
 from src.services.courses.collection_translations import apply_collection_overlay_bulk
 from src.services.communities.community_translations import apply_community_overlay_bulk
 from src.services.podcasts.translations import apply_podcast_overlay_bulk
@@ -81,6 +84,20 @@ def _ilike_any(columns: Sequence[ColumnElement[Any]], pattern: str) -> ColumnEle
     responsible for escaping — no string interpolation on user input.
     """
     return or_(*(column.ilike(pattern, escape=LIKE_ESCAPE_CHAR) for column in columns))
+
+
+def _translated_parent_ids(
+    parent_column: ColumnElement[Any],
+    columns: Sequence[ColumnElement[Any]],
+    pattern: str,
+) -> Any:
+    """Ids whose translation rows (any locale) match `pattern`.
+
+    Search stays language-agnostic: a course/show titled in Arabic is still
+    found by an English or French query, and the other way around, so the
+    result set doesn't depend on the UI locale.
+    """
+    return select(parent_column).where(_ilike_any(list(columns), pattern))
 
 
 def _paginate_and_count(
@@ -168,10 +185,25 @@ async def search_across_org(
     total_courses = len(courses)
 
     # ── Collections ──────────────────────────────────────────────────────────
+    translated_collection_ids = _translated_parent_ids(
+        CollectionTranslation.collection_id,
+        [
+            CollectionTranslation.name,
+            CollectionTranslation.description,
+            CollectionTranslation.about,
+            CollectionTranslation.tags,
+        ],
+        pattern,
+    )
     collections_q = (
         select(Collection)
         .where(Collection.org_id == org.id)
-        .where(_ilike_any([Collection.name, Collection.description], pattern))
+        .where(
+            or_(
+                _ilike_any([Collection.name, Collection.description], pattern),
+                Collection.id.in_(translated_collection_ids),  # type: ignore[attr-defined]
+            )
+        )
     )
     if is_anon:
         collections_q = collections_q.where(Collection.public == sa_true())
@@ -200,10 +232,20 @@ async def search_across_org(
         users, total_users = _paginate_and_count(db_session, users_q, page, limit)
 
     # ── Communities ──────────────────────────────────────────────────────────
+    translated_community_ids = _translated_parent_ids(
+        CommunityTranslation.community_id,
+        [CommunityTranslation.name, CommunityTranslation.description],
+        pattern,
+    )
     communities_q = (
         select(Community)
         .where(Community.org_id == org.id)
-        .where(_ilike_any([Community.name, Community.description], pattern))
+        .where(
+            or_(
+                _ilike_any([Community.name, Community.description], pattern),
+                Community.id.in_(translated_community_ids),  # type: ignore[attr-defined]
+            )
+        )
     )
     if only_public:
         communities_q = communities_q.where(Community.public == sa_true())
@@ -247,11 +289,26 @@ async def search_across_org(
     )
 
     # ── Podcasts ─────────────────────────────────────────────────────────────
+    translated_podcast_ids = _translated_parent_ids(
+        PodcastTranslation.podcast_id,
+        [
+            PodcastTranslation.name,
+            PodcastTranslation.description,
+            PodcastTranslation.about,
+            PodcastTranslation.tags,
+        ],
+        pattern,
+    )
     podcasts_q = (
         select(Podcast)
         .where(Podcast.org_id == org.id)
         .where(Podcast.published == sa_true())
-        .where(_ilike_any([Podcast.name, Podcast.description, Podcast.tags], pattern))
+        .where(
+            or_(
+                _ilike_any([Podcast.name, Podcast.description, Podcast.tags], pattern),
+                Podcast.id.in_(translated_podcast_ids),  # type: ignore[attr-defined]
+            )
+        )
     )
     if only_public:
         podcasts_q = podcasts_q.where(Podcast.public == sa_true())

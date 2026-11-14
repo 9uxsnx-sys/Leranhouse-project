@@ -21,12 +21,14 @@ export function PodcastCard({ id, title, description, thumbnailImage, episodeCou
   const { t } = useTranslation()
   const org = useOrg() as any
 
+  // Durations stay in the English short form in every locale, matching how the
+  // course cards render their duration string.
   const formatDuration = (totalSeconds: number): string => {
     if (totalSeconds <= 0) return t('podcast.page.not_available')
     const hours = Math.floor(totalSeconds / 3600)
     const minutes = Math.floor((totalSeconds % 3600) / 60)
-    if (hours > 0) return t('podcast.page.duration_hours', { hours, minutes })
-    return t('podcast.page.duration_minutes', { minutes })
+    if (hours > 0) return minutes > 0 ? `${hours}h ${minutes}min` : `${hours}h`
+    return `${minutes}min`
   }
 
   const formatDate = (dateStr: string): string => {

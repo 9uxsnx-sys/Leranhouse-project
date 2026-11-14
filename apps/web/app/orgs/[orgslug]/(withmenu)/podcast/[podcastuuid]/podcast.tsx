@@ -126,15 +126,14 @@ export default function PodcastClient({
     }
   }
 
-  // Format duration from seconds to human-readable string
+  // Format duration from seconds — same English short form the course cards use
+  // in every locale (e.g. "1h 13min", "45min").
   const formatDuration = (seconds: number) => {
-    if (!seconds || seconds <= 0) return t('podcast.page.duration_minutes', { minutes: 0 })
+    if (!seconds || seconds <= 0) return '0min'
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
-    if (hours > 0) {
-      return t('podcast.page.duration_hours', { hours, minutes })
-    }
-    return t('podcast.page.duration_minutes', { minutes })
+    if (hours > 0) return minutes > 0 ? `${hours}h ${minutes}min` : `${hours}h`
+    return `${minutes}min`
   }
 
   // Add padding at bottom when player is visible
@@ -218,9 +217,7 @@ export default function PodcastClient({
                   </Badge>
                   <Badge variant="grey" className="flex items-center gap-1">
                     <Clock size={12} />
-                    {meta.total_duration
-                      ? t('podcast.page.duration_minutes', { minutes: meta.total_duration })
-                      : formatDuration(totalDurationSeconds)}
+                    {formatDuration(meta.total_duration ? meta.total_duration * 60 : totalDurationSeconds)}
                   </Badge>
                   {podcast.authors?.length > 0 && (
                     <Badge variant="grey" className="flex items-center gap-1">
@@ -317,9 +314,9 @@ export default function PodcastClient({
                     <div className="flex items-center gap-3">
                       <Clock size={16} className="text-gray-400 shrink-0" />
                       <span className="text-sm text-gray-600">
-                        {meta.total_duration
-                          ? t('podcast.page.duration_minutes_total', { minutes: meta.total_duration })
-                          : t('podcast.page.total_suffix', { duration: formatDuration(totalDurationSeconds) })}
+                        {t('podcast.page.total_suffix', {
+                          duration: formatDuration(meta.total_duration ? meta.total_duration * 60 : totalDurationSeconds),
+                        })}
                       </span>
                     </div>
                     <div className="flex items-center gap-3">
