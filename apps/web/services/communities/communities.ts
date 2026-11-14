@@ -32,6 +32,10 @@ export interface Community {
   moderation_settings: CommunityModerationSettings | null
   thumbnail_image: string | null
   banner_image: string | null
+  // Localization state, filled by the API on localized reads.
+  source_locale?: string
+  content_locale?: string
+  is_fallback?: boolean
   creation_date: string
   update_date: string
 }
@@ -79,10 +83,12 @@ export async function getCommunities(
   page: number = 1,
   limit: number = 10,
   next: any,
-  access_token?: string
+  access_token?: string,
+  locale?: string
 ) {
+  const query = locale ? `?locale=${encodeURIComponent(locale)}` : ''
   const result: any = await fetch(
-    `${getAPIUrl()}communities/org/${org_id}/page/${page}/limit/${limit}`,
+    `${getAPIUrl()}communities/org/${org_id}/page/${page}/limit/${limit}${query}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token)
   )
   const res = await errorHandling(result)
@@ -92,10 +98,12 @@ export async function getCommunities(
 export async function getCommunity(
   community_uuid: string,
   next: any,
-  access_token?: string
+  access_token?: string,
+  locale?: string
 ) {
+  const query = locale ? `?locale=${encodeURIComponent(locale)}` : ''
   const result: any = await fetch(
-    `${getAPIUrl()}communities/${community_uuid}`,
+    `${getAPIUrl()}communities/${community_uuid}${query}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token)
   )
   const res = await errorHandling(result)
@@ -105,10 +113,12 @@ export async function getCommunity(
 export async function getCommunityByCourse(
   course_uuid: string,
   next: any,
-  access_token?: string
+  access_token?: string,
+  locale?: string
 ) {
+  const query = locale ? `?locale=${encodeURIComponent(locale)}` : ''
   const result: any = await fetch(
-    `${getAPIUrl()}communities/course/${course_uuid}`,
+    `${getAPIUrl()}communities/course/${course_uuid}${query}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token)
   )
   const res = await errorHandling(result)

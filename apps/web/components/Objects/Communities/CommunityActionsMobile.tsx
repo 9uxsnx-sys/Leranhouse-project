@@ -55,7 +55,7 @@ export function CommunityActionsMobile({
                 className="flex items-center gap-1.5 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition-colors text-sm font-medium"
               >
                 <Plus size={14} />
-                New
+                {t('communities.new')}
               </button>
             )}
           </div>

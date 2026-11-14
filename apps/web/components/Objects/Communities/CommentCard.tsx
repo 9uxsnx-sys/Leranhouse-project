@@ -254,10 +254,14 @@ export function CommentCard({
                 onClick={handleVote}
                 disabled={!canVote || isVoting}
                 className={`flex items-center gap-1 text-xs transition-colors ${
-                  hasVoted ? 'text-indigo-600' : 'text-gray-400 hover:text-gray-600'
+                  hasVoted ? 'text-red-500' : 'text-gray-400 hover:text-red-500'
                 } ${!canVote ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                <Heart size={14} className={isVoting ? 'animate-pulse' : ''} />
+                <Heart
+                  size={14}
+                  fill={hasVoted ? 'currentColor' : 'none'}
+                  className={isVoting ? 'animate-pulse' : ''}
+                />
                 <span className="font-medium">{voteCount}</span>
               </button>
             </div>

@@ -512,3 +512,39 @@ Seeded `requirements` rows only carry `{text}`; `LearningItemsList` drops object
 ### Still open
 
 Seed content is English-only for `about`, `learnings`, `tags` and every `extra_metadata` string in `generators/collections.py` (`TRANSLATIONS` only carries name + description). The Arabic learner page therefore shows Arabic title/description with English body sections until the seed generator is extended.
+
+## 15. Communities — localized name + description
+
+### Scope
+
+A community only authors two display fields: `name` and `description`. Discussions, replies, reactions and votes are user-generated and stay in the language they were written in. Card metadata (linked course / general, public / private, relative date) is frontend i18n, not content.
+
+### Changes
+
+| Layer | File | Change |
+|---|---|---|
+| DB | `migrations/versions/d5e6f7a8b9c0_add_community_translations.py` | `community.source_locale VARCHAR(10) DEFAULT 'en'`; new `community_translation` table (`UNIQUE(community_id, locale)`, FK cascade) |
+| Model | `src/db/communities/communities.py`, `src/db/communities/community_translations.py` | `source_locale` on `Community`; `CommunityRead` gains `source_locale`, `content_locale`, `is_fallback`; translation table + upsert/read models |
+| Service | `src/services/communities/community_translations.py` | Overlay (name + description only), single + bulk readers, list/upsert/delete; source locale rejected with 422 |
+| API | `src/routers/communities/communities.py`, `src/routers/users.py`, `src/services/search/search.py` | `?locale=` on community reads; `GET/PUT/DELETE /communities/{uuid}/translations[/{locale}]`; localized search + user communities |
+| Web data | `services/communities/communities.ts`, `services/communities/communityTranslations.ts`, `components/Hooks/useCommunityTranslation.ts` | Locale query params, translation CRUD, hook resolving the editor's content row |
+| Web reads | Communities listing/client, community detail, discussion page, dashboard list/client, course community section, user profile | `locale` from the `i18next` cookie; SWR keys include the locale and revalidate on switch |
+| Card | `components/Objects/Thumbnails/CommunityCard.tsx` | Labels via `t()`, `Intl.RelativeTimeFormat` dates, `dir="auto"`, `min-h-[63px]` |
+| Detail UI | `community.tsx`, `CommunitySidebar.tsx`, `CommunityActionsMobile.tsx`, locales | New button, Public/Private and discussion-count badges, sidebar cards (linked course, includes, members, created, updates) and dates localized |
+| Discussions | `DiscussionCard.tsx` | Card keeps the English `dir="ltr"` layout, but the relative time, label chip (`Announcement`…) and See more / See less / Show less / Close buttons follow the platform language. Votes, reply placeholder and empty states stay English |
+| Editor | `CommunityEditGeneral.tsx`, `CommunityEditTranslations.tsx`, dashboard `[subpage]/page.tsx` | General tab edits the current content locale; new **Translations** tab (name + description, copy-from-source, delete) |
+| Seed | `generators/community.py`, `seed_community_translations.py`, `__main__.py`, `reset.py` | `COMMUNITY_TRANSLATIONS` fr/ar copy for all 18 communities; `--seed-community-translations`; reset deletes the rows |
+
+### Verification (live, demo org 463)
+
+- `alembic upgrade head` clean (`b2c3d4e5f6a7 → d5e6f7a8b9c0`).
+- `python -m src.services.seed --seed-community-translations` → `0 updated, 36 created, 0 skipped` (18 communities × fr/ar).
+- `GET /communities/org/463/page/1/limit/50?locale=ar` → 16 published rows, all `content_locale=ar`, `is_fallback=false`, Arabic name + description (`هندسة الواجهة الخلفية بلغة Python`, 318 chars).
+- Same request with `locale=fr` → French; with `locale=en` → base row.
+- `GET /communities/{uuid}?locale=fr` → translated detail.
+- SSR `/orgs/demo/communities` with `Cookie: i18next=ar` → `<html lang="ar" dir="rtl">`, Arabic card title present, English absent; `fr` and `en` likewise.
+- `/orgs/demo/community/{uuid}` with `i18next=ar` → Arabic title, English absent.
+- Browser check on the detail page: AR shows `+ جديد`, `نقاشات`/`عام` badges and the sidebar in Arabic (`يشمل هذا المجتمع`, `153 أعضاء`, `أُنشئ في 4 أكتوبر 2026`, `آخر تحديث …`); FR shows `+ Nouveau`, `10 discussions`, `Aller au cours`, `153 membres`, `Créée le 4 oct. 2026`, `Dernière mise à jour …`.
+- With the platform in Arabic (`lang=ar`, `dir=rtl`), all 50 discussion cards keep `direction: ltr` while the time and label are localized (`قبل شهرين`, `إعلان`, `عرض المزيد`).
+- `tsc --noEmit` / editor diagnostics: 0 errors.
+

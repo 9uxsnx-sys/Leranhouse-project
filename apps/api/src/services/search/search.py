@@ -14,6 +14,7 @@ from src.db.communities.discussions import Discussion, DiscussionRead
 from src.db.playgrounds import Playground, PlaygroundRead, PlaygroundAccessType
 from src.db.podcasts.podcasts import Podcast, PodcastRead
 from src.services.courses.collection_translations import apply_collection_overlay_bulk
+from src.services.communities.community_translations import apply_community_overlay_bulk
 from src.services.podcasts.translations import apply_podcast_overlay_bulk
 from src.services.courses.courses import search_courses
 from src.services.search.normalization import (
@@ -261,7 +262,9 @@ async def search_across_org(
     collection_reads = _build_collection_reads(db_session, collections, locale)
 
     user_reads = [UserRead.model_validate(u) for u in users]
-    community_reads = [CommunityRead.model_validate(c) for c in communities]
+    community_reads = apply_community_overlay_bulk(
+        [CommunityRead.model_validate(c) for c in communities], locale, db_session
+    )
     discussion_reads = [
         SearchDiscussionRead(
             **discussion.model_dump(),

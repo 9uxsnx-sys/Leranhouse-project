@@ -20,6 +20,20 @@ function getAvatarUrl(author: any): string | null {
   return getUserAvatarMediaDirectory(author.user_uuid, author.avatar_image)
 }
 
+/** Locale-aware "2 months ago" — no dayjs locale bundle needed. */
+function formatRelativeDate(dateStr: string, locale: string): string {
+  if (!dateStr) return ''
+  const parsed = dayjs(dateStr)
+  if (!parsed.isValid()) return ''
+  const diffDays = Math.floor((Date.now() - parsed.valueOf()) / (1000 * 60 * 60 * 24))
+  const relative = new Intl.RelativeTimeFormat(locale || 'en', { numeric: 'auto' })
+  if (diffDays < 1) return relative.format(0, 'day')
+  if (diffDays < 7) return relative.format(-diffDays, 'day')
+  if (diffDays < 30) return relative.format(-Math.floor(diffDays / 7), 'week')
+  if (diffDays < 365) return relative.format(-Math.floor(diffDays / 30), 'month')
+  return relative.format(-Math.floor(diffDays / 365), 'year')
+}
+
 interface DiscussionCardProps {
   discussion: DiscussionWithAuthor
   orgslug: string
@@ -67,7 +81,10 @@ function ReplyItem({ reply, replyName, replyTime }: {
   replyName: string
   replyTime: string
 }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  // The card layout stays English/LTR, but the time, label and expand buttons
+  // follow the platform language.
+  const tCard = i18n.getFixedT('en')
   const [replyExpanded, setReplyExpanded] = useState(false)
   const replyContentRef = useRef<HTMLParagraphElement>(null)
   const [replyNeedsTruncation, setReplyNeedsTruncation] = useState(false)
@@ -81,7 +98,7 @@ function ReplyItem({ reply, replyName, replyTime }: {
   }, [reply.content])
 
   return (
-    <div className="flex gap-3">
+    <div dir="ltr" className="flex gap-3">
       <div className="shrink-0 mt-0.5">
         <UserAvatar
           width={32}
@@ -135,13 +152,16 @@ export function DiscussionCard({
   onDiscussionDelete,
   onReplyClick,
 }: DiscussionCardProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  // The card layout stays English/LTR; time, label and expand buttons follow
+  // the platform language.
+  const tCard = i18n.getFixedT('en')
 
-  const timeAgo = dayjs(discussion.creation_date).fromNow()
+  const timeAgo = formatRelativeDate(discussion.creation_date, i18n.language)
 
   const authorName = discussion.author
     ? `${discussion.author.first_name} ${discussion.author.last_name}`.trim() || discussion.author.username
-    : t('common.unknown')
+    : tCard('common.unknown')
 
   const labelInfo = getLabelInfo(discussion.label || 'general')
 
@@ -288,6 +308,7 @@ export function DiscussionCard({
 
   return (
     <div
+      dir="ltr"
       onClick={isSelectMode ? handleClick : undefined}
       className={`relative flex h-fit w-full flex-col gap-3 overflow-hidden rounded-2xl border bg-white shadow-sm transition-colors p-6 ${
         isSelectMode ? 'cursor-pointer' : ''
@@ -390,7 +411,7 @@ export function DiscussionCard({
                   onClick={(e) => { e.stopPropagation(); setIsExpanded(true); }}
                   className="inline text-sm font-semibold tracking-wide text-gray-500 hover:text-gray-700"
                 >
-                  See more
+                  {t('common.see_more')}
                 </button>
               </p>
             </div>
@@ -412,7 +433,7 @@ export function DiscussionCard({
                       onClick={(e) => { e.stopPropagation(); setIsExpanded(false); }}
                       className="inline ms-1.5 text-sm font-semibold tracking-wide text-gray-500 hover:text-gray-700"
                     >
-                      See less
+                      {t('common.see_less')}
                     </button>
                   </>
                 )}
@@ -459,7 +480,9 @@ export function DiscussionCard({
                     onClick={() => setShowAllReplies(!showAllReplies)}
                     className="text-sm font-semibold tracking-wide text-gray-500 hover:text-gray-700 transition-colors"
                   >
-                    {showAllReplies ? 'Show less' : `See more (${replies.length - 3})`}
+                    {showAllReplies
+                      ? t('common.show_less')
+                      : `${t('common.see_more')} (${replies.length - 3})`}
                   </button>
                   <span className="text-gray-300 text-xs">|</span>
                 </>
@@ -468,7 +491,7 @@ export function DiscussionCard({
                 onClick={() => { setIsRepliesExpanded(false); setShowAllReplies(false); }}
                 className="text-sm font-semibold tracking-wide text-gray-500 hover:text-gray-700 transition-colors"
               >
-                Close
+                {t('common.close')}
               </button>
             </div>
           )}
@@ -478,7 +501,7 @@ export function DiscussionCard({
       {/* Select mode: show upvote count */}
       {isSelectMode && (
         <div className="flex items-center gap-1 text-gray-400">
-          <span className="text-xs">{discussion.upvote_count} {t('communities.discussion_card.votes')}</span>
+          <span className="text-xs">{discussion.upvote_count} {tCard('communities.discussion_card.votes')}</span>
         </div>
       )}
 
@@ -496,15 +519,15 @@ export function DiscussionCard({
                 <Loader2 size={16} className="animate-spin text-gray-400" />
               </div>
             ) : replies.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-2">{t('communities.comments.no_replies')}</p>
+              <p className="text-sm text-gray-400 text-center py-2">{tCard('communities.comments.no_replies')}</p>
             ) : (
               <>
                 {/* First 3 replies always visible */}
                 {replies.slice(0, 3).map((reply) => {
                   const replyName = reply.author
                     ? `${reply.author.first_name} ${reply.author.last_name}`.trim() || reply.author.username
-                    : t('common.unknown')
-                  const replyTime = dayjs(reply.creation_date).fromNow()
+                    : tCard('common.unknown')
+                  const replyTime = formatRelativeDate(reply.creation_date, i18n.language)
                   return (
                     <ReplyItem
                       key={reply.comment_uuid}
@@ -527,8 +550,8 @@ export function DiscussionCard({
                         {replies.slice(3).map((reply) => {
                           const replyName = reply.author
                             ? `${reply.author.first_name} ${reply.author.last_name}`.trim() || reply.author.username
-                            : t('common.unknown')
-                          const replyTime = dayjs(reply.creation_date).fromNow()
+                            : tCard('common.unknown')
+                          const replyTime = formatRelativeDate(reply.creation_date, i18n.language)
                           return (
                             <ReplyItem
                               key={reply.comment_uuid}
@@ -586,7 +609,7 @@ export function DiscussionCard({
                       }
                     }}
                     rows={1}
-                    placeholder={t('communities.comments.write_reply')}
+                    placeholder={tCard('communities.comments.write_reply')}
                     className="flex-1 text-sm bg-gray-50/80 border-0 ring-1 ring-inset ring-gray-200 rounded-lg px-3 py-[7px] outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-gray-300 transition-all resize-none overflow-hidden"
                   />
                   <button

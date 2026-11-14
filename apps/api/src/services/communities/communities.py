@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Optional, Union
 from uuid import uuid4
 from datetime import datetime
 from sqlalchemy import text
@@ -15,6 +15,10 @@ from src.db.communities.communities import (
     CommunityCreate,
     CommunityRead,
     CommunityUpdate,
+)
+from src.services.communities.community_translations import (
+    apply_community_overlay,
+    apply_community_overlay_bulk,
 )
 from src.db.usergroup_resources import UserGroupResource
 from src.db.usergroup_user import UserGroupUser
@@ -85,6 +89,7 @@ async def get_community(
     community_uuid: str,
     current_user: Union[PublicUser, AnonymousUser, APITokenUser],
     db_session: Session,
+    locale: Optional[str] = None,
 ) -> CommunityRead:
     """
     Get a community by UUID.
@@ -99,7 +104,8 @@ async def get_community(
     # RBAC check
     await check_resource_access(request, db_session, current_user, community_uuid, AccessAction.READ)
 
-    return CommunityRead.model_validate(community.model_dump())
+    read = CommunityRead.model_validate(community.model_dump())
+    return apply_community_overlay(read, community, locale, db_session)
 
 
 async def get_communities_by_org(
@@ -109,6 +115,7 @@ async def get_communities_by_org(
     db_session: Session,
     page: int = 1,
     limit: int = 10,
+    locale: Optional[str] = None,
 ) -> List[CommunityRead]:
     """
     Get paginated list of communities for an organization.
@@ -133,14 +140,22 @@ async def get_communities_by_org(
         )
         query = query.order_by(Community.creation_date.desc()).offset(offset).limit(limit)  # type: ignore
         communities = db_session.exec(query).all()
-        return [CommunityRead.model_validate(c.model_dump()) for c in communities]
+        return apply_community_overlay_bulk(
+            [CommunityRead.model_validate(c.model_dump()) for c in communities],
+            locale,
+            db_session,
+        )
 
     # Superadmins bypass admin check — they can see all communities
     if is_user_superadmin(acting_user_id, db_session):
         query = select(Community).where(Community.org_id == org_id)
         query = query.order_by(Community.creation_date.desc()).offset(offset).limit(limit)  # type: ignore
         communities = db_session.exec(query).all()
-        return [CommunityRead.model_validate(c.model_dump()) for c in communities]
+        return apply_community_overlay_bulk(
+            [CommunityRead.model_validate(c.model_dump()) for c in communities],
+            locale,
+            db_session,
+        )
 
     # Check if user has admin-level permissions (can read all communities)
     # First check role-based permissions, then fall back to org admin status
@@ -156,7 +171,11 @@ async def get_communities_by_org(
         query = select(Community).where(Community.org_id == org_id)
         query = query.order_by(Community.creation_date.desc()).offset(offset).limit(limit)  # type: ignore
         communities = db_session.exec(query).all()
-        return [CommunityRead.model_validate(c.model_dump()) for c in communities]
+        return apply_community_overlay_bulk(
+            [CommunityRead.model_validate(c.model_dump()) for c in communities],
+            locale,
+            db_session,
+        )
 
     # For regular users, use a subquery approach to avoid DISTINCT with JSON columns
     # Get IDs of communities the user has access to
@@ -186,7 +205,11 @@ async def get_communities_by_org(
     )
 
     communities = db_session.exec(query).all()
-    return [CommunityRead.model_validate(c.model_dump()) for c in communities]
+    return apply_community_overlay_bulk(
+        [CommunityRead.model_validate(c.model_dump()) for c in communities],
+        locale,
+        db_session,
+    )
 
 
 async def get_community_by_course(
@@ -194,6 +217,7 @@ async def get_community_by_course(
     course_uuid: str,
     current_user: Union[PublicUser, AnonymousUser, APITokenUser],
     db_session: Session,
+    locale: Optional[str] = None,
 ) -> CommunityRead | None:
     """
     Get the community linked to a specific course.
@@ -217,7 +241,8 @@ async def get_community_by_course(
         request, db_session, current_user, community.community_uuid, AccessAction.READ
     )
 
-    return CommunityRead.model_validate(community.model_dump())
+    read = CommunityRead.model_validate(community.model_dump())
+    return apply_community_overlay(read, community, locale, db_session)
 
 
 async def update_community(
@@ -621,6 +646,7 @@ async def get_user_communities(
     db_session: Session,
     page: int = 1,
     limit: int = 10,
+    locale: Optional[str] = None,
 ) -> List[CommunityRead]:
     # Verify user is not anonymous
     await authorization_verify_if_user_is_anon(current_user.id)
@@ -662,4 +688,8 @@ async def get_user_communities(
     if not communities:
         return []
 
-    return [CommunityRead.model_validate(c.model_dump()) for c in communities]
+    return apply_community_overlay_bulk(
+        [CommunityRead.model_validate(c.model_dump()) for c in communities],
+        locale,
+        db_session,
+    )

@@ -115,7 +115,9 @@ export function CollectionCard({ id, title, description, courses, org_uuid, href
           <h3 dir="auto" className="text-[15px] font-semibold leading-snug line-clamp-2 text-gray-900">
             {title}
           </h3>
-          <p dir="auto" className={`text-[13px] font-normal leading-relaxed line-clamp-3 ${description ? 'text-[#6B7280]' : 'invisible'}`}>
+          {/* Three lines are reserved in every locale so cards keep one rhythm:
+              Arabic copy needs more lines than English for the same text. */}
+          <p dir="auto" className={`text-[13px] font-normal leading-relaxed line-clamp-3 min-h-[63px] ${description ? 'text-[#6B7280]' : 'invisible'}`}>
             {description || 'placeholder'}
           </p>
         </div>

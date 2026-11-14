@@ -71,7 +71,7 @@ export function CommentUpvoteButton({
       className={cn(
         'flex items-center gap-1 px-2 py-1 rounded-md transition-all duration-200 text-xs',
         hasVoted
-          ? 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
+          ? 'bg-red-50 text-red-600 hover:bg-red-100'
           : 'bg-gray-50 text-gray-500 hover:bg-gray-100',
         !canVote && 'opacity-50 cursor-not-allowed',
         isLoading && 'opacity-70'
@@ -80,9 +80,9 @@ export function CommentUpvoteButton({
     >
       <Heart
         size={14}
+        fill={hasVoted ? 'currentColor' : 'none'}
         className={cn(
           'transition-transform',
-          hasVoted && 'text-indigo-600',
           isLoading && 'animate-pulse'
         )}
       />

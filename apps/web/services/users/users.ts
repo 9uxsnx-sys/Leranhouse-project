@@ -72,9 +72,14 @@ export async function getPodcastsByUser(user_id: string, access_token: string) {
  * SECURITY: Requires authentication.
  * The access_token parameter is required.
  */
-export async function getCommunitiesByUser(user_id: string, access_token: string) {
+export async function getCommunitiesByUser(
+  user_id: string,
+  access_token: string,
+  locale?: string
+) {
+  const query = locale ? `&locale=${encodeURIComponent(locale)}` : ''
   const result = await fetch(
-    `${getAPIUrl()}users/${user_id}/communities?limit=50`,
+    `${getAPIUrl()}users/${user_id}/communities?limit=50${query}`,
     RequestBodyWithAuthHeader('GET', null, null, access_token)
   )
   const res = await getResponseMetadata(result)

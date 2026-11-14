@@ -1,5 +1,7 @@
 """python -m src.services.seed --demo --reset
    python -m src.services.seed --seed-activity-translations
+   python -m src.services.seed --seed-collection-translations
+   python -m src.services.seed --seed-community-translations
 """
 
 from __future__ import annotations
@@ -10,6 +12,12 @@ from pathlib import Path
 
 from src.services.seed.runner import SeedError, run_demo_seed
 from src.services.seed.seed_activity_translations import seed_activity_translations
+from src.services.seed.seed_collection_translations import (
+    seed_collection_translations,
+)
+from src.services.seed.seed_community_translations import (
+    seed_community_translations,
+)
 
 
 def main() -> int:
@@ -38,11 +46,32 @@ def main() -> int:
         action="store_true",
         help="Inject Arabic translations into existing flagship video activities.",
     )
+    parser.add_argument(
+        "--seed-collection-translations",
+        action="store_true",
+        help=(
+            "Backfill about/learnings/tags/metadata on the existing collection "
+            "translation rows."
+        ),
+    )
+    parser.add_argument(
+        "--seed-community-translations",
+        action="store_true",
+        help="Backfill fr/ar name and description on the community rows.",
+    )
     args = parser.parse_args()
 
     # ── Activity translation migration ──
     if args.seed_activity_translations:
         return seed_activity_translations()
+
+    # ── Collection translation backfill ──
+    if args.seed_collection_translations:
+        return seed_collection_translations()
+
+    # ── Community translation backfill ──
+    if args.seed_community_translations:
+        return seed_community_translations()
 
     # ── Full demo seed ──
     if not args.demo:

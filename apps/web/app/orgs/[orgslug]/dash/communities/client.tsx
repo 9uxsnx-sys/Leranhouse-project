@@ -16,6 +16,7 @@ import AuthenticatedClientElement from '@components/Security/AuthenticatedClient
 import PlanRestrictedFeature from '@components/Dashboard/Shared/PlanRestricted/PlanRestrictedFeature'
 import FeatureDisabledView from '@components/Dashboard/Shared/FeatureDisabled/FeatureDisabledView'
 import { usePlan } from '@components/Hooks/usePlan'
+import { useContentLocale } from '@components/Hooks/useCourseTranslation'
 import { searchMatchesAny } from '@/lib/search/normalize'
 import ConfirmationModal from '@components/Objects/StyledElements/ConfirmationModal/ConfirmationModal'
 import toast from 'react-hot-toast'
@@ -54,20 +55,20 @@ const CommunitiesDashClient = ({
   const access_token = session?.data?.tokens?.access_token
   const currentPlan = usePlan()
   const org_uuid = org?.org_uuid
+  const contentLocale = useContentLocale()
 
-  // Client-side re-fetch to keep communities list in sync (e.g. after thumbnail upload)
-  const communitiesListUrl = `${getAPIUrl()}communities/org/${org_id}/page/1/limit/100`
-  console.log('[CommunitiesDashClient] SWR key:', communitiesListUrl)
-  const { data: swrCommunities } = useSWR(
+  // Client-side re-fetch to keep communities list in sync (e.g. after thumbnail
+  // upload). The locale is part of the key so language switches refetch titles.
+  const communitiesListUrl = `${getAPIUrl()}communities/org/${org_id}/page/1/limit/100?locale=${contentLocale}`
+  const { data: swrCommunities, mutate: mutateCommunities } = useSWR(
     communitiesListUrl,
     (url) => swrFetcher(url, access_token),
     { fallbackData: communities, revalidateOnMount: false }
   )
+  React.useEffect(() => {
+    if (contentLocale) mutateCommunities()
+  }, [contentLocale, mutateCommunities])
   const effectiveCommunities = swrCommunities || communities
-  console.log('[CommunitiesDashClient] communities count:', effectiveCommunities.length)
-  effectiveCommunities.forEach((c: any) => {
-    if (c.thumbnail_image) console.log(`[CommunitiesDashClient] ${c.name}: thumbnail_image=${c.thumbnail_image}`)
-  })
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [editingCommunity, setEditingCommunity] = useState<Community | null>(null)

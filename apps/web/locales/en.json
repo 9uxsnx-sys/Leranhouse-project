@@ -732,6 +732,16 @@
                         "discussion":  "discussion",
                         "created":  "Created",
                         "linked_course":  "Linked Course",
+                        "new":  "Post",
+                        "linked_course_description":  "This community is the discussion space for the course. Join the conversation, ask questions, and connect with fellow learners.",
+                        "go_to_course":  "Go to Course",
+                        "sidebar_includes":  "This Community Includes",
+                        "member":  "member",
+                        "members":  "members",
+                        "created_on":  "Created {{date}}",
+                        "updates":  "Updates",
+                        "last_updated":  "Last updated {{date}}",
+                        "not_available":  "N/A",
                         "community_guidelines":  "Community Guidelines",
                         "community_guidelines_text":  "Be respectful and constructive. Help others and share your knowledge with the community.",
                         "new_discussion":  "New Discussion",
@@ -3026,7 +3036,8 @@
                                                                                         "thumbnail":  "Thumbnail",
                                                                                         "access":  "Access",
                                                                                         "course":  "Linked Course",
-                                                                                        "moderation":  "Moderation"
+                                                                                        "moderation":  "Moderation",
+                                                                                        "translations":  "Translations"
                                                                                     },
                                                                            "general":  {
                                                                                            "title":  "General Settings",

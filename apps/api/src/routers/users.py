@@ -977,6 +977,9 @@ async def api_get_user_communities(
     user_id: int,
     page: int = Query(default=1, ge=1, description="Page number"),
     limit: int = Query(default=10, ge=1, le=50, description="Items per page (max 50)"),
+    locale: Optional[str] = Query(
+        default=None, description="Content locale (falls back to the source locale)"
+    ),
 ) -> List[CommunityRead]:
     """
     Get communities accessible by a user.
@@ -990,4 +993,5 @@ async def api_get_user_communities(
         db_session=db_session,
         page=page,
         limit=limit,
+        locale=locale,
     )

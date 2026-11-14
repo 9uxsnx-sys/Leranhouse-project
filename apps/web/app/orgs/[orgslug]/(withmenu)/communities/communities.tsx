@@ -1,10 +1,15 @@
 'use client'
 import React, { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import useSWR from 'swr'
 import { Search, ChevronLeft, ChevronRight, MessagesSquare, Users, CheckSquare } from 'lucide-react'
 import { CommunityCard } from '@components/Objects/Thumbnails/CommunityCard'
 import { searchMatchesAny } from '@/lib/search/normalize'
 import { Community } from '@services/communities/communities'
+import { useContentLocale } from '@components/Hooks/useCourseTranslation'
+import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { getAPIUrl } from '@services/config/config'
+import { swrFetcher } from '@services/utils/ts/requests'
 import { useOrg } from '@components/Contexts/OrgContext'
 import FeatureDisabledView from '@components/Dashboard/Shared/FeatureDisabled/FeatureDisabledView'
 
@@ -30,9 +35,26 @@ const removeCommunityPrefix = (uuid: string) => uuid.replace('community_', '')
 function CommunitiesClient(props: CommunitiesClientProps) {
   const { t } = useTranslation()
   const orgslug = props.orgslug
-  const allCommunities = props.communities
   const org = useOrg() as any
   const org_uuid = org?.org_uuid
+  const session = useLHSession() as any
+  const accessToken = session?.data?.tokens?.access_token
+  const contentLocale = useContentLocale()
+
+  // Titles and descriptions live in community_translation rows, so a client-side
+  // language switch has to re-fetch instead of reusing the SSR props.
+  const { data: swrCommunities, mutate: mutateCommunities } = useSWR(
+    () =>
+      `${getAPIUrl()}communities/org/${props.org_id}/page/1/limit/50?locale=${contentLocale}`,
+    (url: string) => swrFetcher(url, accessToken),
+    { fallbackData: props.communities, revalidateOnFocus: false, dedupingInterval: 30000 }
+  )
+
+  React.useEffect(() => {
+    if (contentLocale) mutateCommunities()
+  }, [contentLocale, mutateCommunities])
+
+  const allCommunities = swrCommunities || props.communities
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('')

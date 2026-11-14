@@ -12,6 +12,7 @@ import CommunityEditGeneral from '@components/Dashboard/Pages/Community/Communit
 import CommunityEditCourse from '@components/Dashboard/Pages/Community/CommunityEditCourse'
 import CommunityEditModeration from '@components/Dashboard/Pages/Community/CommunityEditModeration'
 import CommunityEditAccess from '@components/Dashboard/Pages/Community/CommunityEditAccess'
+import CommunityEditTranslations from '@components/Dashboard/Pages/Community/CommunityEditTranslations'
 
 export type CommunityParams = {
   subpage: string
@@ -30,6 +31,7 @@ const SETTING_TABS: TabItem[] = [
   { id: 'access', labelKey: 'dashboard.courses.communities.settings.tabs.access', icon: SectionIcon.access },
   { id: 'course', labelKey: 'dashboard.courses.communities.settings.tabs.course', icon: SectionIcon.linkedCourse },
   { id: 'moderation', labelKey: 'dashboard.courses.communities.settings.tabs.moderation', icon: SectionIcon.moderation },
+  { id: 'translations', labelKey: 'dashboard.courses.communities.settings.tabs.translations', icon: SectionIcon.translations },
 ]
 
 function CommunityPageTitle() {
@@ -82,6 +84,7 @@ function CommunitySettingsContent({ params }: { params: CommunityParams }) {
             {params.subpage === 'access' && <CommunityEditAccess />}
             {params.subpage === 'course' && <CommunityEditCourse />}
             {params.subpage === 'moderation' && <CommunityEditModeration />}
+            {params.subpage === 'translations' && <CommunityEditTranslations />}
           </motion.div>
         </main>
       </div>

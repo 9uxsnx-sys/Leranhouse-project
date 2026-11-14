@@ -1,7 +1,9 @@
 'use client'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 import { getCommunityThumbnailMediaDirectory } from '@services/media/media'
 import { Users } from 'lucide-react'
+import { CardMetaRow } from './CardMetaRow'
 
 export interface CommunityCardProps {
   id: string
@@ -16,30 +18,35 @@ export interface CommunityCardProps {
   href?: string
 }
 
-function formatDate(dateStr: string) {
-  if (!dateStr) return 'Recently'
+function formatRelativeDate(dateStr: string, locale: string) {
+  if (!dateStr) return ''
   try {
     const date = new Date(dateStr)
     const now = new Date()
     const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24))
-    if (diffDays < 1) return 'Today'
-    if (diffDays < 7) return `${diffDays}d ago`
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`
-    if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`
-    return `${Math.floor(diffDays / 365)}y ago`
+    const relative = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' })
+    if (diffDays < 1) return relative.format(0, 'day')
+    if (diffDays < 7) return relative.format(-diffDays, 'day')
+    if (diffDays < 30) return relative.format(-Math.floor(diffDays / 7), 'week')
+    if (diffDays < 365) return relative.format(-Math.floor(diffDays / 30), 'month')
+    return relative.format(-Math.floor(diffDays / 365), 'year')
   } catch {
-    return 'Recently'
+    return ''
   }
 }
 
 export function CommunityCard({ id, title, description, org_uuid, community_uuid, course_id, ...props }: CommunityCardProps) {
+  const { t, i18n } = useTranslation()
   const imageUrl = props.thumbnail_image && org_uuid
     ? getCommunityThumbnailMediaDirectory(org_uuid, community_uuid, props.thumbnail_image)
     : ''
 
-  console.log(`[CommunityCard] ${title}: thumbnail_image=${props.thumbnail_image}, org_uuid=${org_uuid}, imageUrl=${imageUrl}`)
-
-  const communityType = course_id ? 'Course' : 'General'
+  // Course-linked vs general, access mode and age are UI labels, not content.
+  const meta = [
+    course_id ? t('communities.linked_course') : t('communities.general'),
+    props.public ? t('communities.public') : t('communities.private'),
+    formatRelativeDate(props.creation_date, i18n.language),
+  ].filter(Boolean)
 
   return (
     <Link
@@ -53,8 +60,6 @@ export function CommunityCard({ id, title, description, org_uuid, community_uuid
             className="w-full h-full object-cover"
             src={imageUrl}
             alt={title}
-            onError={(e) => console.error(`[CommunityCard] Image failed to load: ${imageUrl}`, e)}
-            onLoad={() => console.log(`[CommunityCard] Image loaded successfully: ${imageUrl}`)}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-300">
@@ -65,16 +70,15 @@ export function CommunityCard({ id, title, description, org_uuid, community_uuid
       {/* Content */}
       <div className="px-4 pt-3 pb-4 flex flex-col flex-1">
         <div className="flex flex-col gap-1">
-          <h3 className="text-[15px] font-semibold leading-snug line-clamp-2 text-gray-900">
+          <h3 dir="auto" className="text-[15px] font-semibold leading-snug line-clamp-2 text-gray-900">
             {title}
           </h3>
-          <p className={`text-[13px] font-normal leading-relaxed line-clamp-3 ${description ? 'text-[#6B7280]' : 'invisible'}`}>
+          {/* Three lines are reserved in every locale so cards keep one rhythm. */}
+          <p dir="auto" className={`text-[13px] font-normal leading-relaxed line-clamp-3 min-h-[63px] ${description ? 'text-[#6B7280]' : 'invisible'}`}>
             {description || 'placeholder'}
           </p>
         </div>
-        <p className="text-[12px] text-gray-400 mt-1.5">
-          {communityType} &middot; {props.public ? 'Public' : 'Private'} &middot; {formatDate(props.creation_date)}
-        </p>
+        <CardMetaRow parts={meta} />
       </div>
     </Link>
   )

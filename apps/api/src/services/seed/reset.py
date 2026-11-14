@@ -81,6 +81,7 @@ def reset_demo_org(session: Session, content_root: Path) -> None:
         "DELETE FROM podcast_episode_translation WHERE episode_id IN (SELECT id FROM podcastepisode WHERE org_id = :org_id)",
         "DELETE FROM podcast_translation WHERE podcast_id IN (SELECT id FROM podcast WHERE org_id = :org_id)",
         "DELETE FROM collection_translation WHERE collection_id IN (SELECT id FROM collection WHERE org_id = :org_id)",
+        "DELETE FROM community_translation WHERE community_id IN (SELECT id FROM community WHERE org_id = :org_id)",
         "DELETE FROM chapteractivity WHERE org_id = :org_id",
         "DELETE FROM activityversion WHERE org_id = :org_id",
         "DELETE FROM activity WHERE org_id = :org_id",

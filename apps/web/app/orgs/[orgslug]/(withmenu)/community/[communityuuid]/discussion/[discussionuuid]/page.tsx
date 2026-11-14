@@ -1,7 +1,9 @@
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
 import { Metadata } from 'next'
+import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { getServerSession } from '@/lib/auth/server'
+import { localeCode } from '@/lib/direction'
 import { getCommunity } from '@services/communities/communities'
 import { getDiscussion } from '@services/communities/discussions'
 import { getOrgThumbnailMediaDirectory } from '@services/media/media'
@@ -102,12 +104,15 @@ const DiscussionPage = async (params: any) => {
   let community = null
   let discussion = null
   let fetchErrored = false
+  const cookieStore = await cookies()
+  const locale = localeCode(cookieStore.get('i18next')?.value) || 'en'
 
   try {
     community = await getCommunity(
       communityUuid,
       { revalidate: 120, tags: ['communities'] },
-      access_token ? access_token : undefined
+      access_token ? access_token : undefined,
+      locale
     )
   } catch (error) {
     fetchErrored = true

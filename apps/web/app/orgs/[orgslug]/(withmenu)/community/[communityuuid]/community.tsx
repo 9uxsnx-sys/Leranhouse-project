@@ -91,17 +91,20 @@ const CommunityClient = ({
           <div className="flex flex-wrap items-center gap-2 mt-4">
             <Badge variant="grey" className="flex items-center gap-1">
               <MessageSquare size={12} />
-              {initialDiscussions.length} {initialDiscussions.length === 1 ? 'discussion' : 'discussions'}
+              {initialDiscussions.length}{' '}
+              {initialDiscussions.length === 1
+                ? t('communities.discussion')
+                : t('communities.discussions')}
             </Badge>
             {community.public ? (
               <Badge variant="grey" className="flex items-center gap-1">
                 <MessageCircle size={12} />
-                Public
+                {t('communities.public')}
               </Badge>
             ) : (
               <Badge variant="grey" className="flex items-center gap-1">
                 <MessageCircle size={12} />
-                Private
+                {t('communities.private')}
               </Badge>
             )}
           </div>
@@ -152,7 +155,7 @@ const CommunityClient = ({
                   onClick={() => setIsCreatingDiscussion(true)}
                   className="gap-x-1.5"
                 >
-                  +&nbsp;&nbsp;New
+                  +&nbsp;&nbsp;{t('communities.new')}
                 </Button>
               )}
 

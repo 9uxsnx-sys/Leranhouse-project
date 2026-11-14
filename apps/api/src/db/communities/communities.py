@@ -41,6 +41,9 @@ class Community(CommunityBase, table=True):
         sa_column=Column(Integer, ForeignKey("course.id", ondelete="SET NULL"))
     )
     community_uuid: str = Field(default="", index=True)
+    # The base row holds the source-locale content; other locales live in
+    # ``community_translation`` (see the community translations service).
+    source_locale: str = Field(default="en")
     moderation_words: List[str] = Field(default=[], sa_column=Column(JSON, default=[]))
     moderation_settings: Optional[Dict[str, Any]] = Field(
         default=None, sa_column=Column(JSON, nullable=True)
@@ -70,6 +73,10 @@ class CommunityRead(CommunityBase):
     org_id: int = Field(default=None, foreign_key="organization.id")
     course_id: Optional[int] = Field(default=None, foreign_key="course.id")
     community_uuid: str
+    # Localization state, filled by the translations service on read.
+    source_locale: str = "en"
+    content_locale: str = "en"
+    is_fallback: bool = False
     moderation_words: List[str] = []
     moderation_settings: Optional[Dict[str, Any]] = None
     creation_date: str

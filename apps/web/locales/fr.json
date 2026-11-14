@@ -722,6 +722,16 @@
     "discussion": "discussion",
     "created": "Créé",
     "linked_course": "Cours associé",
+    "new": "Publier",
+    "linked_course_description": "Cette communauté est l'espace de discussion du cours. Rejoignez la conversation, posez vos questions et échangez avec les autres apprenants.",
+    "go_to_course": "Aller au cours",
+    "sidebar_includes": "Cette communauté comprend",
+    "member": "membre",
+    "members": "membres",
+    "created_on": "Créée le {{date}}",
+    "updates": "Mises à jour",
+    "last_updated": "Dernière mise à jour {{date}}",
+    "not_available": "N/D",
     "community_guidelines": "Règles de la communauté",
     "community_guidelines_text": "Soyez respectueux et constructif. Aidez les autres et partagez vos connaissances avec la communauté.",
     "new_discussion": "Nouvelle discussion",
@@ -2600,7 +2610,8 @@
             "thumbnail": "Miniature",
             "course": "Cours lié",
             "moderation": "Modération",
-            "access": "Accès"
+            "access": "Accès",
+            "translations": "Traductions"
           },
           "general": {
             "title": "Paramètres généraux",

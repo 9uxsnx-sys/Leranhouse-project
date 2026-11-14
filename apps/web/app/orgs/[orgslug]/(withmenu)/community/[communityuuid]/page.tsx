@@ -1,7 +1,9 @@
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
 import { Metadata } from 'next'
+import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { getServerSession } from '@/lib/auth/server'
+import { localeCode } from '@/lib/direction'
 import { getCommunity } from '@services/communities/communities'
 import { getDiscussions, DiscussionWithAuthor } from '@services/communities/discussions'
 import { getOrgThumbnailMediaDirectory, getOrgOgImageMediaDirectory } from '@services/media/media'
@@ -30,7 +32,14 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
     : `community_${params.communityuuid}`
   let community = null
   try {
-    community = await getCommunity(communityUuid, { revalidate: 120, tags: ['communities'] })
+    const cookieStore = await cookies()
+    const locale = localeCode(cookieStore.get('i18next')?.value) || 'en'
+    community = await getCommunity(
+      communityUuid,
+      { revalidate: 120, tags: ['communities'] },
+      undefined,
+      locale
+    )
   } catch (error) {
     // Community might not exist or user doesn't have access
   }
@@ -103,12 +112,15 @@ const CommunityPage = async (params: any) => {
   let community = null
   let communityError: { status?: number } | null = null
   let discussions: DiscussionWithAuthor[] = []
+  const cookieStore = await cookies()
+  const locale = localeCode(cookieStore.get('i18next')?.value) || 'en'
 
   try {
     community = await getCommunity(
       communityUuid,
       { revalidate: 120, tags: ['communities'] },
-      access_token ? access_token : undefined
+      access_token ? access_token : undefined,
+      locale
     )
   } catch (error: any) {
     communityError = { status: error?.status }

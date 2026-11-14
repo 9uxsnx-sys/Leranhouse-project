@@ -30,9 +30,24 @@ function CollectionsClient(props: CollectionsClientProps) {
   const session = useLHSession() as any
   const accessToken = session?.data?.tokens?.access_token
   const orgslug = props.orgslug
-  const allCollections = props.collections
   const org_uuid = props.org_uuid
   const contentLocale = useContentLocale()
+
+  // The server renders the grid in the visitor's locale, but a client-side
+  // language switch has to re-fetch: titles and descriptions live in the
+  // collection_translation rows, not in the props captured at SSR time.
+  const { data: swrCollections, mutate: mutateCollections } = useSWR(
+    () =>
+      `${getAPIUrl()}collections/org/${props.org_id}/page/1/limit/100?locale=${contentLocale}`,
+    (url: string) => swrFetcher(url, accessToken),
+    { fallbackData: props.collections, revalidateOnFocus: false, dedupingInterval: 30000 }
+  )
+
+  React.useEffect(() => {
+    if (contentLocale) mutateCollections()
+  }, [contentLocale, mutateCollections])
+
+  const allCollections = swrCollections || props.collections
 
   // Bundles the learner already claimed or bought — drives the "Owned" badge
   // and the "My bundles" catalog filter.

@@ -1,7 +1,9 @@
 export const dynamic = 'force-dynamic'
+import { cookies } from 'next/headers'
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
 import { Metadata } from 'next'
 import { getServerSession } from '@/lib/auth/server'
+import { localeCode } from '@/lib/direction'
 import { getCommunities } from '@services/communities/communities'
 import { getOrgThumbnailMediaDirectory, getOrgOgImageMediaDirectory } from '@services/media/media'
 import { getCanonicalUrl, getOrgSeoConfig, buildPageTitle, buildBreadcrumbJsonLd } from '@/lib/seo/utils'
@@ -80,6 +82,8 @@ const CommunitiesPage = async (params: any) => {
   const session = await getServerSession()
   const access_token = session?.tokens?.access_token
   const orgslug = (await params.params).orgslug
+  const cookieStore = await cookies()
+  const locale = localeCode(cookieStore.get('i18next')?.value) || 'en'
   let org
   try {
     org = await getOrganizationContextInfo(orgslug, {
@@ -99,7 +103,8 @@ const CommunitiesPage = async (params: any) => {
       1,
       100,
       { revalidate: 120, tags: ['communities'] },
-      access_token ? access_token : undefined
+      access_token ? access_token : undefined,
+      locale
     )
   } catch (error) {
     console.error('Failed to fetch communities:', error)

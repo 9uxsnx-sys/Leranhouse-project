@@ -64,7 +64,7 @@ function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProp
         const [coursesRes, podcastsRes, communitiesRes] = await Promise.allSettled([
           getCoursesByUser(userData.id, access_token, contentLocale),
           getPodcastsByUser(userData.id, access_token),
-          getCommunitiesByUser(userData.id, access_token),
+          getCommunitiesByUser(userData.id, access_token, contentLocale),
         ])
 
         if (!mounted) return

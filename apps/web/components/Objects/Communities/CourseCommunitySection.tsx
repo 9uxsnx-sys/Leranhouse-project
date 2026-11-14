@@ -11,6 +11,7 @@ import { getUriWithOrg, getAPIUrl } from '@services/config/config'
 import { Community } from '@services/communities/communities'
 import { DiscussionWithAuthor } from '@services/communities/discussions'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
+import { useContentLocale } from '@components/Hooks/useCourseTranslation'
 import useSWR from 'swr'
 import { swrFetcher } from '@services/utils/ts/requests'
 
@@ -23,11 +24,12 @@ export function CourseCommunitySection({ courseUuid, orgslug }: CourseCommunityS
   const { t } = useTranslation()
   const session = useLHSession() as any
   const accessToken = session?.data?.tokens?.access_token
+  const contentLocale = useContentLocale()
 
   // SWR for community data — cached across navigations within the same course
   const { data: community } = useSWR<Community | null>(
     courseUuid && accessToken
-      ? `${getAPIUrl()}communities/course/${courseUuid}`
+      ? `${getAPIUrl()}communities/course/${courseUuid}?locale=${contentLocale}`
       : null,
     (url) => swrFetcher(url, accessToken),
     { revalidateOnFocus: false, dedupingInterval: 30000 }

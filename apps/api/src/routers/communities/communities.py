@@ -1,12 +1,21 @@
-from typing import List
-from fastapi import APIRouter, Depends, Request, UploadFile
+from typing import List, Optional
+from fastapi import APIRouter, Depends, Query, Request, UploadFile
 from pydantic import BaseModel
 from sqlmodel import Session, select
 from src.core.events.database import get_db_session
 from src.db.users import PublicUser
 from src.db.organizations import Organization
 from src.db.communities.communities import CommunityRead, CommunityUpdate
+from src.db.communities.community_translations import (
+    CommunityTranslationRead,
+    CommunityTranslationUpsert,
+)
 from src.security.auth import get_current_user
+from src.services.communities.community_translations import (
+    delete_community_translation,
+    list_community_translations,
+    upsert_community_translation,
+)
 from src.services.communities.communities import (
     create_community,
     get_community,
@@ -95,13 +104,18 @@ async def api_create_community(
 async def api_get_community(
     request: Request,
     community_uuid: str,
+    locale: Optional[str] = Query(
+        default=None, description="Content locale (falls back to the source locale)"
+    ),
     current_user: PublicUser = Depends(get_current_user),
     db_session: Session = Depends(get_db_session),
 ) -> CommunityRead:
     """
     Get a community by UUID.
     """
-    return await get_community(request, community_uuid, current_user, db_session)
+    return await get_community(
+        request, community_uuid, current_user, db_session, locale=locale
+    )
 
 
 @router.get(
@@ -121,6 +135,9 @@ async def api_get_communities_by_org(
     org_id: int,
     page: int = 1,
     limit: int = 10,
+    locale: Optional[str] = Query(
+        default=None, description="Content locale (falls back to the source locale)"
+    ),
     current_user: PublicUser = Depends(get_current_user),
     db_session: Session = Depends(get_db_session),
 ) -> List[CommunityRead]:
@@ -128,7 +145,7 @@ async def api_get_communities_by_org(
     Get paginated list of communities for an organization.
     """
     return await get_communities_by_org(
-        request, org_id, current_user, db_session, page, limit
+        request, org_id, current_user, db_session, page, limit, locale=locale
     )
 
 
@@ -146,13 +163,18 @@ async def api_get_communities_by_org(
 async def api_get_community_by_course(
     request: Request,
     course_uuid: str,
+    locale: Optional[str] = Query(
+        default=None, description="Content locale (falls back to the source locale)"
+    ),
     current_user: PublicUser = Depends(get_current_user),
     db_session: Session = Depends(get_db_session),
 ) -> CommunityRead | None:
     """
     Get the community linked to a specific course.
     """
-    return await get_community_by_course(request, course_uuid, current_user, db_session)
+    return await get_community_by_course(
+        request, course_uuid, current_user, db_session, locale=locale
+    )
 
 
 @router.put(
@@ -483,4 +505,65 @@ async def api_delete_community_banner(
     """
     return await delete_community_banner(
         request, community_uuid, current_user, db_session
+    )
+
+
+@router.get(
+    "/{community_uuid}/translations",
+    response_model=List[CommunityTranslationRead],
+    summary="List community translations",
+    description="List the locale rows attached to a community. Requires edit permission.",
+)
+async def api_list_community_translations(
+    request: Request,
+    community_uuid: str,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session: Session = Depends(get_db_session),
+) -> List[CommunityTranslationRead]:
+    return await list_community_translations(
+        request, community_uuid, current_user, db_session
+    )
+
+
+@router.put(
+    "/{community_uuid}/translations/{locale}",
+    response_model=CommunityTranslationRead,
+    summary="Create or update a community translation",
+    description=(
+        "Upsert one locale of a community. Writing the source locale is "
+        "rejected — update the community itself instead."
+    ),
+    responses={
+        200: {"description": "Translation saved.", "model": CommunityTranslationRead},
+        404: {"description": "Community not found"},
+        422: {"description": "Invalid locale or payload"},
+    },
+)
+async def api_upsert_community_translation(
+    request: Request,
+    community_uuid: str,
+    locale: str,
+    payload: CommunityTranslationUpsert,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session: Session = Depends(get_db_session),
+) -> CommunityTranslationRead:
+    return await upsert_community_translation(
+        request, community_uuid, locale, payload, current_user, db_session
+    )
+
+
+@router.delete(
+    "/{community_uuid}/translations/{locale}",
+    summary="Delete a community translation",
+    description="Remove one locale row. The base community row is untouched.",
+)
+async def api_delete_community_translation(
+    request: Request,
+    community_uuid: str,
+    locale: str,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session: Session = Depends(get_db_session),
+):
+    return await delete_community_translation(
+        request, community_uuid, locale, current_user, db_session
     )

@@ -8,6 +8,12 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useCommunity, useCommunityDispatch } from '@components/Contexts/CommunityContext'
 import { updateCommunity } from '@services/communities/communities'
+import {
+  getCommunityTranslations,
+  upsertCommunityTranslation,
+} from '@services/communities/communityTranslations'
+import { useCommunityTranslation } from '@components/Hooks/useCommunityTranslation'
+import { getCurrentLanguageNativeName } from '@/lib/languages'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { mutate } from 'swr'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
@@ -42,6 +48,14 @@ const CommunityEditGeneral: React.FC = () => {
   const community = communityState?.community
   const accessToken = session?.data?.tokens?.access_token
 
+  // The base row holds the source locale; other languages live in
+  // community_translation and are edited from this same form.
+  const { contentLocale, isSourceLocale, translation, setTranslation } =
+    useCommunityTranslation(
+      community?.community_uuid,
+      community?.source_locale || 'en'
+    )
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
 
@@ -58,8 +72,9 @@ const CommunityEditGeneral: React.FC = () => {
   if (!community) return null
 
   const initialValues = {
-    name: community.name,
-    description: community.description || '',
+    name: (!isSourceLocale && translation?.name) || community.name,
+    description:
+      (!isSourceLocale && translation?.description) || community.description || '',
   }
 
   const handleSubmit = async (values: typeof initialValues) => {
@@ -67,24 +82,40 @@ const CommunityEditGeneral: React.FC = () => {
     const loadingToast = toast.loading(t('dashboard.courses.communities.general.toasts.updating'))
 
     try {
-      const result = await updateCommunity(
-        community.community_uuid,
-        {
-          name: values.name,
-          description: values.description || null,
-        },
-        accessToken
-      )
+      if (!isSourceLocale) {
+        // Translating never touches the base row.
+        await upsertCommunityTranslation(
+          community.community_uuid,
+          contentLocale,
+          {
+            name: values.name,
+            description: values.description || null,
+          },
+          accessToken
+        )
+        const rows = await getCommunityTranslations(community.community_uuid, accessToken)
+        setTranslation(rows.find((row) => row.locale === contentLocale) || null)
+      } else {
+        const result = await updateCommunity(
+          community.community_uuid,
+          {
+            name: values.name,
+            description: values.description || null,
+          },
+          accessToken
+        )
 
-      if (result) {
-        await revalidateTags(['communities'], org.slug)
-        mutate(`${getAPIUrl()}communities/${community.community_uuid}`)
-        if (dispatch) {
-          dispatch({ type: 'setCommunity', payload: { ...community, ...values } })
+        if (result) {
+          if (dispatch) {
+            dispatch({ type: 'setCommunity', payload: { ...community, ...values } })
+          }
         }
-        toast.success(t('dashboard.courses.communities.general.toasts.update_success'), { id: loadingToast })
-        router.refresh()
       }
+
+      await revalidateTags(['communities'], org.slug)
+      mutate(`${getAPIUrl()}communities/${community.community_uuid}`)
+      toast.success(t('dashboard.courses.communities.general.toasts.update_success'), { id: loadingToast })
+      router.refresh()
     } catch (error) {
       console.error('Failed to update community:', error)
       toast.error(t('dashboard.courses.communities.general.toasts.update_error'), { id: loadingToast })
@@ -100,7 +131,9 @@ const CommunityEditGeneral: React.FC = () => {
     setIsPublishing(true)
 
     const newPublishedStatus = !isPublished
-    const toastMessage = newPublishedStatus ? 'Publishing...' : 'Unpublishing...'
+    const toastMessage = newPublishedStatus
+      ? t('dashboard.courses.publishing')
+      : t('dashboard.courses.unpublishing')
     const toastId = toast.loading(toastMessage)
 
     const previousPublished = community.published
@@ -122,7 +155,9 @@ const CommunityEditGeneral: React.FC = () => {
 
       toast.dismiss(toastId)
       toast.success(
-        newPublishedStatus ? 'Community published successfully' : 'Community unpublished successfully'
+        newPublishedStatus
+          ? t('dashboard.courses.published_success')
+          : t('dashboard.courses.unpublished_success')
       )
     } catch (error) {
       console.error('Failed to toggle publish status:', error)
@@ -131,7 +166,7 @@ const CommunityEditGeneral: React.FC = () => {
         dispatch({ type: 'setCommunity', payload: { ...community, published: previousPublished } })
       }
       toast.dismiss(toastId)
-      toast.error('Failed to update publish status')
+      toast.error(t('dashboard.courses.publish_error'))
     } finally {
       setIsPublishing(false)
     }
@@ -159,6 +194,24 @@ const CommunityEditGeneral: React.FC = () => {
               </Link>
 
               <div className="flex items-center gap-2">
+                <span
+                  className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600"
+                  title={
+                    isSourceLocale
+                      ? t('dashboard.courses.general.locale.source')
+                      : t('dashboard.courses.general.locale.translation')
+                  }
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${!dirty ? 'bg-teal-500' : 'bg-amber-400'}`} />
+                  <span>{getCurrentLanguageNativeName(contentLocale)}</span>
+                  <span className="text-gray-400">
+                    {isSourceLocale
+                      ? t('dashboard.courses.general.locale.source')
+                      : translation
+                        ? t('dashboard.courses.general.locale.translation')
+                        : t('dashboard.courses.general.locale.missing')}
+                  </span>
+                </span>
                 <button
                   type="button"
                   onClick={submitForm}
@@ -201,10 +254,10 @@ const CommunityEditGeneral: React.FC = () => {
                   )}
                   <span>
                     {isPublishing
-                      ? 'Processing...'
+                      ? t('dashboard.courses.processing')
                       : isPublished
-                        ? 'Published'
-                        : 'Unpublished'}
+                        ? t('dashboard.courses.published')
+                        : t('dashboard.courses.unpublished')}
                   </span>
                 </button>
               </div>

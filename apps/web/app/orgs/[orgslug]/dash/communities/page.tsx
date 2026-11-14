@@ -1,7 +1,9 @@
 import { getOrganizationContextInfo } from '@services/organizations/orgs'
 import { Metadata } from 'next'
+import { cookies } from 'next/headers'
 import React from 'react'
 import { getServerSession } from '@/lib/auth/server'
+import { localeCode } from '@/lib/direction'
 import { getCommunities } from '@services/communities/communities'
 import CommunitiesDashClient from './client'
 
@@ -35,6 +37,8 @@ async function CommunitiesDashPage(params: any) {
   })
   const session = await getServerSession()
   const access_token = session?.tokens?.access_token
+  const cookieStore = await cookies()
+  const locale = localeCode(cookieStore.get('i18next')?.value) || 'en'
 
   let communities = []
   try {
@@ -43,7 +47,8 @@ async function CommunitiesDashPage(params: any) {
       1,
       100,
       { revalidate: 0, tags: ['communities'] },
-      access_token ? access_token : undefined
+      access_token ? access_token : undefined,
+      locale
     )
   } catch (error) {
     console.error('Failed to fetch communities:', error)

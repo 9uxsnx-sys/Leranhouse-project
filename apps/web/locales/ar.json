@@ -732,6 +732,16 @@
     "discussion": "نقاش",
     "created": "تم الإنشاء",
     "linked_course": "الدورة المرتبطة",
+    "new": "نشر",
+    "linked_course_description": "هذا المجتمع هو مساحة النقاش الخاصة بالدورة. انضم إلى المحادثة واطرح أسئلتك وتواصل مع بقية المتعلمين.",
+    "go_to_course": "الانتقال إلى الدورة",
+    "sidebar_includes": "يشمل هذا المجتمع",
+    "member": "عضو",
+    "members": "أعضاء",
+    "created_on": "أُنشئ في {{date}}",
+    "updates": "التحديثات",
+    "last_updated": "آخر تحديث {{date}}",
+    "not_available": "غير متاح",
     "community_guidelines": "إرشادات المجتمع",
     "community_guidelines_text": "كن محترمًا وبناءً. ساعد الآخرين وشارك معرفتك مع المجتمع.",
     "new_discussion": "نقاش جديد",
@@ -2624,7 +2634,8 @@
             "thumbnail": "الصورة المصغرة",
             "course": "الدورة المرتبطة",
             "moderation": "الإشراف",
-            "access": "الوصول"
+            "access": "الوصول",
+            "translations": "الترجمات"
           },
           "general": {
             "title": "الإعدادات العامة",
