@@ -115,6 +115,8 @@ This cycle:
 | `504335af` | Podcasts: `podcast_translation` + `podcast_episode_translation`, localized `/meta` and episode list, locale-aware General/Episodes, Translations tab, learner pages, episode card surface | done |
 | `fe324eba` | **Checkpoint:** i18n infrastructure for activity translations, locale-aware module editing (ModuleDetailForm rewrite), activity translation seed builder | done |
 | `0b488024` | **Fix:** add `ACTIVITY_TRANSLATIONS` with French (fr) locale keys for all 20 lessons in seed data | done |
+| `acb249c8` | **Fix:** learner listing pages end at the same bottom gutter as the dashboard listings | done |
+| `53df26cf` | Learner home: `home-trending` is locale-aware (courses, podcasts and the metadata row) + `home.*` copy in en/fr/ar | done |
 
 Lesson-page and breadcrumb work from the same cycle (reference for future surfaces):
 
@@ -620,6 +622,45 @@ The dialog itself was off-screen in RTL: it used `start-1/2` (= `right: 50%` in 
 | Web | `components/Objects/Modals/SearchModal.tsx` | `shouldFilter={false}` — cmdk was re-filtering on the *localized* label, so an Arabic result titled `هندسة … ببايثون` was hidden from a `python` query. Static pages are filtered locally instead |
 
 Verified in the palette: AR UI + `python` → 6 Arabic-titled results; AR UI + `بايثون` and `developpement` → same; EN UI + `بايثون` → English-titled courses; EN UI + `حزمة` → 5 English-titled collections. Note: accented French queries (`développement`) still miss because the seeded French copy is written without accents — the base data needs fixing, the search path itself is fine.
+
+## 19. Learner home page — localized sections + card metadata
+
+`OrgHomeClient` already re-fetched the "New Courses" / "New Podcasts" rows with `?locale=`, but two things kept the page looking English:
+
+1. `/orgs/{org_id}/home-trending` ignored locale and returned raw `Course` / `Podcast` rows.
+2. The four section titles and `See All` were rendered from `t(key, { defaultValue })` with no key in any locale file, so they fell back to English in every language.
+
+| Layer | File | Change |
+|---|---|---|
+| Endpoint | `src/routers/orgs/orgs.py` | `home-trending` accepts `?locale=`, pushes each row through `build_translation_overlay` (courses) / `build_podcast_overlay` (podcasts), merges display `extra_metadata` and returns `content_locale` + `is_fallback` |
+| Web | `services/home/trending.ts` | `getOrgHomeTrending(orgId, token, limit, locale)` appends the locale |
+| Web | `app/orgs/[orgslug]/(withmenu)/page.tsx` | Server fetch passes the visitor locale |
+| Web | `components/Objects/Home/OrgHomeClient.tsx` | Trending gets its own locale-keyed SWR entry, matching the courses/podcasts pattern, so a language switch refetches it |
+| Copy | `locales/{en,fr,ar}.json` | Top-level `home` namespace: `trending_courses`, `trending_podcasts`, `new_courses`, `new_podcasts`, `see_all`, `no_content` |
+
+**Trending podcast cards had an empty meta row.** `PodcastCard` reads `episode_count`, `total_duration_seconds` and `creation_date`, but the trending endpoint returned only the base podcast row — those stats are computed by the podcasts listing service, not stored in `extra_metadata` (unlike a course's `lessons_count` / `duration`). The endpoint now aggregates `count(episode)` + `sum(duration_seconds)` for the returned podcasts in one grouped query and includes all three fields.
+
+Verified through the API (same payload the page consumes):
+
+| locale | course | podcast |
+|---|---|---|
+| `en` | Backend Engineering with Python (`en`) | The Freelance Files — 2 eps · 4742s |
+| `fr` | Developpement backend avec Python (`fr`) | Dossiers freelance — `fr` |
+| `ar` | هندسة الخوادم الخلفية ببايثون (`ar`) | ملفات العمل الحر — `ar` |
+
+All three locale files parse and `home.*` resolves at the top level; `PodcastCard` now renders `2 episodes · 42min · <relative date>`.
+
+## 20. Learner listing pages — bottom gutter matches the dashboard
+
+The learner shell wrapped every page in `pb-10` (40px) *on top of* the pagination block's own `pb-8` (32px), so `/courses` and `/collections` ended ~72px under the last row while the dashboard listings ended at 32px — visually close to double.
+
+| Layer | File | Change |
+|---|---|---|
+| Shell | `app/orgs/[orgslug]/(withmenu)/layout.tsx` | Dropped the wrapper's `pb-10` |
+| Shell | `components/Objects/Menus/OrgMenu.tsx` | The 40px moved into the non-full-bleed container (`py-3` → `pt-3 pb-10`), so regular learner pages keep their gutter and full-bleed listings (`/courses`, `/collections`, `/communities`, `/podcasts`, `/trail`) match the dashboard |
+
+Measured at 1440×900: dashboard `/dash/courses` ends at 953 with 953 scroll height; learner `/courses` and `/collections` now also 953/953 (were 953 with 993 scroll height). Non-full-bleed learner home keeps its 40px bottom padding.
+
 
 
 
