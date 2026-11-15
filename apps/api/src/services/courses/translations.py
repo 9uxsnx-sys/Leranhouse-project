@@ -19,6 +19,7 @@ from src.db.courses.course_translations import (
 from src.db.courses.courses import Course
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import AccessAction, AccessContext, check_resource_access
+from src.services.people_locale import merge_localized_people
 
 SUPPORTED_LOCALES = ("en", "fr", "ar")
 DEFAULT_LOCALE = "en"
@@ -64,11 +65,11 @@ def _overlay_from_translation(translation: CourseTranslation, base_extra_metadat
         overlay["seo"] = translation.seo
     if translation.extra_metadata:
         # Only the display-text keys are translated; merge over the base row so
-        # counts, flags and the instructor block survive.
-        overlay["extra_metadata"] = {
-            **(base_extra_metadata or {}),
-            **translation.extra_metadata,
-        }
+        # counts and flags survive. `instructors` is merged entry by entry, so a
+        # translation can rename an instructor without losing their avatar.
+        overlay["extra_metadata"] = merge_localized_people(
+            base_extra_metadata, translation.extra_metadata, "instructors"
+        )
     return overlay
 
 

@@ -34,7 +34,11 @@ export function CommunityActionsMobile({
           <div className="flex-1 min-w-0">
             <p dir="auto" className="font-medium text-gray-900 truncate text-sm">{community.name}</p>
             <p className="text-xs text-gray-400">
-              {community.public ? t('communities.public') : t('communities.private')}
+              {community.resource_type === 'course'
+                ? t('communities.linked_course')
+                : community.resource_type === 'podcast'
+                  ? t('communities.linked_podcast')
+                  : t('communities.not_linked')}
             </p>
           </div>
 

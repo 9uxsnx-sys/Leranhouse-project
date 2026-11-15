@@ -43,9 +43,6 @@ const CSV_FIELDS = [
   'meta.difficulty',
   'meta.duration',
   'meta.requirements',
-  'meta.instructor.name',
-  'meta.instructor.title',
-  'meta.instructor.bio',
   'meta.target_audience.for',
   'meta.target_audience.not_for',
 ] as const
@@ -185,7 +182,6 @@ function EditCourseTranslations(props: Props) {
                 difficulty: courseStructure.extra_metadata.difficulty ?? '',
                 duration: courseStructure.extra_metadata.duration ?? '',
                 requirements: courseStructure.extra_metadata.requirements ?? '',
-                instructor: courseStructure.extra_metadata.instructor ?? null,
                 target_audience: courseStructure.extra_metadata.target_audience ?? null,
               }
             : null,

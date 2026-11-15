@@ -73,6 +73,10 @@ class TestApplyCourseContributor:
     async def test_apply_course_contributor_success(
         self, db, course, regular_user, mock_request
     ):
+        course.open_to_contributors = True
+        db.add(course)
+        db.commit()
+
         with patch(
             "src.services.courses.contributors.authorization_verify_if_user_is_anon",
             new_callable=AsyncMock,
@@ -97,6 +101,23 @@ class TestApplyCourseContributor:
         assert authorship.user_id == regular_user.id
         assert authorship.authorship == ResourceAuthorshipEnum.CONTRIBUTOR
         assert authorship.authorship_status == ResourceAuthorshipStatusEnum.PENDING
+
+    @pytest.mark.asyncio
+    async def test_apply_course_contributor_closed_course_rejected(
+        self, db, course, regular_user, mock_request
+    ):
+        assert course.open_to_contributors is False
+
+        with patch(
+            "src.services.courses.contributors.authorization_verify_if_user_is_anon",
+            new_callable=AsyncMock,
+        ):
+            with pytest.raises(HTTPException) as exc_info:
+                await apply_course_contributor(
+                    mock_request, course.course_uuid, regular_user, db
+                )
+
+        assert exc_info.value.status_code == 403
 
     @pytest.mark.asyncio
     async def test_apply_course_contributor_anon_rejected(
@@ -140,6 +161,9 @@ class TestApplyCourseContributor:
     async def test_apply_course_contributor_existing_authorship_rejected(
         self, db, course, regular_user, mock_request
     ):
+        course.open_to_contributors = True
+        db.add(course)
+        db.commit()
         _make_contributor(db, course, regular_user.id)
 
         with patch(

@@ -11,6 +11,12 @@ from fastapi import HTTPException, UploadFile
 
 def validate_image_content(content: bytes) -> bool:
     """Validate image content using magic bytes (no deprecated modules)."""
+    # SVG is XML text, not a binary format: validate it before the 12-byte
+    # magic-byte floor, otherwise small-but-valid SVGs are rejected as corrupt.
+    head = content.lstrip()[:16]
+    if head.startswith(b'<?xml') or head.startswith(b'<svg'):
+        return validate_svg_content(content)
+
     if len(content) < 12:
         return False
     
@@ -33,8 +39,7 @@ def validate_image_content(content: bytes) -> bool:
     if magic_bytes.startswith(b'RIFF') and b'WEBP' in content[:16]:
         return True
     
-    # SVG: XML-based, check via text validator
-    return validate_svg_content(content)
+    return False
 
 
 def validate_svg_content(content: bytes) -> bool:

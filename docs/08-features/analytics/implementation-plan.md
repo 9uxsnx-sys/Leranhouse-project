@@ -2,7 +2,7 @@
 
 > **Status:** Implemented — the contract below is what shipped. Phases 1–4 and 6 are complete; phase 5 is partial and phase 7 is outstanding — see §6.
 > **Scope:** the org-wide Analytics area at `/orgs/{orgslug}/dash/analytics` (7 tabs).
-> **Companion docs:** the metric catalog + UI rules live in [overview.md](./overview.md); money lives in [Revenue Analytics](../payments/revenue-analytics.md).
+> **Companion docs:** the metric catalog + UI rules live in [overview.md](./overview.md); money was split out into Revenue Analytics (archived plan).
 > **Why this file exists:** every downstream phase (queries → endpoints → UI wiring) is built against the *contract* below, so the UI can never drift from the API.
 
 ---
@@ -272,5 +272,5 @@ Phase 2 made the Tier B cards *possible*; it does not make them *populated*. Eve
 ## 8. Related
 
 - [Analytics — Feature Catalog & Plan](./overview.md) — metrics, tiers, UI rules, sub-tabs
-- [Revenue Analytics](../payments/revenue-analytics.md) — the separate Revenue section
+- Revenue Analytics — the separate Revenue section (archived plan)
 - [Data Model](../../02-architecture/data-model.md) — core entities

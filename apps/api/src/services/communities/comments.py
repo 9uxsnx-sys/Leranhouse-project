@@ -106,6 +106,7 @@ async def create_comment(
             "discussion": {"discussion_uuid": discussion.discussion_uuid, "title": discussion.title},
             "community": {"community_uuid": community.community_uuid},
         },
+        db_session=db_session,
     )
 
     return DiscussionCommentReadWithVoteStatus(

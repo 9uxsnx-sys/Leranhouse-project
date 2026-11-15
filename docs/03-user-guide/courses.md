@@ -1,55 +1,70 @@
+> Status: as-built · Last verified: 2026-11-15
+
 # Courses
 
-> Browsing, purchasing, and taking courses on Koodook.
+Courses are the main learning format: chapters contain activities, and progress is tracked per course.
 
----
+## Course catalogue
 
-## Browsing Courses
+Open **Courses** from the side menu.
 
-### Course List
+| Control | Behaviour |
+|---|---|
+| Search | Matches course name, description and tags |
+| Difficulty filter | All courses, or one difficulty level |
+| User-group filter | Appears on personal and family plans; narrows the grid to one group's resources |
+| Pagination | Eight courses per page |
 
-The **Courses** page shows all available courses with:
-- Course thumbnail image
-- Course name and description
-- Duration and difficulty (e.g. `8 weeks · Beginner`), translated with the rest of the course content
-- Price (free or paid)
+Each card shows the cover image, name, description, lesson count, duration and difficulty. Empty catalogues and empty search results have separate states.
 
-Cards render in the language currently selected in the platform switcher. Courses without duration/difficulty still reserve the metadata row so the grid stays even.
+## Course product page
 
-### Course Detail Page
+Selecting a card opens the course page when your access allows it. Published `public` and `paid` courses keep the full product page visible, including the curriculum, even when the activity bodies are locked.
 
-Clicking a course opens its detail page with:
-- Full course description
-- What you'll learn section
-- Who This Is For section with check (for you) and cross (not for you) indicators
-- About this course section
-- Course curriculum (expandable chapters with activities)
-- Requirements section
-- Instructor information
-- Purchase button
-- Sidebar (in order): Progress bar with **Continue Learning** button, **This Course Includes** stats card, **Community** card with link to the course's community, **Updates** card with recent announcements
+| Section | Content |
+|---|---|
+| Banner | Course banner, falling back to the thumbnail |
+| Header | Name, description, lesson count, duration, difficulty and a share action |
+| What you'll learn | Learning items authored for the course |
+| Who this is for | "For you" and "not for you" lists |
+| About this course | Long description |
+| Curriculum | Expandable chapters and their activities |
+| Requirements | Prerequisites, when authored |
+| Community | The linked course community, when one exists |
 
-If a course only exists in another language, a hint above the title says which language it is shown in.
+The language note above the title appears when the course has no translation for your interface language; the page then shows the source language.
 
-## Purchasing
+## Sidebar
 
-- Click **Purchase** to buy the course
-- You are redirected to the Chargily payment page
-- Pay with **EDAHABIA** (Algérie Poste) or **CIB** (card)
-- On successful payment, you are redirected back to the course
-- All lessons become accessible immediately
+| Card | Content |
+|---|---|
+| Access / progress | Progress bar and **Continue learning** when enrolled; otherwise **Get access** |
+| This course includes | Video hours, lessons, downloadable resources and certificate line |
+| Instructors | Each instructor's photo, name and title |
+| Community | Short community description |
+| Updates | Last update date |
 
-## Taking a Course
+Instructors come from the course's people metadata. A course can list several instructors, each with a name, a title and a photo; translated versions keep the same order and photo.
 
-### Progress Tracking
+## Getting access
 
-- Your progress is tracked per course
-- Completed lessons are marked
-- Overall course progress is displayed
+| Mode | Behaviour |
+|---|---|
+| `public` | **Add to progress** starts the course and adds it to your Progress page |
+| `users_only` | The course is visible only to members of a linked user group; other learners cannot open it |
+| `paid` | The price is shown in DZD; **Get access** opens Chargily checkout for the course |
 
-### Trail
+After a successful payment, the entitlement is recorded and the access card switches to progress and **Continue learning**. Opening the course later resumes where you stopped.
 
-The **Trail** page shows your learning path:
-- Courses you are enrolled in
-- Your progress in each course
-- Recommended next steps
+## Taking a course
+
+**Continue learning** opens the course player. The curriculum marks completed activities and the current activity; chapters can be collapsed. Each activity has its own completion and assignment actions — see [Activities](./activities.md).
+
+When every activity is complete, the course-end screen shows the result and, for certified courses, the certificate and a PDF download.
+
+## Related
+
+- [Activities](./activities.md) — activity types and completion.
+- [Collections](./collections.md) — bundles that contain courses.
+- [Store](./store.md) — paid catalogue.
+- [Courses API](../06-api-reference/courses.md) and [Developer guide](../05-developer-guide/README.md).

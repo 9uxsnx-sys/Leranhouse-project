@@ -31,9 +31,19 @@ export function CommunitySidebar({
   const session = useLHSession() as any
   const accessToken = session?.data?.tokens?.access_token
 
-  // Fetch linked course if community has a course_id
+  // A community inherits its access and context from the linked resource, so
+  // resolve the course or podcast it belongs to.
   const { data: linkedCourse } = useSWR(
-    community.course_id ? `${getAPIUrl()}courses/id/${community.course_id}` : null,
+    community.resource_type === 'course' && community.resource_uuid
+      ? `${getAPIUrl()}courses/${community.resource_uuid}`
+      : null,
+    (url: string) => swrFetcher(url, accessToken),
+    { revalidateOnFocus: false }
+  )
+  const { data: linkedPodcast } = useSWR(
+    community.resource_type === 'podcast' && community.resource_uuid
+      ? `${getAPIUrl()}podcasts/${community.resource_uuid}`
+      : null,
     (url: string) => swrFetcher(url, accessToken),
     { revalidateOnFocus: false }
   )
@@ -65,7 +75,7 @@ export function CommunitySidebar({
   return (
     <div className="space-y-4">
 
-      {/* ── CARD 1: Linked Course / Linked Podcast ── */}
+      {/* ── CARD 1: Linked course or podcast ── */}
       {linkedCourse ? (
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
           <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
@@ -79,6 +89,22 @@ export function CommunitySidebar({
           >
             <Button variant="primary" size="large" className="w-full">
               {t('communities.go_to_course')}
+            </Button>
+          </Link>
+        </div>
+      ) : linkedPodcast ? (
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+            {t('communities.linked_podcast')}
+          </h3>
+          <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+            {t('communities.linked_podcast_description')}
+          </p>
+          <Link
+            href={getUriWithOrg(orgslug, `/podcast/${linkedPodcast.podcast_uuid.replace('podcast_', '')}`)}
+          >
+            <Button variant="primary" size="large" className="w-full">
+              {t('communities.go_to_podcast')}
             </Button>
           </Link>
         </div>

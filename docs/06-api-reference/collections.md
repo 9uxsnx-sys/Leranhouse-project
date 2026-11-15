@@ -1,6 +1,8 @@
 # Collections
 
-> Collections are sellable bundles of courses and podcasts. They carry the same metadata and media as courses, expose three access modes, and fan a single purchase out to per-resource entitlements so the bundle appears in the learner's progress exactly like individually bought courses.
+> Status: as-built · Last verified: 2026-11-15
+
+Collections are sellable bundles of courses and podcasts. They carry the same metadata and media as courses, expose three access modes, and fan a single purchase out to per-resource entitlements so the bundle appears in the learner's progress exactly like individually bought courses.
 
 ---
 
@@ -10,7 +12,7 @@ A collection groups courses and podcasts from one organization into a bundle. It
 
 | `access_type` | Who can browse the catalog | Who can reach the content |
 |---|---|---|
-| `public` | Everyone | Everyone (each course keeps its own rules) |
+| `public` | Everyone | Everyone (each member resource keeps its own rules) |
 | `users_only` | Members of a linked UserGroup (and admins) | Members of the linked UserGroup |
 | `paid` | Everyone, when `published=true` (product page) | Buyers (active entitlement) or linked UserGroup members |
 
@@ -31,8 +33,8 @@ All endpoints are under the Collections router at `/api/v1/collections`. The leg
 | Rule | Response |
 |---|---|
 | `users_only` or draft bundle, viewer is not a member/admin | `403` |
-| Published `paid` bundle metadata and member list | `200` for any viewer |
-| Write operations (`update`, `delete`, membership) | RBAC `collections` permission for the org |
+| Published `paid` bundle metadata and member list | `200` for any viewer (product page) |
+| Write operations (`update`, `delete`, membership) | RBAC `collections` update/delete permission (collections have no authors, so admins/maintainers or a role granting the permission) |
 | Member resource is `users_only` | `422` on add / create / replace |
 | Member resource already in the bundle | `409` on add |
 | Adding a draft resource to a published bundle | `422` with the offender list |
@@ -45,6 +47,10 @@ All endpoints are under the Collections router at `/api/v1/collections`. The leg
 | Claiming a public bundle | Requires org membership; idempotent |
 | Access roster endpoints | RBAC `collections` update permission (admins/maintainers) |
 
+**Locked content:** buying a bundle grants one entitlement per member resource; each member's own course/podcast RBAC rule still decides what the learner can open. Removing a member later never revokes content the learner already bought.
+
+**Price snapshot:** at checkout the bundle's member UUIDs are copied into `price_snapshot.resources` (and the legacy `price_snapshot.courses`) together with the amount. Later bundle edits never retroactively grant or remove content for that order.
+
 ---
 
 ## Create Collection
@@ -52,6 +58,8 @@ All endpoints are under the Collections router at `/api/v1/collections`. The leg
 ```
 POST /api/v1/collections/?org_id={org_id}
 ```
+
+Auth: RBAC `collections` create permission (admin/maintainer or a role granting it).
 
 The organization always comes from the query string, never from the body.
 
@@ -88,21 +96,58 @@ The organization always comes from the query string, never from the body.
 }
 ```
 
-`courses` is optional and contains course **database ids**. Every course is validated (same org, not `users_only`) before anything is written. Online podcasts can only be attached after creation through the `resources` endpoints, because `courses` is course-id based. When `published` is omitted it defaults to `true` for backward compatibility with older clients.
+`courses` is optional and contains course **database ids**. Every course is validated (same org, not `users_only`) before anything is written. Podcasts can only be attached after creation through the `resources` endpoints, because `courses` is course-id based. `public` is required by the schema; `access_type` defaults to `public` and is kept in sync with it. When `published` is omitted it defaults to `true` for backward compatibility with older clients.
 
 ### Response (200 OK)
 
-`CollectionRead`: every `CollectionBase` field (including `seo`) plus `id`, `collection_uuid`, `creation_date`, `update_date`, `member_count` (courses + podcasts), and `courses` (member course objects).
+`CollectionRead`: every `CollectionBase` field plus `id`, `collection_uuid`, `creation_date`, `update_date`, `member_count` (courses + podcasts), `courses` (member course objects), `source_locale`, `content_locale`, `is_fallback`.
+
+```json
+{
+  "id": 7,
+  "collection_uuid": "collection_a8c9dba8-...",
+  "org_id": 1,
+  "name": "UI/UX Foundations",
+  "description": "Everything you need to design production-ready interfaces.",
+  "about": "Long-form page copy.",
+  "learnings": "[{\"id\":\"1\",\"text\":\"Build an 8pt spacing system\",\"emoji\":\"📐\"}]",
+  "tags": "design, figma, ux",
+  "thumbnail_type": "image",
+  "thumbnail_image": "",
+  "thumbnail_video": "",
+  "banner_image": "",
+  "public": true,
+  "published": true,
+  "access_type": "public",
+  "price_amount": null,
+  "price_currency": "DZD",
+  "seo": { "title": "UI/UX Foundations bundle" },
+  "extra_metadata": { "target_audience": { "for": ["..."], "not_for": ["..."] } },
+  "courses": [
+    { "id": 1, "course_uuid": "course_5e6c9e17-...", "name": "UI/UX Design Masterclass" }
+  ],
+  "member_count": 1,
+  "source_locale": "en",
+  "content_locale": "en",
+  "is_fallback": false,
+  "creation_date": "2026-10-19 12:00:00.000000",
+  "update_date": "2026-10-19 12:00:00.000000"
+}
+```
+
+Errors: `403` lacking create permission; `404` a course id is not in this organization; `422` a course is `users_only` or the bundle would be invalid.
 
 ---
 
 ## List Collections
 
 ```
-GET /api/v1/collections/org/{org_id}/page/{page}/limit/{limit}
+GET /api/v1/collections/org/{org_id}/page/{page}/limit/{limit}?locale={locale}
 ```
 
-Returns a JSON array of `CollectionRead` (not a paginated envelope).
+Auth: any caller (anonymous allowed).
+
+Returns a **bare JSON array** of `CollectionRead` (not a paginated envelope). `page` and `limit` are path parameters; this route does not enforce an upper bound on `limit`.
 
 - Learners only see `published` collections with `access_type` in (`public`, `paid`), plus `users_only` bundles linked to one of their UserGroups.
 - Admins and maintainers see drafts and every access type.
@@ -112,20 +157,30 @@ Returns a JSON array of `CollectionRead` (not a paginated envelope).
 ## Get Collection
 
 ```
-GET /api/v1/collections/{collection_uuid}
+GET /api/v1/collections/{collection_uuid}?locale={locale}
 ```
 
+Auth: any caller, subject to the access rules.
+
 Returns `CollectionRead`. Draft members are included for org admins; learners only receive published members with a `public`/`paid` access type.
+
+Errors: `404` collection not found; `403` draft or `users_only` bundle the viewer cannot read.
 
 ---
 
 ## List Collection Members
 
 ```
-GET /api/v1/collections/{collection_uuid}/courses?search={q}&page={page}&limit={limit}
+GET /api/v1/collections/{collection_uuid}/courses?search={q}&page={page}&limit={limit}&locale={locale}
 ```
 
-The path keeps its historical name, but the endpoint returns every member (courses and podcasts) as lean rows used by the dashboard Content table and the learner "What is included" grid:
+Auth: any caller, subject to the access rules.
+
+The path keeps its historical name, but the endpoint returns every member (courses and podcasts) as lean rows used by the dashboard Content table and the learner "What is included" grid. Returns a **bare JSON array** of `CollectionCourseRead`.
+
+- `page` defaults to `1` (min 1); `limit` defaults to `20` and is declared `le=100` — a larger value returns **422**.
+- `search` is a case-insensitive match on the member name.
+- Rows are sorted by `creation_date` descending.
 
 ```json
 [
@@ -142,6 +197,8 @@ The path keeps its historical name, but the endpoint returns every member (cours
     "price_amount": null,
     "price_currency": "DZD",
     "lessons": 12,
+    "duration": "6h 20m",
+    "difficulty": "Intermediate",
     "creation_date": "2026-10-19 12:00:00"
   },
   {
@@ -157,12 +214,14 @@ The path keeps its historical name, but the endpoint returns every member (cours
     "price_amount": null,
     "price_currency": "DZD",
     "lessons": 4,
+    "duration": null,
+    "difficulty": null,
     "creation_date": "2026-08-31 09:30:00"
   }
 ]
 ```
 
-`limit` is capped at 100. `lessons` is the number of activities across all chapters for a course, or the number of episodes for a podcast. Rows are sorted by `creation_date` descending.
+`lessons` is the number of activities across all chapters for a course, or the number of episodes for a podcast. `duration` / `difficulty` are copied from the course `extra_metadata`.
 
 ---
 
@@ -175,9 +234,12 @@ GET /api/v1/collections/{collection_uuid}/members
     &kind=course|podcast
     &status=published|draft
     &page={page}&limit={limit}
+    &locale={locale}
 ```
 
-Powers the dashboard **Content** tab. Returns a paginated envelope instead of a bare array:
+Auth: any caller, subject to the access rules. Powers the dashboard **Content** tab.
+
+Returns an envelope with the current page and the total count — it does **not** echo `page`/`limit`:
 
 ```json
 {
@@ -190,10 +252,10 @@ Powers the dashboard **Content** tab. Returns a paginated envelope instead of a 
 |---|---|
 | `filter=linked` (default) | Members already in the bundle |
 | `filter=available` | Org courses and podcasts that can still be added (skips members, `users_only` items, and drafts when the bundle is published) |
-| `search` | Case-insensitive match on name/description |
+| `search` | Case-insensitive name match; `filter=available` also matches descriptions |
 | `kind` | `course` or `podcast`; omitted = both |
 | `status` | `published` or `draft`; omitted = both |
-| `page` / `limit` | Server-side pagination, `limit` capped at 100 |
+| `page` / `limit` | `page` defaults to `1`; `limit` defaults to `10` and is declared `le=100` — a larger value returns **422**. |
 
 ---
 
@@ -206,14 +268,18 @@ GET /api/v1/collections/{collection_uuid}/access/users
     ?filter=enrolled|available&search={q}&page={page}&limit={limit}
 ```
 
+Auth: RBAC `collections` update permission (admins/maintainers).
+
 - `filter=enrolled` (default) → learners with a `collectionuser` row, newest first.
 - `filter=available` → org members without a row (the search picker).
+- `search` matches first name, last name, username or email.
+- `page` defaults to `1`; `limit` defaults to `10` and is declared `le=100` — a larger value returns **422**.
 
 ```json
 {
   "items": [
     {
-      "user": { "id": 2, "username": "learner", "...": "UserRead" },
+      "user": { "id": 2, "user_uuid": "user_...", "username": "learner", "...": "UserRead" },
       "role": { "id": 4, "name": "User" },
       "joined_at": "2026-09-01 10:00:00",
       "enrolled_at": "2026-10-20 09:12:00",
@@ -243,13 +309,15 @@ DELETE /api/v1/collections/{collection_uuid}/access/users?user_ids=1,2
 POST /api/v1/collections/{collection_uuid}/claim
 ```
 
+Auth: authenticated learner with org membership and read access to the bundle.
+
 Called by the learner's **Get access** button on a public bundle. Adds a `collectionuser` row so the bundle enters the learner's inventory and appears in the Public roster. Idempotent:
 
 ```json
 { "claimed": true, "already_claimed": false }
 ```
 
-Repeat calls return `{ "claimed": false, "already_claimed": true }`. Requires org membership (`403` otherwise) and read access to the bundle.
+Repeat calls return `{ "claimed": false, "already_claimed": true }`. `404` collection not found; `403` the caller is not an org member or cannot read the bundle.
 
 ---
 
@@ -258,10 +326,12 @@ Repeat calls return `{ "claimed": false, "already_claimed": true }`. Requires or
 Two learner-facing endpoints power the catalog **Owned** badge, the **My bundles** filter, and the collection page sidebar.
 
 ```
-GET /api/v1/collections/org/{org_id}/mine
+GET /api/v1/collections/org/{org_id}/mine?locale={locale}
 ```
 
-Returns the published collections in the learner's library — claimed public bundles plus bundles with an active paid entitlement. Anonymous callers receive an empty list.
+Auth: any caller; anonymous callers receive an empty list.
+
+Returns the published collections in the learner's library — claimed public bundles plus bundles with an active paid entitlement. Returns a **bare JSON array** of `CollectionRead`.
 
 ```json
 [
@@ -272,6 +342,8 @@ Returns the published collections in the learner's library — claimed public bu
 ```
 GET /api/v1/collections/{collection_uuid}/access/state
 ```
+
+Auth: any caller, subject to the catalog read rules.
 
 Returns the acting learner's relationship to one bundle:
 
@@ -295,10 +367,13 @@ Returns the acting learner's relationship to one bundle:
 POST /api/v1/collections/{collection_uuid}/resources?resource_uuid={resource_uuid}
 ```
 
+Auth: RBAC `collections` update permission.
+
 Accepts a `course_…` or `podcast_…` UUID. The resource type is inferred from the prefix. Returns the updated `CollectionRead`.
 
 | Status | Meaning |
 |---|---|
+| `403` | Caller lacks update permission, or cannot read the resource |
 | `404` | Collection or resource not found, or resource belongs to another org |
 | `409` | Resource is already a member |
 | `422` | Resource is `users_only`, or the bundle is published and the resource is a draft |
@@ -309,7 +384,15 @@ Accepts a `course_…` or `podcast_…` UUID. The resource type is inferred from
 DELETE /api/v1/collections/{collection_uuid}/resources?resource_uuid={resource_uuid}
 ```
 
-Accepts a `course_…` or `podcast_…` UUID. Returns the updated `CollectionRead`. A `paid` bundle must keep at least one member (`422`).
+Auth: RBAC `collections` update permission.
+
+Accepts a `course_…` or `podcast_…` UUID. Returns the updated `CollectionRead`.
+
+| Status | Meaning |
+|---|---|
+| `403` | Caller lacks update permission |
+| `404` | Collection not found, or the item is not part of this collection |
+| `422` | A `paid` bundle must keep at least one member |
 
 ---
 
@@ -323,6 +406,7 @@ Thin wrapper around `POST /resources` for existing clients. Returns the updated 
 
 | Status | Meaning |
 |---|---|
+| `403` | Caller lacks update permission, or cannot read the course |
 | `404` | Collection or course not found, or course belongs to another org |
 | `409` | Course is already a member |
 | `422` | Course is `users_only`, or the bundle is published and the course is a draft |
@@ -335,7 +419,13 @@ Thin wrapper around `POST /resources` for existing clients. Returns the updated 
 DELETE /api/v1/collections/{collection_uuid}/courses?course_uuid={course_uuid}
 ```
 
-Thin wrapper around `DELETE /resources`. Returns the updated `CollectionRead`. A `paid` bundle must keep at least one member (`422`).
+Thin wrapper around `DELETE /resources`. Returns the updated `CollectionRead`.
+
+| Status | Meaning |
+|---|---|
+| `403` | Caller lacks update permission |
+| `404` | Collection not found, or the course is not part of this collection |
+| `422` | A `paid` bundle must keep at least one member |
 
 ---
 
@@ -345,14 +435,20 @@ Thin wrapper around `DELETE /resources`. Returns the updated `CollectionRead`. A
 PUT /api/v1/collections/{collection_uuid}
 ```
 
-Partial update: only fields present in the JSON body are applied (used for name, description, about, learnings, tags, `seo`, `extra_metadata`, `access_type`, `price_amount`, `published`, and full membership replacement via `courses`).
+Auth: RBAC `collections` update permission.
+
+Partial update: only fields present in the JSON body are applied. `CollectionUpdate` accepts:
+
+`name`, `description`, `about`, `learnings`, `tags`, `thumbnail_type`, `thumbnail_image`, `thumbnail_video`, `banner_image`, `public`, `published`, `access_type`, `price_amount`, `price_currency`, `seo`, `extra_metadata`, and `courses`.
 
 - Omitting `courses` keeps the current membership untouched.
-- Sending `courses` replaces the whole membership and re-validates every course. Podcast members are not affected unless they are re-added through the `resources` endpoints.
+- Sending `courses` **replaces the whole membership** using course ids: every existing member row (including podcast members) is deleted and the supplied courses are re-added. Podcast members must therefore be re-added through the `resources` endpoints.
 - `seo` replaces the whole JSON object; send `{}` to clear it.
 - `price_amount: null` clears the price. Switching to `paid` without a positive price is rejected (`422`).
 - Publish/access-type changes re-run validation: paid requires a positive price and at least one member; publishing requires every member to be published.
-- Switching `access_type` also updates the legacy `public` flag.
+- Switching `access_type` also updates the legacy `public` flag (and vice versa).
+
+Errors: `404` collection or course not found; `422` invalid access configuration, a private course, or an invalid payload; `403` lacking permission.
 
 ---
 
@@ -362,7 +458,13 @@ Partial update: only fields present in the JSON body are applied (used for name,
 DELETE /api/v1/collections/{collection_uuid}
 ```
 
+Auth: RBAC `collections` delete permission.
+
 Deletes the collection, cascades its membership (`collectioncourse`) and inventory (`collectionuser`) rows, and removes its uploaded media directory (`content/orgs/{org_uuid}/collections/{collection_uuid}`). Existing entitlements and `TrailRun` rows are intentionally left untouched, so learners who already bought the bundle keep access.
+
+```json
+{ "detail": "Collection deleted" }
+```
 
 ---
 
@@ -370,10 +472,12 @@ Deletes the collection, cascades its membership (`collectioncourse`) and invento
 
 | Method | Endpoint | Body |
 |---|---|---|
-| `PUT` | `/api/v1/collections/{collection_uuid}/thumbnail` | multipart: `thumbnail` (file), `thumbnail_type` (`image` / `video` / `both`) |
+| `PUT` | `/api/v1/collections/{collection_uuid}/thumbnail` | multipart: `thumbnail` (file), `thumbnail_type` (`image` default or `video`; `both` is derived automatically) |
 | `DELETE` | `/api/v1/collections/{collection_uuid}/thumbnail` | — clears image and video, resets type to `image` |
 | `PUT` | `/api/v1/collections/{collection_uuid}/banner` | multipart: `banner` (file) |
 | `DELETE` | `/api/v1/collections/{collection_uuid}/banner` | — |
+
+Auth: RBAC `collections` update permission.
 
 Files are stored under:
 
@@ -382,7 +486,7 @@ content/orgs/{org_uuid}/collections/{collection_uuid}/thumbnails/{file}
 content/orgs/{org_uuid}/collections/{collection_uuid}/banners/{file}
 ```
 
-All four endpoints return the updated `CollectionRead`.
+All four endpoints return the updated `CollectionRead`. A missing file returns `422`; an invalid file returns `422`.
 
 ---
 
@@ -401,6 +505,7 @@ Checkout requirements:
 1. The collection is published and `access_type=paid`.
 2. `price_amount > 0` and the bundle has at least one member.
 3. The buyer has no active entitlement for the bundle.
+4. Payments are configured and active for the organization.
 
 At order creation every member UUID is snapshotted into `price_snapshot.resources`; course-only members are also mirrored into `price_snapshot.courses` for backward compatibility. Later bundle edits never retroactively grant or revoke content.
 
@@ -412,9 +517,11 @@ On `checkout.paid`, the webhook:
 
 Members added after the purchase are **not** included; members removed after the purchase remain owned.
 
-The price itself is edited in **Payments → Offers**, not in the collection Access tab. `POST /collections/{uuid}` with `price_amount` remains available for the Offers editor.
+### Where prices are edited
 
-For a **public** bundle there is no checkout: `POST /collections/{uuid}/claim` records the learner in `collectionuser` (inventory). Removing that row through the Access roster removes the bundle from their inventory.
+There is **no `/offers` route**. Prices live on the resource itself: send `price_amount` / `price_currency` through `PUT /collections/{collection_uuid}` for a bundle, `PUT /podcasts/{podcast_uuid}` for a podcast, or the course update endpoint for a course. The store UI reads those fields.
+
+For a **public** bundle there is no checkout: `POST /collections/{collection_uuid}/claim` records the learner in `collectionuser` (inventory). Removing that row through the Access roster removes the bundle from their inventory.
 
 Revoking a buyer's bundle entitlement (`DELETE /payments/{org_id}/entitlements?resource_uuid=collection_…`) also revokes the member entitlements created by the same order (`order_id`). Separately purchased items and manual grants are untouched. No refund is issued.
 
@@ -426,7 +533,7 @@ Content locale is a query parameter on every read endpoint. Omitting it returns 
 
 | Endpoint | Localized fields |
 |---|---|
-| `GET /collections/{uuid}?locale=fr` | name, description, about, learnings, tags, seo |
+| `GET /collections/{uuid}?locale=fr` | name, description, about, learnings, tags, seo, extra_metadata display keys |
 | `GET /collections/org/{org_id}/page/{page}/limit/{limit}?locale=fr` | same, one translation query per page |
 | `GET /collections/{uuid}/courses?locale=fr` | member course names/descriptions |
 | `GET /collections/{uuid}/members?locale=fr` | dashboard Content table (linked + available) |
@@ -450,13 +557,17 @@ Content locale is a query parameter on every read endpoint. Omitting it returns 
 GET /api/v1/collections/{collection_uuid}/translations
 ```
 
-Returns every `CollectionTranslationRead` row (`locale`, `name`, `description`, `about`, `learnings`, `tags`, `seo`, `state`, `source_updated_at`, `translated_by`, dates). Requires update permission on the collection.
+Auth: RBAC `collections` update permission.
+
+Returns every `CollectionTranslationRead` row (`locale`, `name`, `description`, `about`, `learnings`, `tags`, `seo`, `extra_metadata`, `state`, `source_updated_at`, `translated_by`, dates).
 
 ### Upsert a translation
 
 ```
 PUT /api/v1/collections/{collection_uuid}/translations/{locale}
 ```
+
+Auth: RBAC `collections` update permission (dashboard context).
 
 ```json
 {
@@ -465,11 +576,21 @@ PUT /api/v1/collections/{collection_uuid}/translations/{locale}
   "about": "…",
   "learnings": "[{\"id\":\"1\",\"text\":\"…\",\"emoji\":\"✅\"}]",
   "tags": "design,ux",
-  "seo": { "title": "SEO FR" }
+  "seo": { "title": "SEO FR" },
+  "extra_metadata": {
+    "difficulty": "Intermédiaire",
+    "duration": "6 h 20",
+    "requirements": ["…"]
+  },
+  "state": "published"
 }
 ```
 
-`name` is required. Writing the collection's source locale returns **422** — update the collection itself instead. Supports the same RBAC as the dashboard General tab.
+- `name` is required.
+- `extra_metadata` carries only display-text keys (difficulty, duration, requirements, target audience); counts and flags stay on the base row. It is merged over the base `extra_metadata` on read.
+- `state` is `draft` (default) / `machine` / `reviewed` / `published`; v1 serves every row regardless of state.
+- Writing the collection's source locale returns **422** — update the collection itself instead.
+- Returns the saved `CollectionTranslationRead`.
 
 ### Delete a translation
 
@@ -477,7 +598,9 @@ PUT /api/v1/collections/{collection_uuid}/translations/{locale}
 DELETE /api/v1/collections/{collection_uuid}/translations/{locale}
 ```
 
-Removes the row; subsequent reads fall back to the source locale.
+Auth: RBAC `collections` update permission.
+
+Removes the row; subsequent reads fall back to the source locale. Returns `{ "detail": "Translation deleted" }`; a missing row returns `404`.
 
 ---
 
@@ -488,5 +611,5 @@ Removes the row; subsequent reads fall back to the source locale.
 | [Courses](./courses.md) | Course CRUD and access modes |
 | [Podcasts](./podcasts.md) | Podcast and episode CRUD, localization |
 | [Payments](./payments.md) | Checkout, orders, entitlements, webhooks |
-| [Collections Implementation Plan](../08-features/collections/implementation-plan.md) | Design decisions, schema, access model, phased delivery |
+| Collections implementation plan (archived) | Design decisions, schema, access model, phased delivery |
 | [Collections localization](../08-features/i18n-rtl/collections-localization.md) | Storage, overlay resolution and dashboard/learner surfaces |

@@ -83,11 +83,16 @@ def create_courses(ctx: SeedContext) -> None:
             "requirements": json.dumps(
                 [{"text": text} for text in meta.get("requirements", [])]
             ),
-            "instructor": {
-                "name": f"{instructor.first_name} {instructor.last_name}",
-                "title": meta.get("instructor_title", "Instructor"),
-                "bio": meta.get("instructor_bio", ""),
-            },
+            "instructors": [
+                {
+                    "name": f"{instructor.first_name} {instructor.last_name}",
+                    "title": meta.get("instructor_title", "Instructor"),
+                    "bio": meta.get("instructor_bio", ""),
+                    "avatar": ctx.assets.avatar_data_url(
+                        f"{instructor.first_name} {instructor.last_name}"
+                    ),
+                }
+            ],
             "target_audience": {
                 "for": meta.get("audience_for", []),
                 "not_for": meta.get("audience_not_for", []),
@@ -187,6 +192,20 @@ def _fix_emoji_escapes(value: str | None) -> str | None:
     return re.sub(r'\\U([0-9a-fA-F]{8})', lambda m: chr(int(m.group(1), 16)), value)
 
 
+def _localized_meta(payload: dict) -> dict | None:
+    """Course translations carry display text only.
+
+    Older copy stored one `instructor` block per translation; the read model now
+    merges an index-aligned `instructors` list, so the localized title is kept
+    and the name is left blank to inherit the source row.
+    """
+    meta = dict(payload.get("extra_metadata") or {})
+    legacy = meta.pop("instructor", None)
+    if isinstance(legacy, dict):
+        meta["instructors"] = [{"name": "", "title": legacy.get("title", "")}]
+    return meta or None
+
+
 def _add_translation(ctx: SeedContext, course: Course, entry: dict) -> None:
     translations = C.COURSE_TRANSLATIONS.get(entry["name"])
     if not translations:
@@ -202,7 +221,7 @@ def _add_translation(ctx: SeedContext, course: Course, entry: dict) -> None:
                 learnings=_fix_emoji_escapes(payload.get("learnings", course.learnings)),
                 tags=payload.get("tags", entry["tags"]),
                 seo=None,
-                extra_metadata=payload.get("extra_metadata"),
+                extra_metadata=_localized_meta(payload),
                 state="published",
                 source_updated_at=course.update_date,
                 translated_by=None,

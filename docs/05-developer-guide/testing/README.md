@@ -1,13 +1,14 @@
 # Testing Guide
 
-This section contains everything you need to test any feature on this platform. It is split into two domains:
+> Status: as-built · Last verified: 2026-11-15
+
+Everything needed to test the FastAPI backend. The suite lives in `apps/api/src/tests` and runs on in-memory SQLite with `TESTING=true`.
 
 ## Which Section to Read
 
 | You Are Working On | Read This First |
 |---|---|
 | **A backend API feature** (new endpoint, service function, auth rule, webhook, AI integration, state machine, plugin) | [api/README.md](./api/README.md) |
-| **An agent capability** (new tool, new command, data query, multi-step conversation workflow) | [agent/README.md](./agent/README.md) |
 | **Live validation** against a running server (curl-based smoke test) | [api/18-live-validation.md](./api/18-live-validation.md) |
 
 ---
@@ -36,12 +37,3 @@ This section contains everything you need to test any feature on this platform. 
 | [api/18-live-validation.md](./api/18-live-validation.md) | curl-based ad-hoc testing against running server |
 | [api/19-checklist.md](./api/19-checklist.md) | Mandatory checklist for every new feature |
 | [api/20-plan-generation.md](./api/20-plan-generation.md) | Meta-guide: decompose any feature into a test plan |
-| [agent/README.md](./agent/README.md) | Agent testing entry point |
-| [agent/01-infrastructure.md](./agent/01-infrastructure.md) | Mock LLM, tool registry, session state fixtures |
-| [agent/02-testing-capabilities.md](./agent/02-testing-capabilities.md) | Tool discovery, prompt behavior, permissions, conversation flow |
-| [agent/03-template-new-tool.md](./agent/03-template-new-tool.md) | Template: adding a new tool |
-| [agent/04-template-new-command.md](./agent/04-template-new-command.md) | Template: adding a new command |
-| [agent/05-template-data-query.md](./agent/05-template-data-query.md) | Template: agent queries platform data |
-| [agent/06-template-workflow.md](./agent/06-template-workflow.md) | Template: multi-step agent conversation workflow |
-| [agent/07-checklist.md](./agent/07-checklist.md) | Agent testing checklist |
-| [agent/08-plan-generation.md](./agent/08-plan-generation.md) | Agent test plan generation meta-guide |

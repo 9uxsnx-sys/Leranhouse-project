@@ -213,11 +213,12 @@ The surface the dashboard **Preview** button opens; also the target of every les
 
 **Route**: `/orgs/[orgslug]/store` — File: `apps/web/app/orgs/[orgslug]/(withmenu)/store/store.tsx`
 
-- **Offer cards** with:
-  - Thumbnail boxes
-  - Resource type icons (course / podcast / playground)
-  - Benefits list
-- **Offer detail**: `/orgs/[orgslug]/store/offers/[offerid]` — File: `apps/web/app/orgs/[orgslug]/(withmenu)/store/offers/[offerid]/offer-detail.tsx`
+- **Product cards** with:
+  - Resource cover (course / podcast / collection)
+  - Resource type badge
+  - Name, description and price
+  - **Get access** call to action that links to the resource product page
+- The grid lists published `paid` resources with a positive price. Buying happens on the resource page itself; there is no separate offer detail route.
 
 ### Account / Settings
 

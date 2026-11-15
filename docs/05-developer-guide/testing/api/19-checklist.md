@@ -1,5 +1,7 @@
 # Mandatory Testing Checklist
 
+> Status: as-built · Last verified: 2026-11-15
+
 This is the **gate** that every new API feature must pass before it can be considered complete. Do not skip any item. If an item does not apply, mark it as N/A and explain why.
 
 ---
@@ -151,8 +153,7 @@ This is the **gate** that every new API feature must pass before it can be consi
 ## Coverage
 
 - [ ] All new code paths are exercised by tests
-- [ ] `pytest --co` passes (coverage >= 25%)
-- [ ] Branch coverage is enabled and met
+- [ ] `uv run pytest --cov` passes (pytest-cov `fail_under = 25` in `pyproject.toml`; branch coverage is not enabled)
 
 ---
 

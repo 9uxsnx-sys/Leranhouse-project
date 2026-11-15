@@ -1,288 +1,75 @@
-# Analytics — Feature Catalog & Plan
-
-> **Status:** Implemented — the 7-tab Analytics area is live. The shipped contract (API surface, event schema, per-card metric map) is [implementation-plan.md](./implementation-plan.md); this file is the feature catalog + UI rules behind it.
-> **Approach:** Build on infrastructure we already run (Postgres) instead of adding a dedicated analytics engine.
-> **Out of scope:** Session replay, heatmaps, and AI anomaly detection (see §4).
-
----
-
-## 1. Method (the short version)
-
-Every metric belongs to one of three tiers:
+> Status: as-built · Last verified: 2026-11-15
 
-| Tier | What it means | New infrastructure |
-|------|---------------|--------------------|
-| **A** | Already stored in existing Postgres tables (`users`, `user_organizations`, `trail_runs`, `trail_steps`, `courses`, payments…) | **None** — just SQL |
-| **B** | Behavioral events (page views, clicks, dwell time) written to **one** new `analytics_events` table in Postgres | **One table** |
-| **C** | Errors / crashes | **None** — already handled by `@sentry/nextjs` |
-
-Rendering is **our own** — reusable chart/table components querying our own API. No third-party dashboard, no external event engine.
+# Analytics Overview
 
-> **Why not PostHog / Tinybird self-hosted:** both need ~8–16 GB RAM and ~100 GB storage (ClickHouse + Kafka / ClickHouse + region container). That is the same weight class and is rejected — see §5.
+The analytics area is a seven-tab dashboard that reads behavioural events and learning records from PostgreSQL and renders charts and tables with in-house components.
 
----
+## Tabs
 
-## 2. ✅ Core metrics we will build
+| Tab | Scope | Question it answers |
+|---|---|---|
+| Overview | Org-wide | Is the platform healthy right now? |
+| Learning | Org-wide | Are learners using the content? |
+| Audience | Org-wide | Where does traffic come from? |
+| Learners | Org-wide | What is one specific user doing? |
+| Courses | One course | How is this course doing? |
+| Podcasts | One podcast | Is anyone listening? |
+| Community | One community | Is the community alive? |
 
-Grouped by area. Every row here is achievable with the method above.
+Overview, Learning and Audience carry no entity filter. Courses, Podcasts and Community each put their own selector in the shared action row; Learners has a search field. The range selector offers `7d`, `30d`, `90d` and `12m`; `12m` buckets by calendar month and the others by day.
 
-### 2.1 Traffic & Audience
-
-| Metric | Example question | Source | Tier |
-|--------|------------------|--------|------|
-| Pageviews & unique visitors | "How many saw the course page?" | `analytics_events` (`page_view`) | B |
-| New vs returning | "Fresh or repeat visitors?" | `analytics_events` (visitor id) | B |
-| Referrer / source | "Google or Instagram?" | `analytics_events.referrer` | B |
-| UTM campaigns | "Which ad drove signups?" | `analytics_events.properties.utm_*` | B |
-| Device / browser / OS | "% on mobile?" | parsed user-agent on `analytics_events` | B |
-| Real-time active users | "Who's on right now?" | recent `analytics_events` | B |
-| DAU / WAU / MAU | "Active this month?" | distinct users per period from events | B |
+## Data sources
 
-### 2.2 Signups & Onboarding
+| Source | Used for |
+|---|---|
+| `analytics_events` | Page views, course views, activity views, time on activity, searches, signups, completions, discussion posts |
+| `trail_runs`, `trail_steps` | Enrollments, completions, active learners, progress distribution |
+| `course`, `chapter`, `activity` | Course and lesson names, lesson counts, content type |
+| `user`, `user_organizations` | Learner identity, role, join date, status |
+| `podcast`, `podcastepisode` | Episode lists, durations, completion |
+| Community tables | Discussions, comments, labels and contributors |
 
-| Metric | Example question | Source | Tier |
-|--------|------------------|--------|------|
-| Signups per day / org | "How many joined this week?" | `users`, `user_organizations` | A |
-| Email-verified rate | "How many verified?" | `users.email_verified` | A |
-| Visit → signup conversion | "200 visitors → 12 signups" | events ⋈ `users` | B |
+The org-wide tabs query PostgreSQL directly. Tinybird still receives a copy of frontend events for the legacy per-course suite, but it is no longer the read source for this area.
 
-### 2.3 Money (highest priority)
+## Event ingestion
 
-| Metric | Example question | Source | Tier |
-|--------|------------------|--------|------|
-| Checkout started | "How many began buying?" | `analytics_events` (`checkout_started`) | B |
-| Sales / completed orders | "How many bought?" | payments (Chargily) | A |
-| Payment success / fail | "How many payments failed?" | payments / webhook result | A |
-| Revenue per day/week/month (DZD) | "How much did we earn?" | payments | A |
-| Revenue per course / org / teacher | "Which course earns most?" | payments joined | A |
-| View → purchase conversion | "How many browsers became buyers?" | events ⋈ payments | B |
-| AOV / ARPU | "Average order value?" | payments | A |
-| Refunds | "How much refunded?" | payments | A |
-| Gateway fees | "What did Chargily take?" | payments | A |
-| Failed-payment reasons | "Why do payments fail?" | `analytics_events.properties.error` | B |
+`POST /api/v1/analytics/events` accepts a whitelisted frontend event: `page_view`, `course_view`, `activity_view`, `search_query` and `time_on_activity`. The caller must be a member of the target organization. The endpoint:
 
-### 2.4 Learning Engagement
+1. Rejects unknown event names with `400`.
+2. Clamps `seconds_spent` to a positive value of at most four hours.
+3. Adds `country_code` from `cf-ipcountry` or `x-country-code` when present.
+4. Writes one row through `record_event`, which parses device and browser from the user agent.
+5. Mirrors the event to Tinybird when a Tinybird configuration exists.
 
-| Metric | Example question | Source | Tier |
-|--------|------------------|--------|------|
-| Enrollments | "How many enrolled?" | `trail_runs` | A |
-| Course starts | "How many began?" | `trail_runs` | A |
-| Activities completed | "Lessons finished?" | `trail_steps` | A |
-| Completion rate per course | "% who finished?" | `trail_steps` / `trail_runs` | A |
-| Time on activity | "How long on lesson 3?" | `analytics_events` (`time_on_activity`) | B |
-| Avg session duration | "How long is a visit?" | `analytics_events` sessions | B |
+API-side events (enrolment, completion, certificate, discussion) are written server-side by their services.
 
-### 2.5 Retention & Value
+## UI building blocks
 
-| Metric | Example question | Source | Tier |
-|--------|------------------|--------|------|
-| Churn (paid but inactive) | "Who paid then stopped?" | payments ⋈ activity | A |
-| Repeat purchases | "Bought twice?" | payments | A |
-| Lifetime value (LTV) | "Value per user?" | payments aggregate | A |
+| Component | Role |
+|---|---|
+| `TrendChart` / `BarsChart` / `RankedBars` | Time series, vertical bars and horizontal rankings |
+| `BreakdownList` / `FunnelSteps` | Distributions and funnels |
+| `DataTable` | Column-driven table, server-paginated where needed |
+| `TabCard` | Maps a card payload `kind` onto the right component |
+| `SectionCard` / `ChartCard` | White card shells with uppercase titles |
+| `AnalyticsToolbar` / `FilterSelect` / `SearchInput` | Shared action row, entity selectors and search |
+| `useChartTheme()` | Chart colours from the live theme |
 
-### 2.6 Content Quality
+Each tab body is pure layout over `useAnalyticsTab(tab, range, entity, extra)`. Entity options come from `useOrgCourses`, `useOrgPodcasts` and `useOrgCommunities`; there is no mock dataset.
 
-| Metric | Example question | Source | Tier |
-|--------|------------------|--------|------|
-| Top / least popular courses | "Which is loved?" | views + enrollments | A |
-| Completion funnel per course | "Where do learners quit?" | `trail_steps` | A |
-| Search queries | "What are they searching?" | `analytics_events` (`search_query`) | B |
-| Searches with no results | "What can't they find?" | `analytics_events` (result count) | B |
-| Content type effectiveness | "Video vs quiz?" | `trail_steps` by type | A |
+## Access
 
-### 2.7 Per-org / Multi-tenant / Payouts
+`GET /analytics/tabs/{tab}` requires organization membership and an organization admin role. In SaaS mode it also requires a Standard plan or higher and answers `403` otherwise; OSS and EE deployments bypass the plan check. The frontend `PlanRestrictedFeature` wrapper is transparent, so the backend check is the real gate. Revenue is not part of this area; it lives in [Payments → Overview](../payments/overview.md).
 
-| Metric | Example question | Source | Tier |
-|--------|------------------|--------|------|
-| Per-org users / revenue / enrollments | "How is org X doing?" | filtered by `org_id` | A |
-| Org growth over time | "Is this org growing?" | `user_organizations` | A |
-| Teacher gross → fees → net → 40/60 | "What does teacher Y get?" | payments + split logic | A |
-| Active teachers | "Who's publishing?" | courses/authors | A |
+## Not built
 
-### 2.8 User-level views
+- Session replay, click maps and scroll heatmaps.
+- AI anomaly detection or generated insights.
+- A cross-organization platform analytics view for superadmins.
+- Revenue per teacher or refund analysis inside Analytics.
 
-| Metric | Example question | Source | Tier |
-|--------|------------------|--------|------|
-| A user's activity history | "What did this learner do?" | `analytics_events` by user | B |
-| A user's progress / courses | "Where are they stuck?" | `trail_runs` / `trail_steps` | A |
+## Related
 
-### 2.9 Product health
-
-| Metric | Example question | Source | Tier |
-|--------|------------------|--------|------|
-| Frontend errors + stack traces | "What's crashing?" | **Sentry** (already installed) | C |
-| Failed API calls | "Which endpoint errors?" | API logs | A |
-| Payment failures | "Gateway errors?" | payments | A |
-
----
-
-## 3. ⚠️ Deferred — low priority (build later or skip)
-
-These are **possible** with the same method but need extra plumbing (geo lookups, session grouping, precomputed rollups). **Treat as last priority.** We revisit only after the ✅ set is live.
-
-| Metric | Why deferred |
-|--------|--------------|
-| Country / geography | needs a MaxMind (or similar) IP→country lookup, plus a data file we must keep updated |
-| Bounce rate & exit pages | needs session boundaries inferred from events |
-| Signup funnel step-by-step drop-off | funnel-over-events, needs ordered-step logic |
-| Drop-off per lesson | needs per-learner progression precompute over `trail_steps` |
-| Return rate (1 / 7 / 30-day) | cohort SQL — must be precomputed to be fast |
-| Cohort retention tables | same — a daily rollup job |
-| Web Vitals / slow pages | better served by Sentry/RUM than by DIY capture |
-
-> **Decision rule:** if it needs a nightly rollup job or an external data file, it goes here until the core is done.
-
----
-
-## 4. ❌ Out of scope (won't build)
-
-| Feature | Why |
-|---------|-----|
-| Session replay | heavy storage + records protected course content (conflicts with the video-DRM/privacy rule) |
-| Click / scroll heatmaps | needs coordinate capture + a rendering layer; low value vs effort |
-| AI anomaly detection / "insights" | needs a real ML pipeline |
-| Feature-flag / A-B platform | not an analytics need; a *light* per-user variant flag in Postgres is possible later if wanted |
-
----
-
-## 5. Rejected tools (and why)
-
-| Tool | Verdict | Reason |
-|------|---------|--------|
-| **PostHog** | ❌ Rejected | ~8 GB+ RAM, 4 cores, 50 GB, Kafka + ClickHouse; session replay leaks paid content |
-| **Tinybird self-managed** | ❌ Rejected | 4 vCPU / **16 GB** RAM / 100 GB ClickHouse + 10 GB Redis — same weight class as PostHog |
-| **Tinybird Cloud (current)** | 🟡 Optional | costs ~0 local resources, but events leave the infra (violates the self-host rule) — keep only as an optional mirror |
-| **Umami / Plausible CE / Matomo** | 🟡 Optional | fine for traffic only; weak on custom **money/product** events, which is our priority |
-| **ClickHouse self-hosted** | ⏳ Future escape hatch | ~2–4 GB; drop-in replacement for `analytics_events` **only if** Postgres stops keeping up |
-
----
-
-## 6. UI — Analytics area
-
-**Approach:** the Analytics area behaves like every other dashboard section — a **pill sub-navigation of tabs**, each tab built from **section cards** (white `rounded-xl border shadow-sm`, 13px uppercase gray-500 titles). A **date-range action row** sits above the content. Charts and tables are **reusable our-own components**.
-
-**Layout rules** (12-column grid, top-to-bottom hierarchy):
-
-- **Charts first — no KPI stat cards.** Stat cards are a *home page* pattern; inside an analytics tab they repeat one number each. Single numbers belong in the **card header** instead.
-- **12-column grid** with `items-start`: one full-width hero per view, then 2-up rows.
-- **One card = one question.** Features that answer the same question share one card.
-- **Small component vocabulary:** (a) **bar chart** — vertical for short labels, horizontal for long labels (course names); (b) **trend chart** (line/area) for anything over time; (c) **data table** for detail rows. Other chart types are avoided unless they earn their place.
-- **No entity filter in the global bar.** The filter belongs to the tab that owns the entity (a Courses tab selects a course, a Podcasts tab selects a podcast, a Community tab selects a community).
-
-### Sub-tabs
-
-| # | Sub-tab | Scope | Core question it answers |
-|---|---------|-------|--------------------------|
-| 1 | **Overview** | Org-wide | "Is the platform healthy right now?" |
-| 2 | **Learning** | Org-wide | "Are learners using the content?" |
-| 3 | **Audience** | Org-wide | "Where does traffic come from?" |
-| 4 | **Learners** | Org-wide (search) | "What is this specific user doing?" |
-| 5 | **Courses** | Select a course | "How is this course doing?" |
-| 6 | **Podcasts** | Select a podcast | "Is anyone listening?" |
-| 7 | **Community** | Select a community (+ table switch) | "Is the community alive?" |
-
-**"The entity owns its selector":** the org-wide tabs (Overview, Learning, Audience, Learners) carry no entity filter; **Courses**, **Podcasts** and **Community** each put their own selector in the shared action row.
-
-> **Revenue is not here.** Money is deep and audience-different (teachers, payouts, refunds, failures), so it is its own dashboard section — see [Revenue Analytics](../payments/revenue-analytics.md). The Revenue tab was **removed from the Analytics shell** for this reason.
-
-*(Optional future: **Platform** — superadmin only, compares all orgs. Open question: whether **Learning** merges into **Courses**, since both cover enrollments/completion.)*
-
-### Section cards per sub-tab
-
-**1. Overview** — org-wide, chart-only. Row 1 full width, then two 2-up rows.
-| Card | Content | Chart type |
-|------|---------|-----------|
-| Activity over time | Active learners + new signups | Trend (area) |
-| Enrollments over time | Enrollments per period | Bar |
-| Enrollment by stage | View → enroll → start → complete | Bar (ordered) |
-| Top courses | Ranked by enrollments | Horizontal bar |
-| Completion by course | Completion rate per course | Horizontal bar |
-
-**2. Learning**
-| Card | Content | Chart type |
-|------|---------|-----------|
-| Completion by course | Per-course completion rate | Bar |
-| Lesson drop-off | Where learners quit | Bar (ordered) |
-| Time on activity | Minutes per activity | Bar |
-| Content type effectiveness | Video vs quiz vs reading | Bar |
-
-**3. Audience**
-| Card | Content | Chart type |
-|------|---------|-----------|
-| Traffic over time | Visits/pageviews | Trend |
-| Sources | Referrers / UTM | Bar |
-| Devices | Desktop / mobile / tablet | Bar (share %) |
-| Top pages | Most-viewed pages | Table |
-
-**4. Learners**
-| Card | Content | Chart type |
-|------|---------|-----------|
-| Search + filters | Find a user (name / username / email) | Controls |
-| Learners table | Name · Username · Email · Role · Status · Joined (+ a row action) | Table (server-side paginated) |
-| User detail (drill-in) | Role · Status · Joined · Last active + per-course progress | Dialog |
-
-> No money column: spend/orders are not part of Analytics (see §6 note on Revenue).
-
-**5. Courses** — course-scoped (selector in the action row)
-| Card | Content | Chart type |
-|------|---------|-----------|
-| Enrollments over time | New enrollments + active learners | Trend (area) |
-| Completion funnel | Enrolled → started → halfway → completed (no "certified" — the certificate table is EE-only, not in this checkout) | Bar |
-| Learner progress | Progress distribution (0–25 … 75–100%) | Bar |
-| Lesson drop-off | Views per lesson | Horizontal bar |
-| Time per lesson | Avg minutes per lesson | Horizontal bar |
-| Students | Learner · enrolled · progress · status | Table |
-
-**6. Podcasts** — podcast-scoped (selector in the action row)
-| Card | Content | Chart type |
-|------|---------|-----------|
-| Listening over time | Episode starts + completions | Trend (area) |
-| Episode plays | Plays per episode | Horizontal bar |
-| Episode completion | Completion % per episode | Horizontal bar |
-| Episode length vs listened | Minutes, grouped | Bar |
-| Series progress | How far listeners get | Bar |
-| Episodes | Episode · status · duration · plays · completion | Table |
-
-**7. Community** — community-scoped (selector + cycle button in the action row)
-| Card | Content | Chart type |
-|------|---------|-----------|
-| Activity over time | Discussions + comments | Trend (area) |
-| Discussions by label | General / Q&A / Ideas / Show & Tell / Announcements | Bar |
-| Detail table (swaps) | Contributors · Top discussions · Unanswered — swapped by the cycle button | Table |
-
-### Shared UI pieces
-
-**Component library — built & locked** (live in `apps/web/components/Analytics/`):
-- `TrendChart` — area/line over time · `BarsChart` — vertical bars, single or grouped (long category labels truncate with `…` so they can't break the axis) · `RankedBars` — horizontal bars / top-N (label column auto-sized to the data, blank-row fallback so an empty card keeps its frame) · `BreakdownList` — distribution · `FunnelSteps` — conversion funnel (kept in the library; unused)
-- `DataTable` — sortable, fully column-driven (avatar cells, status dots, dates, mono paths, signed deltas, action cells all via `render`). **No in-table title** — the `SectionCard` owns it; uniform `px-6` gutters. Rows render in full by default; a tab that needs many rows (Learners) paginates **server-side** and reports `page` / `pageSize` / `total` on the card.
-- `TabCard` — **the single place that maps an API card to a component**: `kind` → `TrendChart` / `BarsChart` / `RankedBars` / `DataTable`, plus the `variant` → cell-renderer mapping (`mono`, `delta`, `percent`, `person`, `username`, `status`, `date`) and the optional `actionsColumn`. This is why each tab body is pure layout.
-- `SectionCard` / `ChartCard` — the white card shells (13px uppercase gray-500 titles). `SectionCard` has a **`bleed`** mode for tables: drops the horizontal padding so rows hover edge-to-edge.
-- `AnalyticsToolbar` — the shared action row (date range on the right, tab controls on the left)
-- `FilterSelect` — the entity selector used by the Courses / Podcasts / Community tabs: a filter-icon trigger + the platform's **card-styled dropdown menu** (no native `<select>` popup)
-- `SearchInput` — the Learners search field (Users/Contributors styling)
-- `DeltaBadge` (arrow + colored value, no pill) · `EmptyState` / `Skeleton` / `ChartSkeleton` (states)
-- `useChartTheme()` — reads live `:root` CSS vars; categorical series use the platform palette (`#6b8de3 · #818cf8 · #a78bfa · #c4b5fd`)
-- `StatCard` — kept for the **dashboard home**; never used inside analytics tabs
-
-**Assembled tabs** (live in `apps/web/components/Dashboard/Analytics/`):
-- `AnalyticsTabs` — the pill-tab shell (page title · pill tab bar · shared action row), same pattern as the dashboard settings pages; 7 tabs, each owning its selector when it has an entity
-- `tabs/OverviewTab` · `tabs/LearningTab` · `tabs/AudienceTab` · `tabs/LearnersTab` · `tabs/CoursesTab` · `tabs/PodcastsTab` · `tabs/CommunityTab` — each is pure grid layout over `useAnalyticsTab(tab, range, entity, extra)`
-- The data layer lives in `apps/web/services/analytics/tabs.ts`: the SWR hook, the card/column types, `useLearnerDetail`, and the real entity-option hooks (`useOrgCourses` / `useOrgPodcasts` / `useOrgCommunities`) that fill the action-row filters from the org rather than a fixture. There is **no mock dataset left**.
-
----
-
-## 7. `analytics_events` (Tier B)
-
-The table exists and is written on every frontend event. The authoritative schema, the indexes, the event whitelist and the per-event `properties` contract live in [implementation-plan.md §3](./implementation-plan.md) — kept in one place so the two docs can't drift apart.
-
-Ingestion goes through the existing FastAPI (validated against the `event_name` whitelist in `apps/api/src/services/analytics/events.py`), dual-written to Postgres (`services/analytics/store.py`) and to Tinybird (which still feeds the legacy per-course suite). Queries are SQL, cached in Redis for 60 s.
-
----
-
-## 8. Related
-
-- [Implementation Plan](./implementation-plan.md) — the frozen build contract: API surface, event schema, and the per-card metric map
-- [PostHog Integration Plan](./posthog-integration-plan.md) — **rejected**; kept for the record
-- [Payments — Overview](../payments/overview.md) — payment/order data source
-- [Revenue Analytics](../payments/revenue-analytics.md) — the separate Revenue dashboard section (money moved out of Analytics)
-- [Data Model](../../02-architecture/data-model.md) — core entities
+- [Analytics API reference](../../06-api-reference/analytics.md)
+- [Analytics admin guide](../../04-admin-guide/analytics.md)
+- [Payments overview](../payments/overview.md)

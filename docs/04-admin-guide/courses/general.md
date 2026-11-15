@@ -1,159 +1,73 @@
+> Status: as-built · Last verified: 2026-11-15
+
 # General Settings
 
-> Configuring the basic information of your course.
+The General tab holds the course's public-facing text, media, catalogue details and instructor list. It edits one locale at a time: the dashboard language switcher decides whether the source row or a translation row is being edited.
 
----
+## Action row
 
-## Fields
+| Control | Behaviour |
+|---|---|
+| Preview | Opens the learner-facing course page in a new tab |
+| Save | Flushes pending edits; disabled and labelled Saved when there is nothing to save |
+| Publish / Unpublish | Toggles the course's published state for every locale |
 
-### Course Name
+In the source locale edits are held in the course editor after a short debounce and written when Save is pressed. In a translation locale the Save button writes the translation explicitly.
 
-The title displayed to learners. Required.
+## Overview fields
 
-### Description
+| Field | Rules and effect |
+|---|---|
+| Name | Required, maximum 100 characters |
+| Description | Required, maximum 1,000 characters; one-line input used on cards |
+| About | Long description shown on the course page |
+| What you will learn | Required list; at least one non-empty item |
+| Requirements | Optional list of prerequisites |
+| Audience — for | Optional list of who the course is for |
+| Audience — not for | Optional list of who it is not for |
 
-A short description of the course. Displayed on the course detail page.
+The list editors add and remove items. Only the learnings list has a minimum item rule.
 
-### Difficulty
+## Media
 
-Three levels available in the source locale:
-- **Beginner** --- No prior knowledge required
-- **Intermediate** --- Some prior knowledge helpful
-- **Advanced** --- In-depth, expert-level content
+| Field | Effect |
+|---|---|
+| Card cover | Thumbnail on course cards and search results |
+| Banner | Hero image on the course detail page |
 
-Selected via the field-style select (`@/components/ui/select-field`), whose trigger matches the surrounding inputs (same background, border, height; one chevron; no blue open ring).
+Both accept JPG, PNG or JPEG files up to 8 MB. An empty field offers an upload button; once an image is set, the same row offers a trash button to remove it. Media is shared by every locale.
 
-In a **non-source locale** the difficulty is a free-text input instead: the label itself is translatable content, so translators are not limited to the three built-in levels.
+## Details
 
-### Duration
-
-Free text describing the expected time commitment (e.g. `8 weeks`, `12 hours`). Shown next to the difficulty on course cards and on the course page, translated per locale.
-
-### Requirements
-
-A list of prerequisites, stored as JSON items (`{ id, text, emoji }`) inside `extra_metadata.requirements`. Rendered as a bullet list under the course page's "Requirements" section, translated per locale.
-
-### Media Section
-
-The course media section provides two image fields inside a dedicated white card:
-
-```
-┌───────────────────────────────────────────────────────────────┐
-│ [ImageIcon]  Card Cover Image                   [UploadCloud] │
-│                                                     or        │
-│                                              [Trash2] (delete) │
-│                                                               │
-│ [ImageIcon]  Banner Image (Hero)                [UploadCloud] │
-│                                                     or        │
-│                                              [Trash2] (delete) │
-└───────────────────────────────────────────────────────────────┘
-```
-
-**Card Cover Image** (`thumbnail_image`) — The course thumbnail displayed on course cards in listing pages, search results, and trail pages. Supported formats: JPG, PNG. Max file size: 8MB.
-
-**Banner Image** (`banner_image`) — The hero banner displayed at the top of the course detail page (spans the full content width, matching the left content column + right sidebar combined width). Supported formats: JPG, PNG. Max file size: 8MB.
-
-**States (applies to both fields):**
-
-- **No image:** Shows an UploadCloud icon button. Clicking it opens a file picker (JPG/PNG only, max 8MB).
-- **Has image:** Shows the current image as a thumbnail preview alongside a Trash2 icon button. Clicking Trash2 deletes the image.
-- **Loading:** The action icon is replaced by a small spinning circle (same 18px size), shown per field.
-
-**Upload flow:**
-
-1. Click the upload icon to pick a file from device
-2. File is validated client-side (type + size)
-3. Uploaded via `FormData` to the appropriate API endpoint
-4. On success, CourseContext dispatches the updated course (via `{ type: 'updateField', payload: { field: 'thumbnail_image' or 'banner_image', value: url } }`), SWR cache revalidates via `revalidateTags` + `mutate`, and `router.refresh()` triggers server re-render
-5. Click the trash icon to delete — sends `DELETE` to the appropriate endpoint, same revalidation flow
-6. On error, toast shows the failure reason
-
-**Backend endpoints:**
-
-| Method | Path | Purpose |
-|--------|------|---------|
-| PUT | `/api/v1/courses/{course_uuid}/thumbnail` | Upload card cover image |
-| DELETE | `/api/v1/courses/{course_uuid}/thumbnail` | Remove card cover image |
-| PUT | `/api/v1/courses/{course_uuid}/banner` | Upload banner image |
-| DELETE | `/api/v1/courses/{course_uuid}/banner` | Remove banner image |
-
-**Frontend services:**
-
-- `updateCourseThumbnail(course_uuid, file, access_token)` — Uploads card cover
-- `deleteCourseThumbnail(course_uuid, access_token)` — Deletes card cover
-- `updateCourseBanner(course_uuid, file, access_token)` — Uploads banner
-- `deleteCourseBanner(course_uuid, access_token)` — Deletes banner
-
-### Offers Certificate
-
-A toggle switch to enable/disable certificate issuance for course completion.
-
-### Categories
-
-Optional categories for organizing courses on the platform.
-
----
-
-## Editing a translation
-
-The General tab edits **one locale at a time**. A locale switcher at the top of the tab selects the language, and a chip shows whether the current locale is the **source** or a **translation** (or **missing**, when no translation row exists yet).
-
-| Field group | Source locale | Translation |
+| Field | Effect | Translation behaviour |
 |---|---|---|
-| Name, description, about, learnings | edit directly on the course row | stored in `course_translation` |
-| Difficulty | three-level select | free-text input |
-| Duration, requirements | edit directly | stored in `course_translation.extra_metadata` |
-| Video hours, resources, certificate toggle, instructor | editable | **read-only** — shared by every locale |
+| Difficulty | Beginner, Intermediate or Advanced in the source locale | Free text in a translation |
+| Duration | Free text such as `8 weeks` or `12 hours` | Translated |
+| Video hours | Free-text figure shown in course details | Shared, read-only |
+| Resources count | Free-text figure shown in course details | Shared, read-only |
+| Offers certificate | Enables the certificate claim for the course | Shared, read-only |
 
-The action row also exposes **Copy from source**, which creates/overwrites the translation with the source text in one click. Saving a translation revalidates the `courses` cache so learner pages pick up the change immediately.
+## Instructors
 
----
+Instructors are repeatable cards stored in `extra_metadata.instructors` as `{name, title, avatar}`. Each card has name and title side by side, a photo area and, in the source locale, a remove button.
 
-## Action Row
+- **Add instructor** appends an empty card.
+- **Upload photo** accepts JPG, PNG or WebP and stores it with the card.
+- In a translation locale only name and title are editable; the number of cards and the photos are inherited from the source row.
+- Source-locale rows without a name are discarded on save.
 
-Above the sectioned cards, there is an inline **action row**:
+## Translating the tab
 
-```
-[👁 Preview]                    [Save] [Publish/Unpublish]
-```
+When the dashboard language is not the course's source locale:
 
-- **Preview** (left) — opens the course page in a new tab as a user would see it. Links to the public course URL (strips the `course_` prefix from the UUID).
-- **Save** (right) — white background when saved, black background when unsaved changes exist. Clicking saves all pending changes immediately. Not clickable when already saved.
-- **Publish/Unpublish** (right) — toggles the course published state with confirmation toast feedback.
+- Name, description, about, learnings, difficulty, duration, requirements and audience are written to the translation row.
+- Video hours, resources count and the certificate toggle stay source-only and are shown disabled.
+- Instructor names and titles are stored index-aligned with the source list; blank fields fall back to the source text and every locale reuses the source avatar.
+- **Copy from source** fills the form with the source text without saving. Review and translate it, then press Save.
+- A missing translation shows an inherited-text notice.
 
-## UI Pattern
+## Related
 
-The General tab uses **sectioned white cards** on a light grey background:
-
-```
-┌─────────────────────────────────────┐
-│  Page background: #f8f8f8           │
-│                                     │
-│  ┌─── White Card ─────────────────┐ │
-│  │  SECTION TITLE                 │ │
-│  │                                │ │
-│  │  Field label                   │ │
-│  │  ┌──────────────────────────┐  │ │
-│  │  │ Input field (bg-ui-bg)   │  │ │
-│  │  └──────────────────────────┘  │ │
-│  │                                │ │
-│  │  Field label                   │ │
-│  │  ┌──────────────────────────┐  │ │
-│  │  │ Input field (bg-ui-bg)   │  │ │
-│  │  └──────────────────────────┘  │ │
-│  └────────────────────────────────┘ │
-│                                     │
-│  ┌─── White Card ─────────────────┐ │
-│  │  NEXT SECTION                  │ │
-│  │  ...                           │ │
-│  └────────────────────────────────┘ │
-└─────────────────────────────────────┘
-```
-
-### Field Styling
-
-Fields use a consistent class pattern:
-```css
-bg-ui-bg-field !shadow-none border border-ui-border-base
-focus:border-ui-border-strong focus-visible:!shadow-none transition-none
-```
+- [Translations](./translations.md)
+- [Access control](./access.md)
+- [SEO](./seo.md)

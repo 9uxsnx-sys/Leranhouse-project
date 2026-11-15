@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict, Any
-from sqlalchemy import Column, ForeignKey, Index, Integer, Text, JSON
+from sqlalchemy import Column, ForeignKey, Index, Integer, String, Text, JSON
 from sqlmodel import Field, SQLModel
 
 
@@ -29,16 +29,22 @@ class CommunityBase(SQLModel):
 class Community(CommunityBase, table=True):
     __table_args__ = (
         Index("ix_community_org_id", "org_id"),
-        Index("ix_community_course_id", "course_id"),
+        Index("ix_community_resource_uuid", "resource_uuid", unique=True),
         Index("ix_community_org_public_published_created", "org_id", "public", "published", "creation_date"),
     )
     id: Optional[int] = Field(default=None, primary_key=True)
     org_id: int = Field(
         sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"))
     )
-    course_id: Optional[int] = Field(
+    # A community is an add-on, never a standalone product: it is attached to
+    # exactly one course or podcast and inherits that resource's access rules.
+    resource_uuid: Optional[str] = Field(
         default=None,
-        sa_column=Column(Integer, ForeignKey("course.id", ondelete="SET NULL"))
+        sa_column=Column(String(length=255), nullable=True, index=False),
+    )
+    resource_type: Optional[str] = Field(
+        default=None,
+        sa_column=Column(String(length=20), nullable=True),
     )
     community_uuid: str = Field(default="", index=True)
     # The base row holds the source-locale content; other locales live in
@@ -54,7 +60,8 @@ class Community(CommunityBase, table=True):
 
 class CommunityCreate(CommunityBase):
     org_id: int = Field(default=None, foreign_key="organization.id")
-    course_id: Optional[int] = Field(default=None, foreign_key="course.id")
+    resource_uuid: Optional[str] = None
+    resource_type: Optional[str] = None
 
 
 class CommunityUpdate(SQLModel):
@@ -71,7 +78,8 @@ class CommunityUpdate(SQLModel):
 class CommunityRead(CommunityBase):
     id: int
     org_id: int = Field(default=None, foreign_key="organization.id")
-    course_id: Optional[int] = Field(default=None, foreign_key="course.id")
+    resource_uuid: Optional[str] = None
+    resource_type: Optional[str] = None
     community_uuid: str
     # Localization state, filled by the translations service on read.
     source_locale: str = "en"

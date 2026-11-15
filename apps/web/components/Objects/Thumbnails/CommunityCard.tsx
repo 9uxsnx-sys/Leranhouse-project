@@ -11,8 +11,7 @@ export interface CommunityCardProps {
   description: string
   org_uuid?: string
   community_uuid: string
-  course_id: number | null
-  public: boolean
+  resource_type?: 'course' | 'podcast' | null
   creation_date: string
   thumbnail_image?: string | null
   href?: string
@@ -35,16 +34,21 @@ function formatRelativeDate(dateStr: string, locale: string) {
   }
 }
 
-export function CommunityCard({ id, title, description, org_uuid, community_uuid, course_id, ...props }: CommunityCardProps) {
+export function CommunityCard({ id, title, description, org_uuid, community_uuid, resource_type, ...props }: CommunityCardProps) {
   const { t, i18n } = useTranslation()
   const imageUrl = props.thumbnail_image && org_uuid
     ? getCommunityThumbnailMediaDirectory(org_uuid, community_uuid, props.thumbnail_image)
     : ''
 
-  // Course-linked vs general, access mode and age are UI labels, not content.
+  // Communities are add-ons: the first label tells which product they follow.
+  const linkedLabel =
+    resource_type === 'course'
+      ? t('communities.linked_course')
+      : resource_type === 'podcast'
+        ? t('communities.linked_podcast')
+        : t('communities.not_linked')
   const meta = [
-    course_id ? t('communities.linked_course') : t('communities.general'),
-    props.public ? t('communities.public') : t('communities.private'),
+    linkedLabel,
     formatRelativeDate(props.creation_date, i18n.language),
   ].filter(Boolean)
 

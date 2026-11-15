@@ -1,25 +1,31 @@
 # Backend Architecture Overview
 
-> The FastAPI backend is the core of the LearnHouse platform, providing a RESTful API organized in a three-layer architecture: routers → services → database models.
+> Status: as-built · Last verified: 2026-11-15
+
+> The FastAPI backend is the core of LearnHouse. It exposes a REST API under `/api/v1` and is organized as routers → services → database models.
 
 ---
 
 ## Technology Stack
 
-| Component | Technology | Version |
-|-----------|-----------|---------|
-| Framework | FastAPI | 0.136.1 |
-| Language | Python | 3.14.3 |
-| ORM | SQLModel | 0.0.38 |
-| Database | PostgreSQL | 16 (with pgvector) |
-| Migrations | Alembic | 1.18.4 |
-| Password Hashing | pwdlib (Argon2) | — |
-| JWT | PyJWT | — |
-| Redis | redis-py | — |
-| Package Manager | uv | — |
-| Testing | pytest | — |
+Versions come from `apps/api/pyproject.toml`:
 
-The backend lives in `apps/api/` within the monorepo and serves as the single source of truth for all data operations, authentication, authorization, content delivery, and business logic.
+| Component | Dependency | Version |
+|-----------|------------|---------|
+| Framework | `fastapi` | 0.136.1 |
+| Language | Python (`requires-python`) | >=3.14.3,<3.14.4 |
+| ORM | `sqlmodel` | 0.0.38 |
+| Migrations | `alembic` | 1.18.4 |
+| Password hashing | `pwdlib[argon2]` | 0.3.0 |
+| JWT | `pyjwt[crypto]` | 2.12.1 |
+| Redis client | `redis` | 7.4.0 |
+| Server | `uvicorn` | 0.46.0 |
+| Database driver | `psycopg2-binary` | 2.9.12 |
+| Embeddings | `pgvector` | 0.4.2 |
+| Testing | `pytest` | 9.0.3 |
+| Package manager | `uv` (`uv.lock`) | — |
+
+The dev CLI starts PostgreSQL as `pgvector/pgvector:pg16` (see [project structure](../project-structure.md)). S3 access uses `boto3`/`botocore`; email uses `resend` or SMTP; AI uses `google-genai`.
 
 ---
 
@@ -27,192 +33,144 @@ The backend lives in `apps/api/` within the monorepo and serves as the single so
 
 ```
 apps/api/
-├── app.py                 # FastAPI application entrypoint
-├── cli.py                 # Typer CLI for installation
-├── alembic.ini            # Alembic configuration
-├── pyproject.toml         # Python dependencies & project metadata
+├── app.py                  # FastAPI application entrypoint
+├── cli.py                  # Typer installer CLI
+├── alembic.ini
+├── pyproject.toml
 ├── config/
-│   └── config.py          # Configuration loading (LearnHouseConfig)
-├── migrations/            # Alembic migration scripts
-│   ├── env.py             # Alembic environment (dynamic model import)
-│   └── versions/          # Individual migration files
-├── scripts/
-│   └── migrate.py         # Data migration utility (roles, org configs)
+│   ├── config.py           # LearnHouseConfig loading (env → YAML)
+│   └── config.yaml         # Defaults / local development values
+├── migrations/             # Alembic env.py + versions
+├── scripts/migrate.py      # Data migration utility
 └── src/
-    ├── api/               # (legacy, unused — routers live in src/routers/)
     ├── core/
-    │   ├── events/
-    │   │   ├── events.py      # Startup/shutdown lifecycle
-    │   │   └── database.py    # Database engine & session management
-    │   ├── middleware/
-    │   │   └── cors.py        # Tenancy-aware CORS configuration
-    │   └── ee_hooks.py        # Enterprise Edition hook points
-    ├── db/                    # SQLModel database models
-    ├── routers/               # FastAPI route handlers
-    ├── security/              # Authentication & authorization
-    │   ├── auth.py            # JWT auth, API token validation
-    │   ├── security.py        # Password hashing
-    │   ├── rbac/              # Role-based access control
-    │   ├── org_auth.py        # Organization-level auth helpers
-    │   ├── superadmin.py      # Superadmin checks
-    │   ├── api_token_utils.py # API token rejection utilities
-    │   └── features_utils/    # Plan-based feature gating
-    ├── services/              # Business logic layer
-    └── tests/                 # Test suite (conftest.py + router tests)
+    │   ├── events/         # startup/shutdown, DB engine, auto-install, logs
+    │   ├── middleware/cors.py
+    │   ├── deployment_mode.py  # saas / ee / oss detection
+    │   └── ee_hooks.py        # EE hook points
+    ├── db/                 # SQLModel models
+    ├── routers/            # Per-domain FastAPI routers
+    ├── router.py           # The single /api/v1 router
+    ├── security/           # auth, API tokens, CSRF helpers, RBAC, plan/feature gates
+    ├── services/           # Business logic
+    └── tests/              # pytest suite
 ```
+
+The Enterprise Edition code is **not** in this repository: it is overlaid at `apps/api/ee/` at build time and gitignored.
 
 ---
 
-## Application Entrypoint (`app.py`)
+## Application Entrypoint (`apps/api/app.py`)
 
-The FastAPI application is created in `apps/api/app.py` and follows this initialization sequence:
-
-1. **Configuration**: Loads `LearnHouseConfig` from environment variables
-2. **Sentry**: Initializes Sentry SDK if a DSN is configured (traces sample rate: 1.0 in dev, 0.1 in production)
-3. **FastAPI app**: Created with title, description, version `1.2.0`; Swagger docs only available in dev mode
-4. **Middleware stack**: CORS (tenancy-aware) → GZip (min 1KB) → EE middlewares
-5. **Lifecycle events**: Startup (DB connection, auto-install, periodic tasks) and shutdown (graceful cleanup)
-6. **Content routers**: S3-based content delivery or local file serving depending on configuration
-7. **API router**: Registers the `v1_router` with all domain routes
+1. `get_learnhouse_config()` runs at import time and loads `LearnHouseConfig`.
+2. Sentry is initialized only when `general_config.sentry_config.dsn` is set (`traces_sample_rate` 1.0 in development mode, else 0.1).
+3. The FastAPI app is created with `version="1.2.0"` and a **lifespan context manager** — not `add_event_handler`:
 
 ```python
-# Simplified from apps/api/app.py
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await startup_app(app)()
+    yield
+    await shutdown_app(app)()
+
 app = FastAPI(
     title=learnhouse_config.site_name,
+    description=learnhouse_config.site_description,
+    docs_url="/docs" if learnhouse_config.general_config.development_mode else None,
+    redoc_url="/redoc" if learnhouse_config.general_config.development_mode else None,
     version="1.2.0",
-    docs_url="/docs" if dev_mode else None,
+    lifespan=lifespan,
 )
-
-configure_cors(app)
-app.add_middleware(GZipMiddleware, minimum_size=1000)
-register_ee_middlewares(app)
-
-app.add_event_handler("startup", startup_app(app))
-app.add_event_handler("shutdown", shutdown_app(app))
-
-# Content delivery (S3 or local)
-if config.content_delivery.type == "s3api":
-    app.include_router(content_files_router)
-else:
-    app.include_router(local_content_router)
-
-app.include_router(v1_router)
 ```
+
+4. Middleware: `configure_cors(app)` → `GZipMiddleware(minimum_size=1000)` → `register_ee_middlewares(app)`.
+5. Content delivery: `content_files_router` when `hosting_config.content_delivery.type == "s3api"`, otherwise `local_content_router`.
+6. `app.include_router(v1_router)` plus a public `GET /` returning a welcome message.
+
+Swagger (`/docs`) and ReDoc (`/redoc`) are served **only in development mode**.
 
 ---
 
 ## Three-Layer Architecture
 
-### 1. Routers (Presentation Layer)
-
-Routers in `src/routers/` handle HTTP request/response concerns:
-- Input validation via Pydantic/SQLModel schemas
-- FastAPI dependency injection for auth, RBAC, database sessions
-- Route decoration with tags, prefixes, and dependency chains
-- Response serialization
-
-Routers should be thin — they delegate all business logic to the service layer.
-
-### 2. Services (Business Logic Layer)
-
-Services in `src/services/` contain all business logic:
-- CRUD operations with proper error handling
-- RBAC checks via `check_resource_access()`
-- Cross-cutting concerns (cache invalidation, webhook dispatch, analytics)
-- Complex operations like reordering, transfer, and migration
-
-Services accept `Request`, `Session`, and domain-specific parameters, and return Pydantic/SQLModel response objects.
-
-### 3. Database Models (Data Access Layer)
-
-SQLModel models in `src/db/` define:
-- Table schemas with column types, indexes, and foreign keys
-- Pydantic read/create/update schemas for API serialization
-- Enum types for constrained values (activity types, lock types, role types)
+| Layer | Location | Responsibility |
+|-------|----------|----------------|
+| Routers | `src/routers/` | HTTP concerns: input validation, dependency injection (auth, RBAC, DB session), response serialization. Kept thin. |
+| Services | `src/services/` | Business logic: CRUD, RBAC enforcement (`check_resource_access`), cache invalidation, webhooks, analytics. |
+| Models | `src/db/` | SQLModel tables plus read/create/update schemas and enums (access types, lock types, payment statuses…). |
 
 ---
 
 ## Configuration
 
-Configuration is loaded from environment variables via `LearnHouseConfig` in `config/config.py`. Key configuration groups:
+`config/config.py` merges environment variables over `config/config.yaml` into `LearnHouseConfig`:
 
-| Group | Purpose |
-|-------|---------|
-| `general_config` | Environment, dev mode, Sentry, log level |
-| `hosting_config` | Port, content delivery, cookie domain, CORS |
-| `security_config` | JWT secret key, allowed origins |
-| `redis_config` | Redis connection string |
-| `database_config` | SQL connection string |
+| Group | Fields (as-built) |
+|-------|-------------------|
+| `general_config` | `development_mode`, `sentry_config.dsn`, `saas_mode`, `env` |
+| `hosting_config` | `tenancy` (`multi`/`single`), `domain`, `frontend_domain`, `ssl`, `port`, `use_default_org`, `allowed_origins`, `allowed_regexp`, `self_hosted`, `cookie_config.domain`, `content_delivery` |
+| `security_config` | `auth_jwt_secret_key` only (required, min 32 chars) |
+| `database_config` | `sql_connection_string` |
+| `redis_config` | `redis_connection_string` |
+| `mailing_config` | `email_provider` (`resend`/`smtp`), system address and provider credentials |
+| `ai_config` | `gemini_api_key`, `is_ai_enabled` |
+| `payments_config` | Stripe keys (`stripe_secret_key`, publishable key, webhook/connect secrets, client id) |
+| `tinybird_config` | Optional; enabled when an API URL is set |
+| `judge0_config` | Optional; enabled when an API URL is set |
 
----
+CORS does **not** live in `security_config`: origins are `hosting_config.allowed_origins` / `allowed_regexp`. There is no log-level field in the config model.
 
-## Middleware Pipeline
-
-1. **CORS** — Tenancy-aware; single-tenant mode allows all origins, multi-tenant mode uses a regex whitelist
-2. **GZip** — Compresses responses over 1KB
-3. **EE Middlewares** — Enterprise Edition extensions (registered via hook)
-4. **Authentication** — Applied per-route via `Depends(get_current_user)`
-5. **RBAC** — Applied per-route via `Depends(require_read_access(...))` or called from services
-6. **Rate Limiting** — Applied to sensitive endpoints (login, refresh, email verification)
+**Tenancy** is a single `hosting_config.tenancy` knob. When unset, it is inferred: SaaS, or EE with a shared dotted cookie domain, on a real (non-localhost) domain and not marked self-hosted/dev → `multi`; anything else → `single`. `multi` requires EE or `LEARNHOUSE_SAAS=true` plus a routable domain.
 
 ---
 
 ## Deployment Modes
 
-### Single Tenancy (Self-Hosted)
+`src/core/deployment_mode.py` is the single source of truth, with priority **saas > ee > oss**:
 
-- Permissive CORS: matches any `http(s)://` origin
-- Simplified auth flows (no subdomain handling)
-- All features included without plan checks
+| Mode | Condition | Behavior |
+|------|-----------|----------|
+| `saas` | `general_config.saas_mode` | Plan-based gating and usage limits |
+| `ee` | `apps/api/ee` present (and license check passes when available) | All features, unlimited |
+| `oss` | EE folder absent (or license invalid) | EE-only features blocked |
 
-### Multi Tenancy (SaaS)
-
-- Strict CORS: configured `LEARNHOUSE_ALLOWED_REGEXP`
-- Subdomain-based organization routing
-- Plan-based feature gating (standard, pro, enterprise)
-- Email verification required for new accounts
-- Cookie domain handling for subdomain isolation
+`EE_ONLY_FEATURES` is `{sso, audit_logs, analytics_advanced, scorm}`. **Payments is not EE-only** — it is LearnHouse's own stack and stays available in every mode (`src/db/payments/`).
 
 ---
 
-## Enterprise Edition (EE)
+## Enterprise Edition Hooks
 
-The platform supports an Enterprise Edition via hook points in `src/core/ee_hooks.py`:
-- `register_ee_routers(v1_router)` — adds EE-specific API routes
-- `register_ee_middlewares(app)` — adds EE-specific middleware
-- `register_ee_event_handlers(app)` — adds EE lifecycle hooks
+`src/core/ee_hooks.py` imports the EE module dynamically and exposes:
 
-EE features include payments, advanced analytics, and premium integrations. The EE module is conditionally imported and gracefully degrades when absent.
+| Function | Purpose |
+|----------|---------|
+| `is_ee_available()` | `ee/` directory exists and `LEARNHOUSE_DISABLE_EE` is not `1` |
+| `get_ee_hooks()` | Imports `ee.hooks`, returns `None` when unavailable |
+| `register_ee_middlewares(app)` | Calls `hooks.register_middlewares(app)` |
+| `register_ee_routers(v1_router)` | Calls `hooks.register_routers(v1_router)` |
+| `run_ee_startup(app)` | Calls `hooks.on_startup(app)` |
+| `is_multi_org_allowed()` | True for `ee` and `saas` modes |
+| `check_ee_activity_paid_access(...)` | Delegates paid-activity checks, falls back to `True` |
+
+All hooks degrade gracefully when the EE folder is missing.
 
 ---
 
-## Request Lifecycle
+## Middleware and Request Lifecycle
 
 ```
-Client Request
-    │
-    ▼
-CORS Middleware ──► GZip Middleware ──► EE Middlewares
-    │
-    ▼
-FastAPI Router Matching
-    │
-    ▼
-Dependency Chain:
-  ├── get_db_session()          → SQLModel Session
-  ├── get_current_user()        → JWT / API Token / Anonymous
-  ├── require_*_access()        → RBAC check
-  └── require_plan_for_*()      → Plan gate
-    │
-    ▼
-Route Handler (thin, delegates to service)
-    │
-    ▼
-Service Layer (business logic, RBAC, cache, webhooks)
-    │
-    ▼
-Database (SQLModel / PostgreSQL)
-    │
-    ▼
-Response (Pydantic serialization)
+Request
+  → CORS (tenancy-aware)
+  → GZip (responses > 1KB)
+  → EE middlewares (if present)
+  → FastAPI router match (/api/v1/...)
+  → Dependencies:
+       get_db_session()        # src/core/events/database.py
+       get_current_user()      # src/security/auth.py
+       RBAC / plan gates       # src/security/rbac, src/security/features_utils
+  → Route handler → service → SQLModel/PostgreSQL → response
 ```
+
+- Authentication is applied per route (or per router in `src/router.py`) via `Depends(...)`; there is no global auth middleware.
+- Rate limiting is applied inside auth flows (`check_login_rate_limit`, `check_refresh_rate_limit`, `check_email_verification_rate_limit` from `src/services/security/rate_limiting.py`), not as a global middleware.
+- RBAC dependencies live in `src/security/rbac/dependencies.py` (`require_read_access`, `require_write_access`); plan gates in `src/security/features_utils/plan_check.py`.

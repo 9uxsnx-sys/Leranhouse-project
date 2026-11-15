@@ -13,7 +13,8 @@ Tests cover:
 """
 
 import pytest
-from unittest.mock import MagicMock
+from types import SimpleNamespace
+from unittest.mock import AsyncMock, MagicMock, patch
 from fastapi import HTTPException
 
 
@@ -86,125 +87,163 @@ class TestCheckContentAccess:
         course = MagicMock()
         course.public = public
         course.course_uuid = "course_abc"
+        course.org_id = 1
         return course
 
     def _make_podcast(self, public=True):
         podcast = MagicMock()
         podcast.public = public
         podcast.podcast_uuid = "podcast_abc"
+        podcast.org_id = 1
         return podcast
 
-    def test_public_course_activity_anonymous(self):
+    def _rbac(self, allowed: bool):
+        """Patch the RBAC decision used by the media guard."""
+        return patch(
+            "src.security.rbac.media.check_resource_access",
+            new_callable=AsyncMock,
+            return_value=SimpleNamespace(allowed=allowed),
+        )
+
+    async def test_public_course_activity_anonymous(self, mock_request):
         """Anonymous users can access activity content of public courses."""
         from src.routers.local_content import _check_content_access
         course = self._make_course(public=True)
         db = self._make_db_session(course=course)
-        # Should not raise
-        _check_content_access(
-            "orgs/org1/courses/course_abc/activities/act1/video.mp4",
-            self._make_anon_user(), db
-        )
-
-    def test_private_course_activity_anonymous_rejected(self):
-        """Anonymous users cannot access activity content of private courses."""
-        from src.routers.local_content import _check_content_access
-        course = self._make_course(public=False)
-        db = self._make_db_session(course=course)
-        with pytest.raises(HTTPException) as exc_info:
-            _check_content_access(
+        with self._rbac(True):
+            await _check_content_access(
+                mock_request,
                 "orgs/org1/courses/course_abc/activities/act1/video.mp4",
                 self._make_anon_user(), db
             )
-        assert exc_info.value.status_code == 401
 
-    def test_private_course_activity_authenticated(self):
-        """Authenticated users can access private course activity content."""
+    async def test_private_course_activity_anonymous_rejected(self, mock_request):
+        """Anonymous users cannot access activity content behind RBAC."""
         from src.routers.local_content import _check_content_access
         course = self._make_course(public=False)
         db = self._make_db_session(course=course)
-        # Should not raise
-        _check_content_access(
-            "orgs/org1/courses/course_abc/activities/act1/video.mp4",
-            self._make_auth_user(), db
-        )
+        with self._rbac(False):
+            with pytest.raises(HTTPException) as exc_info:
+                await _check_content_access(
+                    mock_request,
+                    "orgs/org1/courses/course_abc/activities/act1/video.mp4",
+                    self._make_anon_user(), db
+                )
+        assert exc_info.value.status_code == 401
 
-    def test_course_not_found_anonymous_rejected(self):
+    async def test_private_course_activity_denied_without_access(self, mock_request):
+        """Signed-in users without an entitlement / UserGroup are denied."""
+        from src.routers.local_content import _check_content_access
+        course = self._make_course(public=False)
+        db = self._make_db_session(course=course)
+        with self._rbac(False):
+            with pytest.raises(HTTPException) as exc_info:
+                await _check_content_access(
+                    mock_request,
+                    "orgs/org1/courses/course_abc/activities/act1/video.mp4",
+                    self._make_auth_user(), db
+                )
+        assert exc_info.value.status_code == 403
+
+    async def test_private_course_activity_authenticated_with_access(self, mock_request):
+        """Entitled / UserGroup members can stream private course content."""
+        from src.routers.local_content import _check_content_access
+        course = self._make_course(public=False)
+        db = self._make_db_session(course=course)
+        with self._rbac(True):
+            await _check_content_access(
+                mock_request,
+                "orgs/org1/courses/course_abc/activities/act1/video.mp4",
+                self._make_auth_user(), db
+            )
+
+    async def test_course_not_found_anonymous_rejected(self, mock_request):
         """If course doesn't exist, anonymous users are rejected."""
         from src.routers.local_content import _check_content_access
         db = self._make_db_session()  # returns None
         with pytest.raises(HTTPException) as exc_info:
-            _check_content_access(
+            await _check_content_access(
+                mock_request,
                 "orgs/org1/courses/course_abc/activities/act1/video.mp4",
                 self._make_anon_user(), db
             )
         assert exc_info.value.status_code == 403
 
-    def test_public_podcast_episode_anonymous(self):
+    async def test_public_podcast_episode_anonymous(self, mock_request):
         """Anonymous users can access episode content of public podcasts."""
         from src.routers.local_content import _check_content_access
         podcast = self._make_podcast(public=True)
         db = self._make_db_session(podcast=podcast)
-        _check_content_access(
-            "orgs/org1/podcasts/podcast_abc/episodes/ep1/audio.mp3",
-            self._make_anon_user(), db
-        )
-
-    def test_private_podcast_episode_anonymous_rejected(self):
-        """Anonymous users cannot access episode content of private podcasts."""
-        from src.routers.local_content import _check_content_access
-        podcast = self._make_podcast(public=False)
-        db = self._make_db_session(podcast=podcast)
-        with pytest.raises(HTTPException) as exc_info:
-            _check_content_access(
+        with self._rbac(True):
+            await _check_content_access(
+                mock_request,
                 "orgs/org1/podcasts/podcast_abc/episodes/ep1/audio.mp3",
                 self._make_anon_user(), db
             )
+
+    async def test_private_podcast_episode_anonymous_rejected(self, mock_request):
+        """Anonymous users cannot access episode content behind RBAC."""
+        from src.routers.local_content import _check_content_access
+        podcast = self._make_podcast(public=False)
+        db = self._make_db_session(podcast=podcast)
+        with self._rbac(False):
+            with pytest.raises(HTTPException) as exc_info:
+                await _check_content_access(
+                    mock_request,
+                    "orgs/org1/podcasts/podcast_abc/episodes/ep1/audio.mp3",
+                    self._make_anon_user(), db
+                )
         assert exc_info.value.status_code == 401
 
-    def test_course_thumbnail_always_public(self):
+    async def test_course_thumbnail_always_public(self, mock_request):
         """Course thumbnails (no /activities/) are always public."""
         from src.routers.local_content import _check_content_access
         db = self._make_db_session()
         # Should not raise even for anonymous
-        _check_content_access(
+        await _check_content_access(
+            mock_request,
             "orgs/org1/courses/course_abc/thumbnail.png",
             self._make_anon_user(), db
         )
 
-    def test_org_logo_always_public(self):
+    async def test_org_logo_always_public(self, mock_request):
         """Org-level content is always public."""
         from src.routers.local_content import _check_content_access
         db = self._make_db_session()
-        _check_content_access(
+        await _check_content_access(
+            mock_request,
             "orgs/org1/logo.png",
             self._make_anon_user(), db
         )
 
-    def test_user_avatar_always_public(self):
+    async def test_user_avatar_always_public(self, mock_request):
         """User avatars are always public."""
         from src.routers.local_content import _check_content_access
         db = self._make_db_session()
-        _check_content_access(
+        await _check_content_access(
+            mock_request,
             "users/user_abc/avatars/photo.jpg",
             self._make_anon_user(), db
         )
 
-    def test_unknown_path_anonymous_rejected(self):
+    async def test_unknown_path_anonymous_rejected(self, mock_request):
         """Unknown path patterns require auth as a safe default."""
         from src.routers.local_content import _check_content_access
         db = self._make_db_session()
         with pytest.raises(HTTPException) as exc_info:
-            _check_content_access(
+            await _check_content_access(
+                mock_request,
                 "something/unknown/file.txt",
                 self._make_anon_user(), db
             )
         assert exc_info.value.status_code == 401
 
-    def test_unknown_path_authenticated_allowed(self):
+    async def test_unknown_path_authenticated_allowed(self, mock_request):
         """Unknown path patterns are allowed for authenticated users."""
         from src.routers.local_content import _check_content_access
         db = self._make_db_session()
-        _check_content_access(
+        await _check_content_access(
+            mock_request,
             "something/unknown/file.txt",
             self._make_auth_user(), db
         )
@@ -260,40 +299,55 @@ class TestS3ContentAccess:
     def _make_course(self, public=True):
         course = MagicMock()
         course.public = public
+        course.course_uuid = "c1"
+        course.org_id = 1
         return course
 
-    def test_public_course_anonymous_allowed(self):
+    def _rbac(self, allowed: bool):
+        return patch(
+            "src.security.rbac.media.check_resource_access",
+            new_callable=AsyncMock,
+            return_value=SimpleNamespace(allowed=allowed),
+        )
+
+    async def test_public_course_anonymous_allowed(self, mock_request):
         from src.routers.content_files import _check_content_access
         course = self._make_course(public=True)
         db = self._make_db_session(course=course)
-        _check_content_access(
-            "orgs/org1/courses/c1/activities/a1/file.mp4",
-            self._make_anon_user(), db
-        )
-
-    def test_private_course_anonymous_rejected(self):
-        from src.routers.content_files import _check_content_access
-        course = self._make_course(public=False)
-        db = self._make_db_session(course=course)
-        with pytest.raises(HTTPException) as exc_info:
-            _check_content_access(
+        with self._rbac(True):
+            await _check_content_access(
+                mock_request,
                 "orgs/org1/courses/c1/activities/a1/file.mp4",
                 self._make_anon_user(), db
             )
+
+    async def test_private_course_anonymous_rejected(self, mock_request):
+        from src.routers.content_files import _check_content_access
+        course = self._make_course(public=False)
+        db = self._make_db_session(course=course)
+        with self._rbac(False):
+            with pytest.raises(HTTPException) as exc_info:
+                await _check_content_access(
+                    mock_request,
+                    "orgs/org1/courses/c1/activities/a1/file.mp4",
+                    self._make_anon_user(), db
+                )
         assert exc_info.value.status_code == 401
 
-    def test_user_avatar_public(self):
+    async def test_user_avatar_public(self, mock_request):
         from src.routers.content_files import _check_content_access
         db = self._make_db_session()
-        _check_content_access(
+        await _check_content_access(
+            mock_request,
             "users/user1/avatars/pic.jpg",
             self._make_anon_user(), db
         )
 
-    def test_org_content_public(self):
+    async def test_org_content_public(self, mock_request):
         from src.routers.content_files import _check_content_access
         db = self._make_db_session()
-        _check_content_access(
+        await _check_content_access(
+            mock_request,
             "orgs/org1/logo.png",
             self._make_anon_user(), db
         )

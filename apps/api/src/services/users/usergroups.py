@@ -162,6 +162,7 @@ async def create_usergroup(
             "usergroup_uuid": usergroup.usergroup_uuid,
             "name": usergroup.name,
         },
+        db_session=db_session,
     )
 
     usergroup = UserGroupRead.model_validate(usergroup)
@@ -449,6 +450,7 @@ async def delete_usergroup_by_id(
             "usergroup_uuid": usergroup_uuid_val,
             "name": usergroup_name_val,
         },
+        db_session=db_session,
     )
 
     return "UserGroup deleted successfully"
@@ -533,6 +535,7 @@ async def add_users_to_usergroup(
             "usergroup_uuid": usergroup.usergroup_uuid,
             "user_ids": [int(uid) for uid in user_ids_array],
         },
+        db_session=db_session,
     )
 
     return "Users added to UserGroup successfully"
@@ -659,6 +662,7 @@ async def add_resources_to_usergroup(
             "usergroup_uuid": usergroup.usergroup_uuid,
             "resource_uuids": resources_uuids_array,
         },
+        db_session=db_session,
     )
 
     return "Resources added to UserGroup successfully"

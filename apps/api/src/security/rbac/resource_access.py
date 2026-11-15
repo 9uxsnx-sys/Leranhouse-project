@@ -74,6 +74,7 @@ class ResourceAccessChecker:
         self._access_type_cache: dict[str, Optional[AccessTypeEnum]] = {}
         self._entitlement_cache: dict[str, bool] = {}
         self._parent_uuid_cache: dict[str, Optional[str]] = {}
+        self._claim_cache: dict[tuple[str, str], bool] = {}
 
     async def check_access(
         self,
@@ -136,6 +137,13 @@ class ResourceAccessChecker:
         # Handle API token users separately
         if isinstance(self.current_user, APITokenUser):
             return await self._check_api_token_access(resource_uuid, action, config)
+
+        # Communities are add-ons: their access always follows the course or
+        # podcast they belong to, never their own flags.
+        if config.resource_type == "communities":
+            return await self._check_community_access(
+                resource_uuid, action, context, config
+            )
 
         # Route to appropriate check based on action
         if action == AccessAction.READ:
@@ -711,6 +719,166 @@ class ResourceAccessChecker:
             resource_uuid=resource_uuid,
             action=action.value,
         )
+
+    async def _check_community_access(
+        self,
+        resource_uuid: str,
+        action: AccessAction,
+        context: AccessContext,
+        config: ResourceConfig,
+    ) -> AccessDecision:
+        """Access for a community = access for the course/podcast it belongs to.
+
+        A community never carries its own visibility: it is an add-on that opens
+        with its parent (published, free/restricted/paid, entitlement, usergroup,
+        author or admin). Free parents additionally require an explicit claim
+        (a `TrailRun`) so the community tracks enrolled learners, not every
+        visitor who can read a public course.
+        """
+        user_id = self._get_user_id()
+        community = await self._get_resource(resource_uuid, config)
+        if not community:
+            return AccessDecision(
+                allowed=False,
+                reason="Community not found",
+                resource_uuid=resource_uuid,
+                user_id=user_id,
+                action=action.value,
+                context=context.value,
+            )
+
+        parent_uuid = getattr(community, "resource_uuid", None)
+        parent_type = getattr(community, "resource_type", None)
+        parent_configs = {"course": "courses", "podcast": "podcasts"}
+
+        # `published` is the community-level draft switch: an unpublished
+        # community stays hidden even when its parent is readable.
+        if action == AccessAction.READ and getattr(community, "published", True) is False:
+            is_admin = await self._is_admin_or_maintainer(resource_uuid)
+            if not is_admin:
+                return AccessDecision(
+                    allowed=False,
+                    reason="Community is not published",
+                    resource_uuid=resource_uuid,
+                    user_id=user_id,
+                    action=action.value,
+                    context=context.value,
+                )
+
+        if not parent_uuid or parent_type not in parent_configs:
+            if action == AccessAction.READ:
+                return AccessDecision(
+                    allowed=False,
+                    reason="Community is not attached to a course or podcast",
+                    resource_uuid=resource_uuid,
+                    user_id=user_id,
+                    action=action.value,
+                    context=context.value,
+                )
+            # Orphans stay manageable by org admins so they can be attached.
+            is_admin = await self._is_admin_or_maintainer(resource_uuid)
+            return AccessDecision(
+                allowed=is_admin,
+                reason=(
+                    "User is admin/maintainer"
+                    if is_admin
+                    else "Community is not attached to a course or podcast"
+                ),
+                via_admin=is_admin,
+                resource_uuid=resource_uuid,
+                user_id=user_id,
+                action=action.value,
+                context=context.value,
+            )
+
+        parent_decision = await self.check_access(parent_uuid, action, context)
+        if not parent_decision.allowed:
+            return AccessDecision(
+                allowed=False,
+                reason=(
+                    f"Access denied on the linked {parent_type}: "
+                    f"{parent_decision.reason}"
+                ),
+                resource_uuid=resource_uuid,
+                user_id=user_id,
+                action=action.value,
+                context=context.value,
+            )
+
+        # Free content must be claimed first; paid/restricted already imply a
+        # relationship with the learner. Authors and admins always see it.
+        if action == AccessAction.READ and not (
+            parent_decision.via_admin
+            or parent_decision.via_authorship
+            or parent_decision.via_role
+        ):
+            parent_config = RESOURCE_CONFIGS[parent_configs[parent_type]]
+            parent = await self._get_resource(parent_uuid, parent_config)
+            access_type = await self._get_access_type(parent_uuid, parent_config)
+            if (
+                parent is not None
+                and access_type in (None, AccessTypeEnum.PUBLIC)
+                and not self._has_claimed_parent(
+                    parent_uuid, parent_type, getattr(parent, "id", None)
+                )
+            ):
+                return AccessDecision(
+                    allowed=False,
+                    reason=(
+                        "Claim the linked course or follow the linked podcast "
+                        "to join its community"
+                    ),
+                    resource_uuid=resource_uuid,
+                    user_id=user_id,
+                    action=action.value,
+                    context=context.value,
+                )
+
+        return AccessDecision(
+            allowed=True,
+            reason=f"Access follows the linked {parent_type}",
+            via_public=parent_decision.via_public,
+            via_usergroup=parent_decision.via_usergroup,
+            via_entitlement=parent_decision.via_entitlement,
+            via_authorship=parent_decision.via_authorship,
+            via_admin=parent_decision.via_admin,
+            via_role=parent_decision.via_role,
+            resource_uuid=resource_uuid,
+            user_id=user_id,
+            action=action.value,
+            context=context.value,
+        )
+
+    def _has_claimed_parent(
+        self, parent_uuid: str, parent_type: str, parent_id: Optional[int]
+    ) -> bool:
+        """True when the caller has a TrailRun for the linked resource."""
+        user_id = self._get_user_id()
+        if user_id == 0 or not parent_id:
+            return False
+
+        cache_key = (parent_uuid, "claimed")
+        if cache_key in self._claim_cache:
+            return self._claim_cache[cache_key]
+
+        from src.db.trail_runs import TrailRun, TrailRunEnum
+
+        conditions = [
+            TrailRun.user_id == user_id,
+            TrailRun.run_type == (
+                TrailRunEnum.RUN_TYPE_COURSE
+                if parent_type == "course"
+                else TrailRunEnum.RUN_TYPE_PODCAST
+            ),
+            (
+                TrailRun.course_id == parent_id
+                if parent_type == "course"
+                else TrailRun.podcast_id == parent_id
+            ),
+        ]
+        result = self.db_session.exec(select(TrailRun).where(*conditions)).first() is not None
+        self._claim_cache[cache_key] = result
+        return result
 
     # Helper methods
 

@@ -1,196 +1,84 @@
-# Communities Feature
+> Status: as-built · Last verified: 2026-11-15
 
-> Communities are course-linked social spaces where students and instructors interact through discussions, comments, and reactions. Each community has a three-dimensional access control model that determines who can see and interact with it.
+# Communities
 
----
+A community is a discussion space attached to exactly one course or podcast; it inherits that resource's access rules and adds discussions, comments, reactions and votes.
 
-## Access Control Model
+## Feature flag
 
-Every community has three independent access dimensions:
+Communities are an optional feature resolved per organization, not an always-on module.
 
-| Dimension | Values | What it controls |
-|-----------|--------|-----------------|
-| **Public / Restricted** | `public: bool` | Who can *find* the community. Public = discoverable by anyone. Restricted = only visible to linked UserGroups (typically course enrollees). |
-| **Published / Unpublished** | `published: bool` | Whether the community is *live*. Unpublished = invisible to everyone except admins. Used to prepare content before going live. |
-| **UserGroup links** | `course_id: uuid` | Which specific users get access when the community is restricted. Communities can be linked to a course -- users enrolled in that course (via the course's UserGroup) get automatic access. |
+| Layer | How it is read |
+|---|---|
+| Backend | `resolve_feature("communities", …)` in `security/features_utils/resolve.py` runs through deployment mode, plan, overrides, purchased packs and the admin toggle |
+| Public API payload | The resolved value is exposed as `organization.config.config.resolved_features.communities` |
+| Frontend | `FeatureDisabledView` reads `resolved_features.communities.enabled`, falling back to `features.communities.enabled !== false`; `UserLeftMenu` shows the entry only when the resolved flag is `true` |
+| Effect | The Communities entry disappears from the learner menu, and both the learner listing and the dashboard render a full disabled screen |
 
-These three dimensions combine to produce the full access matrix:
+Communities are not in `EE_ONLY_FEATURES`, so OSS and EE deployments enable them unless an admin disables the toggle; SaaS plans add their own requirement.
 
-### Access Matrix
+## Access model
 
-| State | Anonymous | Signed-in (no UserGroup) | UserGroup members | Admins |
-|-------|-----------|--------------------------|-------------------|--------|
-| **Public + Published** | Can read | Can read | Can read | Full |
-| **Public + Unpublished** | Blocked | Blocked | Blocked | Full |
-| **Restricted + Published** | Blocked | Blocked | Can read | Full |
-| **Restricted + Unpublished** | Blocked | Blocked | Blocked | Full |
+There is no separate community ACL. A community delegates to its linked resource through `ResourceAccessChecker._check_community_access`, so one access implementation serves both.
 
-**The rule:** `published` is the master on/off switch. If a community is unpublished, nobody except admins can see it -- regardless of public/restricted status or UserGroup membership. Once published, the `public`/`restricted` setting determines visibility scope.
+| Rule | Behaviour |
+|---|---|
+| Inheritance | Reading follows the parent course/podcast: publication, access type, entitlement, user groups, authorship and org-admin status |
+| Draft switch | `community.published` is an extra switch; an unpublished community is hidden from non-admins even when the parent is readable |
+| Free parent | The learner must first claim the parent (a `TrailRun` for the course or podcast) unless they are an admin, author or role-granted reader |
+| Orphans | A community with no parent is readable by nobody; org admins can still manage it so it can be linked again |
+| Creation | `resource_uuid` and `resource_type` (`course` or `podcast`) are required; the resource must belong to the same org, and one community per resource is enforced |
+| Management | Follows the parent's authors and org admins |
 
-### User Scenarios
+## Data model
 
-| Scenario | What happens |
-|----------|-------------|
-| **Free user browsing** | Sees only communities that are `public + published`. Restricted or unpublished communities are completely invisible. |
-| **Paid user (course enrollee)** | Sees communities linked to their course (via UserGroup) -- but only if `published`. Also sees `public + published` communities. |
-| **Admin preparing a community** | Sets it to `unpublished`. Nobody sees it. Prepares content, discussions, moderation settings. When ready, clicks Publish. |
-| **Admin taking a community offline** | Sets it to `unpublished`. Community becomes invisible to all users. Existing discussions are preserved. Can re-publish later. |
-| **Public community going live** | Admin sets `published=True`. Community becomes visible to everyone immediately. |
-| **Restricted community going live** | Admin sets `published=True`. Only users linked via the course UserGroup can see it. |
+The `community` table stores `org_id`, `community_uuid`, `name`, `description`, `public`, `published`, `thumbnail_image`, `banner_image`, `resource_uuid`, `resource_type`, `source_locale`, `moderation_words` and `moderation_settings`.
 
----
+- A unique index on `resource_uuid` enforces one community per resource.
+- The source-locale name and description live on the base row; other locales live in `community_translation`.
+- Discussions, comments, votes and reactions are separate tables managed by their own services.
 
-## Architecture
+## API
 
-### Data Model
+The router is mounted at `/api/v1/communities` and owns community CRUD, resource linking, rights and media. Discussions live in the [Discussions API](../../06-api-reference/discussions.md). Full request and response contracts are in the [Communities API reference](../../06-api-reference/communities.md).
 
-The `published` field lives on the `Community` table alongside `public`:
+| Capability | Routes |
+|---|---|
+| List and read | `GET /communities/org/{org_id}/…`, `GET /communities/{uuid}` |
+| Read by parent | `GET /communities/course/{course_uuid}`, `GET /communities/podcast/{podcast_uuid}` |
+| Create / update / delete | `POST /communities/?org_id=`, `PUT /communities/{uuid}`, `DELETE /communities/{uuid}` |
+| Link / unlink | `PUT /communities/{uuid}/link/{resource_type}/{resource_uuid}`, `DELETE /communities/{uuid}/link` |
+| Rights and members | `GET /communities/{uuid}/rights`, member count |
+| Media | `PUT/DELETE /communities/{uuid}/thumbnail`, banner equivalents |
+| Translations | `GET/PUT/DELETE /communities/{uuid}/translations[/{locale}]` |
 
-```python
-class CommunityBase(SQLModel):
-    name: str
-    description: Optional[str]
-    public: bool = True
-    published: bool = Field(default=False)  # Master on/off switch
-    thumbnail_image: Optional[str] = ""
-```
+Listing filters each row through the access checker, so learners only see communities whose parent they can read; admins and superadmins see everything, including orphans.
 
-A composite index optimizes the common listing query:
+## Dashboard
 
-```python
-Index("ix_community_org_public_published_created",
-      "org_id", "public", "published", "creation_date")
-```
+The community editor has five pill tabs:
 
-### RBAC Integration
+| Tab | Content |
+|---|---|
+| General | Name, description, cover and banner media, publish control |
+| Access | Read-only explanation of the inherited access, deep-linking to the parent resource's access settings |
+| Course | Linked-content tab: pick a course or podcast, search, link or unlink through the generic endpoint |
+| Moderation | Word filter, moderation settings and banned words |
+| Translations | Name and description per locale, copy-from-source, delete |
 
-The RBAC system enforces the published check automatically when `has_published_field=True` is set in the resource config. This affects:
+Creating a community requires choosing a course or podcast; already-linked parents are disabled. A community can no longer be created standalone.
 
-- **Anonymous read access** -- `_check_anonymous_read_access()` denies access to unpublished communities
-- **Public view read access** -- `_check_public_view_read_access()` denies access to unpublished communities  
-- **UserGroup access** -- even users in linked UserGroups cannot access unpublished communities
-- **Individual resource access** -- `get_community_user_rights()` checks `published` before granting any access
+## Learner surfaces
 
-Only admins (org admin role or superadmin) bypass the published check.
+- `/communities` lists the communities the learner can read, with filters for all, course-linked and podcast-linked.
+- `/community/{uuid}` renders the feed; discussions expand inline, so the feed does not navigate to a discussion page.
+- The course and podcast detail pages render a recent-discussion section for their linked community.
+- The community card shows `Linked Course` / `Linked Podcast` / `Not linked`, and the sidebar links back to the parent.
+- Name and description follow the selected locale; discussions stay in the language they were written in.
+- Deep links keep the parent gating: API `403` becomes a not-found or "You don't have access" state.
 
-### Listing Filter
+## Related
 
-The `get_communities_by_org()` service function filters at the query level:
-
-| User type | Filter applied |
-|-----------|---------------|
-| Anonymous | `public == True AND published == True` |
-| Regular user | `published == True` AND (`public == True` OR in linked UserGroup) |
-| Admin | No filter (sees all) |
-| Superadmin | No filter (sees all) |
-
----
-
-## Community Edit Tabs
-
-Each community is edited via a tabbed interface in the dashboard. The tabs map to the following components:
-
-| Tab | Component | Purpose |
-|-----|-----------|---------|
-| **General** | `CommunityEditGeneral` | Community name, description, **Media section** (thumbnail upload), **Publish/Unpublish button** |
-| **Access** | `CommunityEditAccess` | Public/restricted toggle with confirmation, course linking |
-| **Moderation** | `CommunityEditModeration` | Word filtering, moderation settings, banned words list |
-| **Course** | `CommunityEditCourse` | Link/unlink community to a course |
-
-### Publish/Unpublish Flow (General tab)
-
-1. Admin clicks Publish/Unpublish button in the action row
-2. Button shows loading state while API call is in progress
-3. API updates `published` field on the community
-4. Community context dispatches optimistic update (rolls back on error)
-5. SWR cache revalidates
-6. Toast notification shows success/error
-
-### Media Section (General tab)
-
-The thumbnail upload is a compact row inside the General tab (not a separate tab):
-
-```
-┌───────────────────────────────────────────────────────────────┐
-│ [ImageIcon]  Community Cover Image              [UploadCloud] │
-│                                                     or        │
-│                                              [Trash2] (delete) │
-└───────────────────────────────────────────────────────────────┘
-```
-
-**States:**
-
-- **No image:** Shows an UploadCloud icon button. Clicking it opens a file picker (JPG/PNG only, max 8MB).
-- **Has image:** Shows a Trash2 icon button. Clicking it deletes the thumbnail image.
-- **Loading:** The action icon is replaced by a small spinning circle (same 18px size).
-
-**Flow:**
-
-1. Click the upload icon to pick a file from device
-2. File is validated client-side (type + size)
-3. Uploaded via `FormData` to `PUT /communities/{uuid}/thumbnail`
-4. On success, CommunityContext dispatches the updated community, SWR cache revalidates (both single community and list), and `router.refresh()` triggers server re-render
-5. Click the trash icon to delete — sends `DELETE /communities/{uuid}/thumbnail`, same revalidation flow
-6. On error, toast shows the failure reason
-
-### Public/Restricted Flow (Access tab)
-
-1. Admin toggles the public/restricted switch
-2. Confirmation modal appears explaining the impact
-3. On confirm, API updates `public` field
-4. Community context updates
-5. If restricted, admin can link the community to a specific course (which controls UserGroup access)
-
----
-
-## Related Services
-
-| Service | File | Purpose |
-|---------|------|---------|
-| Community CRUD | `src/services/communities/communities.py` | Create, read, update, delete communities |
-| Discussions | `src/services/communities/discussions.py` | Discussion threads within communities |
-| Comments | `src/services/communities/comments.py` | Comments on discussions and activities |
-| Moderation | `src/services/communities/moderation.py` | Content moderation, word filtering |
-| Reactions | `src/services/communities/reactions.py` | Emoji reactions on content |
-| Votes | `src/services/communities/votes.py` | Upvote/downvote on discussions |
-
----
-
-## Frontend Context
-
-Community state is managed through `CommunityContext` (`@components/Contexts/CommunityContext`), which provides:
-
-- `community` -- Current community data object
-- `dispatch` -- Dispatch function for state updates
-- Community membership information
-
-See [CommunityContext documentation](../../05-developer-guide/frontend/contexts.md) for details.
-
----
-
-## API Endpoints
-
-| Method | Path | Purpose |
-|--------|------|---------|
-| GET | `/api/v1/communities/` | List communities (filtered by access) |
-| GET | `/api/v1/communities/{uuid}` | Get single community |
-| GET | `/api/v1/communities/by-course/{course_uuid}` | Get community linked to a course |
-| POST | `/api/v1/communities/` | Create community |
-| PUT | `/api/v1/communities/{uuid}` | Update community (including publish/unpublish) |
-| DELETE | `/api/v1/communities/{uuid}` | Delete community |
-| GET | `/api/v1/communities/{uuid}/rights` | Get user's rights for a community |
-| POST | `/api/v1/communities/{uuid}/link-course` | Link community to a course |
-| POST | `/api/v1/communities/{uuid}/unlink-course` | Unlink community from a course |
-| PUT | `/api/v1/communities/{uuid}/thumbnail` | Upload community thumbnail |
-| DELETE | `/api/v1/communities/{uuid}/thumbnail` | Remove community thumbnail |
-
----
-
-## Testing
-
-See the [Testing Guide](../../05-developer-guide/testing/README.md) for community-specific testing patterns:
-
-- [Boolean toggle template](../../05-developer-guide/testing/api/07-template-boolean.md) -- testing publish/unpublish
-- [Authz template](../../05-developer-guide/testing/api/10-template-authz.md) -- testing access control
-- [Upload template](../../05-developer-guide/testing/api/08-template-upload.md) -- testing thumbnail upload
-- [Live validation example](../../05-developer-guide/testing/api/18-live-validation.md) -- curl-based community testing
+- [Communities API reference](../../06-api-reference/communities.md)
+- [Communities user guide](../../03-user-guide/communities.md)
+- [RTL and content localisation](../i18n-rtl/rtl-plan.md)

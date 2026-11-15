@@ -1,471 +1,394 @@
-# Activities
+# Activities API
 
-> Activity endpoints manage the individual lessons and learning objects within a chapter — supporting multiple activity types (video, document, dynamic, assignment, SCORM), versioning with restore, editor bootstrap, and user group access control.
+> Status: as-built · Last verified: 2026-11-15
 
----
+All routes are mounted under `/api/v1/activities` (not `/api/v1/courses/activities`). Collection `POST` uses a trailing slash (`/api/v1/activities/`).
 
-## Overview
-
-Activities (also called lessons) are the core learning units within chapters. Each activity belongs to a single chapter and has a specific type that determines how it is rendered and interacted with.
-
-All activity endpoints are under the Activities router at `/api/v1/courses/activities`.
-
-### Activity Types
-
-| Type | Constant | Description |
-|------|----------|-------------|
-| Video | `TYPE_VIDEO` | Video-based lesson (hosted or external) |
-| Document | `TYPE_DOCUMENT` | Rich text / document lesson |
-| Dynamic | `TYPE_DYNAMIC` | Interactive dynamic content |
-| Assignment | `TYPE_ASSIGNMENT` | Student assignment / submission |
-| Custom | `TYPE_CUSTOM` | Custom content type |
-| SCORM | `TYPE_SCORM` | SCORM-compliant package |
+An activity belongs to one chapter (via the `chapteractivity` link table) and one course (denormalized `course_id`). Its position inside a chapter is stored on the link row (`order`).
 
 ---
 
-## List Activities (by Chapter)
+## Access rules (locked content)
 
-Retrieve all activities for a given chapter.
+`lock_type` on each activity (and its parent chapter) is one of:
+
+| `lock_type` | Who can read |
+|---|---|
+| `public` | Anyone, including anonymous visitors |
+| `authenticated` | Signed-in users only |
+| `restricted` | Members of the user groups attached to the activity, its chapter or the parent course, plus org admins/maintainers |
+
+- A locked chapter cascades: all its activities are locked regardless of their own `lock_type`.
+- A user group attached at the **course** level unlocks every restricted chapter/activity in that course.
+- Org admins/maintainers bypass locks and still see `lock_type` so they can edit it.
+- Locked reads return `content: {}`, `details: null` and `is_locked: true`; `is_locked` is computed per request and never stored.
+- Paid courses: `GET /activities/{activity_uuid}` and the editor bootstrap first enforce the normal course read check, then run the paid-entitlement hook. When the hook denies (for example a user-group member who has not purchased), `content` becomes `{"paid_access": false}`. Builds without the EE hook treat paid access as granted.
+- `GET /activities/id/{activity_id}` (numeric) and `GET /activities/chapter/{chapter_id}` do **not** apply lock or paid stripping; they only enforce read access to the course.
+
+---
+
+## Activity types
+
+`activity_type`: `TYPE_VIDEO` | `TYPE_DOCUMENT` | `TYPE_DYNAMIC` | `TYPE_ASSIGNMENT` | `TYPE_CUSTOM` | `TYPE_SCORM`
+
+`activity_sub_type`: `SUBTYPE_DYNAMIC_PAGE` | `SUBTYPE_DYNAMIC_MARKDOWN` | `SUBTYPE_DYNAMIC_EMBED` | `SUBTYPE_VIDEO_YOUTUBE` | `SUBTYPE_VIDEO_HOSTED` | `SUBTYPE_DOCUMENT_PDF` | `SUBTYPE_DOCUMENT_DOC` | `SUBTYPE_ASSIGNMENT_ANY` | `SUBTYPE_CUSTOM` | `SUBTYPE_SCORM_12` | `SUBTYPE_SCORM_2004`
+
+---
+
+## List activities for a chapter
 
 ```
-GET /api/v1/courses/activities/chapter/{chapter_id}
+GET /api/v1/activities/chapter/{chapter_id}
 ```
 
-### Path Parameters
+Auth: read access to the parent course.
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `chapter_id` | integer | The chapter database ID |
-| `locale` | string | Content locale; overlays translated names/content from `extra_metadata.translations` |
+| Param | In | Type | Notes |
+|---|---|---|---|
+| `chapter_id` | path | integer | Chapter database ID |
+| `locale` | query | string | Overlays translated name/content |
 
-### Response Body (200 OK)
+Only **published** activities are returned, in `chapteractivity.order`. Response `200`: bare JSON array of `ActivityRead`.
 
 ```json
 [
   {
     "id": 100,
-    "uuid": "act-001",
-    "title": "What is a Variable?",
+    "org_id": 1,
+    "course_id": 1,
+    "activity_uuid": "activity_31de...",
+    "name": "What is a Variable?",
     "activity_type": "TYPE_VIDEO",
-    "sort_order": 1,
-    "duration": 600,
-    "chapter_id": 10,
-    "content": {},
-    "extra_metadata": {},
-    "created_at": "2026-09-20T10:00:00Z",
-    "updated_at": "2026-09-22T15:30:00Z"
+    "activity_sub_type": "SUBTYPE_VIDEO_HOSTED",
+    "content": { "filename": "lesson1.mp4", "activity_uuid": "activity_31de..." },
+    "details": {},
+    "published": true,
+    "lock_type": "public",
+    "is_locked": false,
+    "extra_metadata": null,
+    "current_version": 1,
+    "last_modified_by_id": null,
+    "last_modified_by_username": null,
+    "creation_date": "2026-09-20 10:00:00",
+    "update_date": "2026-09-22 15:30:00"
   }
 ]
 ```
 
----
-
-## Get Activity (by UUID)
-
-Retrieve a single activity by its UUID.
-
-```
-GET /api/v1/courses/activities/{activity_uuid}?locale=ar
-```
-
-### Query Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `locale` | string | Optional content locale. When a translation exists in `extra_metadata.translations[locale]`, its `name` and `content` replace the source values — but only after the paid-access and lock checks pass. |
-
-### Response Body (200 OK)
-
-```json
-{
-  "id": 100,
-  "uuid": "act-001",
-  "title": "What is a Variable?",
-  "activity_type": "TYPE_VIDEO",
-  "sort_order": 1,
-  "duration": 600,
-  "chapter_id": 10,
-  "content": {
-    "video_url": "https://cdn.koodook.com/videos/lesson1.mp4",
-    "transcript": "Full transcript text..."
-  },
-  "extra_metadata": {
-    "difficulty": "beginner",
-    "estimated_time_minutes": 10
-  },
-  "created_at": "2026-09-20T10:00:00Z",
-  "updated_at": "2026-09-22T15:30:00Z"
-}
-```
-
-### Errors
-
-| Status | Description |
-|--------|-------------|
-| `404 Not Found` | Activity not found |
+Errors: `403`, `404` (`"No published activities found"` when the chapter has none).
 
 ---
 
-## Get Activity (by ID)
-
-Retrieve a single activity by its numeric ID.
+## Get activity by UUID
 
 ```
-GET /api/v1/courses/activities/id/{activity_id}
+GET /api/v1/activities/{activity_uuid}
 ```
 
-Response is identical to the UUID-based get endpoint.
+Auth: read access to the parent course.
+
+| Param | In | Type | Notes |
+|---|---|---|---|
+| `activity_uuid` | path | string | Activity UUID |
+| `locale` | query | string | Optional content locale |
+
+Response `200`: `ActivityRead`, including `last_modified_by_username`. Paid-entitlement and lock stripping apply (see Access rules).
+
+Errors: `403`, `404`.
 
 ---
 
-## Create Activity
-
-Create a new activity within a chapter.
+## Get activity by numeric ID
 
 ```
-POST /api/v1/courses/activities
+GET /api/v1/activities/id/{activity_id}
 ```
 
-### Request Body (JSON)
+Auth: read access to the parent course. Query `locale` is supported.
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `title` | string | Yes | Activity title |
-| `activity_type` | string | Yes | One of the activity type constants |
-| `chapter_id` | integer | Yes | The parent chapter ID |
-| `content` | object | No | Activity content (structure varies by type) |
-| `sort_order` | integer | No | Position within the chapter |
-| `duration` | integer | No | Duration in seconds |
-| `extra_metadata` | object | No | Arbitrary JSON metadata |
+Response `200`: `ActivityRead`. This route does **not** run the lock or paid-access stripping.
 
-### Example Request
-
-```json
-{
-  "title": "What is a Variable?",
-  "activity_type": "TYPE_VIDEO",
-  "chapter_id": 10,
-  "sort_order": 1,
-  "duration": 600,
-  "extra_metadata": {
-    "difficulty": "beginner"
-  }
-}
-```
-
-### Response Body (201 Created)
-
-```json
-{
-  "id": 100,
-  "uuid": "act-001",
-  "title": "What is a Variable?",
-  "activity_type": "TYPE_VIDEO",
-  "sort_order": 1,
-  "duration": 600,
-  "chapter_id": 10,
-  "content": {},
-  "extra_metadata": {
-    "difficulty": "beginner"
-  },
-  "created_at": "2026-09-23T10:00:00Z",
-  "updated_at": "2026-09-23T10:00:00Z"
-}
-```
-
-### Errors
-
-| Status | Description |
-|--------|-------------|
-| `401 Unauthorized` | Authentication required |
-| `403 Forbidden` | Insufficient permissions |
-| `422 Unprocessable Entity` | Validation error |
+Errors: `403`, `404`.
 
 ---
 
-## Create Video Activity
-
-Create a video activity (with optional external video support).
+## Create activity
 
 ```
-POST /api/v1/courses/activities/video
+POST /api/v1/activities/
 ```
 
-For external (embedded) videos:
+Auth: `create` permission on the parent course.
 
-```
-POST /api/v1/courses/activities/external_video
-```
+Request body (`ActivityCreate`):
 
-### Request Body (Multipart Form Data)
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `title` | string | Yes | Activity title |
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `name` | string | Yes | Not `title` |
 | `chapter_id` | integer | Yes | Parent chapter ID |
-| `video_file` | file | No | Video file (for hosted videos) |
-| `video_url` | string | No | External video URL (for external videos) |
-| `extra_metadata` | string (JSON) | No | JSON string of metadata |
+| `activity_type` | string | No | Default `TYPE_CUSTOM` |
+| `activity_sub_type` | string | No | Default `SUBTYPE_CUSTOM` |
+| `content` | object | No | Default `{}` |
+| `details` | object | No | Default `{}` |
+| `published` | boolean | No | Default `false` |
+| `lock_type` | string | No | `public` \| `authenticated` \| `restricted`; default `public` |
+| `extra_metadata` | object | No | |
 
-### Response Body (201 Created)
+The activity is appended at the end of the chapter. `org_id` and `course_id` are derived from the chapter.
 
-Returns the created activity with video-specific content.
+Response `200`: created `ActivityRead`.
 
----
-
-## Create PDF Activity
-
-Create a PDF document activity.
-
-```
-POST /api/v1/courses/activities/documentpdf
-```
-
-### Request Body (Multipart Form Data)
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `title` | string | Yes | Activity title |
-| `chapter_id` | integer | Yes | Parent chapter ID |
-| `pdf_file` | file | Yes | PDF file |
-| `extra_metadata` | string (JSON) | No | JSON string of metadata |
-
-### Response Body (201 Created)
-
-Returns the created activity with PDF content.
+Errors: `403`, `404` (chapter or course not found), `422`.
 
 ---
 
-## Update Activity
-
-Update an existing activity's fields.
+## Create video activity (upload)
 
 ```
-PUT /api/v1/courses/activities/{activity_uuid}
+POST /api/v1/activities/video
 ```
 
-### Request Body (JSON)
+Auth: `create` permission on the parent course. Request: `multipart/form-data`.
 
-All fields are optional (only provided fields are updated).
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `name` | string | Yes | |
+| `chapter_id` | string | Yes | Chapter ID as a form string |
+| `details` | string (JSON) | No | Default `"{}"` |
+| `extra_metadata` | string (JSON object) | No | |
+| `video_file` | file | Yes in practice | `video/mp4` or `video/webm` |
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `title` | string | Activity title |
-| `content` | object | Activity content |
-| `sort_order` | integer | Position within the chapter |
-| `duration` | integer | Duration in seconds |
-| `extra_metadata` | object | Arbitrary JSON metadata |
+Stored with `activity_type=TYPE_VIDEO`, `activity_sub_type=SUBTYPE_VIDEO_HOSTED`, `content={filename, activity_uuid}`.
 
-### Response Body (200 OK)
-
-Returns the updated activity object.
-
-### Errors
-
-| Status | Description |
-|--------|-------------|
-| `401 Unauthorized` | Authentication required |
-| `403 Forbidden` | Insufficient permissions |
-| `404 Not Found` | Activity not found |
+Response `200`: `ActivityRead`. Errors: `403`, `404`, `409` (missing file or wrong format).
 
 ---
 
-## Delete Activity
-
-Delete an activity.
+## Create external video activity
 
 ```
-DELETE /api/v1/courses/activities/{activity_uuid}
+POST /api/v1/activities/external_video
 ```
 
-### Response
+Auth: `create` permission on the parent course. Request body (`ExternalVideo`, JSON):
 
-`204 No Content` on success.
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `name` | string | Yes | |
+| `uri` | string | Yes | External video URL |
+| `type` | string | Yes | `youtube` \| `vimeo` |
+| `chapter_id` | string | Yes | Chapter ID encoded as a string |
+| `details` | string (JSON) | No | Default `"{}"` |
+| `extra_metadata` | object | No | |
 
-### Errors
+Stored with `activity_type=TYPE_VIDEO`, `activity_sub_type=SUBTYPE_VIDEO_YOUTUBE`, `content={uri, type, activity_uuid}`.
 
-| Status | Description |
-|--------|-------------|
-| `401 Unauthorized` | Authentication required |
-| `403 Forbidden` | Insufficient permissions |
-| `404 Not Found` | Activity not found |
+Response `200`: `ActivityRead`. Errors: `403`, `404`, `422`.
 
 ---
 
-## Activity Versioning
-
-Activities support versioning — each update creates a new version that can be viewed and restored.
-
-### List Versions
-
-Get the version history for an activity.
+## Create PDF activity
 
 ```
-GET /api/v1/courses/activities/{activity_uuid}/versions
+POST /api/v1/activities/documentpdf
 ```
 
-### Response Body (200 OK)
+Auth: `create` permission on the parent course. Request: `multipart/form-data`.
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `name` | string | Yes | |
+| `chapter_id` | string | Yes | Chapter ID as a form string |
+| `pdf_file` | file | Yes in practice | `application/pdf` |
+| `extra_metadata` | string (JSON object) | No | |
+
+Stored with `activity_type=TYPE_DOCUMENT`, `activity_sub_type=SUBTYPE_DOCUMENT_PDF`, `content={filename, activity_uuid}`.
+
+Response `200`: `ActivityRead`. Errors: `403`, `404`, `409` (missing file or wrong format).
+
+---
+
+## Update activity
+
+```
+PUT /api/v1/activities/{activity_uuid}
+```
+
+Auth: `update` permission on the parent course. Only explicitly provided fields are written.
+
+| Field | Type |
+|---|---|
+| `name` | string |
+| `content` | object |
+| `activity_type` | string |
+| `activity_sub_type` | string |
+| `details` | object |
+| `published` | boolean |
+| `published_version` | integer |
+| `version` | integer |
+| `lock_type` | `public` \| `authenticated` \| `restricted` |
+| `extra_metadata` | object |
+
+When `content` is present and the activity already has content, the previous content is snapshotted as a version and `current_version` is incremented.
+
+Response `200`: updated `ActivityRead` (no lock stripping on the write path). Errors: `403`, `404`.
+
+---
+
+## Delete activity
+
+```
+DELETE /api/v1/activities/{activity_uuid}
+```
+
+Auth: `delete` permission on the parent course. Removes the activity and its chapter link; stored activity files are deleted.
+
+Response `200`:
+
+```json
+{ "detail": "Activity deleted" }
+```
+
+Errors: `403`, `404`.
+
+---
+
+## Versioning
+
+Requires the `versioning` feature on the organization (standard plan or OSS). Every route needs read access to the parent course (`restore` needs `update`).
+
+### List versions
+
+```
+GET /api/v1/activities/{activity_uuid}/versions?limit=20&offset=0
+```
+
+| Param | In | Type | Default | Notes |
+|---|---|---|---|---|
+| `limit` | query | integer | `20` | Max 100 |
+| `offset` | query | integer | `0` | |
+
+Response `200`: `ActivityVersionRead[]`, newest first.
 
 ```json
 [
   {
+    "id": 7,
+    "activity_id": 100,
+    "org_id": 1,
     "version_number": 3,
-    "created_at": "2026-09-22T15:30:00Z",
-    "created_by": 1,
-    "change_summary": "Updated video URL"
-  },
-  {
-    "version_number": 2,
-    "created_at": "2026-09-21T12:00:00Z",
-    "created_by": 1,
-    "change_summary": "Fixed typo in transcript"
-  },
-  {
-    "version_number": 1,
-    "created_at": "2026-09-20T10:00:00Z",
-    "created_by": 1,
-    "change_summary": "Initial creation"
+    "content": {},
+    "created_by_id": 1,
+    "created_at": "2026-09-22T15:30:00",
+    "created_by_username": "johndoe",
+    "created_by_avatar": ""
   }
 ]
 ```
 
-### Get Specific Version
-
-Retrieve the content of a specific version.
+### Get one version
 
 ```
-GET /api/v1/courses/activities/{activity_uuid}/versions/{version_number}
+GET /api/v1/activities/{activity_uuid}/versions/{version_number}
 ```
 
-### Response Body (200 OK)
+Response `200`: `ActivityVersionRead`. Errors: `404` (activity or version not found).
 
-Returns the activity content as it existed at that version.
-
-### Restore Version
-
-Restore the activity to a previous version.
+### Get current state (conflict detection)
 
 ```
-POST /api/v1/courses/activities/{activity_uuid}/versions/{version_number}/restore
+GET /api/v1/activities/{activity_uuid}/state
 ```
 
-### Response Body (200 OK)
-
-Returns the restored activity object. A new version is created reflecting the restore.
-
-### Errors
-
-| Status | Description |
-|--------|-------------|
-| `404 Not Found` | Activity or version not found |
-
----
-
-## Activity State (Conflict Detection)
-
-Get the current state of an activity for conflict detection in collaborative editing.
-
-```
-GET /api/v1/courses/activities/{activity_uuid}/state
-```
-
-### Response Body (200 OK)
+Response `200` (`ActivityStateRead`):
 
 ```json
 {
-  "update_date": "2026-09-22T15:30:00Z",
+  "activity_uuid": "activity_31de...",
+  "update_date": "2026-09-22 15:30:00",
   "current_version": 3,
-  "last_modified_by": 1
+  "last_modified_by_id": 1,
+  "last_modified_by_username": "johndoe"
 }
 ```
 
-This lightweight endpoint allows editors to detect if the activity has been modified by someone else since they last loaded it.
+### Restore a version
+
+```
+POST /api/v1/activities/{activity_uuid}/versions/{version_number}/restore
+```
+
+Snapshots the current content, restores the requested version, and increments `current_version`. Response `200`: updated `ActivityRead`. Errors: `403`, `404`.
 
 ---
 
-## Editor Bootstrap
-
-Get all data needed to load the activity editor in a single round trip — including the activity, minimal course data, and the resolved organization with feature flags.
+## Editor bootstrap
 
 ```
-GET /api/v1/courses/activities/{activity_uuid}/editor-bootstrap
+GET /api/v1/activities/{activity_uuid}/editor-bootstrap
 ```
 
-### Response Body (200 OK)
+Auth: read access to the parent course. Single-roundtrip payload for the editor.
+
+Response `200`:
 
 ```json
 {
-  "activity": { "...activity data..." },
-  "course": { "id": 1, "uuid": "...", "name": "..." },
-  "organization": {
+  "activity": { "id": 100, "activity_uuid": "activity_31de...", "name": "What is a Variable?" },
+  "course": {
+    "course_uuid": "course_9f2c...",
+    "name": "Introduction to Algebra",
+    "description": "A beginner-friendly course.",
+    "thumbnail_image": "",
+    "org_uuid": "org_4c1e...",
+    "org_id": 1
+  },
+  "org": {
     "id": 1,
+    "org_uuid": "org_4c1e...",
     "name": "My Org",
-    "features": {
-      "courses": true,
-      "payments": false,
-      "ai": true
-    }
+    "slug": "my-org",
+    "email": "hello@example.com"
   }
 }
 ```
 
----
+`activity` is a full `ActivityRead` (paid + lock rules applied); `org` is an `OrganizationRead` with resolved features.
 
-## User Group Access
-
-### List User Groups with Access
-
-```
-GET /api/v1/courses/activities/{activity_uuid}/usergroups
-```
-
-### Response Body (200 OK)
-
-```json
-[
-  {
-    "uuid": "group-001",
-    "name": "Premium Students",
-    "access_level": "view"
-  }
-]
-```
-
-### Grant Access to User Group
-
-```
-POST /api/v1/courses/activities/{activity_uuid}/usergroups/{usergroup_uuid}
-```
-
-### Revoke Access from User Group
-
-```
-DELETE /api/v1/courses/activities/{activity_uuid}/usergroups/{usergroup_uuid}
-```
-
-### Errors
-
-| Status | Description |
-|--------|-------------|
-| `401 Unauthorized` | Authentication required |
-| `403 Forbidden` | Insufficient permissions |
-| `404 Not Found` | Activity or user group not found |
+Errors: `403`, `404`.
 
 ---
 
-## Data Model Summary
+## User group access
 
-| Field | Type | Description |
-|-------|------|-------------|
+| Method | Path | Permission | Response |
+|---|---|---|---|
+| `GET` | `/api/v1/activities/{activity_uuid}/usergroups` | course read | `[{usergroup_id, usergroup_uuid, name, description}]` |
+| `POST` | `/api/v1/activities/{activity_uuid}/usergroups/{usergroup_uuid}` | course update | `{ "detail": "User group added" }` (or `"User group already has access"`) |
+| `DELETE` | `/api/v1/activities/{activity_uuid}/usergroups/{usergroup_uuid}` | course update | `{ "detail": "User group removed" }` |
+
+Errors: `403`, `404` (activity, course or user group not found; `"User group not associated with resource"` on delete).
+
+---
+
+## Data model summary (`ActivityRead`)
+
+| Field | Type | Notes |
+|---|---|---|
 | `id` | integer | Primary key |
-| `uuid` | string | Public UUID identifier |
-| `chapter_id` | integer | Foreign key to the parent chapter |
-| `title` | string | Activity title |
-| `activity_type` | string | Type constant (`TYPE_VIDEO`, `TYPE_DOCUMENT`, etc.) |
-| `content` | JSON | Activity content (structure varies by type) |
-| `sort_order` | integer | Ordering position within the chapter |
-| `duration` | integer | Duration in seconds |
-| `extra_metadata` | JSON | Arbitrary metadata |
+| `org_id`, `course_id` | integer | Parent identifiers |
+| `activity_uuid` | string | Public UUID (`activity_...`) |
+| `name` | string | Activity name (not `title`) |
+| `activity_type` | string | `TYPE_*` constant |
+| `activity_sub_type` | string | `SUBTYPE_*` constant |
+| `content` | object | Shape varies by type; `{}` when locked |
+| `details` | object \| null | `null` when locked |
+| `published` | boolean | |
+| `lock_type` | string | `public` \| `authenticated` \| `restricted` |
+| `is_locked` | boolean | Computed per request; not stored |
+| `extra_metadata` | object | Free-form |
 | `current_version` | integer | Latest version number |
-| `created_at` | datetime | Creation timestamp |
-| `updated_at` | datetime | Last update timestamp |
+| `last_modified_by_id`, `last_modified_by_username` | integer / string | |
+| `creation_date`, `update_date` | string | |
+
+Order and chapter membership live on the `chapteractivity` link table; there is no `sort_order`, `duration`, or `title` field on the activity.

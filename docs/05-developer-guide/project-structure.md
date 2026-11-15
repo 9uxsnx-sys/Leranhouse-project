@@ -1,155 +1,110 @@
 # Project Structure
 
-> How the monorepo is organized.
+> Status: as-built · Last verified: 2026-11-15
+
+> How the repository is organized.
 
 ---
 
-## Top-Level Layout
+## Top Level
 
-```
-learnhouse-dev/
-├── apps/
-│   ├── api/               # FastAPI backend (Python)
-│   ├── web/               # Next.js frontend (TypeScript)
-│   ├── collab/            # Yjs/Hocuspocus realtime server (TypeScript)
-│   └── cli/               # Development CLI (TypeScript)
-├── packages/
-│   └── ...                # Shared packages
-├── docs/                  # Documentation
-└── .learnhouse/           # Docker compose configs
-```
+There is **no root `package.json`** and no shared `packages/` folder — each app owns its own dependencies, lockfile and build.
+
+| Path | What it is |
+|------|------------|
+| `apps/api/` | FastAPI backend (Python, managed with `uv`) |
+| `apps/web/` | Next.js 16 frontend (TypeScript) |
+| `apps/cli/` | `learnhouse` deployment/dev CLI (TypeScript, published to npm) |
+| `apps/collab/` | Hocuspocus/Yjs realtime server (TypeScript) |
+| `apps/mcp/` | MCP server placeholder — currently only `.env.example` |
+| `docs/` | This documentation set |
+| `docker/` | Container helpers (`nginx.conf`, `start.sh`) |
+| `Dockerfile` | Root production image |
+| `.learnhouse/` | **Generated at runtime**, not checked in (see below) |
 
 ---
 
-## `apps/api` --- FastAPI Backend
+## `apps/api` — FastAPI Backend
 
-```
-apps/api/
-├── src/
-│   ├── api/
-│   │   └── v1/            # API route handlers
-│   ├── db/
-│   │   ├── models/        # SQLModel database models
-│   │   └── migrations/    # Alembic migration files
-│   ├── services/          # Business logic layer
-│   ├── middleware/        # Auth, CORS, rate limiting
-│   ├── router.py          # Route registration
-│   └── app.py             # FastAPI application entry
-├── tests/
-├── pyproject.toml
-└── .env                   # Environment configuration
-```
-
-### Key Files
-
-| File | Purpose |
+| Path | Purpose |
 |------|---------|
-| `src/router.py` | Registers all API routers |
-| `src/app.py` | FastAPI app creation, middleware, startup events |
-| `src/api/v1/` | Versioned API route handlers |
-| `src/db/models/` | Database models (SQLModel) |
-| `src/services/` | Business logic called by routes |
-| `pyproject.toml` | Python dependencies (uv) |
+| `app.py` | FastAPI app, lifespan, middleware, router wiring |
+| `cli.py` | Typer installer CLI |
+| `config/config.py` + `config/config.yaml` | `LearnHouseConfig` loading (env → YAML) |
+| `src/router.py` | Single `v1_router` with prefix `/api/v1` |
+| `src/routers/` | Route handlers, grouped by domain |
+| `src/services/` | Business logic |
+| `src/db/` | SQLModel models (domain subpackages + flat modules) |
+| `src/security/` | Auth, RBAC, plan/feature gates |
+| `src/core/` | Events (startup/DB), CORS middleware, `deployment_mode.py`, `ee_hooks.py` |
+| `src/tests/` | pytest suite (`conftest.py`, router/security tests) |
+| `migrations/` | Alembic environment and versions |
+| `scripts/migrate.py` | Data migration helper |
+| `pyproject.toml` | Python dependencies and pytest config |
+
+> There is no `src/api/` and no `apps/api/tests/` — routes live in `src/routers/` and tests in `src/tests/`.
 
 ---
 
-## `apps/web` --- Next.js Frontend
+## `apps/web` — Next.js Frontend
 
-```
-apps/web/
-├── app/
-│   ├── orgs/
-│   │   └── [orgslug]/
-│   │       ├── (withmenu)/    # User Part (Medusa redesign)
-│   │       │   ├── layout.tsx # Sidebar menu layout
-│   │       │   ├── page.tsx   # Home
-│   │       │   ├── courses/
-│   │       │   ├── course/[uuid]/
-│   │       │   ├── communities/
-│   │       │   ├── boards/
-│   │       │   └── ...
-│   │       └── dash/          # Admin Dashboard (original design)
-│   │           ├── layout.tsx # Admin layout
-│   │           ├── page.tsx   # Dashboard home
-│   │           ├── courses/
-│   │           ├── analytics/
-│   │           ├── org/settings/
-│   │           └── ...
-│   ├── auth/                  # Authentication pages
-│   └── api/                   # API proxy routes
-├── components/
-│   ├── Dashboard/             # Admin components
-│   │   └── Pages/Course/      # Course edit components
-│   ├── Objects/               # Shared UI objects
-│   │   └── Thumbnails/        # Card components
-│   ├── ui/                    # UI components (Medusa)
-│   └── ...                    # Other components
-├── contexts/                  # React contexts
-├── services/                  # API service functions
-├── lib/                       # Utility functions
-├── public/                    # Static assets
-├── package.json
-└── .env.local                 # Environment config
-```
-
-### Key Files
-
-| File | Purpose |
+| Path | Purpose |
 |------|---------|
-| `app/` | Next.js App Router pages |
-| `components/` | React components |
-| `components/ui/` | Medusa design system components |
-| `components/Dashboard/Pages/Course/` | Course editor components |
-| `services/` | API service layer (calls backend) |
-| `contexts/` | Auth, Course, Org, I18n contexts |
-| `proxy.ts` | API request proxy middleware |
+| `app/` | App Router pages and route handlers |
+| `app/api/` | Route handlers: `health`, `revalidate`, `robots`, `sitemap`, catch-all `v1/[...path]` backend proxy |
+| `components/ui/` | Local UI kit (ported from Medusa UI tokens; no Medusa dependency) |
+| `components/Dashboard/` | Admin dashboard components, grouped by page |
+| `components/Objects/` | Shared domain UI (courses, activities, communities, menus…) |
+| `components/Contexts/` | React context providers (auth, org, course, i18n, podcasts…) |
+| `services/` | Typed API service layer (see [services](./frontend/services.md)) |
+| `lib/` | Shared utilities (auth, i18n, SEO, fonts, constants) |
+| `hooks/` | Cross-page React hooks |
+| `locales/` | Translation JSON files |
+| `public/` | Static assets |
+| `styles/globals.css` | Global CSS and design tokens |
+| `ee/` | Enterprise-only frontend code (multi-tenant resolver) |
+| `proxy.ts` | Next.js middleware: tenancy resolution and rewrites |
+| `next.config.js` | Next.js config (Sentry-wrapped) |
 
 ---
 
-## `apps/cli` --- Development CLI
+## `apps/cli` — LearnHouse CLI
 
-```
-apps/cli/
-├── src/
-│   ├── commands/
-│   │   ├── dev.ts          # Dev server orchestrator
-│   │   └── setup.ts        # Setup command
-│   └── bin/
-│       └── learnhouse.ts   # CLI entry point
-├── package.json
-└── .env
-```
+| Path | Purpose |
+|------|---------|
+| `bin/learnhouse.ts` | CLI source entry (built to `dist/bin/learnhouse.js`) |
+| `src/commands/` | Commands: `setup`, `start`, `stop`, `status`, `dev`, `logs`, `backup`, `restore`, `update`, `doctor`, `shell`, … |
+| `src/services/` | Docker, config store, env checks, health, version checks |
+| `src/templates/` | Generated Caddyfile, Nginx and env templates |
+| `tests/` | Vitest unit + e2e tests |
+
+Built with `tsup`; the npm package name is `learnhouse`.
 
 ---
 
-## `apps/collab` --- Realtime Server
+## `apps/collab` — Realtime Server
 
-```
-apps/collab/
-├── src/
-│   ├── index.ts            # Server entry (Hocuspocus)
-│   └── extensions/         # Hocuspocus extensions
-├── package.json
-└── .env
-```
+A single entry file, `src/index.ts`, running the Hocuspocus server (package `@learnhouse/collab`). See [collab-server](./collab-server.md) for protocol details and commands.
 
 ---
 
-## `docs/` --- Documentation
+## `apps/mcp`
 
-```
-docs/
-├── README.md               # Entry point
-├── 01-getting-started/     # Setup guides
-├── 02-architecture/        # System design
-├── 03-user-guide/          # Learner documentation
-├── 04-admin-guide/         # Admin documentation
-├── 05-developer-guide/     # Developer documentation
-├── 06-api-reference/       # API reference
-├── 07-ui-reference/        # UI component reference
-├── 08-features/            # Feature documentation
-├── 09-contributing/        # Contribution guide
-├── 10-changelog/           # Release history
-├── DOCUMENTATION-PLAN.md   # Documentation plan
-└── _archive/               # Old docs (kept for reference)
-```
+Only `apps/mcp/.env.example` exists at the moment — there is no server source in this repository.
+
+---
+
+## `docs/`
+
+Numbered sections (`01-getting-started` … `10-changelog`), each with a `README.md` index.
+
+---
+
+## `.learnhouse/` — Runtime Only
+
+`.learnhouse/` is **created at runtime** by the dev CLI, not stored in the repo:
+
+- `apps/cli/src/commands/dev.ts` writes `.learnhouse/docker-compose.dev.yml` next to the project (Postgres `pgvector/pgvector:pg16` on port 5434 plus Redis on 6379) before spawning the apps.
+- `apps/cli/src/services/config-store.ts` keeps installed deployments under `~/.learnhouse/<name>`.
+
+Do not commit `.learnhouse/`, and do not treat it as a shared configuration folder.

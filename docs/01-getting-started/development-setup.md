@@ -1,67 +1,57 @@
 # Development Setup
 
-> Complete guide to setting up and running the Koodook (Learnhouse) platform locally in development mode.
+> Status: as-built · Last verified: 2026-11-15
+
+Docker runs only PostgreSQL and Redis; the API, web app, and collab server run as local processes with hot reload, orchestrated by the repo CLI.
 
 ---
 
-## 1. Architecture Overview
-
-The platform is a monorepo with 4 apps. In dev mode, **Docker runs only the infrastructure** (PostgreSQL + Redis) and the three app servers run as local processes with hot reload:
+## 1. Architecture
 
 | Component | What it is | Runs as |
 |-----------|-----------|---------|
 | `apps/api` | FastAPI backend | local process (`uv run python app.py`) |
 | `apps/web` | Next.js frontend | local process (`next dev --webpack`) |
-| `apps/collab` | Yjs/Hocuspocus realtime server | local process (`tsx watch src/index.ts`) |
-| `learnhouse-db-dev` | PostgreSQL (pgvector) | Docker container |
+| `apps/collab` | Hocuspocus/Yjs server for boards | local process (`tsx watch src/index.ts`) |
+| `learnhouse-db-dev` | PostgreSQL with pgvector | Docker container |
 | `learnhouse-redis-dev` | Redis | Docker container |
 
-> **Note:** `--webpack` is used instead of `--turbopack` because Next.js 16.2.6 has a known Turbopack bug (issue #97894) that causes all `/orgs/*` routes to silently return 404. The CLI at `apps/cli/src/commands/dev.ts` already uses `--webpack`. If you ever run `next dev` manually, pass `--webpack`.
-
-The CLI (`apps/cli`) orchestrates all of this: it checks env files, starts the containers if needed, auto-installs missing dependencies, spawns the three servers, and gives you restart controls.
+The CLI (`apps/cli`) checks env files, starts the containers, installs missing dependencies, spawns the three servers, and provides restart hotkeys.
 
 ---
 
 ## 2. Prerequisites
 
-| Tool | Why | Check with |
-|------|-----|-----------|
-| Docker Desktop | runs PostgreSQL + Redis containers | `docker version` |
-| Bun | installs/runs web, collab, and the CLI itself | `bun --version` |
-| uv | Python package manager for the API | `uv --version` |
+| Tool | Why | Check |
+|------|-----|-------|
+| Docker Desktop | PostgreSQL + Redis containers | `docker info` |
+| Bun | web, collab, and the CLI | `bun --version` |
+| uv | Python dependency manager for the API | `uv --version` |
 
-> **Important:** Make sure **Docker Desktop is running** before starting the dev server. The CLI will try to start containers and fail if Docker is not available.
+Docker must be running before you start the dev command.
 
 ---
 
-## 3. Ports and Access URLs
-
-> **Critical:** A native PostgreSQL on the host already occupies port **5432** on this machine. That is why the Docker DB is mapped to **5434**. Never change this back to 5432.
+## 3. Ports and URLs
 
 | Service | Host port | URL |
 |---------|-----------|-----|
-| Web app (main UI) | 3000 | http://localhost:3000 |
+| Web | 3000 | http://localhost:3000 |
 | API | 1338 | http://localhost:1338 |
-| API docs (Swagger) | 1338 | http://localhost:1338/docs |
-| API docs (ReDoc) | 1338 | http://localhost:1338/redoc |
-| Collab (websocket) | 4000 | ws://localhost:4000 |
-| PostgreSQL | **5434** (-> 5432 in container) | --- |
-| Redis | 6379 | --- |
+| Swagger UI / ReDoc | 1338 | http://localhost:1338/docs, `/redoc` (development mode only) |
+| Collab WebSocket | 4000 | ws://localhost:4000 |
+| PostgreSQL | **5434** | mapped to 5432 inside the container |
+| Redis | 6379 | — |
 
-### Default Admin Account
+The API port is `LEARNHOUSE_PORT`, falling back to `hosting_config.port` in `apps/api/config/config.yaml`.
 
-```
-Email:    admin@school.dev
-Password: admin123456
-```
+### Admin account
 
-Course creation and management are only visible when logged in as admin.
+The example command below passes `admin@school.dev` / `admin123456`. Auto-install uses those credentials on the first run against an empty database; once an organization exists the values are ignored.
 
 ---
 
-## 4. Start Dev Mode (Everyday Workflow)
-
-> **Before you start:** Make sure **Docker Desktop is running**. The dev server needs Docker to start PostgreSQL and Redis containers.
+## 4. Start dev mode
 
 From the repository root:
 
@@ -71,13 +61,17 @@ bun run apps/cli/bin/learnhouse.ts dev --admin-email admin@school.dev --admin-pa
 
 What happens:
 
-1. Env files are validated (`checkDevEnv`).
-2. Docker containers are created and started (or reused if already running).
-3. Missing `node_modules` / `.venv` are auto-installed via `bun install` / `uv sync`.
-4. API (port 1338), Web (port 3000), Collab (port 4000) start with hot reload.
-5. Admin credentials are injected as `LEARNHOUSE_INITIAL_ADMIN_EMAIL` / `LEARNHOUSE_INITIAL_ADMIN_PASSWORD` (used on first DB setup).
+1. The three env files are checked. If required keys are missing, the CLI lists them and offers to append defaults (or you can abort and set them yourself).
+2. When the containers are not already running, admin credentials are prompted for (unless passed as flags), and `.learnhouse/docker-compose.dev.yml` is written and started.
+3. Containers are reused if they are already running.
+4. `bun install` runs in `apps/web` / `apps/collab` when `node_modules` is absent; `uv sync` runs in `apps/api` when `.venv` is absent.
+5. API (1338), web (3000), and collab (4000) start with hot reload.
 
-### Interactive Controls (when run in a real terminal)
+The first startup also runs the API's auto-install: `SQLModel.metadata.create_all` plus default roles and organization/admin creation when the database has no organization.
+
+### Interactive controls
+
+Available only in a real terminal (not an IDE background terminal):
 
 | Key | Action |
 |-----|--------|
@@ -85,173 +79,95 @@ What happens:
 | `rw` | restart web |
 | `rc` | restart collab |
 | `rb` | restart all |
-| `q` / `Ctrl+C` | stop the dev servers (containers stay running) |
-
-> Note: when run from an IDE's background terminal the key controls are unavailable (no TTY); stop it via the terminal instead.
+| `q` / `Ctrl+C` | stop the app servers (containers stay up) |
 
 ---
 
-## 5. Stop and Restart
+## 5. Stop and restart
 
-**Stop only the app servers** (containers keep running for the next session):
+Stop the app servers: press `q` or `Ctrl+C`.
 
-```bash
-# Press q or Ctrl+C in the dev session
-```
-
-**Stop the containers too:**
+Stop the containers:
 
 ```bash
 docker compose -f .learnhouse/docker-compose.dev.yml -p learnhouse-dev down
 ```
 
-**Clean restart (fresh containers, keeps data volume):**
+Start them again without the CLI:
 
 ```bash
 docker compose -f .learnhouse/docker-compose.dev.yml -p learnhouse-dev up -d
 ```
 
-**Reset the database completely (wipes dev data):**
+Reset the dev database (deletes data):
 
 ```bash
 docker compose -f .learnhouse/docker-compose.dev.yml -p learnhouse-dev down -v
-# then re-run the dev command above
 ```
 
 ---
 
-## 6. Environment Files
+## 6. Environment files
 
 | File | Purpose |
 |------|---------|
-| `apps/api/.env` | API config --- DB connection string, JWT, admin seed, ports |
-| `apps/web/.env.local` | Web config --- API URL, NextAuth secrets |
-| `apps/collab/.env` | Collab config --- API URL, internal key |
+| `apps/api/.env` | DB/Redis connection strings, JWT secret, admin seed, port |
+| `apps/web/.env.local` | Backend URL (and optional runtime overrides) |
+| `apps/collab/.env` | API URL, JWT secret, internal key, port |
 
-The dev CLI validates these exist and fails fast if any is missing.
-
----
-
-## 7. Troubleshooting
-
-### API fails with "connection refused" or "password authentication failed"
-
-Almost always a **port mismatch** between the API `.env` and the DB container.
-
-- API `.env` must use `localhost:5434`:
-  ```
-  LEARNHOUSE_SQL_CONNECTION_STRING=postgresql://learnhouse:learnhouse@localhost:5434/learnhouse
-  ```
-- The DB container must be published on host port **5434**:
-  ```
-  docker port learnhouse-db-dev        # expect: 5432/tcp -> 0.0.0.0:5434
-  ```
-- If the volume was created with a different password, reset it:
-  ```
-  docker exec learnhouse-db-dev psql -U learnhouse -h localhost -d learnhouse \
-    -c "ALTER USER learnhouse WITH PASSWORD 'learnhouse';"
-  ```
-
-### Do NOT use `npx learnhouse dev`
-
-The **published npm CLI** (`npx learnhouse dev`) regenerates `.learnhouse/docker-compose.dev.yml` with the DB on host port **5432:5432**, which conflicts with the native PostgreSQL on this machine and breaks the API. Always use the repo's own CLI:
-
-```bash
-bun run apps/cli/bin/learnhouse.ts dev ...
-```
-
-The repo CLI is already patched (see `apps/cli/src/commands/dev.ts`, `DEV_COMPOSE` template) to map **5434:5432**.
-
-### Seed command can wipe existing data and media files
-
-The `bun run seed` command (or similar seed/reset scripts) **destroys all existing data** and recreates it from scratch. This includes:
-
-- **All database records** (users, courses, podcasts, communities, etc.)
-- **Media files** stored in `content/` (avatars, thumbnails, banners, etc.)
-- Any manually uploaded images or data you added during development
-
-> **Warning:** Do NOT run any seed/reset command unless you are absolutely sure you want to start from a clean slate. If you only need to fix a missing column or update a single user field, use a targeted SQL `ALTER TABLE` or `UPDATE` instead (see example below).
-
-**Safer alternative — targeted SQL updates:**
-
-```bash
-# Fix a missing column (doesn't wipe anything)
-docker exec -i learnhouse-db-dev psql -U learnhouse -d learnhouse -c "ALTER TABLE \"user\" ADD COLUMN banner_image VARCHAR DEFAULT '';"
-
-# Update a single user field
-docker exec -i learnhouse-db-dev psql -U learnhouse -d learnhouse -c "UPDATE \"user\" SET avatar_image='OSLO-11.png' WHERE email='admin@school.dev';"
-```
-
-If you really must re-seed, back up any custom media first:
-
-```bash
-# Backup content directory before seeding
-Copy-Item -Recurse content content-backup
-# After seeding, restore what you need
-```
-
-### Web loads but API calls fail in the browser
-
-Check that http://localhost:1338/docs loads. If not, restart the API: `Ctrl+C` the dev session and re-run the dev command, or press `ra` if you are in a real terminal.
-
-### All `/orgs/*` routes return 404 (blank page)
-
-If every route under `/orgs/default` or similar returns 404, the most likely cause is the **Turbopack bug** in Next.js 16.2.6. Verify the server log shows:
-
-```
-▲ Next.js 16.2.6 (webpack)     <- correct
-```
-
-If it shows `(turbo)` instead, the CLI is using `--turbopack`. Check that `apps/cli/src/commands/dev.ts` line 332 uses `['dev', '--webpack']` instead of `['dev', '--turbopack']`. Restart the dev server after fixing.
-
-A second possible cause is the proxy middleware in `apps/web/proxy.ts` --- if it double-prefixes paths (e.g. `/orgs/default/orgs/default`), the fix is to add a passthrough check that skips the org-prefix rewrite for paths already starting with `/orgs/`.
-
-### `collab` fails with `EADDRINUSE :::4000`
-
-The collab (websocket) server can't start if port 4000 is already occupied by a previous instance. The web app and API will still work normally --- collab is only needed for realtime collaboration features.
-
-To free port 4000:
-```bash
-netstat -ano | findstr :4000
-taskkill /PID <PID> /F
-```
-Then restart the dev server (or press `rc` in a real terminal).
-
-### Port already in use
-
-| Port | Usual culprit | Fix |
-|------|---------------|-----|
-| 3000 | another Next/Vite dev server | `taskkill /PID <PID> /F` or stop it manually |
-| 1338 | another API instance | stop it |
-| 4000 | another collab instance (EADDRINUSE) | `taskkill /PID <PID> /F` or stop the old process |
-| 5432 | **native host PostgreSQL** | leave it alone --- dev DB must stay on 5434 |
+The dev command does not fail fast on missing variables: it lists them, then either appends dev defaults or exits if you choose to abort. See [Environment Variables](../05-developer-guide/environment-variables.md) for the full list.
 
 ---
 
-## 8. Useful Commands
+## 7. Demo seed
+
+The seeder is a Python entry point, not a Bun script. Run it from `apps/api`:
 
 ```bash
-# Show running containers
-docker ps
+cd apps/api
+uv run python -m src.services.seed --demo
+```
 
-# Inspect DB container port mapping
-docker port learnhouse-db-dev
+| Flag | Effect |
+|------|--------|
+| `--demo` | Required confirmation |
+| `--reset` | Deletes the `demo` organization, its rows, its content folder, and seeded user avatars before re-seeding |
+| `--assets-dir <path>` | Alternate image source; defaults to `apps/api/seed-assets` |
+| `--seed-activity-translations` / `--seed-collection-translations` / `--seed-community-translations` / `--seed-podcast-translations` | Run one translation backfill instead of the demo seed |
 
-# Open a SQL shell into the dev database
-docker exec -it learnhouse-db-dev psql -U learnhouse -d learnhouse
+Notes:
 
-# Check Postgres health
-docker exec learnhouse-db-dev pg_isready -U learnhouse
+- `LEARNHOUSE_DEVELOPMENT_MODE=true` is required; the seeder refuses to run otherwise.
+- If the `demo` org already exists, the seeder refuses unless you pass `--reset`.
+- The reset is scoped to the demo organization — it does not wipe unrelated organizations or the whole `content/` directory.
+- Seeded content is written under `apps/api/content` (working directory), and the command prints the demo URL plus the owner login (`owner@koodook.academy` / `Demo12345`).
 
-# Run the API alone (manual)
+---
+
+## 8. Running a service manually
+
+From the app folder:
+
+```bash
+# API
 cd apps/api && uv run python app.py
 
-# Run the web alone (manual)
-cd apps/web && bun run dev
+# Web (same flag the CLI uses)
+cd apps/web && bunx next dev --webpack
+
+# Collab
+cd apps/collab && bun run dev
 ```
+
+The API expects to run with `apps/api` as the working directory (it resolves `config/`, `src/`, and `migrations/` relative to it).
 
 ---
 
-## 9. Version Note
+## 9. Troubleshooting
 
-This repo is pinned at tag **`1.2.0`** (see `VERSION_DECISION.md`). The published npm CLI may be newer and behave differently --- one more reason to always use the repo's own CLI from `apps/cli`.
+- **DB connection refused** — the dev database is on **5434**; make sure `apps/api/.env` uses `localhost:5434` and the `learnhouse-db-dev` container is running.
+- **Port already in use** — check 3000, 1338, 4000, 5434, and 6379; stop the conflicting process.
+- **`/docs` 404** — set `LEARNHOUSE_DEVELOPMENT_MODE=true`.
+- **Collab exits** — both `LEARNHOUSE_AUTH_JWT_SECRET_KEY` and `COLLAB_INTERNAL_KEY` must be present and match the API.
+
+Full symptom-by-symptom guide: [Troubleshooting](../05-developer-guide/troubleshooting.md).

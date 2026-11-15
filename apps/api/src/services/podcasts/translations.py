@@ -28,6 +28,7 @@ from src.db.podcasts.podcasts import Podcast
 from src.db.users import PublicUser
 from src.security.rbac import AccessAction, AccessContext, check_resource_access
 from src.services.courses.translations import DEFAULT_LOCALE, normalize_locale
+from src.services.people_locale import merge_localized_people
 
 
 def _get_podcast_or_404(db_session: Session, podcast_uuid: str) -> Podcast:
@@ -124,10 +125,11 @@ def apply_podcast_overlay(
         podcast, locale, db_session
     )
     if overlay.get("extra_metadata"):
-        overlay["extra_metadata"] = {
-            **(getattr(model, "extra_metadata", None) or {}),
-            **overlay["extra_metadata"],
-        }
+        overlay["extra_metadata"] = merge_localized_people(
+            getattr(model, "extra_metadata", None),
+            overlay["extra_metadata"],
+            "hosts",
+        )
     return model.model_copy(
         update={
             **overlay,
@@ -183,10 +185,11 @@ def apply_podcast_overlay_bulk(podcast_reads, locale: Optional[str], db_session:
             read.model_copy(
                 update={
                     **_overlay_from_podcast_translation(translation),
-                    "extra_metadata": {
-                        **(getattr(read, "extra_metadata", None) or {}),
-                        **(translation.extra_metadata or {}),
-                    },
+                    "extra_metadata": merge_localized_people(
+                        getattr(read, "extra_metadata", None),
+                        translation.extra_metadata,
+                        "hosts",
+                    ),
                     "content_locale": requested,
                     "is_fallback": False,
                 }

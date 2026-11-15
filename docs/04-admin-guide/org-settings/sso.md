@@ -150,5 +150,4 @@ Once testing succeeds:
 ## Related Sections
 
 - [General Settings](./general.md) — Organization name and default locale for SSO login pages
-- [Feature Flags](./features.md) — Toggle SSO features on/off
 - [Audit Logs](./audit-logs.md) — View SSO login attempts and failures

@@ -138,5 +138,5 @@ The API enforces rate limits to ensure fair usage and platform stability.
 
 ## Related Sections
 
-- [Feature Flags](./features.md) — The `api_access` feature flag must be enabled for API tokens to work
+- API tokens also require the organization's `api_access` feature to be enabled in its feature configuration
 - [Audit Logs](./audit-logs.md) — Track API token creation, usage, and revocation

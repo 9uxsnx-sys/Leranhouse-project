@@ -1,4 +1,4 @@
-from types import SimpleNamespace
+﻿from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -15,6 +15,7 @@ from src.security.rbac.resource_access import (
     _get_request_checker,
     check_resource_access,
 )
+from src.security.rbac.config import get_resource_config
 from src.security.rbac.types import AccessAction, AccessContext, AccessDecision, ResourceConfig
 
 
@@ -116,58 +117,93 @@ class TestResourceAccessRuntime:
         assert decision.via_public is True
 
     @pytest.mark.asyncio
-    async def test_check_access_community_public_read_for_anonymous_user(self, mock_request, session, anonymous_user):
+    async def test_check_access_community_without_parent_denied(self, mock_request, session, anonymous_user):
         checker = self._checker(mock_request, session, anonymous_user)
-        community = SimpleNamespace(community_uuid="community_1", public=True, org_id=1)
+        community = SimpleNamespace(
+            community_uuid="community_1", resource_uuid=None, resource_type=None
+        )
         exec_result = Mock()
         exec_result.first.return_value = community
         session.exec.return_value = exec_result
 
         decision = await checker.check_access("community_1", AccessAction.READ)
 
-        assert decision.allowed is True
-        assert decision.via_public is True
+        assert decision.allowed is False
+        assert "not attached" in decision.reason.lower()
 
     @pytest.mark.asyncio
-    async def test_check_access_authenticated_user_community_public_view(self, mock_request, session, public_user):
-        checker = self._checker(mock_request, session, public_user)
-        community = SimpleNamespace(community_uuid="community_3", public=True, org_id=1)
-        exec_result = Mock()
-        exec_result.first.return_value = community
-        session.exec.return_value = exec_result
+    async def test_check_access_community_inherits_parent_denial(self, mock_request, session, anonymous_user):
+        checker = self._checker(mock_request, session, anonymous_user)
+        config = get_resource_config("community_4")
+        community = SimpleNamespace(
+            community_uuid="community_4",
+            resource_uuid="course_4",
+            resource_type="course",
+        )
+        checker._get_resource = AsyncMock(return_value=community)
+        checker.check_access = AsyncMock(
+            return_value=AccessDecision(allowed=False, reason="Course is not public")
+        )
 
-        decision = await checker.check_access(
-            "community_3", AccessAction.READ, AccessContext.PUBLIC_VIEW
+        decision = await checker._check_community_access(
+            "community_4", AccessAction.READ, AccessContext.PUBLIC_VIEW, config
+        )
+
+        assert decision.allowed is False
+        assert "linked course" in decision.reason.lower()
+
+    @pytest.mark.asyncio
+    async def test_check_access_community_requires_claimed_free_parent(
+        self, mock_request, session, public_user
+    ):
+        checker = self._checker(mock_request, session, public_user)
+        config = get_resource_config("community_3")
+        community = SimpleNamespace(
+            community_uuid="community_3",
+            resource_uuid="course_3",
+            resource_type="course",
+        )
+        parent = SimpleNamespace(course_uuid="course_3", id=33)
+        checker._get_resource = AsyncMock(side_effect=[community, parent])
+        checker._get_access_type = AsyncMock(return_value=None)
+        checker._has_claimed_parent = Mock(return_value=False)
+        checker.check_access = AsyncMock(
+            return_value=AccessDecision(allowed=True, via_public=True, reason="public")
+        )
+
+        decision = await checker._check_community_access(
+            "community_3", AccessAction.READ, AccessContext.PUBLIC_VIEW, config
+        )
+
+        assert decision.allowed is False
+        assert "claim" in decision.reason.lower()
+
+    @pytest.mark.asyncio
+    async def test_check_access_community_allows_claimed_free_parent(
+        self, mock_request, session, public_user
+    ):
+        checker = self._checker(mock_request, session, public_user)
+        config = get_resource_config("community_2")
+        community = SimpleNamespace(
+            community_uuid="community_2",
+            resource_uuid="course_2",
+            resource_type="course",
+        )
+        parent = SimpleNamespace(course_uuid="course_2", id=22)
+        checker._get_resource = AsyncMock(side_effect=[community, parent])
+        checker._get_access_type = AsyncMock(return_value=None)
+        checker._has_claimed_parent = Mock(return_value=True)
+        checker.check_access = AsyncMock(
+            return_value=AccessDecision(allowed=True, via_public=True, reason="public")
+        )
+
+        decision = await checker._check_community_access(
+            "community_2", AccessAction.READ, AccessContext.PUBLIC_VIEW, config
         )
 
         assert decision.allowed is True
         assert decision.via_public is True
-
-    @pytest.mark.asyncio
-    async def test_check_access_anonymous_community_private_denied(self, mock_request, session, anonymous_user):
-        checker = self._checker(mock_request, session, anonymous_user)
-        community = SimpleNamespace(community_uuid="community_4", public=False, org_id=1)
-        exec_result = Mock()
-        exec_result.first.return_value = community
-        session.exec.return_value = exec_result
-
-        decision = await checker.check_access("community_4", AccessAction.READ)
-
-        assert decision.allowed is False
-        assert "not public" in decision.reason.lower()
-
-    @pytest.mark.asyncio
-    async def test_check_access_community_private_read_for_anonymous_user(self, mock_request, session, anonymous_user):
-        checker = self._checker(mock_request, session, anonymous_user)
-        community = SimpleNamespace(community_uuid="community_2", public=False, org_id=1)
-        exec_result = Mock()
-        exec_result.first.return_value = community
-        session.exec.return_value = exec_result
-
-        decision = await checker.check_access("community_2", AccessAction.READ)
-
-        assert decision.allowed is False
-        assert "not public" in decision.reason.lower()
+        assert decision.resource_uuid == "community_2"
 
     @pytest.mark.asyncio
     async def test_public_view_authorship_admin_role_and_usergroup_paths(self, mock_request, session, public_user):

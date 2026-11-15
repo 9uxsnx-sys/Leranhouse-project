@@ -732,9 +732,19 @@
     "discussion": "نقاش",
     "created": "تم الإنشاء",
     "linked_course": "الدورة المرتبطة",
+    "linked_podcast": "البودكاست المرتبط",
+    "linked_resource": "المحتوى المرتبط",
+    "not_linked": "غير مرتبط",
     "new": "نشر",
     "linked_course_description": "هذا المجتمع هو مساحة النقاش الخاصة بالدورة. انضم إلى المحادثة واطرح أسئلتك وتواصل مع بقية المتعلمين.",
+    "linked_podcast_description": "هذا المجتمع هو مساحة النقاش الخاصة بالبودكاست. انضم إلى المحادثة واطرح أسئلتك وتواصل مع بقية المستمعين.",
     "go_to_course": "الانتقال إلى الدورة",
+    "go_to_podcast": "الانتقال إلى البودكاست",
+    "access_inherited_title": "الوصول موروث",
+    "access_inherited_course_description": "يتبع هذا المجتمع قواعد الوصول الخاصة بالدورة المرتبط بها. ينضم إليه المتعلمون تلقائياً بمجرد وصولهم إلى الدورة.",
+    "access_inherited_podcast_description": "يتبع هذا المجتمع قواعد الوصول الخاصة بالبودكاست المرتبط به. ينضم إليه المستمعون تلقائياً بمجرد وصولهم إلى البودكاست.",
+    "access_inherited_no_parent": "هذا المجتمع غير مرتبط بأي دورة أو بودكاست. اربطه من تبويب المحتوى المرتبط ليظهر للمتعلمين.",
+    "manage_parent_access": "إدارة الوصول",
     "sidebar_includes": "يشمل هذا المجتمع",
     "member": "عضو",
     "members": "أعضاء",
@@ -878,6 +888,7 @@
     "all_communities": "كل المجتمعات",
     "newest": "الأحدث",
     "course_communities": "مجتمعات الدورات",
+    "podcast_communities": "مجتمعات البودكاست",
     "general": "عامة",
     "results_zero": "لا نتائج لـ «{{query}}»",
     "results_one": "نتيجة واحدة لـ «{{query}}»",
@@ -2211,6 +2222,16 @@
           "instructor_name_label": "اسم المدرب",
           "instructor_title_label": "المسمى الوظيفي للمدرب",
           "instructor_bio_label": "نبذة عن المدرب",
+          "instructors_label": "المدرّسون",
+          "instructor_label": "المدرّب {{number}}",
+          "add_instructor": "إضافة مدرّب",
+          "remove_instructor": "إزالة المدرّب",
+          "instructor_photo_label": "الصورة",
+          "instructor_photo_uploaded": "تم رفع الصورة",
+          "instructor_remove_photo": "إزالة الصورة",
+          "instructor_upload_photo": "انقر لرفع صورة",
+          "instructor_name_placeholder": "مثال: ياسين بن علي",
+          "instructor_title_placeholder": "مثال: مصمم منتجات",
           "audience_for_label": "الجمهور المستهدف",
           "audience_not_for_label": "غير مناسب لـ",
           "requirements_empty_text": "يجب أن تحتوي جميع عناصر المتطلبات على نص"
@@ -2639,7 +2660,7 @@
           "tabs": {
             "general": "عام",
             "thumbnail": "الصورة المصغرة",
-            "course": "الدورة المرتبطة",
+            "course": "المحتوى المرتبط",
             "moderation": "الإشراف",
             "access": "الوصول",
             "translations": "الترجمات"
@@ -2653,8 +2674,8 @@
             "subtitle": "تحديث صورة غلاف المجتمع"
           },
           "course": {
-            "title": "الدورة المرتبطة",
-            "subtitle": "ربط هذا المجتمع بدورة"
+            "title": "المحتوى المرتبط",
+            "subtitle": "ربط هذا المجتمع بدورة أو بودكاست"
           },
           "moderation": {
             "title": "الإشراف",
@@ -2666,14 +2687,21 @@
           }
         },
         "course": {
-          "title": "الدورة المرتبطة",
-          "subtitle": "ربط هذا المجتمع بدورة للنقاشات الخاصة بالدورة",
+          "title": "المحتوى المرتبط",
+          "subtitle": "ربط هذا المجتمع بدورة أو بودكاست للنقاشات",
           "currently_linked": "مرتبط حالياً",
           "unlink": "إلغاء الارتباط",
-          "link_button": "ربط دورة",
-          "search_placeholder": "البحث عن دورات...",
+          "link_button": "ربط",
+          "tab_course": "دورة",
+          "tab_podcast": "بودكاست",
+          "search_placeholder": "بحث...",
+          "search_courses": "البحث عن دورات...",
+          "search_podcasts": "البحث عن بودكاست...",
           "no_courses": "لم يتم العثور على دورات",
-          "no_course_linked": "لا توجد دورة مرتبطة",
+          "no_podcasts": "لم يتم العثور على بودكاست",
+          "no_course_linked": "لا يوجد محتوى مرتبط",
+          "no_resource_linked": "لا توجد دورة أو بودكاست مرتبط بعد",
+          "unlink_hint": "حدد العنصر المرتبط لإلغاء ارتباطه",
           "sort_aria": "ترتيب الدورات",
           "course_linked_id": "الدورة مرتبطة (المعرف: {{id}})",
           "course_not_found": "قد لا تكون الدورة المرتبطة موجودة بعد الآن أو ليس لديك حق الوصول إليها",
@@ -2777,7 +2805,16 @@
               "name_placeholder": "أدخل اسم المجتمع",
               "description_label": "الوصف",
               "description_placeholder": "صف موضوع هذا المجتمع",
-              "public_label": "اجعل هذا المجتمع عاماً (مرئي للجميع)"
+              "resource_label": "الربط بـ",
+              "resource_required": "اختر دورة أو بودكاست",
+              "resource_hint": "المجتمع ينتمي إلى دورة أو بودكاست واحد ويرث قواعد الوصول الخاصة به.",
+              "course_tab": "دورة",
+              "podcast_tab": "بودكاست",
+              "search_courses": "البحث عن دورات...",
+              "search_podcasts": "البحث عن بودكاست...",
+              "no_courses": "لم يتم العثور على دورات",
+              "no_podcasts": "لم يتم العثور على بودكاست",
+              "already_linked": "لديه مجتمع بالفعل"
             },
             "cancel": "إلغاء",
             "submit": "إنشاء المجتمع"
@@ -7026,6 +7063,7 @@
       "curriculum_module": "الوحدة {{number}}",
       "about_title": "حول هذه الدورة",
       "instructor_title": "المدرب",
+      "instructors_title": "يدرّسه",
       "audience_title": "لمن هذه الدورة",
       "audience_for_title": "هذه الدورة لك إذا\u2026",
       "audience_for_subtitle": "أنت تنطبق عليك أي من هذه",
@@ -7126,7 +7164,10 @@
     "badge": {
       "subscription": "اشتراك",
       "one_time": "دفعة واحدة",
-      "one_time_payment": "دفعة واحدة"
+      "one_time_payment": "دفعة واحدة",
+      "course": "دورة",
+      "podcast": "بودكاست",
+      "collection": "مجموعة"
     },
     "resource_types": {
       "course": "دورة",

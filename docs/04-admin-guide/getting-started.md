@@ -1,128 +1,76 @@
+> Status: as-built · Last verified: 2026-11-15
+
 # Getting Started as an Admin
 
-> Your first steps managing courses and learners on Koodook.
+This page covers signing in, reading the dashboard, and moving a resource from draft to live.
 
----
+## Signing in
 
-## First Login
+1. Open the organization's site and choose **Login**.
+2. Enter the email and password issued for your account.
+3. After authentication you land on the dashboard home at `/dash`.
 
-1. Navigate to your organization's Koodook login page
-2. Enter the admin credentials provided during setup (email and password)
-3. Click **Sign In**
+The dashboard is admin-only. A user needs a role whose **Dashboard → Access** permission is enabled (or superadmin status); otherwise the request is redirected to the organization home.
 
-> **Tip:** If you don't have admin credentials yet, ask your organization owner or super admin to create your account with the appropriate role.
+## Reading the dashboard
 
-After signing in, you land on the **Admin Dashboard**.
+The left menu contains Home, Courses, Collections, Communities, Podcasts, Users, Payments, Organization, Notifications and Analytics. Collections, Communities and Podcasts are hidden when the organization has the matching feature disabled.
 
----
+The Users item expands to Users, User Groups, Roles, Signups and Audit Logs. On narrow screens the sidebar is replaced by a mobile menu.
 
-## Navigating the Admin Dashboard
+The top bar shows breadcrumbs, a search button that opens the command palette, the notification bell and a help menu. The command palette searches dashboard destinations and organization content such as courses, users, collections, communities, discussions, playgrounds and podcasts.
 
-The dashboard is the central hub for all administrative tasks. Its layout is:
+## Dashboard home
 
-```
-┌─────────────────────────────────────────────────────┐
-│  SIDEBAR                     │  MAIN CONTENT AREA    │
-│                              │                       │
-│  Dashboard  ☰               │  Welcome back, Admin  │
-│  Courses    📚               │                       │
-│  Users      👥               │  ┌── Stats Cards ──┐  │
-│  Groups     🏷️               │  │ Courses  Users  │  │
-│  Payments   💳               │  │ Revenue  Active │  │
-│  Analytics  📊               │  └─────────────────┘  │
-│  Settings   ⚙️               │                       │
-│                              │  ┌── Recent Activity┐ │
-│                              │  │ ...               │ │
-│                              │  └──────────────────┘ │
-└─────────────────────────────────────────────────────┘
-```
+The home page shows a welcome heading, a date-range selector (`7d`, `30d`, `90d`), and a course filter. Below them:
 
-### Sidebar Sections
+| Block | Content |
+|---|---|
+| Course enrollment trend | Full-width chart for the selected range and course |
+| Recent payments | Latest orders with learner, resource, amount, status and date |
+| Completion funnel | Course completion stages |
+| Learner progress | Progress distribution for the selected course |
 
-| Menu Item | Description |
-|-----------|-------------|
-| **Dashboard** | Main overview with stats and recent activity |
-| **Courses** | List and manage all courses |
-| **Users** | Manage learner accounts and roles |
-| **Groups** | Create and manage user groups for access control |
-| **Payments** | View transaction history, refunds, and payment settings |
-| **Analytics** | Platform-wide usage and revenue reports |
-| **Settings** | Organization configuration (branding, domains, SSO, features) |
+The same charts are available with more detail under **Analytics → Courses**.
 
-### Top Bar
+## Creating and publishing a course
 
-The top bar provides quick access to:
-- **Search** — search across courses and users
-- **Notifications** — alerts for new enrollments, payments, and system events
-- **Profile menu** — your account settings and logout option
-- **Language switcher** — toggle between available languages
+1. Open **Courses** and press **+ New Course**. The create flow asks for the course type before opening the editor.
+2. Fill the **General** tab: name, description, about, learnings, requirements, audience, media and people.
+3. Add modules and lessons in the **Content** tab.
+4. On the **Access** tab choose `public`, `users_only` or `paid`. `users_only` links user groups; `paid` requires a price greater than zero, which is set in **Payments → Offers**.
+5. Press the publish control in the editor header. The same control unpublishes the course.
 
----
+New resources start unpublished. An unpublished resource is not shown to learners.
 
-## Creating Your First Course
+## The access model
 
-1. Click **Courses** in the sidebar
-2. Click the **New Course** button
-3. Fill in the **General** tab:
-   - **Course Name** — a clear, descriptive title
-   - **Description** — a short summary of what learners will gain
-   - **Difficulty** — Beginner, Intermediate, or Advanced
-   - **Thumbnail** — upload a cover image (PNG, JPG, or WEBP)
-   - **Offers Certificate** — toggle on if you want to issue completion certificates
-   - **Categories** — optional, for organizing courses
-4. Click **Save** — the course is created in **draft mode**
+| State | Effect |
+|---|---|
+| `published` | The resource is served according to its access mode |
+| draft (unpublished) | Visible only in the dashboard |
+| `public` | Anyone can open the resource and start it |
+| `users_only` | Only members of a linked user group can open it |
+| `paid` | The product page is public; the content requires a paid entitlement |
 
-Your course is now created and ready for content. Next, add modules and lessons in the **Content** tab.
+The same model applies to podcasts and collections.
 
----
+## Where common tasks live
 
-## The 6 Course Editor Tabs
+| Task | Location |
+|---|---|
+| Change prices | Payments → Offers |
+| Review orders | Payments → Transactions |
+| Configure Chargily | Payments → Configuration |
+| Monthly teacher payouts | Payments → Payouts |
+| Invite or remove members | Users → Users / Signups |
+| Group-based visibility | Users → User Groups, then the resource Access tab |
+| Custom permissions | Users → Roles |
+| Organization identity and language | Organization → General |
+| Search metadata | Organization → SEO |
 
-Once a course is created, clicking on it opens the course editor with six tabs:
+## Related
 
-| # | Tab | Purpose |
-|---|-----|---------|
-| 1 | **General** | Name, description, difficulty, thumbnail, certificate toggle |
-| 2 | **Content** | Build the module and lesson structure |
-| 3 | **Access** | Control who can view the course (Free, Restricted, Paid) |
-| 4 | **Certification** | Design certificates and set passing criteria |
-| 5 | **Contributors** | Add co-authors and instructors |
-| 6 | **SEO** | Configure SEO metadata and social previews |
-
-Each tab is a separate sectioned card layout on a light grey background. Changes auto-save when applicable.
-
-> **Note:** There is also an **Analytics** view available from the course list, accessible via the chart icon on each course row. This shows enrollment, completion, and revenue data for that course.
-
----
-
-## Publishing a Course
-
-After setting up content and access:
-
-1. Ensure the course has at least one module with one lesson
-2. Configure the **Access** tab with your desired access type
-3. Click the **Publish** toggle in the course editor header
-4. The course is now visible to learners according to its access settings
-
-You can unpublish a course at any time — learners who already have access will retain it, but new learners won't be able to enroll.
-
----
-
-## Key Differences from the Learner View
-
-| Aspect | Admin View | Learner View |
-|--------|------------|--------------|
-| **Dashboard** | Management tools, stats, payments, users | Course list, progress, trail, purchases |
-| **Course Page** | Editor with 6 tabs + settings | Course overview, lessons, activities |
-| **Content** | Full CRUD on modules/lessons | Read-only consumption of published content |
-| **Access** | Can configure pricing and access rules | Sees purchase buttons or locked banners |
-| **Users** | Can view/manage all accounts | Sees only their own profile |
-| **Payments** | Sees transaction history and refund tools | Sees only their own purchase history |
-
----
-
-## Next Steps
-
-- Read the [Course Management Overview](./courses/overview.md) for a deeper look at the course editor
-- Configure [Access Control](./courses/access.md) to set up your pay-to-access model
-- Explore [Organization Settings](../README.md) for branding and domain configuration
+- [Users](./users.md), [Roles](./roles.md), [User Groups](./user-groups.md)
+- [Payments](./payments.md) and the [API reference](../06-api-reference/payments.md)
+- [Developer guide](../05-developer-guide/README.md)

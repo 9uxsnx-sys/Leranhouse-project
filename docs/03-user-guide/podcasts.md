@@ -1,78 +1,62 @@
+> Status: as-built · Last verified: 2026-11-15
+
 # Podcasts
 
-> Audio content on Koodook.
+Podcasts are audio series made of episodes. They can be public, group-restricted or paid, and they are tracked separately from courses.
 
----
+## Podcast catalogue
 
-Podcasts are audio-based learning content. You can listen to them directly in the platform.
+Open **Podcasts** from the side menu.
 
-## Features
+| Control | Behaviour |
+|---|---|
+| Search | Matches podcast name, description and tags |
+| Visibility filter | All podcasts, Public or Private |
+| Pagination | Eight podcasts per page |
 
-- Stream podcasts directly in the browser
-- Browse podcast episodes
-- Follow podcast series
-- Listen while browsing other parts of the platform
+Each card shows the cover, name, description, episode count and total duration. Podcasts written in another language keep their source text with a language note.
 
-## Episode Management (Admin)
+## Podcast page
 
-Podcast episodes can be managed in the admin dashboard under **Podcasts > [Podcast] > Episodes**.
+| Section | Content |
+|---|---|
+| Banner | Podcast banner |
+| Header | Name, description, episode count, total duration, host count and a premium badge |
+| What you'll learn | Learning items authored for the series |
+| About | Long description |
+| Episodes | Numbered episode list with titles and saved progress |
+| Community | The linked podcast community, when one exists |
 
-### Episode Cards
+## Sidebar
 
-Each episode appears as a card with a drag handle on the left:
+| Card | Content |
+|---|---|
+| Progress / access | Progress bar and **Continue listening** when started; otherwise **Get access** |
+| This podcast includes | Episode count, total duration, host count and premium content line |
+| Hosts | Each host's photo, name and title |
+| Updates | Last update date |
 
-```
-┌──────────────────────────────────────────────┐
-│  ⠿  🎵  Episode Title  [Published/Draft] [⋮]│
-└──────────────────────────────────────────────┘
-```
+For a paid podcast the card shows the price and **Get access** opens the Chargily checkout. Free podcasts start the podcast trail instead. Paid podcasts keep this metadata page readable; episode audio is gated by the entitlement.
 
-- **Drag handle** — drag to reorder episodes
-- **Music icon** — visual identifier
-- **Episode title** — click to edit episode details (title, description, audio file)
-- **Status badge** — shows Published (green) or Draft (yellow)
-- **3-dot menu** — Duplicate and Delete options
+Hosts come from the podcast's people metadata. A series can list several hosts, each with a name, a title and a photo; translations override only the name and title, keeping the photo and order.
 
-### Drag-and-Drop Reordering
+## Access modes
 
-- Drag episodes up or down to set a custom order
-- Order is persisted immediately via API
-- In the public podcast page, episodes appear in the custom order (first dragged to the top shows first to users)
+| Mode | What you see |
+|---|---|
+| `public` | Series and audio are open |
+| `users_only` | Series is visible only to members of a linked user group |
+| `paid` | Series metadata and episode list stay visible; audio needs an entitlement |
+| Draft | Series is not shown to learners |
 
-### Select Mode
+## Listening
 
-Clicking **Select** in the toolbar replaces drag handles with checkboxes:
+Selecting an episode opens its page and the persistent player. The player keeps playing while you browse the organization site, and the episode list shows a progress bar for the episode that is playing plus saved progress for episodes you paused.
 
-```
-┌──────────────────────────────────────────────┐
-│  ☑  🎵  Episode Title  [Published/Draft] [⋮]│
-└──────────────────────────────────────────────┘
-```
+An episode is marked complete automatically once playback passes roughly 95% of its duration. Playback position is saved continuously, so the episode list shows where you paused and the series sidebar reflects the share of completed episodes.
 
-- Drag-and-drop is disabled in select mode
-- Click a card to toggle its checkbox
-- Selected cards show a blue ring and filled checkbox
+## Related
 
-### Episode Detail Form
-
-Clicking an episode opens the detail form with:
-
-- **Preview button** — opens the public podcast page in a new tab
-- **Language chip** — shows which language you are editing (Source / Translation / Missing)
-- **Copy from source** — appears in French/Arabic to seed the fields from the English episode
-- **Save button** — saves the episode in the language currently selected in the platform switcher
-- **Title field** — edit the episode title
-- **Description field** — edit the episode description
-- **Audio upload** — upload or replace the audio file
-
-## Languages
-
-Podcasts follow the same language model as courses and collections.
-
-- The **language switcher in the platform menu** decides which language you are editing. There is no separate selector inside the podcast editor.
-- Editing in English writes the podcast itself. Editing in French or Arabic writes (or updates) that language's translation; the English row is never touched.
-- **Podcast → Translations** lists every language with a coverage check per field (`Name`, `Description`, `About`, `Tags`, `SEO`), lets you copy from the source, delete a language, and export/import a CSV for an external translator.
-- Episode titles and descriptions are translated from **Podcast → Episodes**: switch the language, open the episode, and edit it — the list itself also shows translated titles.
-- Fields that are shared across languages and never translated: cover, banner, hosts, total duration, audio files, price, access type, publish state and episode order.
-
-Learners see the podcast in the language of the interface they chose. If a podcast has not been translated into that language yet, the source text is shown with a small amber note: *"This podcast is only available in English."*
+- [Collections](./collections.md) — bundles that can include podcasts.
+- [Store](./store.md) — paid podcasts.
+- [Podcasts API](../06-api-reference/podcasts.md) and [Developer guide](../05-developer-guide/README.md).

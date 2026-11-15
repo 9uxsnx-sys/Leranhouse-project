@@ -36,7 +36,8 @@ def _make_community(db, org, **overrides):
         description=overrides.pop("description", "Desc"),
         public=overrides.pop("public", True),
         thumbnail_image=overrides.pop("thumbnail_image", ""),
-        course_id=overrides.pop("course_id", None),
+        resource_uuid=overrides.pop("resource_uuid", None),
+        resource_type=overrides.pop("resource_type", None),
         community_uuid=overrides.pop("community_uuid", "community_comments"),
         moderation_words=overrides.pop("moderation_words", []),
         creation_date=overrides.pop("creation_date", "2024-01-01"),
@@ -111,6 +112,8 @@ class TestCommunityCommentsAndVotes:
         ), patch(
             "src.services.communities.comments.dispatch_webhooks",
             new_callable=AsyncMock,
+        ), patch(
+            "src.services.communities.comments.notify",
         ), patch(
             "src.services.communities.comments.get_user_votes_for_comments",
             new_callable=AsyncMock,
@@ -521,6 +524,8 @@ class TestCommunityCommentsAndVotes:
         ), patch(
             "src.services.communities.comments.dispatch_webhooks",
             new_callable=AsyncMock,
+        ), patch(
+            "src.services.communities.comments.notify",
         ), patch(
             "src.services.communities.comments.get_user_votes_for_comments",
             new_callable=AsyncMock,

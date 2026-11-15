@@ -125,6 +125,45 @@ export const swrFetcher = async (url: string, token?: string) => {
   }
 }
 
+/**
+ * Fetch every page of a paginated list endpoint (`{ items, total, ... }`).
+ *
+ * Dashboard rosters ask for "all users", but the API caps `limit` at 100 and
+ * rejects anything larger with a 422 — which silently left the Access tabs
+ * empty. This walks the real pages instead of asking for an impossible size.
+ */
+export const swrFetchAllPages = async (
+  url: string,
+  token?: string,
+  pageSize = 100
+) => {
+  const withPaging = (page: number) => {
+    const [base, query = ''] = url.split('?')
+    const params = query
+      .split('&')
+      .filter((param) => param && !/^(limit|page)=/.test(param))
+    params.push(`page=${page}`, `limit=${pageSize}`)
+    return `${base}?${params.join('&')}`
+  }
+
+  const first = await swrFetcher(withPaging(1), token)
+  if (!first || !Array.isArray(first.items)) {
+    return first
+  }
+
+  const items = [...first.items]
+  const total = Number(first.total ?? items.length)
+  const pages = Math.ceil(total / pageSize)
+
+  for (let page = 2; page <= pages; page++) {
+    const next = await swrFetcher(withPaging(page), token)
+    if (!next || !Array.isArray(next.items) || next.items.length === 0) break
+    items.push(...next.items)
+  }
+
+  return { ...first, items, total: total || items.length }
+}
+
 export const errorHandling = async (res: any) => {
   if (!res.ok) {
     let detail: any = res.statusText

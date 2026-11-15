@@ -1,51 +1,59 @@
+> Status: as-built · Last verified: 2026-11-15
+
 # Store
 
-> Purchasing courses on Koodook.
+The store is the organization's shop window. It lists the paid, published courses, podcasts and collections in one grid at `/store`.
 
-> **Implementation status:** the paid flow is live — "Get access" opens Chargily, and the return page confirms the purchase. See [Payments — Progress & Roadmap](../08-features/payments/progress.md).
+## What appears
 
----
+A resource is listed only when all of these are true:
 
-The **Store** page shows courses available for purchase.
+- Access type is `paid`.
+- It is published.
+- It has a numeric price greater than zero.
 
-## Payment Flow
+There is no separate offer product, no subscription and no invoice page. Each resource is one card.
 
-1. Browse available courses
-2. Click **Purchase** on a course
-3. You are redirected to the **Chargily Pay v2** payment page
-4. Select payment method:
-   - **EDAHABIA** --- Algérie Poste e-wallet
-   - **CIB** --- Bank card (SATIM)
-5. Complete payment on the secure Chargily page
-6. You are redirected to a **success** page that confirms your access
-7. Press **Back to course** to start learning
+| Card element | Content |
+|---|---|
+| Thumbnail | Resource cover when set, otherwise a shopping-bag placeholder |
+| Type badge | Course, Podcast or Collection |
+| Name and description | Resource title and short description |
+| Price | Formatted in the resource currency (DZD) |
+| Action | **Get access**, which is part of the card link |
 
-If the payment fails or is cancelled, you land on a **failure** page instead. You are not charged, and the same button takes you back to the course so you can try again.
+A count line above the grid states how many products are available. When the organization disables payments, the page shows an availability message instead of the grid; when no resource qualifies, it shows an empty state.
 
-## Payment Methods
+## Buying a course or collection
 
-### EDAHABIA
+1. Select a card. It opens the resource's own product page, not a separate store offer page.
+2. Press **Get access** in the access card.
+3. You are redirected to Chargily Pay.
+4. Choose **EDAHABIA** (Algérie Poste) or **CIB** (bank card) on the Chargily page.
+5. After payment, you return to a result page that confirms the outcome.
+6. Return to the resource; the access card now shows **Continue learning** or the start action.
 
-- Algeria Poste electronic wallet
-- Enter your EDAHABIA credentials on the Chargily page
-- Confirm the payment
+If the payment fails or is cancelled, the result page reports it and no entitlement is granted. You can start the checkout again from the same resource page.
 
-### CIB
+## Payment methods
 
-- Standard bank card (SATIM)
-- Enter card details on the Chargily page
-- Complete 3D Secure verification if required
+| Method | What you need |
+|---|---|
+| EDAHABIA | An Algérie Poste e-wallet; you confirm on the Chargily page |
+| CIB | An Algerian bank card; you enter the card details on the Chargily page |
 
-## Pricing
+Card and wallet details are entered on Chargily, not on the organization site. The checkout returns you to the organization with a success or failure status.
 
-- Prices are set by the organization admin in **Payments → Offers**
-- Prices are displayed in DZD (Algerian Dinar)
-- A price of `0` means the course is explicitly **Free**
-- A course with no price cannot be switched to Paid access
+## Podcasts
 
-## After Purchase
+Paid podcasts are listed in the store like any other product, and their podcast page stays readable. On that page the access card shows the price and **Get access** opens the same Chargily checkout; episode audio remains gated by the entitlement.
 
-- The course appears in your enrolled courses
-- All lessons are unlocked
-- Receipt is available in your account
-- Purchase history shows all transactions
+## Where prices come from
+
+Prices are set by the organization in **Payments → Offers**. The store reads the price stored on the resource; it never edits it. A resource with an empty price or a zero price is not listed here.
+
+## Related
+
+- [Courses](./courses.md), [Collections](./collections.md) and [Podcasts](./podcasts.md) — the product pages.
+- [Payments admin guide](../04-admin-guide/payments.md) — pricing and Chargily configuration.
+- [Payments API](../06-api-reference/payments.md).

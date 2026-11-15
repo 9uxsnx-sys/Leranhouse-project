@@ -183,11 +183,11 @@ def test_file_validator_rejects_oversized_image():
     assert exc.value.status_code == 413
 
 
-def test_file_validator_rejects_svg_outright():
-    """F-22 (sanity): SVG remains blocked as before."""
+def test_file_validator_rejects_malicious_svg():
+    """F-22 (sanity): SVG stays allowed for branding but XSS payloads are blocked."""
     from src.security.file_validation import validate_upload
 
-    f = _upload("evil.svg", b"<svg/>")
+    f = _upload("evil.svg", b'<svg><script>alert(1)</script></svg>')
     with pytest.raises(HTTPException) as exc:
         validate_upload(f, allowed_types=["image"])
     assert exc.value.status_code == 415

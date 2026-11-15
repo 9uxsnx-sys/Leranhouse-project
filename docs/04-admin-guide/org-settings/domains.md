@@ -108,4 +108,3 @@ You can add **multiple custom domains** to a single Koodook organization. This i
 
 - [General Settings](./general.md) — Organization name and contact info
 - [SEO Settings](./seo.md) — Canonical URLs and search engine metadata
-- [Landing Page Builder](./landing.md) — Build your public-facing homepage served from your custom domain

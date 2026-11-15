@@ -152,7 +152,14 @@ const CourseClient = (props: any) => {
   const completedSteps = courseRun?.steps?.length || 0
   const totalSteps = totalLessons || 0
   const progressPercent = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0
-  const instructorData = meta.instructor?.name ? meta.instructor : null
+  // Instructors are shared metadata (`extra_metadata.instructors`), edited like
+  // podcast hosts. Older courses kept a single `instructor` object instead.
+  const instructors: { name: string; title?: string; avatar?: string }[] =
+    Array.isArray(meta.instructors) && meta.instructors.length > 0
+      ? meta.instructors.filter((item: any) => item?.name?.trim())
+      : meta.instructor?.name
+        ? [meta.instructor]
+        : []
   const requirementsList = parseRequirements(meta.requirements)
   const audienceData = meta.target_audience as { for?: string[]; not_for?: string[] } | undefined
 
@@ -451,35 +458,6 @@ const CourseClient = (props: any) => {
                     />
                   )}
 
-                  {/* ── 4B. INSTRUCTOR ── */}
-                  {instructorData && (
-                    <div>
-                      <Heading level="h1" className="!text-2xl mb-4">{t('course.page.instructor_title')}</Heading>
-                      <div className="rounded-xl bg-white border border-gray-100 shadow-sm px-5 py-5">
-                        <div className="flex items-start gap-4">
-                          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center shrink-0 text-lg font-semibold text-indigo-700">
-                            {instructorData.name?.charAt(0)?.toUpperCase() || '?'}
-                          </div>
-                          <div className="min-w-0">
-                            <Text size="base" className="font-semibold text-gray-900">
-                              {instructorData.name}
-                            </Text>
-                            {instructorData.title && (
-                              <Text size="small" className="text-ui-fg-muted mt-0.5">
-                                {instructorData.title}
-                              </Text>
-                            )}
-                            {instructorData.bio && (
-                              <Text size="base" className="text-ui-fg-subtle mt-3 leading-relaxed">
-                                {instructorData.bio}
-                              </Text>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
                   {/* ── 5. ABOUT THIS COURSE ── */}
                   {course?.about && (
                     <div>
@@ -500,6 +478,15 @@ const CourseClient = (props: any) => {
                   {/* ── 7. COURSE REQUIREMENTS ── */}
                   {requirementsList.length > 0 && (
                     <CourseRequirements items={requirementsList} />
+                  )}
+
+                  {/* ── 8. LINKED COMMUNITY ── */}
+                  {course?.course_uuid && (
+                    <CourseCommunitySection
+                      resourceUuid={course.course_uuid}
+                      resourceType="course"
+                      orgslug={orgslug}
+                    />
                   )}
                 </div>
 
@@ -576,7 +563,33 @@ const CourseClient = (props: any) => {
                     </div>
                   </div>
 
-                  {/* ── SIDEBAR 3: Community ── */}
+                  {/* ── SIDEBAR 3: Instructors ── */}
+                  {instructors.length > 0 && (
+                    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                      <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('course.page.instructors_title')}</h3>
+                      <div className="space-y-3">
+                        {instructors.map((instructor, index) => (
+                          <div key={index} className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden shrink-0">
+                              {instructor.avatar ? (
+                                <img src={instructor.avatar} alt={instructor.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-gray-400">
+                                  {instructor.name.charAt(0).toUpperCase()}
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium tracking-wide text-gray-900">{instructor.name}</p>
+                              {instructor.title && <p className="text-xs text-gray-500">{instructor.title}</p>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ── SIDEBAR 4: Community ── */}
                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                     <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('course.page.community_title')}</h3>
                     <p className="text-sm text-gray-600">
@@ -584,7 +597,7 @@ const CourseClient = (props: any) => {
                     </p>
                   </div>
 
-                  {/* ── SIDEBAR 4: Updates ── */}
+                  {/* ── SIDEBAR 5: Updates ── */}
                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                     <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('course.page.updates_title')}</h3>
                     <div className="flex items-center gap-3">

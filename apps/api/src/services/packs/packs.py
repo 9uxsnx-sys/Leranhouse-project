@@ -158,6 +158,7 @@ def activate_pack(
             "quantity": pack_def["quantity"],
             "platform_subscription_id": platform_subscription_id,
         },
+        db_session=db_session,
     )
 
     return org_pack
@@ -218,6 +219,7 @@ def deactivate_pack(
             "pack_type": org_pack.pack_type.value,
             "platform_subscription_id": platform_subscription_id,
         },
+        db_session=db_session,
     )
 
     return org_pack

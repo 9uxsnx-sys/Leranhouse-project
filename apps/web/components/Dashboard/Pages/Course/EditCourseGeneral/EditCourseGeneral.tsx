@@ -4,7 +4,7 @@ import FormLayout, {
   FormLabelAndMessage,
 } from '@components/Objects/StyledElements/Form/Form';
 import { useFormik } from 'formik';
-import { AlertTriangle, Eye, Globe, GlobeLock, Loader2, Check, SaveAllIcon, Copy } from 'lucide-react';
+import { AlertTriangle, Eye, Globe, GlobeLock, Loader2, Check, SaveAllIcon, Copy, Plus, X, Image as ImageIcon, Trash2, UploadCloud } from 'lucide-react';
 import * as Form from '@radix-ui/react-form';
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import CourseMediaSection from './CourseMediaSection';
@@ -42,6 +42,40 @@ type EditCourseStructureProps = {
   orgslug: string
   course_uuid?: string
 }
+
+type CourseInstructor = { name: string; title: string; avatar: string }
+
+/**
+ * Instructors are shared across locales (`extra_metadata.instructors`), the same
+ * way podcast hosts are. Courses seeded before the list existed kept a single
+ * `instructor` object, so it is folded into the first row.
+ */
+const normalizeInstructors = (list: any, legacy: any): CourseInstructor[] => {
+  if (Array.isArray(list) && list.length > 0) {
+    return list.map((item: any) => ({
+      name: item?.name || '',
+      title: item?.title || '',
+      avatar: item?.avatar || '',
+    }));
+  }
+  if (legacy?.name) {
+    return [{ name: legacy.name, title: legacy.title || '', avatar: legacy.avatar || '' }];
+  }
+  return [];
+};
+
+/**
+ * A translation row only carries display text, index-aligned with the base
+ * list, so the translator sees the source text until they replace it.
+ */
+const localizeInstructors = (rows: CourseInstructor[], localized: any): CourseInstructor[] => {
+  if (!Array.isArray(localized) || localized.length === 0) return rows;
+  return rows.map((row, index) => ({
+    ...row,
+    name: localized[index]?.name?.trim() ? localized[index].name : row.name,
+    title: localized[index]?.title?.trim() ? localized[index].title : row.title,
+  }));
+};
 
 const validate = (values: any, t: any) => {
   const errors = {} as any;
@@ -245,9 +279,10 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
       meta_resources_count: meta.resources_count || '',
       meta_has_certificate: meta.has_certificate || false,
       meta_requirements: initializeRequirements(localizedMeta?.requirements ?? meta.requirements),
-      meta_instructor_name: localizedMeta?.instructor?.name ?? meta.instructor?.name ?? '',
-      meta_instructor_title: localizedMeta?.instructor?.title ?? meta.instructor?.title ?? '',
-      meta_instructor_bio: localizedMeta?.instructor?.bio ?? meta.instructor?.bio ?? '',
+      meta_instructors: localizeInstructors(
+        normalizeInstructors(meta.instructors, meta.instructor),
+        localizedMeta?.instructors
+      ),
       meta_audience_for: initializeAudienceItems(localizedMeta?.target_audience?.for ?? meta.target_audience?.for),
       meta_audience_not_for: initializeAudienceItems(localizedMeta?.target_audience?.not_for ?? meta.target_audience?.not_for),
     };
@@ -266,6 +301,18 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
     enableReinitialize: true,
   }) as any;
 
+  const setInstructorList = (list: CourseInstructor[]) => {
+    formik.setFieldValue('meta_instructors', list);
+  };
+
+  const setInstructorField = (index: number, patch: Partial<CourseInstructor>) => {
+    setInstructorList(
+      formik.values.meta_instructors.map((item: CourseInstructor, i: number) =>
+        i === index ? { ...item, ...patch } : item
+      )
+    );
+  };
+
   // Sync form changes to context — compare against formik.initialValues
   // so that reinitialization from server data is never treated as a user edit
   useEffect(() => {
@@ -282,10 +329,15 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
         changes[key] = formik.values[key];
       }
     });
+    // Array fields get a fresh reference on every reinitialize, so they are
+    // compared by value below instead of leaking into the top-level changes.
+    delete changes.meta_instructors;
 
     // Build extra_metadata from prefixed meta_ fields
-    const metadataFields = ['meta_difficulty', 'meta_duration', 'meta_video_hours', 'meta_resources_count', 'meta_has_certificate', 'meta_requirements', 'meta_instructor_name', 'meta_instructor_title', 'meta_instructor_bio', 'meta_audience_for', 'meta_audience_not_for'];
-    const anyMetaChanged = metadataFields.some(f => formik.values[f] !== formik.initialValues[f]);
+    const metadataFields = ['meta_difficulty', 'meta_duration', 'meta_video_hours', 'meta_resources_count', 'meta_has_certificate', 'meta_requirements', 'meta_audience_for', 'meta_audience_not_for'];
+    const instructorsChanged =
+      JSON.stringify(formik.values.meta_instructors) !== JSON.stringify(formik.initialValues.meta_instructors);
+    const anyMetaChanged = metadataFields.some(f => formik.values[f] !== formik.initialValues[f]) || instructorsChanged;
     if (anyMetaChanged) {
       changes.extra_metadata = {
         difficulty: formik.values.meta_difficulty,
@@ -294,11 +346,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
         resources_count: formik.values.meta_resources_count,
         has_certificate: formik.values.meta_has_certificate,
         requirements: formik.values.meta_requirements,
-        instructor: {
-          name: formik.values.meta_instructor_name,
-          title: formik.values.meta_instructor_title,
-          bio: formik.values.meta_instructor_bio,
-        },
+        instructors: formik.values.meta_instructors.filter((item: any) => item.name.trim()),
         target_audience: {
           for: formik.values.meta_audience_for
             ? JSON.parse(formik.values.meta_audience_for).map((i: any) => i.text)
@@ -396,7 +444,8 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
       formik.values.meta_duration !== formik.initialValues.meta_duration ||
       formik.values.meta_requirements !== formik.initialValues.meta_requirements ||
       formik.values.meta_audience_for !== formik.initialValues.meta_audience_for ||
-      formik.values.meta_audience_not_for !== formik.initialValues.meta_audience_not_for)
+      formik.values.meta_audience_not_for !== formik.initialValues.meta_audience_not_for ||
+      JSON.stringify(formik.values.meta_instructors) !== JSON.stringify(formik.initialValues.meta_instructors))
 
   const isSaved = isSourceLocale ? (course?.isSaved ?? true) : !hasTranslationChanges;
   const isActiveSaving = isSaving || isManualSaving || isSavingTranslation;
@@ -428,13 +477,18 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
               difficulty: formik.values.meta_difficulty,
               duration: formik.values.meta_duration,
               requirements: formik.values.meta_requirements,
-              instructor: formik.values.meta_instructor_name
-                ? {
-                    name: formik.values.meta_instructor_name,
-                    title: formik.values.meta_instructor_title,
-                    bio: formik.values.meta_instructor_bio,
-                  }
-                : (translation?.extra_metadata?.instructor ?? undefined),
+              instructors: formik.values.meta_instructors.map((item: CourseInstructor, index: number) => {
+                // Blank out anything still identical to the source so the
+                // localized row never freezes an out-of-date name in place.
+                const base = normalizeInstructors(
+                  courseStructure?.extra_metadata?.instructors,
+                  courseStructure?.extra_metadata?.instructor
+                )[index];
+                return {
+                  name: base?.name?.trim() === item.name.trim() ? '' : item.name,
+                  title: base?.title?.trim() === item.title.trim() ? '' : item.title,
+                };
+              }),
               target_audience: {
                 for: formik.values.meta_audience_for
                   ? JSON.parse(formik.values.meta_audience_for).map((i: any) => i.text)
@@ -495,9 +549,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
       meta_difficulty: meta.difficulty ?? '',
       meta_duration: meta.duration ?? '',
       meta_requirements: initializeRequirements(meta.requirements),
-      meta_instructor_name: meta.instructor?.name ?? '',
-      meta_instructor_title: meta.instructor?.title ?? '',
-      meta_instructor_bio: meta.instructor?.bio ?? '',
+      meta_instructors: normalizeInstructors(meta.instructors, meta.instructor),
       meta_audience_for: initializeAudienceItems(meta.target_audience?.for),
       meta_audience_not_for: initializeAudienceItems(meta.target_audience?.not_for),
     });
@@ -833,50 +885,121 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                 </div>
               </div>
 
-              {/* ── INSTRUCTOR ── */}
+              {/* ── INSTRUCTORS (names/titles per locale, photo shared) ── */}
               <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('common.sections.instructor')}</h3>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField name="meta_instructor_name">
-                      <FormLabelAndMessage label={t('dashboard.courses.general.details.instructor_name_label')} />
-                      <Form.Control asChild>
-                        <Input
-                          className={fieldClassName}
-                          onChange={formik.handleChange}
-                          value={formik.values.meta_instructor_name}
-                          type="text"
-                          disabled={isSaving}
-                        />
-                      </Form.Control>
-                    </FormField>
+                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('dashboard.courses.general.details.instructors_label')}</h3>
+                  <div className="space-y-3">
+                    {formik.values.meta_instructors.map((instructor: CourseInstructor, index: number) => (
+                      <div key={index} className="bg-gray-50 rounded-xl border border-gray-100 p-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold text-gray-800">
+                            {t('dashboard.courses.general.details.instructor_label', { number: index + 1 })}
+                          </span>
+                          {isSourceLocale && (
+                            <button
+                              type="button"
+                              onClick={() => setInstructorList(formik.values.meta_instructors.filter((_: any, i: number) => i !== index))}
+                              className="text-red-400 hover:text-red-600 transition-colors cursor-pointer p-0.5 inline-flex"
+                              title={t('dashboard.courses.general.details.remove_instructor')}
+                            >
+                              <X size={14} />
+                            </button>
+                          )}
+                        </div>
 
-                    <FormField name="meta_instructor_title">
-                      <FormLabelAndMessage label={t('dashboard.courses.general.details.instructor_title_label')} />
-                      <Form.Control asChild>
-                        <Input
-                          className={fieldClassName}
-                          onChange={formik.handleChange}
-                          value={formik.values.meta_instructor_title}
-                          type="text"
-                          disabled={isSaving}
-                        />
-                      </Form.Control>
-                    </FormField>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div>
+                            <label className="text-xs font-medium text-gray-500 mb-1 block">
+                              {t('dashboard.courses.general.details.instructor_name_label')}
+                            </label>
+                            <Input
+                              value={instructor.name}
+                              onChange={(e) => setInstructorField(index, { name: e.target.value })}
+                              placeholder={t('dashboard.courses.general.details.instructor_name_placeholder')}
+                              className={`${fieldClassName} bg-white`}
+                              disabled={isSaving}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs font-medium text-gray-500 mb-1 block">
+                              {t('dashboard.courses.general.details.instructor_title_label')}
+                            </label>
+                            <Input
+                              value={instructor.title}
+                              onChange={(e) => setInstructorField(index, { title: e.target.value })}
+                              placeholder={t('dashboard.courses.general.details.instructor_title_placeholder')}
+                              className={`${fieldClassName} bg-white`}
+                              disabled={isSaving}
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="text-xs font-medium text-gray-500 mb-1 block">
+                            {t('dashboard.courses.general.details.instructor_photo_label')}
+                          </label>
+                          {instructor.avatar ? (
+                            <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-white">
+                              <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden border border-gray-200">
+                                <img src={instructor.avatar} alt={instructor.name} className="w-full h-full object-cover" />
+                              </div>
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-gray-700">{t('dashboard.courses.general.details.instructor_photo_uploaded')}</p>
+                              </div>
+                              {isSourceLocale && (
+                                <button
+                                  type="button"
+                                  onClick={() => setInstructorField(index, { avatar: '' })}
+                                  className="text-red-400 hover:text-red-600 transition-colors cursor-pointer"
+                                  title={t('dashboard.courses.general.details.instructor_remove_photo')}
+                                >
+                                  <Trash2 size={18} />
+                                </button>
+                              )}
+                            </div>
+                          ) : isSourceLocale ? (
+                            <div
+                              className="flex items-center gap-4 p-4 border border-dashed border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors cursor-pointer"
+                              onClick={() => {
+                                const input = document.createElement('input')
+                                input.type = 'file'
+                                input.accept = '.jpg,.jpeg,.png,.webp'
+                                input.onchange = (e: any) => {
+                                  const file = e.target?.files?.[0]
+                                  if (!file) return
+                                  const reader = new FileReader()
+                                  reader.onload = (event: any) => {
+                                    setInstructorField(index, { avatar: event.target?.result as string })
+                                  }
+                                  reader.readAsDataURL(file)
+                                }
+                                input.click()
+                              }}
+                            >
+                              <div className="flex-shrink-0">
+                                <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
+                              </div>
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-gray-700">{t('dashboard.courses.general.details.instructor_upload_photo')}</p>
+                              </div>
+                              <UploadCloud size={18} className="text-gray-400" />
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+                    ))}
+
+                    {isSourceLocale && (
+                      <button
+                        type="button"
+                        onClick={() => setInstructorList([...formik.values.meta_instructors, { name: '', title: '', avatar: '' }])}
+                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl border-2 border-dashed border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+                      >
+                        <Plus size={16} />
+                        {t('dashboard.courses.general.details.add_instructor')}
+                      </button>
+                    )}
                   </div>
-
-                  <FormField name="meta_instructor_bio">
-                    <FormLabelAndMessage label={t('dashboard.courses.general.details.instructor_bio_label')} />
-                    <Form.Control asChild>
-                      <Textarea
-                        className={`${fieldClassName} min-h-[100px]`}
-                        onChange={formik.handleChange}
-                        value={formik.values.meta_instructor_bio}
-                        disabled={isSaving}
-                      />
-                    </Form.Control>
-                  </FormField>
-                </div>
               </div>
 
             </div>

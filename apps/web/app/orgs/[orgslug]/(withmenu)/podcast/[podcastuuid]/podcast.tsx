@@ -6,6 +6,8 @@ import useSWR from 'swr'
 import GeneralWrapperStyled from '@components/Objects/StyledElements/Wrappers/GeneralWrapper'
 import { Podcast, PodcastEpisode, PodcastMeta } from '@services/podcasts/podcasts'
 import { startPodcast } from '@services/podcasts/trail'
+import { createResourceCheckout } from '@services/payments/checkout'
+import toast from 'react-hot-toast'
 import { Headphones, Loader2, Clock, BookOpen, Award, User, Play, Info, RefreshCw } from 'lucide-react'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { getPodcastThumbnailMediaDirectory, getPodcastBannerMediaDirectory } from '@services/media/media'
@@ -19,6 +21,7 @@ import { getCurrentLanguageNativeName } from '@/lib/languages'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { useRegisterBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
 import CourseLearnings from '@components/Objects/Courses/CourseLearnings/CourseLearnings'
+import CourseCommunitySection from '@components/Objects/Communities/CourseCommunitySection'
 import EpisodeCard from '@components/Objects/Podcasts/EpisodeCard'
 
 import { Heading } from '@/components/ui/heading'
@@ -73,6 +76,9 @@ export default function PodcastClient({
   const episodes = data?.episodes || initialEpisodes
   const totalDurationSeconds = episodes.reduce((sum, ep) => sum + (ep.duration_seconds || 0), 0)
   const meta = (podcast as any)?.extra_metadata || {}
+  // Hosts come from `extra_metadata.hosts` when the editor filled them in,
+  // otherwise we fall back to the resource authors.
+  const hostCount = meta.hosts?.length || podcast.authors?.length || 0
 
   useRegisterBreadcrumb([
     { label: t('podcasts.podcasts'), href: '/podcasts' },
@@ -100,6 +106,10 @@ export default function PodcastClient({
   const totalEpisodes = episodes.length || 0
   const progressPercent = totalEpisodes > 0 ? Math.round((completedEpisodes / totalEpisodes) * 100) : 0
 
+  const isPaidPodcast = podcast?.access_type === 'paid'
+  const podcastPrice = typeof podcast?.price_amount === 'number' ? podcast.price_amount : null
+  const [isStarting, setIsStarting] = useState(false)
+
   // Build episode progress map from trail steps (for partial progress indicators)
   const episodeProgressMap = React.useMemo(() => {
     const map: Record<string, { playback_position: number; duration: number } | null> = {}
@@ -118,11 +128,27 @@ export default function PodcastClient({
   }, [podcastRun])
 
   const handleGetAccess = async () => {
+    setIsStarting(true)
     try {
+      if (isPaidPodcast) {
+        if (!access_token) return
+        const checkout = await createResourceCheckout(
+          org_id,
+          { resource_uuid: podcast.podcast_uuid, resource_type: 'podcast' },
+          access_token
+        )
+        if (checkout?.checkout_url) {
+          window.location.href = checkout.checkout_url
+          return
+        }
+        throw new Error('Missing checkout URL')
+      }
       await startPodcast(podcast.podcast_uuid, orgslug, access_token)
       mutateTrail()
-    } catch (e) {
-      console.error('Failed to start podcast trail', e)
+    } catch (e: any) {
+      toast.error(e?.detail || t('podcast.page.get_access_failed', 'Could not get access to this podcast'))
+    } finally {
+      setIsStarting(false)
     }
   }
 
@@ -219,10 +245,10 @@ export default function PodcastClient({
                     <Clock size={12} />
                     {formatDuration(meta.total_duration ? meta.total_duration * 60 : totalDurationSeconds)}
                   </Badge>
-                  {podcast.authors?.length > 0 && (
+                  {hostCount > 0 && (
                     <Badge variant="grey" className="flex items-center gap-1">
                       <User size={12} />
-                      {t('podcast.page.host', { count: podcast.authors.length })}
+                      {t('podcast.page.host', { count: hostCount })}
                     </Badge>
                   )}
                   <Badge variant="grey" className="flex items-center gap-1">
@@ -267,6 +293,15 @@ export default function PodcastClient({
                   </div>
                 </div>
               )}
+
+              {/* ── LINKED COMMUNITY ── */}
+              {podcast?.podcast_uuid && (
+                <CourseCommunitySection
+                  resourceUuid={podcast.podcast_uuid}
+                  resourceType="podcast"
+                  orgslug={orgslug}
+                />
+              )}
             </div>
 
             {/* ═══════════════ RIGHT SIDEBAR ═══════════════ */}
@@ -294,11 +329,34 @@ export default function PodcastClient({
                 ) : (
                   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                     <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-4">{t('podcast.page.get_access')}</h3>
-                    <p className="text-sm text-gray-500 mb-2 leading-snug">
-                      {t('podcast.page.get_access_hint')}
-                    </p>
-                    <Button variant="primary" size="large" className="w-full" onClick={handleGetAccess}>
-                      {t('podcast.page.get_access')}
+                    {isPaidPodcast && podcastPrice !== null && podcastPrice > 0 ? (
+                      <p className="text-2xl font-semibold text-gray-900 mb-4">
+                        {new Intl.NumberFormat(i18n.language || 'en', {
+                          style: 'currency',
+                          currency: podcast.price_currency || 'DZD',
+                          maximumFractionDigits: 0,
+                        }).format(podcastPrice)}
+                      </p>
+                    ) : (
+                      <p className="text-sm text-gray-500 mb-2 leading-snug">
+                        {t('podcast.page.get_access_hint')}
+                      </p>
+                    )}
+                    <Button
+                      variant="primary"
+                      size="large"
+                      className="w-full"
+                      onClick={handleGetAccess}
+                      disabled={isStarting || !access_token}
+                    >
+                      {isStarting ? (
+                        <span className="inline-flex items-center gap-2">
+                          <Loader2 size={16} className="animate-spin" />
+                          {t('course.page.please_wait')}
+                        </span>
+                      ) : (
+                        t('podcast.page.get_access')
+                      )}
                     </Button>
                   </div>
                 )}
@@ -321,7 +379,7 @@ export default function PodcastClient({
                     </div>
                     <div className="flex items-center gap-3">
                       <BookOpen size={16} className="text-gray-400 shrink-0" />
-                      <span className="text-sm text-gray-600">{t('podcast.page.host', { count: podcast.authors?.length || 0 })}</span>
+                      <span className="text-sm text-gray-600">{t('podcast.page.host', { count: hostCount })}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <Award size={16} className="text-gray-400 shrink-0" />
@@ -348,7 +406,7 @@ export default function PodcastClient({
                               )}
                             </div>
                             <div>
-                              <p className="text-sm font-semibold text-gray-900">{host.name}</p>
+                              <p className="text-sm font-medium tracking-wide text-gray-900">{host.name}</p>
                               {host.title && <p className="text-xs text-gray-500">{host.title}</p>}
                             </div>
                           </div>
@@ -384,7 +442,7 @@ export default function PodcastClient({
                   </div>
                 ) : null}
 
-                {/* ── SIDEBAR 4: Updates ── */}
+                {/* ── SIDEBAR 5: Updates ── */}
                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
                   <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('podcast.page.updates_title')}</h3>
                   <div className="flex items-center gap-3">
@@ -397,14 +455,6 @@ export default function PodcastClient({
                       })}
                     </span>
                   </div>
-                </div>
-
-                {/* ── SIDEBAR 5: Community ── */}
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('podcast.page.community_title')}</h3>
-                  <p className="text-sm text-gray-600">
-                    {t('podcast.page.community_description')}
-                  </p>
                 </div>
 
               </div>

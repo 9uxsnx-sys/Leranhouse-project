@@ -352,6 +352,7 @@ async def create_certificate_user(
                     "course_uuid": course.course_uuid,
                     "course_name": course.name,
                 },
+                db_session=db_session,
             )
     except Exception as e:
         logger.warning("Certificate tracking failed (non-critical): %s", e)

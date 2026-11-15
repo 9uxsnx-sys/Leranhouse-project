@@ -30,6 +30,7 @@ from src.security.rbac.rbac import (
     authorization_verify_if_user_is_anon,
 )
 from src.security.rbac import (
+    check_catalog_read_access,
     check_resource_access,
     AccessAction,
 )
@@ -147,8 +148,16 @@ async def get_podcast(
             detail="Podcast not found",
         )
 
-    # RBAC check
-    await check_resource_access(request, db_session, current_user, podcast.podcast_uuid, AccessAction.READ)
+    # RBAC check — a published paid podcast is a product page, so its metadata
+    # stays readable; only the episode audio is gated.
+    await check_catalog_read_access(
+        request,
+        db_session,
+        current_user,
+        podcast.podcast_uuid,
+        published=podcast.published,
+        access_type=podcast.access_type,
+    )
 
     # Check if podcast is published - unpublished podcasts require special permission
     if not podcast.published:
@@ -223,8 +232,17 @@ async def get_podcast_meta(
             detail="Podcast not found",
         )
 
-    # RBAC check
-    await check_resource_access(request, db_session, current_user, podcast.podcast_uuid, AccessAction.READ)
+    # RBAC check — a published paid podcast is a product page, so the metadata
+    # and the episode list stay readable; the audio is stripped in
+    # get_episodes_by_podcast for viewers without an entitlement.
+    await check_catalog_read_access(
+        request,
+        db_session,
+        current_user,
+        podcast.podcast_uuid,
+        published=podcast.published,
+        access_type=podcast.access_type,
+    )
 
     # Check if user can view unpublished content
     can_view_unpublished = await _user_can_view_unpublished_podcast(

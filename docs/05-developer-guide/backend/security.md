@@ -1,6 +1,8 @@
 # Security and Authentication
 
-> The LearnHouse platform implements a multi-layered security model combining JWT authentication, API token support, role-based access control (RBAC), UserGroup-based resource locking, and password hashing with transparent legacy migration support.
+> Status: as-built · Last verified: 2026-11-15
+
+The LearnHouse platform implements a multi-layered security model combining JWT authentication, API token support, role-based access control (RBAC), UserGroup-based resource locking, and password hashing with transparent legacy migration support.
 
 ---
 
@@ -145,16 +147,9 @@ revoke_user_sessions_before(user.id)
 
 ### Refresh Token Rotation
 
-Each refresh token includes a unique `jti` claim. The `/auth/refresh` endpoint atomically marks each `jti` as consumed — replay detection:
+Each refresh token includes a unique `jti` claim, and `/auth/refresh` issues a new access token plus a new refresh token on every call. It re-checks `password_changed_at` and the logout blocklist before rotating.
 
-```python
-def _mark_refresh_jti_used(user_id: int, jti: str) -> bool:
-    # NX + TTL = set-if-not-exists, auto-cleanup
-    ok = r.set(f"refresh_used:{user_id}:{jti}", "1", nx=True, ex=30*86400)
-    return bool(ok)  # False on replay
-```
-
-If a refresh token is replayed, all of the user's sessions are revoked.
+`security/auth.py` also defines `_mark_refresh_jti_used()` (Redis `refresh_used:{user_id}:{jti}`, NX + TTL) for one-time-use replay detection, but the `/auth/refresh` route does **not** call it today — replay protection currently rests on expiry and the revocation blocklist.
 
 ---
 
@@ -199,20 +194,33 @@ API tokens are scoped to a single organization. The system enforces this at mult
 
 ### Architecture
 
-RBAC lives in `src/security/rbac/` and provides a multi-layered authorization system:
+RBAC lives in `src/security/rbac/` and provides a multi-layered authorization system. `ResourceAccessChecker` (`rbac/resource_access.py`) is the unified entry point used by services through `check_resource_access()`:
 
 ```
-ResourceAccessChecker (unified entry point)
+ResourceAccessChecker.check_access()
     │
-    ├── authorization_verify_if_element_is_public()
-    │   → Checks public flag on courses, collections, podcasts
+    ├── get_resource_config(resource_uuid)
+    │   → Resolve resource type; child resources (chapter, activity, episode)
+    │     delegate to their parent (course, podcast)
     │
-    ├── authorization_verify_based_on_roles_and_authorship()
-    │   → Combines role + authorship + usergroup + enrollment checks
+    ├── APITokenUser → _check_api_token_access()
+    │   → Org boundary + per-resource-type rights
     │
-    └── authorization_verify_api_token_permissions()
-        → Org boundary + resource type + action granularity
+    ├── communities → _check_community_access()
+    │   → Access follows the linked course/podcast; free parents also
+    │     require a claim (TrailRun)
+    │
+    ├── READ → _check_read_access()
+    │   → anonymous / dashboard / public-view branches
+    │   → free+published, authorship, admin/maintainer, access_type
+    │     (public / users_only / paid), legacy role, legacy UserGroup
+    │
+    └── CREATE / UPDATE / DELETE → _check_write_access()
+        → placeholder "course_x" create uses role rights;
+          existing resources require authorship, admin/maintainer, or role
 ```
+
+It does **not** delegate to `authorization_verify_if_element_is_public()` or `authorization_verify_api_token_permissions()`. The older role/authorship helpers in `rbac/rbac.py` are still used for the legacy role checks and by services that call them directly.
 
 ### Permission Model
 
@@ -251,14 +259,16 @@ class AccessContext(Enum):
 
 ### Authorization Chain
 
-When checking access for a regular user, the system evaluates:
+For a regular user, the read path evaluates in this order:
 
-1. **Superadmin bypass** — Superadmins have unrestricted access
-2. **Public access** — If the resource is public and action is read, grant access
-3. **Authorship** — If the user is CREATOR/MAINTAINER/CONTRIBUTOR with ACTIVE status
-4. **Role-based** — If any of the user's roles grant the permission for that resource type
-5. **UserGroup access** — If the user is a member of a linked UserGroup
-6. **Paid enrollment** — If the user has purchased access (EE feature)
+1. **Free + published** — `public=True`, `published=True`, and access type `public` (or absent) grants access
+2. **Authorship** — CREATOR/MAINTAINER/CONTRIBUTOR with ACTIVE status
+3. **Admin/maintainer** — org Admin or Maintainer role
+4. **Access type** — a draft (`published=False`) blocks everyone; otherwise `users_only` requires a linked UserGroup, and `paid` requires an active `ResourceEntitlement` (linked UserGroups bypass)
+5. **Legacy role permission** — only for resources still using the public flag
+6. **Legacy UserGroup membership** — subject to the published check
+
+Superadmins bypass these checks in `authorization_verify_based_on_org_admin_status()` and the role helpers. Write paths require authorship, admin/maintainer status, or role rights; anonymous users can never write.
 
 ### FastAPI Dependency Injection
 
@@ -286,9 +296,18 @@ async def update_course(
 ): ...
 ```
 
+`require_dashboard_access()` (in `rbac/dependencies.py`) is the dashboard-context wrapper around `require_resource_access(..., AccessContext.DASHBOARD)`; `CourseAccess`, `PodcastAccess`, and `CommunityAccess` expose read/create/update/delete/dashboard variants.
+
 ### Resource-Level Checks
 
 The RBAC system evaluates access at the resource level through `check_resource_access()` in `resource_access.py`. This function is called by service functions to verify whether the acting user has the required permission on a specific resource (e.g., a specific course or community).
+
+### Read Helpers
+
+Two helpers sit on top of `check_resource_access()`:
+
+- **`check_catalog_read_access()`** (`rbac/catalog.py`) — lets anyone read the metadata of a **published paid** resource (a product page), while returning the decision so callers can strip paid content. `users_only` and draft resources stay denied.
+- **`require_resource_read()`** (`rbac/media.py`) — guards raw media files (local filesystem and S3). API tokens from the owning org keep access; anonymous callers get 401; signed-in callers without access get 403. This prevents knowing a file path from bypassing a paywall.
 
 ### Published Field Enforcement
 
@@ -347,25 +366,38 @@ For paid content, denied access returns **HTTP 402 Payment Required** with offer
 
 Rate limiting is applied to sensitive endpoints:
 
+`src/services/security/rate_limiting.py` exposes per-action helpers (`check_login_rate_limit`, `check_refresh_rate_limit`, `check_signup_rate_limit`, `check_verification_resend_rate_limit`, `check_password_reset_rate_limit`, `check_api_token_rate_limit`, `check_webhook_mutation_rate_limit`). They store counters under `rate_limit:{key}` in Redis.
+
 | Endpoint | Limit |
 |----------|-------|
 | `/api/v1/auth/login` | Configurable per-IP |
 | `/api/v1/auth/refresh` | Configurable per-IP |
-| `/api/v1/auth/verify-email` | Configurable per-IP |
-| `/api/v1/auth/resend-verification` | Configurable per-IP |
+| Signup | Configurable per-IP |
+| Resend verification | Configurable per-IP / email |
+| Password reset | Configurable per-IP / email |
+| API token requests | Configurable per token |
 
 ### Account Lockout
 
-After configurable failed login attempts, the account is temporarily locked:
+`src/services/security/account_lockout.py` locks an account after **10 failed attempts for 5 minutes**, but only when the attempts came from **at least two distinct source IPs** within a 30-minute window (a single-IP client cannot lock an account on its own):
 
 ```python
-from src.services.security.account_lockout import check_account_lockout, record_failed_attempt
+from src.services.security.account_lockout import (
+    check_account_locked,
+    record_failed_login,
+    reset_failed_attempts,
+    update_login_info,
+)
+
+# Before login: returns (is_locked, remaining_seconds)
+is_locked, remaining = check_account_locked(user)
 
 # On login failure:
-record_failed_attempt(user, db_session)
+now_locked, ttl = record_failed_login(user, db_session, ip_address)
 
-# Before login:
-check_account_lockout(user)  # Raises 423 Locked if locked
+# On successful login:
+reset_failed_attempts(user, db_session)
+update_login_info(user, ip_address, db_session)
 ```
 
 ---
@@ -399,14 +431,18 @@ CORS is tenancy-aware (`src/core/middleware/cors.py`):
 
 Credentials are allowed, and all HTTP methods and headers are permitted.
 
+### CSRF Middleware (not active)
+
+`src/security/csrf.py` defines `CSRFProtectionMiddleware`, which validates `Origin` (falling back to `Referer`) on POST/PUT/DELETE/PATCH and exempts API tokens (`Bearer lh_`), Stripe signatures, and internal service keys. It is **not registered** in `apps/api/app.py` — the only `add_middleware` calls there are `configure_cors(app)` and `GZipMiddleware`. Until it is added, CSRF protection is not active (the cookie auth path relies on the CORS policy).
+
 ---
 
 ## Enterprise Edition Hooks
 
-The EE module can extend security with:
-- Additional middleware (`register_ee_middlewares`)
-- Additional routers with auth checks (`register_ee_routers`)
-- Additional lifecycle handlers (`register_ee_event_handlers`)
-- Payment-based enrollment access (`check_enrollment_access`)
+`src/core/ee_hooks.py` loads `ee.hooks` when the `ee` folder exists (and `LEARNHOUSE_DISABLE_EE != "1"`). The hooks it calls are:
+- `register_middlewares(app)` — via `register_ee_middlewares(app)`
+- `register_routers(v1_router)` — via `register_ee_routers(v1_router)`
+- `on_startup(app)` — via `run_ee_startup(app)`
+- `check_activity_paid_access(request, activity_id, user, db_session)` — via `check_ee_activity_paid_access()`; returns `True` (free access) when EE is absent
 
 All EE integrations gracefully degrade when the module is absent.

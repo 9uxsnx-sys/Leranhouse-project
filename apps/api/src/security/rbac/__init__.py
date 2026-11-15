@@ -52,6 +52,8 @@ from src.security.rbac.resource_access import (
     ResourceAccessChecker,
     check_resource_access,
 )
+from src.security.rbac.catalog import check_catalog_read_access
+from src.security.rbac.media import require_resource_read
 
 # New unified RBAC system - FastAPI Dependencies
 from src.security.rbac.dependencies import (
@@ -107,6 +109,8 @@ __all__ = [
     # Checker
     "ResourceAccessChecker",
     "check_resource_access",
+    "check_catalog_read_access",
+    "require_resource_read",
     # FastAPI Dependencies
     "require_resource_access",
     "require_read_access",

@@ -15,21 +15,28 @@ import { useContentLocale } from '@components/Hooks/useCourseTranslation'
 import useSWR from 'swr'
 import { swrFetcher } from '@services/utils/ts/requests'
 
-interface CourseCommunitySection {
-  courseUuid: string
+interface ResourceCommunitySectionProps {
+  // A community is an add-on to exactly one course or podcast, so the section
+  // is rendered from the parent resource and only when the API confirms access.
+  resourceUuid: string
+  resourceType: 'course' | 'podcast'
   orgslug: string
 }
 
-export function CourseCommunitySection({ courseUuid, orgslug }: CourseCommunitySection) {
+export function CourseCommunitySection({
+  resourceUuid,
+  resourceType,
+  orgslug,
+}: ResourceCommunitySectionProps) {
   const { t } = useTranslation()
   const session = useLHSession() as any
   const accessToken = session?.data?.tokens?.access_token
   const contentLocale = useContentLocale()
 
-  // SWR for community data — cached across navigations within the same course
+  // SWR for community data — cached across navigations within the same resource
   const { data: community } = useSWR<Community | null>(
-    courseUuid && accessToken
-      ? `${getAPIUrl()}communities/course/${courseUuid}?locale=${contentLocale}`
+    resourceUuid && accessToken
+      ? `${getAPIUrl()}communities/${resourceType}/${resourceUuid}?locale=${contentLocale}`
       : null,
     (url) => swrFetcher(url, accessToken),
     { revalidateOnFocus: false, dedupingInterval: 30000 }

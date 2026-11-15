@@ -1,55 +1,62 @@
+> Status: as-built · Last verified: 2026-11-15
+
 # Activities
 
-> Types of learning activities you'll encounter in lessons.
+An activity is one item inside a course chapter: a video, a document, a rich page, an assignment or another supported block.
 
----
+## Activity page
 
-## Activity Types
+Opening an activity from the curriculum shows:
 
-### Video Lessons
+| Area | Content |
+|---|---|
+| Header | Course and chapter context, activity title and type |
+| Content | The activity body, rendered by its type |
+| Secondary bar | Chapter dropdown, share action and reading controls |
+| Footer | **What's next**, previous activity and next activity |
+| Actions | Completion or assignment controls |
 
-Embedded video content with playback controls. May include:
-- Instructor recordings
-- Screen shares
-- Animated explanations
+Supported content renderers include video, PDF/document, dynamic page, Markdown, embed and — on enterprise deployments — SCORM. Quizzes and interactive blocks can appear inside a dynamic page.
 
-### Documents
+## Navigation
 
-Text-based lesson content with:
-- Rich text formatting
-- Images and diagrams
-- Code snippets
-- Downloadable resources
+| Control | Behaviour |
+|---|---|
+| Chapter dropdown | Jumps to another chapter in the same course |
+| Previous | Opens the previous activity in course order |
+| Next | Opens the next activity; after the last activity it leads to the course-end screen |
+| Share | Copies a link to the activity |
+| **What's next** | Lists the following activity with a shortcut |
 
-### Dynamic Lessons
+Chapters in the course curriculum can be collapsed and expanded; the current activity is highlighted, and completed activities carry a check.
 
-Interactive content that may include:
-- Embedded web content
-- Interactive exercises
-- Simulated environments
+## Marking completion
 
-### Assignments
+Completion controls appear only for signed-in learners, on published activities whose content is not marked as paid-without-access.
 
-Tasks that require submission:
-- Written responses
-- File uploads
-- Code submissions
-- Graded by instructors
+| State | Action |
+|---|---|
+| Not complete | **Mark as complete** records the activity in your trail |
+| Complete | A completed indicator is shown, with an action to unmark it |
 
-### Knowledge Checks
+Marking the final activity completes the course and opens the course-end screen. The screen shows the course result and, when the course is certified, your certificate with a PDF download.
 
-Built-in questions within lessons:
-- Multiple choice
-- Short answer
-- Review questions
-- Self-assessment
+## Assignments inside a course
 
-## Lesson Navigation
+An assignment activity shows the task instructions and your submission state: not submitted, submitted, late or graded. You can:
 
-Each lesson shows:
-- Lesson name and description
-- Learning objectives
-- Key takeaways
-- Resources (files and links)
-- Knowledge checks
-- Previous/Next lesson navigation
+- Submit your answers for the tasks.
+- Retry when the assignment allows it.
+- Read the final grade and overall feedback once the teacher releases them.
+
+The teacher evaluates submissions in the dashboard; see [Assignments](../04-admin-guide/assignments.md).
+
+## Locked content
+
+If an activity is part of a paid resource without an entitlement, the page explains that access is required instead of rendering the body. The same applies to activities from group-restricted resources when you are not in a linked group.
+
+## Related
+
+- [Courses](./courses.md) — curriculum and progress.
+- [Certificates](./certificates.md) — what happens after the last activity.
+- [Activities API](../06-api-reference/activities.md) and [Assignments API](../06-api-reference/assignments.md).

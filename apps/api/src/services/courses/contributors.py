@@ -40,6 +40,12 @@ async def apply_course_contributor(
             detail="Course not found",
         )
 
+    if not course.open_to_contributors:
+        raise HTTPException(
+            status_code=403,
+            detail="This course is not open to contributor applications",
+        )
+
     # Check if user already has any authorship role for this course
     existing_authorship = db_session.exec(
         select(ResourceAuthor).where(
@@ -310,6 +316,7 @@ async def add_bulk_course_contributors(
                 "course_uuid": course_uuid,
                 "contributors": results["successful"],
             },
+            db_session=db_session,
         )
 
     return results
@@ -433,6 +440,7 @@ async def remove_bulk_course_contributors(
                 "course_uuid": course_uuid,
                 "contributors": results["successful"],
             },
+            db_session=db_session,
         )
 
     return results

@@ -86,6 +86,7 @@ async def create_board(
             "name": board.name,
             "created_by": current_user.id,
         },
+        db_session=db_session,
     )
 
     return _board_to_read(board, db_session)
@@ -259,13 +260,16 @@ async def add_board_member(
     db_session.commit()
     db_session.refresh(member)
 
+    # `role` is a plain string on the API model but an enum internally.
+    role_value = getattr(member_object.role, "value", member_object.role)
+
     await dispatch_webhooks(
         event_name="board_member_added",
         org_id=board.org_id,
         data={
             "board_uuid": board.board_uuid,
             "user_id": member_object.user_id,
-            "role": member_object.role.value,
+            "role": role_value,
         },
     )
 
@@ -275,8 +279,9 @@ async def add_board_member(
         data={
             "board_uuid": board.board_uuid,
             "user_id": member_object.user_id,
-            "role": member_object.role.value,
+            "role": role_value,
         },
+        db_session=db_session,
     )
 
     return _member_to_read(member, db_session)

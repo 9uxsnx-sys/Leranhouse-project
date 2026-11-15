@@ -1,83 +1,47 @@
+> Status: as-built · Last verified: 2026-11-15
+
 # General Settings
 
-> Configure the foundational organization settings that define your Koodook instance, including identity, locale, timezone, and contact details.
+The General tab holds the organization's identity text and its default language.
 
-## Organization Identity
+## Opening General
 
-The **General Settings** page is the first stop when setting up your Koodook organization. It controls the basic identity and regional preferences of your platform.
+Open **Organization → General**. The page uses the same pill tab bar as every organization setting: General, Branding, SEO, Domains, Automations and API Access.
 
-### Organization Name
+## Fields
 
-- Set the public-facing name of your organization. This name appears in the browser title bar, email notifications, landing pages, and the admin dashboard header.
-- The name should be concise but descriptive — it is used as the default `<title>` element across public pages.
-- Changing the organization name does **not** affect the platform URL or subdomain.
+| Field | Rule | Effect |
+|---|---|---|
+| Name | Required, maximum 60 characters | Organization name in the dashboard, titles and organization context |
+| Short description | Required, maximum 100 characters | One-line description used by organization surfaces |
+| About | Optional, maximum 400 characters | Longer organization description |
+| Default language | One language from the available list | Fallback language for the organization's content and interface |
 
-### Logo
+The default language is chosen from an expandable list. The selected language is marked with a check; choosing a language collapses the list. The value is stored in the organization configuration and is used when no per-user language preference applies.
 
-- Upload your organization's logo in **PNG** or **SVG** format.
-- Recommended dimensions: **200 × 60 px** for the header logo. Larger images are automatically scaled down.
-- The logo is displayed in the top navigation bar of both the public site and the admin dashboard.
-- Supported formats: `.png`, `.svg`, `.jpg`, `.webp`. Maximum file size: **2 MB**.
+## Saving
 
-### Logo Icon (Mark)
+The action row contains a three-state save button:
 
-- Upload an optional **icon mark** (logomark) that appears in the collapsed sidebar.
-- Best results with **SVG** format.
-- Falls back to the first letter of the organization name if not set.
+| State | Meaning |
+|---|---|
+| Save | The form has unsaved changes |
+| Saving | The request is in flight |
+| Saved | Everything is persisted; the button is inert |
 
-### Favicon
+Saving writes the identity fields and the default language together, then revalidates the organization context. Leaving the page with unsaved changes discards them.
 
-- Upload a favicon that appears in browser tabs and bookmarks.
-- Recommended format: **ICO** or **PNG**, **32 × 32 px** or **48 × 48 px**.
-- If no favicon is uploaded, Koodook uses a default Learnhouse-branded favicon.
+There is no logo, favicon, timezone, contact or URL field on this tab; branding images and the theme live under **Branding**, and social/search metadata lives under **SEO**.
 
-## Locale & Language
+## Form behaviour
 
-### Default Locale
+- Required fields are validated on save and show inline messages.
+- Maximum lengths are enforced by the inputs, so typing stops at the limit.
+- Saving writes the identity fields first and the default language second. If either request fails, an error toast is shown and the form stays dirty.
+- The form reinitialises from the organization context, so a refresh shows the values that were last persisted.
 
-- Select the default language for your organization from the available locale options.
-- This setting determines the language used for:
-  - Public landing pages and course catalogues
-  - System-generated email notifications
-  - Admin dashboard UI
-  - Default locale for new user accounts
-- Users can override their personal language preference in their account settings.
-- Koodook supports **right-to-left (RTL)** locales. When an RTL locale is selected, the entire UI adjusts accordingly.
+## Related
 
-### Available Locales
-
-- Enable or disable specific languages for your organization. Users will only see enabled locales in their language selector.
-- If only one locale is enabled, the language selector is hidden from users.
-
-## Timezone
-
-- Set the default timezone for your organization. This affects:
-  - Course start/end date display
-  - Schedule and event times
-  - Audit log timestamps
-  - Email notification send times
-  - Reporting and analytics data
-- The timezone selector lists all IANA timezone identifiers (e.g., `Africa/Algiers`, `Europe/Paris`, `America/New_York`).
-- Users with a personal timezone set in their profile will see times converted to their local timezone. The organization timezone serves as the fallback.
-
-## Contact Information
-
-Provide contact details that appear in system-generated communications and on the public site:
-
-- **Email address** — Used as the default sender for system notifications and as a contact point on the landing page.
-- **Phone number** — Optional. Displayed on the contact page if the landing page builder includes a contact section.
-- **Physical address** — Optional. Useful for organizations that operate from a physical location and need to display it for compliance or trust.
-- **Support URL** — Optional. A link to your help desk or support portal, used in email footers and error pages.
-
-## Save Behavior
-
-- All changes on the General Settings page are saved by clicking the **Save** button at the top or bottom of the form.
-- Unsaved changes are **not** preserved when navigating away from the page — a confirmation dialog warns you before leaving.
-- Some fields (logo, favicon) are uploaded immediately upon file selection. Other text fields require an explicit save.
-- Changes take effect **immediately** after saving. There is no deployment or approval step for general settings.
-
-## Related Sections
-
-- [Branding Settings](./branding.md) — Custom fonts, colors, and CSS
-- [Domains](./domains.md) — Custom domain configuration
-- [Landing Page Builder](./landing.md) — Build your public-facing homepage
+- [Branding](./branding.md) — logo, favicon, logomark, thumbnail, theme colour, auth screens.
+- [SEO](./seo.md) — meta tags, social image, verification and indexing.
+- [Organizations API](../../06-api-reference/orgs.md) and [Developer guide](../../05-developer-guide/README.md).

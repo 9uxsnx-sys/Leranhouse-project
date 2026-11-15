@@ -22,7 +22,10 @@ export interface CommunityModerationSettings {
 export interface Community {
   id: number
   org_id: number
-  course_id: number | null
+  // A community is an add-on attached to one course or podcast and inherits
+  // that resource's access rules.
+  resource_uuid: string | null
+  resource_type: 'course' | 'podcast' | null
   community_uuid: string
   name: string
   description: string | null
@@ -43,8 +46,8 @@ export interface Community {
 export interface CommunityCreate {
   name: string
   description?: string | null
-  public?: boolean
-  course_id?: number | null
+  resource_uuid: string
+  resource_type: 'course' | 'podcast'
 }
 
 export interface CommunityUpdate {
@@ -73,8 +76,10 @@ export interface CommunityRights {
   }
   access: {
     via_public: boolean
-    via_usergroups: number[]
-    has_usergroup_restriction: boolean
+    via_resource?: boolean
+    resource_uuid?: string | null
+    resource_type?: 'course' | 'podcast' | null
+    is_linked?: boolean
   }
 }
 
@@ -125,6 +130,21 @@ export async function getCommunityByCourse(
   return res
 }
 
+export async function getCommunityByPodcast(
+  podcast_uuid: string,
+  next: any,
+  access_token?: string,
+  locale?: string
+) {
+  const query = locale ? `?locale=${encodeURIComponent(locale)}` : ''
+  const result: any = await fetch(
+    `${getAPIUrl()}communities/podcast/${podcast_uuid}${query}`,
+    RequestBodyWithAuthHeader('GET', null, next, access_token)
+  )
+  const res = await errorHandling(result)
+  return res
+}
+
 export async function createCommunity(
   org_id: number,
   data: CommunityCreate,
@@ -163,29 +183,45 @@ export async function deleteCommunity(
   return res
 }
 
-export async function linkCommunityToCourse(
+export async function linkCommunityToResource(
   community_uuid: string,
-  course_uuid: string,
+  resource_type: 'course' | 'podcast',
+  resource_uuid: string,
   access_token: string
 ) {
   const result: any = await fetch(
-    `${getAPIUrl()}communities/${community_uuid}/link-course/${course_uuid}`,
+    `${getAPIUrl()}communities/${community_uuid}/link/${resource_type}/${resource_uuid}`,
     RequestBodyWithAuthHeader('PUT', null, null, access_token)
   )
   const res = await errorHandling(result)
   return res
 }
 
-export async function unlinkCommunityFromCourse(
+export async function unlinkCommunityFromResource(
   community_uuid: string,
   access_token: string
 ) {
   const result: any = await fetch(
-    `${getAPIUrl()}communities/${community_uuid}/unlink-course`,
+    `${getAPIUrl()}communities/${community_uuid}/link`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token)
   )
   const res = await errorHandling(result)
   return res
+}
+
+export async function linkCommunityToCourse(
+  community_uuid: string,
+  course_uuid: string,
+  access_token: string
+) {
+  return linkCommunityToResource(community_uuid, 'course', course_uuid, access_token)
+}
+
+export async function unlinkCommunityFromCourse(
+  community_uuid: string,
+  access_token: string
+) {
+  return unlinkCommunityFromResource(community_uuid, access_token)
 }
 
 export async function getCommunityRights(

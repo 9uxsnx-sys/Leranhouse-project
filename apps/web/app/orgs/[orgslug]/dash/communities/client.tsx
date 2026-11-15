@@ -10,7 +10,6 @@ import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { Community, deleteCommunity } from '@services/communities/communities'
 import { CreateCommunityModal } from '@components/Objects/Modals/Communities/CreateCommunityModal'
-import { EditCommunityModal } from '@components/Objects/Modals/Communities/EditCommunityModal'
 import { CommunityCard } from '@components/Objects/Thumbnails/CommunityCard'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import PlanRestrictedFeature from '@components/Dashboard/Shared/PlanRestricted/PlanRestrictedFeature'
@@ -39,7 +38,7 @@ interface CommunitiesDashClientProps {
   communities: Community[]
 }
 
-type FilterMode = 'all' | 'newest' | 'course' | 'general'
+type FilterMode = 'all' | 'newest' | 'course' | 'podcast'
 
 const removeCommunityPrefix = (uuid: string) => uuid.replace('community_', '')
 
@@ -71,7 +70,6 @@ const CommunitiesDashClient = ({
   const effectiveCommunities = swrCommunities || communities
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const [editingCommunity, setEditingCommunity] = useState<Community | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<FilterMode>('all')
   const [selectedCommunities, setSelectedCommunities] = useState<Set<string>>(new Set())
@@ -79,22 +77,22 @@ const CommunitiesDashClient = ({
 
   const filterLabel = useMemo(() => {
     switch (activeFilter) {
-      case 'all': return 'All'
-      case 'newest': return 'Newest'
-      case 'course': return 'Course'
-      case 'general': return 'General'
+      case 'all': return t('communities.all_communities')
+      case 'newest': return t('communities.newest')
+      case 'course': return t('communities.course_communities')
+      case 'podcast': return t('communities.podcast_communities')
     }
-  }, [activeFilter])
+  }, [activeFilter, t])
 
   const filteredCommunities = useMemo(() => {
     let items = effectiveCommunities
 
     switch (activeFilter) {
       case 'course':
-        items = items.filter((c: any) => c.course_id != null)
+        items = items.filter((c: any) => c.resource_type === 'course')
         break
-      case 'general':
-        items = items.filter((c: any) => c.course_id == null)
+      case 'podcast':
+        items = items.filter((c: any) => c.resource_type === 'podcast')
         break
       case 'newest':
         items = [...items].sort((a, b) =>
@@ -300,9 +298,9 @@ const CommunitiesDashClient = ({
                 <span>{t('communities.course_communities')}</span>
                 {activeFilter === 'course' && <ConceptIcon.check size={12} className="text-gray-500" />}
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setActiveFilter('general')} className="flex items-center justify-between">
-                <span>{t('communities.general')}</span>
-                {activeFilter === 'general' && <ConceptIcon.check size={12} className="text-gray-500" />}
+              <DropdownMenuItem onSelect={() => setActiveFilter('podcast')} className="flex items-center justify-between">
+                <span>{t('communities.podcast_communities')}</span>
+                {activeFilter === 'podcast' && <ConceptIcon.check size={12} className="text-gray-500" />}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -343,8 +341,7 @@ const CommunitiesDashClient = ({
                   description={community.description || ''}
                   org_uuid={org_uuid}
                   community_uuid={community.community_uuid}
-                  course_id={community.course_id}
-                  public={community.public || false}
+                  resource_type={community.resource_type}
                   creation_date={community.creation_date || ''}
                   thumbnail_image={community.thumbnail_image}
                   href={`/orgs/${orgslug}/dash/communities/${community.community_uuid}/general`}
@@ -463,16 +460,8 @@ const CommunitiesDashClient = ({
         onClose={() => setIsCreateModalOpen(false)}
         orgId={org_id}
         orgSlug={orgslug}
+        existingCommunities={effectiveCommunities}
       />
-
-      {editingCommunity && (
-        <EditCommunityModal
-          isOpen={!!editingCommunity}
-          onClose={() => setEditingCommunity(null)}
-          community={editingCommunity}
-          orgSlug={orgslug}
-        />
-      )}
     </div>
     </FeatureDisabledView>
     </PlanRestrictedFeature>

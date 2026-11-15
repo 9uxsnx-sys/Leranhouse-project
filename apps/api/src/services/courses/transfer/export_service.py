@@ -343,9 +343,13 @@ def _export_directory_to_zip(
     Skips re-compression for already-compressed media files to save CPU.
     """
     for root, dirs, files in walk_directory(source_path):
+        # `walk_directory` yields OS-native roots on the filesystem branch;
+        # content paths (and ZIP entry names) are always POSIX.
+        root_posix = root.replace(os.sep, "/").rstrip("/")
         for filename in files:
-            file_path = os.path.join(root, filename)
-            rel_path = os.path.relpath(file_path, source_path)
+            file_path = f"{root_posix}/{filename}"
+            # ZIP entry names are POSIX on every platform.
+            rel_path = os.path.relpath(file_path, source_path).replace(os.sep, "/")
             content = read_file_content(file_path)
             if content:
                 entry_path = f"{zip_path}/{rel_path}"

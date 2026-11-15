@@ -35,6 +35,7 @@ from src.security.rbac.rbac import (
 from src.security.rbac import (
     AccessAction,
     AccessContext,
+    check_catalog_read_access,
     check_resource_access,
 )
 from src.security.rbac.constants import ADMIN_OR_MAINTAINER_ROLE_IDS
@@ -68,13 +69,15 @@ async def get_course(
         )
 
     # DASHBOARD context lets authors/admins/usergroup members access unpublished
-    # courses; regular users still fall back to public view rules.
-    await check_resource_access(
+    # courses; regular users still fall back to public view rules. A published
+    # paid course is a product page, so its metadata stays readable.
+    await check_catalog_read_access(
         request,
         db_session,
         current_user,
         course.course_uuid,
-        AccessAction.READ,
+        published=course.published,
+        access_type=course.access_type,
         context=AccessContext.DASHBOARD,
     )
 
@@ -123,7 +126,14 @@ async def get_course_by_id(
         )
 
     # RBAC check
-    await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.READ)
+    await check_catalog_read_access(
+        request,
+        db_session,
+        current_user,
+        course.course_uuid,
+        published=course.published,
+        access_type=course.access_type,
+    )
 
     # Get course authors with their roles
     authors_statement = (
@@ -188,19 +198,31 @@ async def get_course_meta(
     author_results = [(ra, u) for _, ra, u, _ in results if ra is not None and u is not None]
 
     # DASHBOARD context lets authors/admins/usergroup members access unpublished
-    # courses; regular users still fall back to public view rules.
-    await check_resource_access(
+    # courses; regular users still fall back to public view rules. A published
+    # paid course is a product page: the curriculum structure stays readable,
+    # the lesson bodies are stripped per viewer below.
+    await check_catalog_read_access(
         request,
         db_session,
         current_user,
         course.course_uuid,
-        AccessAction.READ,
+        published=course.published,
+        access_type=course.access_type,
         context=AccessContext.DASHBOARD,
+    )
+
+    # The cached payload is shared across users, so it may only be reused when
+    # the viewer cannot change what is inside it. Paid courses are previewed
+    # with per-viewer locks, so they never go through this cache.
+    cacheable = (
+        course.published
+        and not with_unpublished_activities
+        and course.access_type != AccessTypeEnum.PAID
     )
 
     # Permission check passed — try Redis cache for the heavy data
     # (shared across all authorized users for this course)
-    if course.published and not with_unpublished_activities:
+    if cacheable:
         from src.services.courses.cache import get_cached_course_meta
         cached = get_cached_course_meta(course_uuid, slim)
         if cached is not None:
@@ -244,9 +266,20 @@ async def get_course_meta(
         chapters=chapters
     )
 
+    # Never cache a payload whose locks depend on the viewer: a restricted
+    # chapter cached for a member would otherwise be served to a non-member.
+    has_private_locks = any(
+        (chapter.lock_type or "public") != "public"
+        or any(
+            (activity.lock_type or "public") != "public"
+            for activity in chapter.activities
+        )
+        for chapter in chapters
+    )
+
     # Cache for published courses (safe to share across users) — always the
     # source-locale payload; the translation overlay is applied per request.
-    if course.published and not with_unpublished_activities:
+    if cacheable and not has_private_locks:
         from src.services.courses.cache import set_cached_course_meta
         set_cached_course_meta(course_uuid, slim, course_read.model_dump())
 
@@ -792,6 +825,7 @@ async def create_course(
             "name": course.name,
             "org_id": course.org_id,
         },
+        db_session=db_session,
     )
 
     course_data = {key: getattr(course, key) for key in course.model_fields}
@@ -1249,6 +1283,7 @@ async def update_course(
                 "name": course.name,
                 "published": course.published,
             },
+            db_session=db_session,
         )
 
     # Get course authors with their roles
@@ -1330,6 +1365,7 @@ async def delete_course(
             "course_uuid": course_uuid_val,
             "name": course_name_val,
         },
+        db_session=db_session,
     )
 
     return {"detail": "Course deleted"}

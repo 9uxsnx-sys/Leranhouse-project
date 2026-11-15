@@ -1,60 +1,72 @@
 # Test Execution
 
+> Status: as-built · Last verified: 2026-11-15
+
 This document covers how to run tests, interpret results, measure coverage, and integrate testing into CI. Read this after you have written tests using one of the templates (06-16).
+
+The API uses `uv` and requires Python `>=3.14.3,<3.14.4` (see `apps/api/pyproject.toml`). There is no `[dev]` extra — test dependencies (`pytest`, `pytest-asyncio`, `pytest-cov`) are regular dependencies installed by `uv sync`.
 
 ---
 
 ## Running Tests
 
+All commands run from `apps/api`.
+
 ### Run all tests
 
 ```bash
 cd apps/api
-pytest
+uv run pytest
 ```
 
 ### Run a specific test file
 
 ```bash
-pytest src/tests/routers/test_communities_router.py
+uv run pytest src/tests/routers/test_communities_router.py
 ```
 
 ### Run a specific test class
 
 ```bash
-pytest src/tests/routers/test_communities_router.py::TestCommunitiesRouter
+uv run pytest src/tests/routers/test_communities_router.py::TestCommunitiesRouter
 ```
 
 ### Run a specific test method
 
 ```bash
-pytest src/tests/routers/test_communities_router.py::TestCommunitiesRouter::test_community_endpoints
+uv run pytest src/tests/routers/test_communities_router.py::TestCommunitiesRouter::test_community_endpoints
 ```
 
 ### Run tests matching a keyword
 
 ```bash
-pytest -k "community"
-pytest -k "upload or thumbnail"
+uv run pytest -k "community"
+uv run pytest -k "upload or thumbnail"
 ```
 
 ### Run tests with verbose output
 
 ```bash
-pytest -v
-pytest -v -k "community"
+uv run pytest -v
+uv run pytest -v -k "community"
 ```
 
 ### Stop on first failure
 
 ```bash
-pytest -x
+uv run pytest -x
 ```
 
 ### Run tests and show print statements
 
 ```bash
-pytest -s
+uv run pytest -s
+```
+
+### Collect-only (list tests without running them)
+
+```bash
+uv run pytest --co
 ```
 
 ---
@@ -70,34 +82,47 @@ pytest -s
 | `--tb=long` | Full traceback format |
 | `--lf` | Run only the last failed tests |
 | `--ff` | Run failed tests first, then the rest |
-| `--co` | Show coverage report in terminal |
+| `--co` | **Collect-only** — lists tests, runs none |
+| `--cov` | Enable coverage (configuration in `pyproject.toml`) |
+| `--cov-report=html` | Write an HTML coverage report |
 | `--no-header` | Suppress pytest header |
 
 ---
 
 ## Coverage
 
-### Run with coverage
-
-```bash
-pytest --co
-```
-
-This runs the standard pytest-cov configuration from `pyproject.toml`:
+Coverage is configured in `pyproject.toml`:
 
 ```toml
 [tool.coverage.run]
 source = ["src"]
-branch = true
+omit = [
+    "src/tests/*",
+    "src/services/ai/*",
+    "src/routers/ai/*",
+    "src/routers/code_execution.py",
+    "src/routers/stream.py",
+]
 
 [tool.coverage.report]
 fail_under = 25
+show_missing = true
 ```
+
+Branch coverage is **not** enabled (`branch` is not set), so the threshold applies to line coverage.
+
+### Run with coverage
+
+```bash
+uv run pytest --cov
+```
+
+The run fails if total coverage drops below 25%.
 
 ### Generate HTML coverage report
 
 ```bash
-pytest --co --co-report=html
+uv run pytest --cov --cov-report=html
 ```
 
 Open `htmlcov/index.html` in a browser to see line-by-line coverage.
@@ -105,7 +130,7 @@ Open `htmlcov/index.html` in a browser to see line-by-line coverage.
 ### Generate XML coverage report (CI)
 
 ```bash
-pytest --co --co-report=xml
+uv run pytest --cov --cov-report=xml
 ```
 
 Useful for uploading to Codecov, Coveralls, or SonarQube.
@@ -113,12 +138,14 @@ Useful for uploading to Codecov, Coveralls, or SonarQube.
 ### View coverage for a specific module
 
 ```bash
-pytest --co --co-report=annotate src/tests/ --src src/communities
+uv run pytest --cov=src/services/communities --cov-report=annotate src/tests/
 ```
 
 ---
 
 ## CI Integration
+
+There is currently no workflow file in the repository; the snippets below are templates.
 
 ### GitHub Actions example
 
@@ -144,17 +171,19 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.14.3"
+
+      - uses: astral-sh/setup-uv@v5
 
       - name: Install dependencies
         run: |
           cd apps/api
-          pip install -e ".[dev]"
+          uv sync --frozen
 
       - name: Run tests with coverage
         run: |
           cd apps/api
-          pytest --co --junitxml=report.xml
+          uv run pytest --cov --cov-report=html --cov-report=xml --junitxml=report.xml
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
@@ -176,10 +205,12 @@ jobs:
 # .gitlab-ci.yml
 api-tests:
   stage: test
+  image: python:3.14.3
   script:
+    - pip install uv
     - cd apps/api
-    - pip install -e ".[dev]"
-    - pytest --co --junitxml=report.xml
+    - uv sync --frozen
+    - uv run pytest --cov --cov-report=html --cov-report=xml --junitxml=report.xml
   artifacts:
     reports:
       junit: apps/api/report.xml
@@ -195,17 +226,19 @@ api-tests:
 
 ```
 ============================= test session starts ==============================
-platform win32 -- Python 3.12.0, pytest-9.0.3, pluggy-1.5.0
-rootdir: C:\Projects\learnhouse\apps\api
+platform linux -- Python 3.14.3, pytest-9.0.3, pluggy-1.x
+rootdir: /path/to/apps/api
 configfile: pyproject.toml
-plugins: asyncio-0.25.3, cov-6.0.0
-collected 47 items
+plugins: asyncio-1.3.0, cov-7.1.0
+collected ... items
 
-src\tests\routers\test_communities_router.py ...............              [ 31%]
-src\tests\routers\test_courses_router.py ................................ [100%]
+src/tests/routers/test_communities_router.py ...............              [ 31%]
+src/tests/routers/test_courses_router.py ................................ [100%]
 
-============================== 47 passed in 3.21s ==============================
+============================== ... passed in ...s ==============================
 ```
+
+(Collected/passed counts depend on the working tree; the suite currently has 174 `test_*.py` modules.)
 
 ### Reading a failure
 
@@ -243,12 +276,12 @@ print("Status:", response.status_code)
 print("Body:", response.json())
 ```
 
-Run with `pytest -s` to see the output.
+Run with `uv run pytest -s` to see the output.
 
 ### 2. Use --tb=long for full traceback
 
 ```bash
-pytest -x --tb=long
+uv run pytest -x --tb=long
 ```
 
 ### 3. Check database state
@@ -277,7 +310,7 @@ If pytest behaves differently from the live server, use [live validation](./18-l
 
 | Problem | Solution |
 |---------|----------|
-| Tests are slow | Use `--co` only when needed; avoid in rapid iteration |
+| Tests are slow | Run `--cov` only when needed; skip it during rapid iteration |
 | Database state leaking | Ensure `scope="function"` on fixtures; use `yield` cleanup |
 | Too many async warnings | Set `asyncio_default_fixture_loop_scope = "function"` in config |
 | Flaky tests | Check for shared mutable state between tests; use fresh fixtures |
@@ -289,9 +322,9 @@ If pytest behaves differently from the live server, use [live validation](./18-l
 
 | Rule | Detail |
 |------|--------|
-| Run the full suite before pushing | `pytest` from `apps/api` |
-| Keep coverage above 25% | `fail_under = 25` in pyproject.toml |
+| Run the full suite before pushing | `uv run pytest` from `apps/api` |
+| Keep coverage above 25% | `fail_under = 25` in `pyproject.toml` |
 | Use `-x` during development | Stop on first failure to iterate fast |
 | Use `-v` in CI | Verbose output helps diagnose failures |
-| Run `pytest --co` before commits | Ensure coverage threshold is met |
+| Run `uv run pytest --cov` before commits | Ensure the coverage threshold is met |
 | Do not skip coverage for new code | Every new feature must maintain or improve coverage |

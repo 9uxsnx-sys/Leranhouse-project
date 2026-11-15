@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from src.db.communities.communities import Community
 from src.db.communities.community_translations import CommunityTranslation
 from src.db.communities.discussion_comment_votes import DiscussionCommentVote
@@ -207,13 +209,24 @@ def create_communities(ctx: SeedContext) -> None:
     base = org_content_dir(ctx.content_root, ctx.org_uuid) / "communities"
     created_communities = []
 
+    # Communities are add-ons: every seeded one is attached to a course or a
+    # podcast, so its access mirrors that resource. The flagship course comes
+    # first so the course page gets a live feed.
+    parents: list[tuple[Any, str]] = []
+    if ctx.flagship is not None:
+        parents.append((ctx.flagship, "course"))
+    parents.extend((course, "course") for course in ctx.courses if course is not ctx.flagship)
+    parents.extend((podcast, "podcast") for podcast in ctx.podcasts)
+
     for index, (name, description) in enumerate(C.COMMUNITIES):
         created = ctx.date_between(160, 30)
         community_uuid = new_uuid("community")
         community_dir = base / community_uuid
-        # The first community belongs to the flagship course, so the course
-        # page gets a live feed and the "course" filter has something in it.
-        linked_course = ctx.flagship if index == 0 else None
+
+        parent, parent_type = parents[index % len(parents)]
+        resource_uuid = (
+            parent.course_uuid if parent_type == "course" else parent.podcast_uuid
+        )
         if index == 0:
             # The flagship community is opened on camera and reuses the course artwork.
             thumbnail = ctx.named_image(
@@ -234,11 +247,12 @@ def create_communities(ctx: SeedContext) -> None:
             thumbnail_image=thumbnail,
             banner_image=banner,
             org_id=ctx.org_id,
-            course_id=int(linked_course.id or 0) if linked_course else None,
+            resource_uuid=resource_uuid,
+            resource_type=parent_type,
             community_uuid=community_uuid,
             moderation_words=[],
             moderation_settings={},
-            published=index < 16,
+            published=True,
             creation_date=iso(created),
             update_date=iso(created),
         )

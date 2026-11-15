@@ -17,7 +17,7 @@ import {
 } from '@services/payments/entitlements'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { linkResourcesToUserGroup, unLinkResourcesToUserGroup } from '@services/usergroups/usergroups'
-import { swrFetcher } from '@services/utils/ts/requests'
+import { swrFetcher, swrFetchAllPages } from '@services/utils/ts/requests'
 import {
     CreditCard,
     Globe,
@@ -114,7 +114,9 @@ function EditCourseAccess(props: EditCourseAccessProps) {
     }, [detailUser])
 
     // ── Users linked to the course (Public / Paid modes) ────────────────────
-    const accessQuery = `search=${encodeURIComponent(debouncedSearch)}&limit=10000`
+    // The API caps `limit` at 100, so the fetcher walks the pages instead of
+    // asking for everything at once.
+    const accessQuery = `search=${encodeURIComponent(debouncedSearch)}`
     const accessKey =
         (mode === 'public' || mode === 'paid') && courseUuid && org?.id && access_token
             ? mode === 'public'
@@ -131,7 +133,7 @@ function EditCourseAccess(props: EditCourseAccessProps) {
         isValidating: accessValidating,
         error: accessError,
         mutate: mutateAccess,
-    } = useSWR(accessKey, (url: string) => swrFetcher(url, access_token), {
+    } = useSWR(accessKey, (url: string) => swrFetchAllPages(url, access_token), {
         revalidateOnFocus: false,
     })
 

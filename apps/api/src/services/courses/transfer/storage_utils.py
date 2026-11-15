@@ -257,7 +257,8 @@ def walk_directory(base_path: str):
 
         # Yield subdirectories
         for dir_rel in sorted(all_dirs):
-            dir_path = os.path.join(base_path, dir_rel)
+            # S3 keys are always POSIX, so never use os.path.join here.
+            dir_path = f"{base_path}/{dir_rel}"
             files = sorted(dir_files.get(dir_rel, set()))
             # Find immediate subdirs
             subdirs = sorted([

@@ -1,112 +1,115 @@
 # Architecture Overview
 
-> High-level system architecture of the Koodook platform.
+> Status: as-built · Last verified: 2026-11-15
+
+> High-level system architecture of LearnHouse.
 
 ---
 
 ## System Diagram
 
 ```
-┌──────────────────────────────────────────────────────────┐
-│                    Browser (User)                         │
-└────────────┬──────────────────────────────┬───────────────┘
-             │                              │
-    ┌────────▼────────┐          ┌─────────▼─────────┐
-    │  Next.js (Web)   │          │  Yjs (Collab)     │
-    │  Port 3000       │          │  Port 4000        │
-    │  App Router      │          │  Hocuspocus       │
-    └────────┬────────┘          │  WebSocket         │
-             │                   └───────────────────┘
-             │ HTTP/REST
-    ┌────────▼────────┐
-    │  FastAPI (API)   │
-    │  Port 1338       │
-    │  JWT Auth        │
-    └────────┬────────┘
-             │
-    ┌────────▼────────┐     ┌──────────────┐
-    │  PostgreSQL      │     │  Redis       │
-    │  (pgvector)      │     │  (Cache)     │
-    │  Port 5434       │     │  Port 6379   │
-    └─────────────────┘     └──────────────┘
+                        Browser
+                           │
+          ┌────────────────┼─────────────────┐
+          │                                  │
+  Next.js web (3000)                 Yjs client (boards)
+  App Router + proxy.ts                      │ WebSocket
+          │ HTTP/REST                        ▼
+          │                        Hocuspocus collab (4000)
+          ▼                                  │ Redis (6379)
+  FastAPI api (1338) ◄───────────────────────┘
+          │
+     ┌────┴─────┐
+     ▼          ▼
+ PostgreSQL   Redis
+ (pgvector)   (cache)
 ```
+
+Ports: API `1338` and frontend `3000` come from `apps/api/config/config.yaml`; collab `4000` from `COLLAB_PORT`; Redis `6379`. The dev CLI maps PostgreSQL to `5434` on the host.
 
 ---
 
-## The Four Apps
+## The Apps
 
-### `apps/api` --- FastAPI Backend
+### `apps/api` — FastAPI Backend
 
-- Python FastAPI with SQLModel ORM
-- PostgreSQL with pgvector extension for AI embeddings
-- JWT-based authentication with OAuth2 support
-- RESTful API with auto-generated OpenAPI docs at `/docs`
-- Business logic in `apps/api/src/services/`
-- Route definitions in `apps/api/src/routers/`
+- Python/FastAPI with SQLModel and PostgreSQL + pgvector
+- JWT authentication, API tokens and RBAC
+- Single REST API under `/api/v1` (`apps/api/src/router.py`)
+- Swagger (`/docs`) and ReDoc (`/redoc`) are served **only when `development_mode` is enabled**
+- Business logic in `apps/api/src/services/`, routes in `apps/api/src/routers/`
 
-### `apps/web` --- Next.js Frontend
+### `apps/web` — Next.js Frontend
 
-- Next.js 16 App Router with TypeScript
-- Two distinct layouts: `(withmenu)` for user-facing pages and `dash` for admin dashboard
-- SWR for data fetching and caching
-- Medusa design system for UI components
-- Proxy middleware for API requests
+- Next.js 16 App Router with React Server Components
+- Two layouts: `(withmenu)` for learner pages and `dash` for the admin dashboard
+- SWR for client data fetching
+- A local `components/ui` kit **ported from Medusa UI design tokens** — no Medusa package dependency
+- `proxy.ts` middleware resolves tenancy and rewrites paths
 
-### `apps/collab` --- Realtime Collaboration Server
+### `apps/collab` — Realtime Server
 
-- Yjs document synchronization with Hocuspocus
-- WebSocket connections on port 4000
-- Powers collaborative whiteboards (Boards) and realtime features
+- Yjs synchronization over Hocuspocus WebSockets on port 4000
+- Powers collaborative boards; state cached in Redis and persisted through the API
 
-### `apps/cli` --- Development CLI
+### `apps/cli` — LearnHouse CLI
 
-- Orchestrates the dev environment
-- Manages Docker containers, dependency installation, and process spawning
-- Provides interactive controls (restart, stop) during development
+- `learnhouse` npm package for setup/deploy/operate and local dev
+- Manages Docker containers, environment files, health checks and the dev process tree
+
+### `apps/mcp`
+
+- Placeholder only (`apps/mcp/.env.example`); no server source yet
 
 ---
 
 ## Key Design Decisions
 
-### Two Separate Layouts
+### Two Layouts, One UI Kit
 
-The frontend has two completely independent layouts:
+| Layout | Routes | Audience |
+|--------|--------|----------|
+| `(withmenu)` | `/orgs/[orgslug]/*` | Learners |
+| `dash` | `/orgs/[orgslug]/dash/*` | Administrators |
 
-| Layout | Routes | Design | Audience |
-|--------|--------|--------|----------|
-| `(withmenu)` | `/orgs/[orgslug]/*` | Medusa UI redesign | Learners |
-| `dash` | `/orgs/[orgslug]/dash/*` | Original Learnhouse design | Admins |
+Both route groups render inside the shared `components/ui` kit. Layouts and providers are not interchangeable — do not move a dashboard component into the learner layout or vice versa.
 
-These use different components, different layouts, and different design languages. **Never mix components between the two.**
+### Payments Are Implemented
 
-### Pay-to-Access Model
+Payments are part of the product and available in every deployment mode (not EE-only):
 
-Koodook is a paid learning platform:
-- Users see course details but must **purchase** to access lesson content
-- Payment integration planned via **Chargily Pay v2** (EDAHABIA/CIB)
-- Courses can be Free (every logged-in user), Restricted (only members of linked user groups), or Paid (purchase required)
+- Provider enum: `PaymentProviderEnum.CHARGILY` (`apps/api/src/db/payments/enums.py`); methods `edahabia`, `cib`, `chargily_app`.
+- API: `apps/api/src/routers/payments.py` (checkout, orders, overview, payout report, access grants, payment settings) and `apps/api/src/routers/payments_webhooks.py` (`POST /payments/webhook/chargily/{org_uuid}`).
+- Admin UI: `/orgs/[orgslug]/dash/payments/[subpage]`; learner checkout: `/orgs/[orgslug]/store`.
+- Entitlements gate paid resources (`EntitlementSourceEnum`: `purchase`, `manual`, `usergroup`, `free`).
+- Stripe keys and `services/payments/providers/stripe.ts` also exist, but Chargily is the provider registered in the backend enum.
+
+Resource access is `public` (any signed-in user), `users_only` (linked user groups) or `paid` (active entitlement) — see `AccessTypeEnum`.
 
 ### Multi-Tenancy
 
-The platform supports multiple organizations, each with:
-- Their own courses, users, and content
-- Custom branding (fonts, colors, logos)
-- Custom domains
-- Independent SSO configuration
+`hosting_config.tenancy` selects **`single`** or **`multi`**:
+
+- `single` — always serves the default org on any hostname (localhost or self-hosted VPS); host-only cookies.
+- `multi` — `slug.{domain}` subdomain detection plus per-org custom domains; requires EE or `LEARNHOUSE_SAAS=true` and a routable domain.
+
+Each organization gets its own courses, users, branding (fonts, colors, logos), custom domains and SSO configuration (`sso` is an EE-only feature).
+
+### Deployment Modes
+
+`src/core/deployment_mode.py` resolves **`saas` → `ee` → `oss`**. EE-only features are `sso`, `audit_logs`, `analytics_advanced` and `scorm`; SaaS additionally applies plan-based gating and usage limits.
 
 ---
 
 ## Data Flow
 
 ```
-User Action -> Next.js Page -> API Service (SWR) -> FastAPI Endpoint -> Service Layer -> Database
-                                                                                    |
-                                                                              PostgreSQL (pgvector)
+User action → Next.js page → service function (@services) → FastAPI router
+            → service layer → SQLModel → PostgreSQL (pgvector)
 ```
 
-1. User interacts with a Next.js page
-2. Page uses a service function from `@services/` to call the API
-3. API validates authentication via JWT middleware
-4. Request hits a router, which calls a service function
-5. Service function queries the database via SQLModel
-6. Response flows back through the same chain
+1. A page renders data (Server Component) or calls a service function (client component + SWR).
+2. Services send requests to the backend (`getAPIUrl()` or the `/api/v1` proxy).
+3. The router applies auth/RBAC/plan dependencies, then delegates to a service.
+4. The service reads/writes SQLModel entities and returns the serialized response.

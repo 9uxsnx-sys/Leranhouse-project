@@ -49,7 +49,7 @@ class TestResourceConfig:
         config = get_resource_config("community_abc123")
         assert config is not None
         assert config.resource_type == "communities"
-        assert config.has_published_field is False  # Communities don't have published field
+        assert config.has_published_field is True
         assert config.supports_authorship is False  # Communities don't have authors
 
     def test_get_resource_config_for_chapter(self):
@@ -264,24 +264,49 @@ class TestResourceAccessChecker:
         assert "logged in" in decision.reason.lower()
 
     @pytest.mark.asyncio
-    async def test_check_access_community_no_published_field(
+    async def test_check_access_community_without_parent_denied(
         self, mock_request, mock_db_session, mock_anonymous_user
     ):
-        """Test community access without published field."""
+        """A community with no linked course/podcast is not readable."""
         checker = ResourceAccessChecker(mock_request, mock_db_session, mock_anonymous_user)
 
-        # Mock the community lookup - public community (no published field)
         mock_community = Mock()
-        mock_community.public = True
-        mock_community.org_id = 1
-        # Community doesn't have published field
-        del mock_community.published
+        mock_community.resource_uuid = None
+        mock_community.resource_type = None
         mock_db_session.exec.return_value.first.return_value = mock_community
 
         decision = await checker.check_access("community_123", AccessAction.READ)
 
+        assert decision.allowed is False
+        assert "not attached" in decision.reason.lower()
+
+    @pytest.mark.asyncio
+    async def test_check_access_community_inherits_parent_decision(
+        self, mock_request, mock_db_session, mock_anonymous_user
+    ):
+        """A linked community mirrors the access decision of its parent."""
+        checker = ResourceAccessChecker(mock_request, mock_db_session, mock_anonymous_user)
+        config = get_resource_config("community_123")
+
+        mock_community = Mock()
+        mock_community.resource_uuid = "course_123"
+        mock_community.resource_type = "course"
+        checker._get_resource = AsyncMock(return_value=mock_community)
+        checker.check_access = AsyncMock(
+            return_value=AccessDecision(
+                allowed=True, reason="public", via_public=True, via_authorship=True
+            )
+        )
+
+        decision = await checker._check_community_access(
+            "community_123", AccessAction.READ, AccessContext.PUBLIC_VIEW, config
+        )
+
         assert decision.allowed is True
         assert decision.via_public is True
+        assert decision.via_authorship is True
+        assert decision.resource_uuid == "community_123"
+        assert "linked course" in decision.reason.lower()
 
 
 class TestCheckResourceAccessFunction:

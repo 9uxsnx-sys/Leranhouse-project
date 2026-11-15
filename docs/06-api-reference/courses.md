@@ -1,702 +1,701 @@
-# Courses
+# Courses API
 
-> Course endpoints manage the full lifecycle of learning content — create, read, update, delete, clone, export, import, and search courses — with paginated listing, nested chapter/activity metadata, and granular access rights.
+> Status: as-built · Last verified: 2026-11-15
 
----
-
-## Overview
-
-Courses are the top-level content unit in Koodook. Each course belongs to an organization and can contain multiple chapters, which in turn contain activities (lessons). Courses have configurable access levels (`public`, `users_only`, `paid`), pricing, tags, and rich metadata.
-
-All course endpoints are under the Courses router at `/api/v1/courses`. Some endpoints require the `courses` feature to be enabled for the organization (enforced by a router-level dependency).
+All routes are mounted under `/api/v1/courses`. Every route on this router requires the organization's `courses` feature to be enabled. Collection `POST` routes use a trailing slash (`/api/v1/courses/`).
 
 ---
 
-## List Courses (by Org Slug)
+## Access rules
 
-Retrieve a paginated list of courses for a given organization.
+| `access_type` | Who can read | Listed publicly |
+|---|---|---|
+| `public` | Anyone, including anonymous visitors | Yes, when `published` |
+| `users_only` | Members of user groups linked to the course, org admins/maintainers, and active course authors | No |
+| `paid` | Published paid courses are product pages: metadata and curriculum are readable by anyone; lesson bodies are stripped until the viewer has an active entitlement (EE hook) | Yes, when `published` |
+
+- Drafts (`published=false`) are hidden from anonymous and regular-user listings. `include_unpublished=true` only takes effect for org admins/maintainers (or superadmins).
+- Anonymous catalog listing includes only published `public` and `paid` courses.
+- Read/write permissions are enforced per course (`read` / `create` / `update` / `delete`); only course owners (`CREATOR`, `MAINTAINER`), admins and maintainers may change access settings.
+
+---
+
+## List courses (by org slug)
 
 ```
 GET /api/v1/courses/org_slug/{org_slug}/page/{page}/limit/{limit}
 ```
 
-### Path Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `org_slug` | string | The organization's URL slug |
-| `page` | integer | Page number (1-indexed) |
-| `limit` | integer | Items per page (capped server-side) |
-
-### Query Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `visibility` | string | Filter by visibility: `public`, `private`, or omit for all |
-| `sort` | string | Sort order (e.g., `newest`, `oldest`, `title`) |
-| `include_unpublished` | boolean | Include drafts (dashboard list); defaults to `false` |
-| `locale` | string | Content locale (e.g. `ar`, `fr`). Falls back to the course's source locale |
-
-### Example Request
-
-```
-GET /api/v1/courses/org_slug/my-org/page/1/limit/10?visibility=public
-```
-
-### Response Body (200 OK)
-
-```json
-{
-  "items": [
-    {
-      "id": 1,
-      "uuid": "abc123-def456",
-      "name": "Introduction to Algebra",
-      "description": "A beginner-friendly course on algebraic concepts.",
-      "public": true,
-      "access": "public",
-      "price": null,
-      "thumbnail_image": "https://cdn.koodook.com/thumbnails/abc123.jpg",
-      "banner_image": "",
-      "tags": ["math", "algebra", "beginner"],
-      "created_at": "2026-09-20T10:00:00Z",
-      "updated_at": "2026-09-22T15:30:00Z"
-    }
-  ],
-  "total": 42,
-  "page": 1,
-  "limit": 10,
-  "pages": 5
-}
-```
-
-### Localized responses
-
-Course read models carry three localization fields:
-
-| Field | Description |
-|---|---|
-| `source_locale` | Locale the base `course` row is written in |
-| `content_locale` | Locale actually served for this request |
-| `is_fallback` | `true` when `locale` had no translation, so the source content was returned |
-
-Translated fields are overlaid at read time (`name`, `description`, `about`, `learnings`, `tags`, `seo`) together with the display-text keys of `extra_metadata` (`difficulty`, `duration`, `requirements`). Counts, booleans, and the `instructor` block always come from the base row. List and search endpoints localize with one translation query per page.
-
----
-
-## Get Course (by UUID)
-
-Retrieve a single course by its UUID.
-
-```
-GET /api/v1/courses/{course_uuid}
-```
-
-### Path Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `course_uuid` | string | The course UUID |
-
-### Response Body (200 OK)
-
-```json
-{
-  "id": 1,
-  "uuid": "abc123-def456",
-  "name": "Introduction to Algebra",
-  "description": "A beginner-friendly course on algebraic concepts.",
-  "public": true,
-  "access": "public",
-  "price": null,
-  "learnings": "By the end of this course, students will understand basic algebraic concepts.",
-  "about": "This course covers variables, equations, and functions.",
-  "tags": ["math", "algebra", "beginner"],
-  "thumbnail_image": "https://cdn.koodook.com/thumbnails/abc123.jpg",
-  "thumbnail_video": "",
-  "thumbnail_type": "IMAGE",
-  "banner_image": "",
-  "extra_metadata": {
-    "difficulty": "Beginner",
-    "duration": "8 weeks",
-    "requirements": "Basic Python knowledge",
-    "video_hours": 12,
-    "resources_count": 8,
-    "has_certificate": true,
-    "instructor": { "name": "John Doe", "bio": "..." },
-    "target_audience": {
-      "for": ["Python beginners who want to build real projects", "Self-taught developers"],
-      "not_for": ["Experienced backend engineers", "Complete programming beginners"]
-    }
-  },
-  "org_id": 1,
-  "created_at": "2026-09-20T10:00:00Z",
-  "updated_at": "2026-09-22T15:30:00Z"
-}
-```
-
-### Errors
-
-| Status | Description |
-|--------|-------------|
-| `404 Not Found` | Course not found |
-
----
-
-## Get Course (by ID)
-
-Retrieve a single course by its numeric ID.
-
-```
-GET /api/v1/courses/id/{course_id}
-```
-
-### Path Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `course_id` | integer | The course database ID |
-
-Response is identical to the UUID-based get endpoint.
-
----
-
-## Get Full Course Metadata
-
-Retrieve a course with all nested chapters and activities.
-
-```
-GET /api/v1/courses/{course_uuid}/meta
-```
-
-### Query Parameters
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `slim` | boolean | `false` | If `true`, excludes heavy activity content (blocks) for faster loading |
-| `locale` | string | source locale | Locale used to overlay the course's translated content |
-
-### Response Body (200 OK)
-
-```json
-{
-  "id": 1,
-  "uuid": "abc123-def456",
-  "name": "Introduction to Algebra",
-  "description": "A beginner-friendly course on algebraic concepts.",
-  "chapters": [
-    {
-      "id": 10,
-      "uuid": "chap-001",
-      "title": "Chapter 1: Variables",
-      "sort_order": 1,
-      "activities": [
-        {
-          "id": 100,
-          "uuid": "act-001",
-          "title": "What is a Variable?",
-          "activity_type": "TYPE_VIDEO",
-          "sort_order": 1,
-          "duration": 600,
-          "content_summary": null
-        }
-      ]
-    }
-  ],
-  "created_at": "2026-09-20T10:00:00Z",
-  "updated_at": "2026-09-22T15:30:00Z"
-}
-```
-
-When `slim=true`, activity `content` fields (e.g., rich text blocks, video URLs) are omitted.
-
----
-
-## Create Course
-
-Create a new course within an organization.
-
-```
-POST /api/v1/courses/{org_id}
-```
-
-### Path Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `org_id` | integer | The organization ID |
-
-### Request Body (Multipart Form Data)
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `name` | string | Yes | Course name |
-| `description` | string | No | Short description |
-| `public` | boolean | No | Whether the course is publicly visible |
-| `learnings` | string | No | Learning objectives |
-| `tags` | string | No | Comma-separated tags |
-| `about` | string | No | Detailed course description |
-| `thumbnail_type` | string | No | `"IMAGE"`, `"VIDEO"`, or `"BOTH"` |
-| `thumbnail_image` | string | No | Card cover image URL |
-| `banner_image` | string | No | Banner image URL |
-| `extra_metadata` | string (JSON) | No | Arbitrary JSON metadata string. Supports `difficulty`, `duration`, `requirements`, `video_hours`, `resources_count`, `has_certificate`, `instructor`, and `target_audience` (`{ for: string[], not_for: string[] }`) |
-
-### Example Request
-
-```
-POST /api/v1/courses/1
-Content-Type: multipart/form-data
-
-name: Introduction to Algebra
-description: A beginner-friendly course on algebraic concepts.
-public: true
-learnings: Understand variables, equations, and functions
-tags: math,algebra,beginner
-about: This course covers the fundamentals of algebra.
-```
-
-### Response Body (201 Created)
-
-```json
-{
-  "id": 1,
-  "uuid": "abc123-def456",
-  "name": "Introduction to Algebra",
-  "description": "A beginner-friendly course on algebraic concepts.",
-  "public": true,
-  "access": "public",
-  "org_id": 1,
-  "created_at": "2026-09-23T10:00:00Z",
-  "updated_at": "2026-09-23T10:00:00Z"
-}
-```
-
-### Errors
-
-| Status | Description |
-|--------|-------------|
-| `401 Unauthorized` | Authentication required |
-| `403 Forbidden` | Insufficient permissions to create courses |
-| `422 Unprocessable Entity` | Validation error (e.g., missing name) |
-
----
-
-## Update Course
-
-Update an existing course's fields.
-
-```
-PUT /api/v1/courses/{course_uuid}
-```
-
-### Path Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `course_uuid` | string | The course UUID |
-
-### Request Body (Multipart Form Data)
-
-Same fields as Create Course, but all are optional (only provided fields are updated).
-
-### Response Body (200 OK)
-
-Returns the updated course object.
-
-### Errors
-
-| Status | Description |
-|--------|-------------|
-| `401 Unauthorized` | Authentication required |
-| `403 Forbidden` | Insufficient permissions |
-| `404 Not Found` | Course not found |
-
----
-
-## Delete Course
-
-Delete a course and its contents.
-
-```
-DELETE /api/v1/courses/{course_uuid}
-```
-
-### Response
-
-`204 No Content` on success.
-
-### Errors
-
-| Status | Description |
-|--------|-------------|
-| `401 Unauthorized` | Authentication required |
-| `403 Forbidden` | Insufficient permissions |
-| `404 Not Found` | Course not found |
-
----
-
-## Clone Course
-
-Create a copy of an existing course. The cloned course is private by default and has "(Copy)" appended to its name.
-
-```
-POST /api/v1/courses/{course_uuid}/clone
-```
-
-### Response Body (201 Created)
-
-Returns the cloned course object.
-
-### Errors
-
-| Status | Description |
-|--------|-------------|
-| `401 Unauthorized` | Authentication required |
-| `403 Forbidden` | Insufficient permissions |
-| `404 Not Found` | Course not found |
-
----
-
-## Export Course
-
-Export a course to a JSON file for backup or transfer.
-
-```
-GET /api/v1/courses/{course_uuid}/export
-```
-
-### Response (200 OK)
-
-Returns a JSON file download with the complete course structure including chapters, activities, and content blocks.
-
----
-
-## Batch Export
-
-Export up to 20 courses at once.
-
-```
-POST /api/v1/courses/export/batch
-```
-
-### Request Body (JSON)
-
-```json
-{
-  "course_uuids": ["uuid-1", "uuid-2", "uuid-3"]
-}
-```
-
-### Response
-
-Returns a JSON array of exported course objects.
-
----
-
-## Import Course (Analyze)
-
-Analyze an export file to preview what will be imported.
-
-```
-POST /api/v1/courses/import/analyze
-```
-
-### Request Body (Multipart Form Data)
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `file` | file | Yes | Previously exported course JSON file |
-
-### Response Body (200 OK)
-
-Returns an analysis of the import including course names, chapter counts, and activity counts.
-
----
-
-## Import Course
-
-Import a previously exported course into an organization.
-
-```
-POST /api/v1/courses/import
-```
-
-### Request Body (Multipart Form Data)
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `file` | file | Yes | Previously exported course JSON file |
-| `org_id` | integer | Yes | Target organization ID |
-
-### Response Body (201 Created)
-
-Returns the imported course object.
-
----
-
-## Search Courses
-
-Search for courses within an organization by name or description.
-
-```
-GET /api/v1/courses/org_slug/{org_slug}/search
-```
-
-### Query Parameters
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `q` | string | Yes | Search query string |
-| `limit` | integer | No | Max results (default `10`) |
-| `locale` | string | No | Locale used to localize the returned course names |
-
-> Search itself matches the **source-locale** text only; `locale` affects the result payload, not the matching.
-
-### Response Body (200 OK)
+Auth: optional session/API token. Anonymous callers see published public + paid courses only.
+
+| Param | In | Type | Default | Notes |
+|---|---|---|---|---|
+| `org_slug` | path | string | — | Organization slug |
+| `page` | path | integer | — | 1-indexed |
+| `limit` | path | integer | — | Server caps at 100 |
+| `include_unpublished` | query | boolean | `false` | Only honored for org admins/maintainers |
+| `locale` | query | string | source locale | Overlays translated course fields |
+
+Response `200`: a **bare JSON array** of `CourseRead` (no `items`/`total` wrapper). An unknown organization returns `[]`.
 
 ```json
 [
   {
     "id": 1,
-    "uuid": "abc123-def456",
+    "org_id": 1,
+    "course_uuid": "course_9f2c...",
     "name": "Introduction to Algebra",
-    "description": "A beginner-friendly course on algebraic concepts."
+    "description": "A beginner-friendly course.",
+    "about": "Variables, equations and functions.",
+    "learnings": "Understand variables",
+    "tags": "math,algebra",
+    "thumbnail_type": "image",
+    "thumbnail_image": "course_9f2c.../thumbnail.png",
+    "thumbnail_video": "",
+    "banner_image": "",
+    "public": true,
+    "published": true,
+    "open_to_contributors": false,
+    "access_type": "public",
+    "price_amount": null,
+    "price_currency": "DZD",
+    "seo": null,
+    "extra_metadata": { "instructors": [{ "name": "Yacine Benali", "title": "Instructor", "avatar": "..." }] },
+    "source_locale": "en",
+    "content_locale": "en",
+    "is_fallback": false,
+    "creation_date": "2026-09-20 10:00:00",
+    "update_date": "2026-09-22 15:30:00",
+    "authors": [
+      {
+        "user": { "id": 1, "username": "johndoe", "first_name": "John", "last_name": "Doe", "avatar_image": "" },
+        "authorship": "CREATOR",
+        "authorship_status": "ACTIVE",
+        "creation_date": "2026-09-20 10:00:00",
+        "update_date": "2026-09-20 10:00:00"
+      }
+    ]
   }
 ]
 ```
 
+Errors: `422` only for invalid query/pagination values (an unknown organization returns an empty list).
+
 ---
 
-## Count Courses
-
-Get the total number of courses in an organization.
+## Count courses
 
 ```
 GET /api/v1/courses/org_slug/{org_slug}/count
 ```
 
-### Response Body (200 OK)
+Auth: optional. Counts respect the same visibility rules as the list endpoint.
+
+| Param | In | Type | Default | Notes |
+|---|---|---|---|---|
+| `org_slug` | path | string | — | Organization slug |
+| `published` | query | boolean | unset | Narrow to only published (`true`) or draft (`false`) |
+
+Response `200`: a **bare integer**.
+
+```json
+42
+```
+
+An unknown organization returns `0`.
+
+---
+
+## Search courses
+
+```
+GET /api/v1/courses/org_slug/{org_slug}/search
+```
+
+Auth: optional. Matches `name`, `description`, `about`, `learnings`, `tags` on the source row **and** every translation row.
+
+| Param | In | Type | Default | Notes |
+|---|---|---|---|---|
+| `org_slug` | path | string | — | Organization slug |
+| `query` | query | string | — | Required, 1–200 chars (not `q`) |
+| `page` | query | integer | `1` | ≥ 1 |
+| `limit` | query | integer | `10` | 1–50 |
+| `locale` | query | string | source locale | Overlays translated fields |
+
+Response `200`: bare JSON array of `CourseRead`.
+
+Errors: `422` for an empty/oversized query or invalid pagination.
+
+---
+
+## Get course by UUID
+
+```
+GET /api/v1/courses/{course_uuid}
+```
+
+Auth: course read access (anonymous allowed for public/paid).
+
+| Param | In | Type | Notes |
+|---|---|---|---|
+| `course_uuid` | path | string | Course UUID |
+| `locale` | query | string | Optional content locale |
+
+Response `200`: `CourseRead` (same shape as the list item; no chapters).
+
+Errors: `403` (no read access), `404`.
+
+---
+
+## Get course by numeric ID
+
+```
+GET /api/v1/courses/id/{course_id}
+```
+
+Auth: course read access. Response `200`: `CourseRead`. Query `locale` is supported. Errors: `403`, `404`.
+
+---
+
+## Get course metadata (curriculum)
+
+```
+GET /api/v1/courses/{course_uuid}/meta
+```
+
+Auth: course read access.
+
+| Param | In | Type | Default | Notes |
+|---|---|---|---|---|
+| `course_uuid` | path | string | — | Course UUID |
+| `with_unpublished_activities` | query | boolean | `false` | Include draft activities in chapters |
+| `slim` | query | boolean | `false` | Skip activity `content`/`details` in the query; they come back as `{}` / `null` |
+| `locale` | query | string | source locale | Overlays course + chapter/activity translations |
+
+Response `200`: `FullCourseRead` — course fields plus `org_uuid`, `authors[]`, and `chapters[]`.
 
 ```json
 {
-  "count": 42
+  "id": 1,
+  "org_id": 1,
+  "org_uuid": "org_4c1e...",
+  "course_uuid": "course_9f2c...",
+  "name": "Introduction to Algebra",
+  "published": true,
+  "access_type": "public",
+  "price_amount": null,
+  "price_currency": "DZD",
+  "source_locale": "en",
+  "content_locale": "en",
+  "is_fallback": false,
+  "authors": [],
+  "chapters": [
+    {
+      "id": 10,
+      "chapter_uuid": "chapter_7a1b...",
+      "name": "Chapter 1: Variables",
+      "description": "",
+      "thumbnail_image": "",
+      "lock_type": "public",
+      "org_id": 1,
+      "course_id": 1,
+      "extra_metadata": null,
+      "is_locked": false,
+      "creation_date": "2026-09-20 10:00:00",
+      "update_date": "2026-09-20 10:00:00",
+      "activities": [
+        {
+          "id": 100,
+          "activity_uuid": "activity_31de...",
+          "name": "What is a Variable?",
+          "activity_type": "TYPE_VIDEO",
+          "activity_sub_type": "SUBTYPE_VIDEO_HOSTED",
+          "content": { "filename": "lesson1.mp4", "activity_uuid": "activity_31de..." },
+          "details": {},
+          "published": true,
+          "lock_type": "public",
+          "is_locked": false,
+          "current_version": 1,
+          "last_modified_by_id": null,
+          "last_modified_by_username": null,
+          "extra_metadata": null,
+          "org_id": 1,
+          "course_id": 1,
+          "creation_date": "2026-09-20 10:00:00",
+          "update_date": "2026-09-20 10:00:00"
+        }
+      ]
+    }
+  ]
 }
 ```
 
+Paid preview rule: for a **published `paid`** course viewed without an entitlement, every chapter still appears but with `is_locked: true`, `description` and `thumbnail_image` cleared, and every activity with `content: {}`, `details: null`. The structure stays browsable; lesson bodies do not.
+
 ---
 
-## Update Course Thumbnail
-
-Upload a card cover image for the course.
+## Create course
 
 ```
-PUT /api/v1/courses/{course_uuid}/thumbnail
+POST /api/v1/courses/?org_id={org_id}
 ```
 
-### Request Body (Multipart Form Data)
+Auth: `create` permission for courses in the organization.
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `file` | file | Yes | Image file (JPG/PNG, max 8MB) |
+`org_id` is a **query parameter**, not a path parameter.
 
-### Response Body (200 OK)
+Request: `multipart/form-data`.
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `name` | string | Yes | |
+| `description` | string | Yes | |
+| `public` | boolean | Yes | `true` → `access_type=public`, `false` → `users_only` |
+| `about` | string | Yes | |
+| `learnings` | string | No | |
+| `tags` | string | No | |
+| `thumbnail_type` | string | No | `image` \| `video` \| `both`; default `image` |
+| `extra_metadata` | string (JSON object) | No | Invalid JSON → `422` |
+| `thumbnail` | file | No | Image/video file |
+
+Response `200`: created `CourseRead`.
+
+Errors: `403`, `404` (org not found), `422` (invalid form data / metadata).
+
+---
+
+## Update course
+
+```
+PUT /api/v1/courses/{course_uuid}
+```
+
+Auth: course `update` permission. Changing access settings additionally requires `CREATOR`/`MAINTAINER` ownership or admin rights.
+
+Request: **JSON body** (`CourseUpdate`) — every field optional; only provided fields are written. `price_amount: null` explicitly clears the price; `null` on other fields means "not provided".
+
+| Field | Type |
+|---|---|
+| `name`, `description`, `about`, `learnings`, `tags` | string |
+| `thumbnail_type` | `image` \| `video` \| `both` |
+| `thumbnail_image`, `thumbnail_video`, `banner_image` | string |
+| `public` | boolean |
+| `published` | boolean |
+| `open_to_contributors` | boolean |
+| `access_type` | `public` \| `users_only` \| `paid` |
+| `price_amount` | integer |
+| `price_currency` | string |
+| `seo` | object |
+| `extra_metadata` | object |
+
+Response `200`: updated `CourseRead`.
+
+Errors: `403` (not an owner for access fields), `404`, `409` (course is in a collection and cannot be made `users_only` or unpublished), `422` (`paid` without a positive `price_amount`).
+
+---
+
+## Delete course
+
+```
+DELETE /api/v1/courses/{course_uuid}
+```
+
+Auth: course `delete` permission. Response `200`:
 
 ```json
-{
-  "thumbnail_image": "https://cdn.koodook.com/media/course_abc123/thumbnail.jpg"
-}
+{ "detail": "Course deleted" }
 ```
+
+Errors: `403`, `404`.
 
 ---
 
-## Delete Course Thumbnail
-
-Remove the card cover image from a course.
+## Clone course
 
 ```
-DELETE /api/v1/courses/{course_uuid}/thumbnail
+POST /api/v1/courses/{course_uuid}/clone
 ```
 
-### Response
+Auth: read access to the source course + `create` permission in the org. The copy gets a new UUID, `(Copy)` appended to the name, and starts private and unpublished.
 
-`204 No Content` on success.
+Response `200`: cloned `CourseRead`. Errors: `403`, `404`.
 
 ---
 
-## Update Course Banner
+## Thumbnail and banner
 
-Upload a hero banner image for the course detail page.
+| Method | Path | Body | Response |
+|---|---|---|---|
+| `PUT` | `/api/v1/courses/{course_uuid}/thumbnail` | multipart: `thumbnail` (file, optional), `thumbnail_type` (`image`\|`video`\|`both`, default `image`) | `CourseRead` |
+| `DELETE` | `/api/v1/courses/{course_uuid}/thumbnail` | — | `CourseRead` |
+| `PUT` | `/api/v1/courses/{course_uuid}/banner` | multipart: `banner` (file, optional) | `CourseRead` |
+| `DELETE` | `/api/v1/courses/{course_uuid}/banner` | — | `CourseRead` |
 
-```
-PUT /api/v1/courses/{course_uuid}/banner
-```
-
-### Request Body (Multipart Form Data)
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `file` | file | Yes | Image file (JPG/PNG, max 8MB) |
-
-### Response Body (200 OK)
-
-```json
-{
-  "banner_image": "https://cdn.koodook.com/media/course_abc123/banner.jpg"
-}
-```
+All four require course `update` permission and return `200`. Errors: `403`, `404`, `422` (invalid file).
 
 ---
 
-## Delete Course Banner
-
-Remove the banner image from a course.
-
-```
-DELETE /api/v1/courses/{course_uuid}/banner
-```
-
-### Response
-
-`204 No Content` on success.
-
----
-
-## Get Course Rights
-
-Retrieve granular access rights for a course, including ownership, roles, and permissions.
+## Get course user rights
 
 ```
 GET /api/v1/courses/{course_uuid}/rights
 ```
 
-### Response Body (200 OK)
+Auth: none required; anonymous callers only get `read` for `public` courses.
+
+Response `200`: nested `permissions` / `ownership` / `roles` objects.
 
 ```json
 {
-  "is_owner": true,
-  "can_edit": true,
-  "can_delete": true,
-  "can_manage_access": true,
-  "roles": ["admin", "instructor"],
-  "permissions": ["courses:write", "courses:delete"]
+  "course_uuid": "course_9f2c...",
+  "user_id": 1,
+  "is_anonymous": false,
+  "permissions": {
+    "read": true,
+    "create": true,
+    "update": true,
+    "delete": true,
+    "create_content": true,
+    "update_content": true,
+    "delete_content": true,
+    "manage_contributors": true,
+    "manage_access": true,
+    "grade_assignments": true,
+    "mark_activities_done": true,
+    "create_certifications": true
+  },
+  "ownership": {
+    "is_owner": true,
+    "is_creator": true,
+    "is_maintainer": false,
+    "is_contributor": false,
+    "authorship_status": "ACTIVE"
+  },
+  "roles": {
+    "is_admin": false,
+    "is_maintainer_role": false,
+    "is_instructor": true,
+    "is_user": true
+  }
 }
 ```
 
+Errors: `404`.
+
 ---
 
-## Get Course Contributors
+## Contributors
 
-List all contributors (users who have edited or contributed to) a course.
+### List contributors
 
 ```
 GET /api/v1/courses/{course_uuid}/contributors
 ```
 
-### Response Body (200 OK)
+Auth: course read access. Response `200`: bare array of `ResourceAuthor` rows.
 
 ```json
 [
   {
     "user_id": 1,
-    "username": "johndoe",
-    "display_name": "John Doe",
-    "role": "author",
-    "contributed_at": "2026-09-22T10:00:00Z"
+    "authorship": "CREATOR",
+    "authorship_status": "ACTIVE",
+    "creation_date": "2026-09-20 10:00:00",
+    "update_date": "2026-09-20 10:00:00",
+    "user": {
+      "id": 1,
+      "user_uuid": "user_8ab2...",
+      "username": "johndoe",
+      "first_name": "John",
+      "last_name": "Doe",
+      "email": "john@example.com",
+      "avatar_image": "",
+      "banner_image": "",
+      "bio": "",
+      "details": {},
+      "profile": {},
+      "extra_metadata": null,
+      "email_verified": true,
+      "last_login_at": null,
+      "signup_method": "email",
+      "is_superadmin": false,
+      "creation_date": "2026-01-01 09:00:00"
+    }
   }
 ]
 ```
 
----
+Errors: `403`, `404`.
 
-## Get Course Updates
-
-Get the update/change history for a course.
+### Update contributor
 
 ```
-GET /api/v1/courses/{course_uuid}/updates
+PUT /api/v1/courses/{course_uuid}/contributors/{contributor_user_id}?authorship={authorship}&authorship_status={status}
 ```
 
-### Response Body (200 OK)
+Auth: course `update` permission. `authorship` (`CREATOR`\|`CONTRIBUTOR`\|`MAINTAINER`\|`REPORTER`) and `authorship_status` (`ACTIVE`\|`PENDING`\|`INACTIVE`) are **query parameters**.
+
+Response `200`:
 
 ```json
-[
-  {
-    "id": 1,
-    "action": "update",
-    "field": "name",
-    "old_value": "Algebra 101",
-    "new_value": "Introduction to Algebra",
-    "changed_by": 1,
-    "changed_at": "2026-09-22T15:30:00Z"
-  }
-]
+{ "detail": "Contributor updated successfully", "status": "success" }
 ```
+
+Errors: `400` (cannot modify the creator), `403`, `404` (course or contributor not found).
+
+### Bulk add / remove contributors
+
+| Method | Path | Body |
+|---|---|---|
+| `POST` | `/api/v1/courses/{course_uuid}/bulk-add-contributors` | JSON array of usernames, e.g. `["alice","bob"]` |
+| `PUT` | `/api/v1/courses/{course_uuid}/bulk-remove-contributors` | JSON array of usernames |
+
+Auth: course `update` permission. Response `200`:
+
+```json
+{
+  "successful": [{ "username": "alice", "user_id": 2 }],
+  "failed": [{ "username": "bob", "reason": "User not found or invalid" }]
+}
+```
+
+### Apply as contributor
+
+```
+POST /api/v1/courses/{course_uuid}/apply-contributor
+```
+
+Auth: authenticated user (anonymous callers get `403`). The course's `open_to_contributors` flag is not checked by this handler. Response `200`:
+
+```json
+{ "detail": "Contributor application submitted successfully", "status": "pending" }
+```
+
+Errors: `400` (already has an authorship role), `403`, `404`.
 
 ---
 
-## Course Translations
+## Course updates
 
-A course stores its source language on the base `course` row (`source_locale`). Every other language lives in `course_translation`, one row per locale. Reads overlay those rows on top of the base course (`locale` query parameter); writes go through these endpoints and require update access.
+Rows are `CourseUpdateRead`: `{id, title, content, course_id, courseupdate_uuid, linked_activity_uuids, org_id, creation_date, update_date}`. `linked_activity_uuids` is a string or `null`.
 
-### List Translations
-
-```
-GET /api/v1/courses/{course_uuid}/translations
-```
-
-Returns `CourseTranslationRead[]` — every stored locale for the course, including `state`, `source_updated_at` and `translated_by`.
-
-### Upsert Translation
-
-```
-PUT /api/v1/courses/{course_uuid}/translations/{locale}
-```
-
-| Body field | Type | Required | Notes |
+| Method | Path | Body | Response |
 |---|---|---|---|
-| `name` | string | Yes | Translated course title |
-| `description` | string | No | Cards and course header |
-| `about` | string | No | "About this course" paragraphs (`\n\n` separated) |
-| `learnings` | string | No | JSON array of `{ id, text, emoji }` |
-| `tags` | string | No | Comma-separated (no editor in v1) |
-| `seo` | object | No | Same shape as the course `seo` object |
-| `extra_metadata` | object | No | Display-text keys only: `difficulty`, `duration`, `requirements` |
-| `state` | string | No | `draft` \| `machine` \| `reviewed` \| `published` (v1 serves every state) |
+| `GET` | `/api/v1/courses/{course_uuid}/updates` | — | `CourseUpdateRead[]` (newest first) |
+| `POST` | `/api/v1/courses/{course_uuid}/updates` | `{title, content, org_id, linked_activity_uuids?}` | `CourseUpdateRead` (`200`) |
+| `PUT` | `/api/v1/courses/{course_uuid}/update/{courseupdate_uuid}` | `{title?, content?, linked_activity_uuids?}` | `CourseUpdateRead` (`200`) |
+| `DELETE` | `/api/v1/courses/{course_uuid}/update/{courseupdate_uuid}` | — | `{ "message": "Update deleted successfully" }` (`200`) |
 
-`extra_metadata` is **merged** over the base row at read time, so counts (`video_hours`, `resources_count`), flags (`has_certificate`) and `instructor` are never lost by a translation.
-
-Writing the course's own `source_locale` here returns `422` — edit the course instead.
-
-### Delete Translation
-
-```
-DELETE /api/v1/courses/{course_uuid}/translations/{locale}
-```
-
-Removes the locale row; subsequent reads fall back to the source locale with `is_fallback: true`.
+Auth: `GET` only verifies that the course exists (no RBAC check is performed). `PUT`/`DELETE` pass the `courseupdate_...` UUID to the resource RBAC checker; that prefix has no registered resource config, so these two routes currently deny with `403`. Errors: `403`, `409` (course/update does not exist).
 
 ---
 
-## Data Model Summary
+## Translations
 
-| Field | Type | Description |
-|-------|------|-------------|
+The base course row holds the source locale (`source_locale`). Each other locale is one `course_translation` row. Reads overlay the requested `locale` over the base row.
+
+| Method | Path | Permission | Response |
+|---|---|---|---|
+| `GET` | `/api/v1/courses/{course_uuid}/translations` | course `update` | `CourseTranslationRead[]` |
+| `PUT` | `/api/v1/courses/{course_uuid}/translations/{locale}` | course `update` | `CourseTranslationRead` (`200`) |
+| `DELETE` | `/api/v1/courses/{course_uuid}/translations/{locale}` | course `update` | `{ "detail": "Translation deleted" }` (`200`) |
+
+`CourseTranslationUpsert` body:
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `name` | string | Yes | |
+| `description`, `about`, `learnings`, `tags` | string | No | |
+| `seo` | object | No | |
+| `extra_metadata` | object | No | Display-text keys only (see below) |
+| `state` | string | No | `draft` \| `machine` \| `reviewed` \| `published`; default `draft` (v1 serves every state) |
+
+`CourseTranslationRead` fields: `id`, `course_id`, `locale`, `name`, `description`, `about`, `learnings`, `tags`, `seo`, `extra_metadata`, `state`, `source_updated_at`, `translated_by`, `creation_date`, `update_date`.
+
+People metadata rule: `extra_metadata` on a translation may contain `instructors` as an **index-aligned list of `{name, title}` objects**. At read time the list is merged entry-by-entry onto the base row's `instructors`, so names/titles translate while avatars (and any other fields) always come from the base row (`apps/api/src/services/people_locale.py`). Counts and booleans on the base metadata are preserved.
+
+Errors: `403`, `404` (course or translation not found), `422` (writing the source locale, invalid locale).
+
+---
+
+## Course access users (learner inventory)
+
+| Method | Path | Params | Response |
+|---|---|---|---|
+| `GET` | `/api/v1/courses/{course_uuid}/access/users` | `filter` (`enrolled`\|`available`, default `enrolled`), `search`, `page` (default 1), `limit` (1–100, default 10) | see below |
+| `POST` | `/api/v1/courses/{course_uuid}/access/users` | `user_ids` query, comma-separated | `{enrolled, already_enrolled, skipped}` |
+| `DELETE` | `/api/v1/courses/{course_uuid}/access/users` | `user_ids` query, comma-separated | `{removed, not_enrolled}` |
+
+Auth: course `update` permission. `enrolled` lists users with a trail run for the course; `available` lists org members not yet linked.
+
+`GET` response `200`:
+
+```json
+{
+  "items": [
+    {
+      "user": { "id": 2, "username": "alice", "first_name": "Alice", "last_name": "A", "avatar_image": "" },
+      "role": { "id": 4, "name": "User" },
+      "joined_at": "2026-02-01 10:00:00",
+      "enrolled_at": "2026-09-20 10:00:00",
+      "status": null
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "limit": 10
+}
+```
+
+Errors: `403`, `404`.
+
+---
+
+## Export
+
+Both export endpoints return a **ZIP archive** (`application/zip`), not JSON.
+
+### Export one course
+
+```
+GET /api/v1/courses/{course_uuid}/export
+```
+
+Auth: course read access. Response `200`: ZIP download named `learnhouse-export-{course_uuid}-{timestamp}.zip`. Errors: `403`, `404`.
+
+### Batch export
+
+```
+POST /api/v1/courses/export/batch
+```
+
+Auth: read access to every course; all courses must belong to the same organization.
+
+Request body:
+
+```json
+{ "course_uuids": ["course_9f2c...", "course_1a2b..."] }
+```
+
+Between 1 and 20 UUIDs. Response `200`: ZIP download named `learnhouse-export-batch-{timestamp}.zip`. Errors: `403`, `404`, `422` (empty list or more than 20).
+
+---
+
+## Import
+
+### Analyze a package
+
+```
+POST /api/v1/courses/import/analyze?org_id={org_id}
+```
+
+Auth: `create` permission in the organization. `org_id` is a **query parameter**.
+
+Request: `multipart/form-data` with `zip_file` (file).
+
+Response `200` (`ImportAnalysisResponse`):
+
+```json
+{
+  "temp_id": "3f1a4c9e-...",
+  "version": "1.0.0",
+  "courses": [
+    {
+      "course_uuid": "course_9f2c...",
+      "name": "Introduction to Algebra",
+      "description": "A beginner-friendly course.",
+      "chapters_count": 3,
+      "activities_count": 12,
+      "has_thumbnail": true
+    }
+  ]
+}
+```
+
+`temp_id` is valid for 30 minutes. Errors: `400` (invalid package), `403`, `404` (org not found).
+
+### Import courses
+
+```
+POST /api/v1/courses/import?org_id={org_id}
+```
+
+Auth: `create` permission in the organization.
+
+Request body:
+
+```json
+{
+  "temp_id": "3f1a4c9e-...",
+  "course_uuids": ["course_9f2c..."],
+  "name_prefix": "Imported",
+  "set_private": true,
+  "set_unpublished": true
+}
+```
+
+`course_uuids` holds 1–20 entries. `name_prefix` defaults to `null`; `set_private` and `set_unpublished` default to `true`.
+
+Response `200` (`ImportResult`):
+
+```json
+{
+  "total_courses": 1,
+  "successful": 1,
+  "failed": 0,
+  "courses": [
+    {
+      "original_uuid": "course_9f2c...",
+      "new_uuid": "course_88ac...",
+      "name": "Introduction to Algebra",
+      "success": true,
+      "error": null
+    }
+  ]
+}
+```
+
+Errors: `400` (invalid `temp_id`/UUIDs), `403`, `404`, `422` (list size).
+
+---
+
+## Migration (other LMS)
+
+All three routes require an authenticated session (API tokens rejected); `org_id` is a query parameter.
+
+| Method | Path | Request | Response |
+|---|---|---|---|
+| `POST` | `/api/v1/courses/migrate/upload?org_id={org_id}&temp_id={temp_id}` | multipart `files` (list), optional `temp_id` to append | `{temp_id, files: [{file_id, filename, file_type, size, extension}], skipped: []}` |
+| `POST` | `/api/v1/courses/migrate/suggest?org_id={org_id}` | `{temp_id, course_name, description?}` | `MigrationTreeStructure` |
+| `POST` | `/api/v1/courses/migrate/create?org_id={org_id}` | `{temp_id, structure}` | `{course_uuid, course_name, chapters_created, activities_created, success, error}` |
+
+`MigrationTreeStructure`: `{course_name, course_description?, chapters: [{name, activities: [{name, activity_type, activity_sub_type, file_ids}]}]}`.
+
+Errors: `400` (invalid upload/structure), `403`, `404` (temp id or resources not found).
+
+---
+
+## Data model summary (`CourseRead`)
+
+| Field | Type | Notes |
+|---|---|---|
 | `id` | integer | Primary key |
-| `uuid` | string | Public UUID identifier |
-| `org_id` | integer | Foreign key to organization |
-| `name` | string | Course name |
-| `description` | text | Short description |
-| `public` | boolean | Derived from `access_type` — `true` only for Free; kept for catalog indexes |
-| `access_type` | enum | `public` (Free), `users_only` (Restricted), or `paid` |
-| `price_amount` | integer | Price in DZD (null unless `paid`) |
-| `price_currency` | string | Always `DZD` |
-| `learnings` | text | Learning objectives |
-| `about` | text | Detailed description |
-| `tags` | array | Categorization tags |
-| `thumbnail_image` | string | Card cover image URL (course card thumbnail) |
-| `thumbnail_video` | string | Video thumbnail URL |
-| `thumbnail_type` | string | `IMAGE`, `VIDEO`, or `BOTH` |
-| `banner_image` | string | Hero banner image URL (course detail page) |
-| `extra_metadata` | JSON | Flexible metadata including `difficulty`, `duration`, `requirements` (display text), `video_hours`, `resources_count`, `has_certificate`, `instructor` (object), and `target_audience` (`{ for: string[], not_for: string[] }` — drives the "Who This Is For" section) |
-| `created_at` | datetime | Creation timestamp |
-| `updated_at` | datetime | Last update timestamp |
+| `org_id` | integer | Organization ID |
+| `course_uuid` | string | Public UUID (`course_...`) |
+| `name`, `description`, `about`, `learnings`, `tags` | string | Localized when `locale` is supplied |
+| `thumbnail_type` | string | `image` \| `video` \| `both` |
+| `thumbnail_image`, `thumbnail_video`, `banner_image` | string | Stored file paths |
+| `public` | boolean | Legacy mirror of `access_type == public` |
+| `published` | boolean | Drafts are hidden from public listings |
+| `open_to_contributors` | boolean | |
+| `access_type` | string | `public` \| `users_only` \| `paid` |
+| `price_amount` | integer | Required (> 0) for `paid` |
+| `price_currency` | string | Default `DZD` |
+| `seo`, `extra_metadata` | object | Free-form; `extra_metadata.instructors` is a list of `{name, title, avatar}` |
+| `source_locale` | string | Locale of the base row |
+| `content_locale` | string | Locale served for this request |
+| `is_fallback` | boolean | `true` when the requested locale had no translation |
+| `authors` | `AuthorWithRole[]` | `{user, authorship, authorship_status, creation_date, update_date}` |
+| `creation_date`, `update_date` | string | |
+
+`FullCourseRead` adds `org_uuid` and `chapters[]`.

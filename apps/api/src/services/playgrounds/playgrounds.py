@@ -190,6 +190,7 @@ async def create_playground(
             "name": playground.name,
             "created_by": current_user.id,
         },
+        db_session=db_session,
     )
 
     return _playground_to_read(playground, db_session)

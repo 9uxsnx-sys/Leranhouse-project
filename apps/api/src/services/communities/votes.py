@@ -97,6 +97,7 @@ async def upvote_discussion(
             "user_id": current_user.id,
             "upvote_count": discussion.upvote_count,
         },
+        db_session=db_session,
     )
 
     return DiscussionVoteRead.model_validate(vote.model_dump())

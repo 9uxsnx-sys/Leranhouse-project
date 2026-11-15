@@ -130,12 +130,19 @@ class TestValidateUpload:
             validate_upload(upload, ["image"])
         assert exc_info.value.status_code == 400
 
-    def test_validate_upload_blocks_svg(self):
-        upload = _upload("logo.svg", b"<svg></svg>", "image/svg+xml")
+    def test_validate_upload_accepts_safe_svg(self):
+        # SVG is supported for org branding and sanitized against XSS vectors.
+        upload = _upload("logo.svg", b'<svg xmlns="http://www.w3.org/2000/svg"></svg>', "image/svg+xml")
+        mime, content = validate_upload(upload, ["image"])
+        assert mime == "image/svg+xml"
+        assert content.startswith(b"<svg")
+
+    def test_validate_upload_rejects_malicious_svg(self):
+        upload = _upload("evil.svg", b'<svg onload="alert(1)"></svg>', "image/svg+xml")
         with pytest.raises(HTTPException) as exc_info:
             validate_upload(upload, ["image"])
         assert exc_info.value.status_code == 415
-        assert "SVG files are not allowed" in exc_info.value.detail
+        assert "corrupted or invalid" in exc_info.value.detail
 
     def test_validate_upload_rejects_unallowed_extension(self):
         upload = _upload("archive.exe", b"MZ...")

@@ -1,97 +1,73 @@
-# Podcasts content localization
+> Status: as-built · Last verified: 2026-11-15
 
-> **Status:** done. Same contract as courses and collections — see [content-localization.md](./content-localization.md) and [collections-localization.md](./collections-localization.md).
-> Podcast settings **and** episode titles/descriptions follow the platform language switcher.
+# Podcasts Content Localisation
 
----
+A podcast and its episodes can be translated into French and Arabic, edited from the podcast dashboard, and served to learners in their selected language.
 
-## 1. Model
+## Model
 
-The base `podcast` row always holds the **source locale**; a `podcast_translation` row overrides the display fields for one other locale. Episodes are content, so they get their own table — they inherit the source locale from their podcast and store no `source_locale` column.
+The base `podcast` row holds the **source locale** (`podcast.source_locale`, default `en`). A `podcast_translation` row overrides the display fields for another locale. Episodes inherit the podcast's source locale and have their own translation table.
 
-```
-podcast
-├── source_locale          VARCHAR(10) NOT NULL DEFAULT 'en'
-├── podcast_translation
-│   ├── podcast_id         FK podcast(id) ON DELETE CASCADE
-│   ├── locale, name, description, about, tags, seo
-│   └── state, source_updated_at, translated_by, creation_date, update_date
-└── podcastepisode
-    └── podcast_episode_translation
-        ├── episode_id     FK podcastepisode(id) ON DELETE CASCADE
-        ├── locale, title, description
-        └── state, source_updated_at, translated_by, creation_date, update_date
-```
-
-Migration: `apps/api/migrations/versions/z1a2b3c4d5e6_add_podcast_translations.py`.
-
-**Never localized:** cover, banner, hosts, total duration, audio files, price, access type, publish state, episode order. Those are structural and shared.
-
-## 2. API
-
-| Endpoint | Behaviour |
+| Storage | Fields |
 |---|---|
-| `GET /podcasts/{uuid}?locale=xx` | Overlays the translation; returns `source_locale`, `content_locale`, `is_fallback` |
-| `GET /podcasts/{uuid}/meta?locale=xx` | Localizes the podcast **and** its episode titles/descriptions |
-| `GET /podcasts/org_slug/{slug}/page/{p}/limit/{l}?locale=xx` | One translation query per page (`apply_podcast_overlay_bulk`) |
-| `GET /podcasts/{uuid}/episodes?locale=xx` | Localized episode list |
-| `GET /podcasts/episodes/{uuid}?locale=xx` | Localized single episode |
-| `GET/PUT/DELETE /podcasts/{uuid}/translations[/{locale}]` | Podcast translation rows; PUT rejects the source locale with 422 |
-| `GET/PUT/DELETE /podcasts/episodes/{uuid}/translations[/{locale}]` | Episode translation rows; same 422 rule |
+| `podcast_translation` | `name`, `description`, `about`, `tags`, `seo`, `extra_metadata`, `state`, `source_updated_at`, `translated_by` |
+| `podcast_episode_translation` | `title`, `description`, `extra_metadata` (learning objectives, key points), `state`, timestamps |
 
-Implementation: `apps/api/src/services/podcasts/translations.py`. The overlay is applied **after** the publication and RBAC checks, so a translation can never reveal a locked episode.
+**Never localized:** cover, banner, audio files, total duration, price, access type, publish state, episode order. Host entries are split: the list, order and avatars come from the base row, while each host's `name` and `title` are translated index-aligned through `services/people_locale.py`.
 
-Search (`/search`) localizes podcast names through the same bulk helper.
+## API
 
-## 3. Dashboard
+| Behaviour | Endpoint |
+|---|---|
+| Read a podcast in a locale | `GET /podcasts/{uuid}?locale=xx` returns `source_locale`, `content_locale`, `is_fallback` |
+| Podcast with episodes | `GET /podcasts/{uuid}/meta?locale=xx` |
+| List a page | `GET /podcasts/org_slug/{slug}/page/{p}/limit/{l}?locale=xx` |
+| Episode list | `GET /podcasts/{uuid}/episodes?locale=xx` |
+| Single episode | `GET /podcasts/episodes/{uuid}?locale=xx` |
+| Podcast translations | `GET/PUT/DELETE /podcasts/{uuid}/translations[/{locale}]` |
+| Episode translations | `GET/PUT/DELETE /podcasts/episodes/{uuid}/translations[/{locale}]` |
+
+`PUT` rejects the source locale with `422`. Implementation lives in `services/podcasts/translations.py`; overlays are applied **after** publication and access checks, so a translation can never reveal a locked episode. List endpoints localize one page with a single bulk query. Search matches podcast translation rows.
+
+## Dashboard
 
 The platform language switcher is the only content-locale control.
 
 | Surface | Behaviour |
 |---|---|
-| Podcasts list (`/dash/podcasts`) | SWR key carries `locale`, so cards and search follow the UI language |
-| General tab | Source locale writes the base row; other locales write `podcast_translation` (name, description, about). Chip, **Copy from source** and an "inherited" hint. The **Details** card (hosts, duration) is source-only because it is shared |
-| Episodes tab | List refetches with `locale`; the episode editor edits `title`/`description` per locale, with the same chip and Copy from source. Publish stays structural |
-| Translations tab | Coverage matrix per language (name, description, about, tags, SEO), copy-from-source, delete, CSV export/import |
+| Podcast list (`/dash/podcasts`) | SWR key carries `locale` |
+| General tab | Source locale writes the base row; other locales write `podcast_translation` (name, description, about). Chip, **Copy from source** and an inherited hint |
+| Details card | Host names and titles are editable per locale; photos and the total duration stay shared |
+| Episodes tab | Episode list refetches with `locale`; the editor writes `title`, `description` and the structured objectives/key points per locale |
+| Translations tab | Coverage matrix per language, copy-from-source, delete, CSV export/import |
 
-The dashboard context still fetches `/meta` **without** `locale`: the General tab needs the source row as its baseline, exactly like the course and collection editors.
+Dashboard context fetches `/meta` without `locale`, because the editor needs the source row as its baseline.
 
-## 4. Learner surfaces
+## Learner surfaces
 
 | Surface | Behaviour |
 |---|---|
-| `/orgs/{org}/podcasts` | Server-rendered in the visitor's locale (reads the `i18next` cookie before fetching) |
-| `/orgs/{org}/podcast/{id}` | Server fetch and the client SWR key both carry the locale, so a language switch re-fetches |
-| Metadata + JSON-LD | `generateMetadata` uses the localized name/description; episode `name` in JSON-LD now reads `title` (it was undefined) |
+| `/podcasts` | Server-rendered in the visitor's locale from the `i18next` cookie |
+| `/podcast/{id}` | Server fetch and the client SWR key carry the locale, so a language switch re-fetches |
+| Episode page | Fetches the episode and its list with the content locale; renders translated objectives and key takeaways |
+| Metadata / JSON-LD | `generateMetadata` uses the localized name and description |
 | Fallback hint | `is_fallback: true` shows "This podcast is only available in {{language}}." above the title |
 
-## 5. Card surface
+Durations keep the English short form (`7h 32min`, `45min`) in every locale, matching the course cards.
 
-Episode containers were brought onto the platform card surface (`bg-white rounded-xl border border-gray-100 shadow-sm`):
+## Player
 
-- Dashboard episode rows: `shadow-borders-base` → `border border-gray-100 shadow-sm`.
-- Learner `EpisodeCard`: `border-black/10` → `border-gray-100` (+ `shadow-sm`, hover `border-gray-200`).
+The episode player is part of the learning surface, not the translation pipeline. It supports playback speed (`0.75x`–`2x`), loop, a hover-revealed volume track and keyboard shortcuts; its labels follow the interface language. Media controls and the seek bar stay LTR by design.
 
-## 6. Verification
+## Not built
 
-Run against the live API (dev CLI, `admin@school.dev`):
+- RSS feeds, trail lists and receipts keep source-locale names.
+- Machine translation, review workflow and stale detection are out of scope.
+- Per-locale audio is not supported; only text is translated.
 
-```
-PUT podcast fr          → Podcast FR
-GET /meta?fr            → Podcast FR | content_locale=fr | is_fallback=false | 4 episodes
-PUT episode fr          → Titre FR
-GET /meta?fr            → episodes[0].title = Titre FR
-GET /meta?ar            → test podcast | is_fallback=true | source episode title
-GET /meta               → test podcast | source episode title (unchanged)
-DELETE episode + podcast fr → both rows removed, reads fall back
-```
+## Related
 
-`tsc --noEmit` stays at the pre-existing error set (no new errors); `en`/`fr`/`ar` locales parse.
-
-## 7. Known limits
-
-- Trail/progress, RSS feeds and receipts keep the source-locale names — same deliberate boundary as courses.
-- Podcast search matches the source text only in v1.
-- Machine translation, review workflow and stale detection remain out of scope.
-- **Episode `extra_metadata` is not translatable.** The `podcast_episode_translation` table only carries `title` and `description`. Fields stored in `extra_metadata` (`learning_objectives`, `takeaways`) are always served in the source locale regardless of the requested `?locale=`. See [episode-admin-editing-plan.md](../episode-admin-editing-plan.md) for the implementation to close this gap.
-- **`PodcastEpisodeRead` does not include `extra_metadata`.** The API response model omits this field, so the frontend cannot read `extra_metadata` for episodes. This affects both the episode page and the admin form.
+- [RTL and content localisation](./rtl-plan.md)
+- [Course content localisation](./content-localization.md)
+- [Collections localisation](./collections-localization.md)
+- [Podcasts API](../../06-api-reference/podcasts.md)

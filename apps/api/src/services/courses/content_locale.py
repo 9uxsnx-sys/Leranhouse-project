@@ -78,10 +78,20 @@ def apply_activity_locale(
 
 
 def apply_course_content_locale(chapters: list[ChapterRead], locale: Optional[str]) -> None:
-    """Apply chapter + activity overlays to a course tree in one pass."""
+    """Apply chapter + activity overlays to a course tree in one pass.
+
+    Locked rows must stay empty: a translation may never restore the body of a
+    lesson the viewer has not unlocked (paywall or UserGroup lock).
+    """
     if not locale:
         return
     for chapter in chapters:
         apply_chapter_locale(chapter, locale)
+        if chapter.is_locked:
+            chapter.description = ""
+            chapter.thumbnail_image = ""
         for activity in chapter.activities:
-            apply_activity_locale(activity, locale)
+            apply_activity_locale(activity, locale, include_content=not activity.is_locked)
+            if activity.is_locked:
+                activity.content = {}
+                activity.details = None

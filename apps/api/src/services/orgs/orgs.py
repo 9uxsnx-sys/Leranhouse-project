@@ -827,6 +827,7 @@ async def update_org_signup_mechanism(
         event_name="org_signup_method_changed",
         org_id=org_id,
         data={"signup_mechanism": signup_mechanism},
+        db_session=db_session,
     )
 
     return {"detail": "Signup mechanism updated"}
@@ -901,6 +902,7 @@ async def update_org_ai_config(
         event_name="org_ai_config_changed",
         org_id=org_id,
         data={"ai_enabled": ai_enabled, "copilot_enabled": copilot_enabled},
+        db_session=db_session,
     )
 
     return {"detail": "AI configuration updated"}
@@ -986,6 +988,7 @@ async def update_org_payments_config(
         event_name="org_payments_config_changed",
         org_id=org_id,
         data={"payments_enabled": payments_enabled},
+        db_session=db_session,
     )
 
     return result

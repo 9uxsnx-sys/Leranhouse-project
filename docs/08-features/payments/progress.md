@@ -1,8 +1,10 @@
+> Status: as-built · Last verified: 2026-11-15
+
 # Payments — Progress & Roadmap
 
 > Where the payments work stopped, what is already shipped, and the ordered list of what remains. Update this file whenever a step lands.
 
-**Last updated:** 2026-10-20
+**Last updated:** 2026-11-15
 
 ---
 
@@ -10,21 +12,21 @@
 
 | # | Step | State |
 |---|---|---|
-| 1 | Data model (`paymentorder`, `resourceentitlement`, `payment_webhook_event`, `paymentconfig`) | ✅ Done |
-| 2 | Entitlements API (list / candidates / grant / revoke) | ✅ Done |
-| 3 | Orders API (org-scoped, search + status filter) | ✅ Done |
-| 4 | Access tab — Public / Private / Paid tables | ✅ Done |
-| 5 | Offers tab — inline prices for courses + podcasts | ✅ Done |
-| 6 | Chargily checkout creation | ✅ Done |
-| 7 | Chargily webhook receiver | ✅ Done |
-| 8 | Wire Transactions tab to `GET /payments/{org_id}/orders` | ✅ Done |
-| 9 | Wire Overview tab to real order data | ✅ Done |
-| 9b | Wire Payouts tab (40/60 net split) | ✅ Done |
-| 10 | Learner "Get access" → checkout → Progress tab | ✅ Done — paid unlocks via the webhook; free enrolls directly |
-| 10b | Collection bundles — checkout, member snapshot, per-course fan-out | ✅ Done |
-| 11 | Podcast Access tab parity | ✅ Done |
-| 12 | Payments Configuration (per-org Chargily keys) | ✅ Done |
-| 13 | Remove the OSS/plan gate — payments available in every deployment | ✅ Done |
+| 1 | Data model (`paymentorder`, `resourceentitlement`, `payment_webhook_event`, `paymentconfig`) | Done |
+| 2 | Entitlements API (list / candidates / grant / revoke) | Done |
+| 3 | Orders API (org-scoped, search + status filter) | Done |
+| 4 | Access tab — Public / Private / Paid tables | Done |
+| 5 | Offers tab — inline prices for courses, podcasts and collections | Done |
+| 6 | Chargily checkout creation | Done |
+| 7 | Chargily webhook receiver | Done |
+| 8 | Wire Transactions tab to `GET /payments/{org_id}/orders` | Done |
+| 9 | Wire Overview tab to real order data | Done |
+| 9b | Wire Payouts tab (40/60 net split) | Done |
+| 10 | Learner "Get access" → checkout → Progress tab | Done — paid unlocks via the webhook; free enrolls directly |
+| 10b | Collection bundles — checkout, member snapshot, per-course fan-out | Done |
+| 11 | Podcast Access tab parity | Done |
+| 12 | Payments Configuration (per-org Chargily keys) | Done |
+| 13 | Remove the OSS/plan gate — payments available in every deployment | Done |
 
 ---
 
@@ -75,6 +77,7 @@ File: [`components/Dashboard/Pages/Course/EditCourseAccess/EditCourseAccess.tsx`
 - Every row has a 3-dot menu: **Details** + **Delete** (Public/Paid), **Delete** only (Private).
 - Selection clears on query / page / mode change.
 - Mode + status indicators are rounded squares (`w-2.5 h-2.5 rounded`).
+- **Roster fetch:** the three Access tabs (course / podcast / collection) used to request `limit=10000`; every roster endpoint caps `limit` at 100 and answers **422**, so the lists rendered empty. They now go through [`swrFetchAllPages()`](../../../apps/web/services/utils/ts/requests.ts), which walks real pages of 100 and merges them, so every linked user shows up regardless of roster size.
 
 Backend for Public mode: [`services/courses/access.py`](../../../apps/api/src/services/courses/access.py), [`routers/courses/access.py`](../../../apps/api/src/routers/courses/access.py), [`web/services/courses/access.ts`](../../../apps/web/services/courses/access.ts).
 
@@ -82,11 +85,11 @@ Backend for Public mode: [`services/courses/access.py`](../../../apps/api/src/se
 
 File: [`components/Dashboard/Pages/Payments/PaymentsOffersPage.tsx`](../../../apps/web/components/Dashboard/Pages/Payments/PaymentsOffersPage.tsx)
 
-- Single table of every course **and** podcast, including drafts.
+- Single table of every course, podcast and collection, including drafts.
 - Columns: Resource (name + `Draft` tag), Type, Access, **Price (DZD)** (borderless inline input), Added.
 - Toolbar: search, filter menu (Type / Access / Price / Status / Sort / Clear), one **Save** for all edited rows.
 - Price semantics: empty = not priced, `0` = Free, `> 0` = DZD.
-- Saving calls the existing course/podcast update endpoints with `price_amount`; explicit `null` clears the price (backend distinguishes "not provided" via `model_fields_set`).
+- Saving calls the existing course/podcast/collection update endpoints with `price_amount`; explicit `null` clears the price (backend distinguishes "not provided" via `model_fields_set`).
 - Status squares match the dashboard home tables.
 
 ### 6. Chargily checkout creation
@@ -99,7 +102,16 @@ Files: [`services/payments/chargily.py`](../../../apps/api/src/services/payments
 - Persists `chargily_checkout_id`, `checkout_url`, `fees`, `fees_on_merchant`, `provider_payload`; returns `{ order_uuid, checkout_url, amount, currency, status }`.
 - Provider failure marks the order `failed` and returns `502`.
 - Course page "Get Access" now shows the price and redirects to `checkout_url`; non-paid courses enroll the learner via `POST /trail/add_course/{uuid}` (creating the trail when missing) so the course lands in the Progress tab.
+- Podcast and collection product pages start the same Chargily checkout through the shared `createResourceCheckout` client.
 - Tests: [`test_payments_checkout_service.py`](../../../apps/api/src/tests/services/test_payments_checkout_service.py)
+
+### Learner store and product pages
+
+Files: [`app/orgs/[orgslug]/(withmenu)/store/page.tsx`](../../../apps/web/app/orgs/%5Borgslug%5D/(withmenu)/store/page.tsx), [`store.tsx`](../../../apps/web/app/orgs/%5Borgslug%5D/(withmenu)/store/store.tsx)
+
+- `/store` lists one card per published paid course, podcast and collection; every card links to the resource product page.
+- There is no separate offer or subscription product, and the old offer screens have been deleted.
+- Buying always happens on the resource page (course, podcast or collection), which starts the Chargily checkout.
 
 ### 12. Payments Configuration
 
@@ -179,20 +191,32 @@ Files: [`services/payments/payouts.py`](../../../apps/api/src/services/payments/
 ### 10. Learner checkout and Progress tab
 
 - **Done:** the "Get Access" button shows the price for paid courses and redirects to Chargily; after `checkout.paid` the webhook grants the entitlement and creates the `TrailRun`, so the course appears in the Progress tab. Non-paid courses enroll immediately. Chargily returns to the dedicated `payment/success` / `payment/failure` pages.
-- **Remaining:** verify the locked state for `paid` without an entitlement on every lesson/activity page (price + purchase prompt, no content leak).
+- **Done — catalog vs. content split (courses, podcasts, collections):** a published `paid` resource is a **product page**. `GET /courses/{uuid}`, `/courses/{uuid}/meta`, `/podcasts/{uuid}`, `/podcasts/{uuid}/meta` and `GET /podcasts/{uuid}/episodes` now return the full marketing detail (title, description, curriculum / episode titles, price) to a signed-in learner without an entitlement, so the page can render "Get Access". The paid payload is stripped per viewer:
+  - every chapter/activity comes back with `is_locked=true`, `content={}`, `details=null`, and the chapter description/thumbnail cleared (`_apply_locks_to_chapters`);
+  - every episode comes back with `audio_file=""`;
+  - translation overlays re-apply the lock after localisation (`apply_course_content_locale`);
+  - lesson bodies (`GET /activities/{uuid}`) and single episodes (`GET /podcasts/episodes/{uuid}`) still return **403 "Payment required to access this resource"**.
+- **Rule:** [`check_catalog_read_access()`](../../../apps/api/src/security/rbac/catalog.py) is the single place that decides this. `users_only` and drafts keep the plain 403 — there is no product page for a private cohort. Collections already behaved this way and now delegate to the same helper.
+- **Cache safety:** courses with `access_type=paid`, or with any non-public `lock_type` on a chapter/activity, are excluded from the course-meta Redis cache — that payload is viewer-dependent and sharing it would leak locked content.
+- **Media guard:** [`require_resource_read()`](../../../apps/api/src/security/rbac/media.py) now gates both the filesystem (`local_content`) and S3 (`content_files`) content routers with the full RBAC read decision. Previously they only checked the legacy `public` column plus org membership, so a paid file URL was fetchable by any org member. Org-scoped API tokens keep their historical access. Verified live: paid activity media `403` for an org member without an entitlement, `404` (guard passed, file absent) with one; public thumbnails stay public for anonymous.
+- **Verified live (org 463, learner without entitlement):** paid course detail `200`, meta `200` with `7` chapters / `25` activities / `25` locked / `0` with content, activity `403`; paid podcast meta `200` with `2` episodes / `0` with audio, episode `403`. After inserting an entitlement: meta `200` with `0` locked and activity `200`.
+- **Remaining:** no explicit lock badge on episode rows (the player just gets a blank `audio_file`), and the lesson page still relies on the 403 + "Get Access" prompt rather than a dedicated in-lesson upsell.
 
 ### 11. Podcast Access tab parity
 
 - **Done:** the podcast editor has an **Access** tab (shown only with `manage_access`), mirroring the course tab: Public / Private / Paid cycling, publish toggle, paid entitlement roster with grant/revoke, group linking for Private, and the 3-dot row menus.
 - Files: [`EditPodcastAccess.tsx`](../../../apps/web/components/Dashboard/Pages/Podcast/EditPodcastAccess/EditPodcastAccess.tsx), [`usePodcastRights.tsx`](../../../apps/web/components/Hooks/usePodcastRights.tsx).
 - Podcasts use the same `access_type` / `price_amount` fields and the generic `podcast_…` entitlement + UserGroup endpoints — no backend changes were needed.
+- **Price gate:** like courses, the Access tab skips **Paid** with a toast until `price_amount > 0`. Prices are set in **Payments → Offers** (the offers table edits courses, podcasts and collections through the same `price_amount` field), so a podcast needs a price there before Paid becomes selectable.
+- Verified on the flagship podcast **The Pixel Hour** (`podcast_9d7c0a7e…`): price `3500` + `access_type=paid`, entitlements granted to users `1` (admin) and `5502`; `GET /payments/463/entitlements?resource_uuid=podcast_…` returns `total=2`. Learner check: the entitled account sees `14/14` episode `audio_file`s, a non-entitled account gets `14` episodes with `0` audio. The earlier test podcast (`Field Recordings`) was reverted to `public`, price cleared, its entitlements revoked.
+- **Hosts:** the flagship podcast now carries `extra_metadata.hosts` (Yacine Benali — Host & Founder, Lina Cherif — Co-host / Product Design Lead, Mehdi Lounis — Producer & Sound). Avatars are picked from `apps/api/seed-assets/avatars/` and stored as **`data:image/png;base64,…`** (a few KB each) because the public page renders `src={host.avatar}` raw and has no user UUID to build a media path with. Hosts are metadata, so they stay visible to non-entitled learners; the paywall on audio is unaffected. The "host" count badges on the podcast page now prefer `meta.hosts` over `authors`.
 
 ### 12. Collections as a sellable bundle
 
 - **Done (Phase 7 complete):** the **Payment Groups** tab has been removed — Collections superseded it as the bundle resource. `/dash/payments/groups` redirects to the overview.
 - Collections have course-grade fields (media, access modes, price, SEO), a four-tab dashboard editor (General / Content / Access / SEO), and a purchase flow that fans out to per-resource entitlements + `TrailRun`s for course members.
 - Members are polymorphic (`course` / `podcast`) through `collectioncourse.resource_type` + `resource_uuid`; `POST/DELETE /collections/{uuid}/resources` manages both, and collections now appear as rows in Payments → Offers.
-- Full plan: [Collections — Implementation Plan](../collections/implementation-plan.md).
+- Full plan: Collections implementation plan (archived).
 
 ### 13. Deployment availability
 
@@ -230,7 +254,7 @@ Single file / single test:
 .\.venv\Scripts\python.exe -m pytest src/tests/services/test_payments_entitlements_service.py -q
 ```
 
-Baseline at the time of writing: **2466 passed, 2 skipped, 8 failed** — all 8 are pre-existing Windows/environment failures (path separators, SVG heuristic, community config, chapters tuple unpack, communities list). They are not caused by payments work.
+Baseline at the time of writing: **2574 passed, 2 skipped, 0 failed**.
 
 ### Frontend typecheck
 

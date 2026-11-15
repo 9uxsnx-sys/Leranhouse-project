@@ -45,7 +45,7 @@ import {
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { linkResourcesToUserGroup, unLinkResourcesToUserGroup } from '@services/usergroups/usergroups'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
-import { revalidateTags, swrFetcher } from '@services/utils/ts/requests'
+import { revalidateTags, swrFetcher, swrFetchAllPages } from '@services/utils/ts/requests'
 
 type EditCollectionAccessProps = {
   collection: any
@@ -119,7 +119,8 @@ function EditCollectionAccess({ collection, orgslug, onUpdated }: EditCollection
   }, [onUpdated, orgslug])
 
   // ── Users linked to the collection (Public / Paid modes) ─────────────────
-  const accessQuery = `search=${encodeURIComponent(debouncedSearch)}&limit=10000`
+  // The API caps `limit` at 100, so the fetcher walks the pages.
+  const accessQuery = `search=${encodeURIComponent(debouncedSearch)}`
   const accessKey =
     (mode === 'public' || mode === 'paid') && collectionUuid && org?.id && access_token
       ? mode === 'public'
@@ -136,7 +137,7 @@ function EditCollectionAccess({ collection, orgslug, onUpdated }: EditCollection
     isValidating: accessValidating,
     error: accessError,
     mutate: mutateAccess,
-  } = useSWR(accessKey, (url: string) => swrFetcher(url, access_token), {
+  } = useSWR(accessKey, (url: string) => swrFetchAllPages(url, access_token), {
     revalidateOnFocus: false,
   })
 

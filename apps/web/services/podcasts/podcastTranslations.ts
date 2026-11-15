@@ -13,6 +13,7 @@ export type PodcastTranslation = {
   about: string | null
   tags: string | null
   seo: Record<string, any> | null
+  extra_metadata: Record<string, any> | null
   state: string
   source_updated_at: string | null
   translated_by: number | null
@@ -26,6 +27,7 @@ export type PodcastTranslationPayload = {
   about?: string | null
   tags?: string | null
   seo?: Record<string, any> | null
+  extra_metadata?: Record<string, any> | null
   state?: string
 }
 

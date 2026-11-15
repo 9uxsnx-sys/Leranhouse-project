@@ -12,9 +12,25 @@ from src.db.courses.course_updates import (
 from src.db.courses.courses import Course
 from src.db.organizations import Organization
 from src.db.users import AnonymousUser, PublicUser
-from src.security.rbac import check_resource_access, AccessAction
+from src.security.rbac import (
+    AccessAction,
+    check_catalog_read_access,
+    check_resource_access,
+)
 from src.services.webhooks.dispatch import dispatch_webhooks
 from src.services.notifications import notify
+
+
+async def _parent_course(
+    db_session: Session, course_id: int
+) -> Course:
+    """Resolve the course that owns an update, so RBAC runs on the course."""
+    course = db_session.exec(select(Course).where(Course.id == course_id)).first()
+    if not course or course.id is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Course does not exist"
+        )
+    return course
 
 
 async def create_update(
@@ -75,6 +91,7 @@ async def create_update(
         data={
             "course_uuid": course_uuid,
         },
+        db_session=db_session,
     )
 
     return CourseUpdateRead(**update.model_dump())
@@ -98,9 +115,10 @@ async def update_update(
             status_code=status.HTTP_409_CONFLICT, detail="Update does not exist"
         )
 
-    # RBAC check
+    # RBAC check — the course owns the permission, not the update row
+    course = await _parent_course(db_session, update.course_id)
     await check_resource_access(
-        request, db_session, current_user, update.courseupdate_uuid, AccessAction.UPDATE
+        request, db_session, current_user, course.course_uuid, AccessAction.UPDATE
     )
 
     for key, value in update_object.model_dump().items():
@@ -132,9 +150,10 @@ async def delete_update(
             status_code=status.HTTP_409_CONFLICT, detail="Update does not exist"
         )
 
-    # RBAC check
+    # RBAC check — the course owns the permission, not the update row
+    course = await _parent_course(db_session, update.course_id)
     await check_resource_access(
-        request, db_session, current_user, update.courseupdate_uuid, AccessAction.DELETE
+        request, db_session, current_user, course.course_uuid, AccessAction.DELETE
     )
 
     db_session.delete(update)
@@ -158,6 +177,17 @@ async def get_updates_by_course_uuid(
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="Course does not exist"
         )
+
+    # Announcements are course metadata: a published paid course stays readable
+    # as a product page, every other case follows the normal access rules.
+    await check_catalog_read_access(
+        request,
+        db_session,
+        current_user,
+        course.course_uuid,
+        published=course.published,
+        access_type=course.access_type,
+    )
 
     statement = (
         select(CourseUpdate)

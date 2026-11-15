@@ -1,8 +1,8 @@
 # Payments
 
-> Payment endpoints handle Chargily Pay v2 integration for Algerian Dinar (DZD) transactions — create checkout sessions, process webhooks, check purchase status, and manage payment history with full idempotency and signature verification.
+> Status: as-built · Last verified: 2026-11-15
 
-> **Status:** **entitlements**, **orders**, **overview aggregates**, **payment configuration**, **checkout creation** and the **Chargily webhook** are implemented. The learner purchase-status/history endpoints are documented here as the **target contract** and are not live yet. See [Payments — Progress & Roadmap](../08-features/payments/progress.md).
+Payment endpoints handle Chargily Pay v2 integration for Algerian Dinar (DZD) transactions — create checkout sessions, process webhooks, list orders, compute revenue/payout aggregates, manage entitlements, and manage per-org payment credentials.
 
 ---
 
@@ -12,21 +12,25 @@ Koodook uses **Chargily Pay v2** as its sole payment gateway. All transactions a
 
 The payment system consists of:
 
-- **Entitlements** ✅ — who currently holds access to a paid resource (list / candidates / grant / revoke)
-- **Orders** ✅ — the organization's checkout history
-- **Configuration** ✅ — per-org Chargily credentials (secrets write-only)
-- **Checkout creation** ✅ — initiates a payment session and returns a redirect URL to Chargily's hosted page
-- **Webhook handler** ✅ — receives asynchronous payment notifications from Chargily (signature-verified)
-- **Purchase status** ⬜ — whether the current user holds an active entitlement
-- **Payment history** ⬜ — the current user's own transactions
+- **Entitlements** — who currently holds access to a paid resource (list / candidates / grant / revoke)
+- **Orders** — the organization's checkout history
+- **Overview aggregates** — revenue total and time series
+- **Payouts** — monthly gross/fees/costs, the 40/60 net split and pro-rata teacher payouts
+- **Configuration** — per-org Chargily credentials (secrets write-only)
+- **Checkout creation** — initiates a payment session and returns a redirect URL to Chargily's hosted page
+- **Webhook handler** — receives asynchronous payment notifications from Chargily (signature-verified)
 
 All communication with Chargily is server-to-server. The frontend never holds Chargily credentials.
+
+**There is no `/offers` route.** An "offer" is simply a resource's own `price_amount` / `price_currency` fields, edited through the course, podcast or collection update endpoints. See [Pricing & Offers](#pricing--offers).
+
+**Payouts are computed on the fly.** Nothing is persisted except the manually entered operating costs (`payoutcost`); the report is rebuilt from the paid orders of the month every time.
 
 ---
 
 ## Implemented endpoints
 
-All routes are mounted under `/api/v1/payments`, require an authenticated user, and additionally require an organization administrator at the service layer.
+All routes are mounted under `/api/v1/payments`. The webhook route is public (called by Chargily); every other route requires an authenticated user session and rejects API tokens (`require_authenticated_user`). The admin routes call `authorize_org_admin` at the service layer; **checkout only requires organization membership**, not an administrator role.
 
 ### List entitlements
 
@@ -34,7 +38,28 @@ All routes are mounted under `/api/v1/payments`, require an authenticated user, 
 GET /api/v1/payments/{org_id}/entitlements?resource_uuid=course_…&search=&page=1&limit=10
 ```
 
-Returns the **active** access roster for a course, podcast, or collection: `{ items, total, page, limit, pages }`, each item carrying `user`, `role`, `joined_at`, `enrolled_at` (grant timestamp), `status`, `source`, `valid_until`.
+Admin only. Returns the **active** access roster for a course, podcast, or collection. The envelope has **no `pages` key**:
+
+```json
+{
+  "items": [
+    {
+      "user": { "id": 2, "user_uuid": "user_...", "username": "learner", "first_name": "Amine", "last_name": "K.", "email": "learner@school.dev", "avatar_image": "" },
+      "role": { "id": 4, "name": "User" },
+      "joined_at": "2026-09-01 10:00:00",
+      "enrolled_at": "2026-10-20T09:12:00",
+      "status": "active",
+      "source": "purchase",
+      "valid_until": null
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "limit": 10
+}
+```
+
+`limit` is declared `le=100` (larger values return `422`); rows are newest-granted first. `404` when the resource does not exist in the org.
 
 ### List entitlement candidates
 
@@ -42,7 +67,7 @@ Returns the **active** access roster for a course, podcast, or collection: `{ it
 GET /api/v1/payments/{org_id}/entitlements/candidates?resource_uuid=course_…&search=&page=1&limit=10
 ```
 
-Same shape, but only organization members **without** an active entitlement — used by the search picker.
+Admin only. Same envelope, but only organization members **without** an active entitlement — used by the search picker. Candidate rows carry `enrolled_at`, `status`, `source` and `valid_until` as `null`.
 
 ### Grant entitlements
 
@@ -50,7 +75,11 @@ Same shape, but only organization members **without** an active entitlement — 
 POST /api/v1/payments/{org_id}/entitlements?resource_uuid=course_…&user_ids=1,2,3
 ```
 
-Creates `resourceentitlement` rows with `source=manual`, `status=active`, `granted_by` = acting admin. Response: `{ granted, already, skipped }`.
+Admin only. Creates `resourceentitlement` rows with `source=manual`, `status=active`, `granted_by` = acting admin. Non-members are skipped.
+
+```json
+{ "granted": [1, 2], "already": [3], "skipped": [9] }
+```
 
 ### Revoke entitlements
 
@@ -58,7 +87,11 @@ Creates `resourceentitlement` rows with `source=manual`, `status=active`, `grant
 DELETE /api/v1/payments/{org_id}/entitlements?resource_uuid=course_…&user_ids=1,2,3&reason=manual
 ```
 
-Flips matching rows to `status=revoked` and sets `revoked_at` / `revoke_reason`. Rows are never deleted. Response: `{ revoked, not_found }`.
+Admin only. Flips matching rows to `status=revoked` and sets `revoked_at` / `revoke_reason`. Rows are never deleted.
+
+```json
+{ "revoked": [1, 2], "not_found": [3] }
+```
 
 **Collection cascade:** when `resource_uuid` is a `collection_…`, the revoke also flips every ACTIVE entitlement for the same user and the same `order_id` (the per-course/per-podcast rows granted by that bundle purchase). Items bought separately have a different `order_id` and manual grants have none, so they stay active. `TrailRun`s are never deleted — progress is kept, access is denied by the entitlement check.
 
@@ -68,7 +101,43 @@ Flips matching rows to `status=revoked` and sets `revoked_at` / `revoke_reason`.
 GET /api/v1/payments/{org_id}/orders?search=&status=&page=1&limit=20
 ```
 
-Newest first, joins the buyer. Search covers name, username, email, resource name and order uuid. Unknown `status` → `422`.
+Admin only. Newest first, joins the buyer. Same envelope shape (`items`, `total`, `page`, `limit`); `limit` is `le=100`. Search covers first name, last name, username, email, resource name and order uuid. Unknown `status` → `422`.
+
+```json
+{
+  "items": [
+    {
+      "order_uuid": "order_abc-123",
+      "resource_uuid": "course_abc-123",
+      "resource_type": "course",
+      "resource_name": "Introduction to Algebra",
+      "amount": 1500,
+      "currency": "DZD",
+      "status": "paid",
+      "payment_method": "edahabia",
+      "checkout_url": "https://pay.chargily.dz/test/checkouts/01hjjj9aymmrwe664nbzrv84sg/pay",
+      "customer_name": "Amine K.",
+      "customer_email": "learner@school.dev",
+      "fees": 375,
+      "fees_on_merchant": 375,
+      "user": {
+        "id": 2,
+        "user_uuid": "user_...",
+        "username": "learner",
+        "first_name": "Amine",
+        "last_name": "K.",
+        "email": "learner@school.dev",
+        "avatar_image": ""
+      },
+      "creation_date": "2026-10-19T12:00:00",
+      "paid_at": "2026-10-19T12:04:11"
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "limit": 20
+}
+```
 
 ### Payments overview
 
@@ -76,7 +145,19 @@ Newest first, joins the buyer. Search covers name, username, email, resource nam
 GET /api/v1/payments/{org_id}/overview?range=30d
 ```
 
-`range` is one of `7d` / `30d` / `90d` / `12m` (unknown values fall back to `30d`). Returns `{ range, currency, revenue, series }` where only `paid` orders inside the window are summed. `series` is zero-filled: one daily bucket per day for 7d/30d/90d, and the last 12 calendar months for 12m. Each point is `{ label, revenue }`.
+Admin only. `range` is one of `7d` / `30d` / `90d` / `12m` (unknown values fall back to `30d`). Only `paid` orders inside the window are summed. `series` is zero-filled: one daily bucket per day for 7d/30d/90d, and the last 12 calendar months for 12m. Each point is `{ label, revenue }`.
+
+```json
+{
+  "range": "30d",
+  "currency": "DZD",
+  "revenue": 15000,
+  "series": [
+    { "label": "17 Oct", "revenue": 0 },
+    { "label": "18 Oct", "revenue": 5000 }
+  ]
+}
+```
 
 ### Payout report
 
@@ -84,7 +165,7 @@ GET /api/v1/payments/{org_id}/overview?range=30d
 GET /api/v1/payments/{org_id}/payouts?month=2026-10
 ```
 
-`month` is `YYYY-MM`; malformed values → `422`. Only `paid` orders with `paid_at` inside the month are counted.
+Admin only. `month` is `YYYY-MM` (defaults to the current month); malformed values → `422`. Only `paid` orders with `paid_at` inside the month are counted. Computed on the fly from the orders + saved manual costs.
 
 ```json
 {
@@ -115,9 +196,13 @@ GET /api/v1/payments/{org_id}/payouts?month=2026-10
 }
 ```
 
-`gateway_fees` comes from `fees_on_merchant` (falling back to `fees`). `manual_costs` is the month's saved `{ hosting, marketing, other }`. `total_costs = gateway_fees + hosting + marketing + other`. `net_profit = max(0, gross − total_costs)`, `teacher_pool = round(net × 40%)`, `platform_pool = net − teacher_pool`.
-
-Attribution: course orders belong to their course; collection orders are split evenly across `price_snapshot["courses"]` (rounding remainder to the first teacher). Each course's revenue goes to its active **MAINTAINERs**, else its active **CREATORs**. Revenue without an active author is reported in `unattributed_revenue` and stays with the platform. Per teacher, `share = attributed revenue / total attributed revenue` (a 0–1 fraction) and `payout = round(teacher_pool × share)`.
+- `gateway_fees` comes from `fees_on_merchant` (falling back to `fees`).
+- `manual_costs` is the month's saved `{ hosting, marketing, other }`; nothing else is stored.
+- `total_costs = gateway_fees + hosting + marketing + other`.
+- `net_profit = max(0, gross − total_costs)`, `teacher_pool = round(net × 40%)`, `platform_pool = net − teacher_pool`.
+- Attribution: a course order belongs to its course; a collection order is split evenly across `price_snapshot["courses"]` (rounding remainder to the first teacher). Each course's revenue goes to its active **MAINTAINERs**, else its active **CREATORs**. Revenue without an active author is reported in `unattributed_revenue` and stays with the platform.
+- Per teacher, `share = teacher gross / total gross revenue` (a 0–1 fraction) and `payout = round(teacher_pool × share)`.
+- `teachers` is sorted by `payout` descending.
 
 ### Update payout costs
 
@@ -125,7 +210,7 @@ Attribution: course orders belong to their course; collection orders are split e
 PUT /api/v1/payments/{org_id}/payouts/costs
 ```
 
-Body: `{ "month": "2026-10", "hosting": 2000, "marketing": 1000, "other": 500 }`.
+Admin only. Body: `{ "month": "2026-10", "hosting": 2000, "marketing": 1000, "other": 500 }`.
 
 Upserts one row per `(org_id, month)` and returns the recalculated report in the same shape as the GET. Negative values or a malformed month → `422`. Omitting a field leaves that cost at `0`.
 
@@ -135,7 +220,21 @@ Upserts one row per `(org_id, month)` and returns the recalculated report in the
 GET /api/v1/payments/{org_id}/config
 ```
 
-Returns `{ configured, provider, mode, public_key, active, has_secret_key, has_webhook_secret }`. **Secret keys are never returned** — only flags saying whether they are stored. An unconfigured org answers `configured: false` with `mode: "test"`.
+Admin only. An unconfigured org answers:
+
+```json
+{
+  "configured": false,
+  "provider": "chargily",
+  "mode": "test",
+  "public_key": null,
+  "active": false,
+  "has_secret_key": false,
+  "has_webhook_secret": false
+}
+```
+
+A configured org additionally returns `id`, `creation_date` and `update_date`. **Secret keys are never returned** — only the `has_secret_key` / `has_webhook_secret` flags.
 
 ### Update payment configuration
 
@@ -143,11 +242,13 @@ Returns `{ configured, provider, mode, public_key, active, has_secret_key, has_w
 PUT /api/v1/payments/{org_id}/config
 ```
 
-Body: `{ provider?, mode, public_key?, secret_key?, webhook_secret?, active? }`.
+Admin only. Body: `{ provider?, mode, public_key?, secret_key?, webhook_secret?, active? }`.
 
+- `provider` accepts only `chargily`; anything else → `422`.
 - `mode` accepts `test` or `live`; anything else → `422`.
 - `secret_key` / `webhook_secret` are **write-only**: send a non-empty value to replace, omit or send an empty string to keep the stored one. They are stored Fernet-encrypted.
 - Setting `active: true` requires both a public key and a stored secret key, otherwise `400`.
+- Removing the public key while payments are active → `400`.
 - Upserts a single row per `(org_id, provider)`.
 
 ### Create a checkout
@@ -156,7 +257,7 @@ Body: `{ provider?, mode, public_key?, secret_key?, webhook_secret?, active? }`.
 POST /api/v1/payments/{org_id}/checkout
 ```
 
-See [Create Checkout Session](#create-checkout-session).
+Requires an authenticated organization member. See [Create Checkout Session](#create-checkout-session).
 
 ### Chargily webhook
 
@@ -165,6 +266,20 @@ POST /api/v1/payments/webhook/chargily/{org_uuid}
 ```
 
 No auth dependency. See [Chargily Webhook](#chargily-webhook).
+
+---
+
+## Pricing & Offers
+
+There is no offers table and no `/offers` route. What the store calls an "offer" is a paid resource:
+
+| Resource | Where to set the price |
+|---|---|
+| Course | Course update endpoint (`price_amount`, `price_currency`) |
+| Podcast | `PUT /api/v1/podcasts/{podcast_uuid}` |
+| Collection | `PUT /api/v1/collections/{collection_uuid}` |
+
+A resource is purchasable when `access_type=paid`, `published=true`, and `price_amount > 0`. Collections also need at least one member.
 
 ---
 
@@ -181,7 +296,7 @@ No auth dependency. See [Chargily Webhook](#chargily-webhook).
 
 ## Create Checkout Session
 
-> Implemented. Requires an authenticated organization member.
+> Implemented. Requires an authenticated organization member (not necessarily an admin).
 
 Initiate a payment for a course, podcast, or collection. Creates a `paymentorder` record and returns a Chargily-hosted checkout URL for user redirect.
 
@@ -194,8 +309,9 @@ POST /api/v1/payments/{org_id}/checkout
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `resource_uuid` | string | Yes | `course_…`, `podcast_…`, or `collection_…` |
-| `resource_type` | string | Yes | `course`, `podcast`, or `collection` |
+| `resource_type` | string | No | `course`, `podcast`, or `collection` (inferred from the UUID) |
 | `payment_method` | string | No | `edahabia`, `cib` or `chargily_app` (the customer can change it on the hosted page) |
+| `locale` | string | No | `ar`, `en` or `fr` for the hosted page; defaults to `en` |
 
 ### Example Request
 
@@ -203,7 +319,8 @@ POST /api/v1/payments/{org_id}/checkout
 {
   "resource_uuid": "course_abc-123",
   "resource_type": "course",
-  "payment_method": "edahabia"
+  "payment_method": "edahabia",
+  "locale": "fr"
 }
 ```
 
@@ -221,86 +338,23 @@ POST /api/v1/payments/{org_id}/checkout
 
 ### Flow
 
-1. Validate the user is authenticated, the resource exists, `access_type = paid`, and `price_amount > 0`.
-2. Reject if the user already holds an active entitlement.
-3. Create a `paymentorder` row (`status=pending`, `amount` = price, `price_snapshot`).
-4. Call Chargily `POST /checkouts` — integer `amount`, lowercase `currency: "dzd"`, `success_url`, `failure_url`, `webhook_endpoint`, `metadata`.
-5. Persist `chargily_checkout_id` + `checkout_url` and return the URL.
+1. Validate the caller is an org member, the resource exists, `published=true`, `access_type=paid`, and `price_amount > 0` (a collection also needs at least one member).
+2. Reject if the caller already holds an active entitlement.
+3. Require an active payment configuration with a stored secret key.
+4. Create a `paymentorder` row (`status=pending`, `amount` = price, `price_snapshot`).
+5. Call Chargily `POST /checkouts` — integer `amount`, lowercase `currency: "dzd"`, `success_url`, `failure_url`, `webhook_endpoint`, `metadata`.
+6. Persist `chargily_checkout_id` + `checkout_url` and return the URL.
 
 ### Errors
 
 | Status | Description |
 |--------|-------------|
-| `400 Bad Request` | Resource is free, has no price, or the user already owns it |
+| `400 Bad Request` | Resource not published / not paid / no price / collection has no items / user already owns it / payments not configured |
 | `401 Unauthorized` | Authentication required |
-| `404 Not Found` | Resource not found in this organization |
+| `403 Forbidden` | Caller is not a member of the organization |
+| `404 Not Found` | Organization or resource not found in this organization |
 | `422 Unprocessable Entity` | Invalid payment method |
 | `502 Bad Gateway` | Chargily API unavailable or returned an error |
-
----
-
-## Check Access Status (planned)
-
-> Not implemented yet. The learner-side "do I own this?" check.
-
-```
-GET /api/v1/payments/{org_id}/access/{resource_uuid}
-```
-
-### Response Body (200 OK)
-
-```json
-{
-  "has_access": true,
-  "source": "purchase",
-  "granted_at": "2026-09-22T14:30:00Z",
-  "order_uuid": "order_abc-123",
-  "valid_until": null
-}
-```
-
-Access is derived from an active `resourceentitlement` row. `access_type != paid` resources answer `has_access: true` for anyone allowed by the access rules (see [Course Access Levels](#course-access-levels)).
-
-### Errors
-
-| Status | Description |
-|--------|-------------|
-| `401 Unauthorized` | Authentication required |
-| `404 Not Found` | Resource not found |
-
----
-
-## Payment History
-
-**Admin (implemented):** `GET /api/v1/payments/{org_id}/orders` — see [List orders](#list-orders).
-
-**Learner (planned):**
-
-```
-GET /api/v1/payments/history?page=1&limit=20
-```
-
-### Response Body (200 OK)
-
-```json
-{
-  "items": [
-    {
-      "order_uuid": "order_abc-123",
-      "resource_name": "Introduction to Algebra",
-      "amount": 1500,
-      "currency": "DZD",
-      "payment_method": "edahabia",
-      "status": "paid",
-      "paid_at": "2026-09-22T14:30:00Z"
-    }
-  ],
-  "total": 5,
-  "page": 1,
-  "limit": 20,
-  "pages": 1
-}
-```
 
 ---
 
@@ -319,7 +373,7 @@ POST /api/v1/payments/webhook/chargily/{org_uuid}
 | Header | Description |
 |--------|-------------|
 | `Content-Type: application/json` | Request body format |
-| `signature` | Hex HMAC-SHA256 of the **raw body**, keyed with the org's Secret Key |
+| `signature` | Hex HMAC-SHA256 of the **raw body**, keyed with the org's webhook secret (falling back to the Chargily secret key when no webhook secret is stored) |
 
 ### Webhook Events
 
@@ -367,11 +421,11 @@ POST /api/v1/payments/webhook/chargily/{org_uuid}
 
 ```
 receive_webhook()
-  ├─ Verify hex HMAC-SHA256 over the raw body with the org's secret key
+  ├─ Verify hex HMAC-SHA256 over the raw body with the org's webhook/secret key
   │    ├─ missing header → 400
   │    └─ mismatch       → 403
-  ├─ Insert payment_webhook_event(event_id = payload.id)   # unique
-  │    └─ conflict → 200 OK (no-op)
+  ├─ Insert paymentwebhookevent(event_id = payload.id)   # unique
+  │    └─ conflict / already processed → 200 OK (no-op)
   ├─ Event type:
   │    ├─ checkout.paid     → order paid → resourceentitlement(source=purchase)
   │    ├─ checkout.failed   → order failed
@@ -398,8 +452,9 @@ is_valid = hmac.compare_digest(expected, signature_header)
 
 | Status | Description |
 |--------|-------------|
-| `400 Bad Request` | Missing `signature` header |
+| `400 Bad Request` | Org missing payments config, missing `signature` header, invalid JSON, or missing event id |
 | `403 Forbidden` | Signature mismatch |
+| `404 Not Found` | Unknown organization UUID |
 | `500 Internal Server Error` | Processing failed — Chargily will retry |
 | `200 OK` | Success, including idempotent duplicates |
 
@@ -416,7 +471,7 @@ is_valid = hmac.compare_digest(expected, signature_header)
 | `org_id` / `user_id` | integer | Organization and buyer |
 | `resource_uuid` / `resource_type` / `resource_name` | string | What is sold |
 | `amount` / `currency` | integer / string | Snapshot at creation (`DZD`) |
-| `price_snapshot` | JSONB | Resource price at checkout time |
+| `price_snapshot` | JSONB | Resource price + member UUIDs at checkout time |
 | `payment_method` | enum | `edahabia`, `cib`, `chargily_app` |
 | `status` | enum | `pending`, `processing`, `paid`, `failed`, `canceled`, `expired`, `refunded`, `partially_refunded` |
 | `chargily_checkout_id` | string | Chargily checkout id (unique) — webhook lookup key |
@@ -441,7 +496,7 @@ is_valid = hmac.compare_digest(expected, signature_header)
 | `granted_by` / `granted_at` | integer / datetime | Acting admin and timestamp |
 | `revoked_at` / `revoke_reason` | datetime / string | Revocation audit |
 
-### `payment_webhook_event`
+### `paymentwebhookevent`
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -463,19 +518,28 @@ is_valid = hmac.compare_digest(expected, signature_header)
 | `secret_key_encrypted` / `webhook_secret_encrypted` | string | Encrypted at rest, never returned |
 | `active` | boolean | Provider enabled for the org |
 
+### `payoutcost`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `org_id` / `month` | integer / string | Unique pair; `month` is `YYYY-MM` |
+| `hosting` / `marketing` / `other` | integer | Manually entered operating costs (DZD) |
+
+Gateway fees are **not** stored here; they are summed from the paid orders when the report is built.
+
 ---
 
 ## Course Access Levels
 
 | Level | Description | Payment Required |
 |-------|-------------|-----------------|
-| `public` | Free — every logged-in user can view all content | No |
+| `public` | Free — published public content is readable by everyone, including anonymous visitors | No |
 | `users_only` | Restricted — only members of the linked user groups | No |
-| `paid` | Must purchase to access | Yes |
+| `paid` | Metadata is a product page; content requires an active entitlement | Yes |
 
 `published = false` (draft) overrides all three: author / admin / maintainer only.
 
-Access is enforced at three levels: database flags, backend middleware, and frontend UI gating. The platform itself is login-only — there is no anonymous tier.
+Access is enforced at three levels: database flags, backend middleware, and frontend UI gating.
 
 > See [Course Access Control](../../04-admin-guide/courses/access.md) for the full rule table.
 
@@ -483,12 +547,11 @@ Access is enforced at three levels: database flags, backend middleware, and fron
 
 ## Refund Flow
 
-Refunds are issued from the Chargily merchant dashboard — Chargily Pay v2 exposes **no refund endpoint**.
+Refunds are issued from the Chargily merchant dashboard — Chargily Pay v2 exposes **no refund endpoint**, and this API has no refund route or `checkout.refunded` event.
 
 1. Admin refunds the payment in the Chargily dashboard.
-2. Admin marks the order as refunded in Koodook with an optional reason.
-3. `paymentorder.status` becomes `refunded` or `partially_refunded`.
-4. A full refund revokes the entitlement; a partial refund keeps it.
+2. The order is recorded as `refunded` / `partially_refunded` operationally (`paymentorder.status` supports both values).
+3. Access is not revoked automatically. For a full refund, call `DELETE /api/v1/payments/{org_id}/entitlements` with the revoked user to flip the entitlement to `revoked`. A partial refund can keep the entitlement.
 
 ---
 

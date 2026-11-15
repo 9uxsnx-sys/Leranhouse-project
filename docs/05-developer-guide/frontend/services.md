@@ -1,404 +1,125 @@
 # API Service Layer
 
-> Koodook services are async TypeScript functions that wrap fetch calls to the backend API, providing a typed interface for all data operations with consistent auth header handling and error management.
+> Status: as-built · Last verified: 2026-11-15
+
+> Services are async TypeScript functions in `apps/web/services/` that wrap fetch calls to the backend, centralizing URL building and auth-header handling.
 
 ---
 
 ## Service Organization
 
-All service modules live under `apps/web/services/`, organized by domain:
+All modules live under `apps/web/services/`, grouped by domain:
 
-```
-services/
-├── courses/
-│   ├── courses.ts         # Course CRUD
-│   ├── chapters.ts        # Chapter/module CRUD
-│   ├── activities.ts      # Activity CRUD
-│   ├── activity.ts        # Single activity operations
-│   ├── assignments.ts     # Assignment management
-│   ├── certifications.ts  # Certificate operations
-│   ├── collections.ts     # Collection operations
-│   ├── collectionTranslations.ts # Collection locale rows
-│   ├── translations.ts    # Course locale rows
-│   ├── migration.ts       # Course migration
-│   ├── transfer.ts        # Course transfer
-│   └── updates.ts         # Course updates/changelog
-├── auth/
-│   ├── auth.ts            # Authentication
-│   ├── cookies.ts         # Cookie management
-│   └── sso.ts             # SSO operations
-├── organizations/
-│   ├── orgs.ts            # Organization CRUD
-│   └── invites.ts         # Org invites
-├── communities/
-│   ├── communities.ts     # Community CRUD
-│   └── discussions.ts     # Discussion operations
-├── users/
-│   └── users.ts           # User management
-├── payments/
-│   ├── payments.ts        # Payment operations
-│   ├── offers.ts          # Offer management
-│   ├── groups.ts          # Payment groups
-│   └── providers/stripe.ts # Stripe integration
-├── media/
-│   └── media.ts           # Media file URLs
-├── analytics/
-│   └── analytics.ts       # Analytics data
-├── boards/
-│   ├── boards.ts          # Board CRUD
-│   └── playground.ts      # Playground operations
-├── config/
-│   └── config.ts          # Runtime configuration
-├── settings/
-│   ├── org.ts             # Org settings
-│   ├── profile.ts         # User profile
-│   └── password.ts        # Password management
-├── utils/
-│   └── ts/
-│       └── requests.ts    # Fetch helpers, auth headers, error handling
-├── roles/
-│   ├── roles.ts           # Role management
-├── usergroups/
-│   └── usergroups.ts      # User group management
-├── plans/
-│   └── plans.ts           # Plan/feature checks
-├── search/
-│   └── search.ts          # Search operations
-├── podcasts/
-│   ├── podcasts.ts        # Podcast CRUD
-│   ├── episodes.ts        # Episode CRUD
-│   └── podcastTranslations.ts # Podcast + episode locale rows
-└── ee/
-    ├── audit_logs.ts      # Enterprise audit logs
-    └── superadmin.ts      # Superadmin operations
-```
+| Domain | Files |
+|--------|-------|
+| `ai/` | `ai.ts`, `courseplanning.ts`, `magicblocks.ts` |
+| `analytics/` | `analytics.ts`, `tabs.ts` |
+| `api_tokens/` | `api_tokens.ts` |
+| `auth/` | `auth.ts`, `cookies.ts`, `sso.ts` |
+| `blocks/` | `Audio/audio.ts`, `CodePlayground/sqlite.ts`, `Image/images.ts`, `Pdf/pdf.ts`, `Quiz/quiz.ts`, `Video/video.ts` |
+| `boards/` | `boards.ts`, `playground.ts` |
+| `communities/` | `communities.ts`, `communityTranslations.ts`, `discussions.ts` |
+| `config/` | `config.ts` (runtime config, URL builders) |
+| `courses/` | `access.ts`, `activities.ts`, `activity.ts`, `assignments.ts`, `certifications.ts`, `chapters.ts`, `collectionTranslations.ts`, `collections.ts`, `courses.ts`, `migration.ts`, `transfer.ts`, `translations.ts`, `updates.ts` |
+| `custom_domains/` | `custom_domains.ts` |
+| `ee/` | `audit_logs.ts`, `superadmin.ts` |
+| `home/` | `trail.ts`, `trending.ts` |
+| `media/` | `media.ts` (media URL builders) |
+| `org/` | `orgResolution.ts` |
+| `organizations/` | `orgs.ts`, `invites.ts` |
+| `orgs/` | `usage.ts` |
+| `packs/` | `packs.ts` |
+| `payments/` | `checkout.ts`, `entitlements.ts`, `offers.ts`, `orders.ts`, `overview.ts`, `payments.ts`, `payouts.ts`, `providers/stripe.ts` |
+| `plans/` | `plans.ts` |
+| `playgrounds/` | `playgrounds.ts`, `generator.ts` |
+| `podcasts/` | `podcasts.ts`, `episodes.ts`, `podcastTranslations.ts`, `trail.ts` |
+| `roles/` | `roles.ts` |
+| `search/` | `search.ts` |
+| `settings/` | `org.ts`, `password.ts`, `profile.ts` |
+| `usergroups/` | `usergroups.ts` |
+| `users/` | `users.ts` |
+| `utils/` | `health.ts`, `ts/requests.ts`, `ts/hostUtils.ts`, `ts/colorUtils.ts`, `react/middlewares/views.ts` |
+| `webhooks/` | `webhooks.ts` |
+| root | `notifications.ts` |
 
 ---
 
-## How Services Call the API
+## URL Building
 
-All services use a shared set of helpers from `@services/utils/ts/requests`:
+`services/config/config.ts` is the single source of truth:
 
-### Base URL
-
-The API base URL is obtained via `getAPIUrl()` from `@services/config/config`:
+- `getAPIUrl()` — full backend API base (`{backend}/api/v1/`), or the relative `/api/v1/` when the browser is on a custom domain (so requests stay same-origin through the Next.js proxy).
+- `getServerAPIUrl()` — always the absolute URL; use it in Server Components and route handlers.
+- `getBackendUrl()` — backend origin without the `/api/v1/` suffix.
+- `getUriWithOrg(orgslug, path)` — relative path on the current host, or an absolute subdomain URL when crossing subdomains in multi tenancy.
+- Runtime values come from `window.__RUNTIME_CONFIG__` / `runtime-config.json`, falling back to `process.env` server-side (`getConfig`).
 
 ```ts
 import { getAPIUrl } from '@services/config/config'
 
-// Returns something like "http://localhost/api/v1/"
-// On custom domains, returns a relative path "/api/v1/" for same-origin requests
-```
-
-### Fetch Wrappers
-
-Three request builders handle different content types:
-
-**`RequestBodyWithAuthHeader(method, data, next, token)`** — JSON requests with optional Bearer token auth:
-
-```ts
-const options = RequestBodyWithAuthHeader('POST', { name: 'New Course' }, null, access_token)
-// Result:
-// {
-//   method: 'POST',
-//   headers: { 'Content-Type': 'application/json', Authorization: 'Bearer <token>' },
-//   credentials: 'include',
-//   cache: 'no-store',
-//   body: '{"name":"New Course"}'
-// }
-```
-
-Key behaviors:
-- Always sets `cache: 'no-store'` to prevent Next.js from caching API responses
-- Always includes `credentials: 'include'` for cookie-based auth
-- Only adds `Authorization` header when a token is provided
-- Only includes `body` for POST/PUT/DELETE methods
-
-**`RequestBodyFormWithAuthHeader(method, data, next, access_token)`** — FormData requests (file uploads):
-
-```ts
-const formData = new FormData()
-formData.append('name', 'Course Name')
-formData.append('thumbnail', file)
-const options = RequestBodyFormWithAuthHeader('POST', formData, null, access_token)
-// Content-Type is not set (browser sets it with boundary for FormData)
-```
-
-**`swrFetcher(url, token)`** — SWR-specific fetcher that handles errors:
-
-```ts
-const { data, error } = useSWR(url, (url) => swrFetcher(url, access_token))
-```
-
-### Error Handling
-
-The `errorHandling()` function parses API errors consistently:
-
-```ts
-const result = await fetch(url, options)
-const res = await errorHandling(result)
-// If response is not ok, throws an Error with:
-//   error.status — HTTP status code
-//   error.detail — Parsed error body
-// If response is ok, returns parsed JSON
-```
-
-The `getResponseMetadata()` function returns a structured response for mutation operations:
-
-```ts
-const res = await getResponseMetadata(result)
-// { success: boolean, data: any, status: number, HTTPmessage: string }
+const res = await fetch(`${getAPIUrl()}courses/`, options)
 ```
 
 ---
 
-## Key Services
+## Request Helpers (`@services/utils/ts/requests`)
 
-### Courses (`@services/courses/courses`)
-
-```ts
-// GET — called via SWR in components
-getCourseMetadata(course_uuid, next, access_token, options?)    // Course metadata
-getOrgCourses(org_slug, next, access_token, include_unpublished?)
-searchOrgCourses(org_slug, query, page, limit, next, access_token?)
-getCourse(course_uuid, next, access_token)
-getCourseById(course_id, next, access_token)
-getCourseRights(course_uuid, access_token)
-getCourseContributors(course_uuid, access_token)
-
-// POST/PUT/DELETE
-updateCourse(course_uuid, data, access_token)
-createNewCourse(org_id, course_body, thumbnail, access_token)
-deleteCourseFromBackend(course_uuid, access_token)
-cloneCourse(course_uuid, access_token)
-updateCourseThumbnail(course_uuid, formData, access_token)
-editContributor(course_uuid, contributor_id, authorship, authorship_status, access_token)
-applyForContributor(course_uuid, data, access_token)
-```
-
-### Chapters (`@services/courses/chapters`)
-
-```ts
-getCourseChaptersMetadata(course_uuid, next, access_token)
-updateChaptersMetadata(course_uuid, data, access_token)
-updateChapter(coursechapter_id, data, access_token)
-updateCourseOrderStructure(course_uuid, data: OrderPayload, access_token)
-createChapter(data, access_token)
-deleteChapter(coursechapter_id, access_token)
-getChapterUserGroups(chapter_uuid, access_token)
-addUserGroupToChapter(chapter_uuid, usergroup_uuid, access_token)
-removeUserGroupFromChapter(chapter_uuid, usergroup_uuid, access_token)
-```
-
-### Activities (`@services/courses/activities`)
-
-```ts
-createActivity(data, chapter_id, org_id, access_token)
-createFileActivity(file, type, data, chapter_id, access_token)
-createExternalVideoActivity(data, activity, chapter_id, access_token)
-getActivity(activity_uuid, next, access_token)
-getActivityByID(activity_id, next, access_token)
-getActivityWithAuthHeader(activity_uuid, next, access_token)
-updateActivity(data, activity_uuid, access_token)
-deleteActivity(activity_uuid, access_token)
-getActivityVersions(activity_uuid, access_token, limit?, offset?)
-getActivityVersion(activity_uuid, version_number, access_token)
-restoreActivityVersion(activity_uuid, version_number, access_token)
-getActivityUserGroups(activity_uuid, access_token)
-addUserGroupToActivity(activity_uuid, usergroup_uuid, access_token)
-removeUserGroupFromActivity(activity_uuid, usergroup_uuid, access_token)
-```
-
-### Communities (`@services/communities/communities`)
-
-```ts
-getCommunities(org_id, page, limit, next, access_token?)
-getCommunity(community_uuid, next, access_token?)
-getCommunityByCourse(course_uuid, next, access_token?)
-createCommunity(org_id, data: CommunityCreate, access_token)
-updateCommunity(community_uuid, data: CommunityUpdate, access_token)
-deleteCommunity(community_uuid, access_token)
-getCommunityRights(community_uuid, access_token?)
-linkCommunityToCourse(community_uuid, course_uuid, access_token)
-unlinkCommunityFromCourse(community_uuid, access_token)
-updateCommunityThumbnail(community_uuid, formData, access_token)
-```
+| Helper | Behavior |
+|--------|----------|
+| `RequestBodyWithAuthHeader(method, data, next, token?)` | JSON request. Adds `Authorization: Bearer <token>` only when a token is passed; sets `credentials: 'include'` and `redirect: 'follow'`; adds a JSON body only when `data` is not `null`/`undefined`. It does **not** set `cache`. |
+| `RequestBodyFormWithAuthHeader(method, data, next, access_token)` | `FormData` request with a Bearer token and no `Content-Type` (the browser adds the multipart boundary). |
+| `RequestBody(method, data, next)` | Unauthenticated JSON request. |
+| `swrFetcher(url, token?)` | GET + `errorHandling()`, used as the SWR fetcher; returns `undefined` on `AbortError`. |
+| `swrFetchAllPages(url, token?, pageSize = 100)` | Walks `{ items, total }` pages, because the API caps `limit` at 100. |
+| `secureFetch(url, options)` | Rejects URLs that do not start with `getAPIUrl()` (SSRF guard); use it for user-influenced URLs. |
+| `errorHandling(response)` | Throws an `Error` carrying `status` and `detail` on non-OK responses; otherwise returns parsed JSON. |
+| `getResponseMetadata(response)` | Always returns `{ success, data, status, HTTPmessage }`; `success` is true only for HTTP 200. |
+| `revalidateTags(tags, orgslug)` | Calls `/api/revalidate?tag=...` twice per tag (to reach multiple pods behind a load balancer). |
 
 ---
 
-## Service Function Patterns
+## Two Error Patterns
 
-Every service function follows the same pattern:
-
-### 1. Async function with typed parameters
+**Fetching (SWR):** use `errorHandling` / `swrFetcher` so SWR receives a thrown error.
 
 ```ts
-export async function createActivity(
-  data: any,
-  chapter_id: any,
-  org_id: any,
-  access_token: string
-) {
-  // ...
-}
-```
-
-### 2. Build URL using `getAPIUrl()`
-
-```ts
-const result = await fetch(
-  `${getAPIUrl()}activities/?coursechapter_id=${chapter_id}&org_id=${org_id}`,
-  RequestBodyWithAuthHeader('POST', data, null, access_token)
-)
-```
-
-### 3. Parse and return response
-
-```ts
-const res = await result.json()
-return res
-```
-
-Or with error handling:
-
-```ts
-const res = await errorHandling(result)
-return res
-```
-
-Or with response metadata:
-
-```ts
-const res = await getResponseMetadata(result)
-return res  // { success, data, status, HTTPmessage }
-```
-
----
-
-## Error Handling in Services
-
-There are two error handling patterns:
-
-### For Data Fetching (used with SWR)
-
-Use `errorHandling()` which throws on non-OK responses:
-
-```ts
-import { errorHandling } from '@services/utils/ts/requests'
-
 export async function getCourseMetadata(course_uuid: string, next: any, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}courses/course_${course_uuid}/meta`,
     RequestBodyWithAuthHeader('GET', null, next, access_token)
   )
-  const res = await errorHandling(result)
-  return res
+  return await errorHandling(result)
 }
 ```
 
-The thrown error has `status` and `detail` properties, which SWR captures in its `error` object.
-
-### For Mutations (create, update, delete)
-
-Use `getResponseMetadata()` which always returns a structured object:
+**Mutations (create/update/delete):** many modules use `getResponseMetadata` and let callers check `res.success`; others still use `errorHandling`.
 
 ```ts
-import { getResponseMetadata } from '@services/utils/ts/requests'
-
-export async function updateActivity(data: any, activity_uuid: string, access_token: string) {
+export async function updateCourseThumbnail(course_uuid: any, formData: FormData, access_token: any) {
   const result = await fetch(
-    `${getAPIUrl()}activities/${activity_uuid}`,
-    RequestBodyWithAuthHeader('PUT', data, null, access_token)
+    `${getAPIUrl()}courses/${course_uuid}/thumbnail`,
+    RequestBodyFormWithAuthHeader('PUT', formData, null, access_token)
   )
-  const res = await getResponseMetadata(result)
-  return res  // { success: boolean, data: any, status: number, HTTPmessage: string }
+  return await getResponseMetadata(result)
 }
 ```
 
-Callers then check `res.success` to determine if the operation succeeded.
-
----
-
-## Revalidation After Mutations
-
-After successful mutations, services or calling code revalidate SWR caches and Next.js data cache tags:
+Callers then revalidate caches after a successful mutation:
 
 ```ts
 import { revalidateTags } from '@services/utils/ts/requests'
 import { mutate } from 'swr'
 
-// Revalidate Next.js data cache tags
-await revalidateTags(['courses'], props.orgslug)
-
-// Revalidate SWR cache
-await mutate(getCourseMetaCacheKey(course_uuid, withUnpublishedActivities), undefined, { revalidate: true })
-```
-
-The `revalidateTags` function makes two programmatic fetches per tag to the revalidation endpoint (to ensure it hits multiple pods behind a load balancer):
-
-```ts
-export const revalidateTags = async (tags: string[], orgslug: string) => {
-  const url = getUriWithOrg(orgslug, '')
-  const calls = tags.flatMap((tag) => [
-    fetch(`${url}/api/revalidate?tag=${tag}`, { cache: 'no-store' }),
-    fetch(`${url}/api/revalidate?tag=${tag}`, { cache: 'no-store' }),
-  ])
-  await Promise.allSettled(calls)
-}
+await revalidateTags(['courses'], orgslug)
+await mutate(cacheKey, undefined, { revalidate: true })
 ```
 
 ---
 
-## Example: `createActivity()` and `updateActivity()`
+## Conventions
 
-### `createActivity()`
-
-```ts
-export async function createActivity(data: any, chapter_id: any, org_id: any, access_token: string) {
-  data.content = data.content || {}
-  delete data.chapterId  // Remove redundant field
-
-  const result = await fetch(
-    `${getAPIUrl()}activities/?coursechapter_id=${chapter_id}&org_id=${org_id}`,
-    RequestBodyWithAuthHeader('POST', data, null, access_token)
-  )
-  const res = await result.json()
-  return res
-}
-```
-
-### `updateActivity()`
-
-```ts
-export async function updateActivity(data: any, activity_uuid: string, access_token: string) {
-  const result = await fetch(
-    `${getAPIUrl()}activities/${activity_uuid}`,
-    RequestBodyWithAuthHeader('PUT', data, null, access_token)
-  )
-  const res = await getResponseMetadata(result)
-  return res
-}
-```
-
-Typical usage in a component:
-
-```tsx
-import { createActivity } from '@services/courses/activities'
-import { useLHSession } from '@components/Contexts/LHSessionContext'
-
-function NewActivityForm({ chapterId, orgId }: Props) {
-  const session = useLHSession() as any
-  const access_token = session?.data?.tokens?.access_token
-
-  const handleCreate = async () => {
-    const activity = await createActivity(
-      { name: 'New Lesson', content: {} },
-      chapterId,
-      orgId,
-      access_token
-    )
-    // Revalidate cache
-    await mutate(cacheKey)
-  }
-}
-```
+- One file per backend domain; new endpoints go in the matching folder rather than a generic `api.ts`.
+- Always build URLs with `getAPIUrl()` (or `getServerAPIUrl()` on the server) — never hardcode hosts or `/api/v1`.
+- Pass the access token explicitly; helpers only attach `Authorization` when a token is provided.
+- Return the helper result directly (`errorHandling` or `getResponseMetadata`) instead of re-implementing status checks.
+- Verified examples: `services/courses/courses.ts` exports `getOrgCourses`, `getCourseMetadata`, `updateCourse`, `createNewCourse`, `cloneCourse`, `getCourseRights`, `applyForContributor`, `updateCourseThumbnail` and `updateCourseBanner`.

@@ -1,246 +1,67 @@
+> Status: as-built · Last verified: 2026-11-15
+
 # Content Structure
 
-> Managing modules and lessons in the Content tab.
+The Content tab builds the course from modules (chapters) and lessons (activities). Navigation is drill-down: module list, then lesson list, then the lesson form. The module and lesson names follow the dashboard language.
 
----
+## Module list
 
-## Overview
+The toolbar contains a search box, the module count, **New**, **Select** and a sort toggle.
 
-The Content tab is where you build the course structure. It has three levels of navigation:
+| Control | Behaviour |
+|---|---|
+| Search | Filters modules by their displayed name |
+| New | Creates a module immediately with the default name `New Module`; no dialog |
+| Select | Switches cards from drag handles to checkboxes |
+| Sort | Toggles name order between ascending and descending |
 
-```
-Course
-  └── Module (Chapter)
-        └── Lesson (Activity)
-              └── Lesson Detail (edit form)
-```
+Each module card shows a drag handle, a folder icon and its name. Drag a card by the handle to reorder modules; the new order is saved to the API and an error reverts it.
 
----
+The three-dot menu offers:
 
-## Module List
+| Item | Behaviour |
+|---|---|
+| Edit | Opens the module detail form (name and description) |
+| Duplicate | Placeholder only; it shows a "coming soon" toast |
+| Delete | Deletes the module and its lessons without an extra dialog |
 
-The top-level view shows all modules in the course.
+Select mode only selects modules; there is no bulk action in this list. Clicking a module outside select mode opens its lessons.
 
-### Toolbar
+## Lesson list
 
-```
-[Search...]    [N modules]              [+ New]  [Select]  [⇅]
-```
+The lesson list uses the same toolbar and card pattern inside the selected module. **New** creates a lesson immediately with the default name `New Lesson` and an empty description.
 
-| Element | Description |
-|---------|-------------|
-| Search | Filter modules by name |
-| Count | Shows total module count |
-| New | Creates a module immediately (with loading spinner) |
-| Select | Toggle select mode for bulk actions |
-| Sort | Toggle ascending/descending order |
+Cards show a drag handle, a file icon, the lesson name and a three-dot menu. Dragging reorders lessons within the module and persists through the course-order endpoint. The menu's **Duplicate** is a placeholder; **Delete** removes the lesson immediately.
 
-### Module Cards
+## Lesson form
 
-Each module is displayed as a card:
+Opening a lesson shows sectioned cards:
 
-```
-┌──────────────────────────────────────────────┐
-│  ⠿  📁  Module Name                   [⋮]   │
-└──────────────────────────────────────────────┘
-```
+| Section | Fields |
+|---|---|
+| Overview | Lesson name (required), description |
+| What you'll learn | Learning objectives list |
+| Key takeaways | Hierarchical takeaway list |
+| Resources | Named resources with URL or uploaded file |
+| Knowledge checks | Question and answer pairs |
 
-- **Drag handle** (⠿) on the left — drag to reorder modules
-- **Folder icon** next to the drag handle
-- **Module name** centered
-- **3-dot menu** on the right with Duplicate and Delete options
+The action row contains **Preview**, the locale chip, **Save** and **Publish/Unpublish**. Preview opens the learner lesson-preview page, which renders the objectives, takeaways, resources and knowledge checks; it does not render a separate rich-text body because none exists in this form.
 
-### Module Actions
+## Reordering and select mode
 
-- **Click** a module to view its lessons
-- **Duplicate** --- creates a copy of the module
-- **Delete** --- removes the module (with confirmation)
-- **Drag** the drag handle to reorder modules — order persists via API
+- Drag-and-drop is disabled while select mode is active.
+- Select mode replaces drag handles with checkboxes and highlights selected cards with a blue ring.
+- The selection is not tied to a bulk operation; exit select mode with **Cancel**.
+- Leaving a search or sort view does not change the saved order until a drag is completed.
 
-### Select Mode
+## Auto-save and translations
 
-Clicking **Select** in the toolbar toggles select mode:
+Lesson and module edits auto-save after a 600 ms debounce and are flushed when leaving the form. The Save button forces the pending write.
 
-```
-┌──────────────────────────────────────────────┐
-│  ☑  📁  Module Name                   [⋮]   │
-└──────────────────────────────────────────────┘
-```
+In a non-source locale the module and lesson lists show localized names. The form loads localized name, description, objectives, takeaways, resources and knowledge checks and writes them to `extra_metadata.translations[locale]`. The source row is never modified. Switching the dashboard language flushes pending text into the language it was typed in before loading the new locale.
 
-- Drag handles are replaced with **checkboxes**
-- Drag-and-drop is disabled
-- Clicking a card toggles its checkbox
-- Selected cards show a **blue ring** and filled checkbox
-- Click **Cancel** to exit select mode and restore drag handles
+## Related
 
----
-
-## Lesson List
-
-Clicking a module shows its lessons, using the **exact same layout** as the module list:
-
-### Toolbar
-
-```
-[Search...]    [N lessons]              [+ New]  [Select]  [⇅]
-```
-
-### Lesson Cards
-
-```
-┌──────────────────────────────────────────────┐
-│  ⠿  📄  Lesson Name                   [⋮]   │
-└──────────────────────────────────────────────┘
-```
-
-- **Drag handle** (⠿) on the left — drag to reorder lessons within the module
-- **FileText icon** next to the drag handle
-- **Lesson name** only (no type badges/icons)
-- **3-dot menu** with Duplicate and Delete
-
-### Select Mode
-
-Same as modules — clicking **Select** replaces drag handles with checkboxes:
-
-```
-┌──────────────────────────────────────────────┐
-│  ☑  📄  Lesson Name                   [⋮]   │
-└──────────────────────────────────────────────┘
-```
-
-- Drag handles are replaced with **checkboxes**
-- Drag-and-drop is disabled
-- Clicking a card toggles its checkbox
-- Selected cards show a **blue ring** and filled checkbox
-
-### Lesson Creation
-
-Clicking **New** immediately creates a lesson with default name "New Lesson" and empty content. No modal or form --- matches module creation flow exactly.
-
----
-
-## Lesson Detail Form
-
-Clicking a lesson opens the detail form with sectioned white cards.
-
-### Action Row
-
-Above the sectioned cards, there is an inline **action row**:
-
-```
-[👁 Preview]        [Copy from source] [🌐 Language · Source/Translation] [Save] [Publish/Unpublish]
-```
-
-- **Copy from source** — translation locales only. Fills the form with the source-language text so the author rewrites what differs.
-- **Language chip** — shows the dashboard's active language plus whether this lesson is the source (`Source`), has a translation (`Translation`), or inherits the source (`Missing`). The dot is teal when saved, amber when there are unsaved edits.
-- **Preview** (left) — opens the lesson preview page in a new tab, showing how the lesson appears to learners: video slot, What You'll Learn, Key Takeaways, Resources, Knowledge Checks. Links to `/course/{uuid}/lesson-preview?activityid={id}`. The lesson's rich-text body is not rendered there — every block the learner reads is authored in this form.
-- **Save** (right) — white background when saved, black background when unsaved. Clicking triggers an immediate save. Not clickable when already in saved state.
-- **Publish/Unpublish** (right) — toggles the lesson's published state (shared across locales), saved via auto-save.
-
-### Editing a translation
-
-The Content tab follows the platform language switcher — there is no second selector. With a non-source language active:
-
-- The module list and lesson list show the localized names.
-- The form loads that language's `name`, `description`, objectives, takeaways, resources and knowledge checks; empty fields fall back to the source text.
-- Saving writes only `extra_metadata.translations[locale]`. The base (source) lesson row is never modified, so a translator cannot rename or overwrite the source lesson.
-- Auto-save is debounced (600 ms), flushes on unmount, and flushes into the language the text was typed in before you switch languages.
-
-### Basic Information
-
-```
-┌──────────────────────────────────────────────┐
-│  BASIC INFORMATION                            │
-│                                               │
-│  Lesson Name                                  │
-│  ┌──────────────────────────────────────────┐ │
-│  │ Input field                              │ │
-│  └──────────────────────────────────────────┘ │
-│                                               │
-│  Description                                  │
-│  ┌──────────────────────────────────────────┐ │
-│  │ Input field                              │ │
-│  └──────────────────────────────────────────┘ │
-└──────────────────────────────────────────────┘
-```
-
-### What You'll Learn
-
-```
-┌──────────────────────────────────────────────┐
-│  WHAT YOU'LL LEARN                            │
-│                                               │
-│  ┌── Learning objective ───────────────────┐  │
-│  │  ⠿  [text input]                    ✕   │  │
-│  └─────────────────────────────────────────┘  │
-│  ┌── Learning objective ───────────────────┐  │
-│  │  ⠿  [text input]                    ✕   │  │
-│  └─────────────────────────────────────────┘  │
-│                                               │
-│  + Add learning objective                     │
-└──────────────────────────────────────────────┘
-```
-
-- Drag-and-drop to reorder
-- Click + to add new item
-- Click ✕ to remove
-
-### Key Takeaways
-
-Same pattern as What You'll Learn but hierarchical:
-
-```
-┌──────────────────────────────────────────────┐
-│  KEY TAKEAWAYS                                │
-│                                               │
-│  ┌── Main point ──────────────────────────┐  │
-│  │  ⠿  [title input]                  ✕   │  │
-│  │  ┌── Sub-point ──────────────────────┐ │  │
-│  │  │  ⠿  [text input]              ✕   │ │  │
-│  │  └────────────────────────────────────┘ │  │
-│  │  + Add sub-point                        │  │
-│  └─────────────────────────────────────────┘  │
-│                                               │
-│  + Add main point                             │
-└──────────────────────────────────────────────┘
-```
-
-### Resources
-
-```
-┌──────────────────────────────────────────────┐
-│  RESOURCES                                    │
-│                                               │
-│  ┌── Resource ────────────────────────────┐  │
-│  │  ⠿  [name input]  [url input]  🔗  📤 ✕ │  │
-│  └─────────────────────────────────────────┘  │
-│                                               │
-│  + Add resource                               │
-└──────────────────────────────────────────────┘
-```
-
-- **Link icon** (🔗) --- click to expand URL input field
-- **Upload icon** (📤) --- file upload button
-- **✕** --- delete resource
-
-### Knowledge Checks
-
-```
-┌──────────────────────────────────────────────┐
-│  KNOWLEDGE CHECKS                             │
-│                                               │
-│  ┌── Q&A pair ────────────────────────────┐  │
-│  │  ⠿  [question input]               ✕   │  │
-│  │     [answer input]                     │  │
-│  └─────────────────────────────────────────┘  │
-│                                               │
-│  + Add question                               │
-└──────────────────────────────────────────────┘
-```
-
-- One drag handle for the paired question + answer
-- Both fields use transparent styling (no borders)
-
-### Auto-Save
-
-All lesson form fields auto-save with a **600ms debounce**. Changes are flushed on unmount so nothing is lost when navigating away.
+- [General settings](./general.md)
+- [Translations](./translations.md)
+- HTTP contracts: [Chapters API](../../06-api-reference/chapters.md), [Activities API](../../06-api-reference/activities.md)

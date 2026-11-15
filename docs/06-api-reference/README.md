@@ -1,6 +1,8 @@
 # API Reference
 
-> The Koodook REST API is built with FastAPI (Python) and exposes all platform functionality under the `/api/v1/` base path using Bearer JWT authentication, paginated list endpoints, and consistent JSON error responses.
+> Status: as-built · Last verified: 2026-11-15
+
+The Koodook REST API is built with FastAPI (Python) and exposes all platform functionality under the `/api/v1/` base path using Bearer JWT authentication, mixed response shapes (bare arrays and envelopes), and consistent JSON error responses. The FastAPI code under `apps/api/src/routers` is the source of truth for paths and payloads.
 
 ---
 
@@ -20,13 +22,15 @@ In development, the base URL is typically `http://localhost:8000/api/v1`.
 
 ### Bearer JWT (Standard API Access)
 
-Most endpoints require authentication via a JWT access token. The token is set as an httpOnly cookie (`access_token_cookie`) and is also returned in the response body of login and refresh endpoints.
+Most endpoints require authentication via a JWT access token. The token is set as an httpOnly cookie (`LH_access`) and is also accepted via the `Authorization: Bearer <token>` header.
 
 | Method | Header / Cookie | Format |
 |--------|----------------|--------|
-| Cookie | `access_token_cookie` | httpOnly, Secure, SameSite=Lax |
-| Cookie | `refresh_token_cookie` | httpOnly, Secure, SameSite=Lax |
-| Header | `Authorization: Bearer <token>` | For headless/admin API access only |
+| Cookie | `LH_access` | httpOnly, Secure (HTTPS), SameSite=Lax; 8-hour expiry |
+| Cookie | `LH_refresh` | httpOnly, Secure (HTTPS), SameSite=Lax; 30-day expiry |
+| Header | `Authorization: Bearer <jwt>` | For headless/browserless access |
+
+Login and refresh set both cookies. Refresh rotates the pair. Logout clears both.
 
 ### API Tokens (Headless / Admin Access)
 
@@ -36,7 +40,11 @@ For server-to-server or admin API access, use `lh_`-prefixed API tokens:
 Authorization: Bearer lh_abc123def456...
 ```
 
-API tokens are managed per-organization via the API Tokens management endpoints. They are scoped to a specific organization and have their own rate limits.
+API tokens are managed per-organization via the API Tokens management endpoints. They are scoped to a specific organization and have their own rate limits. Several routers deliberately reject API tokens (for example notifications, payments configuration and most admin-only routes).
+
+### Anonymous visitors
+
+Read endpoints that use the plain `get_current_user` dependency admit anonymous visitors as `AnonymousUser`. They can read published `public` catalog content; draft, `users_only` and `paid` content still applies its RBAC rules. Routers mounted with `require_authenticated_user` reject anonymous callers with `401`.
 
 ---
 
@@ -44,7 +52,7 @@ API tokens are managed per-organization via the API Tokens management endpoints.
 
 ### Success Responses
 
-All successful responses follow standard HTTP status codes with a JSON body. List endpoints return paginated structures.
+Successful responses use standard HTTP status codes with a JSON body. **Response shapes are not uniform** — check the endpoint page.
 
 **Single resource (200 OK):**
 
@@ -59,7 +67,16 @@ All successful responses follow standard HTTP status codes with a JSON body. Lis
 }
 ```
 
-**Paginated list (200 OK):**
+**Resource list — bare array (200 OK):**
+
+```json
+[
+  { "id": 1, "name": "Course A" },
+  { "id": 2, "name": "Course B" }
+]
+```
+
+**Envelope list (200 OK):**
 
 ```json
 {
@@ -69,12 +86,22 @@ All successful responses follow standard HTTP status codes with a JSON body. Lis
   ],
   "total": 42,
   "page": 1,
-  "limit": 10,
-  "pages": 5
+  "limit": 10
 }
 ```
 
-The pagination response structure may vary slightly by endpoint (some use `page`/`limit`/`total`/`pages`, others use the FastAPI `page`/`limit` query parameters and return a list directly).
+### Response envelopes by endpoint family
+
+| Endpoint family | Shape |
+|---|---|
+| Resource lists — courses, podcasts, collections, collection members (`/{uuid}/courses`), chapters, activities, orgs, roles, usergroups, boards, playgrounds, communities, discussions, certifications, webhooks | **Bare JSON array**; pagination via `page`/`limit` (path or query) |
+| Dashboard members table — `GET /collections/{uuid}/members` | `{ "items": [...], "total": N }` |
+| Access rosters — `GET /collections/{uuid}/access/users`, `GET /payments/{org_id}/entitlements`, `/entitlements/candidates`, `/orders` | `{ "items": [...], "total": N, "page": N, "limit": N }` — **no `pages` key** |
+| Notifications — `GET /notifications`, `GET /notifications/announcements` | `{ "notifications" \| "announcements": [...], "total": N, "page": N, "pages": N }` |
+| Payments overview — `GET /payments/{org_id}/overview` | `{ "range", "currency", "revenue", "series": [{ "label", "revenue" }] }` |
+| Payout report — `GET /payments/{org_id}/payouts` | Object: `month`, `currency`, `gross_revenue`, `gateway_fees`, `manual_costs`, `total_costs`, `net_profit`, `teacher_share_percent`, `teacher_pool`, `platform_pool`, `attributed_revenue`, `unattributed_revenue`, `order_count`, `teachers[]` |
+| Mutations | `200` (a few integration endpoints use `201`) with the created/updated resource or a result object |
+| Deletes | Usually `200` with a JSON body such as `{ "detail": "… deleted" }`; the API does not use `204 No Content` |
 
 ### Error Responses
 
@@ -106,9 +133,8 @@ Validation errors (422 Unprocessable Entity) return a list of field-level errors
 
 | Code | Description |
 |------|-------------|
-| `200 OK` | Request succeeded |
-| `201 Created` | Resource created successfully |
-| `204 No Content` | Request succeeded, no response body (used for deletes) |
+| `200 OK` | Request succeeded (including most creates, updates and deletes) |
+| `201 Created` | Used by a small number of integration endpoints |
 | `400 Bad Request` | Invalid request (missing or malformed parameters) |
 | `401 Unauthorized` | Authentication required or invalid credentials |
 | `403 Forbidden` | Authenticated but insufficient permissions |
@@ -145,9 +171,14 @@ List endpoints use page/limit pagination:
 | Query Parameter | Type | Default | Description |
 |----------------|------|---------|-------------|
 | `page` | integer | 1 | The page number (1-indexed) |
-| `limit` | integer | Varies (typically 10–50) | Number of items per page (capped for security) |
+| `limit` | integer | Varies (typically 10–50) | Number of items per page |
 
-The `limit` parameter is capped server-side to prevent abuse. Exceeding the cap silently uses the maximum allowed value.
+There is no global pagination envelope or global cap:
+
+- Most resource lists return a **bare array** and apply `page`/`limit` in the path or query string.
+- Query-based list endpoints that declare `le=100` (collection members, collection access rosters, payments entitlements/candidates/orders) return **422** for `limit > 100`; they do **not** silently cap it.
+- Some path-based list routes (`/org/{org_id}/page/{page}/limit/{limit}`) do not enforce an upper bound.
+- Envelope endpoints that do return `total` may or may not include `page`/`limit` — see [Response envelopes](#response-envelopes-by-endpoint-family).
 
 ---
 
@@ -158,8 +189,8 @@ The `limit` parameter is capped server-side to prevent abuse. Exceeding the cap 
 | `Content-Type: application/json` | Request body format (JSON endpoints) |
 | `Content-Type: multipart/form-data` | Request body format (file upload endpoints) |
 | `Authorization: Bearer <token>` | JWT or API token authentication |
-| `Cookie: access_token_cookie=<jwt>` | JWT access token (set by auth endpoints) |
-| `Cookie: refresh_token_cookie=<jwt>` | JWT refresh token (set by auth endpoints) |
+| `Cookie: LH_access=<jwt>` | JWT access token (set by auth endpoints) |
+| `Cookie: LH_refresh=<jwt>` | JWT refresh token (set by auth endpoints) |
 | `Retry-After` | Included in 429 responses (seconds until retry) |
 
 ---
@@ -179,7 +210,7 @@ Most resources are scoped to an organization. Endpoints accept either:
 
 For example:
 - `GET /api/v1/courses/org_slug/{org_slug}/page/{page}/limit/{limit}` — List courses by org slug
-- `POST /api/v1/courses/{org_id}` — Create course by org ID
+- `GET /api/v1/collections/org/{org_id}/page/{page}/limit/{limit}` — List collections by org ID
 
 ---
 
@@ -195,7 +226,21 @@ For example:
 | [Activities](./activities.md) | Activity/lesson CRUD, versioning, types |
 | [Users](./users.md) | User management, profiles, password reset |
 | [Organizations](./orgs.md) | Org management, branding, invites, feature config |
-| [Payments](./payments.md) | Chargily checkout, webhooks, purchase history |
+| [UserGroups](./usergroups.md) | User groups, membership and resource access |
+| [Roles](./roles.md) | Roles and permissions |
+| [Trail](./trail.md) | Learner progress, runs and enrollment |
+| [Assignments](./assignments.md) | Assignment submissions and grading |
+| [Certifications](./certifications.md) | Certification issuance and verification |
+| [Analytics](./analytics.md) | Organization analytics endpoints |
+| [Communities](./communities.md) | Communities and membership |
+| [Discussions](./discussions.md) | Community discussions, comments and votes |
+| [Boards](./boards.md) | Boards and collaborators |
+| [Playgrounds](./playgrounds.md) | Playgrounds and generated content |
+| [AI](./ai.md) | AI assistants, RAG and generation endpoints |
+| [Code](./code.md) | Code execution and submissions |
+| [Search](./search.md) | Cross-resource search |
+| [Media](./media.md) | Blocks, stream and content file endpoints |
+| [Payments](./payments.md) | Chargily checkout, webhooks, entitlements, orders, payouts |
 | [Webhooks](./webhooks.md) | Webhook endpoint management, delivery logs |
 | [Notifications](./notifications.md) | In-app feed, unread count, read state, event catalog, template overrides, announcements |
 | [Admin API](./admin.md) | Headless admin endpoints (API tokens required) |

@@ -163,6 +163,7 @@ async def create_discussion(
             "discussion": {"discussion_uuid": discussion.discussion_uuid, "title": discussion.title},
             "community": {"community_uuid": community_uuid},
         },
+        db_session=db_session,
     )
 
     # Create auto-upvote from author
@@ -518,6 +519,7 @@ async def pin_discussion(
             "is_pinned": is_pinned,
             "community_uuid": community.community_uuid,
         },
+        db_session=db_session,
     )
 
     # Get author info
@@ -597,6 +599,7 @@ async def lock_discussion(
             "is_locked": is_locked,
             "community_uuid": community.community_uuid,
         },
+        db_session=db_session,
     )
 
     # Get author info

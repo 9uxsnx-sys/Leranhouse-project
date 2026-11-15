@@ -146,6 +146,8 @@ class TestCourseUpdatesService:
             )
 
         mock_access.assert_awaited_once()
+        # The course owns the permission; the update row has no RBAC config.
+        assert mock_access.await_args.args[3] == course.course_uuid
         assert updated.title == "Renamed"
         assert updated.linked_activity_uuids == "activity-updated"
         assert updated.content == seeded.content
@@ -176,6 +178,7 @@ class TestCourseUpdatesService:
             result = await delete_update(mock_request, seeded.courseupdate_uuid, admin_user, db)
 
         mock_access.assert_awaited_once()
+        assert mock_access.await_args.args[3] == course.course_uuid
         assert result == {"message": "Update deleted successfully"}
         assert db.get(CourseUpdate, seeded.id) is None
 
@@ -206,8 +209,16 @@ class TestCourseUpdatesService:
             creation_date="2025-02-01 10:00:00",
         )
 
-        updates = await get_updates_by_course_uuid(mock_request, course.course_uuid, admin_user, db)
+        with patch(
+            "src.services.courses.updates.check_catalog_read_access",
+            new_callable=AsyncMock,
+        ) as mock_access:
+            updates = await get_updates_by_course_uuid(
+                mock_request, course.course_uuid, admin_user, db
+            )
 
+        # Announcements inherit the course access rules, never the row's own uuid.
+        assert mock_access.await_args.args[3] == course.course_uuid
         assert [item.courseupdate_uuid for item in updates] == [newer.courseupdate_uuid, older.courseupdate_uuid]
         assert updates[0].title == "Update 2"
         assert updates[1].title == "Update 1"

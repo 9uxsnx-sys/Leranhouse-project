@@ -1,6 +1,8 @@
 # Notifications
 
-> In-app notification endpoints: the per-user feed and unread counter, read state, the organization event catalog with template status, per-event overrides and kill switches, and admin announcements.
+> Status: as-built · Last verified: 2026-11-15
+
+In-app notification endpoints: the per-user feed and unread counter, read state, the organization event catalog with template status, per-event overrides and kill switches, and admin announcements.
 
 ---
 

@@ -160,7 +160,7 @@ class TestPodcastsService:
             "src.services.podcasts.podcasts._is_podcasts_feature_enabled",
             return_value=True,
         ), patch(
-            "src.services.podcasts.podcasts.check_resource_access",
+            "src.services.podcasts.podcasts.check_catalog_read_access",
             new_callable=AsyncMock,
         ), patch(
             "src.services.podcasts.episodes.check_resource_access",
@@ -465,7 +465,7 @@ class TestPodcastsService:
             "src.services.podcasts.podcasts._is_podcasts_feature_enabled",
             return_value=True,
         ), patch(
-            "src.services.podcasts.podcasts.check_resource_access",
+            "src.services.podcasts.podcasts.check_catalog_read_access",
             new_callable=AsyncMock,
         ), patch(
             "src.services.podcasts.podcasts.is_user_superadmin",
@@ -1257,7 +1257,7 @@ class TestEpisodesService:
                 is True
             )
 
-        with patch("src.services.podcasts.episodes.check_resource_access", new_callable=AsyncMock):
+        with patch("src.services.podcasts.episodes.check_catalog_read_access", new_callable=AsyncMock):
             filtered = await get_episodes_by_podcast(
                 mock_request,
                 podcast.id,

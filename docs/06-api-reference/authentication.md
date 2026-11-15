@@ -1,168 +1,173 @@
 # Authentication
 
-> The Koodook authentication system uses dual JWT tokens (access + refresh) set as httpOnly cookies and returned in response bodies, with support for OAuth/SSO, email verification, IP-based rate limiting, and account lockout after repeated failed attempts.
+> Status: as-built · Last verified: 2026-11-15
 
 ---
 
 ## Overview
 
-Authentication is handled by the Auth router at `/api/v1/auth`. The system uses:
+The Auth router is mounted at `/api/v1/auth`. It issues JWT access and refresh tokens, sets them as httpOnly cookies, and supports username/password login, Google OAuth, email verification, and logout.
 
-- **Access Token** — Short-lived JWT (typically 15–60 minutes) for API access
-- **Refresh Token** — Longer-lived JWT (typically 7–30 days) for obtaining new access tokens
-- **httpOnly Cookies** — Both tokens are set as secure, httpOnly cookies with configurable domain scoping for multi-tenancy
-- **Response Body** — Tokens are also returned in the response body for clients that need them (e.g., mobile apps, headless clients)
-- **Token Revocation** — Revoked tokens are tracked via Redis for immediate invalidation
-- **Email Verification** — Required in SaaS mode before full access is granted
+| Item | Value |
+|------|-------|
+| Access cookie | `LH_access` (8-hour JWT) |
+| Refresh cookie | `LH_refresh` (30-day JWT) |
+| Cookie flags | `httpOnly`, `SameSite=Lax`, `Secure` when the request is HTTPS (or any non-dev request) |
+| Access token header | `Authorization: Bearer <jwt>` also accepted |
+| API tokens | `Authorization: Bearer lh_...` — only accepted on routers that allow API-token auth |
+| Token subject | `sub` = user email |
+| `expiry` field | Epoch **milliseconds** of access-token expiry, or `null` in dev mode |
+
+JWT revocation is enforced through a Redis blocklist keyed `jwt_revoked_before:{user_id}`, plus a `password_changed_at` cutover check in `get_current_user`.
 
 ---
 
 ## Login
 
-Authenticate with username/email and password to receive JWT tokens.
-
-```
-POST /api/v1/auth/login
-```
-
-### Request Body (Form Data)
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `username` | string | Yes | Username or email address |
-| `password` | string | Yes | User password |
-
-### Example Request
-
 ```
 POST /api/v1/auth/login
 Content-Type: application/x-www-form-urlencoded
-
-username=johndoe&password=securepassword123
 ```
 
-### Response Body (200 OK)
+### Form fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `username` | string | Yes | Email address (used as the JWT subject) |
+| `password` | string | Yes | Password |
+
+### Example request
+
+```
+username=john@example.com&password=securepassword123
+```
+
+### Response (200 OK)
 
 ```json
 {
   "user": {
     "id": 1,
-    "uuid": "a1b2c3d4-...",
+    "user_uuid": "user_a1b2c3d4-...",
     "username": "johndoe",
+    "first_name": "John",
+    "last_name": "Doe",
     "email": "john@example.com",
-    "display_name": "John Doe",
-    "avatar_url": null,
-    "is_active": true
+    "avatar_image": "",
+    "banner_image": "",
+    "bio": "",
+    "details": {},
+    "profile": {},
+    "extra_metadata": null,
+    "email_verified": true,
+    "last_login_at": "2026-11-15 08:12:40.123456",
+    "signup_method": "email",
+    "is_superadmin": false,
+    "creation_date": "2026-01-15 08:00:00.000000"
   },
   "tokens": {
     "access_token": "eyJhbGciOiJIUzI1NiIs...",
     "refresh_token": "eyJhbGciOiJIUzI1NiIs...",
-    "expiry": 3600
+    "expiry": 1794756000000
   }
 }
 ```
 
+**Cookies set:** `LH_access`, `LH_refresh`.
+
 ### Errors
 
-| Status | Description |
-|--------|-------------|
-| `401 Unauthorized` | Invalid username or password |
-| `401 Unauthorized` | Account locked due to too many failed attempts |
-| `401 Unauthorized` | Email not verified (SaaS mode only) |
-| `429 Too Many Requests` | Too many login attempts from this IP |
+| Status | Body `detail` |
+|--------|---------------|
+| `401` | `{"code": "INVALID_CREDENTIALS", "message": "Incorrect Email or password"}` |
+| `403` | `{"code": "EMAIL_NOT_VERIFIED", "message": "...", "email": "john@example.com"}` — SaaS deployment only |
+| `423` | `{"code": "ACCOUNT_LOCKED", "message": "...", "retry_after": 300}` |
+| `429` | `{"code": "RATE_LIMITED", "message": "...", "retry_after": <seconds>}` |
 
-**Cookies set:** `LH_access`, `LH_refresh`
+Login is rate-limited to **30 attempts per 5 minutes per IP**.
 
 ---
 
-## Token Refresh
-
-Obtain a new access token using the refresh token cookie.
+## Refresh
 
 ```
 GET /api/v1/auth/refresh
 ```
 
-This endpoint reads the `LH_refresh` cookie from the request. No request body is needed.
+Reads `LH_refresh` from cookies. No body.
 
-### Response Body (200 OK)
+### Response (200 OK)
 
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIs...",
   "refresh_token": "eyJhbGciOiJIUzI1NiIs...",
-  "expiry": 3600
+  "expiry": 1794756000000
 }
 ```
+
+Both cookies are replaced with freshly minted tokens.
+
+> **Rotation caveat:** the endpoint mints a new refresh token and overwrites the cookie, but it does **not** call `_mark_refresh_jti_used()`. The previous refresh token is therefore not marked consumed and there is no replay detection on this route; only `exp` and the logout/password-change revocation checks bound its life.
 
 ### Errors
 
 | Status | Description |
 |--------|-------------|
-| `401 Unauthorized` | Refresh token missing, expired, or revoked |
-| `429 Too Many Requests` | Too many refresh attempts from this IP |
-
-**Cookies set:** `LH_access`, `LH_refresh` (rotated)
+| `401` | Refresh token missing, invalid, expired, revoked, or minted before `password_changed_at` (detail: `"Invalid credentials"`) |
+| `429` | More than 60 refresh attempts per minute from this IP |
 
 ---
 
 ## Logout
 
-Revoke the current session's tokens.
-
 ```
 DELETE /api/v1/auth/logout
 ```
 
-### Response
+Clears `LH_access` / `LH_refresh` and writes a Redis revocation cutoff for the user, invalidating every JWT issued before the call (access and refresh).
 
-`200 OK` with body `{"msg": "Successfully logout"}`. Every JWT for the user (access and refresh, across sessions) is revoked and the auth cookies are cleared.
+### Response (200 OK)
+
+```json
+{ "msg": "Successfully logout" }
+```
 
 ### Errors
 
 | Status | Description |
 |--------|-------------|
-| `401 Unauthorized` | Not authenticated |
-
-**Cookies cleared:** `LH_access`, `LH_refresh`
+| `401` | No access token/cookie present (detail: `"Not authenticated"`) |
 
 ---
 
 ## Register
 
-Create a new user account (organization-level registration).
+Registration is not on the Auth router. It lives under Users:
 
-```
-POST /api/v1/users/{org_id}
-```
+- `POST /api/v1/users/{org_id}` — open signup; returns `403` if the org is invite-only.
+- `POST /api/v1/users/{org_id}/invite/{invite_code}` — invite-only signup.
+- `POST /api/v1/users/` — account with no organization.
 
-> **Note:** The registration endpoint is under the Users router, not the Auth router. See [Users API](./users.md) for details.
-
-Depending on the organization's signup mechanism (`open` vs `inviteOnly`), registration may require an invite code.
-
-With an invite code, use `POST /api/v1/users/{org_id}/invite/{invite_code}` instead. There is also an org-less variant at `POST /api/v1/users/`.
+See [Users](./users.md).
 
 ---
 
-## OAuth / SSO
-
-Authenticate using an external OAuth provider or SAML-based SSO.
+## OAuth (Google)
 
 ```
 POST /api/v1/auth/oauth
 ```
 
-> **Optional query param:** `?org_id={org_id}` scopes the resulting account/membership to a specific organization.
+### Query parameters
 
-### Request Body (JSON)
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `org_id` | integer | No | Attach the account to this organization |
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `email` | string | Yes | Email address returned by the provider |
-| `provider` | string | Yes | OAuth provider identifier — currently only `google` is accepted |
-| `access_token` | string | Yes | OAuth access/ID token obtained by the client from the provider |
+`org_id` is rejected with `400` if the organization does not exist. If it exists but no pending Redis invite (`invited_user:{email}:org:{org_uuid}`) is found for the email, the value is ignored and the user is created without an organization.
 
-### Example Request
+### Request body
 
 ```json
 {
@@ -172,117 +177,96 @@ POST /api/v1/auth/oauth
 }
 ```
 
-### Response Body (200 OK)
+`provider` is a literal and currently accepts only `"google"`.
 
-```json
-{
-  "user": {
-    "id": 1,
-    "uuid": "a1b2c3d4-...",
-    "username": "johndoe",
-    "email": "john@example.com",
-    "display_name": "John Doe",
-    "avatar_url": "https://lh3.googleusercontent.com/...",
-    "is_active": true
-  },
-  "tokens": {
-    "access_token": "eyJhbGciOiJIUzI1NiIs...",
-    "refresh_token": "eyJhbGciOiJIUzI1NiIs...",
-    "expiry": 3600
-  }
-}
-```
+### Response (200 OK)
+
+Same shape as login: `{"user": <UserRead>, "tokens": {"access_token", "refresh_token", "expiry"}}`.
+
+**Cookies set:** `LH_access`, `LH_refresh`.
 
 ### Errors
 
 | Status | Description |
 |--------|-------------|
-| `400 Bad Request` | Invalid or expired authorization code |
-| `401 Unauthorized` | OAuth provider rejected the authentication |
-| `401 Unauthorized` | Email not verified (SaaS mode only) |
-
-**Cookies set:** `LH_access`, `LH_refresh`
+| `400` | Invalid `org_id` |
+| `401` | Third-party authentication failed (detail: `"Incorrect Email or password"`) |
 
 ---
 
-## Email Verification
-
-Verify a user's email address using a verification token.
+## Verify Email
 
 ```
 POST /api/v1/auth/verify-email
 ```
 
-### Request Body (JSON)
+### Request body
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `token` | string | Yes | Email verification token |
-| `user_uuid` | string | Yes | UUID of the user being verified |
+| `token` | string | Yes | Verification token |
+| `user_uuid` | string | Yes | UUID of the user |
 | `org_uuid` | string | Yes | UUID of the organization |
-| `email` | string | No | Email address; when provided it is used as the rate-limit key |
+| `email` | string (email) | No | When supplied, used as the rate-limit key instead of `user_uuid` |
 
-### Example Request
+### Example request
 
 ```json
 {
   "token": "verify_abc123def456",
-  "user_uuid": "a1b2c3d4-...",
-  "org_uuid": "e5f6g7h8-..."
+  "user_uuid": "user_a1b2c3d4-...",
+  "org_uuid": "org_e5f6g7h8-..."
 }
 ```
 
-### Response
+### Response (200 OK)
 
-`200 OK` on success (`{"message": "..."}`). The user's email is marked as verified.
+```json
+{ "message": "Email verified successfully" }
+```
+
+If the address was already verified the message is `"Email already verified"`.
 
 ### Errors
 
 | Status | Description |
 |--------|-------------|
-| `400 Bad Request` | Invalid or expired verification token |
-| `429 Too Many Requests` | Too many verification attempts (5 per 5 minutes per user) |
+| `400` | `"Invalid or expired verification token"`, `"Verification token has expired"`, `"Invalid verification token"`, or `"User not found"` |
+| `429` | More than 5 attempts per 5 minutes for the same email/`user_uuid` |
 
 ---
 
 ## Resend Verification Email
 
-Request a new verification email to be sent.
-
 ```
 POST /api/v1/auth/resend-verification
 ```
 
-### Request Body (JSON)
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `email` | string | Yes | Email address to send verification to |
-| `org_id` | integer | No | Organization to scope the verification to |
-
-### Example Request
+### Request body
 
 ```json
-{
-  "email": "john@example.com"
-}
+{ "email": "john@example.com", "org_id": 1 }
 ```
 
-### Response
+`org_id` is optional. The response is generic whether or not the account exists.
 
-`200 OK` on success (`{"message": "..."}`). A generic response is returned regardless of whether an account exists, to avoid user enumeration.
+### Response (200 OK)
+
+```json
+{ "message": "If an account with this email exists, a verification email has been sent" }
+```
 
 ### Errors
 
 | Status | Description |
 |--------|-------------|
-| `429 Too Many Requests` | Too many verification email requests — rate limited |
+| `429` | Resend rate limit exceeded (5 per 5 minutes per email) |
 
 ---
 
 ## API Tokens
 
-Manage `lh_`-prefixed API tokens for headless and admin API access.
+API tokens (`lh_` prefix) are organization-scoped and mounted under `/api/v1/orgs/{org_id}/api-tokens`. The router requires a real user session (API-token auth is rejected) and a **Pro plan** (`API Access` feature).
 
 ### Create API Token
 
@@ -290,138 +274,127 @@ Manage `lh_`-prefixed API tokens for headless and admin API access.
 POST /api/v1/orgs/{org_id}/api-tokens
 ```
 
-### Request Body (JSON)
+#### Request body (`APITokenCreate`)
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | Yes | Token label (max 100) |
+| `description` | string | No | Max 500 |
+| `rights` | object | No | Rights document; mirrors role rights |
+| `expires_at` | string | No | ISO-8601 expiry; `null` = never expires |
 
 ```json
 {
   "name": "My Integration Token",
-  "permissions": ["courses:read", "users:read"]
+  "description": "Nightly course sync",
+  "rights": {
+    "courses": { "action_read": true },
+    "users": { "action_read": true }
+  },
+  "expires_at": "2027-01-01T00:00:00Z"
 }
 ```
 
-### Response Body (200 OK)
+#### Response (200 OK)
 
 ```json
 {
-  "uuid": "token-uuid-here",
+  "token": "lh_abc12345def67890...",
+  "token_uuid": "apitoken_7d1c...",
   "name": "My Integration Token",
-  "prefix": "lh_abc12",
-  "full_token": "lh_abc12def34...",
-  "created_at": "2026-09-23T10:00:00Z"
+  "description": "Nightly course sync",
+  "token_prefix": "lh_abc12345",
+  "org_id": 1,
+  "rights": { "courses": { "action_read": true } },
+  "created_by_user_id": 1,
+  "creation_date": "2026-11-15 09:00:00.000000",
+  "expires_at": "2027-01-01T00:00:00Z"
 }
 ```
 
-> **Important:** The `full_token` value is only returned once upon creation. Store it securely.
+`token` is the only time the full secret is returned.
 
-### List API Tokens
+### List / Get / Update / Delete / Regenerate
 
+| Method | Path | Response |
+|--------|------|----------|
+| `GET` | `/{org_id}/api-tokens` | Array of `APITokenRead` |
+| `GET` | `/{org_id}/api-tokens/{token_uuid}` | `APITokenRead` |
+| `PUT` | `/{org_id}/api-tokens/{token_uuid}` | `APITokenRead` |
+| `POST` | `/{org_id}/api-tokens/{token_uuid}/regenerate` | `APITokenCreatedResponse` (new `token`) |
+| `DELETE` | `/{org_id}/api-tokens/{token_uuid}` | `{"message": "API token revoked successfully"}` |
+
+`APITokenRead`:
+
+```json
+{
+  "id": 3,
+  "token_uuid": "apitoken_7d1c...",
+  "name": "My Integration Token",
+  "description": "Nightly course sync",
+  "token_prefix": "lh_abc12345",
+  "org_id": 1,
+  "rights": { "courses": { "action_read": true } },
+  "created_by_user_id": 1,
+  "creation_date": "2026-11-15 09:00:00.000000",
+  "update_date": "2026-11-15 09:00:00.000000",
+  "last_used_at": null,
+  "expires_at": "2027-01-01T00:00:00Z",
+  "is_active": true
+}
 ```
-GET /api/v1/orgs/{org_id}/api-tokens
-```
 
-Returns token metadata (prefix, name, created date) but never the full token secret.
-
-### Get API Token
-
-```
-GET /api/v1/orgs/{org_id}/api-tokens/{token_uuid}
-```
-
-### Update API Token
-
-```
-PUT /api/v1/orgs/{org_id}/api-tokens/{token_uuid}
-```
-
-### Regenerate API Token
-
-```
-POST /api/v1/orgs/{org_id}/api-tokens/{token_uuid}/regenerate
-```
-
-### Revoke (Delete) API Token
-
-```
-DELETE /api/v1/orgs/{org_id}/api-tokens/{token_uuid}
-```
+Update body (`APITokenUpdate`) accepts optional `name`, `description`, `rights`, `expires_at`.
 
 ### Errors
 
 | Status | Description |
 |--------|-------------|
-| `401 Unauthorized` | Authentication required |
-| `403 Forbidden` | Insufficient permissions to manage tokens |
-| `429 Too Many Requests` | Rate limit exceeded for token creation |
+| `401` | Authentication required |
+| `403` | Caller lacks the required org permission, is not on a Pro plan, or is authenticated with an API token |
+| `429` | More than 10 create/regenerate requests per hour from this IP |
 
 ---
 
 ## Token Security Model
 
-### Token Storage
+### Revocation
 
-- **Access tokens** and **refresh tokens** are set as httpOnly cookies
-- Cookies use `Secure` flag (HTTPS only), `SameSite=Lax`, and configurable domain
-- In multi-tenant mode, cookie domain is scoped to the organization's domain
-- Tokens can be revoked immediately via Redis-based blocklist
+- Logout writes `jwt_revoked_before:{user_id}` to Redis with a TTL equal to the refresh-token lifetime (30 days).
+- `get_current_user` rejects any token whose `iat` is older than that cutoff.
+- Tokens minted before the user's `password_changed_at` are rejected.
 
-### Account Lockout
+### Account lockout
 
-| Parameter | Default |
-|-----------|---------|
-| Failed attempts before lockout | 5 (configurable) |
-| Lockout duration | 15 minutes (configurable) |
-| Scope | Per-user, regardless of IP |
+| Parameter | Value |
+|-----------|-------|
+| Failed attempts before lockout | 10 |
+| Lockout duration | 5 minutes |
+| Multi-IP requirement | Lock only when failures come from at least 2 distinct IPs within 30 minutes |
+| Reset | On successful login |
 
-After a successful login, failed attempt counters are reset.
+A single-IP attacker is handled by the per-IP login rate limit (30 / 5 min) instead of locking the account.
 
-### Rate Limiting
+### Rate limits
 
 | Endpoint | Limit | Scope |
 |----------|-------|-------|
-| `POST /login` | Per-IP configurable | IP address |
-| `GET /refresh` | Per-IP configurable | IP address |
-| `POST /orgs/{org_id}/api-tokens` | Per-IP configurable | IP address |
+| `POST /auth/login` | 30 / 5 min | IP |
+| `GET /auth/refresh` | 60 / min | IP |
+| `POST /auth/verify-email` | 5 / 5 min | Email or `user_uuid` |
+| `POST /auth/resend-verification` | 5 / 5 min | Email |
+| `POST /orgs/{org_id}/api-tokens` | 10 / hour | IP |
+| `POST /orgs/{org_id}/api-tokens/{uuid}/regenerate` | 10 / hour | IP |
 
 ---
 
-## Auth Flow Diagram
+## Recommended Client Flow
 
 ```
-Client                          Server
-  │                                │
-  │  POST /auth/login              │
-  │  (username + password)         │
-  │ ──────────────────────────────►│
-  │                                │── Validate credentials
-  │                                │── Check rate limit & lockout
-  │                                │── Check email verification
-  │                                │── Create JWT pair
-  │                                │── Set httpOnly cookies
-  │  ◄─────────────────────────────│
-  │  { user, tokens } + cookies    │
-  │                                │
-  │  GET /auth/refresh             │
-  │  (refresh_token_cookie)        │
-  │ ──────────────────────────────►│
-  │                                │── Validate refresh token
-  │                                │── Rotate token pair
-  │  ◄─────────────────────────────│
-  │  { tokens } + new cookies      │
-  │                                │
-  │  DELETE /auth/logout           │
-  │ ──────────────────────────────►│
-  │                                │── Revoke tokens in Redis
-  │                                │── Clear cookies
-  │  ◄─────────────────────────────│
-  │  204 No Content                │
+1. POST /auth/login          → cookies + { user, tokens }
+2. Authenticated requests    → cookie or Authorization: Bearer <access_token>
+3. GET /auth/refresh         → new cookies + new tokens
+4. DELETE /auth/logout       → cookies cleared, all JWTs revoked
 ```
 
----
-
-## Security Best Practices
-
-- Always use HTTPS in production to protect token transmission
-- Store tokens securely client-side (httpOnly cookies are preferred over localStorage)
-- Rotate refresh tokens on each use to limit replay window
-- Revoke compromised tokens immediately via the API token management endpoints
-- Use API tokens (`lh_`-prefixed) for server-to-server communication instead of user JWTs
+Use API tokens only for server-to-server calls on routers that explicitly support them (Admin API, Orgs, Courses, etc.); the Users router rejects API-token authentication.

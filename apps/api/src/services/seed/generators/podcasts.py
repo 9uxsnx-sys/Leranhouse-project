@@ -1322,16 +1322,49 @@ FLAGSHIP_EPISODE_TRANSLATIONS = {
 }
 
 
+FLAGSHIP_HOSTS = [
+    ("Yacine Benali", "Host & Founder"),
+    ("Lina Cherif", "Co-host, Product Design Lead"),
+    ("Mehdi Lounis", "Producer & Sound"),
+]
+
+FLAGSHIP_HOSTS_TRANSLATIONS = {
+    "fr": [
+        {"name": "Yacine Benali", "title": "Animateur et fondateur"},
+        {"name": "Lina Cherif", "title": "Co-animatrice, lead design produit"},
+        {"name": "Mehdi Lounis", "title": "Producteur et son"},
+    ],
+    "ar": [
+        {"name": "ياسين بن علي", "title": "المؤسس والمقدم"},
+        {"name": "لينا شريف", "title": "شريكة التقديم، قائدة تصميم المنتج"},
+        {"name": "مهدي لونيس", "title": "المنتج والصوت"},
+    ],
+}
+
+
+def _podcast_hosts(ctx, index: int, host: str) -> list[dict]:
+    """Hosts live on the base row; avatars are inline so reseeding reproduces the demo."""
+    people = FLAGSHIP_HOSTS if index == 0 else [(host, "Host")]
+    return [
+        {"name": name, "title": title, "avatar": ctx.assets.avatar_data_url(name)}
+        for name, title in people
+    ]
+
+
 def podcast_meta_translation_payload(
     name: str, host: str, locale: str, localized_name: str
 ) -> dict:
     """Return the localized `extra_metadata` for a seeded podcast."""
+    localized_hosts = (
+        FLAGSHIP_HOSTS_TRANSLATIONS.get(locale) if name == "The Pixel Hour" else None
+    )
+
     specific = PODCAST_META_TRANSLATIONS.get(name, {}).get(locale)
     if specific:
-        return specific
+        return {**specific, **({"hosts": localized_hosts} if localized_hosts else {})}
 
     template = GENERIC_PODCAST_META[locale]
-    return {
+    payload = {
         "learnings": [
             item.format(host=host, show=localized_name)
             for item in template["learnings"]
@@ -1339,6 +1372,9 @@ def podcast_meta_translation_payload(
         "target_audience": template["target_audience"],
         "requirements": template["requirements"],
     }
+    if localized_hosts:
+        payload["hosts"] = localized_hosts
+    return payload
 
 
 def episode_meta_translation_payload(
@@ -1438,7 +1474,10 @@ def create_podcasts(ctx: SeedContext) -> None:
                 "robots_nofollow": False,
                 "enable_jsonld": True,
             },
-            extra_metadata=_podcast_meta(name, host),
+            extra_metadata={
+                **_podcast_meta(name, host),
+                "hosts": _podcast_hosts(ctx, index, host),
+            },
             access_type=AccessTypeEnum.PUBLIC,
             price_amount=None,
             price_currency="DZD",

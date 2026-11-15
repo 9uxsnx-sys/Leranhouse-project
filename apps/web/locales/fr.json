@@ -722,9 +722,19 @@
     "discussion": "discussion",
     "created": "Créé",
     "linked_course": "Cours associé",
+    "linked_podcast": "Podcast associé",
+    "linked_resource": "Contenu associé",
+    "not_linked": "Non associé",
     "new": "Publier",
     "linked_course_description": "Cette communauté est l'espace de discussion du cours. Rejoignez la conversation, posez vos questions et échangez avec les autres apprenants.",
+    "linked_podcast_description": "Cette communauté est l'espace de discussion du podcast. Rejoignez la conversation, posez vos questions et échangez avec les autres auditeurs.",
     "go_to_course": "Aller au cours",
+    "go_to_podcast": "Aller au podcast",
+    "access_inherited_title": "L'accès est hérité",
+    "access_inherited_course_description": "Cette communauté suit les règles d'accès du cours auquel elle est rattachée. Les apprenants la rejoignent automatiquement dès qu'ils ont accès au cours.",
+    "access_inherited_podcast_description": "Cette communauté suit les règles d'accès du podcast auquel elle est rattachée. Les auditeurs la rejoignent automatiquement dès qu'ils ont accès au podcast.",
+    "access_inherited_no_parent": "Cette communauté n'est rattachée à aucun cours ni podcast. Rattachez-la depuis l'onglet Contenu associé pour qu'elle apparaisse aux apprenants.",
+    "manage_parent_access": "Gérer l'accès",
     "sidebar_includes": "Cette communauté comprend",
     "member": "membre",
     "members": "membres",
@@ -868,6 +878,7 @@
     "all_communities": "Toutes les communautés",
     "newest": "Plus récentes",
     "course_communities": "Communautés de cours",
+    "podcast_communities": "Communautés de podcasts",
     "general": "Générales",
     "results_one": "{{count}} résultat pour « {{query}} »",
     "results_other": "{{count}} résultats pour « {{query}} »",
@@ -2191,6 +2202,16 @@
           "instructor_name_label": "Nom du formateur",
           "instructor_title_label": "Titre du formateur",
           "instructor_bio_label": "Biographie du formateur",
+          "instructors_label": "Formateurs",
+          "instructor_label": "Formateur {{number}}",
+          "add_instructor": "Ajouter un formateur",
+          "remove_instructor": "Supprimer le formateur",
+          "instructor_photo_label": "Photo",
+          "instructor_photo_uploaded": "Photo téléchargée",
+          "instructor_remove_photo": "Supprimer la photo",
+          "instructor_upload_photo": "Cliquez pour télécharger une photo",
+          "instructor_name_placeholder": "ex. Yacine Benali",
+          "instructor_title_placeholder": "ex. Product designer",
           "audience_for_label": "Public cible",
           "audience_not_for_label": "Ne convient pas à",
           "requirements_empty_text": "Tous les éléments de prérequis doivent contenir du texte"
@@ -2615,7 +2636,7 @@
           "tabs": {
             "general": "Général",
             "thumbnail": "Miniature",
-            "course": "Cours lié",
+            "course": "Contenu lié",
             "moderation": "Modération",
             "access": "Accès",
             "translations": "Traductions"
@@ -2629,8 +2650,8 @@
             "subtitle": "Mettre à jour l'image de couverture de la communauté"
           },
           "course": {
-            "title": "Cours lié",
-            "subtitle": "Connecter cette communauté à un cours"
+            "title": "Contenu lié",
+            "subtitle": "Rattacher cette communauté à un cours ou à un podcast"
           },
           "moderation": {
             "title": "Modération",
@@ -2642,14 +2663,21 @@
           }
         },
         "course": {
-          "title": "Cours lié",
-          "subtitle": "Connecter cette communauté à un cours pour des discussions spécifiques au cours",
+          "title": "Contenu lié",
+          "subtitle": "Rattacher cette communauté à un cours ou à un podcast pour les discussions",
           "currently_linked": "Actuellement lié",
           "unlink": "Dissocier",
-          "link_button": "Lier un cours",
-          "search_placeholder": "Rechercher des cours...",
+          "link_button": "Lier",
+          "tab_course": "Cours",
+          "tab_podcast": "Podcast",
+          "search_placeholder": "Rechercher...",
+          "search_courses": "Rechercher des cours...",
+          "search_podcasts": "Rechercher des podcasts...",
           "no_courses": "Aucun cours trouvé",
-          "no_course_linked": "Aucun cours lié",
+          "no_podcasts": "Aucun podcast trouvé",
+          "no_course_linked": "Aucun contenu lié",
+          "no_resource_linked": "Aucun cours ni podcast lié pour le moment",
+          "unlink_hint": "Sélectionnez l'élément lié pour le dissocier",
           "sort_aria": "Trier les cours",
           "course_linked_id": "Cours lié (ID: {{id}})",
           "course_not_found": "Le cours lié n'existe peut-être plus ou vous n'y avez pas accès",
@@ -2753,7 +2781,16 @@
               "name_placeholder": "Entrez le nom de la communauté",
               "description_label": "Description",
               "description_placeholder": "Décrivez le sujet de cette communauté",
-              "public_label": "Rendre cette communauté publique (visible par tous)"
+              "resource_label": "Rattacher à",
+              "resource_required": "Choisissez un cours ou un podcast",
+              "resource_hint": "Une communauté appartient à un cours ou à un podcast et hérite de ses règles d'accès.",
+              "course_tab": "Cours",
+              "podcast_tab": "Podcast",
+              "search_courses": "Rechercher des cours...",
+              "search_podcasts": "Rechercher des podcasts...",
+              "no_courses": "Aucun cours trouvé",
+              "no_podcasts": "Aucun podcast trouvé",
+              "already_linked": "A déjà une communauté"
             },
             "cancel": "Annuler",
             "submit": "Créer la communauté"
@@ -6935,6 +6972,7 @@
       "curriculum_module": "Module {{number}}",
       "about_title": "À propos de ce cours",
       "instructor_title": "Votre formateur",
+      "instructors_title": "Enseigné par",
       "audience_title": "Pour qui est ce cours",
       "audience_for_title": "Ce cours est pour vous si\u2026",
       "audience_for_subtitle": "Vous vous identifiez à l'un de ces profils",
@@ -7011,7 +7049,10 @@
     "badge": {
       "subscription": "Abonnement",
       "one_time": "Paiement unique",
-      "one_time_payment": "Paiement unique"
+      "one_time_payment": "Paiement unique",
+      "course": "Cours",
+      "podcast": "Podcast",
+      "collection": "Collection"
     },
     "resource_types": {
       "course": "Cours",

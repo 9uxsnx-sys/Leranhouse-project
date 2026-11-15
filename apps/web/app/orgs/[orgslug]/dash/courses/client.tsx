@@ -8,6 +8,11 @@ import { ImportTypeSelector, LearnHouseCourseImport } from '@components/Objects/
 import { removeCoursePrefix, AdminEditOptions } from '@components/Objects/Thumbnails/CourseThumbnail'
 import { CourseCard } from '@components/Objects/Thumbnails/CourseCard'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
+import {
+  DIFFICULTY_OPTIONS,
+  canonicalDifficulty,
+  difficultyTranslationKey,
+} from '@/lib/difficulty'
 import AuthenticatedClientElement from '@components/Security/AuthenticatedClientElement'
 import NewCourseButton from '@components/Objects/StyledElements/Buttons/NewCourseButton'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
@@ -145,13 +150,27 @@ function CoursesHome(params: CourseProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState('All')
 
-  // Filter courses based on search and usergroup (client-side)
+  const difficultyLabel = (value: string) => {
+    const key = difficultyTranslationKey(value)
+    return key ? t(key) : value
+  }
+
+  // Filter courses based on search, difficulty and usergroup (client-side)
   const filteredCourses = useMemo(() => {
     let courses = allCourses
 
     // Usergroup filter
     if (usergroupResourceUuids) {
       courses = courses.filter((course: any) => usergroupResourceUuids.has(course.course_uuid))
+    }
+
+    // Difficulty filter — compare on the canonical value, translations may hold
+    // an authored label.
+    if (activeFilter !== 'All') {
+      courses = courses.filter(
+        (course: any) =>
+          canonicalDifficulty(course.extra_metadata?.difficulty) === activeFilter
+      )
     }
 
     // Search filter
@@ -162,7 +181,7 @@ function CoursesHome(params: CourseProps) {
     }
 
     return courses
-  }, [allCourses, searchQuery, usergroupResourceUuids])
+  }, [allCourses, searchQuery, activeFilter, usergroupResourceUuids])
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
@@ -171,7 +190,7 @@ function CoursesHome(params: CourseProps) {
   // Reset to page 1 when search or filter changes
   React.useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, selectedUsergroupId])
+  }, [searchQuery, activeFilter, selectedUsergroupId])
 
   // Calculate pagination (client-side)
   const totalPages = Math.ceil(filteredCourses.length / itemsPerPage)
@@ -549,18 +568,16 @@ function CoursesHome(params: CourseProps) {
                 <span>{t('common.all_courses')}</span>
                 {activeFilter === 'All' && <ConceptIcon.check size={12} className="text-gray-500" />}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setActiveFilter('Easy')} className="flex items-center justify-between">
-                <span>{t('common.easy')}</span>
-                {activeFilter === 'Easy' && <ConceptIcon.check size={12} className="text-gray-500" />}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setActiveFilter('Medium')} className="flex items-center justify-between">
-                <span>{t('common.medium')}</span>
-                {activeFilter === 'Medium' && <ConceptIcon.check size={12} className="text-gray-500" />}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setActiveFilter('Hard')} className="flex items-center justify-between">
-                <span>{t('common.hard')}</span>
-                {activeFilter === 'Hard' && <ConceptIcon.check size={12} className="text-gray-500" />}
-              </DropdownMenuItem>
+              {DIFFICULTY_OPTIONS.map((option) => (
+                <DropdownMenuItem
+                  key={option}
+                  onClick={() => setActiveFilter(option)}
+                  className="flex items-center justify-between"
+                >
+                  <span>{difficultyLabel(option)}</span>
+                  {activeFilter === option && <ConceptIcon.check size={12} className="text-gray-500" />}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
 

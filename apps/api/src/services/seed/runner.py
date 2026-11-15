@@ -96,8 +96,10 @@ def run_demo_seed(
             ("People and groups", lambda: create_people(ctx)),
             ("Courses", lambda: create_courses(ctx)),
             ("Collections", lambda: create_collections(ctx)),
-            ("Communities", lambda: create_communities(ctx)),
+            # Podcasts before communities: each community is attached to a
+            # course or podcast, so the show list must exist first.
             ("Podcasts", lambda: create_podcasts(ctx)),
+            ("Communities", lambda: create_communities(ctx)),
             ("Group resources", lambda: attach_group_resources(ctx, _resource_pairs(ctx))),
             ("Enrollments and certificates", lambda: create_progress(ctx)),
             ("Assignments", lambda: create_assignments(ctx)),

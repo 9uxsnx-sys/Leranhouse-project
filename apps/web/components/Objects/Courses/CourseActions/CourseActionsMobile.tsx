@@ -4,14 +4,13 @@ import { useRouter } from 'next/navigation'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg, useOrgMembership } from '@components/Contexts/OrgContext'
 import { getUriWithOrg } from '@services/config/config'
-import { getOffersByResource } from '@services/payments/offers'
-import { LogIn, LogOut, ShoppingCart, Lock, UserPlus } from 'lucide-react'
+import { createResourceCheckout } from '@services/payments/checkout'
+import { LogIn, LogOut, ShoppingCart, UserPlus } from 'lucide-react'
 import { removeCourse, startCourse } from '@services/courses/activity'
 import { revalidateTags } from '@services/utils/ts/requests'
 import UserAvatar from '../../UserAvatar'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
-import useSWR from 'swr'
-import Link from 'next/link'
+import toast from 'react-hot-toast'
 
 interface Author {
   user: {
@@ -34,6 +33,9 @@ interface Course {
   id: string
   course_uuid: string
   authors: Author[]
+  access_type?: 'public' | 'users_only' | 'paid'
+  price_amount?: number | null
+  price_currency?: string
   trail?: {
     runs: CourseRun[]
   }
@@ -134,7 +136,6 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
   const [isActionLoading, setIsActionLoading] = useState(false)
   // Clean up course UUID by removing 'course_' prefix if it exists
   const cleanCourseUuid = course.course_uuid?.replace('course_', '');
-  const resourceUuid = cleanCourseUuid ? `course_${cleanCourseUuid}` : null;
 
   const isStarted = trailData?.runs?.find(
     (run: any) => {
@@ -143,12 +144,41 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
     }
   ) ?? false;
 
-  // Public endpoint — no auth needed, works for unauthenticated visitors too
-  const { data: offersResult, isLoading } = useSWR(
-    org && resourceUuid ? [`/offers/by-resource`, org.id, resourceUuid] : null,
-    ([, orgId, uuid]) => getOffersByResource(orgId, uuid)
-  );
-  const linkedOffers: any[] = offersResult?.data ?? [];
+  const isPaidCourse = course?.access_type === 'paid'
+  const coursePrice = typeof course?.price_amount === 'number' ? course.price_amount : null
+  const formattedPrice = coursePrice !== null
+    ? new Intl.NumberFormat(i18n.language || 'en', {
+        style: 'currency',
+        currency: course?.price_currency || 'DZD',
+        maximumFractionDigits: 0,
+      }).format(coursePrice)
+    : null
+
+  const handleGetAccess = async () => {
+    if (!session.data?.user || !isUserPartOfTheOrg) {
+      router.push(getUriWithOrg(orgslug, '/signup'))
+      return
+    }
+    if (!org?.id || !course?.course_uuid || !session.data?.tokens?.access_token) return
+
+    setIsActionLoading(true)
+    try {
+      const checkout = await createResourceCheckout(
+        org.id,
+        { resource_uuid: course.course_uuid, resource_type: 'course' },
+        session.data.tokens.access_token
+      )
+      if (checkout?.checkout_url) {
+        window.location.href = checkout.checkout_url
+        return
+      }
+      throw new Error('Missing checkout URL')
+    } catch (err: any) {
+      toast.error(err?.detail || 'Could not start this course')
+    } finally {
+      setIsActionLoading(false)
+    }
+  }
 
   const handleCourseAction = async () => {
     if (!session.data?.user) {
@@ -195,10 +225,6 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
     }
   }
 
-  if (isLoading) {
-    return <div className="animate-pulse h-16 bg-gray-100 rounded-lg mt-4 mb-8" />
-  }
-
   // Show join organization prompt for authenticated users who are not part of the org
   if (session.data?.user && !isUserPartOfTheOrg) {
     return (
@@ -242,63 +268,23 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
     <div className="bg-white/90 backdrop-blur-sm shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4 my-6 mx-2">
       <div className="flex flex-col space-y-4">
         <MultipleAuthors authors={sortedAuthors} />
-        
-        {linkedOffers.length > 0 ? (() => {
-          const offer = linkedOffers[0];
-          const formattedPrice = offer?.amount != null
-            ? new Intl.NumberFormat(i18n.language, { style: 'currency', currency: offer.currency ?? 'USD' }).format(offer.amount)
-            : null;
-          const storeHref = org?.slug ? getUriWithOrg(org.slug, `/store/offers/${offer.offer_id}`) : '#';
 
-          return (
-            <div className="space-y-3">
-              {!!isStarted ? (
-                <>
-                  <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                      <span className="text-green-800 text-sm font-semibold">You Own This Course</span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={handleCourseAction}
-                    disabled={isActionLoading}
-                    className="w-full py-2 px-4 rounded-lg bg-red-500 text-white font-semibold text-sm hover:bg-red-600 transition-colors flex items-center justify-center gap-2 disabled:bg-red-400"
-                  >
-                    {isActionLoading ? (
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <>
-                        <LogOut className="w-4 h-4" />
-                        Leave Course
-                      </>
-                    )}
-                  </button>
-                </>
-              ) : (
-                <>
-                  <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <Lock className="w-4 h-4 text-gray-600" />
-                      <div>
-                        <span className="text-gray-900 text-sm font-semibold">{offer.offer_name}</span>
-                        {formattedPrice && (
-                          <p className="text-gray-500 text-xs">{formattedPrice}{offer.offer_type === 'subscription' ? ' / month' : ' one-time'}</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <Link href={storeHref}>
-                    <button className="w-full py-2 px-4 rounded-lg bg-neutral-900 text-white font-semibold text-sm hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2">
-                      <ShoppingCart className="w-4 h-4" />
-                      {formattedPrice ? `Get Access — ${formattedPrice}` : 'Purchase Course'}
-                    </button>
-                  </Link>
-                </>
-              )}
-            </div>
-          );
-        })() : (
+        {isPaidCourse && !isStarted ? (
+          <button
+            onClick={handleGetAccess}
+            disabled={isActionLoading}
+            className="w-full py-2 px-4 rounded-lg bg-neutral-900 text-white font-semibold text-sm hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2 disabled:bg-neutral-700"
+          >
+            {isActionLoading ? (
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <>
+                <ShoppingCart className="w-4 h-4" />
+                {formattedPrice ? `Get Access — ${formattedPrice}` : 'Get Access'}
+              </>
+            )}
+          </button>
+        ) : (
           <button
             onClick={handleCourseAction}
             disabled={isActionLoading}
@@ -333,4 +319,4 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
   )
 }
 
-export default CourseActionsMobile 
+export default CourseActionsMobile

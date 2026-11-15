@@ -1,435 +1,299 @@
-# Common Development Issues
+# Troubleshooting
 
-> Practical solutions for frequent issues encountered when setting up and running the LearnHouse development environment.
+> Status: as-built · Last verified: 2026-11-15
+
+Commands assume the repository root unless a step says `cd apps/<app>`.
 
 ---
 
-## Database Issues
+## Database
 
-### PostgreSQL Connection Refused
+### `connection refused` on port 5434
 
-**Error**: `psycopg2.OperationalError: connection to server on host "localhost" (::1), port 5434 failed: Connection refused`
+The dev database is published on **5434** (`5434:5432` in `.learnhouse/docker-compose.dev.yml`). Common causes: containers stopped, another process on 5434, or Postgres still starting.
 
-**Causes**:
-- Docker containers not running
-- Port conflict (another service on 5434)
-- Containers still starting up
-
-**Solutions**:
-
-```bash
-# 1. Check if containers are running
-docker ps | findstr learnhouse
-
-# 2. View container logs
+```powershell
+docker ps
 docker logs learnhouse-db-dev
-
-# 3. Restart containers
 docker compose -f .learnhouse/docker-compose.dev.yml -p learnhouse-dev restart db
-
-# 4. Full reset if needed
-docker compose -f .learnhouse/docker-compose.dev.yml -p learnhouse-dev down
-docker volume rm learnhouse-dev_learnhouse_db_dev_data
-# Then re-run the dev CLI
 ```
 
-### Wrong Port (5432 vs 5434)
+Full reset (deletes dev data):
 
-The development database uses port **5434** (not the PostgreSQL default 5432) to avoid conflicts with locally installed PostgreSQL instances.
+```powershell
+docker compose -f .learnhouse/docker-compose.dev.yml -p learnhouse-dev down
+docker volume rm learnhouse-dev_learnhouse_db_dev_data
+```
 
-Check your `apps/api/.env`:
+### API connects to 5432 instead of 5434
+
+`config.yaml` falls back to `...@localhost:5432/learnhouse`. The dev `.env` must override it:
+
 ```
 LEARNHOUSE_SQL_CONNECTION_STRING=postgresql://learnhouse:learnhouse@localhost:5434/learnhouse
 ```
 
-### Alembic Migration Fails
+### Alembic errors (`relation "organization" does not exist`)
 
-**Error**: `sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedTable) relation "organization" does not exist`
+From `apps/api`:
 
-**Solutions**:
-
-```bash
-# 1. Check migration status
+```powershell
 cd apps/api
 uv run alembic current
-
-# 2. Apply all pending migrations
-uv run alembic upgrade head
-
-# 3. If migrations are out of sync, stamp current state
-uv run alembic stamp head
-
-# 4. For a fresh database (will lose data):
-uv run alembic downgrade base
 uv run alembic upgrade head
 ```
 
-### Enum Type Migration Issues
+Fresh database (destroys data): `uv run alembic downgrade base` then `uv run alembic upgrade head`.
 
-PostgreSQL enum migrations require the `alembic_postgresql_enum` extension. If you see errors about enum types:
+### Enum migration errors
 
-```bash
-# Ensure the package is installed
-uv add alembic_postgresql_enum
+Postgres enum changes use `alembic-postgresql-enum`, which is already in `pyproject.toml`. Re-sync the environment rather than adding it:
 
-# The extension is configured in migrations/env.py:
-# from alembic_postgresql_enum import ...
+```powershell
+cd apps/api
+uv sync
 ```
 
 ---
 
-## Docker Issues
+## Docker
 
-### Docker Not Installed
+The CLI prints `Docker is not installed. Please install Docker and try again.` or `Docker is not running. Please start Docker and try again.` and exits.
 
-**Error**: `Docker is not installed. Please install Docker and try again.`
+- Start Docker Desktop (or `sudo systemctl start docker` on Linux) and retry.
+- `docker info` should return without error.
 
-**Solution**: Install Docker Desktop from [docker.com](https://www.docker.com/products/docker-desktop/).
+### `port is already allocated` / port in use
 
-### Docker Not Running
-
-**Error**: `Docker is not running. Please start Docker and try again.`
-
-**Solutions**:
-- Start Docker Desktop from your applications menu
-- On Linux: `sudo systemctl start docker`
-- Wait for the Docker daemon to fully initialize
-
-### Port Conflicts
-
-**Error**: `port is already allocated`
-
-**Solutions**:
-
-```bash
-# Check which process is using the port
+```powershell
 netstat -ano | findstr :5434
 netstat -ano | findstr :1338
 netstat -ano | findstr :3000
+netstat -ano | findstr :4000
 netstat -ano | findstr :6379
-
-# Kill the process (replace <PID> with the actual PID)
 taskkill /PID <PID> /F
-
-# Or stop a competing Docker container
-docker stop <container_name>
 ```
 
-### Container Health Check Fails
+### `Database did not become ready in time` / `Redis did not become ready in time`
 
-**Error**: `Health checks failed` or `Database did not become ready in time`
+The CLI polls `pg_isready` / `redis-cli ping` for ~30 attempts. Check manually:
 
-**Solutions**:
-
-```bash
-# 1. Check container logs
-docker logs learnhouse-db-dev
-docker logs learnhouse-redis-dev
-
-# 2. Check if enough resources allocated to Docker
-# Docker Desktop → Settings → Resources → Increase memory/CPUs
-
-# 3. Try running health checks manually
+```powershell
 docker exec learnhouse-db-dev pg_isready -U learnhouse
 docker exec learnhouse-redis-dev redis-cli ping
-
-# 4. Slow startup on macOS/Windows is normal — increase the wait timeout
-# in apps/cli/src/commands/dev.ts, increase maxAttempts from 30
+docker logs learnhouse-db-dev
+docker logs learnhouse-redis-dev
 ```
+
+Retry once Docker has settled if the first startup is slow.
 
 ---
 
-## Python / uv Issues
+## Python / uv
 
-### uv Not Installed
+### `'uv' is not recognized`
 
-**Error**: `'uv' is not recognized as an internal or external command`
+Install uv, then close and reopen the terminal so `PATH` refreshes. Verify with `uv --version`.
 
-**Solution**: Install uv:
+### `ImportError: No module named 'src'`
 
-```bash
-# Windows (PowerShell)
-powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+Run the API from `apps/api` (the app resolves `config`, `src`, and `migrations` relative to that directory):
 
-# macOS/Linux
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-
-### Virtual Environment Issues
-
-**Error**: `ImportError: No module named 'src'`
-
-**Solutions**:
-
-```bash
-# 1. Ensure virtual environment exists
+```powershell
 cd apps/api
-uv sync  # Creates .venv and installs all dependencies
-
-# 2. Activate the virtual environment
-.venv\Scripts\activate  # Windows
-source .venv/bin/activate  # macOS/Linux
-
-# 3. Verify Python path
-uv run python -c "import sys; print(sys.path)"
+uv sync
+uv run python app.py
 ```
 
-### Dependency Conflicts
+### Dependency conflicts
 
-**Error**: `ResolutionError` or dependency version conflicts
-
-**Solutions**:
-
-```bash
-# 1. Sync exact versions from lockfile
+```powershell
 cd apps/api
 uv sync --frozen
-
-# 2. Full reinstall
-rm -rf .venv
-uv sync
-
-# 3. Check pyproject.toml for version constraints
-# Look for incompatible version ranges
 ```
 
-### SQLite Test Database Issues
+If the lockfile is stale, `uv sync` (without `--frozen`) updates `.venv` from `uv.lock`.
 
-**Error**: `(sqlite3.OperationalError) no such column: <column_name>`
+### Tests fail on SQLite
 
-The test environment uses SQLite in-memory, which has limitations compared to PostgreSQL:
+`apps/api/src/tests/conftest.py` sets `TESTING=true`, provides a 32+ character JWT secret, and builds an in-memory SQLite database. `JSONB` columns are remapped to `JSON` at import time — new Postgres-only column types need the same treatment in `conftest.py` before router tests will create the schema.
 
-- **JSONB columns** are automatically remapped to JSON (handled in `conftest.py`)
-- **Enum types** are stored as strings
-- **Array columns** are not supported — use JSON instead
-- **Full-text search** features are PostgreSQL-specific
-
-If you add a new model or column, ensure the test fixtures in `conftest.py` are updated accordingly.
-
----
-
-## Redis Issues
-
-### Redis Connection Refused
-
-**Error**: `redis.exceptions.ConnectionError: Error -2 connecting to redis://localhost:6379`
-
-**Solutions**:
-
-```bash
-# 1. Check if Redis container is running
-docker ps | findstr redis
-
-# 2. View Redis logs
-docker logs learnhouse-redis-dev
-
-# 3. Test Redis connection
-docker exec learnhouse-redis-dev redis-cli ping
-# Should return: PONG
-```
-
-### Redis Not Configured (Graceful Degradation)
-
-The platform is designed to work without Redis — it degrades gracefully:
-
-- **Session revocation**: Fails open (JWTs still honor `exp` and `password_changed_at`)
-- **Refresh token replay**: Fails open (tokens still honor expiration)
-- **Collab caching**: Falls back to direct database reads
-
-If Redis is unavailable, set `LEARNHOUSE_REDIS_URL` to an empty string in `apps/api/.env`.
-
----
-
-## API Server Issues
-
-### Server Won't Start
-
-**Error**: `uvicorn.error: Can't connect to '0.0.0.0:1338'`
-
-**Solutions**:
-
-```bash
-# 1. Check if port is in use
-netstat -ano | findstr :1338
-
-# 2. Change the port in .env
-LEARNHOUSE_API_PORT=1339
-
-# 3. Check the .env file exists and has required variables
-cat apps/api/.env
-
-# Required: LEARNHOUSE_SQL_CONNECTION_STRING, LEARNHOUSE_JWT_SECRET
-```
-
-### JWT Secret Not Set
-
-**Error**: `ValueError: JWT secret key is not configured`
-
-**Solution**: Set `LEARNHOUSE_AUTH_JWT_SECRET_KEY` in `apps/api/.env`. The key must be at least 32 characters for HS256.
-
-### CORS Errors in Browser
-
-**Error**: `Access to fetch at 'http://localhost:1338/...' from origin 'http://localhost:3000' has been blocked by CORS policy`
-
-**Solutions**:
-
-1. Ensure CORS origins are configured in `apps/api/.env`:
-   ```
-   LEARNHOUSE_ALLOWED_REGEXP=http://localhost:3000
-   ```
-
-2. In single-tenancy mode, all origins are allowed automatically
-
-3. If the error persists, check the CORS middleware configuration in `src/core/middleware/cors.py`
-
----
-
-## Web Frontend Issues
-
-### API Connection Refused
-
-**Error**: `Failed to fetch` or `Network Error` in the browser console
-
-**Solutions**:
-
-```bash
-# 1. Ensure the API server is running
-# Check the CLI output for [api] logs
-
-# 2. Verify NEXT_PUBLIC_API_URL in apps/web/.env.local
-NEXT_PUBLIC_API_URL=http://localhost:1338
-
-# 3. Check the API proxy configuration in apps/web/
-```
-
-### Next.js Build Errors
-
-**Error**: TypeScript compilation errors during `next dev`
-
-**Solutions**:
-
-```bash
-# 1. Clear Next.js cache
-rm -rf apps/web/.next
-
-# 2. Reinstall dependencies
-cd apps/web && rm -rf node_modules && bun install
-
-# 3. Check for TypeScript errors
-cd apps/web && bun run tsc --noEmit
-```
-
----
-
-## Collaboration Server Issues
-
-### WebSocket Connection Failed
-
-**Error**: `WebSocket connection to 'ws://localhost:4000/' failed`
-
-**Solutions**:
-
-```bash
-# 1. Ensure collab server is running
-# Check CLI output for [collab] logs
-
-# 2. Verify the port
-netstat -ano | findstr :4000
-
-# 3. Check NEXT_PUBLIC_WS_URL in apps/web/.env.local
-NEXT_PUBLIC_WS_URL=ws://localhost:4000
-```
-
-### Collab Authentication Fails
-
-**Error**: `Authentication required` or `Invalid token` in collab logs
-
-**Solutions**:
-
-1. Ensure `LEARNHOUSE_AUTH_JWT_SECRET_KEY` is the same in both `apps/api/.env` and `apps/collab/.env`
-2. Ensure `COLLAB_INTERNAL_KEY` is set in `apps/collab/.env`
-3. Verify the backend API is reachable from the collab server (`LEARNHOUSE_API_URL`)
-
----
-
-## Git / Monorepo Issues
-
-### Merge Conflicts in Migrations
-
-When multiple branches add Alembic migrations, you may get revision ID conflicts:
-
-```bash
-# 1. Check current revision
+```powershell
 cd apps/api
-uv run alembic current
-
-# 2. Resolve by running the latest migration head
-uv run alembic upgrade head
-
-# 3. If branches have diverged migration chains, you may need to
-# manually edit migration dependencies or create a merge point
-```
-
-### Node_modules Not Found
-
-**Error**: `Cannot find module '@hocuspocus/server'` or similar
-
-**Solution**: Install dependencies from the monorepo root or per-app:
-
-```bash
-# From monorepo root
-bun install
-
-# Or per-app
-cd apps/web && bun install
-cd apps/collab && bun install
+uv run pytest
 ```
 
 ---
 
-## Logs and Debugging
+## Redis
 
-### Enabling Debug Logs
+The API and collab use different variables:
+
+| App | Variable |
+|-----|----------|
+| API | `LEARNHOUSE_REDIS_CONNECTION_STRING` |
+| Collab | `LEARNHOUSE_REDIS_URL` |
+
+Check the container:
+
+```powershell
+docker exec learnhouse-redis-dev redis-cli ping   # expect PONG
+docker logs learnhouse-redis-dev
+```
+
+What degrades without Redis:
+
+- Auth rate limiting **raises HTTP 500** (`Redis connection string not found`) when `LEARNHOUSE_REDIS_CONNECTION_STRING` is empty.
+- Session revocation fails open (JWTs still honour `exp` and `password_changed_at`).
+- Org/instance caches fall back to database reads.
+- Collab logs Redis errors and persists ydoc state through the API instead.
+
+---
+
+## API server
+
+### Port conflict / server will not start
+
+The API port comes from `LEARNHOUSE_PORT`, falling back to `hosting_config.port` in `config.yaml` (`1338`).
+
+```powershell
+netstat -ano | findstr :1338
+# then set LEARNHOUSE_PORT in apps/api/.env if you need another port
+```
+
+### `SECURITY ERROR: LEARNHOUSE_AUTH_JWT_SECRET_KEY must be set`
+
+The API refuses to boot without a JWT secret of at least 32 characters. Generate one:
+
+```powershell
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+```
+
+Set it as `LEARNHOUSE_AUTH_JWT_SECRET_KEY` in `apps/api/.env`.
+
+### `/docs` and `/redoc` return 404
+
+Both are only mounted when `LEARNHOUSE_DEVELOPMENT_MODE=true`. Check `apps/api/.env`.
+
+### CORS errors in the browser
+
+- In `single` tenancy the API accepts any well-formed `http(s)` origin.
+- In `multi` tenancy CORS uses `LEARNHOUSE_ALLOWED_REGEXP`; `LEARNHOUSE_ALLOWED_ORIGINS` is the email-link allowlist, not the CORS list.
+- If the error persists, confirm the request origin is `http://localhost:3000` and that the API restarted after the env change.
+
+---
+
+## Web frontend
+
+### `Failed to fetch` / `Network Error`
+
+1. Confirm the API responds at `http://localhost:1338/api/v1/health`.
+2. Check `apps/web/.env.local`:
+
+   ```
+   NEXT_PUBLIC_LEARNHOUSE_BACKEND_URL=http://localhost:1338
+   ```
+
+   Use `NEXT_PUBLIC_LEARNHOUSE_API_URL` only if you need to override the URL derived from the backend URL.
+
+### Next.js build / type errors
+
+```powershell
+Remove-Item -Recurse -Force apps/web/.next
+cd apps/web
+bun install
+bunx tsc --noEmit
+```
+
+### Realtime features do not connect
+
+The browser reads `NEXT_PUBLIC_COLLAB_URL` (default `ws://localhost:4000`). Confirm the collab process is running and the variable points at it.
+
+---
+
+## Collaboration server
+
+The collab server exits immediately when required configuration is missing:
+
+```
+[collab] FATAL: LEARNHOUSE_AUTH_JWT_SECRET_KEY is not set
+[collab] FATAL: COLLAB_INTERNAL_KEY is not set
+```
+
+- `LEARNHOUSE_AUTH_JWT_SECRET_KEY` must be identical in `apps/api/.env` and `apps/collab/.env`.
+- `COLLAB_INTERNAL_KEY` must also match; it is the `X-Internal-Key` used for ydoc persistence.
+- `LEARNHOUSE_API_URL` must reach the API (`http://localhost:1338` in dev).
+- `Invalid token` / `Not authorized for this board` means the JWT is expired or the user is not a board member.
+
+### `EADDRINUSE :::4000`
+
+Another collab instance is running. Only boards are affected; the API and web app keep working.
+
+```powershell
+netstat -ano | findstr :4000
+taskkill /PID <PID> /F
+```
+
+Then restart the dev command (or press `rc` in a real terminal).
+
+---
+
+## Monorepo / installs
+
+There is no root `package.json`. Install per app:
+
+```powershell
+cd apps/web; bun install
+cd ../collab; bun install
+cd ../cli; bun install
+```
+
+The dev command does this automatically when `node_modules` is missing, and runs `uv sync` when `apps/api/.venv` is missing.
+
+### Migration branch conflicts
+
+Alembic revision IDs can conflict when branches add migrations independently:
+
+```powershell
+cd apps/api
+uv run alembic heads
+```
+
+If multiple heads are listed, create a merge revision (`uv run alembic merge -m "merge heads" <rev1> <rev2>`) or rebase the migration onto the current head.
+
+---
+
+## Logs and debugging
+
+The dev command prefixes output: `[api]` (magenta), `[web]` (cyan), `[collab]` (yellow). Use `ra`, `rw`, `rc`, `rb` in a real terminal to restart a service, or `q` to stop everything.
+
+### Sentry
+
+| App | Variable |
+|-----|----------|
+| API | `LEARNHOUSE_SENTRY_DSN` |
+| Web | `NEXT_PUBLIC_LEARNHOUSE_SENTRY_DSN` |
+| Web build | `SENTRY_ORG` + `SENTRY_PROJECT` (source maps) |
+
+The API samples 100% of traces in development mode and 10% otherwise. It only initialises Sentry when a DSN is configured.
+
+### Checking endpoints
+
+Use `curl.exe` in Windows PowerShell, `curl` elsewhere:
 
 ```bash
-# Set log level in apps/api/.env
-LEARNHOUSE_LOG_LEVEL=DEBUG
-
-# Or via environment variable when running
-LEARNHOUSE_LOG_LEVEL=DEBUG uv run python app.py
+curl http://localhost:1338/api/v1/health
+curl http://localhost:1338/api/v1/instance/info
+curl -H "Authorization: Bearer <token>" http://localhost:1338/api/v1/users/profile
 ```
 
-### Sentry Error Tracking
+### Common status codes
 
-If Sentry is configured, errors are automatically reported. Configure in `apps/api/.env`:
-
-```
-SENTRY_DSN=https://<key>@<org>.ingest.sentry.io/<project>
-```
-
-Sentry is only initialized when a DSN is present. In production, the sample rate is 0.1; in dev mode, it's 1.0.
-
-### Checking API Responses
-
-```bash
-# Test a public endpoint
-curl http://localhost:1338/api/v1/instance
-
-# Test with authentication
-curl -H "Authorization: Bearer <token>" http://localhost:1338/api/v1/users/me
-
-# Test with verbose output
-curl -v http://localhost:1338/api/v1/health
-```
-
-### Common HTTP Status Codes
-
-| Code | Meaning | Common Cause |
-|------|---------|-------------|
-| 401 | Unauthorized | Missing or expired JWT |
-| 402 | Payment Required | Resource behind a paid UserGroup |
-| 403 | Forbidden | Insufficient RBAC permissions |
-| 404 | Not Found | Invalid UUID or resource doesn't exist |
-| 422 | Validation Error | Invalid request body |
-| 429 | Too Many Requests | Rate limit exceeded |
-| 500 | Internal Server Error | Unhandled exception (check Sentry/logs) |
+| Code | Meaning | Common cause |
+|------|---------|--------------|
+| 401 | Unauthorized | Missing/expired JWT |
+| 403 | Forbidden | RBAC permission or tenancy check |
+| 404 | Not found | Unknown UUID, or `/docs` outside development mode |
+| 422 | Validation error | Invalid request body |
+| 429 | Too many requests | Auth/rate-limit window exceeded (needs Redis) |
+| 500 | Internal error | Unhandled exception — check API logs |

@@ -30,7 +30,11 @@ from src.db.usergroup_user import UserGroupUser
 from src.db.users import AnonymousUser, APITokenUser, PublicUser
 from src.db.user_organizations import UserOrganization
 from src.security.auth import resolve_acting_user_id
-from src.security.rbac import check_resource_access, AccessAction
+from src.security.rbac import (
+    check_catalog_read_access,
+    check_resource_access,
+    AccessAction,
+)
 from src.security.rbac.constants import ADMIN_OR_MAINTAINER_ROLE_IDS
 from src.security.superadmin import is_user_superadmin
 from src.services.courses.collection_translations import (
@@ -207,22 +211,16 @@ async def _check_catalog_read_access(
     A published paid bundle is a product page: learners must be able to browse
     what they are buying before they pay. The lessons stay protected by each
     course's own RBAC check. Private (``users_only``) and draft collections keep
-    the strict RBAC denial.
+    the strict RBAC denial. Delegates to the shared catalog rule so collections,
+    courses and podcasts cannot drift apart.
     """
-    decision = await check_resource_access(
+    await check_catalog_read_access(
         request,
         db_session,
         current_user,
         collection.collection_uuid,
-        AccessAction.READ,
-        raise_on_deny=False,
-    )
-    if decision.allowed:
-        return
-    if collection.published and collection.access_type == AccessTypeEnum.PAID:
-        return
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN, detail=decision.reason
+        published=collection.published,
+        access_type=collection.access_type,
     )
 
 
@@ -340,6 +338,7 @@ async def create_collection(
             "collection_uuid": collection.collection_uuid,
             "name": collection.name,
         },
+        db_session=db_session,
     )
 
     return result

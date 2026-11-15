@@ -2,13 +2,14 @@ from typing import List, Optional, Union
 from uuid import uuid4
 from datetime import datetime
 from sqlalchemy import text
-from sqlmodel import Session, select, and_, or_
+from sqlmodel import Session, select
 from fastapi import HTTPException, Request
 
 from src.db.users import PublicUser, AnonymousUser, APITokenUser
 from src.security.auth import resolve_acting_user_id
 from src.db.organizations import Organization
 from src.db.courses.courses import Course
+from src.db.podcasts.podcasts import Podcast
 from src.security.superadmin import is_user_superadmin
 from src.db.communities.communities import (
     Community,
@@ -20,9 +21,6 @@ from src.services.communities.community_translations import (
     apply_community_overlay,
     apply_community_overlay_bulk,
 )
-from src.db.usergroup_resources import UserGroupResource
-from src.db.usergroup_user import UserGroupUser
-from src.db.resource_authors import ResourceAuthor
 from src.security.rbac import (
     check_resource_access,
     AccessAction,
@@ -30,6 +28,26 @@ from src.security.rbac import (
     authorization_verify_based_on_org_admin_status,
     authorization_verify_based_on_roles,
 )
+
+
+COMMUNITY_RESOURCE_TYPES = ("course", "podcast")
+
+
+def _get_parent_resource(
+    db_session: Session, resource_uuid: str, resource_type: str
+):
+    """Resolve the course/podcast a community is attached to, or raise 404."""
+    if resource_type == "course":
+        parent = db_session.exec(
+            select(Course).where(Course.course_uuid == resource_uuid)
+        ).first()
+    else:
+        parent = db_session.exec(
+            select(Podcast).where(Podcast.podcast_uuid == resource_uuid)
+        ).first()
+    if not parent:
+        raise HTTPException(status_code=404, detail="Linked resource not found")
+    return parent
 
 
 async def create_community(
@@ -65,13 +83,41 @@ async def create_community(
             detail="You don't have permission to create communities. Check your role permissions.",
         )
 
+    # A community is an add-on: it must belong to exactly one course or podcast
+    # and inherits that resource's access rules.
+    resource_uuid = (community_object.resource_uuid or "").strip()
+    resource_type = (community_object.resource_type or "").strip().lower()
+    if not resource_uuid or resource_type not in COMMUNITY_RESOURCE_TYPES:
+        raise HTTPException(
+            status_code=422,
+            detail="A community must be linked to a course or a podcast",
+        )
+
+    parent = _get_parent_resource(db_session, resource_uuid, resource_type)
+    if int(parent.org_id) != org_id:
+        raise HTTPException(
+            status_code=400,
+            detail="The linked resource must belong to the same organization",
+        )
+
+    existing = db_session.exec(
+        select(Community).where(Community.resource_uuid == resource_uuid)
+    ).first()
+    if existing:
+        raise HTTPException(
+            status_code=400,
+            detail="This resource already has a community",
+        )
+
     # Create community
     community = Community(
         name=community_object.name,
         description=community_object.description,
-        public=community_object.public,
+        public=True,
+        published=True,
         org_id=org_id,
-        course_id=community_object.course_id,
+        resource_uuid=resource_uuid,
+        resource_type=resource_type,
         community_uuid=f"community_{uuid4()}",
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
@@ -131,80 +177,47 @@ async def get_communities_by_org(
     # admin / membership checks run against a real user_id.
     acting_user_id = resolve_acting_user_id(current_user)
 
-    # For anonymous users, only show public and published communities
-    if isinstance(current_user, AnonymousUser) or acting_user_id == 0:
-        query = select(Community).where(
-            Community.org_id == org_id,
-            Community.public == True,
-            Community.published == True
-        )
-        query = query.order_by(Community.creation_date.desc()).offset(offset).limit(limit)  # type: ignore
-        communities = db_session.exec(query).all()
-        return apply_community_overlay_bulk(
-            [CommunityRead.model_validate(c.model_dump()) for c in communities],
-            locale,
-            db_session,
-        )
+    # Communities are add-ons: a row is visible only when the course/podcast it
+    # belongs to is readable by this caller (plus the claim rule for free
+    # content). The access checker is memoized per request, so the per-row check
+    # stays cheap; org admins skip it and see everything, including orphans.
+    is_admin_viewer = False
+    if acting_user_id:
+        if is_user_superadmin(acting_user_id, db_session):
+            is_admin_viewer = True
+        else:
+            has_admin_read = await authorization_verify_based_on_roles(
+                request, acting_user_id, "update", f"community_{org_id}", db_session
+            )
+            is_admin_viewer = has_admin_read or await authorization_verify_based_on_org_admin_status(
+                request, acting_user_id, "read", f"org_{org_id}", db_session
+            )
 
-    # Superadmins bypass admin check — they can see all communities
-    if is_user_superadmin(acting_user_id, db_session):
-        query = select(Community).where(Community.org_id == org_id)
-        query = query.order_by(Community.creation_date.desc()).offset(offset).limit(limit)  # type: ignore
-        communities = db_session.exec(query).all()
-        return apply_community_overlay_bulk(
-            [CommunityRead.model_validate(c.model_dump()) for c in communities],
-            locale,
-            db_session,
-        )
-
-    # Check if user has admin-level permissions (can read all communities)
-    # First check role-based permissions, then fall back to org admin status
-    has_admin_read = await authorization_verify_based_on_roles(
-        request, acting_user_id, "update", f"community_{org_id}", db_session
-    )
-    is_admin_or_maintainer = has_admin_read or await authorization_verify_based_on_org_admin_status(
-        request, acting_user_id, "read", f"org_{org_id}", db_session
+    all_communities = list(
+        db_session.exec(
+            select(Community)
+            .where(Community.org_id == org_id)
+            .order_by(Community.creation_date.desc())  # type: ignore[attr-defined]
+        ).all()
     )
 
-    if is_admin_or_maintainer:
-        # Admins see all communities
-        query = select(Community).where(Community.org_id == org_id)
-        query = query.order_by(Community.creation_date.desc()).offset(offset).limit(limit)  # type: ignore
-        communities = db_session.exec(query).all()
-        return apply_community_overlay_bulk(
-            [CommunityRead.model_validate(c.model_dump()) for c in communities],
-            locale,
-            db_session,
-        )
+    if is_admin_viewer:
+        visible = all_communities
+    else:
+        visible = []
+        for community in all_communities:
+            decision = await check_resource_access(
+                request,
+                db_session,
+                current_user,
+                community.community_uuid,
+                AccessAction.READ,
+                raise_on_deny=False,
+            )
+            if decision.allowed:
+                visible.append(community)
 
-    # For regular users, use a subquery approach to avoid DISTINCT with JSON columns
-    # Get IDs of communities the user has access to
-    accessible_community_ids_query = (
-        select(Community.id)
-        .where(Community.org_id == org_id, Community.published == True)
-        .outerjoin(UserGroupResource, UserGroupResource.resource_uuid == Community.community_uuid)
-        .outerjoin(UserGroupUser, and_(
-            UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
-            UserGroupUser.user_id == acting_user_id
-        ))
-        .where(or_(
-            Community.public == True,
-            UserGroupResource.resource_uuid.is_(None),  # Not in any UserGroup
-            UserGroupUser.user_id == acting_user_id,  # User in linked UserGroup
-        ))
-        .distinct()
-    )
-
-    # Now select full communities using the IDs
-    query = (
-        select(Community)
-        .where(Community.id.in_(accessible_community_ids_query))
-        .order_by(Community.creation_date.desc())
-        .offset(offset)
-        .limit(limit)
-    )
-
-    communities = db_session.exec(query).all()
+    communities = visible[offset : offset + limit]
     return apply_community_overlay_bulk(
         [CommunityRead.model_validate(c.model_dump()) for c in communities],
         locale,
@@ -230,13 +243,47 @@ async def get_community_by_course(
         raise HTTPException(status_code=404, detail="Course not found")
 
     # Find community linked to this course
-    community_statement = select(Community).where(Community.course_id == course.id)
+    community_statement = select(Community).where(
+        Community.resource_uuid == course.course_uuid,
+        Community.resource_type == "course",
+    )
     community = db_session.exec(community_statement).first()
 
     if not community:
         return None
 
-    # Check if user can read the community
+    # Check if user can read the community (inherits the course's access)
+    await check_resource_access(
+        request, db_session, current_user, community.community_uuid, AccessAction.READ
+    )
+
+    read = CommunityRead.model_validate(community.model_dump())
+    return apply_community_overlay(read, community, locale, db_session)
+
+
+async def get_community_by_podcast(
+    request: Request,
+    podcast_uuid: str,
+    current_user: Union[PublicUser, AnonymousUser, APITokenUser],
+    db_session: Session,
+    locale: Optional[str] = None,
+) -> CommunityRead | None:
+    """Get the community linked to a podcast (same rules as a course link)."""
+    podcast = db_session.exec(
+        select(Podcast).where(Podcast.podcast_uuid == podcast_uuid)
+    ).first()
+    if not podcast:
+        raise HTTPException(status_code=404, detail="Podcast not found")
+
+    community = db_session.exec(
+        select(Community).where(
+            Community.resource_uuid == podcast.podcast_uuid,
+            Community.resource_type == "podcast",
+        )
+    ).first()
+    if not community:
+        return None
+
     await check_resource_access(
         request, db_session, current_user, community.community_uuid, AccessAction.READ
     )
@@ -405,18 +452,25 @@ async def delete_community(
     return {"detail": "Community deleted"}
 
 
-async def link_community_to_course(
+async def link_community_to_resource(
     request: Request,
     community_uuid: str,
-    course_uuid: str,
+    resource_uuid: str,
+    resource_type: str,
     current_user: Union[PublicUser, AnonymousUser, APITokenUser],
     db_session: Session,
 ) -> CommunityRead:
-    """
-    Link a community to a course.
+    """Attach a community to exactly one course or podcast.
 
-    Requires admin/maintainer role.
+    A community never stands alone: linking is what makes it reachable, and the
+    resource's own access rules then govern who can read it.
     """
+    resource_type = (resource_type or "").strip().lower()
+    if resource_type not in COMMUNITY_RESOURCE_TYPES:
+        raise HTTPException(
+            status_code=422, detail="Resource type must be 'course' or 'podcast'"
+        )
+
     # Get community
     statement = select(Community).where(Community.community_uuid == community_uuid)
     community = db_session.exec(statement).first()
@@ -424,37 +478,88 @@ async def link_community_to_course(
     if not community:
         raise HTTPException(status_code=404, detail="Community not found")
 
-    # RBAC check
+    # RBAC check — follows the current parent (orphans: org admins only)
     await check_resource_access(request, db_session, current_user, community_uuid, AccessAction.UPDATE)
 
-    # Get the course
-    course_statement = select(Course).where(Course.course_uuid == course_uuid)
-    course = db_session.exec(course_statement).first()
+    parent = _get_parent_resource(db_session, resource_uuid, resource_type)
 
-    if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
-
-    # Check if course belongs to same org
-    if course.org_id != community.org_id:
+    # Check if the resource belongs to the same org
+    if int(parent.org_id) != int(community.org_id):
         raise HTTPException(
             status_code=400,
-            detail="Course must belong to the same organization as the community",
+            detail="The linked resource must belong to the same organization as the community",
         )
 
-    # Check if another community is already linked to this course
-    existing_statement = select(Community).where(
-        Community.course_id == course.id,
-        Community.id != community.id
-    )
-    existing = db_session.exec(existing_statement).first()
-
+    # One community per resource
+    existing = db_session.exec(
+        select(Community).where(
+            Community.resource_uuid == resource_uuid,
+            Community.id != community.id,
+        )
+    ).first()
     if existing:
         raise HTTPException(
             status_code=400,
-            detail="This course already has a linked community",
+            detail="This resource already has a linked community",
         )
 
-    community.course_id = course.id
+    community.resource_uuid = resource_uuid
+    community.resource_type = resource_type
+    community.update_date = str(datetime.now())
+
+    db_session.add(community)
+    db_session.commit()
+    db_session.refresh(community)
+
+    return CommunityRead.model_validate(community.model_dump())
+
+
+async def link_community_to_course(
+    request: Request,
+    community_uuid: str,
+    course_uuid: str,
+    current_user: Union[PublicUser, AnonymousUser, APITokenUser],
+    db_session: Session,
+) -> CommunityRead:
+    """Back-compat wrapper around `link_community_to_resource`."""
+    return await link_community_to_resource(
+        request, community_uuid, course_uuid, "course", current_user, db_session
+    )
+
+
+async def link_community_to_podcast(
+    request: Request,
+    community_uuid: str,
+    podcast_uuid: str,
+    current_user: Union[PublicUser, AnonymousUser, APITokenUser],
+    db_session: Session,
+) -> CommunityRead:
+    return await link_community_to_resource(
+        request, community_uuid, podcast_uuid, "podcast", current_user, db_session
+    )
+
+
+async def unlink_community_from_resource(
+    request: Request,
+    community_uuid: str,
+    current_user: Union[PublicUser, AnonymousUser, APITokenUser],
+    db_session: Session,
+) -> CommunityRead:
+    """Detach a community from its resource.
+
+    The row stays in the database (with its discussions) but becomes invisible
+    to learners until it is attached again; admins can still manage it.
+    """
+    statement = select(Community).where(Community.community_uuid == community_uuid)
+    community = db_session.exec(statement).first()
+
+    if not community:
+        raise HTTPException(status_code=404, detail="Community not found")
+
+    await check_resource_access(request, db_session, current_user, community_uuid, AccessAction.UPDATE)
+
+    community.resource_uuid = None
+    community.resource_type = None
     community.update_date = str(datetime.now())
 
     db_session.add(community)
@@ -470,29 +575,10 @@ async def unlink_community_from_course(
     current_user: Union[PublicUser, AnonymousUser, APITokenUser],
     db_session: Session,
 ) -> CommunityRead:
-    """
-    Unlink a community from its course.
-
-    Requires admin/maintainer role.
-    """
-    # Get community
-    statement = select(Community).where(Community.community_uuid == community_uuid)
-    community = db_session.exec(statement).first()
-
-    if not community:
-        raise HTTPException(status_code=404, detail="Community not found")
-
-    # RBAC check
-    await check_resource_access(request, db_session, current_user, community_uuid, AccessAction.UPDATE)
-
-    community.course_id = None
-    community.update_date = str(datetime.now())
-
-    db_session.add(community)
-    db_session.commit()
-    db_session.refresh(community)
-
-    return CommunityRead.model_validate(community.model_dump())
+    """Back-compat alias for `unlink_community_from_resource`."""
+    return await unlink_community_from_resource(
+        request, community_uuid, current_user, db_session
+    )
 
 
 async def get_community_user_rights(
@@ -539,58 +625,42 @@ async def get_community_user_rights(
         },
     }
 
-    # Handle anonymous users
-    if acting_user_id == 0:
-        if community.public:
-            rights["permissions"]["read"] = True
-            rights["access"]["via_public"] = True
-        return rights
-
-    # Check community access method
-    rights["access"]["via_public"] = community.public
-
-    # Check UserGroups access
-    usergroup_stmt = select(UserGroupResource).where(
-        UserGroupResource.resource_uuid == community_uuid
+    # Rights are inherited from the linked resource: reading follows its access
+    # rules (plus the claim rule for free content), managing follows its authors
+    # and org admins.
+    read_decision = await check_resource_access(
+        request,
+        db_session,
+        current_user,
+        community_uuid,
+        AccessAction.READ,
+        raise_on_deny=False,
     )
-    usergroup_resources = db_session.exec(usergroup_stmt).all()
-
-    if usergroup_resources:
-        rights["access"]["has_usergroup_restriction"] = True
-        usergroup_ids = [ugr.usergroup_id for ugr in usergroup_resources]
-
-        membership_stmt = select(UserGroupUser).where(
-            UserGroupUser.usergroup_id.in_(usergroup_ids),
-            UserGroupUser.user_id == acting_user_id
-        )
-        user_memberships = db_session.exec(membership_stmt).all()
-        rights["access"]["via_usergroups"] = [m.usergroup_id for m in user_memberships]
-
-    # Check admin/maintainer role using role-based permissions
-    has_update_permission = await authorization_verify_based_on_roles(
-        request, acting_user_id, "update", community_uuid, db_session
-    )
-    is_admin_or_maintainer = has_update_permission or await authorization_verify_based_on_org_admin_status(
-        request, acting_user_id, "update", community_uuid, db_session
+    update_decision = await check_resource_access(
+        request,
+        db_session,
+        current_user,
+        community_uuid,
+        AccessAction.UPDATE,
+        raise_on_deny=False,
     )
 
-    # Check if user has access via public, UserGroups, or admin status
-    # If community is unpublished, only admins have access
-    if not community.published:
-        has_access = is_admin_or_maintainer
-    else:
-        has_access = (
-            community.public or
-            not rights["access"]["has_usergroup_restriction"] or
-            len(rights["access"]["via_usergroups"]) > 0 or
-            is_admin_or_maintainer
-        )
+    rights["access"]["via_public"] = read_decision.via_public
+    rights["access"]["via_resource"] = (
+        read_decision.via_entitlement
+        or read_decision.via_usergroup
+        or update_decision.via_authorship
+        or update_decision.via_admin
+    )
+    rights["access"]["resource_uuid"] = community.resource_uuid
+    rights["access"]["resource_type"] = community.resource_type
+    rights["access"]["is_linked"] = bool(community.resource_uuid)
 
-    if has_access:
+    if read_decision.allowed:
         rights["permissions"]["read"] = True
         rights["permissions"]["create_discussion"] = True
 
-    if is_admin_or_maintainer:
+    if update_decision.allowed:
         rights["ownership"]["is_admin"] = True
         rights["ownership"]["is_maintainer_role"] = True
         rights["permissions"]["create"] = True
@@ -651,39 +721,34 @@ async def get_user_communities(
     # Verify user is not anonymous
     await authorization_verify_if_user_is_anon(current_user.id)
 
-    # Fetch communities the user has access to via user groups.
-    group_subquery = (
-        select(UserGroupResource.resource_uuid)
-        .join(UserGroupUser, UserGroupUser.usergroup_id == UserGroupResource.usergroup_id)
-        .where(UserGroupUser.user_id == user_id)
-        .distinct()
-        .subquery()
-    )
+    # Communities the user can actually reach: each one follows the access of
+    # its linked course/podcast, so the list is filtered with the same check as
+    # the org listing instead of community-level usergroup links.
+    from src.db.user_organizations import UserOrganization
 
-    # Also fetch communities the user is an author of (via resourceauthor).
-    author_subquery = (
-        select(ResourceAuthor.resource_uuid)
-        .where(
-            ResourceAuthor.user_id == user_id,
-            ResourceAuthor.resource_uuid.like("community_%"),
-            ResourceAuthor.authorship_status == "ACTIVE",
-        )
-        .distinct()
-        .subquery()
+    org_ids = select(UserOrganization.org_id).where(
+        UserOrganization.user_id == user_id
     )
-
-    # Combine both sources using UNION
-    combined = (
+    candidates = db_session.exec(
         select(Community)
-        .where(
-            Community.community_uuid.in_(group_subquery)  # type: ignore
-            | Community.community_uuid.in_(author_subquery)  # type: ignore
-        )
-        .offset((page - 1) * limit)
-        .limit(limit)
-    )
+        .where(Community.org_id.in_(org_ids))  # type: ignore[attr-defined]
+        .order_by(Community.creation_date.desc())  # type: ignore[attr-defined]
+    ).all()
 
-    communities = db_session.exec(combined).all()
+    visible = []
+    for community in candidates:
+        decision = await check_resource_access(
+            request,
+            db_session,
+            current_user,
+            community.community_uuid,
+            AccessAction.READ,
+            raise_on_deny=False,
+        )
+        if decision.allowed:
+            visible.append(community)
+
+    communities = visible[(page - 1) * limit : (page - 1) * limit + limit]
 
     if not communities:
         return []

@@ -6,7 +6,8 @@ collection or community. A file placed directly in the root belongs to no niche
 and is kept aside for the handful of hand picked slots such as the flagship
 banner.
 
-Files inside the `avatars` folder are only used for user avatars. They never
+Files inside the `avatars` folder are only used for people: user avatars, plus
+the inline portraits stored on course instructors and podcast hosts. They never
 leak into card artwork, which is what would happen with a single flat pool.
 
 Pictures are dealt from a shuffled deck per pool, so the same image never lands
@@ -16,6 +17,7 @@ unavoidable when a niche has fewer pictures than slots.
 
 from __future__ import annotations
 
+import base64
 import random
 import shutil
 import uuid
@@ -25,6 +27,7 @@ from typing import Optional
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
 AUDIO_SUFFIXES = {".mp3", ".m4a", ".wav", ".ogg"}
 AVATAR_FOLDER = "avatars"
+AVATAR_MIME = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp"}
 
 
 class AssetPool:
@@ -37,6 +40,7 @@ class AssetPool:
         self.copied = 0
         self._decks: dict[str, list[Path]] = {}
         self._named: dict[str, Path] = {}
+        self._avatar_urls: dict[str, str] = {}
         self._scan()
 
     def _scan(self) -> None:
@@ -99,6 +103,25 @@ class AssetPool:
         if not self.avatars:
             return None
         return self._deal("avatars", self.avatars)
+
+    def avatar_data_url(self, key: Optional[str] = None) -> str:
+        """Return a portrait as a data URL.
+
+        Instructor and host cards store the picture inline (there is no user
+        row to build a media path from), so the file is encoded instead of
+        copied into the content tree. `key` keeps one person on the same
+        portrait across every course they teach.
+        """
+        if key and key in self._avatar_urls:
+            return self._avatar_urls[key]
+        source = self.pick_avatar()
+        if source is None:
+            return ""
+        mime = AVATAR_MIME.get(source.suffix.lower(), "image/png")
+        url = f"data:{mime};base64,{base64.b64encode(source.read_bytes()).decode()}"
+        if key:
+            self._avatar_urls[key] = url
+        return url
 
     def copy(self, source: Optional[Path], dest_dir: Path, prefix: str) -> str:
         """Copy a picture into the content tree and return its filename only."""

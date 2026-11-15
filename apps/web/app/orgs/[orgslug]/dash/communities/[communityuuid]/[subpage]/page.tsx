@@ -2,6 +2,7 @@
 import { getUriWithOrg } from '@services/config/config'
 import { LucideIcon } from 'lucide-react'
 import React, { use } from 'react'
+import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'motion/react'
 import { PageTabs } from '@components/ui/page-tabs'
@@ -41,6 +42,20 @@ function CommunityPageTitle() {
     <h1 className="text-3xl md:text-4xl font-semibold text-ui-fg-base leading-tight">
       {community?.name || '...'}
     </h1>
+  )
+}
+
+function CommunityTranslationsTab() {
+  const communityState = useCommunity()
+  const org = useOrg() as any
+  const router = useRouter()
+
+  return (
+    <CommunityEditTranslations
+      community={communityState?.community}
+      orgslug={org?.slug}
+      onUpdated={() => router.refresh()}
+    />
   )
 }
 
@@ -84,7 +99,7 @@ function CommunitySettingsContent({ params }: { params: CommunityParams }) {
             {params.subpage === 'access' && <CommunityEditAccess />}
             {params.subpage === 'course' && <CommunityEditCourse />}
             {params.subpage === 'moderation' && <CommunityEditModeration />}
-            {params.subpage === 'translations' && <CommunityEditTranslations />}
+            {params.subpage === 'translations' && <CommunityTranslationsTab />}
           </motion.div>
         </main>
       </div>

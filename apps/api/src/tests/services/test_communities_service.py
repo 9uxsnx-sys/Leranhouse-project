@@ -1,6 +1,7 @@
 """Tests for src/services/communities/*.py."""
 
 from datetime import datetime, timedelta, timezone
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -65,7 +66,8 @@ def _make_community(db, org, **overrides):
         description=overrides.pop("description", "Desc"),
         public=overrides.pop("public", True),
         thumbnail_image=overrides.pop("thumbnail_image", ""),
-        course_id=overrides.pop("course_id", None),
+        resource_uuid=overrides.pop("resource_uuid", None),
+        resource_type=overrides.pop("resource_type", None),
         community_uuid=overrides.pop("community_uuid", "community_test"),
         moderation_words=overrides.pop("moderation_words", []),
         creation_date=overrides.pop("creation_date", "2024-01-01"),
@@ -122,7 +124,8 @@ class TestCommunitiesService:
     async def test_community_crud_link_and_lookup(
         self, db, org, admin_user, mock_request
     ):
-        course = _make_course(db, org)
+        course = _make_course(db, org, course_uuid="course_link_a")
+        other_course = _make_course(db, org, id=31, course_uuid="course_link_b")
         with patch(
             "src.services.communities.communities.authorization_verify_if_user_is_anon",
             new_callable=AsyncMock,
@@ -137,7 +140,12 @@ class TestCommunitiesService:
             created = await create_community(
                 mock_request,
                 org.id,
-                CommunityCreate(name="Community", description="Desc", public=True),
+                CommunityCreate(
+                    name="Community",
+                    description="Desc",
+                    resource_uuid=course.course_uuid,
+                    resource_type="course",
+                ),
                 admin_user,
                 db,
             )
@@ -145,10 +153,14 @@ class TestCommunitiesService:
                 mock_request, created.community_uuid, admin_user, db
             )
             linked = await link_community_to_course(
-                mock_request, created.community_uuid, course.course_uuid, admin_user, db
+                mock_request,
+                created.community_uuid,
+                other_course.course_uuid,
+                admin_user,
+                db,
             )
             by_course = await get_community_by_course(
-                mock_request, course.course_uuid, admin_user, db
+                mock_request, other_course.course_uuid, admin_user, db
             )
             updated = await update_community(
                 mock_request,
@@ -171,44 +183,54 @@ class TestCommunitiesService:
             )
 
         assert fetched.community_uuid == created.community_uuid
-        assert linked.course_id == course.id
+        assert created.resource_uuid == course.course_uuid
+        assert created.resource_type == "course"
+        assert linked.resource_uuid == other_course.course_uuid
         assert by_course.community_uuid == created.community_uuid
         assert updated.name == "Updated"
         assert updated.description == "Updated Desc"
         assert updated.public is False
         assert updated.moderation_words == ["x"]
-        assert unlinked.course_id is None
+        assert unlinked.resource_uuid is None
+        assert unlinked.resource_type is None
         assert deleted == {"detail": "Community deleted"}
 
     @pytest.mark.asyncio
-    async def test_get_communities_by_org_variants_and_rights(
+    async def test_get_communities_by_org_filters_by_linked_resource(
         self, db, org, admin_user, regular_user, anonymous_user, mock_request
     ):
-        public_community = _make_community(
-            db, org, id=1, community_uuid="community_public", public=True
+        course = _make_course(db, org, course_uuid="course_filter_a")
+        visible = _make_community(
+            db,
+            org,
+            id=1,
+            community_uuid="community_visible",
+            resource_uuid=course.course_uuid,
+            resource_type="course",
         )
-        private_community = _make_community(
-            db, org, id=2, community_uuid="community_private", public=False
+        hidden = _make_community(
+            db,
+            org,
+            id=2,
+            community_uuid="community_hidden",
+            resource_uuid="course_filter_b",
+            resource_type="course",
         )
-        usergroup = _make_usergroup(db, org, id=50)
-        db.add(
-            UserGroupResource(
-                usergroup_id=usergroup.id,
-                resource_uuid=private_community.community_uuid,
-                org_id=org.id,
-                creation_date=str(datetime.now()),
-                update_date=str(datetime.now()),
+        orphan = _make_community(
+            db, org, id=3, community_uuid="community_orphan"
+        )
+
+        async def fake_check(request, session, user, uuid, action, **kwargs):
+            return SimpleNamespace(
+                allowed=uuid == visible.community_uuid,
+                via_public=False,
+                via_usergroup=False,
+                via_entitlement=False,
+                via_authorship=False,
+                via_admin=False,
+                via_role=False,
+                reason="filtered",
             )
-        )
-        db.add(
-            UserGroupUser(
-                usergroup_id=usergroup.id,
-                user_id=regular_user.id,
-                creation_date=str(datetime.now()),
-                update_date=str(datetime.now()),
-            )
-        )
-        db.commit()
 
         with patch(
             "src.services.communities.communities.is_user_superadmin",
@@ -221,15 +243,15 @@ class TestCommunitiesService:
             "src.services.communities.communities.authorization_verify_based_on_org_admin_status",
             new_callable=AsyncMock,
             return_value=False,
+        ), patch(
+            "src.services.communities.communities.check_resource_access",
+            side_effect=fake_check,
         ):
-            anon_result = await get_communities_by_org(
-                mock_request, org.id, anonymous_user, db
-            )
             regular_result = await get_communities_by_org(
                 mock_request, org.id, regular_user, db
             )
             rights = await get_community_user_rights(
-                mock_request, private_community.community_uuid, regular_user, db
+                mock_request, visible.community_uuid, regular_user, db
             )
 
         with patch(
@@ -240,16 +262,14 @@ class TestCommunitiesService:
                 mock_request, org.id, admin_user, db
             )
 
-        assert [community.community_uuid for community in anon_result] == [
-            public_community.community_uuid
+        # Orphans and communities whose linked resource is denied stay hidden.
+        assert [community.community_uuid for community in regular_result] == [
+            visible.community_uuid
         ]
-        assert {community.community_uuid for community in regular_result} == {
-            public_community.community_uuid,
-            private_community.community_uuid,
-        }
         assert rights["permissions"]["read"] is True
-        assert rights["access"]["via_usergroups"] == [usergroup.id]
-        assert len(admin_result) == 2
+        assert rights["access"]["is_linked"] is True
+        assert rights["access"]["resource_uuid"] == course.course_uuid
+        assert len(admin_result) == 3
 
     @pytest.mark.asyncio
     async def test_community_admin_and_error_branches(
@@ -269,7 +289,8 @@ class TestCommunitiesService:
             id=22,
             community_uuid="community_linked",
             public=False,
-            course_id=course.id,
+            resource_uuid=course.course_uuid,
+            resource_type="course",
         )
         other_org_community = _make_community(
             db,
@@ -277,6 +298,27 @@ class TestCommunitiesService:
             id=23,
             community_uuid="community_other_org",
             public=False,
+        )
+
+        allowed_decision = SimpleNamespace(
+            allowed=True,
+            via_public=False,
+            via_usergroup=False,
+            via_entitlement=False,
+            via_authorship=False,
+            via_admin=False,
+            via_role=False,
+            reason="allowed",
+        )
+        denied_decision = SimpleNamespace(
+            allowed=False,
+            via_public=False,
+            via_usergroup=False,
+            via_entitlement=False,
+            via_authorship=False,
+            via_admin=False,
+            via_role=False,
+            reason="denied",
         )
 
         with patch(
@@ -293,12 +335,10 @@ class TestCommunitiesService:
         ), patch(
             "src.services.communities.communities.check_resource_access",
             new_callable=AsyncMock,
+            return_value=allowed_decision,
         ):
             admin_rights_result = await get_community_user_rights(
                 mock_request, community.community_uuid, admin_user, db
-            )
-            anon_rights_result = await get_community_user_rights(
-                mock_request, community.community_uuid, anonymous_user, db
             )
             admin_list_result = await get_communities_by_org(
                 mock_request, org.id, admin_user, db
@@ -316,7 +356,12 @@ class TestCommunitiesService:
                 await create_community(
                     mock_request,
                     9999,
-                    CommunityCreate(name="Missing Org", description="Desc", public=True),
+                    CommunityCreate(
+                        name="Missing Org",
+                        description="Desc",
+                        resource_uuid=course.course_uuid,
+                        resource_type="course",
+                    ),
                     admin_user,
                     db,
                 )
@@ -365,21 +410,26 @@ class TestCommunitiesService:
         ), patch(
             "src.services.communities.communities.check_resource_access",
             new_callable=AsyncMock,
+            return_value=allowed_decision,
         ):
             with pytest.raises(HTTPException) as create_denied_exc:
                 await create_community(
                     mock_request,
                     org.id,
-                    CommunityCreate(name="Denied", description="Desc", public=True),
+                    CommunityCreate(
+                        name="Denied",
+                        description="Desc",
+                        resource_uuid=course.course_uuid,
+                        resource_type="course",
+                    ),
                     admin_user,
                     db,
                 )
             existing_linked_community = _make_community(
                 db,
                 org,
-                id=24,
+                id=26,
                 community_uuid="community_existing_link",
-                course_id=course.id,
             )
             with pytest.raises(HTTPException) as link_same_org_exc:
                 await link_community_to_course(
@@ -389,7 +439,16 @@ class TestCommunitiesService:
                     admin_user,
                     db,
                 )
-            assert existing_linked_community.course_id == course.id
+            assert existing_linked_community.resource_uuid is None
+
+        with patch(
+            "src.services.communities.communities.check_resource_access",
+            new_callable=AsyncMock,
+            return_value=denied_decision,
+        ):
+            anon_rights_result = await get_community_user_rights(
+                mock_request, community.community_uuid, anonymous_user, db
+            )
 
         other_course = _make_course(
             db,
@@ -435,71 +494,73 @@ class TestCommunitiesService:
     async def test_community_user_rights_anonymous_and_no_access(
         self, db, org, anonymous_user, regular_user, mock_request
     ):
-        public_community = _make_community(
+        linked = _make_community(
             db,
             org,
             id=30,
-            community_uuid="community_public_rights",
-            public=True,
+            community_uuid="community_linked_rights",
+            resource_uuid="course_rights",
+            resource_type="course",
         )
-        private_community = _make_community(
-            db,
-            org,
-            id=31,
-            community_uuid="community_private_rights",
-            public=False,
+        orphan = _make_community(
+            db, org, id=31, community_uuid="community_orphan_rights"
         )
-        usergroup = _make_usergroup(db, org, id=32, usergroup_uuid="ug_private_rights")
-        db.add(
-            UserGroupResource(
-                usergroup_id=usergroup.id,
-                resource_uuid=private_community.community_uuid,
-                org_id=org.id,
-                creation_date=str(datetime.now()),
-                update_date=str(datetime.now()),
-            )
+
+        denied_decision = SimpleNamespace(
+            allowed=False,
+            via_public=False,
+            via_usergroup=False,
+            via_entitlement=False,
+            via_authorship=False,
+            via_admin=False,
+            via_role=False,
+            reason="denied",
         )
-        db.commit()
-        private_group = _make_usergroup(db, org, id=51)
-        db.add(
-            UserGroupResource(
-                usergroup_id=private_group.id,
-                resource_uuid=private_community.community_uuid,
-                org_id=org.id,
-                creation_date=str(datetime.now()),
-                update_date=str(datetime.now()),
-            )
-        )
-        db.commit()
 
         with patch(
-            "src.services.communities.communities.authorization_verify_based_on_roles",
+            "src.services.communities.communities.check_resource_access",
             new_callable=AsyncMock,
-            return_value=False,
-        ), patch(
-            "src.services.communities.communities.authorization_verify_based_on_org_admin_status",
-            new_callable=AsyncMock,
-            return_value=False,
+            return_value=denied_decision,
         ):
             anonymous_rights = await get_community_user_rights(
-                mock_request, public_community.community_uuid, anonymous_user, db
+                mock_request, linked.community_uuid, anonymous_user, db
             )
-            private_rights = await get_community_user_rights(
-                mock_request, private_community.community_uuid, regular_user, db
+            orphan_rights = await get_community_user_rights(
+                mock_request, orphan.community_uuid, regular_user, db
             )
 
-        assert anonymous_rights["permissions"]["read"] is True
-        assert anonymous_rights["access"]["via_public"] is True
-        assert private_rights["permissions"]["read"] is False
-        assert private_rights["permissions"]["create_discussion"] is False
-        assert private_rights["access"]["via_public"] is False
-        assert private_rights["access"]["has_usergroup_restriction"] is True
+        assert anonymous_rights["permissions"]["read"] is False
+        assert anonymous_rights["permissions"]["create_discussion"] is False
+        assert anonymous_rights["access"]["is_linked"] is True
+        assert anonymous_rights["access"]["resource_uuid"] == "course_rights"
+        assert orphan_rights["permissions"]["read"] is False
+        assert orphan_rights["access"]["is_linked"] is False
 
     @pytest.mark.asyncio
     async def test_community_error_paths(self, db, org, admin_user, mock_request):
         course = _make_course(db, org, id=2, course_uuid="course_two")
-        community = _make_community(db, org, id=10, course_id=course.id)
-        _make_community(db, org, id=11, community_uuid="community_two", course_id=course.id)
+        community = _make_community(
+            db,
+            org,
+            id=10,
+            resource_uuid=course.course_uuid,
+            resource_type="course",
+        )
+        _make_community(
+            db,
+            org,
+            id=11,
+            community_uuid="community_two",
+        )
+
+        # A community can only link to a resource that has no community yet, so
+        # an orphan cannot steal the course already owned by `community`.
+        orphan = _make_community(
+            db,
+            org,
+            id=12,
+            community_uuid="community_orphan_two",
+        )
 
         with patch(
             "src.services.communities.communities.authorization_verify_if_user_is_anon",
@@ -513,7 +574,12 @@ class TestCommunitiesService:
                 await create_community(
                     mock_request,
                     org.id,
-                    CommunityCreate(name="Denied", description="Desc", public=True),
+                    CommunityCreate(
+                        name="Denied",
+                        description="Desc",
+                        resource_uuid=course.course_uuid,
+                        resource_type="course",
+                    ),
                     admin_user,
                     db,
                 )
@@ -525,7 +591,7 @@ class TestCommunitiesService:
         ):
             with pytest.raises(HTTPException) as link_exc:
                 await link_community_to_course(
-                    mock_request, community.community_uuid, course.course_uuid, admin_user, db
+                    mock_request, orphan.community_uuid, course.course_uuid, admin_user, db
                 )
         assert link_exc.value.status_code == 400
 
@@ -565,6 +631,8 @@ class TestDiscussionsService:
         ), patch(
             "src.services.communities.discussions.dispatch_webhooks",
             new_callable=AsyncMock,
+        ), patch(
+            "src.services.communities.discussions.notify",
         ), patch(
             "src.services.communities.discussions.authorization_verify_based_on_org_admin_status",
             new_callable=AsyncMock,

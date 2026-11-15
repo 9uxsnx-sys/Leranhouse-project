@@ -1,66 +1,63 @@
+> Status: as-built · Last verified: 2026-11-15
+
 # Account
 
-> Managing your LearnHouse account settings.
-
----
+Account settings have three tabs: General, Security and Privacy. All three are per user, not per organization.
 
 ## General
 
-The General tab lets you manage your profile information:
+The General tab edits your public profile.
 
-- **Avatar** --- Profile picture (upload via drag-and-drop or file picker)
-- **Username** --- Your unique username on the platform
-- **Bio** --- Short description about yourself
-- **Language** --- Preferred interface language
+| Field | Notes |
+|---|---|
+| Username | Unique handle; checked for availability before saving |
+| First name | Required display name |
+| Bio | Up to 400 characters; a live counter shows what remains |
+| Profile picture | JPG or PNG up to 8 MB; cropped to a square before upload |
+| Banner | JPG or PNG up to 8 MB; cropped to a 4:1 banner before upload |
 
-All changes are saved via the **Save** button at the bottom of the form.
-
----
+Avatar and banner changes upload immediately after cropping. Text fields use the **Save** button at the bottom, which switches between Save, Saving and Saved.
 
 ## Security
 
-The Security tab covers authentication-related settings:
+The Security tab has two rows plus a destructive action.
 
-### Email
+| Row | Behaviour |
+|---|---|
+| Email | Shows the current address masked. **Change** opens a modal for the new address; success signs you out so you can sign in again |
+| Password | **Change** opens a modal with current password, new password and a live strength indicator. The new password needs at least 8 characters; success signs you out |
+| Delete account | Opens a confirmation modal. Type `DELETE` to enable the destructive button; deletion is permanent and signs you out |
 
-- Click **Change Email** to open a modal
-- Enter your current email and the new email address
-- On success, you'll be signed out and need to sign in again with the new email
-
-### Password
-
-- Click **Change Password** to open a modal
-- Enter your current password and the new password
-- A **password strength indicator** shows in real-time as you type (weak / fair / strong)
-- The new password must meet minimum complexity requirements
-- On success, you'll be signed out and need to sign in again
-
-### Delete Account
-
-- Click **Delete Account** to open a confirmation modal
-- Type the word **DELETE** (case-sensitive) to enable the confirm button
-- This permanently removes all your data including courses, progress, and personal information
-- This action cannot be undone
-
----
+Both credential changes sign you out after they succeed, so plan to sign in again.
 
 ## Privacy
 
-The Privacy tab controls what information is visible on your public profile:
+The Privacy tab controls what appears on your public profile.
 
-- **Hide courses I own** --- Your created courses won't show up on your public profile
-- **Hide podcasts I own** --- Your podcasts won't be listed on your public profile
-- **Hide communities I have** --- Groups you're in won't be visible on your profile
+| Toggle | Effect |
+|---|---|
+| Hide courses I own | Your authored courses disappear from your profile |
+| Hide podcasts I own | Your authored podcasts disappear from your profile |
+| Hide communities I have | Your community memberships disappear from your profile |
 
-Each setting is a toggle switch that saves immediately when changed.
+Each toggle saves immediately; no Save button is involved. The values are stored in your user metadata.
 
----
+## Avatar and banner cropping
 
-## Purchase History
+Selecting a new image opens a crop dialog rather than uploading the file directly.
 
-View your past course purchases including:
-- Course name
-- Purchase date
-- Payment method
-- Amount paid
-- Receipt
+1. Drag the image to reposition it and use the wheel to zoom.
+2. The crop frame is square for the avatar and 4:1 for the banner.
+3. Press **Save** in the dialog to upload the cropped result; **Cancel** discards it.
+
+Uploaded images replace the previous file. Use the trash action next to an existing avatar or banner to remove it.
+
+## What is not here
+
+There is no purchases tab, no my-courses tab, no invoice list and no payment-management tab. Paid access is managed through the resource pages, the store and the payment result page; your enrolled courses live on the **Progress** page.
+
+## Related
+
+- [Getting Started](./getting-started.md) — signup and sign-in.
+- [Courses](./courses.md) and [Progress](./getting-started.md#progress).
+- [Users API](../06-api-reference/users.md) and [Authentication API](../06-api-reference/authentication.md).

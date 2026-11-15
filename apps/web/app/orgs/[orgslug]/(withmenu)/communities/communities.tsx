@@ -28,7 +28,7 @@ interface CommunitiesClientProps {
   org_id: number
 }
 
-type FilterMode = 'all' | 'newest' | 'course' | 'general'
+type FilterMode = 'all' | 'newest' | 'course' | 'podcast'
 
 const removeCommunityPrefix = (uuid: string) => uuid.replace('community_', '')
 
@@ -66,7 +66,7 @@ function CommunitiesClient(props: CommunitiesClientProps) {
       case 'all': return t('communities.all_communities')
       case 'newest': return t('communities.newest')
       case 'course': return t('communities.course_communities')
-      case 'general': return t('communities.general')
+      case 'podcast': return t('communities.podcast_communities')
     }
   }, [activeFilter, t])
 
@@ -77,10 +77,10 @@ function CommunitiesClient(props: CommunitiesClientProps) {
     // Apply filter
     switch (activeFilter) {
       case 'course':
-        communities = communities.filter((c: any) => c.course_id != null)
+        communities = communities.filter((c: any) => c.resource_type === 'course')
         break
-      case 'general':
-        communities = communities.filter((c: any) => c.course_id == null)
+      case 'podcast':
+        communities = communities.filter((c: any) => c.resource_type === 'podcast')
         break
       case 'newest':
         communities = [...communities].sort((a: any, b: any) =>
@@ -210,9 +210,9 @@ function CommunitiesClient(props: CommunitiesClientProps) {
                 <span>{t('communities.course_communities')}</span>
                 {activeFilter === 'course' && <CheckSquare size={12} className="text-gray-500" />}
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setActiveFilter('general')} className="flex items-center justify-between">
-                <span>{t('communities.general')}</span>
-                {activeFilter === 'general' && <CheckSquare size={12} className="text-gray-500" />}
+              <DropdownMenuItem onSelect={() => setActiveFilter('podcast')} className="flex items-center justify-between">
+                <span>{t('communities.podcast_communities')}</span>
+                {activeFilter === 'podcast' && <CheckSquare size={12} className="text-gray-500" />}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -229,8 +229,7 @@ function CommunitiesClient(props: CommunitiesClientProps) {
                 description={community.description || ''}
                 org_uuid={org_uuid}
                 community_uuid={community.community_uuid}
-                course_id={community.course_id}
-                public={community.public || false}
+                resource_type={community.resource_type}
                 creation_date={community.creation_date || ''}
                 thumbnail_image={community.thumbnail_image}
                 href={`/orgs/${orgslug}/community/${removeCommunityPrefix(community.community_uuid)}`}

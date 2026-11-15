@@ -6,6 +6,11 @@ import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { CourseCard } from '@components/Objects/Thumbnails/CourseCard'
 import { searchMatchesAny } from '@/lib/search/normalize'
+import {
+  DIFFICULTY_OPTIONS,
+  canonicalDifficulty,
+  difficultyTranslationKey,
+} from '@/lib/difficulty'
 import { getUserGroups, getUserGroupResources } from '@services/usergroups/usergroups'
 import { usePlan } from '@components/Hooks/usePlan'
 import { getCourseThumbnailMediaDirectory } from '@services/media/media'
@@ -109,13 +114,27 @@ function Courses(props: CourseProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState('All')
 
-  // Filter courses based on search and usergroup
+  const difficultyLabel = (value: string) => {
+    const key = difficultyTranslationKey(value)
+    return key ? t(key) : value
+  }
+
+  // Filter courses based on search, difficulty and usergroup
   const filteredCourses = useMemo(() => {
     let courses = allCourses
 
     // Usergroup filter
     if (usergroupResourceUuids) {
       courses = courses.filter((course: any) => usergroupResourceUuids.has(course.course_uuid))
+    }
+
+    // Difficulty filter — compare on the canonical value, translations may hold
+    // an authored label.
+    if (activeFilter !== 'All') {
+      courses = courses.filter(
+        (course: any) =>
+          canonicalDifficulty(course.extra_metadata?.difficulty) === activeFilter
+      )
     }
 
     // Search filter
@@ -126,7 +145,7 @@ function Courses(props: CourseProps) {
     }
 
     return courses
-  }, [allCourses, searchQuery, usergroupResourceUuids])
+  }, [allCourses, searchQuery, activeFilter, usergroupResourceUuids])
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
@@ -135,7 +154,7 @@ function Courses(props: CourseProps) {
   // Reset to page 1 when search or filter changes
   React.useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, selectedUsergroupId])
+  }, [searchQuery, activeFilter, selectedUsergroupId])
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredCourses.length / itemsPerPage)
@@ -220,14 +239,16 @@ function Courses(props: CourseProps) {
                 <svg width="14" height="14" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M2.5 4.5h10M4.5 7.5h6M6.5 10.5h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                <span>{activeFilter}</span>
+                <span>{activeFilter === 'All' ? t('common.all_courses') : difficultyLabel(activeFilter)}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white min-w-0 w-28">
               <DropdownMenuItem onClick={() => setActiveFilter('All')}>{t('common.all_courses')}</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setActiveFilter('Easy')}>{t('common.easy')}</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setActiveFilter('Medium')}>{t('common.medium')}</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setActiveFilter('Hard')}>{t('common.hard')}</DropdownMenuItem>
+              {DIFFICULTY_OPTIONS.map((option) => (
+                <DropdownMenuItem key={option} onClick={() => setActiveFilter(option)}>
+                  {difficultyLabel(option)}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
 

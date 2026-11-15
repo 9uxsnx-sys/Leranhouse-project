@@ -17,7 +17,12 @@ from src.db.podcasts.episodes import (
 from src.services.podcasts.thumbnails import upload_episode_thumbnail, upload_episode_audio
 from fastapi import HTTPException, Request, UploadFile
 from datetime import datetime
-from src.security.rbac import check_resource_access, AccessAction
+from src.db.payments.enums import AccessTypeEnum
+from src.security.rbac import (
+    check_catalog_read_access,
+    check_resource_access,
+    AccessAction,
+)
 from src.security.rbac.constants import ADMIN_OR_MAINTAINER_ROLE_IDS
 from src.services.webhooks.dispatch import dispatch_webhooks
 from src.services.notifications import notify
@@ -162,6 +167,18 @@ async def get_episodes_by_podcast(
                     can_view_unpublished = True
                     break
 
+    # The episode list doubles as the product page for a paid podcast: the
+    # metadata stays visible, the audio is what the purchase unlocks.
+    access = await check_catalog_read_access(
+        request,
+        db_session,
+        current_user,
+        podcast.podcast_uuid,
+        published=podcast.published,
+        access_type=podcast.access_type,
+    )
+    hide_audio = podcast.access_type == AccessTypeEnum.PAID and not access.allowed
+
     # Query episodes
     query = select(PodcastEpisode).where(PodcastEpisode.podcast_id == podcast_id)
 
@@ -173,9 +190,15 @@ async def get_episodes_by_podcast(
     episodes = db_session.exec(query).all()
 
     reads = [PodcastEpisodeRead(**episode.model_dump()) for episode in episodes]
-    return apply_episode_overlay_bulk(
+    reads = apply_episode_overlay_bulk(
         reads, episodes, podcast_source_locale(podcast), locale, db_session
     )
+
+    if hide_audio:
+        for read in reads:
+            read.audio_file = ""
+
+    return reads
 
 
 async def create_episode(
@@ -263,6 +286,7 @@ async def create_episode(
             "title": episode.title if hasattr(episode, "title") else None,
             "episode_number": episode.episode_number,
         },
+        db_session=db_session,
     )
 
     return PodcastEpisodeRead(**episode.model_dump())

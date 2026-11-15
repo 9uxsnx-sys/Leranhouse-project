@@ -259,8 +259,7 @@ function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProp
                       description={community.description || ''}
                       org_uuid={orgUuid}
                       community_uuid={community.community_uuid}
-                      course_id={community.course_id}
-                      public={community.public}
+                      resource_type={community.resource_type}
                       creation_date={community.creation_date}
                       thumbnail_image={community.thumbnail_image}
                       href={`/orgs/${orgslug}/community/${community.community_uuid || community.id}`}

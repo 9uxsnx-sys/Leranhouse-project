@@ -1,259 +1,160 @@
-# CLI Tool Reference
+# CLI Reference
 
-> The LearnHouse CLI provides development workflow orchestration — starting infrastructure (PostgreSQL, Redis), managing application services (API, Web, Collab), and automating setup tasks — all from a single command.
+> Status: as-built · Last verified: 2026-11-15
 
----
-
-## Overview
-
-The CLI lives in `apps/cli/` and is written in TypeScript, run via Bun. It serves as the primary development interface for the monorepo.
-
-### Entry Point
-
-```
-apps/cli/src/bin/learnhouse.ts  →  bun run apps/cli/src/bin/learnhouse.ts
-```
-
-### Commands
-
-| Command | Description |
-|---------|-------------|
-| `dev` | Start development environment (infra + services) |
-| `setup` | Initial project setup |
+The CLI lives in `apps/cli/` (TypeScript, run with Bun). It has two jobs: run the monorepo in development, and manage a Docker deployment under `~/.learnhouse/<name>`.
 
 ---
 
-## Dev Command
+## Invocation
 
-The `dev` command orchestrates the full development environment:
+| Context | Command |
+|---------|---------|
+| Repo checkout (from the repository root) | `bun run apps/cli/bin/learnhouse.ts <command>` |
+| Published npm package | `npx learnhouse <command>` |
+
+The entry point is `apps/cli/bin/learnhouse.ts`. Running it without a command prints the banner and the command list.
+
+---
+
+## Commands
+
+| Command | Flags | What it does |
+|---------|-------|--------------|
+| `setup` | `--ci`, `--name`, `--domain`, `--port`, `--admin-email`, `--admin-password`, `--channel stable\|dev`, `--no-start` | Interactive deployment wizard (or non-interactive with `--ci`); writes the install directory and optionally starts it |
+| `start` | — | `docker compose up -d` for the detected install |
+| `stop` | — | `docker compose down` for the detected install |
+| `logs` | — | Streams compose logs, falling back to `docker logs` for running containers |
+| `config` | — | Prints version, install directory, URL, and org slug |
+| `env` | — | Category-based editor for the install's `.env`; offers a restart |
+| `backup` | `[archive]`, `--restore` | Creates `<install>/backups/learnhouse-backup-<timestamp>.tar.gz` (database dump + `.env`), or restores with `backup <archive> --restore` |
+| `restore` | `<archive>` | Restores a backup into the local Docker database |
+| `deployments` | — | Lists deployments or sets container resource limits |
+| `doctor` | — | Checks Docker, containers, restart counts, ports, DNS, disk, logs, and `.env` keys |
+| `shell` | — | Opens `/bin/sh` in a selected running container |
+| `update` | `-v, --version <version>`, `--migrate`, `--no-migrate` | Switches the image tag, restarts, optionally runs Alembic |
+| `status` | — | Shows `docker compose ps` for the install |
+| `health` | — | Container status, `pg_isready`, Redis ping, `GET /api/v1/health`, disk and resource usage |
+| `dev` | `--ee`, `--admin-email <email>`, `--admin-password <password>` | Development mode (below) |
+
+`setup --ci` requires `--admin-password`. If `--admin-password` is omitted outside `--ci`, the wizard prompts for it.
+
+---
+
+## Two operating modes
+
+### Deployment commands
+
+`setup`, `start`, `stop`, `logs`, `config`, `env`, `backup`, `restore`, `deployments`, `doctor`, `shell`, `update`, `status`, and `health` all resolve the install directory through `~/.learnhouse/<name>` (the most recent complete install, `~/.learnhouse/default`, or a legacy install in the current directory). The install contains:
+
+```
+~/.learnhouse/<name>/
+  learnhouse.config.json     # version, deploymentId, domain/port, org slug
+  docker-compose.yml         # app + db + redis (+ nginx/Caddy)
+  .env                       # secrets and runtime settings
+  extra/nginx.prod.conf      # or extra/Caddyfile when auto-SSL is enabled
+```
+
+### `dev`
+
+`dev` is the only command that works on the source tree instead of an installed deployment.
 
 ```bash
-# Basic usage
-bun run apps/cli/src/bin/learnhouse.ts dev
-
-# With admin credentials (non-interactive)
-bun run apps/cli/src/bin/learnhouse.ts dev \
-    --admin-email admin@school.dev \
-    --admin-password admin123456
-
-# With Enterprise Edition
-bun run apps/cli/src/bin/learnhouse.ts dev --ee
+# from the repository root
+bun run apps/cli/bin/learnhouse.ts dev
+bun run apps/cli/bin/learnhouse.ts dev --admin-email admin@school.dev --admin-password admin123456
+bun run apps/cli/bin/learnhouse.ts dev --ee
 ```
 
-### What It Does
+What it does:
 
-1. **Checks environment** — Validates Docker, env files, project structure
-2. **Starts infrastructure** — PostgreSQL (pgvector) and Redis containers via Docker Compose
-3. **Waits for health** — Polls until DB and Redis are ready
-4. **Auto-installs dependencies** — `bun install` for web/collab, `uv sync` for API
-5. **Starts application services** — API (uvicorn), Web (Next.js), Collab (Hocuspocus)
-6. **Interactive controls** — Hotkey management of running services
+1. Checks `apps/api/.env`, `apps/web/.env.local`, and `apps/collab/.env`. Missing required keys are listed; choosing "Apply dev defaults" appends them (it does not abort automatically).
+2. Requires Docker to be installed and running.
+3. When the containers are not already running, prompts for admin email/password, then starts PostgreSQL + Redis from `.learnhouse/docker-compose.dev.yml`.
+4. Waits for `pg_isready` and `redis-cli ping` (30 attempts, 1 s apart).
+5. Runs `bun install` in `apps/web` and `apps/collab` when `node_modules` is missing, and `uv sync` in `apps/api` when `.venv` is missing.
+6. Starts the services as child processes with hot reload.
 
-### Infrastructure
+| Service | Command | Port |
+|---------|---------|------|
+| API | `uv run python app.py` | 1338 |
+| Web | `next dev --webpack` | 3000 |
+| Collab | `tsx watch src/index.ts` | 4000 |
 
-The dev command generates a Docker Compose file at `.learnhouse/docker-compose.dev.yml`:
+Infrastructure from `.learnhouse/docker-compose.dev.yml`:
 
-```yaml
-services:
-  db:
-    image: pgvector/pgvector:pg16
-    container_name: learnhouse-db-dev
-    ports:
-      - "5434:5432"    # Note: 5434, not 5432
-    environment:
-      - POSTGRES_USER=learnhouse
-      - POSTGRES_PASSWORD=learnhouse
-      - POSTGRES_DB=learnhouse
-    volumes:
-      - learnhouse_db_dev_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U learnhouse"]
+| Service | Image | Host port |
+|---------|-------|-----------|
+| db | `pgvector/pgvector:pg16` (`learnhouse-db-dev`) | 5434 → 5432 |
+| redis | `redis:8.6.1-alpine` (`learnhouse-redis-dev`) | 6379 |
 
-  redis:
-    image: redis:8.6.1-alpine
-    container_name: learnhouse-redis-dev
-    command: redis-server --appendonly yes
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-```
+Child processes receive `FORCE_COLOR=1`, `LEARNHOUSE_INITIAL_ADMIN_EMAIL`, `LEARNHOUSE_INITIAL_ADMIN_PASSWORD`, and `LEARNHOUSE_DISABLE_EE=1` (omitted with `--ee`).
 
-### Container Lifecycle
+Interactive controls (only in a real TTY): `ra` restart API, `rw` restart web, `rc` restart collab, `rb` restart all, `q` / `Ctrl+C` stop the servers. The DB and Redis containers are left running.
 
-- **First run**: Containers are created and started
-- **Subsequent runs**: Existing containers are detected and reused
-- **Shutdown**: Containers remain running for next session (fast restart)
-- **Manual cleanup**:
-  ```bash
-  docker compose -f .learnhouse/docker-compose.dev.yml -p learnhouse-dev down
-  docker volume rm learnhouse-dev_learnhouse_db_dev_data  # Wipes DB
-  ```
+Container cleanup:
 
-### Service Management
-
-The CLI spawns three child processes:
-
-| Service | Command | Color | Restart Key |
-|---------|---------|-------|-------------|
-| API | `uv run python app.py` | Magenta | `ra` |
-| Web | `next dev --webpack` | Cyan | `rw` |
-| Collab | `tsx watch src/index.ts` | Yellow | `rc` |
-
-### Interactive Controls
-
-Once running, the CLI provides hotkey controls:
-
-```
-────────────────────────────────────────────────────────────
-  ra  restart api    rw  restart web    rc  restart collab
-  rb  restart all    q   quit
-────────────────────────────────────────────────────────────
-```
-
-| Key | Action |
-|-----|--------|
-| `r` then `a` | Restart API server |
-| `r` then `w` | Restart Web server |
-| `r` then `c` | Restart Collab server |
-| `r` then `b` | Restart all servers |
-| `q` | Shutdown gracefully |
-
-### Environment Variables
-
-The CLI sets these environment variables for child processes:
-
-```typescript
-serviceEnv = {
-    FORCE_COLOR: '1',
-    LEARNHOUSE_INITIAL_ADMIN_EMAIL: adminEmail,
-    LEARNHOUSE_INITIAL_ADMIN_PASSWORD: adminPassword,
-    LEARNHOUSE_DISABLE_EE: '1',  // Omitted when --ee is passed
-}
-```
-
-### Health Checks
-
-```typescript
-// Waits up to 30 seconds for each service
-const [dbReady, redisReady] = await Promise.all([
-    waitForHealth('DB', 'docker', 
-        ['exec', 'learnhouse-db-dev', 'pg_isready', '-U', 'learnhouse']),
-    waitForHealth('Redis', 'docker',
-        ['exec', 'learnhouse-redis-dev', 'redis-cli', 'ping']),
-])
+```bash
+docker compose -f .learnhouse/docker-compose.dev.yml -p learnhouse-dev down
+docker volume rm learnhouse-dev_learnhouse_db_dev_data   # wipes dev DB
 ```
 
 ---
 
 ## API CLI (Typer)
 
-The backend also includes a Typer-based CLI for installation operations in `apps/api/cli.py`:
+Separate from the TypeScript CLI, the API ships `apps/api/cli.py`:
 
 ```bash
-# From apps/api/
-uv run python cli.py install
-
-# Non-interactive mode
-uv run python cli.py install --short
+cd apps/api
+uv run python cli.py install          # interactive org + admin prompts
+uv run python cli.py install --short  # default org "default" + admin from env
 ```
 
-### Install Command
+`install` calls `SQLModel.metadata.create_all(engine)` — it does not run Alembic — then installs default roles/permissions and creates the organization and admin user. `--short` requires `LEARNHOUSE_INITIAL_ADMIN_PASSWORD` and exits if it is missing.
 
-The `install` command:
-1. Creates database tables (runs all migrations)
-2. Installs default elements (roles, permissions)
-3. Creates the organization
-4. Creates the admin user (reads `LEARNHOUSE_INITIAL_ADMIN_EMAIL` and `LEARNHOUSE_INITIAL_ADMIN_PASSWORD` env vars)
-
-This runs automatically on first startup via the startup event handler.
+The same `install(short=True)` runs automatically on API startup when the database contains no organization (`src/core/events/autoinstall.py`).
 
 ---
 
-## Data Migration Script
+## Data migration script
 
-A standalone migration script lives at `apps/api/scripts/migrate.py` for data migrations that can't be handled by Alembic schema migrations:
+`apps/api/scripts/migrate.py` performs data backfills that are not schema migrations. The migration name is a **positional argument**:
 
 ```bash
-# Show pending migrations
-uv run python scripts/migrate.py --show
+cd apps/api
+uv run python scripts/migrate.py                       # run all
+uv run python scripts/migrate.py communities           # one migration
+uv run python scripts/migrate.py --show                # print current roles/features
+uv run python scripts/migrate.py --dry-run             # preview changes
+```
 
-# Run all pending migrations
+Accepted names: `communities`, `podcasts`, `colors`, `boards`, `playgrounds`.
+
+The script reads `DATABASE_URL` (or `LEARNHOUSE_DB_URL`), **not** `LEARNHOUSE_SQL_CONNECTION_STRING`, and defaults to `localhost:5432`. In dev, set it explicitly:
+
+```powershell
+$env:DATABASE_URL="postgresql://learnhouse:learnhouse@localhost:5434/learnhouse"
 uv run python scripts/migrate.py
-
-# Run a specific migration
-uv run python scripts/migrate.py --migration communities
-
-# Dry run (preview without applying)
-uv run python scripts/migrate.py --dry-run
 ```
-
-Handles migrations for:
-- Communities & discussions permissions
-- Podcasts permissions
-- Boards permissions
-- Playgrounds permissions
-- Org config colors reset
 
 ---
 
-## Default Ports
+## Ports
 
 | Service | Port | Notes |
 |---------|------|-------|
-| PostgreSQL | 5434 | Mapped to container's 5432 |
-| Redis | 6379 | Standard Redis port |
-| API | 1338 | FastAPI (configurable via `LEARNHOUSE_API_PORT`) |
-| Web | 3000 | Next.js |
-| Collab | 4000 | Hocuspocus WebSocket |
+| API | 1338 | `LEARNHOUSE_PORT` overrides `config.yaml`'s `hosting_config.port` |
+| Web | 3000 | Next.js dev server |
+| Collab | 4000 | `COLLAB_PORT` |
+| PostgreSQL (dev) | 5434 | Compose maps `5434:5432` |
+| Redis (dev) | 6379 | Standard port |
 
 ---
 
-## Troubleshooting CLI Issues
+## CLI troubleshooting
 
-### Docker Not Available
-
-```bash
-# Check Docker
-docker --version
-docker info
-
-# On macOS: Docker Desktop must be running
-# On Linux: systemctl start docker
-```
-
-### Port Conflicts
-
-```bash
-# Check if ports are in use
-netstat -an | findstr ":5434"
-netstat -an | findstr ":1338"
-netstat -an | findstr ":3000"
-
-# Kill process on a port (Windows)
-netstat -ano | findstr :1338
-taskkill /PID <PID> /F
-```
-
-### Container Issues
-
-```bash
-# View logs
-docker logs learnhouse-db-dev
-docker logs learnhouse-redis-dev
-
-# Reset containers
-docker compose -f .learnhouse/docker-compose.dev.yml -p learnhouse-dev down
-docker volume rm learnhouse-dev_learnhouse_db_dev_data
-
-# Then restart the dev command
-```
-
-### Dependency Issues
-
-```bash
-# Force reinstall
-cd apps/api && rm -rf .venv && uv sync
-cd apps/web && rm -rf node_modules && bun install
-cd apps/collab && rm -rf node_modules && bun install
-```
+- `Docker is not installed` / `Docker is not running` — start Docker Desktop (or `sudo systemctl start docker`) and retry.
+- `No LearnHouse installation found` — run `setup` first; deployment commands do not operate on the repo checkout.
+- Port already in use — `netstat -ano | findstr :1338` (or `:3000`, `:4000`, `:5434`) then stop the conflicting process.
+- Dependency installs — the CLI installs per app; there is no root `package.json`. Force a reinstall with `cd apps/web && bun install`, `cd apps/collab && bun install`, `cd apps/api && uv sync`.

@@ -1,6 +1,8 @@
 # Database Layer
 
-> LearnHouse uses PostgreSQL with SQLModel (SQLAlchemy + Pydantic) for ORM, Alembic for migrations, and Redis for caching. The database layer spans models, migrations, connections, and query patterns.
+> Status: as-built · Last verified: 2026-11-15
+
+LearnHouse uses PostgreSQL with SQLModel (SQLAlchemy + Pydantic) for the ORM, Alembic for migrations, and Redis for caching.
 
 ---
 
@@ -8,99 +10,122 @@
 
 | Component | Technology | Notes |
 |-----------|-----------|-------|
-| Database | PostgreSQL 16 | With pgvector extension for RAG |
+| Database | PostgreSQL | With pgvector extension for RAG |
 | ORM | SQLModel 0.0.38 | SQLAlchemy + Pydantic integration |
-| Migrations | Alembic 1.18.4 | With `alembic_postgresql_enum` extension |
+| Migrations | Alembic 1.18.4 | With `alembic_postgresql_enum` |
 | Connection | SQLAlchemy engine | Pool size 20, max overflow 10 |
-| Cache | Redis | Session revocation, collab state, API caching |
-| Package Manager | uv | Replaces pip/poetry |
+| Cache | Redis | Session revocation, public course lists, org cache |
+| Package Manager | uv | `uv sync` / `uv run`, replaces pip/poetry |
 
 ---
 
 ## Database Engine & Sessions
 
-Database connection management lives in `src/core/events/database.py`:
+Database connection management lives in `src/core/events/database.py`. The production/dev engine uses the configured connection string:
 
 ```python
-# Production: PostgreSQL with connection pooling
 engine = create_engine(
-    connection_string,
+    learnhouse_config.database_config.sql_connection_string,
+    echo=False,
+    pool_pre_ping=True,
     pool_size=20,
     max_overflow=10,
-    pool_recycle=300,  # Recycle connections every 5 minutes
-    pool_timeout=30,   # Wait up to 30 seconds for a connection
-)
-
-# Test mode: SQLite in-memory (with JSONB-to-JSON remapping)
-engine = create_engine(
-    "sqlite://",
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
+    pool_recycle=300,  # 5 minutes
+    pool_timeout=30,
 )
 ```
+
+When `TESTING=true`, this module creates an in-memory SQLite engine (`sqlite:///:memory:`). Test modules normally use their own engine from `conftest.py` instead (see `docs/05-developer-guide/testing/api/01-infrastructure.md`).
 
 The `get_db_session` FastAPI dependency provides a SQLModel Session per request:
 
 ```python
-async def get_db_session() -> Generator[Session, None, None]:
+def get_db_session():
     with Session(engine) as session:
         yield session
 ```
 
 ### Pool Monitoring
 
-SQLAlchemy events are registered for pool monitoring:
+SQLAlchemy events are registered for pool monitoring in non-test mode:
 - `connect` — Logs new connections
 - `checkout` — Tracks connection checkout
 - `checkin` — Tracks connection return
 
 ### Key Models
 
+Table names follow SQLModel's default (lowercased class name) unless a model sets `__tablename__`.
+
 | Model | Table | Purpose |
 |-------|-------|---------|
 | `Organization` | `organization` | Tenant orgs with custom domains and config |
-| `Course` | `course` | Courses with published, public, pricing fields |
-| `Community` | `community` | Course-linked social spaces with 3D access control (public/restricted, published/unpublished, UserGroup) |
-| `Chapter` | `coursechapter` | Course module/chapter structure |
-| `Activity` | `activity` | Individual lessons within chapters |
-| `Collection` | `collection` | Content collections (courses grouped by org) |
-| `CourseTranslation` | `course_translation` | One locale of a course (name, description, about, learnings, tags, SEO, requirements) |
+| `Course` | `course` | Courses with published, public, access_type, pricing fields |
+| `Chapter` | `chapter` | Course module (name, description, thumbnail, lock_type) |
+| `CourseChapter` | `coursechapter` | Ordered course → chapter membership |
+| `Activity` | `activity` | Individual lesson |
+| `ChapterActivity` | `chapteractivity` | Ordered chapter → activity membership |
+| `Collection` | `collection` | Course/podcast bundles |
+| `CollectionCourse` | `collectioncourse` | Polymorphic bundle membership (`resource_type` + `resource_uuid`) |
+| `CollectionUser` | `collectionuser` | User's collected bundles |
+| `Community` | `community` | Course/podcast-linked social space (`resource_type` + `resource_uuid`) |
+| `CommunityTranslation` | `community_translation` | One locale of a community |
+| `CourseTranslation` | `course_translation` | One locale of a course |
 | `CollectionTranslation` | `collection_translation` | One locale of a collection |
 | `PodcastTranslation` | `podcast_translation` | One locale of a podcast |
-| `PodcastEpisodeTranslation` | `podcast_episode_translation` | One locale of an episode (title, description) |
-| `User` | `user` | Platform users with roles and memberships |
+| `PodcastEpisodeTranslation` | `podcast_episode_translation` | One locale of an episode |
+| `User` | `user` | Platform users |
 | `UserGroup` | `usergroup` | Access groups for resource gating |
-| `PaymentOrder` | `payment_order` | Payment transactions via Chargily |
-| `CoursePurchase` | `course_purchase` | Course purchase records |
+| `Certifications` | `certifications` | Per-course certificate config |
+| `CertificateUser` | `certificateuser` | Issued certificate for a user |
+| `Trail` | `trail` | Learner's trail per org |
+| `TrailRun` | `trailrun` | One course/podcast run inside a trail |
+| `TrailStep` | `trailstep` | Per-step progress inside a run |
+| `Notification` | `notification` | Notification content row |
+| `NotificationRecipient` | `notification_recipient` | Per-user read/muted state |
+| `NotificationTemplate` | `notification_template` | Per-org template overrides |
+| `WebhookEndpoint` | `webhook_endpoint` | Org webhook subscriptions |
+| `WebhookDeliveryLog` | `webhook_delivery_log` | Delivery attempts |
+| `OrgPack` | `orgpack` | AI-credit / member-seat packs |
+| `Playground` | `playground` | Standalone HTML playgrounds |
+| `APIToken` | `apitoken` | Hashed `lh_` API tokens |
+| `CustomDomain` | `customdomain` | Org custom domains and verification state |
+| `AnalyticsEvent` | `analytics_events` | Behavioral analytics events (timestamptz) |
+| `PaymentOrder` | `paymentorder` | Chargily checkout lifecycle |
+| `ResourceEntitlement` | `resourceentitlement` | Paid-resource access grant |
+| `PaymentConfig` | `paymentconfig` | Per-org payment provider credentials |
+| `PaymentWebhookEvent` | `paymentwebhookevent` | Chargily webhook idempotency log |
+| `PayoutCost` | `payoutcost` | Manually entered monthly operating costs |
 
 ### Cache Invalidation on Commit
 
-The database layer hooks into commit events to automatically bust Redis caches:
-- Org slug changes → clear org caches
-- Course UUID operations → clear course caches
-- Activity/chapter changes → clear content caches
-- Community UUID operations → clear community caches
+`_register_cache_invalidation_hooks()` tracks changes during the flush and invalidates after a successful commit:
+- `Organization` insert/update/delete → clear org cache for the old and new slug
+- `OrganizationConfig` changes → clear the parent org's cache
+- `Course` changes → clear course list and course meta caches for that org/course
+- `Activity`, `Chapter`, `ChapterActivity` changes → clear the parent course's meta cache
 
 ---
 
 ## Alembic Migrations
 
-Migrations are configured in `migrations/env.py`:
+Migrations are configured in `migrations/env.py`. It loads the LearnHouse config, then **walks `src/db` itself** and imports every non-`__init__` Python module with `importlib.import_module` before assigning `target_metadata = SQLModel.metadata`. It does not call `import_all_models` (that helper lives in `src/core/events/database.py` and also scans `ee/db`).
 
 ```python
-# Dynamic model import — walks src/db directory tree
-from src.db import import_all_models
+base_dir = 'src/db'
+base_module_path = 'src.db'
 
-# PostgreSQL enum support
-from alembic_postgresql_enum import ...
+for root, dirs, files in os.walk(base_dir):
+    # ... build module path from the directory tree ...
+    for file_name in module_files:
+        importlib.import_module(f"{current_module_base}.{file_name[:-3]}")
 
-# Target metadata from SQLModel
 target_metadata = SQLModel.metadata
 ```
 
 Default connection string (from `alembic.ini`):
+
 ```
-postgresql://learnhouse:learnhouse@localhost:5432/learnhouse
+postgresql://learnhouse:learnhouse@localhost:5434/learnhouse
 ```
 
 ### Migration Commands
@@ -128,6 +153,7 @@ alembic history
 | Field | Type | Notes |
 |-------|------|-------|
 | `id` | Integer, PK | Auto-increment |
+| `org_uuid` | String | Unique public identifier |
 | `name` | String | Organization name |
 | `slug` | String | Unique, indexed — used in URLs |
 | `email` | String | Contact email |
@@ -136,10 +162,11 @@ alembic history
 | `socials` | JSON | Social media links |
 | `links` | JSON | External links |
 | `scripts` | JSON | Custom scripts |
-| `logo_image` | String | Logo URL |
+| `logo_image` / `logo_icon` | String | Branding images |
 | `thumbnail_image` | String | Thumbnail URL |
 | `previews` | JSON | Preview images |
-| `explore` | Boolean | Visible in explore/discovery |
+| `explore` | Boolean | Visible in explore/discovery, indexed |
+| `label` | String | Optional display label |
 
 ### User (`src/db/users.py`)
 
@@ -147,21 +174,20 @@ alembic history
 |-------|------|-------|
 | `id` | Integer, PK | Auto-increment |
 | `username` | String | Unique username |
-| `email` | EmailStr | Unique email |
+| `first_name` / `last_name` | String | Display name |
+| `email` | EmailStr | Indexed email |
 | `password` | String | Argon2 hash |
 | `user_uuid` | String | Public UUID |
-| `email_verified` | Boolean | Email verification status |
+| `email_verified` / `email_verified_at` | Boolean / String | Email verification |
 | `failed_login_attempts` | Integer | For account lockout |
-| `locked_until` | DateTime | Lockout expiration |
-| `last_login_at` | DateTime | Last successful login |
-| `last_login_ip` | String | IP of last login |
+| `locked_until` | String | Lockout expiration (ISO timestamp) |
+| `last_login_at` / `last_login_ip` | String | Last successful login |
 | `signup_method` | String | email, google, etc. |
 | `is_superadmin` | Boolean | Bypasses all RBAC |
 | `password_changed_at` | DateTime | For JWT revocation |
-| `avatar_image` | String | Avatar URL |
-| `bio` | Text | User biography |
-| `details` | JSON | Extended details |
-| `profile` | JSON | Profile settings |
+| `avatar_image` / `banner_image` | String | Profile images |
+| `bio` | String | User biography |
+| `details` / `profile` | JSON | Extended details |
 | `extra_metadata` | JSONB | Extensible metadata |
 
 ### Course (`src/db/courses/courses.py`)
@@ -173,18 +199,22 @@ alembic history
 | `course_uuid` | String | Indexed, public identifier |
 | `name` | String | Course name |
 | `description` | Text | Course description |
-| `public` | Boolean | Visible to non-members |
+| `about` / `learnings` / `tags` | Text | Editorial fields |
+| `public` | Boolean | Legacy visibility flag, kept in sync with `access_type` |
 | `published` | Boolean | Published status |
-| `thumbnail_type` | Enum | `IMAGE`, `VIDEO`, or `BOTH` |
-| `thumbnail_image` | String | Card cover image URL (course card thumbnail) |
+| `access_type` | Enum | `public`, `users_only`, `paid` |
+| `price_amount` / `price_currency` | Integer / String | Paid pricing |
+| `open_to_contributors` | Boolean | Contributor applications |
+| `thumbnail_type` | Enum | `image`, `video`, `both` |
+| `thumbnail_image` | String | Card cover image URL |
 | `thumbnail_video` | String | Video thumbnail URL |
-| `banner_image` | String | Hero banner image URL (course detail page) |
+| `banner_image` | String | Hero banner image URL |
+| `source_locale` | String | Locale of the base row |
 | `seo` | JSONB | SEO metadata (OG, Twitter, JSON-LD) |
 | `extra_metadata` | JSONB | Extensible metadata |
-| `creation_date` | String | ISO date |
-| `update_date` | String | ISO date |
+| `creation_date` / `update_date` | String | ISO dates |
 
-Composite index: `(org_id, public, published, creation_date)`
+Index: `(org_id, public, published, creation_date)`
 
 ### Chapter (`src/db/courses/chapters.py`)
 
@@ -193,9 +223,14 @@ Composite index: `(org_id, public, published, creation_date)`
 | `id` | Integer, PK | Auto-increment |
 | `org_id` | Integer, FK → Organization | Organization owner |
 | `course_id` | Integer, FK → Course | Parent course |
-| `chapter_uuid` | String | Public identifier |
-| `lock_type` | Enum | public, authenticated, restricted |
+| `name` | String | Chapter name |
+| `description` | String | Chapter description |
+| `thumbnail_image` | String | Chapter thumbnail |
+| `chapter_uuid` | String | Public identifier (indexed) |
+| `lock_type` | Enum | `public`, `authenticated`, `restricted` |
 | `extra_metadata` | JSONB | Extensible metadata |
+
+Order is **not** on `Chapter`; it lives on `CourseChapter.order`.
 
 ### Activity (`src/db/courses/activities.py`)
 
@@ -204,23 +239,27 @@ Composite index: `(org_id, public, published, creation_date)`
 | `id` | Integer, PK | Auto-increment |
 | `org_id` | Integer, FK → Organization | Organization owner |
 | `course_id` | Integer, FK → Course | Parent course |
-| `activity_uuid` | String | Public identifier |
+| `name` | String | Activity name |
+| `activity_uuid` | String | Public identifier (indexed) |
 | `activity_type` | Enum | TYPE_VIDEO, TYPE_DOCUMENT, TYPE_DYNAMIC, TYPE_ASSIGNMENT, TYPE_CUSTOM, TYPE_SCORM |
 | `activity_sub_type` | Enum | Detailed subtype per type |
 | `content` | JSON | Activity content (Prosemirror doc format) |
 | `details` | JSON | Activity details |
 | `published` | Boolean | Published status |
-| `lock_type` | Enum | public, authenticated, restricted |
+| `lock_type` | Enum | `public`, `authenticated`, `restricted` |
 | `current_version` | Integer | Version counter |
+| `last_modified_by_id` | Integer, FK → User | Last editor |
 | `extra_metadata` | JSONB | Extensible metadata |
+
+Order is **not** on `Activity`; it lives on `ChapterActivity.order`.
 
 ### Role (`src/db/roles.py`)
 
 | Field | Type | Notes |
 |-------|------|-------|
-| `id` | Integer, PK | Auto-increment |
+| `id` | Integer, PK | Seeded: Admin 1, Maintainer 2, Instructor 3, User 4 |
 | `org_id` | Integer, FK → Organization | Null for global roles |
-| `name` | String | Role name (e.g., "Admin", "User") |
+| `name` | String | Role name |
 | `role_type` | Enum | TYPE_ORGANIZATION, TYPE_ORGANIZATION_API_TOKEN, TYPE_GLOBAL |
 | `rights` | JSON | Permission structure |
 | `role_uuid` | String | Public identifier |
@@ -253,17 +292,15 @@ class Rights(BaseModel):
 
 ## JSONB Columns
 
-Several models use JSONB columns for flexible data storage:
-
 | Model | JSONB Column | Purpose |
 |-------|-------------|---------|
 | Course | `seo` | OG tags, Twitter cards, JSON-LD structured data |
 | Course | `extra_metadata` | Custom course metadata |
 | Chapter | `extra_metadata` | Custom chapter metadata |
-| Activity | `content` | Rich text content (Prosemirror doc format) |
-| Activity | `details` | Activity-specific configuration |
-| User | `details`, `profile` | Extended user data |
-| Organization | `socials`, `links`, `scripts`, `previews` | Organization configuration |
+| Activity | `extra_metadata` | Custom activity metadata |
+| `Activity.content` / `details` | `content`, `details` | Rich text and activity-specific configuration (stored as JSON, not JSONB) |
+| User | `extra_metadata` | Extended user data (`details`/`profile` are JSON) |
+| Organization | `socials`, `links`, `scripts`, `previews` | Organization configuration (JSON) |
 
 ---
 
@@ -271,13 +308,13 @@ Several models use JSONB columns for flexible data storage:
 
 | Table | Source → Target | Purpose |
 |-------|----------------|---------|
-| `CourseChapter` | Course → Chapter | Ordered chapter membership |
-| `ChapterActivity` | Chapter → Activity | Ordered activity membership |
-| `CollectionCourse` | Collection → Course | Course grouping |
-| `UserOrganization` | User → Organization | Org membership with role |
-| `UserGroupUser` | UserGroup → User | Group membership |
-| `UserGroupResource` | UserGroup → Resource | Resource access control |
-| `ResourceAuthor` | Resource → User | Authorship tracking (CREATOR, MAINTAINER, CONTRIBUTOR) |
+| `coursechapter` | Course → Chapter | Ordered chapter membership (`order`) |
+| `chapteractivity` | Chapter → Activity | Ordered activity membership (`order`, unique per chapter+activity) |
+| `collectioncourse` | Collection → resource | Polymorphic membership: `resource_type` (`course` / `podcast`) + `resource_uuid`; legacy nullable `course_id` stays in sync for course members |
+| `userorganization` | User → Organization | Org membership with `role_id` |
+| `usergroupuser` | UserGroup → User | Group membership |
+| `usergroupresource` | UserGroup → resource | Resource access control by `resource_uuid` |
+| `resourceauthor` | Resource → User | Authorship tracking (CREATOR, CONTRIBUTOR, MAINTAINER, REPORTER) with ACTIVE/PENDING/INACTIVE status |
 
 ---
 
@@ -299,46 +336,38 @@ Each type has corresponding `ActivitySubTypeEnum` values for finer granularity.
 
 ## Lock Types
 
-Chapters and activities use a three-tier locking system:
+Chapters (`LockType`) and activities (`ActivityLockType`) use the same three-tier locking system:
 
 ```python
-class ActivityLockType(str, Enum):
-    PUBLIC = "public"           # Anyone can view
-    AUTHENTICATED = "authenticated"  # Any logged-in user
-    RESTRICTED = "restricted"   # Must be in an assigned UserGroup
+class LockType(str, Enum):       # ActivityLockType has the same values
+    PUBLIC = "public"                # Anyone, including anonymous
+    AUTHENTICATED = "authenticated"  # Any signed-in user
+    RESTRICTED = "restricted"        # Must be in an assigned UserGroup
 ```
 
-Lock access is computed in `src/services/courses/locks.py` and the `is_locked` field on `ActivityRead` and `ChapterRead` is calculated dynamically based on the current user.
+Lock access is computed by `is_locked_for_user()` in `src/services/courses/locks.py`, and the `is_locked` field on `ActivityRead` and `ChapterRead` is calculated per request.
 
 ---
 
 ## UserGroup-Based Access Control
 
-UserGroups enable pay-to-access patterns:
+UserGroupResource links a group to a chapter, activity, course, or other resource by UUID:
 
-1. A course/chapter/activity is set to `restricted` lock type
+1. A chapter/activity is set to `restricted`, or a course/podcast uses `users_only`
 2. One or more UserGroups are linked via `UserGroupResource`
-3. Users must be members of a linked UserGroup to access the resource
-4. When a UserGroup is tied to a `PaymentsOffer`, denied access returns **HTTP 402 Payment Required** with offer metadata
+3. Users must be members of a linked UserGroup (org admins/maintainers bypass)
+4. For course/podcast reads, the unified `ResourceAccessChecker` applies the access type: `public` (free), `users_only` (whitelist groups), or `paid` (active `ResourceEntitlement`, with linked groups as a bypass)
 
-```python
-async def check_usergroup_access(
-    resource_uuid: str,
-    user_id: int,
-    db_session: Session,
-) -> bool:
-    # Returns True if no UserGroups linked, or user is a member
-    # Raises HTTP 402 if resource is behind a paid offer's UserGroup
-```
+When a legacy blocking UserGroup is tied to an EE `PaymentsOffer`, `authorization_verify_based_on_roles_and_authorship()` raises **HTTP 402 Payment Required** with offer metadata. The database layer itself does not raise 402.
 
 ---
 
 ## Testing Database Configuration
 
-Tests use an in-memory SQLite database with automatic JSONB-to-JSON remapping:
+Tests use an in-memory SQLite database with automatic JSONB-to-JSON remapping. The remap runs once at conftest import and again inside the `engine` fixture (so late-registered model modules are covered):
 
 ```python
-# In conftest.py
+# apps/api/src/tests/conftest.py
 @pytest.fixture
 def engine():
     eng = create_engine(
@@ -346,15 +375,13 @@ def engine():
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
-    # Remap JSONB columns to JSON for SQLite compatibility
-    for table in SQLModel.metadata.tables.values():
-        for col in table.columns:
-            if isinstance(col.type, JSONB):
-                col.type = JSON()
+    _make_schema_sqlite_compatible()
     SQLModel.metadata.create_all(eng)
     yield eng
     eng.dispose()
 ```
+
+`_make_schema_sqlite_compatible()` swaps `JSONB` columns to `JSON` and drops Postgres cast defaults such as `'{}'::jsonb`.
 
 ---
 
@@ -362,9 +389,11 @@ def engine():
 
 | Purpose | Key Pattern | TTL |
 |---------|------------|-----|
-| Session revocation | `jwt_revoked_before:{user_id}` | 30 days |
-| Refresh token replay | `refresh_used:{user_id}:{jti}` | 30 days |
-| Collab ydoc cache | `collab:ydoc:{board_uuid}` | 1 hour |
-| Org caching | `org:{slug}:*` | Configurable |
-| Course caching | `course:{uuid}:*` | Configurable |
-| Rate limiting | `ratelimit:{endpoint}:{ip}` | Configurable |
+| Session revocation | `jwt_revoked_before:{user_id}` | Refresh-token lifetime (30 days) |
+| Refresh token replay (helper defined, not called by `/auth/refresh`) | `refresh_used:{user_id}:{jti}` | Refresh-token lifetime (30 days) |
+| Org by slug | `org_cache:slug:{slug}` | 2 minutes |
+| Instance info | `org_cache:instance_info` | 10 minutes |
+| Public course list | `courses_cache:*` | 1 minute |
+| Course meta | `courses_cache:*` | 1 minute |
+| Rate limiting | `rate_limit:{key}` | Configurable window |
+| Failed-login IP tracking | `failed_login_ips:{user_id}` (HyperLogLog) | 30 minutes |

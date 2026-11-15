@@ -37,7 +37,8 @@ def _mock_community(**overrides) -> CommunityRead:
     data = dict(
         id=1,
         org_id=1,
-        course_id=None,
+        resource_uuid=None,
+        resource_type=None,
         name="Community",
         description="Desc",
         public=True,
@@ -113,7 +114,15 @@ def _upload_file():
 class TestCommunitiesRouter:
     async def test_community_endpoints(self, client):
         with patch("src.routers.communities.communities.create_community", new_callable=AsyncMock, return_value=_mock_community()):
-            response = await client.post("/api/v1/communities/?org_id=1", json={"name": "Community", "description": "Desc", "public": True})
+            response = await client.post(
+                "/api/v1/communities/?org_id=1",
+                json={
+                    "name": "Community",
+                    "description": "Desc",
+                    "resource_uuid": "course_test",
+                    "resource_type": "course",
+                },
+            )
         assert response.status_code == 200
 
         with patch("src.routers.communities.communities.get_community", new_callable=AsyncMock, return_value=_mock_community()):
@@ -136,8 +145,20 @@ class TestCommunitiesRouter:
             response = await client.delete("/api/v1/communities/community_test")
         assert response.status_code == 200
 
-        with patch("src.routers.communities.communities.link_community_to_course", new_callable=AsyncMock, return_value=_mock_community(course_id=1)):
+        with patch("src.routers.communities.communities.link_community_to_course", new_callable=AsyncMock, return_value=_mock_community(resource_uuid="course_test", resource_type="course")):
             response = await client.put("/api/v1/communities/community_test/link-course/course_test")
+        assert response.status_code == 200
+
+        with patch("src.routers.communities.communities.link_community_to_resource", new_callable=AsyncMock, return_value=_mock_community(resource_uuid="podcast_test", resource_type="podcast")):
+            response = await client.put("/api/v1/communities/community_test/link/podcast/podcast_test")
+        assert response.status_code == 200
+
+        with patch("src.routers.communities.communities.get_community_by_podcast", new_callable=AsyncMock, return_value=_mock_community(resource_uuid="podcast_test", resource_type="podcast")):
+            response = await client.get("/api/v1/communities/podcast/podcast_test")
+        assert response.status_code == 200
+
+        with patch("src.routers.communities.communities.unlink_community_from_resource", new_callable=AsyncMock, return_value=_mock_community()):
+            response = await client.delete("/api/v1/communities/community_test/link")
         assert response.status_code == 200
 
         with patch("src.routers.communities.communities.unlink_community_from_course", new_callable=AsyncMock, return_value=_mock_community()):

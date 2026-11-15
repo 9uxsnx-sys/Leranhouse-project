@@ -21,9 +21,12 @@ from src.services.communities.communities import (
     get_community,
     get_communities_by_org,
     get_community_by_course,
+    get_community_by_podcast,
     update_community,
     delete_community,
+    link_community_to_resource,
     link_community_to_course,
+    unlink_community_from_resource,
     unlink_community_from_course,
     get_community_user_rights,
     get_community_member_count,
@@ -46,20 +49,26 @@ router = APIRouter()
 class CommunityCreateRequest(BaseModel):
     name: str
     description: str | None = None
-    public: bool = True
-    course_id: int | None = None
+    # Every community belongs to one course or podcast and inherits its access.
+    resource_uuid: str
+    resource_type: str
 
 
 @router.post(
     "/",
     response_model=CommunityRead,
     summary="Create a community",
-    description="Create a new community inside an organization. Optionally link it to a course on creation. Requires admin/maintainer role.",
+    description=(
+        "Create a community attached to a course or a podcast. Communities are "
+        "add-ons and inherit the access rules of their linked resource. "
+        "Requires admin/maintainer role."
+    ),
     responses={
         200: {"description": "Community created successfully.", "model": CommunityRead},
         401: {"description": "Authentication required"},
         403: {"description": "User lacks admin/maintainer role for the organization"},
-        404: {"description": "Organization or course not found"},
+        404: {"description": "Organization or linked resource not found"},
+        422: {"description": "Missing or invalid linked resource"},
     },
 )
 async def api_create_community(
@@ -79,9 +88,9 @@ async def api_create_community(
     community_create = CommunityCreate(
         name=community_data.name,
         description=community_data.description,
-        public=community_data.public,
         org_id=org_id,
-        course_id=community_data.course_id,
+        resource_uuid=community_data.resource_uuid,
+        resource_type=community_data.resource_type,
     )
 
     return await create_community(
@@ -177,6 +186,34 @@ async def api_get_community_by_course(
     )
 
 
+@router.get(
+    "/podcast/{podcast_uuid}",
+    summary="Get community for a podcast",
+    description="Retrieve the community that is linked to a specific podcast, if one exists.",
+    responses={
+        200: {"description": "Community linked to the podcast, or null if none is linked."},
+        401: {"description": "Authentication required"},
+        403: {"description": "User does not have access to this podcast"},
+        404: {"description": "Podcast not found"},
+    },
+)
+async def api_get_community_by_podcast(
+    request: Request,
+    podcast_uuid: str,
+    locale: Optional[str] = Query(
+        default=None, description="Content locale (falls back to the source locale)"
+    ),
+    current_user: PublicUser = Depends(get_current_user),
+    db_session: Session = Depends(get_db_session),
+) -> CommunityRead | None:
+    """
+    Get the community linked to a specific podcast.
+    """
+    return await get_community_by_podcast(
+        request, podcast_uuid, current_user, db_session, locale=locale
+    )
+
+
 @router.put(
     "/{community_uuid}",
     response_model=CommunityRead,
@@ -229,6 +266,60 @@ async def api_delete_community(
     Requires admin/maintainer role.
     """
     return await delete_community(request, community_uuid, current_user, db_session)
+
+
+@router.put(
+    "/{community_uuid}/link/{resource_type}/{resource_uuid}",
+    response_model=CommunityRead,
+    summary="Link community to a course or podcast",
+    description=(
+        "Attach a community to a course or a podcast. A community follows the "
+        "access rules of its linked resource and accepts a single link."
+    ),
+    responses={
+        200: {"description": "Community linked.", "model": CommunityRead},
+        401: {"description": "Authentication required"},
+        403: {"description": "User cannot manage this community"},
+        404: {"description": "Community or linked resource not found"},
+        422: {"description": "Resource type must be 'course' or 'podcast'"},
+    },
+)
+async def api_link_community_to_resource(
+    request: Request,
+    community_uuid: str,
+    resource_type: str,
+    resource_uuid: str,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session: Session = Depends(get_db_session),
+) -> CommunityRead:
+    return await link_community_to_resource(
+        request,
+        community_uuid,
+        resource_uuid,
+        resource_type,
+        current_user,
+        db_session,
+    )
+
+
+@router.delete(
+    "/{community_uuid}/link",
+    response_model=CommunityRead,
+    summary="Unlink a community from its resource",
+    description=(
+        "Detach the community from its course/podcast. The community becomes "
+        "invisible to learners until it is linked again."
+    ),
+)
+async def api_unlink_community(
+    request: Request,
+    community_uuid: str,
+    current_user: PublicUser = Depends(get_current_user),
+    db_session: Session = Depends(get_db_session),
+) -> CommunityRead:
+    return await unlink_community_from_resource(
+        request, community_uuid, current_user, db_session
+    )
 
 
 @router.put(

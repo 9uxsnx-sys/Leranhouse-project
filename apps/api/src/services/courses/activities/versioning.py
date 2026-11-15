@@ -61,6 +61,7 @@ async def create_activity_version(
             "version_number": version.version_number,
             "created_by_id": user_id,
         },
+        db_session=db_session,
     )
 
     return version
@@ -359,6 +360,7 @@ async def restore_activity_version(
             "restored_version_number": version_number,
             "new_version_number": activity.current_version,
         },
+        db_session=db_session,
     )
 
     return activity

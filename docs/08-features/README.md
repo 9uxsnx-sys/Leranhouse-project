@@ -1,166 +1,100 @@
+> Status: as-built · Last verified: 2026-11-15
+
 # Features
 
-> Deep-dive documentation for significant feature areas that span multiple parts of the Koodook codebase — payments, AI, realtime collaboration, and SEO.
+> Deep-dive documentation for feature areas that span several layers of the platform: database, backend services, API endpoints, frontend components and third-party integrations.
 
----
+Unlike the admin or user guides, which explain how to use a feature, these pages explain how it works internally.
 
-## What This Section Covers
-
-The documents in this section describe cross-cutting feature areas that touch multiple layers of the platform (database, backend services, API endpoints, frontend components, and third-party integrations). Unlike the admin or user guides — which explain how to *use* features — these documents explain how features *work* internally: the architecture, data flow, integration points, and design decisions behind each major capability.
-
-## Quick Links
-
-### Payments
+## Payments
 
 | Document | Description |
 |----------|-------------|
-| [Overview](./payments/overview.md) | Payment system architecture: Chargily Pay v2 integration, course purchase flow, access gating, transaction records, refunds |
+| [Overview](./payments/overview.md) | Payment architecture: Chargily Pay v2 integration, the paid product page and store, access gating and transaction records |
 | [Progress & Roadmap](./payments/progress.md) | What is shipped, what stopped where, and the ordered list of remaining payments work |
-| [Chargily Integration](./payments/chargily-integration.md) | Chargily Pay v2 API integration plan: checkout creation, webhook handling, signature verification, sandbox testing |
-| [Teacher Payout Plan](./payments/teacher-payout-plan.md) | Teacher revenue share system: 40/60 pro-rata distribution, earnings ledger, monthly payout calculation, admin/teacher dashboards |
+| [Chargily Integration](./payments/chargily-integration.md) | Chargily Pay v2 API integration: checkout creation, webhook handling, signature verification, sandbox testing |
 
-### Collections
-
-| Document | Description |
-|----------|-------------|
-| [Implementation Plan](./collections/implementation-plan.md) | Course-grade collections: full media parity, add/remove course table, three access modes, purchase fan-out to per-course entitlements, and the phased delivery plan |
-
-### AI
+## Analytics
 
 | Document | Description |
 |----------|-------------|
-| [Overview](./ai/overview.md) | AI Copilot features, Magic Blocks, course planning assistance, RAG system, embedding pipeline |
+| [Overview](./analytics/overview.md) | The 7-tab Analytics area: metric catalog, tiers and UI rules |
+| [Implementation Plan](./analytics/implementation-plan.md) | The shipped build contract: API surface, event schema and the per-card metric map |
 
-### Communities
-
-| Document | Description |
-|----------|-------------|
-| [Overview](./communities/overview.md) | Community access control model (3 dimensions), publish/unpublish, public/restricted, course linking, moderation, discussions |
-
-### Notifications
+## AI
 
 | Document | Description |
 |----------|-------------|
-| [Overview](./notifications/overview.md) | In-app notifications: 39 events across 10 categories, audience rules, per-org template overrides with EN/FR/AR defaults, snapshot rendering, dashboard Events/Announcements tabs, and the bell dropdown with its centered reading window |
+| [Overview](./ai/overview.md) | AI Copilot features, Magic Blocks, course planning assistance, RAG system and embedding pipeline |
 
-### Video & Media
-
-| Document | Description |
-|----------|-------------|
-| [Cloudflare Stream Integration](./video/cloudflare-stream-integration.md) | Video upload, encoding, and streaming via Cloudflare Stream |
-| [Video Protection & DRM](./video/video-protection-drm.md) | Multi-tier content protection strategy: signed URLs, DRM, screen recording prevention, offline downloads, CDN cost savings |
-
-### Mobile App
+## Communities
 
 | Document | Description |
 |----------|-------------|
-| [Mobile App Architecture](./mobile-app/mobile-app-architecture.md) | Cross-platform mobile app with Capacitor — same Next.js codebase, native features, app store distribution |
+| [Overview](./communities/overview.md) | Community access control model, publish/unpublish, public/restricted, course linking, moderation and discussions |
 
-### Desktop App
-
-| Document | Description |
-|----------|-------------|
-| [Desktop App Architecture](./desktop-app/desktop-app-architecture.md) | Cross-platform desktop app with Capacitor Electron — native OS protection, offline playback, app store distribution |
-
-### Demo Data
+## Notifications
 
 | Document | Description |
 |----------|-------------|
-| [Seed Manifest](./demo-seed/seed-manifest.md) | Countable list of every table and row the demo seeder will create, plus the copy voice rules and the asset contract |
-| [Seed Plan](./demo-seed/seed-plan.md) | One-command demo seeder: fills a demo org with realistic courses, lessons, enrollments, podcasts, community and analytics so the platform can be demoed "fully alive" on demand |
+| [Overview](./notifications/overview.md) | In-app notifications: events and categories, audience rules, per-org template overrides with EN/FR/AR defaults, snapshot rendering and the dashboard tabs |
 
-### Dashboard Polish
-
-| Document | Description |
-|----------|-------------|
-| [Consistency Plan](./dashboard-polish/consistency-plan.md) | Delivered dashboard consistency sweep: shared `ActionRow` / `PageTabs` / `ConceptIcon` / `SectionIcon` primitives, unified filters and selects, and translation-ready strings across en / fr / ar (Phase 5 guardrails pending) |
-
-### Navigation
+## Video and Media
 
 | Document | Description |
 |----------|-------------|
-| [User Breadcrumbs Plan](./navigation/user-breadcrumbs-plan.md) | Learner-side breadcrumbs: one trail per screen resolved from the route plus page-registered entity names (`Home > Courses > Course > Lesson`), translated across en / fr / ar; inline-only surfaces (community feed, podcast episodes) intentionally add no crumb |
+| [Cloudflare Stream Integration](./video/cloudflare-stream-integration.md) | Video upload, encoding and streaming via Cloudflare Stream |
 
-### Internationalization & RTL
+## Internationalization and RTL
 
 | Document | Description |
 |----------|-------------|
-| [RTL Plan](./i18n-rtl/rtl-plan.md) | English / French / Arabic with accurate bidirectional layout: direction plumbing shipped (SSR `lang`/`dir`, `DirectionProvider`, Arabic font); logical-property refactor and QA pending |
-| [Progress & Handoff](./i18n-rtl/progress.md) | Live log: commit ledger per phase, what the RTL refactor has covered, the remaining file inventory, verification commands, gotchas and open decisions |
+| [RTL and Direction](./i18n-rtl/rtl-plan.md) | English / French / Arabic with bidirectional layout: direction plumbing, logical properties and what is not built yet |
+| [Localisation Progress](./i18n-rtl/progress.md) | As-built status per surface, verification commands and open decisions |
 | [Content Localization](./i18n-rtl/content-localization.md) | Course metadata, SEO, chapters and lessons: `course_translation`, `extra_metadata.translations`, fallback chain, dashboard editors and learner surfaces |
-| [Collections Localization](./i18n-rtl/collections-localization.md) | `collection_translation`, `?locale=` on every read, locale-aware General/SEO editors, Translations tab, learner listing and fallback notice |
-| [Podcasts Localization](./i18n-rtl/podcasts-localization.md) | `podcast_translation` + `podcast_episode_translation`, localized `/meta` and episode lists, locale-aware editors, Translations tab, card-surface unification |
+| [Collections Localization](./i18n-rtl/collections-localization.md) | `collection_translation`, `?locale=` on every read, locale-aware editors, Translations tab and fallback notice |
+| [Podcasts Localization](./i18n-rtl/podcasts-localization.md) | `podcast_translation` and `podcast_episode_translation`, localized `/meta` and episode lists, locale-aware editors |
 
-### Podcasts
-
-| Document | Description |
-|----------|-------------|
-| [Episode Admin Editing Plan](./episode-admin-editing-plan.md) | Plan to extend episode admin editing to match the lesson form: What You'll Learn, Key Takeaways, and full translation support for `extra_metadata` fields |
-
-### Home Page
+## Demo Data
 
 | Document | Description |
 |----------|-------------|
-| [Home Page Layout](./home-page/home-page.md) | Learner home page design: 4 sections (Trending Courses, Trending Podcasts, New Courses, New Podcasts) with `SectionRow` responsive grid, trending endpoint, and "See All" routing |
+| [Seed Manifest](./demo-seed/seed-manifest.md) | Countable list of every table and row the demo seeder creates, plus copy voice rules and the asset contract |
+| [Seed Plan](./demo-seed/seed-plan.md) | One-command demo seeder that fills a demo org with courses, lessons, enrollments, podcasts, community and analytics |
 
-### Planned (Future)
+## Dashboard Polish
 
 | Document | Description |
 |----------|-------------|
-| [PostHog Integration](./analytics/posthog-integration-plan.md) | PostHog analytics platform: product analytics, session replay, feature flags, A/B testing, surveys, error tracking |
-| `realtime.md` | Yjs-based realtime collaboration with Hocuspocus server |
-| `seo.md` | SEO system: metadata, sitemaps, Open Graph, JSON-LD |
+| [Consistency Plan](./dashboard-polish/consistency-plan.md) | Delivered dashboard consistency sweep: shared primitives, unified filters and selects, translation-ready strings |
+| [Glossary](./dashboard-polish/glossary.md) | Shared vocabulary for dashboard sections, actions and icons |
 
-## How Features Relate to the Platform Architecture
+## Navigation
 
-Each feature in this section integrates across the following layers:
+| Document | Description |
+|----------|-------------|
+| [User Breadcrumbs](./navigation/user-breadcrumbs-plan.md) | Learner-side breadcrumbs: one trail per screen resolved from the route plus page-registered entity names |
+
+## Home Page
+
+| Document | Description |
+|----------|-------------|
+| [Home Page Layout](./home-page/home-page.md) | Learner home page: 4 content sections, responsive grid, trending endpoint and "See All" routing |
+
+## How features relate to the code
+
+Each feature in this section touches the same layers:
 
 ```
 Frontend (Next.js)         → UI components, pages, state management
 API (FastAPI routers)      → Endpoints, request validation, response formatting
 Services (FastAPI)         → Business logic, third-party API clients
 Database (PostgreSQL)      → Schema, indexes, queries, migrations
-External Services          → Chargily Pay v2, LLM providers, Tinybird
+External services          → Chargily Pay v2, LLM providers, Cloudflare
 ```
 
-### Payment System Architecture
-
-```
-User Browser ──► Koodook API ──► Chargily Pay v2
-                    │
-                    ▼
-              PostgreSQL
-         (paymentorder,
-          resourceentitlement,
-          payment_webhook_event)
-```
-
-- The frontend initiates checkout via Koodook API endpoints (never talks directly to Chargily).
-- The backend creates Chargily checkouts, handles webhook callbacks, and manages the payment lifecycle.
-- `paymentorder` records every checkout, `resourceentitlement` records every access grant, `payment_webhook_event` guarantees idempotent webhook processing.
-- Access is enforced through resource flags, backend checks, and frontend UI gating.
-
-### AI System Architecture
-
-```
-Editor (Frontend) ──► AI API ──► LLM Provider (Gemini)
-                              │
-                              ▼
-                         Vector DB
-                     (pgvector embeddings)
-```
-
-- AI Copilot and Magic Blocks use the LLM provider for content generation.
-- The RAG system retrieves relevant course content via pgvector similarity search and grounds LLM responses in that content.
-- An embedding pipeline extracts, chunks, and indexes course content on save.
-
-### Key Design Principles
-
-- **Single source of truth.** Payment state lives in the database, managed by the backend. The frontend reflects the database state.
-- **Idempotent processing.** Webhook handlers and payment events must be safe to process multiple times.
-- **Feature gating.** Organization-level feature flags control which features are available (payments, AI, communities, etc.).
-- **Extensibility.** Payment providers and LLM providers are abstracted behind interfaces, making future swaps possible.
-
----
+- **Single source of truth.** Payment state lives in the database and is managed by the backend; the frontend reflects it.
+- **Idempotent processing.** Webhook handlers and payment events are safe to process more than once.
+- **Feature gating.** Resource access is enforced by backend checks and mirrored in the frontend UI.
 
 > See the [Architecture Overview](../02-architecture/overview.md) for the full system design context.

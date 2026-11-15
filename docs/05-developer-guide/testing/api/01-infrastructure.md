@@ -1,5 +1,7 @@
 # Test Infrastructure
 
+> Status: as-built · Last verified: 2026-11-15
+
 This document describes the test framework, database setup, and fixture hierarchy used by every test in this project. Read this first before writing any test.
 
 ---
@@ -8,27 +10,60 @@ This document describes the test framework, database setup, and fixture hierarch
 
 | Component | Technology | Notes |
 |-----------|-----------|-------|
-| Test runner | pytest | `asyncio_mode = "auto"` |
+| Test runner | pytest 9.0.3 | `asyncio_mode = "auto"` |
+| Async support | pytest-asyncio 1.3.0 | Async tests run automatically |
 | HTTP client | httpx | `AsyncClient` with `ASGITransport` for router tests |
 | Database | SQLite (in-memory) | JSONB-to-JSON remapping for PostgreSQL compatibility |
 | Mocking | `unittest.mock` | `AsyncMock` for async patches |
-| Coverage | pytest-cov | Minimum 25% threshold, branch coverage enabled |
+| Coverage | pytest-cov 7.1.0 | `fail_under = 25` (no branch coverage) |
 
-Configuration in `pyproject.toml`:
+Configuration in `pyproject.toml` (the suite has no `testpaths`; pytest discovers from the working directory, so run it from `apps/api`):
 
 ```toml
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-testpaths = ["src/tests"]
+markers = [
+    "asyncio: mark test as async",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::UserWarning",
+    # ... targeted ignores for crypt/utcnow/instrumentation warnings ...
+]
 
 [tool.coverage.run]
 source = ["src"]
-branch = true
+omit = [
+    "src/tests/*",
+    "src/services/ai/*",
+    "src/routers/ai/*",
+    "src/routers/code_execution.py",
+    "src/routers/stream.py",
+]
 
 [tool.coverage.report]
 fail_under = 25
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "if __name__",
+]
 ```
+
+### Markers
+
+- `asyncio` is the only custom marker registered, and it is optional: `asyncio_mode = "auto"` already runs `async def` tests. Some modules still decorate with `@pytest.mark.asyncio`.
+- `@pytest.mark.parametrize` (built-in) is used in a few modules (for example `src/tests/analytics/test_shared.py`).
+- There are no `unit` / `integration` / `slow` markers — do not use them expecting a filter.
+
+### Where Fixtures Live
+
+- `apps/api/src/tests/conftest.py` — shared DB, org, role, user, course, and bypass fixtures.
+- `apps/api/src/tests/analytics/conftest.py` — a Postgres-only `pg_engine` / `pg` pair for the analytics SQL tests. It skips (does not fail) when Postgres is unreachable.
+
+The suite currently has 174 `test_*.py` modules under `apps/api/src/tests`.
 
 ---
 
@@ -45,16 +80,16 @@ The `engine` fixture creates the in-memory database and creates all tables from 
 ```python
 @pytest.fixture
 def engine():
-    """In-memory SQLite engine with JSONB-to-JSON remapping."""
+    """In-memory SQLite engine (schema made SQLite-compatible at import)."""
     eng = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
     )
-    for table in SQLModel.metadata.tables.values():
-        for col in table.columns:
-            if isinstance(col.type, JSONB):
-                col.type = JSON()  # SQLite doesn't support JSONB
+    # Test modules import additional model modules during collection, after the
+    # import-time rewrite above has already run. Re-apply before create_all so
+    # late-registered tables (e.g. payments) are SQLite-compatible too.
+    _make_schema_sqlite_compatible()
     SQLModel.metadata.create_all(eng)
     yield eng
     eng.dispose()
@@ -66,6 +101,8 @@ def db(engine):
     with Session(engine) as session:
         yield session
 ```
+
+`_make_schema_sqlite_compatible()` is defined at the top of `conftest.py` and also runs once at import, so every module that builds its own engine benefits. It rewrites `JSONB` columns to `JSON` and strips Postgres-cast server defaults such as `'{}'::jsonb`.
 
 ---
 
@@ -130,12 +167,12 @@ def other_org(db):
 
 ### Role Fixtures
 
-Two roles are pre-configured with full permission sets:
+Two org-scoped roles are pre-configured:
 
 | Fixture | Type | Rights Level | Role Type |
 |---------|------|-------------|-----------|
-| `admin_role` | `Role` | Full CRUD on all domains | `TYPE_ORGANIZATION` |
-| `user_role` | `Role` | Read-only on most domains | `TYPE_ORGANIZATION` |
+| `admin_role` | `Role` (id=1, "Admin") | Full CRUD on all domains | `TYPE_ORGANIZATION` |
+| `user_role` | `Role` (id=4, "User") | Read-only on most domains | `TYPE_ORGANIZATION` |
 
 ```python
 ADMIN_RIGHTS = Rights(

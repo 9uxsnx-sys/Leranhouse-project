@@ -1,76 +1,60 @@
-# Home Page Layout
+> Status: as-built · Last verified: 2026-11-15
 
-> Learner-facing home page showing trending and new content in a responsive grid layout.
+# Home Pages
 
-## Overview
+There are two home surfaces: `/home` is the authenticated organization picker, and `/orgs/{slug}` is the learner home of one organization.
 
-The home page is the first thing learners see when visiting an org. It displays 4 content sections in a clean, responsive grid — each showing up to 4 cards in a single row with a "See All" link pointing to the full listing page.
+## `/home` — organization picker
 
-## Sections
+`apps/web/app/home/home.tsx` renders a centered panel over a blueprint grid.
 
-| Order | Section | Source | Logic |
-|-------|---------|--------|-------|
-| 1 | **Trending Courses** | `GET /orgs/{org_id}/home-trending` | Top 8 courses by enrollment count (trailrun GROUP BY) |
-| 2 | **Trending Podcasts** | `GET /orgs/{org_id}/home-trending` | Top 8 podcasts by listener count (trailrun GROUP BY) |
-| 3 | **New Courses** | `getOrgCourses()` | Ordered by `creation_date desc` |
-| 4 | **New Podcasts** | `getOrgPodcasts()` | Ordered by `creation_date desc` |
+| Behaviour | Implementation |
+|---|---|
+| Authentication | Unauthenticated visitors are redirected to `/login` |
+| Organization list | `GET /orgs/user/page/1/limit/50` for the signed-in user |
+| Loading | Three skeleton rows, then the list |
+| Empty state | A "no organizations" card |
+| Navigation | Each row links to `/orgs/{slug}` |
+| Language | The user menu switches between English, French and Arabic |
+| Account | The same menu offers sign out |
 
-Empty sections are automatically hidden.
+## `/orgs/{slug}` — learner home
 
-## Component Architecture
+The server component fetches the organization, its courses, its podcasts and the trending payload, then passes them to `OrgHomeClient`.
 
-```
-page.tsx (server component)
-  └─ fetches trending data from API, courses, podcasts
-  └─ OrgHomeClient.tsx (client component)
-       └─ SectionRow × 4
-            ├─ title + "See All" link
-            └─ responsive grid of CourseCard / PodcastCard
-```
+| Order | Section | Source | Content |
+|---|---|---|---|
+| 1 | Trending Courses | `GET /orgs/{org_id}/home-trending` | Top courses by enrollment count |
+| 2 | Trending Podcasts | `GET /orgs/{org_id}/home-trending` | Top podcasts by listener count |
+| 3 | New Courses | `GET /courses/org_slug/{slug}/...` | Newest published courses |
+| 4 | New Podcasts | `GET /podcasts/org_slug/{slug}/...` | Newest published podcasts |
 
-### Key Components
+Every section shows up to **four** cards in a single row and a **See All** link to `/courses` or `/podcasts`. A section with no data is not rendered.
 
-**SectionRow** ([`components/Objects/Home/SectionRow.tsx`](file:///c:\Projects\learnhouse-dev\learnhouse-dev\apps\web\components\Objects\Home/SectionRow.tsx))
-- Reusable component: renders a section title, "See All" link, and a grid of children
-- Title: `text-[22px] font-semibold text-ui-fg-base` with `mb-5` spacing below
-- "See All" link: muted gray (`text-gray-400 hover:text-gray-600`) with `ArrowRight` icon
-- Grid: `grid-cols-1 sm:2 lg:3 xl:4 gap-6` — responsive, matches listing page card size
+## Trending endpoint
 
-**OrgHomeClient** ([`components/Objects/Home/OrgHomeClient.tsx`](file:///c:\Projects\learnhouse-dev\learnhouse-dev\apps\web\components\Objects\Home/OrgHomeClient.tsx))
-- Client component that receives pre-fetched data as props
-- Renders all 4 sections with `space-y-10` between them
-- Card images use `removeCoursePrefix()` / `removePodcastPrefix()` before passing IDs (PodcastCard internally adds the `podcast_` prefix)
+`GET /orgs/{org_id}/home-trending?limit=8&locale=xx`.
 
-### Page Server Component
+- Requires organization membership; non-members receive `403`.
+- Courses are ranked by `COUNT(TrailRun.id)` where `run_type = RUN_TYPE_COURSE`.
+- Podcasts are ranked by `COUNT(TrailRun.id)` where `run_type = RUN_TYPE_PODCAST`.
+- Each row is overlaid with the requested locale and returns `content_locale` / `is_fallback`.
+- Podcast rows also include `episode_count` and `total_duration_seconds`, computed with one grouped query, so the card meta row is never empty.
+- The default limit is 8; the learner home uses 8 and renders the first 4.
 
-**page.tsx** ([`app/orgs/[orgslug]/(withmenu)/page.tsx`](file:///c:\Projects\learnhouse-dev\learnhouse-dev\apps\web\app/orgs/%5Borgslug%5D/(withmenu)/page.tsx))
-- Fetches courses, podcasts, and trending data server-side
-- Passes all data to `OrgHomeClient`
+## Client behaviour
 
-## Backend
+- `OrgHomeClient` seeds SWR with the server data as `fallbackData`, so the first render does not wait for a client fetch.
+- Course and podcast SWR keys include `?locale=`; changing the language re-fetches them without a reload.
+- Trending has its own locale-keyed SWR entry, so its server-computed cards also follow a language switch.
+- Card titles and descriptions carry `dir="auto"` for mixed-direction content.
 
-### Trending Endpoint
+## Card and layout conventions
 
-**`GET /orgs/{org_id}/home-trending`** ([`routers/orgs/orgs.py`](file:///c:\Projects\learnhouse-dev\learnhouse-dev\apps\api\src\routers\orgs\orgs.py))
+`SectionRow` renders the section title at 22px semibold, a muted **See All** link with an arrow, and a responsive grid: one column on mobile, two on small screens, three on large and four on extra large, with the same card size as the listing pages. Sections are separated by `space-y-10`; the page uses the standard learner container.
 
-Returns:
-```json
-{
-  "trending_courses": [...],
-  "trending_podcasts": [...]
-}
-```
+## Related
 
-- Courses ranked by enrollment count (trailrun where course_id is not null, GROUP BY course_id)
-- Podcasts ranked by listener count (trailrun where run_type = RUN_TYPE_PODCAST, GROUP BY podcast_uuid)
-- Each returns top 8 results, limited by `LIMIT 8`
-- Returns full course/podcast data with thumbnail_image for card rendering
-
-## Design Rules
-
-- Cards match the exact size and style of the listing pages (same grid breakpoints, same gap)
-- Only 4 cards per row — no scrolling, no overflow
-- Section titles are smaller than the page title (`22px` vs `28px`)
-- "See All" link is subtle gray — does not compete with content
-- Spacing: `space-y-10` between sections, `mb-5` between title and card row
-- Container: `w-full px-6` — matches courses listing page layout
+- [RTL and content localisation](../i18n-rtl/rtl-plan.md)
+- [Courses](../../06-api-reference/courses.md)
+- [Podcasts](../../06-api-reference/podcasts.md)

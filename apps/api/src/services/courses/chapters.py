@@ -17,7 +17,8 @@ from src.db.courses.chapters import (
 )
 from src.db.courses.courses import Course
 from fastapi import HTTPException, status, Request
-from src.security.rbac import check_resource_access, AccessAction
+from src.db.payments.enums import AccessTypeEnum
+from src.security.rbac import check_catalog_read_access, check_resource_access, AccessAction
 from src.services.courses.locks import (
     batch_accessible_restricted_uuids,
     is_locked_for_user,
@@ -117,8 +118,16 @@ async def get_chapter(
             status_code=status.HTTP_404_NOT_FOUND, detail="Course does not exist"
         )
 
-    # RBAC check
-    await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.READ)
+    # RBAC check — a published paid course still exposes its curriculum so the
+    # product page can be browsed; the lesson bodies are stripped below.
+    access = await check_catalog_read_access(
+        request,
+        db_session,
+        current_user,
+        course.course_uuid,
+        published=course.published,
+        access_type=course.access_type,
+    )
 
     # Get activities for this chapter
     statement = (
@@ -135,7 +144,9 @@ async def get_chapter(
         activities=[ActivityRead(**activity.model_dump()) for activity in activities],
     )
 
-    _apply_locks_to_chapters([chapter], course, current_user, db_session)
+    _apply_locks_to_chapters(
+        [chapter], course, current_user, db_session, course_access_granted=access.allowed
+    )
 
     return chapter
 
@@ -253,8 +264,16 @@ async def get_course_chapters(
     chapters = [ChapterRead(**chapter.model_dump(), activities=[]) for chapter in chapters]
 
     # RBAC check — cheap when the caller already ran it on this request
-    # (the checker is memoized on request.state).
-    await check_resource_access(request, db_session, current_user, course.course_uuid, AccessAction.READ)  # type: ignore
+    # (the checker is memoized on request.state). A published paid course is a
+    # product page, so the curriculum list stays readable.
+    access = await check_catalog_read_access(
+        request,
+        db_session,
+        current_user,
+        course.course_uuid,  # type: ignore
+        published=course.published,  # type: ignore
+        access_type=course.access_type,  # type: ignore
+    )
 
     chapter_ids = [chapter.id for chapter in chapters]
     if chapter_ids:
@@ -361,7 +380,9 @@ async def get_course_chapters(
         for chapter in chapters:
             chapter.activities = chapter_activities_map.get(chapter.id, [])
 
-    _apply_locks_to_chapters(chapters, course, current_user, db_session)
+    _apply_locks_to_chapters(
+        chapters, course, current_user, db_session, course_access_granted=access.allowed
+    )
 
     return chapters
 
@@ -371,6 +392,8 @@ def _apply_locks_to_chapters(
     course: "Course | None",
     current_user: PublicUser | AnonymousUser | APITokenUser,
     db_session: Session,
+    *,
+    course_access_granted: bool = True,
 ) -> None:
     """Compute is_locked for each chapter + activity and strip content for locked items.
 
@@ -390,6 +413,19 @@ def _apply_locks_to_chapters(
 
     # Admins see everything — no stripping.
     if admin:
+        return
+
+    # A published paid course is a product page: learners without an
+    # entitlement browse the structure, never the lesson bodies.
+    if course.access_type == AccessTypeEnum.PAID and not course_access_granted:
+        for chapter in chapters:
+            chapter.is_locked = True
+            chapter.description = ""
+            chapter.thumbnail_image = ""
+            for activity in chapter.activities:
+                activity.is_locked = True
+                activity.content = {}
+                activity.details = None
         return
 
     # Collect the uuids we need to check access on, in a single batch query:

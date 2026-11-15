@@ -2599,6 +2599,7 @@ async def _apply_grade_and_finalize(
             "passed": computed["passed"],
             "grading_type": computed["grading_type"],
         },
+        db_session=db_session,
     )
 
     return computed

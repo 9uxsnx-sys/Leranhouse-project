@@ -23,8 +23,8 @@ from src.core.events.database import get_db_session
 from src.db.courses.courses import Course
 from src.db.podcasts.podcasts import Podcast
 from src.db.users import AnonymousUser, PublicUser, APITokenUser
-from src.db.user_organizations import UserOrganization
 from src.security.auth import get_current_user
+from src.security.rbac import require_resource_read
 from src.services.courses.transfer.storage_utils import (
     get_storage_client,
     get_s3_bucket_name,
@@ -92,11 +92,13 @@ def _validate_content_path(file_path: str) -> str | None:
     full_real = os.path.realpath(os.path.join(base_real, normalized))
     if not full_real.startswith(base_real + os.sep):
         return None
-    # Return the validated relative path
-    return os.path.relpath(full_real, base_real)
+    # Return the validated relative path with POSIX separators so it matches
+    # the URL/content-path contract on every platform.
+    return os.path.relpath(full_real, base_real).replace(os.sep, '/')
 
 
-def _check_content_access(
+async def _check_content_access(
+    request: Request,
     file_path: str,
     current_user: PublicUser | AnonymousUser | APITokenUser,
     db_session: Session,
@@ -112,7 +114,8 @@ def _check_content_access(
     """
     parts = file_path.split('/')
 
-    # Activity content: requires course to be public or user to be org member
+    # Activity content: paid / restricted courses are decided by RBAC, not by
+    # the legacy `public` flag.
     if (
         len(parts) >= 6
         and parts[0] == 'orgs'
@@ -125,27 +128,12 @@ def _check_content_access(
         ).first()
         if not course:
             raise HTTPException(status_code=403, detail="Access denied")
-        if course.public:
-            return  # Public course — allow anonymous
-        if isinstance(current_user, AnonymousUser):
-            raise HTTPException(status_code=401, detail="Authentication required")
-        # Verify API token is scoped to the correct org
-        if isinstance(current_user, APITokenUser):
-            if current_user.org_id != course.org_id:
-                raise HTTPException(status_code=403, detail="Access denied")
-            return
-        # Verify user belongs to the org that owns this course
-        membership = db_session.exec(
-            select(UserOrganization).where(
-                UserOrganization.user_id == current_user.id,
-                UserOrganization.org_id == course.org_id,
-            )
-        ).first()
-        if not membership:
-            raise HTTPException(status_code=403, detail="Access denied")
+        await require_resource_read(
+            request, db_session, current_user, course.course_uuid, org_id=course.org_id
+        )
         return
 
-    # Podcast episode content: requires podcast to be public or user to be org member
+    # Podcast episode content: same rule as courses.
     if (
         len(parts) >= 6
         and parts[0] == 'orgs'
@@ -158,24 +146,9 @@ def _check_content_access(
         ).first()
         if not podcast:
             raise HTTPException(status_code=403, detail="Access denied")
-        if podcast.public:
-            return  # Public podcast — allow anonymous
-        if isinstance(current_user, AnonymousUser):
-            raise HTTPException(status_code=401, detail="Authentication required")
-        # Verify API token is scoped to the correct org
-        if isinstance(current_user, APITokenUser):
-            if current_user.org_id != podcast.org_id:
-                raise HTTPException(status_code=403, detail="Access denied")
-            return
-        # Verify user belongs to the org that owns this podcast
-        membership = db_session.exec(
-            select(UserOrganization).where(
-                UserOrganization.user_id == current_user.id,
-                UserOrganization.org_id == podcast.org_id,
-            )
-        ).first()
-        if not membership:
-            raise HTTPException(status_code=403, detail="Access denied")
+        await require_resource_read(
+            request, db_session, current_user, podcast.podcast_uuid, org_id=podcast.org_id
+        )
         return
 
     # Course metadata (thumbnails, etc.) and org-level content — always public
@@ -220,7 +193,7 @@ async def serve_content_file(
     if safe_path is None:
         raise HTTPException(status_code=400, detail="Invalid path")
 
-    _check_content_access(safe_path, current_user, db_session)
+    await _check_content_access(request, safe_path, current_user, db_session)
 
     s3_key = f"content/{safe_path}"
     s3_client = get_storage_client()
@@ -349,6 +322,7 @@ async def serve_content_file(
     },
 )
 async def head_content_file(
+    request: Request,
     file_path: str,
     current_user: PublicUser | AnonymousUser | APITokenUser = Depends(get_current_user),
     db_session: Session = Depends(get_db_session),
@@ -358,7 +332,7 @@ async def head_content_file(
     if safe_path is None:
         raise HTTPException(status_code=400, detail="Invalid path")
 
-    _check_content_access(safe_path, current_user, db_session)
+    await _check_content_access(request, safe_path, current_user, db_session)
 
     s3_key = f"content/{safe_path}"
     s3_client = get_storage_client()

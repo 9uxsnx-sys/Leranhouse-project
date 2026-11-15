@@ -1,33 +1,58 @@
+> Status: as-built · Last verified: 2026-11-15
+
 # Communities
 
-> Discussion communities on Koodook.
+Communities are discussion spaces attached to a course or podcast, or to the organization itself.
 
----
+## Community catalogue
 
-Communities are discussion spaces where learners can interact, ask questions, and share knowledge.
+Open **Communities** from the side menu.
 
-## Browsing Communities
+| Control | Behaviour |
+|---|---|
+| Search | Matches community name or description |
+| Filter | All communities, Newest, Course communities, Podcast communities |
+| Pagination | Eight communities per page |
 
-The **Communities** page shows all available communities for your organization.
+Each card shows the community cover, name, description, linked resource type and creation date. The whole feature is hidden when the organization disables communities.
 
-## Community Features
+## Community page
 
-- **Discussions** --- Create and reply to discussion threads
-- **Votes** --- Upvote helpful content
-- **Search** --- Find discussions by keyword
-- **Member count** --- See how many people are active in the community
-- **Linked courses** --- Communities tied to a course show a "Go to Course" button
+| Element | Content |
+|---|---|
+| Banner | Community banner |
+| Header | Name, description, discussion count and linked resource type |
+| Search | Filters the discussion feed |
+| **New discussion** | Visible when you have create permission and belong to the organization |
+| Filter menu | Sort by Recent, Top or Hot, plus discussion labels |
+| Feed | Discussion cards that expand in place |
 
-## Community Sidebar
+Discussion labels are General, Q&A, Ideas, Announcements and Show and Tell. Use the filter menu to isolate one label; the menu icon shows a dot while a non-default sort or label is active.
 
-Each community page has a right sidebar with:
+## Discussions
 
-- **Linked Course** --- If the community is linked to a course, a card with a "Go to Course" button is shown
-- **This Community Includes** --- Displays member count, discussion count, and creation date
-- **Updates** --- Shows the last time the community was updated
-- **Community Guidelines** --- Rules and expectations for participation
+A discussion card shows its title, author, label, timestamp and engagement. Opening it expands the thread in place, where you can:
 
-## Community Types
+- Read the full body.
+- Vote on the discussion.
+- Read replies and add your own.
+- Edit or delete your own content when permissions allow.
 
-- **Course communities** --- Discussion spaces tied to specific courses
-- **Organization communities** --- General discussion spaces for the organization
+Sorting by **Top** orders by votes; **Recent** orders by activity; **Hot** balances activity and recency.
+
+## Sidebar
+
+| Card | Content |
+|---|---|
+| Linked resource | Course or podcast card with a link to open it |
+| This community includes | Member count, discussion count and creation date |
+| Updates | Last update date |
+| Community guidelines | The organization's community rules |
+
+The community inherits access and context from its linked resource, so a community attached to a restricted course follows that course's visibility.
+
+## Related
+
+- [Courses](./courses.md) and [Podcasts](./podcasts.md) — resources that can own a community.
+- [Communities API](../06-api-reference/communities.md) and [Discussions API](../06-api-reference/discussions.md).
+- [Developer guide](../05-developer-guide/README.md).

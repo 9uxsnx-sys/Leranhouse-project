@@ -2,7 +2,6 @@ import {
   CurrencyCircleDollar,
   Tag,
   Gear,
-  User as UserIcon,
 } from '@phosphor-icons/react'
 import type { SearchMeta } from '@/lib/dashboard-search/types'
 
@@ -34,16 +33,6 @@ export const searchMetas: SearchMeta[] = [
     keywordsKey: 'dashboard.search.entries.payments_configuration.keywords',
     icon: Gear,
     href: '/dash/payments/configuration',
-    group: 'payments',
-    featureKey: 'payments',
-  },
-  {
-    id: 'dash.payments.customers',
-    titleKey: 'dashboard.search.entries.payments_customers.title',
-    descriptionKey: 'dashboard.search.entries.payments_customers.description',
-    keywordsKey: 'dashboard.search.entries.payments_customers.keywords',
-    icon: UserIcon,
-    href: '/dash/payments/customers',
     group: 'payments',
     featureKey: 'payments',
   },

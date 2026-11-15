@@ -1,101 +1,76 @@
-# Collections content localization
+> Status: as-built · Last verified: 2026-11-15
 
-> **Status:** done. Same contract as courses — see [content-localization.md](./content-localization.md).
-> A collection authored in English can be fully translated into French and Arabic, edited from the same dashboard, and served to learners in their language.
+# Collections Content Localisation
 
----
+A collection authored in one language can be translated into French and Arabic, edited from the collection dashboard, and served to learners in their selected language.
 
-## 1. Model
+## Model
 
-The base `collection` row always holds the **source locale**. A `collection_translation` row overrides the display fields for one other locale. Resolution is `requested locale → base row`.
+The base `collection` row holds the **source locale** (`collection.source_locale`, default `en`). A `collection_translation` row overrides the display fields for another locale. Resolution is `requested locale → base row`.
 
-```
-collection
-├── source_locale        VARCHAR(10) NOT NULL DEFAULT 'en'
-└── collection_translation
-    ├── collection_id    FK collection(id) ON DELETE CASCADE
-    ├── locale           VARCHAR(10)
-    ├── name             TEXT NOT NULL
-    ├── description, about, learnings, tags
-    ├── seo              JSONB
-    ├── extra_metadata   JSONB (display-text keys only)
-    ├── state            draft | machine | reviewed | published
-    ├── source_updated_at, translated_by, creation_date, update_date
-    └── UNIQUE (collection_id, locale)
-```
+| Storage | Fields |
+|---|---|
+| `collection_translation` | `name`, `description`, `about`, `learnings`, `tags`, `seo`, display `extra_metadata`, `state`, `source_updated_at`, `translated_by` |
 
-Migrations: `y0f1a2b3c4d5_add_collection_translations.py`, then `b2c3d4e5f6a7_add_collection_translation_metadata.py` for `extra_metadata`.
+Uniqueness is `(collection_id, locale)`, and the row cascades when the collection is deleted. **Never localized:** thumbnail, banner, price, access type, publish state and membership.
 
-**Never localized:** thumbnail, banner, price, access type, publish state, membership. A bundle is one record with one structure.
+### Display metadata
 
-### Translatable metadata
-
-`collection.extra_metadata` mixes display text with derived values. Only the display-text keys are copied into a translation row:
+`collection.extra_metadata` mixes display text with derived values. Only display-text keys are written into a translation row; everything else stays on the base row and is merged over.
 
 | Translated | Stays on the base row |
 |---|---|
 | `difficulty`, `duration`, `requirements`, `target_audience.for`, `target_audience.not_for` | `lessons_count`, `video_hours`, `resources_count`, `has_certificate` |
 
-The overlay merges the translation over the base object (`{**base, **translation}`), so a locale row can translate four keys and still inherit every count. Note `requirements` is a JSON **string** in the object; the editor parses it, assigns ids to older rows that only carry `{text}`, and re-serializes on save.
+The overlay merges `{**base, **translation}`, so a locale can translate a few keys and still inherit every count. Requirements are stored as a JSON string; the editor parses them and assigns ids to older rows that only carry `{text}`. `difficulty` is a fixed `Beginner | Intermediate | Advanced` select in the source locale and free text in a translation.
 
-`difficulty` is authored as free text in a translation and as one of `Beginner | Intermediate | Advanced` in the source locale. Learner surfaces canonicalise the value and emit the localized label at render time, so a translated row may also keep the English word.
+## API
 
-## 2. API
-
-| Endpoint | Behaviour |
+| Behaviour | Endpoint |
 |---|---|
-| `GET /collections/{uuid}?locale=xx` | Overlays the translation; returns `source_locale`, `content_locale`, `is_fallback` |
-| `GET /collections/org/{id}/page/{p}/limit/{l}?locale=xx` | Same, one translation query per page (`apply_collection_overlay_bulk`) |
-| `GET /collections/{uuid}/courses?locale=xx` | Localizes member course names/descriptions |
-| `GET /collections/{uuid}/members?…&locale=xx` | Localizes the dashboard Content table (linked + available/search) |
-| `GET /collections/org/{id}/mine?locale=xx` | "My bundles" listing |
-| `GET /collections/{uuid}/translations` | List translation rows (requires update permission) |
-| `PUT /collections/{uuid}/translations/{locale}` | Upsert one row; **422** when `locale == source_locale` |
-| `DELETE /collections/{uuid}/translations/{locale}` | Delete one row |
+| Read a collection in a locale | `GET /collections/{uuid}?locale=xx` returns `source_locale`, `content_locale`, `is_fallback` |
+| List a page | `GET /collections/org/{id}/page/{p}/limit/{l}?locale=xx` |
+| Member courses | `GET /collections/{uuid}/courses?locale=xx` |
+| Dashboard members | `GET /collections/{uuid}/members?…&locale=xx` |
+| My bundles | `GET /collections/org/{id}/mine?locale=xx` |
+| List translations | `GET /collections/{uuid}/translations` |
+| Upsert one locale | `PUT /collections/{uuid}/translations/{locale}` — `422` for the source locale |
+| Delete one locale | `DELETE /collections/{uuid}/translations/{locale}` |
 
-Implementation: `apps/api/src/services/courses/collection_translations.py`. The overlay is applied **after** every access/lock check, so a translation can never reveal a locked collection.
+Implementation lives in `services/courses/collection_translations.py`. The overlay is applied **after** every access and lock check, so a translation cannot reveal a locked collection. Listing pages use one bulk query (`apply_collection_overlay_bulk`). Search matches collection translation rows.
 
-Search results (`/search`) localize collection names through the same bulk helper.
+## Dashboard
 
-## 3. Dashboard
-
-The platform language switcher is the only content-locale control — there is no second selector.
+The platform language switcher is the only content-locale control.
 
 | Surface | Behaviour |
 |---|---|
-| Collections list (`/dash/collections`) | SWR key carries `locale`, so cards/search follow the UI language |
-| General tab | Reads/writes the translation row for non-source locales; source locale keeps writing the base row. Action row shows the language chip (Source / Translation / Missing), **Copy from source** and the Save state. Requirements, audience (for / not for), difficulty and duration are editable in both locales; the certificate toggle is read-only outside the source locale because the flag is shared |
-| SEO tab | Same rule for the `seo` object. Read-only until the locale has a translation row (the API needs a `name`), with an "inherited" hint |
+| Collections list (`/dash/collections`) | SWR key carries `locale` |
+| General tab | Source locale writes the base row; other locales write the translation row. Requirements, audience, difficulty and duration are editable in every locale; the certificate toggle is read-only outside the source locale because the flag is shared |
+| SEO tab | Same rule for `seo`; read-only until the locale has a translation row, with an inherited hint |
 | Content tab | Member course names come back localized through `?locale=` |
 | Translations tab | Coverage matrix per language (name, description, about, learnings, tags, SEO, metadata), copy-from-source, delete, CSV export/import |
 
-Dashboard fetches of the collection itself deliberately omit `locale`: the editor needs the **source row** as its baseline, exactly like the course editor.
+Dashboard fetches of the collection itself deliberately omit `locale`, so the editor always has the source row as its baseline. `useCollectionTranslation` resolves the editable row for the active locale.
 
-## 4. Learner surfaces
+## Learner surfaces
 
 | Surface | Behaviour |
 |---|---|
-| `/orgs/{org}/collections` | Server-rendered in the visitor's locale (reads the `i18next` cookie before fetching) |
-| `/orgs/{org}/collection/{id}` | SWR keys carry the locale; a client-side language switch re-fetches |
-| Metadata | `generateMetadata` reads the same cookie, so the localized `seo`/name reach `<head>` |
+| `/collections` | Server-rendered in the visitor's locale from the `i18next` cookie |
+| `/collection/{id}` | SWR keys carry the locale, so a language switch re-fetches |
+| Metadata | `generateMetadata` reads the same cookie, so the localized name and `seo` reach `<head>` |
 | Fallback hint | `is_fallback: true` shows "This collection is only available in {{language}}." above the title |
 
-## 5. Verification
+## Not built
 
-Run against the live API (dev CLI, `admin@school.dev`):
+- Payments, entitlements and receipts keep the collection name in the source locale; money documents do not change language mid-transaction.
+- New collections default to `en`; there is no per-org content default.
+- Machine translation, review workflow and stale detection are out of scope.
 
-```
-PUT fr      → name=Phase 5 QA FR, seo=SEO FR
-GET ?fr     → Phase 5 QA FR | content_locale=fr | is_fallback=false | seo=SEO FR
-GET ?ar     → Phase 5 QA   | content_locale=en | is_fallback=true
-DELETE fr   → Translation deleted
-GET ?fr     → Phase 5 QA   | is_fallback=true
-```
+## Related
 
-`tsc --noEmit` stays at the 25-line baseline; `en`/`fr`/`ar` locales parse.
-
-## 6. Known limits
-
-- Payments, entitlements and receipts keep the collection name in the source locale — money documents should not change language mid-transaction.
-- New collections default to `en`; there is no per-org default locale for content yet (same as courses).
-- Machine translation, review workflow and stale detection remain out of scope, as for courses.
+- [RTL and content localisation](./rtl-plan.md)
+- [Course content localisation](./content-localization.md)
+- [Podcasts localisation](./podcasts-localization.md)
+- [Collections API](../../06-api-reference/collections.md)

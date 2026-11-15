@@ -128,5 +128,3 @@ Unlike the uploads, the Auth card is **not** auto-saved. Click **Save** below th
 ## Related Sections
 
 - [General Settings](./general.md) — Organization name, slug, and locale
-- [Landing Page Builder](./landing.md) — Build your public homepage
-- [Feature Flags](./features.md) — Enable platform features for the organization

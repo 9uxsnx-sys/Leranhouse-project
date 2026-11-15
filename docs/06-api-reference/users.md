@@ -1,71 +1,76 @@
 # Users
 
-> The Users router at `/api/v1/users` manages the current user's profile and session, account creation and lookup, profile/avatar/password updates, and password-reset flows. Sessions are cached in Redis and lookups require authentication to prevent enumeration.
+> Status: as-built · Last verified: 2026-11-15
 
 ---
 
 ## Overview
 
-The `user` row is the platform-wide identity (username, email, name, avatar, bio). A user becomes a member of an organization through a `userorganization` row that also carries the per-org `role`. The Users router handles the identity itself; per-organization user administration (invites, role assignment, batch operations, the org roster) lives in the Orgs router — see [Organizations](./orgs.md).
+The Users router is mounted at `/api/v1/users`. It covers the current user's profile and session, account creation and lookup, profile/avatar/banner/password updates, courses/podcasts authored by a user, communities the user can access, and password-reset flows.
 
-Two things are worth stating up front because earlier drafts of this page got them wrong:
-
-- **Tokens are not issued here.** Access/refresh tokens come from the Auth router — see [Authentication](./authentication.md). `GET /session` returns the user plus their org roles, **not** tokens.
-- **There is no `is_active` flag.** Account state on the row is `email_verified` (returned) plus `failed_login_attempts` / `locked_until` (not returned).
-
----
-
-## Authentication
-
-Every endpoint is mounted with a router-level guard (`get_non_api_token_user`) that **rejects API tokens** but admits anonymous requests. Each endpoint then declares its own dependency:
+The router-level dependency rejects API-token authentication (`get_non_api_token_user`) but admits anonymous requests; each endpoint then declares its own dependency.
 
 | Endpoint group | Dependency | Anonymous behaviour |
 |----------------|-----------|---------------------|
-| `GET /profile` | `get_current_user` | Returns an **anonymous** user object (see below) |
-| `GET /session`, `GET /authorize/...`, create/update/avatar/password, reset flows, `DELETE`, `GET /{user_id}/courses` | `get_current_user` | Anonymous caller is handled by the service layer (typically `400`/`403`) |
+| `GET /profile` | `get_current_user` | Returns the `AnonymousUser` object |
+| `GET /session`, `GET /authorize/...`, `GET /check-username/...`, create/update/avatar/banner/password, reset flows, `DELETE`, profile listings | `get_current_user` | Service layer decides (usually `400`/`403`) |
 | `GET /id/{user_id}`, `GET /uuid/{user_uuid}`, `GET /username/{username}` | `get_authenticated_user` | `401 Unauthorized` |
 
-**Note on naming:** the profile route spells the resource `ressource` (double *s*) — `GET /api/v1/users/authorize/ressource/{ressource_uuid}/action/{action}`.
+The authorization route spells the resource `ressource` (double *s*).
 
 ---
 
 ## Response Objects
 
-### `UserRead` (profile, create, update, avatar, password)
+### `UserRead` (profile, create, update, avatar/banner/password responses)
 
-Inherits the base user fields (`username`, `first_name`, `last_name`, `email`, `avatar_image`, `bio`, `details`, `profile`, `extra_metadata`) and adds:
+```json
+{
+  "id": 1,
+  "user_uuid": "user_a1b2c3d4-...",
+  "username": "johndoe",
+  "first_name": "John",
+  "last_name": "Doe",
+  "email": "john@example.com",
+  "avatar_image": "",
+  "banner_image": "",
+  "bio": "",
+  "details": {},
+  "profile": {},
+  "extra_metadata": null,
+  "email_verified": true,
+  "last_login_at": "2026-11-15 08:12:40.123456",
+  "signup_method": "email",
+  "is_superadmin": false,
+  "creation_date": "2026-01-15 08:00:00.000000"
+}
+```
 
-| Field | Type | Notes |
-|-------|------|-------|
-| `id` | integer | Primary key |
-| `user_uuid` | string | Public UUID identifier |
-| `email_verified` | boolean | Whether the email is verified |
-| `last_login_at` | string \| null | ISO-8601 |
-| `signup_method` | string \| null | e.g. the provider used at signup |
-| `is_superadmin` | boolean | Platform-level admin flag |
-| `creation_date` | string | ISO-8601 |
-
-`password`, `failed_login_attempts`, `locked_until`, `last_login_ip` and `update_date` are **not** part of this response.
+`password`, `failed_login_attempts`, `locked_until`, `last_login_ip`, `password_changed_at` and `update_date` are not returned.
 
 ### `UserReadPublic` (lookups by id/uuid/username)
 
-Same base fields plus `id`, `user_uuid`, `email_verified` — a restricted view that omits `last_login_at`, `signup_method`, `is_superadmin` and `creation_date`.
+Inherits all `UserBase` fields (`username`, `first_name`, `last_name`, `email`, `avatar_image`, `banner_image`, `bio`, `details`, `profile`, `extra_metadata`) plus:
+
+| Field | Type |
+|-------|------|
+| `id` | integer |
+| `user_uuid` | string |
+| `email_verified` | boolean |
+
+It omits `last_login_at`, `signup_method`, `is_superadmin` and `creation_date`.
 
 ### `AnonymousUser` (profile when unauthenticated)
 
 ```json
-{
-  "id": 0,
-  "user_uuid": "user_anonymous",
-  "username": "anonymous"
-}
+{ "id": 0, "user_uuid": "user_anonymous", "username": "anonymous" }
 ```
 
-### `UserSession` (session)
+### `UserSession`
 
 ```json
 {
-  "user": { "id": 1, "user_uuid": "a1b2c3d4-...", "username": "johndoe", "first_name": "John", "last_name": "Doe", "email": "john@example.com", "email_verified": true, "creation_date": "2026-01-15T08:00:00+00:00" },
+  "user": { "id": 1, "user_uuid": "user_a1b2c3d4-...", "username": "johndoe", "email_verified": true, "...": "..." },
   "roles": [
     {
       "role": { "id": 1, "name": "Admin", "role_uuid": "role_admin", "role_type": "TYPE_ORGANIZATION", "rights": { "...": "..." } },
@@ -85,81 +90,59 @@ Same base fields plus `id`, `user_uuid`, `email_verified` — a restricted view 
 GET /api/v1/users/profile
 ```
 
-Returns the authenticated user as `UserRead`, or the `AnonymousUser` object when there is no session. No `response_model` is declared — the body is the model dump.
-
-### Errors
-
-| Status | Description |
-|--------|-------------|
-| `200 OK` | Profile returned (or anonymous object when unauthenticated) |
+Returns `UserRead` (model dump) or `AnonymousUser` when unauthenticated. No `response_model` is declared.
 
 ---
 
 ## Get Session
 
-Retrieve the current user with their organization memberships and roles.
-
 ```
 GET /api/v1/users/session
 ```
 
-Response model: `UserSession` (see above). The result is cached in Redis under `session:{user_id}` for **10 minutes**; profile updates, avatar updates and deletes invalidate it.
+Returns `UserSession`. Cached in Redis under `session:{user_id}` for 10 minutes; profile/avatar/banner updates and deletes invalidate the cache.
 
 ### Errors
 
 | Status | Description |
 |--------|-------------|
-| `200 OK` | Session returned |
+| `400` | Authenticated user no longer exists |
 
 ---
 
 ## Authorization Check
 
-Check whether the current user may perform an action on a resource.
-
 ```
 GET /api/v1/users/authorize/ressource/{ressource_uuid}/action/{action}
 ```
 
-### Path Parameters
+| Path parameter | Values |
+|----------------|--------|
+| `ressource_uuid` | Resource UUID |
+| `action` | `create`, `read`, `update`, `delete` |
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `ressource_uuid` | string | The resource UUID to check |
-| `action` | string | One of `create`, `read`, `update`, `delete` |
-
-### Response Body (200 OK)
+### Response (200 OK)
 
 ```json
 true
 ```
 
-On denial the endpoint raises `403` rather than returning a falsey object.
-
 ### Errors
 
 | Status | Description |
 |--------|-------------|
-| `400 Bad Request` | The authenticated user no longer exists |
-| `403 Forbidden` | The user is not authorized for the action |
+| `400` | Current user does not exist |
+| `403` | Not authorized for this action |
 
 ---
 
 ## Create User (in Organization)
 
-Create a user and attach them to an organization. Rejected when the organization is invite-only.
-
 ```
 POST /api/v1/users/{org_id}
 ```
 
-### Path Parameters
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `org_id` | integer | Organization to attach the user to |
-
-### Request Body (`UserCreate`)
+### Request body (`UserCreate`)
 
 | Field | Type | Required | Notes |
 |-------|------|----------|-------|
@@ -167,13 +150,15 @@ POST /api/v1/users/{org_id}
 | `first_name` | string | No | Defaults to `""` |
 | `last_name` | string | No | Defaults to `""` |
 | `email` | string (email) | Yes | Unique |
-| `password` | string | Yes | |
+| `password` | string | Yes | Complexity validated |
 | `avatar_image` | string | No | |
+| `banner_image` | string | No | |
 | `bio` | string | No | |
-| `details` / `profile` | object | No | Free-form JSON |
-| `extra_metadata` | object | No | Free-form JSONB |
+| `details` | object | No | |
+| `profile` | object | No | |
+| `extra_metadata` | object | No | |
 
-### Response Body (200 OK)
+### Response (200 OK)
 
 `UserRead`.
 
@@ -181,8 +166,8 @@ POST /api/v1/users/{org_id}
 
 | Status | Description |
 |--------|-------------|
-| `403 Forbidden` | Organization is invite-only — an invite code is required |
-| `422 Unprocessable Entity` | Validation error |
+| `400` | Weak password, organization does not exist, or email/username already in use |
+| `403` | Organization is invite-only (an invite code is required) |
 
 ---
 
@@ -192,32 +177,38 @@ POST /api/v1/users/{org_id}
 POST /api/v1/users/{org_id}/invite/{invite_code}
 ```
 
-Same body as above. For invite-only organizations.
+Same body as above. Only valid when the organization is invite-only.
 
 ### Errors
 
 | Status | Description |
 |--------|-------------|
-| `400 Bad Request` | Invalid or expired invite code |
-| `429 Too Many Requests` | Rate limit exceeded (per IP + org) |
+| `400` | Weak password or email/username already in use |
+| `403` | Organization does not require an invite code, or caller lacks permission to read the code |
+| `404` | Invite code not found |
+| `429` | More than 20 invite-code attempts per 15 minutes per IP + org |
 
 ---
 
 ## Create User (without Organization)
 
-Create a standalone account not yet attached to any organization.
-
 ```
-POST /api/v1/users
+POST /api/v1/users/
 ```
 
-Same body as organization-scoped creation. Response: `UserRead`.
+Same body. Response: `UserRead`. The user is not attached to any organization.
+
+### Errors
+
+| Status | Description |
+|--------|-------------|
+| `400` | Weak password, or email/username already in use |
 
 ---
 
 ## Lookup Users
 
-Lookups require authentication (`get_authenticated_user`) to prevent enumeration and return the restricted `UserReadPublic` view.
+Requires authentication and returns `UserReadPublic`.
 
 ```
 GET /api/v1/users/id/{user_id}
@@ -229,8 +220,26 @@ GET /api/v1/users/username/{username}
 
 | Status | Description |
 |--------|-------------|
-| `401 Unauthorized` | Authentication required |
-| `404 Not Found` | User not found |
+| `401` | Authentication required |
+| `404` | Not found (detail: `"Resource not found"`) |
+
+---
+
+## Check Username Availability
+
+```
+GET /api/v1/users/check-username/{username}
+```
+
+Excludes the current user from the check.
+
+### Response (200 OK)
+
+```json
+{ "available": true }
+```
+
+`{"available": false}` means another user already owns the username.
 
 ---
 
@@ -240,26 +249,25 @@ GET /api/v1/users/username/{username}
 PUT /api/v1/users/{user_id}
 ```
 
-### Request Body (`UserUpdate`)
+### Request body (`UserUpdate`)
 
 | Field | Type | Required |
 |-------|------|----------|
 | `username` | string | Yes |
 | `email` | string (email) | Yes |
 | `first_name` / `last_name` | string | No |
-| `avatar_image` / `bio` | string | No |
+| `avatar_image` / `banner_image` / `bio` | string | No |
 | `details` / `profile` | object | No |
 | `extra_metadata` | object | No |
 
-Response: `UserRead`. Invalidates the user's cached session.
+Response: `UserRead`. The session cache is invalidated. Changing the email resets `email_verified` to `false`.
 
 ### Errors
 
 | Status | Description |
 |--------|-------------|
-| `400 Bad Request` | Validation failed (duplicate email/username, invalid fields) |
-| `403 Forbidden` | Caller lacks permission to update this user |
-| `404 Not Found` | User not found |
+| `400` | `"Email or username is already in use"` or `"User does not exist"` |
+| `403` | Caller lacks permission to update this user |
 
 ---
 
@@ -269,19 +277,67 @@ Response: `UserRead`. Invalidates the user's cached session.
 PUT /api/v1/users/update_avatar/{user_id}
 ```
 
-### Request Body (Multipart Form Data)
+Multipart form field: `avatar_file` (optional in the signature; if omitted the user is returned unchanged).
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `avatar_file` | file | Yes | Avatar image (the form field is named `avatar_file`) |
-
-Response: `UserRead`. The `user_id` in the URL **must** match the authenticated user (IDOR protection), and the cached session is invalidated.
+Response: `UserRead`. `user_id` must match the authenticated user. Session cache invalidated.
 
 ### Errors
 
 | Status | Description |
 |--------|-------------|
-| `403 Forbidden` | Attempted to update another user's avatar |
+| `403` | `"You can only update your own avatar"` |
+| `400` | Upload failed |
+
+---
+
+## Delete Avatar
+
+```
+DELETE /api/v1/users/delete_avatar/{user_id}
+```
+
+Sets `avatar_image` to `null`. Response: `UserRead`. Session cache invalidated.
+
+### Errors
+
+| Status | Description |
+|--------|-------------|
+| `403` | `"You can only delete your own avatar"` |
+
+---
+
+## Update Banner
+
+```
+PUT /api/v1/users/update_banner/{user_id}
+```
+
+Multipart form field: `banner_file` (optional; if omitted the user is returned unchanged).
+
+Response: `UserRead`. Session cache invalidated.
+
+### Errors
+
+| Status | Description |
+|--------|-------------|
+| `403` | `"You can only update your own banner"` |
+| `400` | `"Banner upload failed: ..."` |
+
+---
+
+## Delete Banner
+
+```
+DELETE /api/v1/users/delete_banner/{user_id}
+```
+
+Sets `banner_image` to `null`. Response: `UserRead`. Session cache invalidated.
+
+### Errors
+
+| Status | Description |
+|--------|-------------|
+| `403` | `"You can only delete your own banner"` |
 
 ---
 
@@ -291,12 +347,11 @@ Response: `UserRead`. The `user_id` in the URL **must** match the authenticated 
 PUT /api/v1/users/change_password/{user_id}
 ```
 
-### Request Body (`UserUpdatePassword`)
+### Request body (`UserUpdatePassword`)
 
-| Field | Type | Required |
-|-------|------|----------|
-| `old_password` | string | Yes |
-| `new_password` | string | Yes |
+```json
+{ "old_password": "currentPassword123", "new_password": "newSecurePassword123" }
+```
 
 Response: `UserRead`.
 
@@ -304,9 +359,9 @@ Response: `UserRead`.
 
 | Status | Description |
 |--------|-------------|
-| `400 Bad Request` | New password fails validation |
-| `401 Unauthorized` | Wrong current password |
-| `403 Forbidden` | Caller cannot change this user's password |
+| `400` | Weak new password (`{"code": "WEAK_PASSWORD", ...}`) |
+| `401` | `"Wrong password"` |
+| `403` | `"You can only change your own password"` |
 
 ---
 
@@ -316,79 +371,191 @@ Response: `UserRead`.
 DELETE /api/v1/users/user_id/{user_id}
 ```
 
-Returns `200 OK` on success (there is no `204` variant) and invalidates the user's cached session.
+Returns `200 OK` and invalidates the cached session.
 
 ### Errors
 
 | Status | Description |
 |--------|-------------|
-| `403 Forbidden` | Caller cannot delete this user |
-| `404 Not Found` | User not found |
+| `400` | `"User does not exist"` |
+| `403` | Caller cannot delete this user |
 
 ---
 
-## Get User Courses
-
-List the courses a user authored or contributed to.
+## List User Courses
 
 ```
-GET /api/v1/users/{user_id}/courses?page=1&limit=10
+GET /api/v1/users/{user_id}/courses?page=1&limit=10&locale=en
 ```
 
-### Query Parameters
+### Query parameters
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `page` | integer | 1 | Page number (≥ 1) |
-| `limit` | integer | 10 | Items per page (1–50; the 50 cap prevents bulk extraction) |
+| `limit` | integer | 10 | 1–50; the 50 cap prevents bulk extraction |
+| `locale` | string | null | Locale code for course translation overlay |
 
-Response model: `List[CourseRead]` — see [Courses](./courses.md) for the course shape.
+Response model: `List[CourseRead]`.
+
+```json
+[
+  {
+    "id": 12,
+    "org_id": 1,
+    "course_uuid": "course_abc123",
+    "name": "Introduction to Algebra",
+    "description": "A beginner-friendly course.",
+    "public": true,
+    "published": true,
+    "authors": [],
+    "creation_date": "2026-09-20 10:00:00.000000",
+    "update_date": "2026-09-22 15:30:00.000000",
+    "thumbnail_image": "",
+    "banner_image": "",
+    "content_locale": "en",
+    "is_fallback": false
+  }
+]
+```
 
 ### Errors
 
 | Status | Description |
 |--------|-------------|
-| `404 Not Found` | User not found |
+| `403` | Unauthenticated caller (`"You should be logged in to perform this action"`) |
+
+Users with no authored courses return an empty array, not a `404`.
+
+---
+
+## List User Podcasts
+
+```
+GET /api/v1/users/{user_id}/podcasts?page=1&limit=10
+```
+
+Query parameters: `page` (default 1, ≥ 1), `limit` (default 10, 1–50). No `locale` parameter on this route.
+
+Response: `List[PodcastRead]`.
+
+```json
+[
+  {
+    "id": 4,
+    "org_id": 1,
+    "podcast_uuid": "podcast_abc123",
+    "name": "The Learning Loop",
+    "description": "Weekly conversations.",
+    "public": true,
+    "published": true,
+    "authors": [],
+    "creation_date": "2026-10-01 09:00:00.000000",
+    "update_date": "2026-10-02 09:00:00.000000",
+    "thumbnail_image": "",
+    "banner_image": "",
+    "source_locale": "en",
+    "content_locale": "en",
+    "is_fallback": false
+  }
+]
+```
+
+### Errors
+
+| Status | Description |
+|--------|-------------|
+| `403` | Unauthenticated caller (`"You should be logged in to perform this action"`) |
+
+Users with no authored podcasts return an empty array, not a `404`.
+
+---
+
+## List User Communities
+
+```
+GET /api/v1/users/{user_id}/communities?page=1&limit=10&locale=en
+```
+
+Communities the user can access; each community follows the access rules of its linked course or podcast.
+
+Query parameters: `page` (default 1), `limit` (default 10, 1–50), `locale` (optional content locale, falls back to the source locale).
+
+Response: `List[CommunityRead]`.
+
+```json
+[
+  {
+    "id": 2,
+    "org_id": 1,
+    "community_uuid": "community_abc123",
+    "name": "Algebra Study Group",
+    "description": "Ask questions and share notes.",
+    "public": true,
+    "published": true,
+    "thumbnail_image": "",
+    "banner_image": "",
+    "source_locale": "en",
+    "content_locale": "en",
+    "is_fallback": false,
+    "moderation_words": [],
+    "moderation_settings": null
+  }
+]
+```
+
+### Errors
+
+| Status | Description |
+|--------|-------------|
+| `403` | Unauthenticated caller (`"You should be logged in to perform this action"`) |
+
+A user with no accessible communities receives an empty array, not a `404`.
 
 ---
 
 ## Password Reset
 
-Two flows exist — **organization-scoped** (a code tied to an org) and **platform-level** (a code not tied to any org). Each flow has a "send code" endpoint and a "change password" endpoint. Every endpoint also has a **deprecated legacy variant** that takes the email as a path parameter instead of in the body; prefer the body form.
+Two flows exist: **organization-scoped** (an `org_id`-bound code) and **platform-level** (no org). Each has a send-code endpoint and a change-password endpoint. Every endpoint also has a deprecated legacy variant that takes the email as a path parameter; prefer the body form.
 
-### Organization-Scoped
+### Organization-scoped
 
 ```
 POST /api/v1/users/reset_password/send_reset_code
 POST /api/v1/users/reset_password/change_password
 ```
 
-**Send reset code** — request body:
+**Send reset code** body:
 
-| Field | Type | Required |
-|-------|------|----------|
-| `email` | string (email) | Yes |
-| `org_id` | integer | Yes |
+```json
+{ "email": "john@example.com", "org_id": 1 }
+```
 
-**Change password** — request body:
+**Change password** body:
 
-| Field | Type | Required |
-|-------|------|----------|
-| `email` | string (email) | No (required by the service; optional in the model so the legacy path variant can reuse it) |
-| `new_password` | string | Yes |
-| `org_id` | integer | Yes |
-| `reset_code` | string | Yes |
+```json
+{
+  "email": "john@example.com",
+  "new_password": "newSecurePassword123",
+  "org_id": 1,
+  "reset_code": "123456"
+}
+```
 
-### Platform-Level
+`email` is optional in the model only so the legacy path variant can reuse it; the v2 handler rejects a missing email with `422` and `"email is required"`.
+
+### Platform-level
 
 ```
 POST /api/v1/users/reset_password/platform/send_reset_code
 POST /api/v1/users/reset_password/platform/change_password
 ```
 
-Same shape as the org-scoped flow but `org_id` is not sent.
+**Send reset code** body:
 
-**Send reset code** body: `{ "email": "john@example.com" }`.
+```json
+{ "email": "john@example.com" }
+```
 
 **Change password** body:
 
@@ -396,37 +563,62 @@ Same shape as the org-scoped flow but `org_id` is not sent.
 { "email": "john@example.com", "new_password": "newSecurePassword123", "reset_code": "123456" }
 ```
 
-### Errors (Password Reset)
+### Responses
+
+Both send-code endpoints return a bare JSON string:
+
+```json
+"If an account with that email exists, a reset code has been sent"
+```
+
+Both change-password endpoints return:
+
+```json
+"Password changed"
+```
+
+### Deprecated legacy variants
+
+```
+POST /api/v1/users/reset_password/change_password/{email}
+POST /api/v1/users/reset_password/send_reset_code/{email}
+POST /api/v1/users/reset_password/platform/send_reset_code/{email}
+POST /api/v1/users/reset_password/platform/change_password/{email}
+```
+
+These are marked `deprecated=True` and place the email in the URL path.
+
+### Errors (password reset)
 
 | Status | Description |
 |--------|-------------|
-| `400 Bad Request` | Invalid or expired reset code |
-| `404 Not Found` | Email not found |
+| `400` | Organization not found (send-code), weak password, or invalid/expired reset code |
+| `422` | `email` missing from a v2 change-password body |
+| `429` | More than 5 password-reset attempts per 5 minutes per email |
 
 ---
 
 ## Data Model Summary
-
-Fields on the `user` row that the API exposes (via `UserRead` / `UserReadPublic`):
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `id` | integer | Primary key |
 | `user_uuid` | string | Public UUID identifier |
 | `username` | string | Unique username |
-| `first_name` / `last_name` | string | Name parts (no single `display_name` field exists) |
+| `first_name` / `last_name` | string | Name parts |
 | `email` | string | Email address |
-| `avatar_image` | string | Avatar image (no `avatar_url`) |
+| `avatar_image` | string \| null | Avatar image |
+| `banner_image` | string \| null | Profile banner image |
 | `bio` | string | Short biography |
 | `details` / `profile` | object | Free-form JSON |
-| `extra_metadata` | object | Free-form JSONB |
-| `email_verified` | boolean | Email verification state (no `is_verified`) |
-| `last_login_at` | string \| null | ISO-8601 |
+| `extra_metadata` | object \| null | Free-form JSONB |
+| `email_verified` | boolean | Email verification state |
+| `last_login_at` | string \| null | Timestamp string |
 | `signup_method` | string \| null | Signup provider |
 | `is_superadmin` | boolean | Platform admin |
-| `creation_date` | string | ISO-8601 (no `created_at`) |
+| `creation_date` | string | Timestamp string |
 
-Fields that exist on the row but are **not** returned by these endpoints: `password`, `failed_login_attempts`, `locked_until`, `last_login_ip`, `password_changed_at`, `update_date`.
+Not returned by these endpoints: `password`, `failed_login_attempts`, `locked_until`, `last_login_ip`, `password_changed_at`, `update_date`.
 
 ---
 
@@ -434,6 +626,7 @@ Fields that exist on the row but are **not** returned by these endpoints: `passw
 
 | Document | Description |
 |----------|-------------|
-| [Authentication](./authentication.md) | Login, register, token refresh, OAuth/SSO |
-| [Organizations](./orgs.md) | Org management, branding, invites, org users |
-| [Courses](./courses.md) | Course shape returned by `GET /{user_id}/courses` |
+| [Authentication](./authentication.md) | Login, refresh, OAuth, API tokens |
+| [Organizations](./orgs.md) | Org management, invites, org users |
+| [Courses](./courses.md) | `CourseRead` shape |
+| [Podcasts](./podcasts.md) | `PodcastRead` shape |

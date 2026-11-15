@@ -122,15 +122,12 @@ const CommunityClient = ({
                 ? t('communities.discussion')
                 : t('communities.discussions')}
             </Badge>
-            {activeCommunity.public ? (
+            {activeCommunity.resource_type && (
               <Badge variant="grey" className="flex items-center gap-1">
                 <MessageCircle size={12} />
-                {t('communities.public')}
-              </Badge>
-            ) : (
-              <Badge variant="grey" className="flex items-center gap-1">
-                <MessageCircle size={12} />
-                {t('communities.private')}
+                {activeCommunity.resource_type === 'course'
+                  ? t('communities.linked_course')
+                  : t('communities.linked_podcast')}
               </Badge>
             )}
           </div>

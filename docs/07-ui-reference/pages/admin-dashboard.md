@@ -201,7 +201,7 @@ Subpages:
 
 - Courses / Podcasts / Community each add their own entity selector to the action row; Community also has a button that cycles its detail table (Contributors → Top discussions → Unanswered). The Learners row action opens a per-learner detail dialog.
 - Backed by `GET /api/v1/analytics/tabs/{tab}` (org admin, Standard+ plan), with the learner dialog on `GET /api/v1/analytics/learners/{user_id}`.
-- **Revenue and payouts are not part of this area** — money has its own section; see [Revenue Analytics](../../08-features/payments/revenue-analytics.md).
+- **Revenue and payouts are not part of this area** — money was planned as its own section (Revenue Analytics, archived plan).
 
 ### Community Management
 

@@ -6,6 +6,7 @@ Covers: get_course, get_course_by_id, get_courses_orgslug,
 """
 
 from datetime import datetime
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -121,7 +122,7 @@ class TestGetCourse:
         self, db, org, course, admin_user, mock_request
     ):
         with patch(
-            "src.services.courses.courses.check_resource_access",
+            "src.services.courses.courses.check_catalog_read_access",
             new_callable=AsyncMock,
         ) as mock_access:
             await get_course(mock_request, "course_test", admin_user, db)
@@ -131,7 +132,8 @@ class TestGetCourse:
             db,
             admin_user,
             "course_test",
-            AccessAction.READ,
+            published=course.published,
+            access_type=course.access_type,
             context=AccessContext.DASHBOARD,
         )
 
@@ -209,12 +211,21 @@ class TestGetCourseMeta:
             )
 
         assert result.org_uuid == "org_test"
+        assert result.content_locale == "en"
         mock_chapters.assert_awaited_once()
         call = mock_chapters.await_args
         assert call.args[:5] == (mock_request, course.id, db, admin_user, False)
         assert call.kwargs["slim"] is True
         assert call.kwargs["course"].id == course.id
-        mock_set_cache.assert_called_once_with("course_test", True, result.model_dump())
+
+        # The cache stores the source-locale payload; the translation overlay is
+        # applied per request, after the cache write.
+        mock_set_cache.assert_called_once()
+        cached_uuid, cached_slim, cached_payload = mock_set_cache.call_args.args
+        assert cached_uuid == "course_test"
+        assert cached_slim is True
+        assert cached_payload["course_uuid"] == "course_test"
+        assert cached_payload["content_locale"] is None
 
     @pytest.mark.asyncio
     async def test_get_course_meta_skips_chapters_when_course_id_missing(
@@ -241,7 +252,12 @@ class TestGetCourseMeta:
             new_callable=AsyncMock,
         ), patch(
             "src.services.courses.courses.FullCourseRead",
-            side_effect=lambda **kwargs: kwargs,
+            side_effect=lambda **kwargs: SimpleNamespace(**kwargs),
+        ), patch(
+            "src.services.courses.courses.apply_overlay",
+            side_effect=lambda course_read, *args, **kwargs: course_read,
+        ), patch(
+            "src.services.courses.courses.apply_course_content_locale",
         ), patch(
             "src.services.courses.chapters.get_course_chapters",
             new_callable=AsyncMock,
@@ -254,7 +270,7 @@ class TestGetCourseMeta:
                 fake_db,
             )
 
-        assert result["course_uuid"] == "course_detached"
+        assert result.course_uuid == "course_detached"
         mock_chapters.assert_not_called()
 
     @pytest.mark.asyncio
