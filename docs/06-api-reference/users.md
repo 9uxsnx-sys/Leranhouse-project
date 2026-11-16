@@ -437,7 +437,7 @@ GET /api/v1/users/{user_id}/podcasts?page=1&limit=10
 
 Query parameters: `page` (default 1, ≥ 1), `limit` (default 10, 1–50). No `locale` parameter on this route.
 
-Response: `List[PodcastRead]`.
+Response: `List[PodcastReadWithEpisodeCount]` — `PodcastRead` plus `episode_count` and `total_duration_seconds`, aggregated in one grouped query so the profile cards can render their meta row without a per-card request.
 
 ```json
 [
@@ -456,7 +456,9 @@ Response: `List[PodcastRead]`.
     "banner_image": "",
     "source_locale": "en",
     "content_locale": "en",
-    "is_fallback": false
+    "is_fallback": false,
+    "episode_count": 2,
+    "total_duration_seconds": 4514
   }
 ]
 ```

@@ -20,7 +20,7 @@ from src.services.orgs.orgs import get_org_join_mechanism
 from src.security.auth import get_current_user, get_authenticated_user
 from src.core.events.database import get_db_session
 from src.db.courses.courses import CourseRead
-from src.db.podcasts.podcasts import PodcastRead
+from src.db.podcasts.podcasts import PodcastRead, PodcastReadWithEpisodeCount
 from src.db.communities.communities import CommunityRead
 
 from src.db.users import (
@@ -925,7 +925,7 @@ async def api_get_user_courses(
 
 @router.get(
     "/{user_id}/podcasts",
-    response_model=List[PodcastRead],
+    response_model=List[PodcastReadWithEpisodeCount],
     tags=["users"],
     summary="List podcasts for user",
     description="List podcasts authored or contributed to by a user. Paginated; the maximum page size is 50 to prevent bulk data extraction.",
@@ -942,7 +942,7 @@ async def api_get_user_podcasts(
     user_id: int,
     page: int = Query(default=1, ge=1, description="Page number"),
     limit: int = Query(default=10, ge=1, le=50, description="Items per page (max 50)"),
-) -> List[PodcastRead]:
+) -> List[PodcastReadWithEpisodeCount]:
     """
     Get podcasts made or contributed by a user.
 

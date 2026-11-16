@@ -294,6 +294,7 @@ Defined in `apps/web/components/Objects/Modals/SearchModal.tsx`. A command-palet
   - **Someone else's profile** — `users/{id}/courses` and `users/{id}/podcasts`, which are authorship-scoped (ACTIVE `ResourceAuthor` rows). An empty tab means that user has not created any, not that none exist.
   - **Your own profile** — the authored lists are merged (deduplicated by uuid) with the org listings `courses/org_slug/{slug}/page/1/limit/100` and `podcasts/org_slug/{slug}/page/1/limit/100`, so the tabs answer *"what can I open here"*: published content, UserGroup access, and your own unpublished drafts. Merging authored first keeps drafts visible even when the catalogue query omits them.
   - Communities are always access-based (`check_resource_access`), for every viewer.
+- **Card meta**: course cards read `extra_metadata.lessons_count` / `duration` / `difficulty`; podcast cards read `episode_count` and `total_duration_seconds`, which both the org listing and `users/{id}/podcasts` now return.
 
 ### Podcast Detail
 

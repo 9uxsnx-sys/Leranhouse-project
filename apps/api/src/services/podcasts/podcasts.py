@@ -1221,11 +1221,30 @@ async def get_user_podcasts(
         )
 
     result = []
+    # Episode counts keep the profile cards from rendering "0 episodes · N/A".
+    podcast_ids = [podcast.id for podcast in podcasts if podcast.id is not None]
+    episode_stats_query = (
+        select(
+            PodcastEpisode.podcast_id,
+            func.count(PodcastEpisode.id),
+            func.coalesce(func.sum(PodcastEpisode.duration_seconds), 0),
+        )
+        .where(PodcastEpisode.podcast_id.in_(podcast_ids))
+        .group_by(PodcastEpisode.podcast_id)
+    )
+    episode_stats = {
+        podcast_id: (count, duration)
+        for podcast_id, count, duration in db_session.exec(episode_stats_query).all()
+    }
+
     for podcast in podcasts:
-        podcast_read = PodcastRead.model_validate({
+        stats = episode_stats.get(podcast.id, (0, 0))
+        podcast_read = PodcastReadWithEpisodeCount.model_validate({
             **podcast.model_dump(),
             "id": podcast.id or 0,
             "authors": podcast_authors.get(podcast.podcast_uuid, []),
+            "episode_count": stats[0],
+            "total_duration_seconds": stats[1],
         })
         result.append(podcast_read)
 

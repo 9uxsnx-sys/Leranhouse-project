@@ -19,6 +19,7 @@ Entries below are derived from the commit history of the current branch (`feat/l
 - Widened the auth image column (58/42 → 61.5/38.5 at `lg`, 63.6/36.4 at `xl`) to give the artwork more room without moving the form card.
 - Fixed every paginated dashboard table: they requested `limit=10000` while the API caps at 100, so the endpoints answered 422 and the tables rendered empty. They now walk the real pages through `swrFetchAllPages`.
 - Fixed the profile's Courses and Podcasts tabs showing 0: they only ever read authored resources. On your own profile they now merge the org listings, so the tabs show what you can open; other profiles keep the authored-only semantics. Seeded podcasts also gain their `ResourceAuthor` row, which the seed script never wrote.
+- Restored the profile card meta rows: course cards now pass `extra_metadata` (lessons, duration, difficulty), and podcast cards read real `episode_count` / `total_duration_seconds` instead of a hard-coded 0 and `N/A`. `GET /users/{id}/podcasts` returns those two fields now.
 - Fixed the course media cache key that targeted the non-existent `courses/org/{id}` route.
 
 ## 2026-11-14

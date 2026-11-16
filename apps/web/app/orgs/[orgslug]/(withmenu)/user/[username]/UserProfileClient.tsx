@@ -240,6 +240,9 @@ function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProp
                         title={course.name}
                         description={course.description || ''}
                         image={imageUrl}
+                        lessons={course.extra_metadata?.lessons_count}
+                        duration={course.extra_metadata?.duration || ''}
+                        difficulty={course.extra_metadata?.difficulty || ''}
                         href={`/orgs/${orgslug}/course/${course.course_uuid || course.id}`}
                       />
                     )
@@ -268,8 +271,8 @@ function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProp
                       title={podcast.name}
                       description={podcast.description || ''}
                       thumbnailImage={podcast.thumbnail_image}
-                      episodeCount={0}
-                      totalDurationSeconds={0}
+                      episodeCount={podcast.episode_count ?? podcast.extra_metadata?.episode_count ?? 0}
+                      totalDurationSeconds={podcast.total_duration_seconds ?? podcast.extra_metadata?.total_duration_seconds ?? 0}
                       creationDate={podcast.creation_date}
                       org_uuid={orgUuid}
                       href={`/orgs/${orgslug}/podcast/${removePodcastPrefix(podcast.podcast_uuid || podcast.id)}`}
