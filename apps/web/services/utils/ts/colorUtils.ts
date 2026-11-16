@@ -54,17 +54,26 @@ export function getContrastRatio(foreground: string, background: string): number
   return Math.round(((lighter + 0.05) / (darker + 0.05)) * 10) / 10
 }
 
+/** Ink foreground for light brand fills. */
+const INK_FG = '#18181b'
+/** White foreground for dark brand fills. */
+const LIGHT_FG = '#ffffff'
+
 /**
  * Foreground used for text and icons sitting on the brand colour.
  *
- * The organization may pin an explicit value; otherwise it is chosen by WCAG
- * luminance. Empty or malformed input falls back to the automatic choice, so a
- * half-typed hex in the branding form can never break the shell.
+ * The organization may pin an explicit value; otherwise the two candidates are
+ * compared and the higher-contrast one wins. Comparing beats a brightness
+ * threshold: a mid-tone brand such as clay resolves to white under a threshold
+ * (3.12:1) while ink on the same fill is 5.68:1.
+ *
+ * Empty or malformed input falls back to the automatic choice, so a half-typed
+ * hex in the branding form can never break the shell.
  */
 export function resolveBrandFg(brand: string, explicit?: string | null): string {
   const raw = (explicit || '').trim()
   if (/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.test(raw)) return normalizeBrandColor(raw)
-  return isLightColor(brand) ? '#18181b' : '#ffffff'
+  return getContrastRatio(INK_FG, brand) >= getContrastRatio(LIGHT_FG, brand) ? INK_FG : LIGHT_FG
 }
 
 /**
@@ -84,19 +93,26 @@ export function normalizeBrandColor(value?: string | null): string {
  * The CSS custom properties every brand surface reads.
  *
  * Derived from one hex so an organization never has to pick six colours:
- * the foreground is chosen by WCAG luminance, and hover/pressed/soft/ring are
- * mixed in CSS with `color-mix`, so they follow whatever hex is configured.
+ * the foreground is chosen by contrast, and hover/pressed/soft/ring are mixed
+ * in CSS with `color-mix`, so they follow whatever hex is configured.
+ *
+ * The hover/pressed dimming depends on the foreground. Dimming a fill raises
+ * contrast under white text but lowers it under dark text, so a dark foreground
+ * uses a gentler step — 14%/26% black would take a clay brand from 5.68:1 to
+ * 4.32:1 / 3.36:1, while 6%/12% keeps it at 5.07:1 / 4.51:1.
  *
  * With no colour set the whole set resolves to ink — the interface looks
  * exactly as it did before the brand feature existed.
  */
 export function getBrandStyle(color?: string | null, brandFg?: string | null): Record<string, string> {
   const brand = normalizeBrandColor(color)
+  const fg = resolveBrandFg(brand, brandFg)
+  const dim = isLightColor(fg) ? { hover: 14, pressed: 26 } : { hover: 6, pressed: 12 }
   return {
     '--brand': brand,
-    '--brand-fg': resolveBrandFg(brand, brandFg),
-    '--brand-hover': `color-mix(in oklab, ${brand} 86%, black)`,
-    '--brand-pressed': `color-mix(in oklab, ${brand} 74%, black)`,
+    '--brand-fg': fg,
+    '--brand-hover': `color-mix(in oklab, ${brand} ${100 - dim.hover}%, black)`,
+    '--brand-pressed': `color-mix(in oklab, ${brand} ${100 - dim.pressed}%, black)`,
     '--brand-soft': `color-mix(in oklab, ${brand} 10%, transparent)`,
     '--brand-ring': `color-mix(in oklab, ${brand} 35%, transparent)`,
   }

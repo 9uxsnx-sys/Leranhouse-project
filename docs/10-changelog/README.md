@@ -9,6 +9,7 @@ Entries below are derived from the commit history of the current branch (`feat/l
 - Added the brand token layer (`--brand`, `--brand-fg`, hover / pressed / soft / ring) and drove the primary button, progress fills and tab underline from it on all four shells.
 - Moved every chart series onto the brand ramp; fixed the ramp turning saturated oranges brown by mixing toward white only, and read the colour from the org context rather than `--brand` on the root.
 - Added Branding → Theme → **Text & Icons**, which pins the foreground used on brand fills (`customization.general.brand_fg`) with a live WCAG read-out.
+- Made the automatic foreground compare both candidates instead of using a luminance threshold, and gentled the hover/pressed dimming for dark text so mid-tone brands stay above 4.5:1 in every state.
 - Fixed every paginated dashboard table: they requested `limit=10000` while the API caps at 100, so the endpoints answered 422 and the tables rendered empty. They now walk the real pages through `swrFetchAllPages`.
 - Fixed the course media cache key that targeted the non-existent `courses/org/{id}` route.
 
