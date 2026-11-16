@@ -14,6 +14,7 @@ import {
 } from 'recharts'
 import { TrendingUp } from 'lucide-react'
 import CourseWidgetCard, { WidgetIcon, AnimatedNumber } from './CourseWidgetCard'
+import { useChartTheme } from '@components/Analytics/chartTheme'
 
 const kFormatter = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v))
 const shortDate = (v: string) =>
@@ -27,6 +28,7 @@ export default function CourseEnrollmentTrend({
   days?: string
 }) {
   const { t } = useTranslation()
+  const chart = useChartTheme()
   const { data, isLoading } = useCoursePipe('course_enrollment_trend', courseId, { days })
   const rows = data?.data ?? []
 
@@ -68,15 +70,15 @@ export default function CourseEnrollmentTrend({
                 <AreaChart data={rows}>
                   <defs>
                     <linearGradient id="enrollModalGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#6366f1" stopOpacity={0.25} />
-                      <stop offset="100%" stopColor="#6366f1" stopOpacity={0.02} />
+                      <stop offset="0%" stopColor={chart.primary} stopOpacity={0.25} />
+                      <stop offset="100%" stopColor={chart.primary} stopOpacity={0.02} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="#9ca3af" tickFormatter={shortDate} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11 }} stroke="#9ca3af" tickFormatter={kFormatter} axisLine={false} tickLine={false} allowDecimals={false} />
                   <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid #f3f4f6', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                  <Area type="monotone" dataKey="enrollments" stroke="#6366f1" strokeWidth={2.5} fill="url(#enrollModalGrad)" dot={false} />
+                  <Area type="monotone" dataKey="enrollments" stroke={chart.primary} strokeWidth={2.5} fill="url(#enrollModalGrad)" dot={false} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -99,13 +101,13 @@ export default function CourseEnrollmentTrend({
               <AreaChart data={rows}>
                 <defs>
                   <linearGradient id="enrollMiniGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#6366f1" stopOpacity={0.2} />
-                    <stop offset="100%" stopColor="#6366f1" stopOpacity={0.02} />
+                    <stop offset="0%" stopColor={chart.primary} stopOpacity={0.2} />
+                    <stop offset="100%" stopColor={chart.primary} stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="date" tick={{ fontSize: 9 }} stroke="#9ca3af" tickFormatter={shortDate} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid #f3f4f6', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                <Area type="monotone" dataKey="enrollments" stroke="#6366f1" strokeWidth={2} fill="url(#enrollMiniGrad)" dot={false} />
+                <Area type="monotone" dataKey="enrollments" stroke={chart.primary} strokeWidth={2} fill="url(#enrollMiniGrad)" dot={false} />
               </AreaChart>
             </ResponsiveContainer>
           </div>

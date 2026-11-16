@@ -420,7 +420,7 @@ function OptionCMinimalRow({
                 cx="12"
                 cy="12"
                 r="10"
-                stroke="#6366f1"
+                style={{ stroke: 'var(--brand)' }}
                 strokeWidth="2.5"
                 fill="none"
                 strokeDasharray={`${2 * Math.PI * 10}`}

@@ -37,6 +37,7 @@ import {
     YAxis,
 } from 'recharts';
 import { useTranslation } from 'react-i18next';
+import { useChartTheme } from '@components/Analytics/chartTheme';
 
 type Submission = {
     assignmentusersubmission_uuid: string;
@@ -70,6 +71,7 @@ const GRADE_BUCKETS = [
 
 function AssignmentAnalyticsSubPage({ assignment_uuid }: { assignment_uuid: string }) {
     const { t } = useTranslation();
+    const chart = useChartTheme();
     const session = useLHSession() as any;
     const access_token = session?.data?.tokens?.access_token;
     const assignment = useAssignments() as any;
@@ -375,12 +377,12 @@ function AssignmentAnalyticsSubPage({ assignment_uuid }: { assignment_uuid: stri
                                 <AreaChart data={timelineData} margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
                                     <defs>
                                         <linearGradient id="submittedGrad" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="0%" stopColor="#6366f1" stopOpacity={0.35} />
-                                            <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
+                                            <stop offset="0%" stopColor={chart.primary} stopOpacity={0.35} />
+                                            <stop offset="100%" stopColor={chart.primary} stopOpacity={0} />
                                         </linearGradient>
                                         <linearGradient id="gradedGrad" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="0%" stopColor="#10b981" stopOpacity={0.3} />
-                                            <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                                            <stop offset="0%" stopColor={chart.categorical[1]} stopOpacity={0.3} />
+                                            <stop offset="100%" stopColor={chart.categorical[1]} stopOpacity={0} />
                                         </linearGradient>
                                     </defs>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
@@ -417,20 +419,20 @@ function AssignmentAnalyticsSubPage({ assignment_uuid }: { assignment_uuid: stri
                                     <Area
                                         type="monotone"
                                         dataKey="submitted"
-                                        stroke="#6366f1"
+                                        stroke={chart.primary}
                                         strokeWidth={2}
                                         fill="url(#submittedGrad)"
                                         name={t('dashboard.assignments.analytics.timeline.submitted')}
-                                        dot={{ r: 3, strokeWidth: 0, fill: '#6366f1' }}
+                                        dot={{ r: 3, strokeWidth: 0, fill: chart.primary }}
                                     />
                                     <Area
                                         type="monotone"
                                         dataKey="graded"
-                                        stroke="#10b981"
+                                        stroke={chart.categorical[1]}
                                         strokeWidth={2}
                                         fill="url(#gradedGrad)"
                                         name={t('dashboard.assignments.analytics.timeline.graded')}
-                                        dot={{ r: 3, strokeWidth: 0, fill: '#10b981' }}
+                                        dot={{ r: 3, strokeWidth: 0, fill: chart.categorical[1] }}
                                     />
                                 </AreaChart>
                             </ResponsiveContainer>

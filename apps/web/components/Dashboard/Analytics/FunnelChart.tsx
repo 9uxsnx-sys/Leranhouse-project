@@ -3,12 +3,13 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAnalyticsPipe } from './useAnalyticsDashboard'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+import { useChartTheme } from '@components/Analytics/chartTheme'
 
-const COLORS = ['#6b8de3', '#818cf8', '#a78bfa', '#c4b5fd']
 const kFormatter = (v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)
 
 export default function FunnelChart({ days = '30' }: { days?: string }) {
   const { t } = useTranslation()
+  const chart = useChartTheme()
   const { data, isLoading } = useAnalyticsPipe('enrollment_funnel', { days })
   const row = data?.data?.[0]
 
@@ -36,7 +37,7 @@ export default function FunnelChart({ days = '30' }: { days?: string }) {
             <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid #f3f4f6', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} formatter={(v = 0) => v.toLocaleString()} />
             <Bar dataKey="value" name={t('analytics.common.count')} radius={[0, 4, 4, 0]}>
               {stages.map((_entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                <Cell key={`cell-${index}`} fill={chart.categorical[index % chart.categorical.length]} />
               ))}
             </Bar>
           </BarChart>

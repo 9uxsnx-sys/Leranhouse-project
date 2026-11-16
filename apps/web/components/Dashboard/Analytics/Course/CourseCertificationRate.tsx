@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useCoursePipe } from '../useAnalyticsDashboard'
 import { Award } from 'lucide-react'
 import CourseWidgetCard, { WidgetIcon, ProgressRing } from './CourseWidgetCard'
+import { useChartTheme } from '@components/Analytics/chartTheme'
 
 export default function CourseCertificationRate({
   courseId,
@@ -13,6 +14,7 @@ export default function CourseCertificationRate({
   days?: string
 }) {
   const { t } = useTranslation()
+  const chart = useChartTheme()
   const { data, isLoading } = useCoursePipe('course_certification_rate', courseId, { days })
   const row = data?.data?.[0]
 
@@ -33,7 +35,7 @@ export default function CourseCertificationRate({
         ) : (
           <div className="space-y-8 py-6">
             <div className="flex justify-center">
-              <ProgressRing percent={rate} size={160} strokeWidth={12} color="#10b981" />
+              <ProgressRing percent={rate} size={160} strokeWidth={12} color={chart.primary} />
             </div>
             <div className="text-center">
               <p className="text-5xl font-black text-gray-900">{rate}%</p>
@@ -59,7 +61,7 @@ export default function CourseCertificationRate({
         <div className="h-48 flex items-center justify-center text-gray-300 text-sm">{t('analytics.course_analytics.common.no_data')}</div>
       ) : (
         <div className="flex items-center justify-center h-48 gap-5">
-          <ProgressRing percent={rate} size={80} strokeWidth={6} color="#10b981" />
+          <ProgressRing percent={rate} size={80} strokeWidth={6} color={chart.primary} />
           <div>
             <p className="text-4xl font-black text-gray-900">{rate}%</p>
             <p className="text-sm text-gray-500">{t('analytics.course_analytics.units.claim_rate')}</p>

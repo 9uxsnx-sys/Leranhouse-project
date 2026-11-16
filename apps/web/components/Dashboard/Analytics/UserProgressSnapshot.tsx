@@ -12,12 +12,16 @@ import {
   Tooltip,
   Legend,
 } from 'recharts'
+import { useChartTheme } from '@components/Analytics/chartTheme'
 
 const BRACKETS = ['0%', '1-25%', '26-50%', '51-75%', '76-100%']
-const COLORS = ['#e5e7eb', '#c4b5fd', '#a78bfa', '#8b5cf6', '#6d28d9']
 
 export default function UserProgressSnapshot({ days = '90' }: { days?: string }) {
   const { t } = useTranslation()
+  const chart = useChartTheme()
+  // 0% stays neutral; the other brackets step from light to dark brand, so a
+  // fuller progress bracket always reads stronger than an empty one.
+  const bracketColors = ['#e5e7eb', ...chart.categorical.slice(1).reverse()]
   const { data, isLoading } = useAnalyticsPipe('user_progress_snapshot', { days })
   const rows: any[] = data?.data ?? []
 
@@ -70,7 +74,7 @@ export default function UserProgressSnapshot({ days = '90' }: { days?: string })
                   dataKey={b}
                   name={b}
                   stackId="a"
-                  fill={COLORS[i]}
+                  fill={bracketColors[i]}
                   radius={i === BRACKETS.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
                 />
               ))}

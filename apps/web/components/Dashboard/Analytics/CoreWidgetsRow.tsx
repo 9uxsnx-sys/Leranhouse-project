@@ -27,11 +27,10 @@ import {
   Cell,
 } from 'recharts'
 import AnalyticsDetailModal from './AnalyticsDetailModal'
+import { useChartTheme } from '@components/Analytics/chartTheme'
 import { useTranslation } from 'react-i18next'
 
 const kFormatter = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v))
-
-const COLORS = ['#6b8de3', '#818cf8', '#a78bfa', '#c4b5fd']
 
 function ExpandButton({ onClick }: { onClick: () => void }) {
   const { t } = useTranslation()
@@ -48,6 +47,7 @@ function ExpandButton({ onClick }: { onClick: () => void }) {
 
 export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
   const { t } = useTranslation()
+  const chart = useChartTheme()
   const org = useOrg() as any
   const { data: funnelData, isLoading: funnelLoading } = useAnalyticsPipe(
     'enrollment_funnel',
@@ -132,7 +132,7 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
                   />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                     {chartData.map((_, i) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      <Cell key={i} fill={chart.categorical[i % chart.categorical.length]} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -239,7 +239,7 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
                   />
                   <Bar dataKey="value" radius={[0, 6, 6, 0]}>
                     {chartData.map((_, i) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      <Cell key={i} fill={chart.categorical[i % chart.categorical.length]} />
                     ))}
                   </Bar>
                 </BarChart>

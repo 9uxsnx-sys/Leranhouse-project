@@ -35,6 +35,7 @@ import {
   Cell,
 } from 'recharts'
 import { useTranslation } from 'react-i18next'
+import { useChartTheme } from '@components/Analytics/chartTheme'
 
 const kFormatter = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v))
 const shortDate = (v: string) =>
@@ -69,12 +70,9 @@ const EVENT_META: Record<
   },
 }
 
-const DEVICE_COLORS: Record<string, string> = {
-  desktop: '#6b8de3',
-  mobile: '#818cf8',
-  tablet: '#a78bfa',
-  unknown: '#d1d5db',
-}
+/** Order of the brand ramp for the device split; unknown stays neutral. */
+const DEVICE_ORDER = ['desktop', 'mobile', 'tablet'] as const
+const DEVICE_UNKNOWN_COLOR = '#d1d5db'
 
 const DEVICE_ICONS: Record<string, React.ReactNode> = {
   desktop: <Monitor size={13} className="text-blue-400" />,
@@ -85,6 +83,7 @@ const DEVICE_ICONS: Record<string, React.ReactNode> = {
 
 export default function EventOverview({ days = '30' }: { days?: string }) {
   const { t } = useTranslation()
+  const chart = useChartTheme()
   const { data, isLoading } = useAnalyticsPipe('event_counts', { days })
   const { data: liveData, isLoading: liveLoading } = useAnalyticsPipe(
     'live_users',
@@ -134,11 +133,14 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
     return { ...meta, label: t(meta.labelKey), total: row?.total ?? 0, unique: row?.unique_users ?? 0 }
   })
 
-  const devicePieData = deviceRows.map((r: any) => ({
-    name: r.device_type,
-    value: r.visits,
-    fill: DEVICE_COLORS[r.device_type] || DEVICE_COLORS.unknown,
-  }))
+  const devicePieData = deviceRows.map((r: any) => {
+    const rampIndex = DEVICE_ORDER.indexOf(r.device_type)
+    return {
+      name: r.device_type,
+      value: r.visits,
+      fill: rampIndex >= 0 ? chart.categorical[rampIndex] : DEVICE_UNKNOWN_COLOR,
+    }
+  })
   const totalDeviceVisits = devicePieData.reduce((s: number, d: any) => s + d.value, 0)
 
   // Custom tooltip for the DAU chart
@@ -254,8 +256,8 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
               <AreaChart data={dauRows}>
                 <defs>
                   <linearGradient id="dauOverviewGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#6b8de3" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#6b8de3" stopOpacity={0.02} />
+                    <stop offset="0%" stopColor={chart.primary} stopOpacity={0.3} />
+                    <stop offset="100%" stopColor={chart.primary} stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
@@ -279,7 +281,7 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
                 <Area
                   type="monotone"
                   dataKey="dau"
-                  stroke="#6b8de3"
+                  stroke={chart.primary}
                   strokeWidth={2}
                   fill="url(#dauOverviewGradient)"
                   dot={false}

@@ -1,10 +1,10 @@
-> Status: in progress · Created: 2026-11-16 · Phases 1–3 done, Phase 4 steps 1–4 done
+> Status: in progress · Created: 2026-11-16 · Phases 1–3 done, Phase 4 steps 1–4 and 6 done
 
 # UI theme colour and button cleanup
 
 Two things, in this order: **clean the buttons**, then **connect the brand colour**. The first is a prerequisite for the second — a themed button that still carries a glossy overlay looks wrong, and today the app ships two different button finishes.
 
-This page is the agreed plan. Phases 1–3 are built; Phase 4 is built except the charts decision and the optional selection tint. The repository checkpoint for rolling back is commit `7a85a7cb`.
+This page is the agreed plan. Phases 1–3 are built; Phase 4 is built except the optional selection tint. The repository checkpoint for rolling back is commit `7a85a7cb`.
 
 ## Goal
 
@@ -94,9 +94,15 @@ Add the matching utilities to `styles/globals.css`: `bg-brand`, `text-brand-fg`,
 | 2 | Course / podcast progress fill | `TrailCourseElement:125`, `TrailCourseCard:92`, `CourseEndView:583`, `ActivityIndicators:435`, `course.tsx:506`, `PodcastPlayer:158`, `EpisodePlayer:276`, `EpisodeCard:76,103`, `episode-design-options:222,327`, `AssignmentStudentActivity:191` | Video player chrome stays neutral (it sits on top of video and must not fight it). Password strength stays semantic. Assignment task bars are pass/fail, so they stay emerald/rose rather than brand |
 | 3 | Tab underline | `UserProfileClient.tsx` learner profile tabs | Sidebars keep their existing animated active container. A brand marker was tried there and removed — it was a second chromatic element on every page, against one signal per screen |
 | 4 | Selection tint | active filter chips, selected table rows, current tab underline | 8–12% alpha only. Selected checkboxes stay ink — a tinted checkbox reads weaker |
-| 5 | Charts | `components/Analytics/chartTheme.ts` | **Decision needed.** See below |
+| 5 | Charts | `components/Analytics/chartTheme.ts` + every recharts consumer | **Brand ramp.** One hue, five steps, derived from the org hex |
+| 6 | Progress rings | SVG circles in the trail card, episode list and community card | `stroke: var(--brand)` — same signal as the progress bars |
 
-**Charts are currently in an inconsistent state** — `useChartTheme()` reads `--primary` for the primary series, so after Phase 2 that series is now ink, while `CHART_PALETTE` is still an indigo→violet ramp (`#6b8de3 → #c4b5fd`). A chart today paints one black series next to three indigo ones. Either point the whole palette at `--brand` (white-label look) or make it a neutral grey ramp (Claude look). The plan's default is the grey ramp.
+**Charts use the brand ramp.** `useChartTheme()` derives everything from the org hex: `primary` is the brand (deepened when the brand is very light, so a stroke keeps ~3:1 on a white card), `categorical` is a five-step ramp of that same hue, and `positive` / `negative` stay emerald / rose because they carry meaning. Grid and axis stay neutral.
+
+Two details worth keeping in mind:
+
+- The brand is read from the org context, not from `--brand` on `document.documentElement`. Child effects run before the shell's, so reading the custom property would capture the ink fallback on first paint and never update.
+- Recharts renders SVG presentation attributes, where CSS `var()` does not resolve, so the ramp is computed in JS and handed over as real hex strings. Raw SVG progress rings are the exception — they use `style={{ stroke: 'var(--brand)' }}`, which does resolve.
 
 **Order of work** — each step ships on its own:
 
@@ -105,7 +111,7 @@ Add the matching utilities to `styles/globals.css`: `bg-brand`, `text-brand-fg`,
 3. ✅ **Done.** Every progress fill reads `bg-brand`: course cover bar, course-end bar, trail card and trail row, activity indicators, podcast player, episode player/card, episode design options, assignment task progress, onboarding bar.
 4. ✅ **Done.** Primary buttons read the token: the shared `Button` (`primary` + `default`), `IconButton` primary, the 33 hand-written CTAs, the 15 save strips, every `bg-primary` CTA in the dashboard (boards, playgrounds, assignments, course migrate, SCORM, activity-create modals, roles/user-groups modals, onboarding), and the selection fills (active filter chips, active page numbers, selected member rows). Checkboxes, switches, status dots and media controls were left ink/semantic on purpose.
 5. Selection tint → optional polish. `--brand-soft` is emitted but no surface consumes it yet.
-6. Charts → after the grey-ramp vs brand-ramp decision.
+6. ✅ **Done.** Charts read the brand ramp — `TrendChart`, `BarsChart`, `RankedBars`, `FunnelSteps`, `BreakdownList`, plus every dashboard widget (core row, funnel, DAU, event overview, growth, new vs returning, progress snapshot, grade distribution, certification, time-to-completion, retention, view-to-enrollment, session duration, activity-type breakdown, course effectiveness, assignment analytics). Only the dropoff bar (`#f87171`) and the A–F grade bands keep semantic colour.
 
 **Not themed, on purpose:** sidebar and header surfaces, links, focus rings, checkboxes and switches, status badges, destructive/success/warning, video player chrome, certificate artwork.
 

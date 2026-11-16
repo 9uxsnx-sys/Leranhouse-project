@@ -49,7 +49,7 @@ export function CommunityActions({
                       cx="32"
                       cy="32"
                       r="28"
-                      stroke="#6366f1"
+                      style={{ stroke: 'var(--brand)' }}
                       strokeWidth="6"
                       fill="none"
                       strokeLinecap="round"

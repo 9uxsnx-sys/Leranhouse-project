@@ -3,9 +3,11 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAnalyticsPipe } from './useAnalyticsDashboard'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { useChartTheme } from '@components/Analytics/chartTheme'
 
 export default function CertificationRate({ days = '90' }: { days?: string }) {
   const { t } = useTranslation()
+  const chart = useChartTheme()
   const { data, isLoading } = useAnalyticsPipe('certification_rate', { days })
   const rows = data?.data ?? []
 
@@ -24,7 +26,7 @@ export default function CertificationRate({ days = '90' }: { days?: string }) {
             <XAxis dataKey="course_name" tick={{ fontSize: 10 }} stroke="#9ca3af" />
             <YAxis tick={{ fontSize: 11 }} stroke="#9ca3af" tickFormatter={(v: number) => `${v}%`} />
             <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid #f3f4f6', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} formatter={(v = 0) => `${v}%`} />
-            <Bar dataKey="claim_rate" name={t('analytics.advanced_widgets.certification_rate.claim_rate')} fill="#10b981" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="claim_rate" name={t('analytics.advanced_widgets.certification_rate.claim_rate')} fill={chart.primary} radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       )}

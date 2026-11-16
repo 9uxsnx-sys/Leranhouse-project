@@ -3,9 +3,11 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAnalyticsPipe } from './useAnalyticsDashboard'
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ZAxis } from 'recharts'
+import { useChartTheme } from '@components/Analytics/chartTheme'
 
 export default function CourseEffectivenessMatrix({ days = '90' }: { days?: string }) {
   const { t } = useTranslation()
+  const chart = useChartTheme()
   const { data, isLoading } = useAnalyticsPipe('course_rating_by_completion', { days })
   const rows = (data?.data ?? []).map((r: any) => ({
     ...r,
@@ -43,7 +45,7 @@ export default function CourseEffectivenessMatrix({ days = '90' }: { days?: stri
             <YAxis dataKey="completion_rate" name={t('analytics.advanced_widgets.course_effectiveness_matrix.completion_pct')} tick={{ fontSize: 11 }} stroke="#9ca3af" tickFormatter={(v: number) => `${v}%`} label={{ value: t('analytics.advanced_widgets.course_effectiveness_matrix.completion_pct'), angle: -90, position: 'insideLeft', fontSize: 11 }} />
             <ZAxis dataKey="z" range={[40, 400]} />
             <Tooltip content={<CustomTooltip />} />
-            <Scatter data={rows} fill="rgba(139, 92, 246, 0.6)" stroke="#8b5cf6" strokeWidth={1} />
+            <Scatter data={rows} fill={chart.primarySoft} stroke={chart.primary} strokeWidth={1} />
           </ScatterChart>
         </ResponsiveContainer>
       )}

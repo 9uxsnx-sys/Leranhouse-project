@@ -12,9 +12,11 @@ import {
   Tooltip,
   Legend,
 } from 'recharts'
+import { useChartTheme } from '@components/Analytics/chartTheme'
 
 export default function NewVsReturning({ days = '30' }: { days?: string }) {
   const { t } = useTranslation()
+  const chart = useChartTheme()
   const { data, isLoading } = useAnalyticsPipe('new_vs_returning', { days })
   const rows = data?.data ?? []
 
@@ -38,12 +40,12 @@ export default function NewVsReturning({ days = '30' }: { days?: string }) {
             <AreaChart data={chartRows} stackOffset="none">
               <defs>
                 <linearGradient id="newUsersGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#60a5fa" stopOpacity={0.25} />
-                  <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.02} />
+                  <stop offset="0%" stopColor={chart.primary} stopOpacity={0.25} />
+                  <stop offset="100%" stopColor={chart.primary} stopOpacity={0.02} />
                 </linearGradient>
                 <linearGradient id="retUsersGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.25} />
-                  <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.02} />
+                  <stop offset="0%" stopColor={chart.categorical[1]} stopOpacity={0.25} />
+                  <stop offset="100%" stopColor={chart.categorical[1]} stopOpacity={0.02} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
@@ -73,7 +75,7 @@ export default function NewVsReturning({ days = '30' }: { days?: string }) {
                 type="monotone"
                 dataKey="new_users"
                 name={t('analytics.advanced_widgets.new_vs_returning.new')}
-                stroke="#60a5fa"
+                stroke={chart.primary}
                 strokeWidth={2}
                 fill="url(#newUsersGrad)"
                 stackId="1"
@@ -83,7 +85,7 @@ export default function NewVsReturning({ days = '30' }: { days?: string }) {
                 type="monotone"
                 dataKey="returning_users"
                 name={t('analytics.advanced_widgets.new_vs_returning.returning')}
-                stroke="#8b5cf6"
+                stroke={chart.categorical[1]}
                 strokeWidth={2}
                 fill="url(#retUsersGrad)"
                 stackId="1"

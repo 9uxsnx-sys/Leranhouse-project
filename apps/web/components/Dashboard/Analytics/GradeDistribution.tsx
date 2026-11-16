@@ -3,9 +3,11 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAnalyticsDbQuery } from './useAnalyticsDashboard'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { useChartTheme } from '@components/Analytics/chartTheme'
 
 export default function GradeDistribution() {
   const { t } = useTranslation()
+  const chart = useChartTheme()
   const { data, isLoading } = useAnalyticsDbQuery('grade_distribution')
   const rows = data?.data ?? []
 
@@ -24,7 +26,7 @@ export default function GradeDistribution() {
             <XAxis dataKey="grade" tick={{ fontSize: 11 }} stroke="#9ca3af" />
             <YAxis tick={{ fontSize: 11 }} stroke="#9ca3af" allowDecimals={false} />
             <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid #f3f4f6', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-            <Bar dataKey="count" name={t('analytics.common.count')} fill="#10b981" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="count" name={t('analytics.common.count')} fill={chart.primary} radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       )}

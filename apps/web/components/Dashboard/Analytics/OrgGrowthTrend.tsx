@@ -12,9 +12,11 @@ import {
   Tooltip,
   Legend,
 } from 'recharts'
+import { useChartTheme } from '@components/Analytics/chartTheme'
 
 export default function OrgGrowthTrend({ days = '90' }: { days?: string }) {
   const { t } = useTranslation()
+  const chart = useChartTheme()
   const { data, isLoading } = useAnalyticsPipe('org_growth_trend', { days })
   const rows = data?.data ?? []
 
@@ -64,7 +66,7 @@ export default function OrgGrowthTrend({ days = '90' }: { days?: string }) {
                 type="monotone"
                 dataKey="signups"
                 name={t('analytics.overview.signups')}
-                stroke="#60a5fa"
+                stroke={chart.primary}
                 strokeWidth={2}
                 dot={false}
               />
@@ -72,7 +74,7 @@ export default function OrgGrowthTrend({ days = '90' }: { days?: string }) {
                 type="monotone"
                 dataKey="enrollments"
                 name={t('analytics.common.enrollments')}
-                stroke="#8b5cf6"
+                stroke={chart.categorical[1]}
                 strokeWidth={2}
                 dot={false}
               />
@@ -80,7 +82,7 @@ export default function OrgGrowthTrend({ days = '90' }: { days?: string }) {
                 type="monotone"
                 dataKey="completions"
                 name={t('analytics.common.completions')}
-                stroke="#10b981"
+                stroke={chart.categorical[2]}
                 strokeWidth={2}
                 dot={false}
               />

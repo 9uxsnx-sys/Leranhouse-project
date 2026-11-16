@@ -4,31 +4,10 @@ import { useTranslation } from 'react-i18next'
 import { useCoursePipe } from '../useAnalyticsDashboard'
 import { Box } from 'lucide-react'
 import CourseWidgetCard, { WidgetIcon } from './CourseWidgetCard'
+import { useChartTheme } from '@components/Analytics/chartTheme'
 
-const TYPE_COLORS: Record<string, string> = {
-  video: 'bg-blue-500',
-  document: 'bg-amber-500',
-  quiz: 'bg-purple-500',
-  assignment: 'bg-rose-500',
-  dynamic: 'bg-teal-500',
-  custom: 'bg-gray-500',
-  scorm: 'bg-cyan-500',
-}
-
-const TYPE_HEX: Record<string, string> = {
-  video: '#3b82f6',
-  document: '#f59e0b',
-  quiz: '#8b5cf6',
-  assignment: '#f43f5e',
-  dynamic: '#14b8a6',
-  custom: '#6b7280',
-  scorm: '#06b6d4',
-}
-
-function getColor(type: string) {
-  const key = type.replace(/^TYPE_/, '').toLowerCase()
-  return TYPE_COLORS[key] || 'bg-gray-400'
-}
+/** Fixed order so each activity type keeps a stable step of the brand ramp. */
+const TYPE_ORDER = ['video', 'document', 'quiz', 'assignment', 'dynamic', 'custom', 'scorm']
 
 export default function CourseActivityTypeBreakdown({
   courseId,
@@ -38,6 +17,14 @@ export default function CourseActivityTypeBreakdown({
   days?: string
 }) {
   const { t } = useTranslation()
+  const chart = useChartTheme()
+  const typeColor = (type: string) => {
+    const key = type.replace(/^TYPE_/, '').toLowerCase()
+    const index = TYPE_ORDER.indexOf(key)
+    return chart.categorical[
+      index >= 0 ? index % chart.categorical.length : chart.categorical.length - 1
+    ]
+  }
   const getTypeLabel = (type: string) => {
     const key = type.replace(/^TYPE_/, '').toLowerCase()
     const label = t('analytics.course_analytics.type_labels.' + key)
@@ -67,8 +54,8 @@ export default function CourseActivityTypeBreakdown({
                 return (
                   <div
                     key={i}
-                    className={`${getColor(row.activity_type)} transition-all flex items-center justify-center`}
-                    style={{ width: `${pct}%` }}
+                    className="transition-all flex items-center justify-center"
+                    style={{ width: `${pct}%`, background: typeColor(row.activity_type) }}
                   >
                     {pct > 10 && (
                       <span className="text-white text-xs font-medium">{Math.round(pct)}%</span>
@@ -95,7 +82,7 @@ export default function CourseActivityTypeBreakdown({
                   return (
                     <tr key={i} className="border-b border-gray-50 last:border-0">
                       <td className="py-2.5 font-medium text-gray-700 flex items-center gap-2">
-                        <div className={`w-3 h-3 rounded-sm ${getColor(row.activity_type)}`} />
+                        <div className="w-3 h-3 rounded-sm" style={{ background: typeColor(row.activity_type) }} />
                         {getTypeLabel(row.activity_type)}
                       </td>
                       <td className="py-2.5 text-end text-gray-600">{row.views}</td>
@@ -125,8 +112,8 @@ export default function CourseActivityTypeBreakdown({
               return (
                 <div
                   key={i}
-                  className={`${getColor(row.activity_type)} transition-all`}
-                  style={{ width: `${pct}%` }}
+                  className="transition-all"
+                  style={{ width: `${pct}%`, background: typeColor(row.activity_type) }}
                   title={`${getTypeLabel(row.activity_type)}: ${Math.round(pct)}%`}
                 />
               )
@@ -139,7 +126,7 @@ export default function CourseActivityTypeBreakdown({
               const pct = totalViews > 0 ? Math.round((row.views / totalViews) * 100) : 0
               return (
                 <div key={i} className="flex items-center gap-2">
-                  <div className={`w-2.5 h-2.5 rounded-sm shrink-0 ${getColor(row.activity_type)}`} />
+                  <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: typeColor(row.activity_type) }} />
                   <span className="text-xs text-gray-600 flex-1">
                     {getTypeLabel(row.activity_type)}
                   </span>

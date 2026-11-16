@@ -480,7 +480,7 @@ function ActivityClient(props: ActivityClientProps) {
                                 cx="16"
                                 cy="16"
                                 r="14"
-                                stroke="#10b981"
+                                style={{ stroke: 'var(--brand)' }}
                                 strokeWidth="3"
                                 fill="none"
                                 strokeLinecap="round"

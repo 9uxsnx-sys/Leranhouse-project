@@ -1,12 +1,22 @@
 /**
  * Analytics chart theme.
  *
- * Chart libraries (recharts) render SVG attributes — CSS `var()` does NOT resolve
- * in presentation attributes, so we read the live CSS custom properties from
- * :root on the client and hand recharts real `hsl(...)` strings. This is what
- * makes every chart inherit the organization's primary color automatically.
+ * Every series colour is derived from the organization's single brand hex — the
+ * same value every other brand surface reads. That makes all chart types
+ * (area/line, bar, ranked bar, funnel, scatter) white-label without a second
+ * colour source.
+ *
+ * Recharts renders SVG presentation attributes, where CSS `var()` does not
+ * resolve, so the hex is resolved in JS and handed over as a real colour string.
+ *
+ * The brand is read from the org context rather than from `--brand` on
+ * `document.documentElement`: child effects run before the shell's, so reading
+ * the custom property here would capture the ink fallback on first paint and
+ * never update.
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useOrg } from '@components/Contexts/OrgContext'
+import { isLightColor, normalizeBrandColor } from '@services/utils/ts/colorUtils'
 
 export interface ChartTheme {
   primary: string
@@ -18,48 +28,104 @@ export interface ChartTheme {
   categorical: string[]
 }
 
-/**
- * The platform's chart palette (see Dashboard/Analytics/CoreWidgetsRow + FunnelChart).
- * Categorical series all come from this one indigo→violet ramp — never an ad-hoc rainbow.
- */
-export const CHART_PALETTE = ['#6b8de3', '#818cf8', '#a78bfa', '#c4b5fd']
+const GRID = '#e4e4e7'
+const AXIS = '#71717a'
+const POSITIVE = '#10b981'
+const NEGATIVE = '#f43f5e'
 
-const FALLBACK: ChartTheme = {
-  primary: '#6366f1',
-  primarySoft: 'rgba(99, 102, 241, 0.12)',
-  grid: '#e4e4e7',
-  axis: '#71717a',
-  positive: '#10b981',
-  negative: '#f43f5e',
-  categorical: CHART_PALETTE,
+type Rgb = { r: number; g: number; b: number }
+const WHITE: Rgb = { r: 255, g: 255, b: 255 }
+const BLACK: Rgb = { r: 0, g: 0, b: 0 }
+
+function hexToRgb(hex: string): Rgb {
+  const clean = hex.replace('#', '')
+  const full =
+    clean.length === 3
+      ? clean.split('').map((c) => c + c).join('')
+      : clean
+  return {
+    r: parseInt(full.slice(0, 2), 16),
+    g: parseInt(full.slice(2, 4), 16),
+    b: parseInt(full.slice(4, 6), 16),
+  }
+}
+
+function rgbToHex({ r, g, b }: Rgb): string {
+  const part = (n: number) => Math.round(n).toString(16).padStart(2, '0')
+  return `#${part(r)}${part(g)}${part(b)}`
+}
+
+/** Blends `hex` toward `target`. 0 keeps the hex, 1 returns the target. */
+function blend(hex: string, target: Rgb, amount: number): string {
+  const c = hexToRgb(hex)
+  return rgbToHex({
+    r: c.r + (target.r - c.r) * amount,
+    g: c.g + (target.g - c.g) * amount,
+    b: c.b + (target.b - c.b) * amount,
+  })
+}
+
+function withAlpha(hex: string, alpha: number): string {
+  const c = hexToRgb(hex)
+  return `rgba(${c.r}, ${c.g}, ${c.b}, ${alpha})`
+}
+
+/**
+ * The first series colour. A very light brand is deepened so the stroke keeps
+ * roughly 3:1 against a white card; a normal brand is used untouched.
+ */
+export function chartPrimary(brand: string): string {
+  return isLightColor(brand) ? blend(brand, BLACK, 0.28) : brand
+}
+
+/**
+ * Categorical ramp: one hue, five steps. Dark brands step toward white, light
+ * brands step toward black, so the steps stay distinct on a white card either
+ * way — and they still read as one colour family, never a rainbow.
+ */
+export function buildBrandRamp(brand: string): string[] {
+  const base = chartPrimary(brand)
+  const target = isLightColor(brand) ? BLACK : WHITE
+  return [0, 0.22, 0.4, 0.56, 0.7].map((amount) =>
+    amount === 0 ? base : blend(base, target, amount)
+  )
 }
 
 export function useChartTheme(): ChartTheme {
-  const [theme, setTheme] = useState<ChartTheme>(FALLBACK)
+  const org = useOrg() as any
+  const orgConfig = org?.config?.config
+  const brand = normalizeBrandColor(
+    orgConfig?.customization?.general?.color || orgConfig?.general?.color || ''
+  )
 
+  const [neutrals, setNeutrals] = useState({ grid: GRID, axis: AXIS })
+
+  // Grid and axis stay neutral tokens; they are not part of the brand signal.
   useEffect(() => {
     try {
       const s = getComputedStyle(document.documentElement)
-      const hsl = (name: string, fb: string) => {
+      const hsl = (name: string, fallback: string) => {
         const raw = s.getPropertyValue(name).trim()
-        return raw ? `hsl(${raw})` : fb
+        return raw ? `hsl(${raw})` : fallback
       }
-      const primary = hsl('--primary', FALLBACK.primary)
-      setTheme({
-        primary,
-        primarySoft: primary.replace('hsl(', 'hsla(').replace(')', ' / 0.12)'),
-        grid: hsl('--border', FALLBACK.grid),
-        axis: hsl('--muted-foreground', FALLBACK.axis),
-        positive: FALLBACK.positive,
-        negative: FALLBACK.negative,
-        categorical: CHART_PALETTE,
-      })
+      setNeutrals({ grid: hsl('--border', GRID), axis: hsl('--muted-foreground', AXIS) })
     } catch {
       /* SSR / no document — keep fallbacks */
     }
   }, [])
 
-  return theme
+  return useMemo(() => {
+    const primary = chartPrimary(brand)
+    return {
+      primary,
+      primarySoft: withAlpha(primary, 0.12),
+      grid: neutrals.grid,
+      axis: neutrals.axis,
+      positive: POSITIVE,
+      negative: NEGATIVE,
+      categorical: buildBrandRamp(brand),
+    }
+  }, [brand, neutrals.grid, neutrals.axis])
 }
 
 export function formatNumber(n: number): string {

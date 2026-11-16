@@ -5,6 +5,7 @@ import { useCoursePipe } from '../useAnalyticsDashboard'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { Users } from 'lucide-react'
 import CourseWidgetCard, { WidgetIcon, AnimatedNumber } from './CourseWidgetCard'
+import { useChartTheme } from '@components/Analytics/chartTheme'
 
 export default function CourseLearnerRetention({
   courseId,
@@ -14,6 +15,7 @@ export default function CourseLearnerRetention({
   days?: string
 }) {
   const { t } = useTranslation()
+  const chart = useChartTheme()
   const { data, isLoading } = useCoursePipe('course_learner_retention', courseId, { days })
   const rows = data?.data ?? []
 
@@ -33,8 +35,8 @@ export default function CourseLearnerRetention({
       <AreaChart data={chartRows}>
         <defs>
           <linearGradient id="retentionGradientMini" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#6366f1" stopOpacity={0.2} />
-            <stop offset="100%" stopColor="#6366f1" stopOpacity={0.02} />
+            <stop offset="0%" stopColor={chart.primary} stopOpacity={0.2} />
+            <stop offset="100%" stopColor={chart.primary} stopOpacity={0.02} />
           </linearGradient>
         </defs>
         <XAxis dataKey="day" tick={{ fontSize: 9 }} axisLine={false} tickLine={false} />
@@ -43,7 +45,7 @@ export default function CourseLearnerRetention({
           labelFormatter={(label) => t('analytics.course_analytics.learner_retention.day_label', { day: label })}
           contentStyle={{ borderRadius: 12, border: '1px solid #f3f4f6', fontSize: 13 }}
         />
-        <Area type="monotone" dataKey="retention" stroke="#6366f1" strokeWidth={2} fill="url(#retentionGradientMini)" dot={false} />
+        <Area type="monotone" dataKey="retention" stroke={chart.primary} strokeWidth={2} fill="url(#retentionGradientMini)" dot={false} />
       </AreaChart>
     </ResponsiveContainer>
   )
@@ -53,8 +55,8 @@ export default function CourseLearnerRetention({
       <AreaChart data={chartRows}>
         <defs>
           <linearGradient id="retentionGradientModal" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#6366f1" stopOpacity={0.3} />
-            <stop offset="100%" stopColor="#6366f1" stopOpacity={0.02} />
+            <stop offset="0%" stopColor={chart.primary} stopOpacity={0.3} />
+            <stop offset="100%" stopColor={chart.primary} stopOpacity={0.02} />
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
@@ -77,7 +79,7 @@ export default function CourseLearnerRetention({
           labelFormatter={(label) => t('analytics.course_analytics.learner_retention.day_label', { day: label })}
           contentStyle={{ borderRadius: 12, border: '1px solid #f3f4f6', fontSize: 13 }}
         />
-        <Area type="monotone" dataKey="retention" stroke="#6366f1" strokeWidth={2.5} fill="url(#retentionGradientModal)" dot={{ r: 3, fill: '#6366f1', strokeWidth: 0 }} />
+        <Area type="monotone" dataKey="retention" stroke={chart.primary} strokeWidth={2.5} fill="url(#retentionGradientModal)" dot={{ r: 3, fill: chart.primary, strokeWidth: 0 }} />
       </AreaChart>
     </ResponsiveContainer>
   )

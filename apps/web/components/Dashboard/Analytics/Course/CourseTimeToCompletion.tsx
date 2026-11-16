@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useCoursePipe } from '../useAnalyticsDashboard'
 import { Timer } from 'lucide-react'
 import CourseWidgetCard, { WidgetIcon, ProgressRing } from './CourseWidgetCard'
+import { useChartTheme } from '@components/Analytics/chartTheme'
 
 export default function CourseTimeToCompletion({
   courseId,
@@ -13,6 +14,7 @@ export default function CourseTimeToCompletion({
   days?: string
 }) {
   const { t } = useTranslation()
+  const chart = useChartTheme()
   const { data, isLoading } = useCoursePipe('course_time_to_completion', courseId, { days })
   const row = data?.data?.[0]
 
@@ -76,7 +78,7 @@ export default function CourseTimeToCompletion({
             percent={p75 > 0 ? Math.min((median / p75) * 100, 100) : 50}
             size={80}
             strokeWidth={6}
-            color="#3b82f6"
+            color={chart.primary}
           />
           <div>
             <p className="text-4xl font-black text-gray-900">{median}</p>

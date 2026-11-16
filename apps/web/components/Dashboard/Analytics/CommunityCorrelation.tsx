@@ -3,9 +3,11 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAnalyticsPipe } from './useAnalyticsDashboard'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { useChartTheme } from '@components/Analytics/chartTheme'
 
 export default function CommunityCorrelation({ days = '90' }: { days?: string }) {
   const { t } = useTranslation()
+  const chart = useChartTheme()
   const { data, isLoading } = useAnalyticsPipe('community_correlation', { days })
   const rows = data?.data ?? []
 
@@ -31,7 +33,7 @@ export default function CommunityCorrelation({ days = '90' }: { days?: string })
             <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="#9ca3af" />
             <YAxis tick={{ fontSize: 11 }} stroke="#9ca3af" tickFormatter={(v: number) => `${v}%`} />
             <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid #f3f4f6', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} formatter={(v = 0) => `${v}%`} />
-            <Bar dataKey="completion_rate" name={t('analytics.course_analytics.common.completion_rate')} fill="#6366f1" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="completion_rate" name={t('analytics.course_analytics.common.completion_rate')} fill={chart.primary} radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       )}
