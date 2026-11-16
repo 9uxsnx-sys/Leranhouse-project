@@ -18,6 +18,7 @@ Entries below are derived from the commit history of the current branch (`feat/l
 - Connected the auth submit CTA to the brand token: `authPrimaryBtnClass` now uses `bg-brand` / `text-brand-fg`, so sign-in, sign-up, forgot, reset and verify inherit the theme and the Text & Icons foreground. Google, SSO and text links stay neutral.
 - Widened the auth image column (58/42 → 61.5/38.5 at `lg`, 63.6/36.4 at `xl`) to give the artwork more room without moving the form card.
 - Fixed every paginated dashboard table: they requested `limit=10000` while the API caps at 100, so the endpoints answered 422 and the tables rendered empty. They now walk the real pages through `swrFetchAllPages`.
+- Fixed the profile's Courses and Podcasts tabs showing 0: they only ever read authored resources. On your own profile they now merge the org listings, so the tabs show what you can open; other profiles keep the authored-only semantics. Seeded podcasts also gain their `ResourceAuthor` row, which the seed script never wrote.
 - Fixed the course media cache key that targeted the non-existent `courses/org/{id}` route.
 
 ## 2026-11-14

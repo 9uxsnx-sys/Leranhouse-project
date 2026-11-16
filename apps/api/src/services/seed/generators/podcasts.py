@@ -8,6 +8,11 @@ from src.db.payments.enums import AccessTypeEnum
 from src.db.podcasts.episodes import PodcastEpisode
 from src.db.podcast_translations import PodcastEpisodeTranslation, PodcastTranslation
 from src.db.podcasts.podcasts import Podcast
+from src.db.resource_authors import (
+    ResourceAuthor,
+    ResourceAuthorshipEnum,
+    ResourceAuthorshipStatusEnum,
+)
 from src.services.seed import copy as C
 from src.services.seed.core import SeedContext, iso, new_uuid, org_content_dir
 
@@ -1435,6 +1440,15 @@ def episode_translation_payload(
     return payload
 
 
+def _podcast_author(ctx: SeedContext, index: int):
+    """Same rule as courses: the founder hosts the flagship, the rest rotate."""
+    if index == 0 and ctx.owner is not None:
+        return ctx.owner
+    if ctx.teachers:
+        return ctx.teachers[index % len(ctx.teachers)]
+    return ctx.owner
+
+
 def create_podcasts(ctx: SeedContext) -> None:
     base = org_content_dir(ctx.content_root, ctx.org_uuid) / "podcasts"
     shows: list[Podcast] = []
@@ -1486,6 +1500,21 @@ def create_podcasts(ctx: SeedContext) -> None:
             update_date=iso(created),
         )
         ctx.session.add(podcast)
+        # Authorship drives the profile tabs and podcast rights, exactly like
+        # courses. Without this row every seeded podcast is invisible to
+        # /users/{id}/podcasts and to the creator-only permissions.
+        author = _podcast_author(ctx, index)
+        if author is not None:
+            ctx.session.add(
+                ResourceAuthor(
+                    resource_uuid=podcast_uuid,
+                    user_id=int(author.id or 0),
+                    authorship=ResourceAuthorshipEnum.CREATOR,
+                    authorship_status=ResourceAuthorshipStatusEnum.ACTIVE,
+                    creation_date=iso(created),
+                    update_date=iso(created),
+                )
+            )
         ctx.session.commit()
         ctx.session.refresh(podcast)
         shows.append(podcast)

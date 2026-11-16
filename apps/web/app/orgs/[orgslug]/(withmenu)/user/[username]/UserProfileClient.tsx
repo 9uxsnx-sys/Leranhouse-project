@@ -6,7 +6,8 @@ import UserAvatar from '@components/Objects/UserAvatar'
 import { BookOpen, Mic, Users } from 'lucide-react'
 import { getUserAvatarMediaDirectory, getUserBannerMediaDirectory, getCourseThumbnailMediaDirectory, getPodcastThumbnailMediaDirectory, getCommunityThumbnailMediaDirectory } from '@services/media/media'
 import { getCoursesByUser, getPodcastsByUser, getCommunitiesByUser } from '@services/users/users'
-import { removePodcastPrefix } from '@services/podcasts/podcasts'
+import { getOrgCourses } from '@services/courses/courses'
+import { getOrgPodcasts, removePodcastPrefix } from '@services/podcasts/podcasts'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useRegisterBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
 import { useOrg } from '@components/Contexts/OrgContext'
@@ -29,12 +30,22 @@ const tabsConfig: { id: TabType; label: string; icon: React.ReactNode }[] = [
   { id: 'communities', label: 'Communities', icon: <Users className="w-4 h-4" /> },
 ]
 
+/** Appends `extra` after `primary`, skipping items already listed. */
+function mergeByUuid(primary: any[], extra: any[], key: string) {
+  const seen = new Set(primary.map((item) => item?.[key]))
+  return [...primary, ...extra.filter((item) => item && !seen.has(item[key]))]
+}
+
 function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProps) {
   const { t, i18n } = useTranslation()
   const session = useLHSession() as any
   const org = useOrg() as any
   const access_token = session?.data?.tokens?.access_token
   const contentLocale = (i18n.language || 'en').split('-')[0]
+  // Ids, not usernames: a rename mid-session must not switch the tabs back to
+  // authored-only. Viewing someone else keeps the portfolio semantics.
+  const isOwnProfile =
+    !!session?.data?.user?.id && String(session.data.user.id) === String(userData.id)
   const [activeTab, setActiveTab] = React.useState<TabType>('courses')
 
   // Data states
@@ -67,15 +78,37 @@ function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProp
           getCommunitiesByUser(userData.id, access_token, contentLocale),
         ])
 
+        let courses: any[] =
+          coursesRes.status === 'fulfilled' && Array.isArray(coursesRes.value.data)
+            ? coursesRes.value.data
+            : []
+        let podcasts: any[] =
+          podcastsRes.status === 'fulfilled' && Array.isArray(podcastsRes.value.data)
+            ? podcastsRes.value.data
+            : []
+
+        // The /users/{id} routes only return authored resources. On your own
+        // profile the tabs answer "what can I open here", so the org listing is
+        // merged in: it already covers published content, user-group access and
+        // your own unpublished drafts.
+        if (isOwnProfile) {
+          const [orgCoursesRes, orgPodcastsRes] = await Promise.allSettled([
+            getOrgCourses(orgslug, null, access_token, false, contentLocale),
+            getOrgPodcasts(orgslug, null, access_token, false, contentLocale),
+          ])
+          if (orgCoursesRes.status === 'fulfilled' && Array.isArray(orgCoursesRes.value)) {
+            courses = mergeByUuid(courses, orgCoursesRes.value, 'course_uuid')
+          }
+          if (orgPodcastsRes.status === 'fulfilled' && Array.isArray(orgPodcastsRes.value)) {
+            podcasts = mergeByUuid(podcasts, orgPodcastsRes.value, 'podcast_uuid')
+          }
+        }
+
         if (!mounted) return
 
-        if (coursesRes.status === 'fulfilled' && coursesRes.value.data) {
-          setUserCourses(coursesRes.value.data)
-        }
-        if (podcastsRes.status === 'fulfilled' && podcastsRes.value.data) {
-          setUserPodcasts(podcastsRes.value.data)
-        }
-        if (communitiesRes.status === 'fulfilled' && communitiesRes.value.data) {
+        setUserCourses(courses)
+        setUserPodcasts(podcasts)
+        if (communitiesRes.status === 'fulfilled' && Array.isArray(communitiesRes.value.data)) {
           setUserCommunities(communitiesRes.value.data)
         }
 
@@ -97,7 +130,7 @@ function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProp
 
     fetchAllData()
     return () => { mounted = false }
-  }, [userData.id, access_token, contentLocale])
+  }, [userData.id, access_token, contentLocale, isOwnProfile, orgslug])
 
   const bannerUrl = userData.banner_image
     ? getUserBannerMediaDirectory(userData.user_uuid, userData.banner_image)
@@ -215,7 +248,11 @@ function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProp
                   <div className="col-span-full text-center py-16 text-gray-400">
                     <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-50" />
                     <p className="text-lg font-medium">No courses yet</p>
-                    <p className="text-sm mt-1">Courses created by this user will appear here.</p>
+                    <p className="text-sm mt-1">
+                      {isOwnProfile
+                        ? 'Courses you can open in this organisation will appear here.'
+                        : 'Courses created by this user will appear here.'}
+                    </p>
                   </div>
                 )}
               </div>
@@ -242,7 +279,11 @@ function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProp
                   <div className="col-span-full text-center py-16 text-gray-400">
                     <Mic className="w-12 h-12 mx-auto mb-3 opacity-50" />
                     <p className="text-lg font-medium">No podcasts yet</p>
-                    <p className="text-sm mt-1">Podcasts created by this user will appear here.</p>
+                    <p className="text-sm mt-1">
+                      {isOwnProfile
+                        ? 'Podcasts you can open in this organisation will appear here.'
+                        : 'Podcasts created by this user will appear here.'}
+                    </p>
                   </div>
                 )}
               </div>

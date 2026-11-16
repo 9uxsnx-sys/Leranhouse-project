@@ -290,6 +290,10 @@ Defined in `apps/web/components/Objects/Modals/SearchModal.tsx`. A command-palet
 **Route**: `/orgs/[orgslug]/user/[username]` — File: `apps/web/app/orgs/[orgslug]/(withmenu)/user/[username]/UserProfileClient.tsx`
 
 - **Public user profile**: Shows user information, activity, and contributions.
+- **Tabs**: Courses, Podcasts and Communities, each with a count in the header. The data source depends on who is looking:
+  - **Someone else's profile** — `users/{id}/courses` and `users/{id}/podcasts`, which are authorship-scoped (ACTIVE `ResourceAuthor` rows). An empty tab means that user has not created any, not that none exist.
+  - **Your own profile** — the authored lists are merged (deduplicated by uuid) with the org listings `courses/org_slug/{slug}/page/1/limit/100` and `podcasts/org_slug/{slug}/page/1/limit/100`, so the tabs answer *"what can I open here"*: published content, UserGroup access, and your own unpublished drafts. Merging authored first keeps drafts visible even when the catalogue query omits them.
+  - Communities are always access-based (`check_resource_access`), for every viewer.
 
 ### Podcast Detail
 
