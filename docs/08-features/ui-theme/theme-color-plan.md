@@ -129,6 +129,7 @@ Acceptance: changing Branding → Primary Color recolours the primary button, pr
 
 ## Related
 
+- [Brand colour surface audit](./brand-surface-audit.md) — every screen and element, with its status
 - [UI reference — Button](../../07-ui-reference/components/button.md)
 - [Design tokens](../../07-ui-reference/design-tokens.md)
 - [Organization branding](../../04-admin-guide/org-settings/branding.md)
