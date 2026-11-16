@@ -1,8 +1,8 @@
-> Status: as-built · Last verified: 2026-11-15
+> Status: as-built · Last verified: 2026-11-16
 
 # Changelog
 
-Entries below are derived from the commit history of the current branch (`feat/learnhouse-1.2.0-custom`); dates are commit dates. Work that is uncommitted at the time of writing is listed separately at the end.
+Entries below are derived from the commit history of the current branch (`feat/learnhouse-1.2.0-custom`); dates are commit dates. Work landed on the branch but not yet released is grouped at the end.
 
 ## 2026-11-16
 
@@ -112,7 +112,7 @@ Entries below are derived from the commit history of the current branch (`feat/l
 - Fixed the field select to show a single chevron without a blue ring.
 - Documented the course editor cleanup, the field select and the localization API.
 
-## Current development line (uncommitted)
+## Current development line
 
 - **Access and payments** — the offer form, offer resources panel, payment wall and offers service were removed from the store and payments surfaces. Resource access checks moved into a shared RBAC layer (`apps/api/src/security/rbac/catalog.py`, `media.py`, `resource_access.py`), and a migration links communities to resources.
 - **Localization** — new `apps/api/src/services/people_locale.py` resolves instructor and host names per locale across courses, chapters, collections, podcasts and communities. The `en`, `fr` and `ar` locale files were updated.
