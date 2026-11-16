@@ -154,7 +154,7 @@ export function ModerationSettingsModal({
                 type="button"
                 onClick={handleAddWord}
                 disabled={!newWord.trim()}
-                className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm font-medium"
+                className="px-4 py-2 bg-brand hover:bg-brand-hover text-brand-fg rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 text-sm font-medium"
               >
                 <Plus size={16} />
                 Add
@@ -212,7 +212,7 @@ export function ModerationSettingsModal({
           <button
             onClick={handleSave}
             disabled={isSubmitting || !hasChanges}
-            className="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-4 py-2 text-sm font-medium text-brand-fg bg-brand hover:bg-brand-hover rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {isSubmitting ? (
               <>

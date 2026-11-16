@@ -357,7 +357,7 @@ export default function PlaygroundsListClient({ org_id, orgslug }: PlaygroundsLi
                           onClick={() => goToPage(page as number)}
                           className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                             currentPage === page
-                              ? 'bg-primary text-primary-foreground'
+                              ? 'bg-brand text-brand-fg'
                               : 'bg-white text-gray-600 nice-shadow hover:bg-gray-50'
                           }`}
                         >
@@ -418,7 +418,7 @@ export default function PlaygroundsListClient({ org_id, orgslug }: PlaygroundsLi
               <button
                 onClick={handleCreate}
                 disabled={isCreating}
-                className="px-4 py-2 bg-primary text-primary-foreground text-sm font-bold rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                className="px-4 py-2 bg-brand text-brand-fg text-sm font-bold rounded-lg hover:bg-brand-hover disabled:opacity-50 transition-colors"
               >
                 {isCreating ? 'Creating…' : 'Create'}
               </button>

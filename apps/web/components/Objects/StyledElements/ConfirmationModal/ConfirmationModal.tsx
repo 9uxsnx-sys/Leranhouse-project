@@ -19,7 +19,7 @@ const ConfirmationModal = (params: ModalParams) => {
   const iconColors = isWarning ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'
   const buttonColors = isWarning
     ? 'text-white bg-red-500 hover:bg-red-600'
-    : 'text-white bg-zinc-800 hover:bg-zinc-700'
+    : 'text-brand-fg bg-brand hover:bg-brand-hover'
 
   const handleConfirm = React.useCallback(() => {
     params.functionToExecute()

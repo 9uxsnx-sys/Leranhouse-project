@@ -272,7 +272,7 @@ export default function EpisodePlayer({ episode, podcast }: EpisodePlayerProps) 
           onMouseDown={handleMouseDown}
         >
           <div
-            className="absolute inset-y-0 start-0 bg-gray-900 rounded-full"
+            className="absolute inset-y-0 start-0 bg-brand rounded-full"
             style={{ width: `${progressPercent}%` }}
           />
         </div>

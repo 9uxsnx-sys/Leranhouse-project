@@ -587,7 +587,7 @@ function AddRole(props: AddRoleProps) {
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 w-full sm:w-auto font-medium shadow-sm"
+                            className="px-4 py-2 bg-brand text-brand-fg rounded-md hover:bg-brand-hover transition-colors disabled:opacity-50 w-full sm:w-auto font-medium shadow-sm"
                         >
                             {isSubmitting ? t('dashboard.users.roles.modals.create.form.loading') : t('dashboard.users.roles.modals.create.form.submit')}
                         </button>

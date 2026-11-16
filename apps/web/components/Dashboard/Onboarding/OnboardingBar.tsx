@@ -241,7 +241,7 @@ export default function OnboardingBar() {
                 <div className="flex items-center gap-2 mt-1">
                   <div className="h-1.5 w-24 bg-gray-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-primary rounded-full transition-all duration-300"
+                      className="h-full bg-brand rounded-full transition-all duration-300"
                       style={{ width: `${progress * 100}%` }}
                     />
                   </div>
@@ -290,7 +290,7 @@ export default function OnboardingBar() {
                         setShowFarewell(false)
                         dismiss()
                       }}
-                      className="mt-4 px-6 py-2.5 text-xs font-semibold text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors"
+                      className="mt-4 px-6 py-2.5 text-xs font-semibold text-brand-fg bg-brand rounded-lg hover:bg-brand-hover transition-colors"
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.3, duration: 0.3, ease }}
@@ -348,7 +348,7 @@ export default function OnboardingBar() {
                 {/* Progress */}
                 <div className="mx-4 h-1 bg-gray-100 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-primary rounded-full transition-all duration-300"
+                    className="h-full bg-brand rounded-full transition-all duration-300"
                     style={{ width: `${progress * 100}%` }}
                   />
                 </div>
@@ -462,7 +462,7 @@ export default function OnboardingBar() {
                                       {!step.completed && actionHref && (
                                         <button
                                           onClick={() => navigateTo(actionHref)}
-                                          className="relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors shrink-0"
+                                          className="relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-brand-fg bg-brand rounded-lg hover:bg-brand-hover transition-colors shrink-0"
                                         >
                                           <ConceptIcon.add size={14} />
                                           {t(`onboarding.steps.${step.id}.action`)}
@@ -501,7 +501,7 @@ export default function OnboardingBar() {
                                       <div className="relative px-3 pb-3">
                                         <div className="flex items-center gap-2">
                                           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white nice-shadow flex-1">
-                                            <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold shrink-0">
+                                            <div className="flex items-center justify-center w-5 h-5 rounded-full bg-brand text-brand-fg text-[10px] font-bold shrink-0">
                                               1
                                             </div>
                                             <ConceptIcon.add size={16} className="text-gray-500 shrink-0" />
@@ -513,7 +513,7 @@ export default function OnboardingBar() {
                                           <span className="text-gray-300 shrink-0">→</span>
 
                                           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white nice-shadow flex-1">
-                                            <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold shrink-0">
+                                            <div className="flex items-center justify-center w-5 h-5 rounded-full bg-brand text-brand-fg text-[10px] font-bold shrink-0">
                                               2
                                             </div>
                                             <AppWindow
@@ -528,7 +528,7 @@ export default function OnboardingBar() {
                                           <span className="text-gray-300 shrink-0">→</span>
 
                                           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white nice-shadow flex-1">
-                                            <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold shrink-0">
+                                            <div className="flex items-center justify-center w-5 h-5 rounded-full bg-brand text-brand-fg text-[10px] font-bold shrink-0">
                                               3
                                             </div>
                                             <ConceptIcon.edit
@@ -652,7 +652,7 @@ export default function OnboardingBar() {
                                             completeStep('teach_the_world')
                                             setShowFarewell(true)
                                           }}
-                                          className="w-full flex items-center justify-center gap-2 py-2.5 mt-1 text-xs font-semibold text-primary-foreground bg-primary nice-shadow rounded-lg hover:bg-primary/90 transition-colors"
+                                          className="w-full flex items-center justify-center gap-2 py-2.5 mt-1 text-xs font-semibold text-brand-fg bg-brand nice-shadow rounded-lg hover:bg-brand-hover transition-colors"
                                         >
                                           <Check size={14} />
                                           {t('onboarding.done')}

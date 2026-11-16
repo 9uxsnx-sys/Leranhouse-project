@@ -87,7 +87,7 @@ function TrailCourseCard(props: TrailCourseCardProps) {
       <div className="h-1 bg-gray-100">
         <div
           className={`h-full transition-all ${
-            isCompleted ? 'bg-green-500' : 'bg-indigo-500'
+            isCompleted ? 'bg-green-500' : 'bg-brand'
           }`}
           style={{ width: `${course_progress}%` }}
         />

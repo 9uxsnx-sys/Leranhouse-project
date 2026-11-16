@@ -194,7 +194,7 @@ export function CommentCard({
               <button
                 onClick={handleEdit}
                 disabled={!editContent.trim() || isSubmitting}
-                className="px-3 py-1 text-xs font-medium text-white bg-neutral-900 hover:bg-neutral-800 rounded-md transition-colors disabled:opacity-50 flex items-center gap-1"
+                className="px-3 py-1 text-xs font-medium text-brand-fg bg-brand hover:bg-brand-hover rounded-md transition-colors disabled:opacity-50 flex items-center gap-1"
               >
                 {isSubmitting ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
                 {isSubmitting ? t('communities.comments.saving') : t('communities.comments.save')}

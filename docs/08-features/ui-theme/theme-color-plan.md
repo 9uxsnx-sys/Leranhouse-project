@@ -1,10 +1,10 @@
-> Status: in progress · Created: 2026-11-16 · Phases 1–3 implemented, Phase 4 pending
+> Status: in progress · Created: 2026-11-16 · Phases 1–3 done, Phase 4 steps 1–4 done
 
 # UI theme colour and button cleanup
 
 Two things, in this order: **clean the buttons**, then **connect the brand colour**. The first is a prerequisite for the second — a themed button that still carries a glossy overlay looks wrong, and today the app ships two different button finishes.
 
-This page is the agreed plan. Phases 1–3 are built; Phase 4 (brand colour) is not. The repository checkpoint for rolling back is commit `7a85a7cb`.
+This page is the agreed plan. Phases 1–3 are built; Phase 4 is built except the charts decision and the optional selection tint. The repository checkpoint for rolling back is commit `7a85a7cb`.
 
 ## Goal
 
@@ -69,7 +69,7 @@ Acceptance: no indigo appears anywhere in the product with no brand colour confi
 
 Acceptance: no blue/indigo remains on any call-to-action, progress fill or active marker. Remaining hits are semantic.
 
-### Phase 4 — Connect the brand colour — in progress (step 1 done)
+### Phase 4 — Connect the brand colour — in progress (steps 1–4 done)
 
 Infrastructure first, then surfaces. Until the tokens exist on both shells, nothing changes visually.
 
@@ -90,7 +90,7 @@ Add the matching utilities to `styles/globals.css`: `bg-brand`, `text-brand-fg`,
 
 | # | Surface | Files | Note |
 |---|---|---|---|
-| 1 | Filled primary button | `ui/button.tsx` (`primary` + `default`), `ui/icon-button.tsx` (`primary`), and the 33 hand-written dark CTAs | The hand-written ones are the pills (`CourseEndView`, `CourseActionsMobile`, store card, `CourseThumbnailLanding`). If they are not converted to the token they keep ink while the component turns brand — that split is the main risk in this phase |
+| 1 | Filled primary button | `ui/button.tsx` (`primary` + `default`), `ui/icon-button.tsx` (`primary`), and the hand-written dark CTAs | Converted. The pills (`CourseEndView`, store card, `CourseThumbnailLanding`) keep their geometry and only the fill moved to the token |
 | 2 | Course / podcast progress fill | `TrailCourseElement:125`, `TrailCourseCard:92`, `CourseEndView:583`, `ActivityIndicators:435`, `course.tsx:506`, `PodcastPlayer:158`, `EpisodePlayer:276`, `EpisodeCard:76,103`, `episode-design-options:222,327`, `AssignmentStudentActivity:191` | Video player chrome stays neutral (it sits on top of video and must not fight it). Password strength stays semantic |
 | 3 | Tab underline | `UserProfileClient.tsx` learner profile tabs | Sidebars keep their existing animated active container. A brand marker was tried there and removed — it was a second chromatic element on every page, against one signal per screen |
 | 4 | Selection tint | active filter chips, selected table rows, current tab underline | 8–12% alpha only. Selected checkboxes stay ink — a tinted checkbox reads weaker |
@@ -100,11 +100,11 @@ Add the matching utilities to `styles/globals.css`: `bg-brand`, `text-brand-fg`,
 
 **Order of work** — each step ships on its own:
 
-1. ✅ **Done.** Tokens in `:root` (ink defaults), `getBrandStyle()` in `services/utils/ts/colorUtils.ts`, applied on both shells — `OrgMenu` for the learner side and `ClientAdminLayout` for the dashboard. Bad or missing values normalise to ink, so nothing can break the shell. The six utilities exist in `globals.css` and stay unemitted until a surface uses them.
+1. ✅ **Done.** Tokens in `:root` (ink defaults), `getBrandStyle()` in `services/utils/ts/colorUtils.ts`, applied on all four shells — `OrgMenu` + `(withmenu)/layout.tsx` for the learner side, `ClientAdminLayout` for the dashboard, `auth/layout.tsx` and `embed/[orgslug]/layout.tsx` for the two previously blocked shells. The same values are mirrored onto `document.documentElement` because Radix dialogs and popovers portal to `<body>` and would otherwise fall back to ink. Bad or missing values normalise to ink, so nothing can break the shell.
 2. ✅ **Done.** The learner profile tab strip in `UserProfileClient.tsx` uses `border-brand` for its active underline. A 3px brand bar was tried in the sidebars and removed: the existing animated active container is already the state, and the bar added a second chromatic element to every page. `PageTabs` has an `underline` variant no caller sets — dormant, not visible.
-3. Progress fills → the learner side starts to feel branded.
-4. Primary buttons → needs the one-filled-primary-per-view audit first.
-5. Selection tint → optional polish.
+3. ✅ **Done.** Every progress fill reads `bg-brand`: course cover bar, course-end bar, trail card and trail row, activity indicators, podcast player, episode player/card, episode design options, assignment task progress, onboarding bar.
+4. ✅ **Done.** Primary buttons read the token: the shared `Button` (`primary` + `default`), `IconButton` primary, the 33 hand-written CTAs, the 15 save strips, every `bg-primary` CTA in the dashboard (boards, playgrounds, assignments, course migrate, SCORM, activity-create modals, roles/user-groups modals, onboarding), and the selection fills (active filter chips, active page numbers, selected member rows). Checkboxes, switches, status dots and media controls were left ink/semantic on purpose.
+5. Selection tint → optional polish. `--brand-soft` is emitted but no surface consumes it yet.
 6. Charts → after the grey-ramp vs brand-ramp decision.
 
 **Not themed, on purpose:** sidebar and header surfaces, links, focus rings, checkboxes and switches, status badges, destructive/success/warning, video player chrome, certificate artwork.

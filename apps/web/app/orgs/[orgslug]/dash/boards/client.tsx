@@ -85,7 +85,7 @@ function CreateBoardForm({ onCreated, orgId, accessToken }: {
         <button
           type="submit"
           disabled={!name.trim()}
-          className="rounded-lg bg-primary px-5 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50 hover:bg-primary/90 transition-colors"
+          className="rounded-lg bg-brand px-5 py-2 text-sm font-medium text-brand-fg disabled:opacity-50 hover:bg-brand-hover transition-colors"
         >
           {t('boards.create_board')}
         </button>
@@ -439,7 +439,7 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
                       onClick={() => goToPage(page as number)}
                       className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                         currentPage === page
-                          ? 'bg-primary text-primary-foreground'
+                          ? 'bg-brand text-brand-fg'
                           : 'bg-white text-gray-600 nice-shadow hover:bg-gray-50'
                       }`}
                     >

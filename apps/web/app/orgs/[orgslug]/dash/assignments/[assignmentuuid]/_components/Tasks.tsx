@@ -59,7 +59,7 @@ function AssignmentTasks({ assignment_uuid }: any) {
                         dialogTrigger={
                             <button
                                 type='button'
-                                className='group flex items-center justify-center gap-1.5 w-full px-3 py-2.5 bg-primary text-primary-foreground text-xs font-semibold rounded-lg hover:bg-primary/90 transition-colors'
+                                className='group flex items-center justify-center gap-1.5 w-full px-3 py-2.5 bg-brand text-brand-fg text-xs font-semibold rounded-lg hover:bg-brand-hover transition-colors'
                             >
                                 <Plus size={14} className='transition-transform group-hover:scale-110' />
                                 <span>{t('dashboard.assignments.editor.add_task')}</span>
@@ -103,7 +103,7 @@ function AssignmentTasks({ assignment_uuid }: any) {
                             {/* Accent bar when selected */}
                             <span
                                 className={`absolute start-0 top-0 bottom-0 w-[3px] transition-colors
-                                    ${isSelected ? 'bg-primary' : 'bg-transparent'}
+                                    ${isSelected ? 'bg-brand' : 'bg-transparent'}
                                 `}
                                 aria-hidden
                             />

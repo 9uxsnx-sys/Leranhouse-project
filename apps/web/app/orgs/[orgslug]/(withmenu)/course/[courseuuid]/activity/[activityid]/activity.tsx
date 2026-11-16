@@ -414,7 +414,7 @@ function ActivityClient(props: ActivityClientProps) {
             {!isAuthenticated && (
               <Link
                 href={getUriWithOrg(orgslug, '/login')}
-                className="inline-flex items-center justify-center px-4 py-2 bg-zinc-800 text-white rounded-lg text-sm font-semibold hover:bg-zinc-700 transition-colors"
+                className="inline-flex items-center justify-center px-4 py-2 bg-brand text-brand-fg rounded-lg text-sm font-semibold hover:bg-brand-hover transition-colors"
               >
                 {t('auth.sign_in', 'Sign in')}
               </Link>
@@ -853,7 +853,7 @@ function ActivityClient(props: ActivityClientProps) {
                                   </div>
                                   <button
                                     onClick={() => navigateToActivity(nextActivity)}
-                                    className="flex items-center gap-1.5 text-xs font-semibold text-white bg-zinc-800 px-3 py-2 rounded-lg hover:bg-zinc-700 transition-colors cursor-pointer"
+                                    className="flex items-center gap-1.5 text-xs font-semibold text-brand-fg bg-brand px-3 py-2 rounded-lg hover:bg-brand-hover transition-colors cursor-pointer"
                                   >
                                     {t('activities.continue', 'Continue')}
                                     <ChevronRight size={14} />
@@ -1873,7 +1873,7 @@ function AssignmentTools(props: {
                             <button
                               type="button"
                               disabled={isRetrying}
-                              className="mt-3 w-full inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-white text-sm font-semibold transition-colors"
+                              className="mt-3 w-full inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg bg-brand hover:bg-brand-hover disabled:opacity-50 text-brand-fg text-sm font-semibold transition-colors"
                             >
                               <RotateCcw size={14} />
                               {t('assignments.retry_assignment')}

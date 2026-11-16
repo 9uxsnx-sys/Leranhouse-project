@@ -431,7 +431,7 @@ function ActivityIndicators(props: Props) {
           </div>
           <div className="w-full bg-zinc-200/80 rounded-full h-[6px] overflow-hidden">
             <div
-              className="h-full bg-teal-500 rounded-full transition-all duration-300"
+              className="h-full bg-brand rounded-full transition-all duration-300"
               style={{ width: `${progressPercent}%` }}
             />
           </div>

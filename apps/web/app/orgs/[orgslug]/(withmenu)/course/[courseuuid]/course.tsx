@@ -503,7 +503,7 @@ const CourseClient = (props: any) => {
                         <span className="text-sm text-gray-500">{completedSteps}/{totalSteps}</span>
                       </div>
                       <div className="w-full h-1.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
-                        <div className="h-full bg-black rounded-full transition-all" style={{ width: `${progressPercent}%` }} />
+                        <div className="h-full bg-brand rounded-full transition-all" style={{ width: `${progressPercent}%` }} />
                       </div>
                       <Link href={getUriWithOrg(orgslug, `/course/${courseuuid}/lesson-preview`)} className="block w-full mt-4">
                         <Button variant="primary" size="large" className="w-full">

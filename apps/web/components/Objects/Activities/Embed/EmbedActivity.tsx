@@ -108,7 +108,7 @@ function EmbedActivity({ activity, editable = false, style }: EmbedActivityProps
           <button
             onClick={handleSaveUrl}
             disabled={saving || editUrl.trim() === embedUrl}
-            className="inline-flex items-center gap-2 h-9 px-4 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 flex-shrink-0"
+            className="inline-flex items-center gap-2 h-9 px-4 text-sm font-medium text-brand-fg bg-brand rounded-lg hover:bg-brand-hover transition-colors disabled:opacity-50 flex-shrink-0"
           >
             {saving ? (
               <SpinnerGap size={16} className="animate-spin" />

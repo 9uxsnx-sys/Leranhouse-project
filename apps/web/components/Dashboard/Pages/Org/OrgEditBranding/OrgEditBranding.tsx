@@ -177,10 +177,10 @@ export default function OrgEditBranding() {
             disabled={isActiveSaving}
             className={`inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors ${
               isActiveSaving
-                ? 'bg-zinc-800 text-white border-zinc-800 opacity-50 cursor-not-allowed'
+                ? 'bg-brand text-brand-fg border-brand opacity-50 cursor-not-allowed'
                 : isSaved
                   ? 'bg-white text-gray-600 border-gray-200 cursor-default'
-                  : 'bg-zinc-800 text-white border-zinc-800 hover:bg-zinc-700 cursor-pointer'
+                  : 'bg-brand text-brand-fg border-brand hover:bg-brand-hover cursor-pointer'
             }`}
           >
             {isActiveSaving ? (

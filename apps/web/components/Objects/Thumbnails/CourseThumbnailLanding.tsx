@@ -197,7 +197,7 @@ const CourseThumbnailLanding: React.FC<PropsType> = ({ course, orgslug, customLi
         <Link 
           prefetch 
           href={customLink ? customLink : getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}
-          className="inline-flex items-center justify-center w-full px-3 py-1.5 bg-zinc-800 text-white text-xs font-medium rounded-lg hover:bg-zinc-700 transition-colors"
+          className="inline-flex items-center justify-center w-full px-3 py-1.5 bg-brand text-brand-fg text-xs font-medium rounded-lg hover:bg-brand-hover transition-colors"
         >
           {t('courses.start_learning')}
         </Link>

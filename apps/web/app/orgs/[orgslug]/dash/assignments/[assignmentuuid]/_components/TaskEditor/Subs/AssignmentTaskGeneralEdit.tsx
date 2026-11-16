@@ -222,7 +222,7 @@ function UpdateTaskRef() {
                                     href={getTaskRefDirUI()}
                                     download
                                     target='_blank'
-                                    className='bg-zinc-800 text-white px-3 py-1 rounded-full text-xs font-semibold'>{t('dashboard.assignments.editor.task_editor.general.download')}</Link>
+                                    className='bg-brand text-brand-fg px-3 py-1 rounded-full text-xs font-semibold'>{t('dashboard.assignments.editor.task_editor.general.download')}</Link>
                                 {/** <button onClick={() => deleteReferenceFile()}
                                     className='bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold'>Delete</button> */}
                             </div>

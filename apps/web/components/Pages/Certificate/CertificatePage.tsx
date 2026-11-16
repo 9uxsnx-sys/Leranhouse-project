@@ -345,7 +345,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
             <p className="text-red-600 mb-4">{error}</p>
             <Link
               href={getUriWithOrg(orgslug, '') + `/course/${courseid}`}
-              className="inline-flex items-center space-x-2 bg-zinc-800 text-white px-6 py-3 rounded-full hover:bg-zinc-700 transition duration-200"
+              className="inline-flex items-center space-x-2 bg-brand text-brand-fg px-6 py-3 rounded-full hover:bg-brand-hover transition duration-200"
             >
               <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
               <span>{t('certificate.back_to_course')}</span>
@@ -367,7 +367,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
             </p>
             <Link
               href={getUriWithOrg(orgslug, '') + `/course/${courseid}`}
-              className="inline-flex items-center space-x-2 bg-zinc-800 text-white px-6 py-3 rounded-full hover:bg-zinc-700 transition duration-200"
+              className="inline-flex items-center space-x-2 bg-brand text-brand-fg px-6 py-3 rounded-full hover:bg-brand-hover transition duration-200"
             >
               <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
               <span>{t('certificate.back_to_course')}</span>

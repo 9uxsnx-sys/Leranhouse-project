@@ -497,7 +497,7 @@ function SearchPage() {
           </div>
           <button
             type="submit"
-            className="absolute inset-y-2 end-2 px-4 rounded-lg bg-zinc-800 text-white text-xs font-semibold hover:bg-zinc-700 transition-colors"
+            className="absolute inset-y-2 end-2 px-4 rounded-lg bg-brand text-brand-fg text-xs font-semibold hover:bg-brand-hover transition-colors"
           >
             {t('common.search')}
           </button>
@@ -602,13 +602,13 @@ function TabButton({
       onClick={onClick}
       className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
         active
-          ? 'bg-zinc-800 text-white'
+          ? 'bg-brand text-brand-fg'
           : 'bg-black/5 text-black/70 hover:bg-black/10'
       }`}
     >
       <Icon size={14} />
       {label}
-      <span className={active ? 'text-white/70' : 'text-black/40'}>{count}</span>
+      <span className={active ? 'text-brand-fg opacity-70' : 'text-black/40'}>{count}</span>
     </button>
   )
 }
@@ -767,7 +767,7 @@ function Pagination({
             onClick={() => onChange(p)}
             className={`w-8 h-8 rounded-md text-xs font-medium transition-colors ${
               p === page
-                ? 'bg-zinc-800 text-white'
+                ? 'bg-brand text-brand-fg'
                 : 'text-black/60 hover:bg-black/5'
             }`}
             aria-current={p === page ? 'page' : undefined}

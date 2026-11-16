@@ -279,7 +279,7 @@ const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) =>
         <div className="flex justify-end space-x-2 pt-2">
           <button
             type="submit"
-            className="px-4 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-medium rounded-full transition-colors duration-150"
+            className="px-4 py-1.5 bg-brand hover:bg-brand-hover text-brand-fg text-xs font-medium rounded-full transition-colors duration-150"
           >
             {t('courses.publish_update')}
           </button>

@@ -18,7 +18,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          "text-ui-contrast-fg-primary bg-ui-button-inverted hover:bg-ui-button-inverted-hover active:bg-ui-button-inverted-pressed",
+          "text-brand-fg bg-brand hover:bg-brand-hover active:bg-brand-pressed",
         secondary:
           "text-ui-fg-base bg-ui-button-neutral border border-ui-border-base hover:bg-ui-button-neutral-hover active:bg-ui-button-neutral-pressed",
         transparent:
@@ -27,7 +27,7 @@ const buttonVariants = cva(
           "text-ui-fg-on-color bg-ui-button-danger hover:bg-ui-button-danger-hover active:bg-ui-button-danger-pressed focus-visible:ring-red-500/25",
         /* shadcn aliases → same classes as the Medusa variants above */
         default:
-          "text-ui-contrast-fg-primary bg-ui-button-inverted hover:bg-ui-button-inverted-hover active:bg-ui-button-inverted-pressed",
+          "text-brand-fg bg-brand hover:bg-brand-hover active:bg-brand-pressed",
         destructive:
           "text-ui-fg-on-color bg-ui-button-danger hover:bg-ui-button-danger-hover active:bg-ui-button-danger-pressed focus-visible:ring-red-500/25",
         outline:

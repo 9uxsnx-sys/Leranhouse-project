@@ -1,4 +1,6 @@
 > Status: audit · Created: 2026-11-16 · Companion to [theme-color-plan.md](./theme-color-plan.md)
+>
+> **Implementation status (2026-11-16):** the statuses below are the original audit snapshot. Every **Ready** and **Needs work** row in sections 3 and 4 is now connected — the surface reads `bg-brand` / `text-brand-fg` / `hover:bg-brand-hover`, and `--brand` resolves on all four shells (learner, dashboard, auth, embed) plus `document.documentElement` so portalled dialogs inherit it. The two **Blocked** rows in section 5 are fixed. Still open: the **charts** decision (section 4.7), the optional **`--brand-soft` selection tint**, and everything listed under **Excluded** (unchanged by design). Mobile shells remain out of scope.
 
 # Brand colour — full surface audit
 

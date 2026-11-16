@@ -741,10 +741,10 @@ function EpisodeDetailForm({
             disabled={isSaving || !title.trim() || !dirty}
             className={`inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors ${
               isSaving
-                ? 'bg-zinc-800 text-white border-zinc-800 opacity-50 cursor-not-allowed'
+                ? 'bg-brand text-brand-fg border-brand opacity-50 cursor-not-allowed'
                 : !dirty
                   ? 'bg-white text-gray-600 border-gray-200 cursor-default'
-                  : 'bg-zinc-800 text-white border-zinc-800 hover:bg-zinc-700 cursor-pointer'
+                  : 'bg-brand text-brand-fg border-brand hover:bg-brand-hover cursor-pointer'
             }`}
           >
             {isSaving ? (
@@ -1017,7 +1017,7 @@ function CreateEpisodeModal({
             <button
               type="submit"
               disabled={isSubmitting || !title.trim()}
-              className="px-4 py-2 text-sm font-semibold rounded-lg bg-zinc-800 text-white hover:bg-zinc-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-4 py-2 text-sm font-semibold rounded-lg bg-brand text-brand-fg hover:bg-brand-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
               {t('podcasts.dashboard.episodes.create')}

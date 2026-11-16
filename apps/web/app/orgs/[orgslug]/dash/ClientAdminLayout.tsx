@@ -11,7 +11,7 @@ import { DashboardBreadcrumbProvider } from '@components/Objects/Breadcrumbs/Das
 import CommandPalette from '@components/Dashboard/CommandPalette/CommandPalette'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getBrandStyle } from '@services/utils/ts/colorUtils'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useMediaQuery } from 'usehooks-ts';
 
 function ClientAdminLayout({
@@ -27,6 +27,18 @@ function ClientAdminLayout({
     const org = useOrg() as any
     const orgConfig = org?.config?.config
     const brandColor = orgConfig?.customization?.general?.color || orgConfig?.general?.color || ''
+
+    // Dialogs and popovers portal to <body>, outside the wrapper below, so the
+    // brand variables are also published on the root element. Without this the
+    // primary action inside a modal would silently fall back to ink.
+    useEffect(() => {
+        const vars = getBrandStyle(brandColor)
+        const root = document.documentElement
+        Object.entries(vars).forEach(([key, value]) => root.style.setProperty(key, value))
+        return () => {
+            Object.keys(vars).forEach((key) => root.style.removeProperty(key))
+        }
+    }, [brandColor])
 
     return (
         <SessionGate>

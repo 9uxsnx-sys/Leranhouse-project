@@ -938,7 +938,7 @@ export default function BoardCanvas({ board, accessToken, orgslug, username, org
           <p className="text-xs text-neutral-400">You may not have access, or the session has expired.</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-2 rounded-lg bg-primary px-4 py-2 text-xs font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+            className="mt-2 rounded-lg bg-brand px-4 py-2 text-xs font-medium text-brand-fg hover:bg-brand-hover transition-colors"
           >
             Retry
           </button>

@@ -89,7 +89,7 @@ function PaidCourseActivityDisclaimer({ course }: PaidCourseActivityProps) {
         <button
           onClick={handleGetAccess}
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-zinc-800 text-white font-semibold hover:bg-zinc-700 transition-colors disabled:opacity-60"
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-brand text-brand-fg font-semibold hover:bg-brand-hover transition-colors disabled:opacity-60"
         >
           {isLoading ? (
             <Loader2 size={16} className="animate-spin" />

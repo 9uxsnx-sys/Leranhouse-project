@@ -154,7 +154,7 @@ export default function PodcastPlayer() {
               >
                 <div className="relative w-full h-[5px] bg-ui-border-base rounded-full overflow-hidden">
                   <div
-                    className="absolute inset-y-0 left-0 bg-ui-fg-base rounded-full transition-none"
+                    className="absolute inset-y-0 left-0 bg-brand rounded-full transition-none"
                     style={{ width: `${progressPercent}%` }}
                   />
                   <div className="absolute inset-0 -top-2 -bottom-2 group-hover:-top-3 group-hover:-bottom-3 transition-all" />

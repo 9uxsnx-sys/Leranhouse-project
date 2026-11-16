@@ -313,7 +313,7 @@ function AddBoardMember({ boardUuid, orgId, accessToken, setModalOpen, membersKe
             onClick={() => setActiveGroup(null)}
             className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-colors ${
               activeGroup === null
-                ? 'bg-primary text-white'
+                ? 'bg-brand text-brand-fg'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
@@ -325,7 +325,7 @@ function AddBoardMember({ boardUuid, orgId, accessToken, setModalOpen, membersKe
               onClick={() => setActiveGroup(g.usergroup_uuid === activeGroup ? null : g.usergroup_uuid)}
               className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-colors ${
                 activeGroup === g.usergroup_uuid
-                  ? 'bg-primary text-white'
+                  ? 'bg-brand text-brand-fg'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
@@ -374,7 +374,7 @@ function AddBoardMember({ boardUuid, orgId, accessToken, setModalOpen, membersKe
                     key={u.id}
                     onClick={() => toggleUser(u.id)}
                     className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                      isSelected ? 'bg-primary' : 'hover:bg-gray-50'
+                      isSelected ? 'bg-brand' : 'hover:bg-gray-50'
                     }`}
                   >
                     <input
@@ -393,11 +393,11 @@ function AddBoardMember({ boardUuid, orgId, accessToken, setModalOpen, membersKe
                     />
                     <div className="flex flex-col min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className={`font-semibold text-sm truncate ${isSelected ? 'text-white' : 'text-gray-800'}`}>
+                        <span className={`font-semibold text-sm truncate ${isSelected ? 'text-brand-fg' : 'text-gray-800'}`}>
                           {getUserDisplayName(u)}
                         </span>
                         <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
-                          isSelected ? 'bg-primary/80 text-white' : 'bg-gray-100 text-gray-500'
+                          isSelected ? 'bg-white/20 text-brand-fg' : 'bg-gray-100 text-gray-500'
                         }`}>
                           @{u.username}
                         </span>
@@ -408,7 +408,7 @@ function AddBoardMember({ boardUuid, orgId, accessToken, setModalOpen, membersKe
                         </span>
                       )}
                     </div>
-                    {isSelected && <Check className="w-4 h-4 text-white shrink-0" />}
+                    {isSelected && <Check className="w-4 h-4 text-brand-fg shrink-0" />}
                   </button>
                 )
               })}
@@ -459,7 +459,7 @@ function AddBoardMember({ boardUuid, orgId, accessToken, setModalOpen, membersKe
         <button
           onClick={handleAdd}
           disabled={selectedUserIds.size === 0 || isAdding}
-          className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-semibold px-5 py-2 rounded-lg text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary/90 transition-all"
+          className="inline-flex items-center gap-2 bg-brand text-brand-fg font-semibold px-5 py-2 rounded-lg text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-brand-hover transition-all"
         >
           <UserPlus className="w-4 h-4" />
           {isAdding

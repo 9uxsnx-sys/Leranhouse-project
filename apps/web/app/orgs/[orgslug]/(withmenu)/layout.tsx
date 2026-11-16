@@ -10,10 +10,23 @@ import { UserBreadcrumbProvider } from '@components/Objects/Breadcrumbs/UserBrea
 
 import { PageViewTracker } from '@components/Analytics/PageViewTracker'
 import { getGoogleFontUrl, DEFAULT_FONT } from '@/lib/fonts'
+import { getBrandStyle } from '@services/utils/ts/colorUtils'
 
 function LayoutContent({ children, orgslug }: { children: React.ReactNode; orgslug: string }) {
   const org = useOrg() as any
   const customFont = org?.config?.config?.customization?.general?.font || org?.config?.config?.general?.font || ''
+  const brandColor = org?.config?.config?.customization?.general?.color || org?.config?.config?.general?.color || ''
+
+  // Portalled dialogs/popovers live outside the shell wrapper, so the brand
+  // variables are mirrored on the root element as well.
+  useEffect(() => {
+    const vars = getBrandStyle(brandColor)
+    const root = document.documentElement
+    Object.entries(vars).forEach(([key, value]) => root.style.setProperty(key, value))
+    return () => {
+      Object.keys(vars).forEach((key) => root.style.removeProperty(key))
+    }
+  }, [brandColor])
 
   // Inject Google Font stylesheet into document head
   useEffect(() => {

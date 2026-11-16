@@ -350,7 +350,7 @@ function AccessTab({
                 />
               }
               dialogTrigger={
-                <button className="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-black nice-shadow transition-all">
+                <button className="flex items-center gap-1.5 h-8 px-3 rounded-lg bg-brand text-brand-fg hover:bg-brand-hover text-xs font-black nice-shadow transition-all">
                   <Plus size={12} weight="bold" />
                   {t('playground.options.access.add_group')}
                 </button>

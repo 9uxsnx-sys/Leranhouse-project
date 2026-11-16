@@ -271,7 +271,7 @@ export function DiscussionList({
                 {canCreateDiscussion && onCreateClick && (
                   <button
                     onClick={onCreateClick}
-                    className="rounded-lg bg-primary transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-primary-foreground nice-shadow flex space-x-2 items-center hover:bg-primary/90 hover:scale-105"
+                    className="rounded-lg bg-brand transition-all duration-100 ease-linear antialiased p-2 px-5 my-auto font text-xs font-bold text-brand-fg nice-shadow flex space-x-2 items-center hover:bg-brand-hover hover:scale-105"
                   >
                     <div>{t('communities.discussion_list.start_discussion')} </div>
                     <div className="text-md bg-white/20 px-1 rounded-full">+</div>
