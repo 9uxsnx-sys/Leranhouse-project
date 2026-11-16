@@ -71,23 +71,27 @@ function withAlpha(hex: string, alpha: number): string {
 }
 
 /**
- * The first series colour. A very light brand is deepened so the stroke keeps
- * roughly 3:1 against a white card; a normal brand is used untouched.
+ * Luminance above which a brand is too pale to read as a chart fill on white.
+ * Deliberately far above the 0.4 text threshold: a saturated mango orange is
+ * light enough to need dark text but must still be drawn at full strength —
+ * darkening it is what turns orange into brown.
  */
+const NEAR_WHITE = 0.82
+
+/** The first series colour. The brand is used exactly, except for near-white. */
 export function chartPrimary(brand: string): string {
-  return isLightColor(brand) ? blend(brand, BLACK, 0.28) : brand
+  return isLightColor(brand, NEAR_WHITE) ? blend(brand, BLACK, 0.45) : brand
 }
 
 /**
- * Categorical ramp: one hue, five steps. Dark brands step toward white, light
- * brands step toward black, so the steps stay distinct on a white card either
- * way — and they still read as one colour family, never a rainbow.
+ * Categorical ramp: one hue, five steps, all derived by mixing toward white so
+ * every step stays in the brand's own family. Lightening only — mixing toward
+ * black would take a saturated hue through brown.
  */
 export function buildBrandRamp(brand: string): string[] {
   const base = chartPrimary(brand)
-  const target = isLightColor(brand) ? BLACK : WHITE
-  return [0, 0.22, 0.4, 0.56, 0.7].map((amount) =>
-    amount === 0 ? base : blend(base, target, amount)
+  return [0, 0.18, 0.34, 0.5, 0.64].map((amount) =>
+    amount === 0 ? base : blend(base, WHITE, amount)
   )
 }
 

@@ -97,11 +97,12 @@ Add the matching utilities to `styles/globals.css`: `bg-brand`, `text-brand-fg`,
 | 5 | Charts | `components/Analytics/chartTheme.ts` + every recharts consumer | **Brand ramp.** One hue, five steps, derived from the org hex |
 | 6 | Progress rings | SVG circles in the trail card, episode list and community card | `stroke: var(--brand)` — same signal as the progress bars |
 
-**Charts use the brand ramp.** `useChartTheme()` derives everything from the org hex: `primary` is the brand (deepened when the brand is very light, so a stroke keeps ~3:1 on a white card), `categorical` is a five-step ramp of that same hue, and `positive` / `negative` stay emerald / rose because they carry meaning. Grid and axis stay neutral.
+**Charts use the brand ramp.** `useChartTheme()` derives everything from the org hex: `primary` is the brand **exactly as configured**, and `categorical` is a five-step ramp made by mixing that hue toward white only. `positive` / `negative` stay emerald / rose because they carry meaning, and grid / axis stay neutral.
 
-Two details worth keeping in mind:
+Two rules that are easy to get wrong:
 
-- The brand is read from the org context, not from `--brand` on `document.documentElement`. Child effects run before the shell's, so reading the custom property would capture the ink fallback on first paint and never update.
+- **Never mix a chart colour toward black.** That is what turned a mango orange brand into brown. The only exception is a near-white brand (luminance above 0.82), which is deepened because it would otherwise vanish on a white card. The 0.4 luminance threshold used for *text* contrast is not the right test for a *fill* — a saturated orange needs dark text but must still be drawn at full strength.
+- **Read the brand from the org context, not from `--brand` on `document.documentElement`.** Child effects run before the shell's, so reading the custom property would capture the ink fallback on first paint and never update.
 - Recharts renders SVG presentation attributes, where CSS `var()` does not resolve, so the ramp is computed in JS and handed over as real hex strings. Raw SVG progress rings are the exception — they use `style={{ stroke: 'var(--brand)' }}`, which does resolve.
 
 **Order of work** — each step ships on its own:

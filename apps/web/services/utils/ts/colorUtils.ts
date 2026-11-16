@@ -22,11 +22,18 @@ function relativeLuminance(r: number, g: number, b: number): number {
   return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs
 }
 
-/** Returns true when the background is light enough to need dark text */
-export function isLightColor(hex: string): boolean {
+/**
+ * Returns true when the background is light enough to need dark text.
+ *
+ * The threshold defaults to 0.4 (text contrast). Callers that only care about
+ * "so light it disappears on white" can pass a higher one — a saturated mango
+ * orange is a light *text* background but must never be treated as a
+ * near-white fill.
+ */
+export function isLightColor(hex: string, threshold = 0.4): boolean {
   const rgb = hexToRgb(hex)
   if (!rgb) return false
-  return relativeLuminance(rgb.r, rgb.g, rgb.b) > 0.4
+  return relativeLuminance(rgb.r, rgb.g, rgb.b) > threshold
 }
 
 /** Ink — the signal colour used when an organization has not set one. */

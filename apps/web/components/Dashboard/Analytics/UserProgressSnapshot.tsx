@@ -19,8 +19,8 @@ const BRACKETS = ['0%', '1-25%', '26-50%', '51-75%', '76-100%']
 export default function UserProgressSnapshot({ days = '90' }: { days?: string }) {
   const { t } = useTranslation()
   const chart = useChartTheme()
-  // 0% stays neutral; the other brackets step from light to dark brand, so a
-  // fuller progress bracket always reads stronger than an empty one.
+  // 0% stays neutral; the other brackets run from a pale brand tint up to the
+  // brand itself, so a fuller bracket always reads stronger than an empty one.
   const bracketColors = ['#e5e7eb', ...chart.categorical.slice(1).reverse()]
   const { data, isLoading } = useAnalyticsPipe('user_progress_snapshot', { days })
   const rows: any[] = data?.data ?? []
