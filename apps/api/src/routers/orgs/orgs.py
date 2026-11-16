@@ -586,6 +586,8 @@ async def api_update_org_color_config(
     org_id: int,
     color: str = "",
     brand_fg: str = "",
+    brand_sidebar: bool = False,
+    brand_hover: str = "",
     current_user: PublicUser = Depends(get_current_user),
     db_session: Session = Depends(get_db_session),
 ):
@@ -593,7 +595,14 @@ async def api_update_org_color_config(
     Update organization color configuration
     """
     return await update_org_color_config(
-        request, color, org_id, current_user, db_session, brand_fg=brand_fg
+        request,
+        color,
+        org_id,
+        current_user,
+        db_session,
+        brand_fg=brand_fg,
+        brand_sidebar=brand_sidebar,
+        brand_hover=brand_hover,
     )
 
 

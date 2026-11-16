@@ -1066,6 +1066,8 @@ async def update_org_color_config(
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
     brand_fg: str = "",
+    brand_sidebar: bool = False,
+    brand_hover: str = "",
 ):
     statement = select(Organization).where(Organization.id == org_id)
     org = db_session.exec(statement).first()
@@ -1087,10 +1089,14 @@ async def update_org_color_config(
         updated_config.setdefault("customization", {}).setdefault("general", {})
         updated_config["customization"]["general"]["color"] = color
         updated_config["customization"]["general"]["brand_fg"] = brand_fg
+        updated_config["customization"]["general"]["brand_sidebar"] = brand_sidebar
+        updated_config["customization"]["general"]["brand_hover"] = brand_hover
     else:
         updated_config.setdefault("general", {"enabled": True, "color": "", "watermark": True})
         updated_config["general"]["color"] = color
         updated_config["general"]["brand_fg"] = brand_fg
+        updated_config["general"]["brand_sidebar"] = brand_sidebar
+        updated_config["general"]["brand_hover"] = brand_hover
 
     org_config.config = updated_config
     org_config.update_date = str(datetime.now())
@@ -1098,6 +1104,9 @@ async def update_org_color_config(
     db_session.add(org_config)
     db_session.commit()
     db_session.refresh(org_config)
+
+    from src.services.orgs.cache import invalidate_org_cache
+    invalidate_org_cache(org.slug)
 
     return {"detail": "Color configuration updated"}
 
@@ -1352,6 +1361,42 @@ async def upload_org_auth_background_service(
 
     # Upload background
     name_in_disk = await upload_org_auth_background(background_file, org.org_uuid)
+
+    # Persist immediately, like the logo and favicon uploads: the auth shell
+    # reads background_type + background_image straight from the config.
+    statement = select(OrganizationConfig).where(OrganizationConfig.org_id == org.id)
+    org_config = db_session.exec(statement).first()
+
+    if org_config is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Organization config not found",
+        )
+
+    updated_config = _deep_copy_config(org_config)
+
+    if _is_v2_config(updated_config):
+        branding = updated_config.setdefault("customization", {}).setdefault("auth_branding", {})
+        branding["background_image"] = name_in_disk
+        branding["background_type"] = "custom"
+    else:
+        general = updated_config.setdefault(
+            "general",
+            {"enabled": True, "color": "", "footer_text": "", "watermark": True, "auth_branding": {}},
+        )
+        branding = general.setdefault("auth_branding", {})
+        branding["background_image"] = name_in_disk
+        branding["background_type"] = "custom"
+
+    org_config.config = updated_config
+    org_config.update_date = str(datetime.now())
+
+    db_session.add(org_config)
+    db_session.commit()
+    db_session.refresh(org_config)
+
+    from src.services.orgs.cache import invalidate_org_cache
+    invalidate_org_cache(org.slug)
 
     return {
         "detail": "Auth background uploaded successfully",

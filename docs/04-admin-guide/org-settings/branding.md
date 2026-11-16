@@ -11,10 +11,10 @@ The page is built from a top **Action Row** followed by three stacked section ca
 | Card | Controls |
 |------|----------|
 | **Logo & Favicon** | Logo, Favicon, Logomark, Thumbnail uploads |
-| **Theme** | The organization's Primary Color, and the text/icon colour used on it |
-| **Auth** | The sign-in / sign-up page background and welcome message |
+| **Theme** | The organization's Primary Color, its hover fill, and the text/icon colour used on it |
+| **Auth** | The image shown behind the sign-in / sign-up form |
 
-> **Note:** Image uploads (Logo, Favicon, Logomark, Thumbnail) save **immediately** on upload. The Theme and Auth cards are saved with the **Save** button in the Action Row.
+> **Note:** Every media upload (Logo, Favicon, Logomark, Thumbnail, Auth image) saves **immediately** on upload. Only the Theme card uses the **Save** button in the Action Row.
 
 ---
 
@@ -66,7 +66,7 @@ Supported formats for all four fields: `.png`, `.jpg`, `.svg`.
 
 ## Theme
 
-The Theme card is the brand accent system. One hex becomes the colour of filled primary buttons, progress fills, chart series and the active tab underline. It has two rows.
+The Theme card is the brand accent system. One hex becomes the colour of filled primary buttons, progress fills, chart series and the active tab underline. It has three rows.
 
 ### Primary Color
 
@@ -80,9 +80,19 @@ The row contains:
 
 > **Note:** There is no native OS color-picker dialog. Enter the hex value directly in the field. The preview square reflects the value live.
 
+### Hover Color
+
+The row directly below Primary Color sets the fill brand-connected buttons switch to when hovered or pressed.
+
+- **Empty (Auto)** — the primary colour is darkened automatically. The step depends on the label: 14% then 26% toward black when the label is white, a gentler 6% / 12% when it is dark, so the label keeps its contrast.
+- **Any hex** — used verbatim as the hover fill. The pressed state then takes one further 12% step in the same direction, so a lighter hover produces a lighter pressed state rather than jumping to an unrelated dark shade.
+- The **`Aa` preview square** shows the hover fill with the resolved label colour on top.
+- The row prints the hover **WCAG contrast ratio** against the label and turns amber below 4.5:1. Informational only — it never blocks saving.
+- The **clear (×)** button returns the row to Auto.
+
 ### Text & Icons
 
-The second row controls the foreground painted on top of the brand colour — the labels **and** icons inside every brand-connected button.
+The third row controls the foreground painted on top of the brand colour — the labels **and** icons inside every brand-connected button.
 
 - **Empty (Auto)** — the platform chooses black or white from the primary colour. This is the default.
 - **Any hex** — used verbatim. `#ffffff`, `ffffff` and `fff` are all accepted.
@@ -92,55 +102,46 @@ The second row controls the foreground painted on top of the brand colour — th
 
 Because icons inherit `currentColor`, one value covers both the text and the icons.
 
-Changing either row marks the Action Row as having unsaved changes — click **Save** to apply.
+Where the brand foreground applies today: primary buttons across the dashboard and learner pages, the submit button on the sign-in, sign-up, forgot-password, reset-password and email-verification pages, progress fills, chart series and the active-tab underline. On the auth pages the **Continue with Google** and **SSO** buttons and the text links stay neutral on purpose, so each screen keeps exactly one filled action.
+
+### Brand the active sidebar tab
+
+A switch below the Text & Icons row controls the floating pill behind the selected tab in the dashboard, learner and account sidebars.
+
+| State | Result |
+|-------|--------|
+| **Off** (default) | The tab stays a neutral white surface with ink text — the original look |
+| **On** | The pill fills with the primary colour and its label and icon switch to the Text & Icons foreground |
+
+It is off by default so no existing organization changes appearance. Turning it on makes the sidebar the largest brand surface in the product, so check it against your charts before committing to it.
+
+Changing any of the Theme rows marks the Action Row as having unsaved changes — click **Save** to apply.
 
 ---
 
 ## Auth Page Branding
 
-The Auth card customizes the **sign-in / sign-up experience**. It has a settings panel on the left and a live **preview** on the right (a 4:3 mock showing the branded panel beside a form mock).
+The Auth card holds a single upload row for the image shown beside the sign-in and sign-up form. It follows the same pattern as the Logo and Favicon rows above it:
 
-### Welcome Message
+- **No image** → an **Upload** (cloud) icon opens the file picker.
+- **Image present** → a thumbnail replaces the icon, and the **Trash** icon opens the picker to replace it.
+- Accepted formats: `.png`, `.jpg`, `.webp`, up to **8 MB**. A wrong format or an oversized file is rejected with a toast and nothing is uploaded.
+- While uploading, a spinner replaces the action and a toast reports progress, then success or failure. If the upload fails, the previous state is restored and the error is reported.
 
-- A short message shown on the auth page (max **200 characters**).
-- Leave empty to hide it.
+**The upload saves immediately — there is no Save button on this card.** The backend writes `background_type: "custom"` and the stored file name into the organization config, so the change is live on the next render.
 
-### Background Type
+When no image is set, the auth page keeps its default dark gradient. Once an image is set, it replaces that gradient on the left panel of the login and signup pages: the image is rendered **as an image** in its own column, next to the white form card — no background-image trick and **no dark overlay or tint**, so the artwork keeps its real colours. On small screens the same image becomes a banner above the form.
 
-Choose one of three background modes:
-
-| Option | Behavior |
-|--------|----------|
-| **Gradient** | The default dark gradient (`#202020 → #000000`). No image. |
-| **Custom** | Upload your own background image (`.png`, `.jpg`, `.webp`). |
-| **Unsplash** | Pick a photo from the built-in Unsplash picker. Photographer credit metadata is stored with the selection. |
-
-All non-gradient backgrounds render behind a `black/30` overlay to keep text legible.
-
-### Text Color
-
-Controls the color of the text overlaid on the background:
-
-- **Light** — white text (use for dark/photographic backgrounds).
-- **Dark** — near-black text (use for light backgrounds).
-
-### Preview Panel
-
-The right-hand panel is a **live mock preview** — it reflects the selected background, text color, welcome message, and your current logo as you change them. It is a design aid only; it does not publish anything.
-
-### Saving Auth Branding
-
-Unlike the uploads, the Auth card is **not** auto-saved. Click **Save** below the settings panel to persist the welcome message, background, and text color. The background image upload itself is stored when selected, but the configuration is written on Save.
+The panel is filled edge to edge (`object-fit: cover`), so use a landscape image with the subject near the centre — anything near the edges may be cropped on tall or narrow viewports.
 
 ---
 
 ## Best Practices
 
-- **Test contrast** — ensure the chosen Text Color is legible over your background (photos vary; the `black/30` overlay helps but is not a guarantee).
 - **Use SVG where possible** — logos and logomarks stay crisp on high-DPI displays.
 - **Keep the primary color brand-consistent** — the same accent should flow through your logo, buttons, and progress.
 - **Prefer Auto for Text & Icons** — only pin a colour when the automatic choice is not what you want (for example a mid-tone brand that reads better with white). Keep the ratio at or above 4.5:1 when you do.
-- **Preview on mobile** — the auth layout stacks vertically on small screens; check that the background still reads well.
+- **Preview on mobile** — the auth layout stacks vertically on small screens; check that the image still reads well as a banner above the form.
 
 ## Related Sections
 

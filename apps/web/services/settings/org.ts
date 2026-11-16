@@ -84,10 +84,12 @@ export async function updateOrgColorConfig(
   org_id: string,
   color: string,
   access_token: string,
-  brand_fg: string = ''
+  brand_fg: string = '',
+  brand_sidebar: boolean = false,
+  brand_hover: string = ''
 ) {
   const result: any = await fetch(
-    `${getAPIUrl()}orgs/${org_id}/config/color?color=${encodeURIComponent(color)}&brand_fg=${encodeURIComponent(brand_fg)}`,
+    `${getAPIUrl()}orgs/${org_id}/config/color?color=${encodeURIComponent(color)}&brand_fg=${encodeURIComponent(brand_fg)}&brand_sidebar=${brand_sidebar}&brand_hover=${encodeURIComponent(brand_hover)}`,
     RequestBodyWithAuthHeader('PUT', null, null, access_token)
   )
   const res = await errorHandling(result)

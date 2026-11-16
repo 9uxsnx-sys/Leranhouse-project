@@ -195,8 +195,14 @@ function UserLeftMenu() {
         <div className="relative" ref={navContainerRef}>
           {/* Floating active indicator */}
           <div
-            className="absolute start-0 end-0 bg-white border border-gray-100 rounded-xl shadow-sm transition-all duration-200 ease-out pointer-events-none"
-            style={{ top: indicatorTop, height: 40, opacity: indicatorOpacity }}
+            className="absolute start-0 end-0 border rounded-xl shadow-sm transition-all duration-200 ease-out pointer-events-none"
+            style={{
+              top: indicatorTop,
+              height: 40,
+              opacity: indicatorOpacity,
+              backgroundColor: 'var(--sidebar-active-bg)',
+              borderColor: 'var(--sidebar-active-border)',
+            }}
           />
           <div className="flex flex-col">
             <div data-nav-item>
@@ -455,6 +461,7 @@ const MenuLink = ({ href, icon, label, isCollapsed, isExternal, active }: {
           : "text-ui-fg-subtle hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover",
         isCollapsed ? "justify-center h-10" : "h-10 px-4 gap-x-2.5"
       )}
+      style={active ? { color: 'var(--sidebar-active-fg)' } : undefined}
     >
       {icon}
       {!isCollapsed && (

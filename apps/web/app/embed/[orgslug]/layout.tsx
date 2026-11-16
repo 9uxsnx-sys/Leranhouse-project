@@ -17,18 +17,22 @@ function EmbedShell({ children }: { children: React.ReactNode }) {
     org?.config?.config?.customization?.general?.brand_fg ||
     org?.config?.config?.general?.brand_fg ||
     ''
+  const brandHover =
+    org?.config?.config?.customization?.general?.brand_hover ||
+    org?.config?.config?.general?.brand_hover ||
+    ''
 
   useEffect(() => {
-    const vars = getBrandStyle(brandColor, brandFg)
+    const vars = getBrandStyle(brandColor, brandFg, false, brandHover)
     const root = document.documentElement
     Object.entries(vars).forEach(([key, value]) => root.style.setProperty(key, value))
     return () => {
       Object.keys(vars).forEach((key) => root.style.removeProperty(key))
     }
-  }, [brandColor, brandFg])
+  }, [brandColor, brandFg, brandHover])
 
   return (
-    <div className="min-h-screen" style={getBrandStyle(brandColor, brandFg) as React.CSSProperties}>
+    <div className="min-h-screen" style={getBrandStyle(brandColor, brandFg, false, brandHover) as React.CSSProperties}>
       {children}
     </div>
   )

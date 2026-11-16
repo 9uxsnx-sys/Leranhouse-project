@@ -14,7 +14,7 @@ export default function AuthLayout({ org, children }: AuthLayoutProps) {
   const { t } = useTranslation()
 
   return (
-    <div className="flex flex-col lg:grid lg:grid-cols-[1.4fr_1fr] h-screen bg-gray-50">
+    <div className="flex flex-col lg:grid lg:grid-cols-[1.6fr_1fr] xl:grid-cols-[1.75fr_1fr] h-screen bg-gray-50">
       {/* Left — branding image (content intentionally omitted for now) */}
       <div className="h-[180px] lg:h-full">
         <AuthBrandingPanel org={org} />

@@ -57,8 +57,14 @@ export function AccountSidebar({ orgslug, currentSubpage }: AccountSidebarProps)
     <div className="relative" ref={containerRef}>
       {/* Floating active indicator */}
       <div
-        className="absolute left-0 right-0 bg-white border border-gray-100 rounded-xl shadow-sm transition-all duration-200 ease-out pointer-events-none"
-        style={{ top: indicatorTop, height: 40, opacity: indicatorOpacity }}
+        className="absolute left-0 right-0 border rounded-xl shadow-sm transition-all duration-200 ease-out pointer-events-none"
+        style={{
+          top: indicatorTop,
+          height: 40,
+          opacity: indicatorOpacity,
+          backgroundColor: 'var(--sidebar-active-bg)',
+          borderColor: 'var(--sidebar-active-border)',
+        }}
       />
       <nav className="flex flex-col gap-0.5">
         {NAV_ITEMS.map((item) => {
@@ -75,6 +81,7 @@ export function AccountSidebar({ orgslug, currentSubpage }: AccountSidebarProps)
                     ? "text-ui-fg-base"
                     : "text-ui-fg-subtle hover:bg-ui-bg-subtle-hover hover:text-ui-fg-base"
                 )}
+                style={isActive ? { color: 'var(--sidebar-active-fg)' } : undefined}
               >
                 <Icon className="w-[18px] h-[18px]" />
                 <span className="text-sm font-medium">{t(item.labelKey)}</span>

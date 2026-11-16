@@ -678,6 +678,12 @@
     --brand-pressed: #52525b;
     --brand-soft: rgba(39, 39, 42, 0.1);
     --brand-ring: rgba(39, 39, 42, 0.35);
+
+    /* Floating pill behind the active sidebar item. Neutral by default; an
+       organization can opt in to a brand fill from Branding → Theme. */
+    --sidebar-active-bg: #ffffff;
+    --sidebar-active-border: #f3f4f6;
+    --sidebar-active-fg: #18181b;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;

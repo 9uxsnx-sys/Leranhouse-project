@@ -28,11 +28,15 @@ export default async function AuthLayout({
         org?.config?.config?.customization?.general?.brand_fg ||
         org?.config?.config?.general?.brand_fg ||
         ''
+    const brandHover =
+        org?.config?.config?.customization?.general?.brand_hover ||
+        org?.config?.config?.general?.brand_hover ||
+        ''
 
     return (
         <OrgProvider orgslug={orgslug}>
             <OrgLanguageSync />
-            <div style={getBrandStyle(brandColor, brandFg) as CSSProperties}>
+            <div style={getBrandStyle(brandColor, brandFg, false, brandHover) as CSSProperties}>
                 {children}
             </div>
         </OrgProvider>

@@ -239,12 +239,12 @@ That is why links, focus rings, checkboxes and status colours stay out of this l
 
 ## 5. Outside the organization shell
 
-These screens can show an organization's content but do not currently receive its colour.
+These screens sit outside the organization shell. Both now mount the brand tokens, so their primary CTA fills with the tenant colour.
 
 | What it is | Status | What it takes |
 |---|---|---|
-| **Login / signup / forgot / reset** submit buttons | **Blocked** → 1-line fix | `app/auth/layout.tsx` mounts the org context but never applies `--brand`, so the token falls back to ink. Apply `getBrandStyle()` on that layout and these become Ready |
-| **Embedded activity** "sign in to continue" button | **Blocked** → 1-line fix | `app/embed/[orgslug]/layout.tsx` has the same gap |
+| **Login / signup / forgot / reset / verify** submit buttons | **Connected** | `authPrimaryBtnClass` in `components/Auth/authStyles.ts` fills with `bg-brand` / `text-brand-fg` / `bg-brand-hover` / `bg-brand-pressed`; the token arrives from `getBrandStyle()` in `app/auth/layout.tsx`. Google, SSO and the text links stay neutral on purpose |
+| **Embedded activity** "sign in to continue" button | **Connected** | `app/embed/[orgslug]/layout.tsx` mounts the same tokens |
 | Platform **`/home`** and superadmin **`/admin`** | **Excluded** | No organization in scope — platform-level UI, not tenant UI |
 
 ---

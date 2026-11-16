@@ -17,17 +17,25 @@ function LayoutContent({ children, orgslug }: { children: React.ReactNode; orgsl
   const customFont = org?.config?.config?.customization?.general?.font || org?.config?.config?.general?.font || ''
   const brandColor = org?.config?.config?.customization?.general?.color || org?.config?.config?.general?.color || ''
   const brandFg = org?.config?.config?.customization?.general?.brand_fg || org?.config?.config?.general?.brand_fg || ''
+  const brandSidebar = !!(
+    org?.config?.config?.customization?.general?.brand_sidebar ||
+    org?.config?.config?.general?.brand_sidebar
+  )
+  const brandHover =
+    org?.config?.config?.customization?.general?.brand_hover ||
+    org?.config?.config?.general?.brand_hover ||
+    ''
 
   // Portalled dialogs/popovers live outside the shell wrapper, so the brand
   // variables are mirrored on the root element as well.
   useEffect(() => {
-    const vars = getBrandStyle(brandColor, brandFg)
+    const vars = getBrandStyle(brandColor, brandFg, brandSidebar, brandHover)
     const root = document.documentElement
     Object.entries(vars).forEach(([key, value]) => root.style.setProperty(key, value))
     return () => {
       Object.keys(vars).forEach((key) => root.style.removeProperty(key))
     }
-  }, [brandColor, brandFg])
+  }, [brandColor, brandFg, brandSidebar, brandHover])
 
   // Inject Google Font stylesheet into document head
   useEffect(() => {

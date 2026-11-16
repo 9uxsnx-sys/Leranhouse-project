@@ -7,10 +7,12 @@ interface AuthBrandingPanelProps {
 }
 
 /**
- * Left panel of the auth shell — background image only.
+ * Left panel of the auth shell — the organization's uploaded image, shown as
+ * an image (not as a CSS background) next to the white form panel.
  *
- * The org logomark / name / welcome message are intentionally omitted for now;
- * they will be layered back on top in a dedicated branding pass.
+ * No dark overlay: nothing is layered on top of it, so the artwork keeps its
+ * real colours. With no image configured the panel falls back to the default
+ * dark gradient.
  */
 export default function AuthBrandingPanel({ org }: AuthBrandingPanelProps) {
   const authBranding =
@@ -19,34 +21,31 @@ export default function AuthBrandingPanel({ org }: AuthBrandingPanelProps) {
 
   const { background_type = 'gradient', background_image = '' } = authBranding
 
-  const getBackgroundStyle = (): React.CSSProperties => {
-    if (background_type === 'custom' && background_image) {
-      return {
-        backgroundImage: `url(${getOrgAuthBackgroundMediaDirectory(org?.org_uuid, background_image)})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }
-    }
-    if (background_type === 'unsplash' && background_image) {
-      return {
-        backgroundImage: `url(${background_image})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }
-    }
-    return {
-      background: 'linear-gradient(041.61deg, #202020 7.15%, #000000 90.96%)',
-    }
+  // Uploads store a file name; legacy Unsplash selections store an absolute URL.
+  const imageUrl =
+    background_type === 'custom' && background_image
+      ? getOrgAuthBackgroundMediaDirectory(org?.org_uuid, background_image)
+      : background_type === 'unsplash' && background_image
+        ? background_image
+        : ''
+
+  if (!imageUrl) {
+    return (
+      <div
+        className="w-full h-full"
+        style={{ background: 'linear-gradient(041.61deg, #202020 7.15%, #000000 90.96%)' }}
+      />
+    )
   }
 
-  const hasCustomBackground = background_type !== 'gradient' && background_image
-
   return (
-    <div
-      className="relative w-full h-full overflow-hidden"
-      style={getBackgroundStyle()}
-    >
-      {hasCustomBackground && <div className="absolute inset-0 bg-black/30" />}
+    <div className="relative w-full h-full overflow-hidden bg-gray-100">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={imageUrl}
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover"
+      />
     </div>
   )
 }

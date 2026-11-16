@@ -28,18 +28,22 @@ function ClientAdminLayout({
     const orgConfig = org?.config?.config
     const brandColor = orgConfig?.customization?.general?.color || orgConfig?.general?.color || ''
     const brandFg = orgConfig?.customization?.general?.brand_fg || orgConfig?.general?.brand_fg || ''
+    const brandSidebar = !!(
+        orgConfig?.customization?.general?.brand_sidebar || orgConfig?.general?.brand_sidebar
+    )
+    const brandHover = orgConfig?.customization?.general?.brand_hover || orgConfig?.general?.brand_hover || ''
 
     // Dialogs and popovers portal to <body>, outside the wrapper below, so the
     // brand variables are also published on the root element. Without this the
     // primary action inside a modal would silently fall back to ink.
     useEffect(() => {
-        const vars = getBrandStyle(brandColor, brandFg)
+        const vars = getBrandStyle(brandColor, brandFg, brandSidebar, brandHover)
         const root = document.documentElement
         Object.entries(vars).forEach(([key, value]) => root.style.setProperty(key, value))
         return () => {
             Object.keys(vars).forEach((key) => root.style.removeProperty(key))
         }
-    }, [brandColor, brandFg])
+    }, [brandColor, brandFg, brandSidebar, brandHover])
 
     return (
         <SessionGate>
@@ -48,7 +52,7 @@ function ClientAdminLayout({
                   <DashboardBreadcrumbProvider>
                     <div
                         className="flex flex-col md:flex-row"
-                        style={getBrandStyle(brandColor, brandFg) as React.CSSProperties}
+                        style={getBrandStyle(brandColor, brandFg, brandSidebar, brandHover) as React.CSSProperties}
                     >
                         {isMobile ? (
                             <DashMobileMenu />

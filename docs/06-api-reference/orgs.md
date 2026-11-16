@@ -318,7 +318,7 @@ Other features return `{"detail": "<Feature> configuration updated"}`.
 
 | Method | Path | Query parameter | Response |
 |--------|------|-----------------|----------|
-| `PUT` | `/{org_id}/config/color` | `color` (default `""`), `brand_fg` (default `""` = auto) | `{"detail": "Color configuration updated"}` |
+| `PUT` | `/{org_id}/config/color` | `color` (default `""`), `brand_fg` (default `""` = auto), `brand_sidebar` (default `false`), `brand_hover` (default `""` = auto-darkened) | `{"detail": "Color configuration updated"}` |
 | `PUT` | `/{org_id}/config/font` | `font` (default `""`) | `{"detail": "Font configuration updated"}` |
 | `PUT` | `/{org_id}/config/footer_text` | `footer_text` (default `""`) | `{"detail": "Footer text configuration updated"}` |
 | `PUT` | `/{org_id}/config/default_language` | `default_language` (required) | `{"detail": "Default language updated"}` (`400` unsupported language) |
@@ -348,7 +348,7 @@ Responses: `{"detail": "Auth branding configuration updated"}` and `{"detail": "
 | `PUT` | `/{org_id}/favicon` | `favicon_file` | `{"detail": "Favicon updated"}` |
 | `PUT` | `/{org_id}/thumbnail` | `thumbnail_file` | `{"detail": "Thumbnail updated"}` |
 | `PUT` | `/{org_id}/preview` | `preview_file` | `{"name_in_disk": "org_.../preview.png"}` |
-| `PUT` | `/{org_id}/auth_background` | `background_file` | `{"detail": "Auth background uploaded successfully", "filename": "..."}` |
+| `PUT` | `/{org_id}/auth_background` | `background_file` | `{"detail": "Auth background uploaded successfully", "filename": "..."}`. Also writes `background_type: "custom"` and the filename into `auth_branding`, so the upload is live without a second call |
 | `PUT` | `/{org_id}/og_image` | `og_image_file` | `{"detail": "OG image uploaded successfully", "filename": "..."}` |
 | `PUT` | `/{org_id}/landing` | JSON body (raw dict) | `{"detail": "Landing object updated"}` |
 | `POST` | `/{org_id}/landing/content` | `content_file` | `{"detail": "Landing content uploaded successfully", "filename": "..."}` |

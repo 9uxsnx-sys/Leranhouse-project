@@ -9,7 +9,14 @@ Entries below are derived from the commit history of the current branch (`feat/l
 - Added the brand token layer (`--brand`, `--brand-fg`, hover / pressed / soft / ring) and drove the primary button, progress fills and tab underline from it on all four shells.
 - Moved every chart series onto the brand ramp; fixed the ramp turning saturated oranges brown by mixing toward white only, and read the colour from the org context rather than `--brand` on the root.
 - Added Branding → Theme → **Text & Icons**, which pins the foreground used on brand fills (`customization.general.brand_fg`) with a live WCAG read-out.
+- Added Branding → Theme → **Hover Color** (`customization.general.brand_hover`): empty keeps the automatic darkening, a hex is used verbatim, and the pressed state takes one further step in the same direction so a lighter hover stays lighter. Hover and pressed are now real hex values instead of `color-mix()` strings, which lets the row print their contrast ratio.
 - Made the automatic foreground compare both candidates instead of using a luminance threshold, and gentled the hover/pressed dimming for dark text so mid-tone brands stay above 4.5:1 in every state.
+- Added an opt-in switch that brands the active sidebar tab (`customization.general.brand_sidebar`); off by default, so all three sidebars keep their neutral white pill.
+- Reduced Org → Branding → Auth to a single image upload: it saves on selection like the logo and favicon rows, writes the config server-side, and replaces the black gradient on the auth pages.
+- The auth image is now rendered as an `<img>` in its own column beside the white form card — no `background-image` and no dark overlay — and the nav-bar header that painted it as a background was removed.
+- Org config writes for the brand colour and the auth image now invalidate the org read cache, so the login page reflects an upload immediately instead of after the cache TTL.
+- Connected the auth submit CTA to the brand token: `authPrimaryBtnClass` now uses `bg-brand` / `text-brand-fg`, so sign-in, sign-up, forgot, reset and verify inherit the theme and the Text & Icons foreground. Google, SSO and text links stay neutral.
+- Widened the auth image column (58/42 → 61.5/38.5 at `lg`, 63.6/36.4 at `xl`) to give the artwork more room without moving the form card.
 - Fixed every paginated dashboard table: they requested `limit=10000` while the API caps at 100, so the endpoints answered 422 and the tables rendered empty. They now walk the real pages through `swrFetchAllPages`.
 - Fixed the course media cache key that targeted the non-existent `courses/org/{id}` route.
 

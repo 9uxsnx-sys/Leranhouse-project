@@ -9,11 +9,12 @@ import { toast } from 'react-hot-toast'
 import { constructAcceptValue } from '@/lib/constants'
 import { uploadOrganizationLogo, uploadOrganizationThumbnail, updateOrgColorConfig, uploadOrganizationFavicon, uploadOrganizationLogoIcon } from '@services/settings/org'
 import { Input } from "@components/ui/input"
+import { Switch } from '@components/ui/switch'
 import { useTranslation } from 'react-i18next'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { mutate } from 'swr'
 import { getAPIUrl } from '@services/config/config'
-import { getContrastRatio, normalizeBrandColor, resolveBrandFg } from '@services/utils/ts/colorUtils'
+import { getContrastRatio, normalizeBrandColor, resolveBrandFg, resolveBrandHover } from '@services/utils/ts/colorUtils'
 import AuthBrandingTab from './AuthBrandingTab'
 
 const SUPPORTED_FILES = constructAcceptValue(['png', 'jpg', 'svg'])
@@ -43,6 +44,10 @@ export default function OrgEditBranding() {
   // Theme state
   const [primaryColor, setPrimaryColor] = useState<string>(org?.config?.config?.customization?.general?.color || org?.config?.config?.general?.color || '')
   const [brandFg, setBrandFg] = useState<string>(org?.config?.config?.customization?.general?.brand_fg || org?.config?.config?.general?.brand_fg || '')
+  const [brandHover, setBrandHover] = useState<string>(org?.config?.config?.customization?.general?.brand_hover || org?.config?.config?.general?.brand_hover || '')
+  const [brandSidebar, setBrandSidebar] = useState<boolean>(
+    !!(org?.config?.config?.customization?.general?.brand_sidebar || org?.config?.config?.general?.brand_sidebar)
+  )
   const [isSaved, setIsSaved] = useState(true)
   const [isManualSaving, setIsManualSaving] = useState(false)
   const isActiveSaving = isManualSaving
@@ -145,7 +150,7 @@ export default function OrgEditBranding() {
     setIsManualSaving(true)
     const loadingToast = toast.loading(t('dashboard.organization.settings.updating'))
     try {
-      await updateOrgColorConfig(org.id, primaryColor, access_token, brandFg)
+      await updateOrgColorConfig(org.id, primaryColor, access_token, brandFg, brandSidebar, brandHover)
       await revalidateTags(['organizations'], org.slug)
       mutate(`${getAPIUrl()}orgs/slug/${org.slug}`)
       setIsSaved(true)
@@ -177,12 +182,34 @@ export default function OrgEditBranding() {
     setIsSaved(false)
   }
 
+  const handleBrandHoverInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setBrandHover(e.target.value)
+    setIsSaved(false)
+  }
+
+  const handleClearBrandHover = () => {
+    setBrandHover('')
+    setIsSaved(false)
+  }
+
+  const handleBrandSidebarChange = (checked: boolean) => {
+    setBrandSidebar(checked)
+    setIsSaved(false)
+  }
+
   // Preview of the actual button colours: the resolved foreground sitting on
   // the resolved brand background.
   const previewBrand = normalizeBrandColor(primaryColor)
   const previewBrandFg = resolveBrandFg(previewBrand, brandFg)
   const previewContrast = getContrastRatio(previewBrandFg, previewBrand)
   const isContrastLow = previewContrast < 4.5
+
+  // Hover fill: explicit when set, otherwise the automatic darkening step. The
+  // foreground is already resolved, so the read-out shows what the label will
+  // actually look like on the hover state.
+  const previewHover = resolveBrandHover(previewBrand, previewBrandFg, brandHover)
+  const previewHoverContrast = getContrastRatio(previewBrandFg, previewHover.hover)
+  const isHoverContrastLow = previewHoverContrast < 4.5
 
   return (
     <div className="space-y-3">
@@ -436,6 +463,48 @@ export default function OrgEditBranding() {
           </div>
           <p className="text-xs text-gray-400">{t('dashboard.organization.theme.primary_color_desc')}</p>
 
+          {/* Hover fill — the colour brand buttons switch to on hover / press */}
+          <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50">
+            <div className="flex-shrink-0">
+              <div
+                className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-100 shadow-sm text-sm font-semibold"
+                style={{ backgroundColor: previewHover.hover, color: previewBrandFg }}
+              >
+                Aa
+              </div>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-700">{t('dashboard.organization.theme.brand_hover')}</p>
+              <p className="text-xs text-gray-400">
+                {brandHover ? previewHover.hover.toUpperCase() : `${t('dashboard.organization.theme.brand_hover_auto')} · ${previewHover.hover.toUpperCase()}`}
+                {' · '}
+                {t('dashboard.organization.theme.contrast')} {previewHoverContrast}:1
+                {isHoverContrastLow && (
+                  <span className="text-amber-600"> · {t('dashboard.organization.theme.contrast_low')}</span>
+                )}
+              </p>
+            </div>
+            <Input
+              type="text"
+              value={brandHover}
+              onChange={handleBrandHoverInputChange}
+              placeholder={t('dashboard.organization.theme.brand_hover_auto')}
+              className="w-24 h-10 rounded-lg border border-gray-100 !shadow-sm font-mono text-sm uppercase bg-white focus-visible:!shadow-sm focus-visible:border-gray-100 focus:outline-none"
+              maxLength={7}
+            />
+            {brandHover && (
+              <button
+                type="button"
+                onClick={handleClearBrandHover}
+                className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                title={t('dashboard.organization.theme.clear_color')}
+              >
+                <X size={18} />
+              </button>
+            )}
+          </div>
+          <p className="text-xs text-gray-400">{t('dashboard.organization.theme.brand_hover_desc')}</p>
+
           {/* Brand foreground — text and icons sitting on brand surfaces */}
           <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50">
             {/* Live preview: the resolved foreground on the resolved brand */}
@@ -477,6 +546,19 @@ export default function OrgEditBranding() {
             )}
           </div>
           <p className="text-xs text-gray-400">{t('dashboard.organization.theme.brand_fg_desc')}</p>
+
+          {/* Sidebar active tab — opt in to a brand fill on the floating pill */}
+          <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50">
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-700">{t('dashboard.organization.theme.brand_sidebar')}</p>
+              <p className="text-xs text-gray-400">{t('dashboard.organization.theme.brand_sidebar_desc')}</p>
+            </div>
+            <Switch
+              checked={brandSidebar}
+              onCheckedChange={handleBrandSidebarChange}
+              className="data-[state=checked]:bg-brand"
+            />
+          </div>
         </div>
       </div>
 

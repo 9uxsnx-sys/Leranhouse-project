@@ -89,32 +89,114 @@ export function normalizeBrandColor(value?: string | null): string {
   return BRAND_FALLBACK
 }
 
+function rgbToHex(r: number, g: number, b: number): string {
+  const channel = (value: number) =>
+    Math.max(0, Math.min(255, Math.round(value))).toString(16).padStart(2, '0')
+  return `#${channel(r)}${channel(g)}${channel(b)}`
+}
+
+/** Darkens a hex by `amount` percent — the automatic hover/pressed step. */
+function mixTowardBlack(hex: string, amount: number): string {
+  const rgb = hexToRgb(hex)
+  if (!rgb) return hex
+  const keep = 1 - amount / 100
+  return rgbToHex(rgb.r * keep, rgb.g * keep, rgb.b * keep)
+}
+
+/** Lightens a hex by `amount` percent. */
+function mixTowardWhite(hex: string, amount: number): string {
+  const rgb = hexToRgb(hex)
+  if (!rgb) return hex
+  const keep = 1 - amount / 100
+  return rgbToHex(
+    rgb.r * keep + 255 * (amount / 100),
+    rgb.g * keep + 255 * (amount / 100),
+    rgb.b * keep + 255 * (amount / 100)
+  )
+}
+
+/**
+ * Hover and pressed fills for the brand colour.
+ *
+ * With no explicit hover the steps are mixed toward black, gentler when the
+ * foreground is dark because dimming lowers contrast under dark text.
+ *
+ * An explicit hover is used verbatim and pressed is one further 12% step from
+ * that hover in the same direction — lighter hover → lighter pressed. Measuring
+ * from the hover instead of extrapolating the brand→hover vector keeps a pale
+ * hover from saturating to pure white. Both values are real hex, not
+ * `color-mix()` expressions, so the branding screen can print their contrast
+ * ratio.
+ */
+export function resolveBrandHover(
+  brand: string,
+  fg: string,
+  explicit?: string | null
+): { hover: string; pressed: string } {
+  const raw = (explicit || '').trim()
+  const isHex = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.test(raw)
+
+  if (!isHex) {
+    const step = isLightColor(fg) ? { hover: 14, pressed: 26 } : { hover: 6, pressed: 12 }
+    return {
+      hover: mixTowardBlack(brand, step.hover),
+      pressed: mixTowardBlack(brand, step.pressed),
+    }
+  }
+
+  const hover = normalizeBrandColor(raw)
+  const base = hexToRgb(brand)
+  const target = hexToRgb(hover)
+  if (!base || !target) return { hover, pressed: hover }
+
+  const lighter =
+    relativeLuminance(target.r, target.g, target.b) >
+    relativeLuminance(base.r, base.g, base.b)
+
+  return {
+    hover,
+    pressed: lighter ? mixTowardWhite(hover, 12) : mixTowardBlack(hover, 12),
+  }
+}
+
 /**
  * The CSS custom properties every brand surface reads.
  *
  * Derived from one hex so an organization never has to pick six colours:
- * the foreground is chosen by contrast, and hover/pressed/soft/ring are mixed
- * in CSS with `color-mix`, so they follow whatever hex is configured.
+ * the foreground is chosen by contrast, and hover/pressed are computed from
+ * the brand (or from the explicit hover the organization pinned) while
+ * soft/ring are mixed from the brand.
  *
- * The hover/pressed dimming depends on the foreground. Dimming a fill raises
- * contrast under white text but lowers it under dark text, so a dark foreground
- * uses a gentler step — 14%/26% black would take a clay brand from 5.68:1 to
- * 4.32:1 / 3.36:1, while 6%/12% keeps it at 5.07:1 / 4.51:1.
+ * When no hover is pinned, the dimming depends on the foreground. Dimming a
+ * fill raises contrast under white text but lowers it under dark text, so a
+ * dark foreground uses a gentler step — 14%/26% black would take a clay brand
+ * from 5.68:1 to 4.32:1 / 3.36:1, while 6%/12% keeps it at 5.07:1 / 4.51:1.
  *
  * With no colour set the whole set resolves to ink — the interface looks
  * exactly as it did before the brand feature existed.
  */
-export function getBrandStyle(color?: string | null, brandFg?: string | null): Record<string, string> {
+export function getBrandStyle(
+  color?: string | null,
+  brandFg?: string | null,
+  sidebarBrand = false,
+  brandHover?: string | null
+): Record<string, string> {
   const brand = normalizeBrandColor(color)
   const fg = resolveBrandFg(brand, brandFg)
-  const dim = isLightColor(fg) ? { hover: 14, pressed: 26 } : { hover: 6, pressed: 12 }
+  const hover = resolveBrandHover(brand, fg, brandHover)
   return {
     '--brand': brand,
     '--brand-fg': fg,
-    '--brand-hover': `color-mix(in oklab, ${brand} ${100 - dim.hover}%, black)`,
-    '--brand-pressed': `color-mix(in oklab, ${brand} ${100 - dim.pressed}%, black)`,
+    '--brand-hover': hover.hover,
+    '--brand-pressed': hover.pressed,
     '--brand-soft': `color-mix(in oklab, ${brand} 10%, transparent)`,
     '--brand-ring': `color-mix(in oklab, ${brand} 35%, transparent)`,
+    // The floating pill behind the active sidebar item. Off keeps the original
+    // white surface; on makes it a brand fill, so the label follows the
+    // foreground rather than ink.
+    '--sidebar-active-bg': sidebarBrand ? brand : '#ffffff',
+    '--sidebar-active-border': sidebarBrand ? brand : '#f3f4f6',
+    '--sidebar-active-fg': sidebarBrand ? fg : '#18181b',
   }
 }
 
