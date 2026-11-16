@@ -78,12 +78,6 @@ export function AccountSidebar({ orgslug, currentSubpage }: AccountSidebarProps)
               >
                 <Icon className="w-[18px] h-[18px]" />
                 <span className="text-sm font-medium">{t(item.labelKey)}</span>
-                {isActive && (
-                  <span
-                    aria-hidden="true"
-                    className="absolute start-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-brand"
-                  />
-                )}
               </Link>
             </div>
           )

@@ -545,12 +545,6 @@ const MenuLink = ({ href, icon, label, isCollapsed, isExternal, active }: {
         isCollapsed ? "justify-center h-10" : "h-10 px-4 gap-x-2.5"
       )}
     >
-      {active && (
-        <span
-          aria-hidden="true"
-          className="absolute start-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-full bg-brand"
-        />
-      )}
       {icon}
       {!isCollapsed && (
         <span className="text-sm font-medium">{label}</span>
