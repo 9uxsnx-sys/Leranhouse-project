@@ -76,8 +76,12 @@ const CourseMediaSection: React.FC = () => {
       const res = await updateCourseThumbnail(course.course_uuid, formData, accessToken)
       await revalidateTags(['courses'], org.slug)
       mutate(`${getAPIUrl()}courses/${course.course_uuid}/meta?with_unpublished_activities=false&slim=true`)
-      if (org?.id) {
-        mutate(`${getAPIUrl()}courses/org/${org.id}/page/1/limit/100`)
+      if (org?.slug) {
+        mutate(
+          (key: any) =>
+            typeof key === 'string' &&
+            key.startsWith(`${getAPIUrl()}courses/org_slug/${org.slug}/`)
+        )
       }
       await new Promise((r) => setTimeout(r, 1000))
       if (res.success === false) {
@@ -103,8 +107,12 @@ const CourseMediaSection: React.FC = () => {
       const res = await deleteCourseThumbnail(course.course_uuid, accessToken)
       await revalidateTags(['courses'], org.slug)
       mutate(`${getAPIUrl()}courses/${course.course_uuid}/meta?with_unpublished_activities=false&slim=true`)
-      if (org?.id) {
-        mutate(`${getAPIUrl()}courses/org/${org.id}/page/1/limit/100`)
+      if (org?.slug) {
+        mutate(
+          (key: any) =>
+            typeof key === 'string' &&
+            key.startsWith(`${getAPIUrl()}courses/org_slug/${org.slug}/`)
+        )
       }
       await new Promise((r) => setTimeout(r, 1000))
       if (res.success === false) {

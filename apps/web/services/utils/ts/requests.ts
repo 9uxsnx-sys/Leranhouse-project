@@ -135,7 +135,8 @@ export const swrFetcher = async (url: string, token?: string) => {
 export const swrFetchAllPages = async (
   url: string,
   token?: string,
-  pageSize = 100
+  pageSize = 100,
+  itemsKey = 'items'
 ) => {
   const withPaging = (page: number) => {
     const [base, query = ''] = url.split('?')
@@ -147,21 +148,21 @@ export const swrFetchAllPages = async (
   }
 
   const first = await swrFetcher(withPaging(1), token)
-  if (!first || !Array.isArray(first.items)) {
+  if (!first || !Array.isArray(first[itemsKey])) {
     return first
   }
 
-  const items = [...first.items]
+  const items = [...first[itemsKey]]
   const total = Number(first.total ?? items.length)
   const pages = Math.ceil(total / pageSize)
 
   for (let page = 2; page <= pages; page++) {
     const next = await swrFetcher(withPaging(page), token)
-    if (!next || !Array.isArray(next.items) || next.items.length === 0) break
-    items.push(...next.items)
+    if (!next || !Array.isArray(next[itemsKey]) || next[itemsKey].length === 0) break
+    items.push(...next[itemsKey])
   }
 
-  return { ...first, items, total: total || items.length }
+  return { ...first, [itemsKey]: items, total: total || items.length }
 }
 
 export const errorHandling = async (res: any) => {

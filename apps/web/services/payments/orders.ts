@@ -20,3 +20,31 @@ export async function getOrgOrders(
   )
   return await errorHandling(result)
 }
+
+/**
+ * Fetch every order by walking the pages.
+ *
+ * The endpoint caps `limit` at 100 and rejects anything larger with a 422, so
+ * the transactions table cannot ask for "all orders" in one request.
+ */
+export async function getAllOrgOrders(
+  orgId: number,
+  params: { search?: string; status?: string },
+  access_token: string
+) {
+  const pageSize = 100
+  const items: any[] = []
+  let total = 0
+  let page = 1
+
+  do {
+    const res = await getOrgOrders(orgId, { ...params, page, limit: pageSize }, access_token)
+    const batch = res?.items || []
+    items.push(...batch)
+    total = Number(res?.total ?? items.length)
+    if (batch.length === 0) break
+    page += 1
+  } while (items.length < total)
+
+  return { items, total }
+}

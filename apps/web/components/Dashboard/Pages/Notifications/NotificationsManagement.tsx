@@ -38,7 +38,7 @@ import FormLayout, {
 } from '@components/Objects/StyledElements/Form/Form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { swrFetcher } from '@services/utils/ts/requests'
+import { swrFetcher, swrFetchAllPages } from '@services/utils/ts/requests'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { getUsersLinkedToUserGroup } from '@services/usergroups/usergroups'
 import {
@@ -599,9 +599,9 @@ function AnnouncementsSection() {
   // History
   const { data: history, isLoading: historyLoading } = useSWR<AnnouncementListResponse>(
     orgId && view === 'history'
-      ? `${getAPIUrl()}notifications/announcements?org_id=${orgId}&limit=10000`
+      ? `${getAPIUrl()}notifications/announcements?org_id=${orgId}`
       : null,
-    (url: string) => swrFetcher(url, accessToken),
+    (url: string) => swrFetchAllPages(url, accessToken, 100, 'announcements'),
     { revalidateOnFocus: false }
   )
   const announcements: AnnouncementItem[] = history?.announcements || []

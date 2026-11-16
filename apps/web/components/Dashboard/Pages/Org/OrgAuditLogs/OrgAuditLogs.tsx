@@ -4,7 +4,7 @@ import PageLoading from '@components/Objects/Loaders/PageLoading'
 import UserAvatar from '@components/Objects/UserAvatar'
 import Modal from '@components/Objects/StyledElements/Modal/Modal'
 import { getAPIUrl } from '@services/config/config'
-import { swrFetcher } from '@services/utils/ts/requests'
+import { swrFetchAllPages } from '@services/utils/ts/requests'
 import { Search, Activity, ShieldCheck, RefreshCw, Eye, Globe, Terminal, Calendar, Download } from 'lucide-react'
 import React, { useState } from 'react'
 import useSWR, { mutate } from 'swr'
@@ -46,7 +46,7 @@ const OrgAuditLogs = () => {
   const buildQuery = () => {
     const params = new URLSearchParams()
     if (org?.id) params.append('org_id', org.id.toString())
-    params.append('limit', '10000')
+    params.append('limit', '100')
     
     // Search logic based on selected field
     if (filters.searchValue) {
@@ -87,7 +87,7 @@ const OrgAuditLogs = () => {
   const logsUrl = org && access_token ? `${getAPIUrl()}ee/audit_logs/?${buildQuery()}` : null
   const { data, isLoading, isValidating } = useSWR(
     logsUrl,
-    (url) => swrFetcher(url, access_token),
+    (url) => swrFetchAllPages(url, access_token),
     { revalidateOnFocus: false }
   )
 

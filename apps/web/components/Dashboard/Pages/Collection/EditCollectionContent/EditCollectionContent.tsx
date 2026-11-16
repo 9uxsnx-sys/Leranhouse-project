@@ -35,7 +35,7 @@ import {
   removeResourceFromCollection,
 } from '@services/courses/collections'
 import { getAPIUrl } from '@services/config/config'
-import { swrFetcher } from '@services/utils/ts/requests'
+import { swrFetchAllPages } from '@services/utils/ts/requests'
 
 type EditCollectionContentProps = {
   collection: any
@@ -80,12 +80,12 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
     collectionUuid && accessToken
       ? `${getAPIUrl()}collections/${collectionUuid}/members?filter=${
           isSearching ? 'available' : 'linked'
-        }&search=${encodeURIComponent(debouncedSearch)}&kind=${kindFilter}&status=${statusFilter}&limit=10000&locale=${contentLocale}`
+        }&search=${encodeURIComponent(debouncedSearch)}&kind=${kindFilter}&status=${statusFilter}&locale=${contentLocale}`
       : null
 
   const { data, error, isValidating, mutate } = useSWR(
     membersKey,
-    (url: string) => swrFetcher(url, accessToken),
+    (url: string) => swrFetchAllPages(url, accessToken),
     { revalidateOnFocus: false }
   )
 

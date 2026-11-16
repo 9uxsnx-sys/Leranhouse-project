@@ -9,7 +9,7 @@ import { getAPIUrl } from '@services/config/config'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { searchMatchesAny } from '@/lib/search/normalize'
 import { createUserGroup, updateUserGroup, deleteUserGroup, linkUsersToUserGroup, unlinkUsersFromUserGroup } from '@services/usergroups/usergroups'
-import { swrFetcher } from '@services/utils/ts/requests'
+import { swrFetcher, swrFetchAllPages } from '@services/utils/ts/requests'
 import { Search, ArrowUpDown, CheckSquare, MoreVertical, Copy, Trash2, Users, Loader2, Check, SaveAllIcon, LogOut, ArrowLeft, MoreHorizontal, X } from 'lucide-react'
 import { ConceptIcon } from '@components/ui/icons'
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
@@ -101,7 +101,6 @@ function OrgUserGroups() {
     const buildMembersQuery = () => {
         const params = new URLSearchParams()
         params.append('usergroup_id', membersGroupId!.toString())
-        params.append('limit', '10000')
         if (membersSearch.trim()) {
             params.append('search', membersSearch.trim())
             params.append('usergroup_filter', 'not_in_group')
@@ -115,7 +114,7 @@ function OrgUserGroups() {
         : null
     const { data: usersData, isValidating: isMembersValidating } = useSWR(
         membersUrl,
-        (url) => swrFetcher(url, access_token),
+        (url) => swrFetchAllPages(url, access_token),
         { keepPreviousData: true }
     )
     const isMembersLoading = !usersData && isMembersValidating

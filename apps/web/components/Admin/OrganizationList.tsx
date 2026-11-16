@@ -3,7 +3,7 @@ import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import useSWR from 'swr'
 import { getAPIUrl } from '@services/config/config'
 import { getOrgLogoMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media'
-import { swrFetcher } from '@services/utils/ts/requests'
+import { swrFetcher, swrFetchAllPages } from '@services/utils/ts/requests'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import Link from 'next/link'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
@@ -236,7 +236,6 @@ export default function OrganizationList() {
   const queryParams = useMemo(() => {
     const params = new URLSearchParams({
       sort: sortBy,
-      limit: '10000',
     })
     if (debouncedSearch) params.set('search', debouncedSearch)
     if (planFilter !== 'all') params.set('plan', planFilter)
@@ -245,7 +244,7 @@ export default function OrganizationList() {
 
   const { data: orgData, isLoading, isValidating } = useSWR<PaginatedOrgResponse>(
     accessToken ? `${getAPIUrl()}ee/superadmin/organizations?${queryParams}` : null,
-    (url: string) => swrFetcher(url, accessToken),
+    (url: string) => swrFetchAllPages(url, accessToken),
     { revalidateOnFocus: true }
   )
 

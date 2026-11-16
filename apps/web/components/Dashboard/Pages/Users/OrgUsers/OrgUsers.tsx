@@ -8,7 +8,7 @@ import UserAvatar from '@components/Objects/UserAvatar'
 import { getAPIUrl } from '@services/config/config'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
 import { removeUserFromOrg, removeUsersFromOrg, updateUserRole } from '@services/organizations/orgs'
-import { swrFetcher } from '@services/utils/ts/requests'
+import { swrFetcher, swrFetchAllPages } from '@services/utils/ts/requests'
 import { Check, Search, LogOut, MoreHorizontal, X } from 'lucide-react'
 import { ConceptIcon } from '@components/ui/icons'
 import React, { useState, useCallback, useEffect } from 'react'
@@ -70,14 +70,13 @@ function OrgUsers() {
   const buildQuery = () => {
     const params = new URLSearchParams()
     if (searchValue) params.append('search', searchValue)
-    params.append('limit', '10000')
     return params.toString()
   }
 
   const usersUrl = org && access_token ? `${getAPIUrl()}orgs/${org?.id}/users?${buildQuery()}` : null
   const { data, isValidating } = useSWR(
     usersUrl,
-    (url) => swrFetcher(url, access_token),
+    (url) => swrFetchAllPages(url, access_token),
     {
       revalidateOnFocus: false,
     }

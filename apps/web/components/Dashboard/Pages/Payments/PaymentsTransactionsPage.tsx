@@ -10,7 +10,7 @@ import { SearchInput, FilterSelect } from '@components/Analytics/Filters'
 import { PaymentStatusDot, mapOrderStatus, type PaymentStatus } from './PaymentStatus'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
-import { getOrgOrders } from '@services/payments/orders'
+import { getAllOrgOrders } from '@services/payments/orders'
 
 interface TransactionRow {
   id: string
@@ -83,12 +83,11 @@ export default function PaymentsTransactionsPage() {
   const { data, error, isLoading } = useSWR(
     swrKey,
     () =>
-      getOrgOrders(
+      getAllOrgOrders(
         org.id,
         {
           search: debouncedQuery,
           status: status === 'all' ? '' : status,
-          limit: 10000,
         },
         access_token
       ),

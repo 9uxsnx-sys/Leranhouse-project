@@ -3,7 +3,7 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react'
 import useSWR from 'swr'
 import { getAPIUrl } from '@services/config/config'
 import { getUserAvatarMediaDirectory } from '@services/media/media'
-import { swrFetcher } from '@services/utils/ts/requests'
+import { swrFetchAllPages } from '@services/utils/ts/requests'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import {
@@ -163,7 +163,6 @@ export default function UserList() {
   const queryParams = useMemo(() => {
     const params = new URLSearchParams({
       sort: sortBy,
-      limit: '10000',
     })
     if (debouncedSearch) params.set('search', debouncedSearch)
     if (superadminFilter !== 'all')
@@ -180,7 +179,7 @@ export default function UserList() {
     accessToken
       ? `${getAPIUrl()}ee/superadmin/users?${queryParams}`
       : null,
-    (url: string) => swrFetcher(url, accessToken),
+    (url: string) => swrFetchAllPages(url, accessToken),
     { revalidateOnFocus: true }
   )
 

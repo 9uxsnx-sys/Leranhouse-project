@@ -2,7 +2,7 @@ import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getAPIUrl } from '@services/config/config'
 import { linkUsersToUserGroup, unlinkUsersFromUserGroup } from '@services/usergroups/usergroups'
-import { swrFetcher } from '@services/utils/ts/requests'
+import { swrFetchAllPages } from '@services/utils/ts/requests'
 import LearnHouseSpinner from '@components/Objects/Loaders/LearnHouseSpinner'
 import { Search, Check, Plus, Minus, Users } from 'lucide-react'
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
@@ -42,7 +42,6 @@ function ManageUsers(props: ManageUsersProps) {
   // Build query for org users with server-side usergroup filtering
   const buildQuery = useCallback(() => {
     const params = new URLSearchParams()
-    params.append('limit', '10000')
     if (debouncedSearch) {
       params.append('search', debouncedSearch)
     }
@@ -60,7 +59,7 @@ function ManageUsers(props: ManageUsersProps) {
   const usersUrl = org && access_token ? `${getAPIUrl()}orgs/${org?.id}/users?${buildQuery()}` : null
   const { data: usersData, isValidating } = useSWR(
     usersUrl,
-    (url) => swrFetcher(url, access_token),
+    (url) => swrFetchAllPages(url, access_token),
   )
 
   const orgUsers = usersData?.items || []
