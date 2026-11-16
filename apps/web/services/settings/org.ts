@@ -83,10 +83,11 @@ export async function updateOrgCommunitiesConfig(
 export async function updateOrgColorConfig(
   org_id: string,
   color: string,
-  access_token: string
+  access_token: string,
+  brand_fg: string = ''
 ) {
   const result: any = await fetch(
-    `${getAPIUrl()}orgs/${org_id}/config/color?color=${encodeURIComponent(color)}`,
+    `${getAPIUrl()}orgs/${org_id}/config/color?color=${encodeURIComponent(color)}&brand_fg=${encodeURIComponent(brand_fg)}`,
     RequestBodyWithAuthHeader('PUT', null, null, access_token)
   )
   const res = await errorHandling(result)

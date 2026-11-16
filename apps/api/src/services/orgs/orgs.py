@@ -1065,6 +1065,7 @@ async def update_org_color_config(
     org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
+    brand_fg: str = "",
 ):
     statement = select(Organization).where(Organization.id == org_id)
     org = db_session.exec(statement).first()
@@ -1085,9 +1086,11 @@ async def update_org_color_config(
     if _is_v2_config(updated_config):
         updated_config.setdefault("customization", {}).setdefault("general", {})
         updated_config["customization"]["general"]["color"] = color
+        updated_config["customization"]["general"]["brand_fg"] = brand_fg
     else:
         updated_config.setdefault("general", {"enabled": True, "color": "", "watermark": True})
         updated_config["general"]["color"] = color
+        updated_config["general"]["brand_fg"] = brand_fg
 
     org_config.config = updated_config
     org_config.update_date = str(datetime.now())

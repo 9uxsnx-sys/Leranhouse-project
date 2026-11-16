@@ -207,6 +207,7 @@ export const OrgMenu = ({
   // Get primary color from org config (v2: customization.general.color, v1: general.color)
   const config = org?.config?.config
   const primaryColor = config?.customization?.general?.color || config?.general?.color || ''
+  const brandFg = config?.customization?.general?.brand_fg || config?.general?.brand_fg || ''
 
   // Filter dashboard menu items by resolved_features from API
   const rf = config?.resolved_features
@@ -265,7 +266,7 @@ export const OrgMenu = ({
         className="relative flex h-screen w-full flex-col items-start lg:flex-row"
         style={{
           ...(shellHeight ? { height: shellHeight } : {}),
-          ...getBrandStyle(primaryColor),
+          ...getBrandStyle(primaryColor, brandFg),
         } as React.CSSProperties}
       >
         {/* Desktop sidebar — rendered directly, matching dashboard layout */}

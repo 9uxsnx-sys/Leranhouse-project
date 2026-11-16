@@ -24,11 +24,15 @@ export default async function AuthLayout({
         org?.config?.config?.customization?.general?.color ||
         org?.config?.config?.general?.color ||
         ''
+    const brandFg =
+        org?.config?.config?.customization?.general?.brand_fg ||
+        org?.config?.config?.general?.brand_fg ||
+        ''
 
     return (
         <OrgProvider orgslug={orgslug}>
             <OrgLanguageSync />
-            <div style={getBrandStyle(brandColor) as CSSProperties}>
+            <div style={getBrandStyle(brandColor, brandFg) as CSSProperties}>
                 {children}
             </div>
         </OrgProvider>

@@ -318,7 +318,7 @@ Other features return `{"detail": "<Feature> configuration updated"}`.
 
 | Method | Path | Query parameter | Response |
 |--------|------|-----------------|----------|
-| `PUT` | `/{org_id}/config/color` | `color` (default `""`) | `{"detail": "Color configuration updated"}` |
+| `PUT` | `/{org_id}/config/color` | `color` (default `""`), `brand_fg` (default `""` = auto) | `{"detail": "Color configuration updated"}` |
 | `PUT` | `/{org_id}/config/font` | `font` (default `""`) | `{"detail": "Font configuration updated"}` |
 | `PUT` | `/{org_id}/config/footer_text` | `footer_text` (default `""`) | `{"detail": "Footer text configuration updated"}` |
 | `PUT` | `/{org_id}/config/default_language` | `default_language` (required) | `{"detail": "Default language updated"}` (`400` unsupported language) |

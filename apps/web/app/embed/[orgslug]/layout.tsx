@@ -13,18 +13,22 @@ function EmbedShell({ children }: { children: React.ReactNode }) {
     org?.config?.config?.customization?.general?.color ||
     org?.config?.config?.general?.color ||
     ''
+  const brandFg =
+    org?.config?.config?.customization?.general?.brand_fg ||
+    org?.config?.config?.general?.brand_fg ||
+    ''
 
   useEffect(() => {
-    const vars = getBrandStyle(brandColor)
+    const vars = getBrandStyle(brandColor, brandFg)
     const root = document.documentElement
     Object.entries(vars).forEach(([key, value]) => root.style.setProperty(key, value))
     return () => {
       Object.keys(vars).forEach((key) => root.style.removeProperty(key))
     }
-  }, [brandColor])
+  }, [brandColor, brandFg])
 
   return (
-    <div className="min-h-screen" style={getBrandStyle(brandColor) as React.CSSProperties}>
+    <div className="min-h-screen" style={getBrandStyle(brandColor, brandFg) as React.CSSProperties}>
       {children}
     </div>
   )

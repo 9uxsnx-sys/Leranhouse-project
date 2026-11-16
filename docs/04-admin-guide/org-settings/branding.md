@@ -11,7 +11,7 @@ The page is built from a top **Action Row** followed by three stacked section ca
 | Card | Controls |
 |------|----------|
 | **Logo & Favicon** | Logo, Favicon, Logomark, Thumbnail uploads |
-| **Theme** | The organization's Primary Color |
+| **Theme** | The organization's Primary Color, and the text/icon colour used on it |
 | **Auth** | The sign-in / sign-up page background and welcome message |
 
 > **Note:** Image uploads (Logo, Favicon, Logomark, Thumbnail) save **immediately** on upload. The Theme and Auth cards are saved with the **Save** button in the Action Row.
@@ -25,10 +25,10 @@ At the top-right of the page is a single Save button that tracks whether the The
 | State | Icon | Meaning |
 |-------|------|---------|
 | **Saved** | ✓ Check | No pending changes — button is inactive |
-| **Save** | 💾 Save | You have unsaved Primary Color changes — click to save |
+| **Save** | 💾 Save | You have unsaved Primary Color or Text & Icons changes — click to save |
 | **Saving...** | Spinner | Request in progress |
 
-Only the **Primary Color** (Theme card) is tracked by this button. Uploads are persisted the moment you pick a file.
+Only the two **Theme** rows are tracked by this button. Uploads are persisted the moment you pick a file.
 
 ---
 
@@ -64,19 +64,35 @@ Supported formats for all four fields: `.png`, `.jpg`, `.svg`.
 
 ---
 
-## Theme — Primary Color
+## Theme
 
-The Theme card defines the organization's **Primary Color** — the brand accent used for primary buttons, links, interactive elements, and focus rings across the platform.
+The Theme card is the brand accent system. One hex becomes the colour of filled primary buttons, progress fills, chart series and the active tab underline. It has two rows.
 
-The card is a single row containing:
+### Primary Color
+
+The Theme card defines the organization's **Primary Color** — the brand accent used for primary buttons, progress and charts across the platform.
+
+The row contains:
 
 - A **color preview square** on the left (shows the current color, or white if none is set).
-- The **hex input** on the right — type a 6-digit hex value (e.g. `#6366F1`). Input is uppercase and capped at 7 characters (`#RRGGBB`).
-- A **clear (×)** button that appears once a color is set, resetting it to the platform default.
+- The **hex input** on the right — type a 6-digit hex value (e.g. `#D97757`). Input is uppercase and capped at 7 characters (`#RRGGBB`).
+- A **clear (×)** button that appears once a color is set, resetting it to the platform default (ink).
 
 > **Note:** There is no native OS color-picker dialog. Enter the hex value directly in the field. The preview square reflects the value live.
 
-Changing the color marks the Action Row as having unsaved changes — click **Save** to apply. The platform derives the full shade palette (50–900) and contrast pairings from your primary color so components stay accessible.
+### Text & Icons
+
+The second row controls the foreground painted on top of the brand colour — the labels **and** icons inside every brand-connected button.
+
+- **Empty (Auto)** — the platform chooses black or white from the primary colour. This is the default.
+- **Any hex** — used verbatim. `#ffffff`, `ffffff` and `fff` are all accepted.
+- The **`Aa` preview square** shows the resolved foreground on the resolved brand colour.
+- The row prints the live **WCAG contrast ratio** (e.g. `Contrast 5.7:1`) and turns amber below 4.5:1. The warning is informational — it never blocks saving.
+- The **clear (×)** button returns the row to Auto.
+
+Because icons inherit `currentColor`, one value covers both the text and the icons.
+
+Changing either row marks the Action Row as having unsaved changes — click **Save** to apply.
 
 ---
 
@@ -122,7 +138,8 @@ Unlike the uploads, the Auth card is **not** auto-saved. Click **Save** below th
 
 - **Test contrast** — ensure the chosen Text Color is legible over your background (photos vary; the `black/30` overlay helps but is not a guarantee).
 - **Use SVG where possible** — logos and logomarks stay crisp on high-DPI displays.
-- **Keep the primary color brand-consistent** — the same accent should flow through your logo, buttons, and links.
+- **Keep the primary color brand-consistent** — the same accent should flow through your logo, buttons, and progress.
+- **Prefer Auto for Text & Icons** — only pin a colour when the automatic choice is not what you want (for example a mid-tone brand that reads better with white). Keep the ratio at or above 4.5:1 when you do.
 - **Preview on mobile** — the auth layout stacks vertically on small screens; check that the background still reads well.
 
 ## Related Sections

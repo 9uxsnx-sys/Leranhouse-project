@@ -1,4 +1,4 @@
-> Status: in progress · Created: 2026-11-16 · Phases 1–3 done, Phase 4 steps 1–4 and 6 done
+> Status: in progress · Created: 2026-11-16 · Phases 1–3 done, Phase 4 steps 1–6 done; `--brand-fg` override shipped
 
 # UI theme colour and button cleanup
 
@@ -78,13 +78,17 @@ Infrastructure first, then surfaces. Until the tokens exist on both shells, noth
 | Token | Value | Used by |
 |---|---|---|
 | `--brand` | the org hex, sanitized; fallback `#27272a` (ink) | filled primary, progress fill, active marker, tab underline |
-| `--brand-fg` | `#ffffff` or `#18181b`, chosen by the existing `isLightColor()` | label on a brand fill |
+| `--brand-fg` | `#ffffff` or `#18181b`, chosen by the existing `isLightColor()`, unless the org pins `customization.general.brand_fg` | label on a brand fill |
 | `--brand-hover` | `color-mix(in oklab, var(--brand) 86%, black)` | hover |
 | `--brand-pressed` | `color-mix(in oklab, var(--brand) 74%, black)` | active |
 | `--brand-soft` | `color-mix(in oklab, var(--brand) 10%, transparent)` | selection tint |
 | `--brand-ring` | `color-mix(in oklab, var(--brand) 35%, transparent)` | selected outline |
 
 Add the matching utilities to `styles/globals.css`: `bg-brand`, `text-brand-fg`, `hover:bg-brand-hover`, `active:bg-brand-pressed`, `bg-brand-soft`, `border-brand`.
+
+`--brand-fg` is the only token that can be overridden per organization. Branding → Theme has a "Text & Icons" row that writes `customization.general.brand_fg`; empty means auto. It exists because the automatic choice is not always the wanted one — a mango orange resolves to dark text, while many brands want white on it. The row shows the live WCAG ratio but never blocks saving.
+
+**Known follow-up (not built yet).** The automatic foreground still uses the 0.4 luminance threshold instead of comparing the two candidate colours, and `--brand-hover` / `--brand-pressed` always mix 14% / 26% black. That pairing is calibrated for **white** text. For a mid-tone brand that resolves to dark text (e.g. `#D97757` at 5.68:1), the same mix drops hover to 4.32:1 and pressed to 3.36:1 — the button gets harder to read when pressed. The fix is two rules in `colorUtils.ts`: pick whichever of `#18181b` / `#ffffff` has the higher contrast, and, when the foreground is dark, dim by 6% / 12% instead of 14% / 26% (giving 5.07:1 / 4.51:1 for the same brand).
 
 **Where it is allowed** — this list is exhaustive; anything not here stays neutral.
 

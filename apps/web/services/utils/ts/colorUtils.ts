@@ -40,6 +40,34 @@ export function isLightColor(hex: string, threshold = 0.4): boolean {
 export const BRAND_FALLBACK = '#27272a'
 
 /**
+ * WCAG 2.1 contrast ratio between two colours, rounded to one decimal.
+ * Returned by the branding screen as a read-out, never as a gate.
+ */
+export function getContrastRatio(foreground: string, background: string): number {
+  const fg = hexToRgb(normalizeBrandColor(foreground))
+  const bg = hexToRgb(normalizeBrandColor(background))
+  if (!fg || !bg) return 1
+  const one = relativeLuminance(fg.r, fg.g, fg.b)
+  const two = relativeLuminance(bg.r, bg.g, bg.b)
+  const lighter = Math.max(one, two)
+  const darker = Math.min(one, two)
+  return Math.round(((lighter + 0.05) / (darker + 0.05)) * 10) / 10
+}
+
+/**
+ * Foreground used for text and icons sitting on the brand colour.
+ *
+ * The organization may pin an explicit value; otherwise it is chosen by WCAG
+ * luminance. Empty or malformed input falls back to the automatic choice, so a
+ * half-typed hex in the branding form can never break the shell.
+ */
+export function resolveBrandFg(brand: string, explicit?: string | null): string {
+  const raw = (explicit || '').trim()
+  if (/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.test(raw)) return normalizeBrandColor(raw)
+  return isLightColor(brand) ? '#18181b' : '#ffffff'
+}
+
+/**
  * Accepts `#rgb`, `rgb`, `#rrggbb` or `rrggbb` and normalises to `#rrggbb`.
  * Anything else falls back to ink, so a bad value can never break the shell.
  */
@@ -62,11 +90,11 @@ export function normalizeBrandColor(value?: string | null): string {
  * With no colour set the whole set resolves to ink — the interface looks
  * exactly as it did before the brand feature existed.
  */
-export function getBrandStyle(color?: string | null): Record<string, string> {
+export function getBrandStyle(color?: string | null, brandFg?: string | null): Record<string, string> {
   const brand = normalizeBrandColor(color)
   return {
     '--brand': brand,
-    '--brand-fg': isLightColor(brand) ? '#18181b' : '#ffffff',
+    '--brand-fg': resolveBrandFg(brand, brandFg),
     '--brand-hover': `color-mix(in oklab, ${brand} 86%, black)`,
     '--brand-pressed': `color-mix(in oklab, ${brand} 74%, black)`,
     '--brand-soft': `color-mix(in oklab, ${brand} 10%, transparent)`,

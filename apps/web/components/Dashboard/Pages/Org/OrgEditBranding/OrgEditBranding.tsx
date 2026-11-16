@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { mutate } from 'swr'
 import { getAPIUrl } from '@services/config/config'
+import { getContrastRatio, normalizeBrandColor, resolveBrandFg } from '@services/utils/ts/colorUtils'
 import AuthBrandingTab from './AuthBrandingTab'
 
 const SUPPORTED_FILES = constructAcceptValue(['png', 'jpg', 'svg'])
@@ -41,6 +42,7 @@ export default function OrgEditBranding() {
 
   // Theme state
   const [primaryColor, setPrimaryColor] = useState<string>(org?.config?.config?.customization?.general?.color || org?.config?.config?.general?.color || '')
+  const [brandFg, setBrandFg] = useState<string>(org?.config?.config?.customization?.general?.brand_fg || org?.config?.config?.general?.brand_fg || '')
   const [isSaved, setIsSaved] = useState(true)
   const [isManualSaving, setIsManualSaving] = useState(false)
   const isActiveSaving = isManualSaving
@@ -143,7 +145,7 @@ export default function OrgEditBranding() {
     setIsManualSaving(true)
     const loadingToast = toast.loading(t('dashboard.organization.settings.updating'))
     try {
-      await updateOrgColorConfig(org.id, primaryColor, access_token)
+      await updateOrgColorConfig(org.id, primaryColor, access_token, brandFg)
       await revalidateTags(['organizations'], org.slug)
       mutate(`${getAPIUrl()}orgs/slug/${org.slug}`)
       setIsSaved(true)
@@ -164,6 +166,23 @@ export default function OrgEditBranding() {
     setPrimaryColor('')
     setIsSaved(false)
   }
+
+  const handleBrandFgInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setBrandFg(e.target.value)
+    setIsSaved(false)
+  }
+
+  const handleClearBrandFg = () => {
+    setBrandFg('')
+    setIsSaved(false)
+  }
+
+  // Preview of the actual button colours: the resolved foreground sitting on
+  // the resolved brand background.
+  const previewBrand = normalizeBrandColor(primaryColor)
+  const previewBrandFg = resolveBrandFg(previewBrand, brandFg)
+  const previewContrast = getContrastRatio(previewBrandFg, previewBrand)
+  const isContrastLow = previewContrast < 4.5
 
   return (
     <div className="space-y-3">
@@ -416,6 +435,48 @@ export default function OrgEditBranding() {
             )}
           </div>
           <p className="text-xs text-gray-400">{t('dashboard.organization.theme.primary_color_desc')}</p>
+
+          {/* Brand foreground — text and icons sitting on brand surfaces */}
+          <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50">
+            {/* Live preview: the resolved foreground on the resolved brand */}
+            <div className="flex-shrink-0">
+              <div
+                className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-100 shadow-sm text-sm font-semibold"
+                style={{ backgroundColor: previewBrand, color: previewBrandFg }}
+              >
+                Aa
+              </div>
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-700">{t('dashboard.organization.theme.brand_fg')}</p>
+              <p className="text-xs text-gray-400">
+                {brandFg ? '' : `${t('dashboard.organization.theme.brand_fg_auto')} · `}
+                {t('dashboard.organization.theme.contrast')} {previewContrast}:1
+                {isContrastLow && (
+                  <span className="text-amber-600"> · {t('dashboard.organization.theme.contrast_low')}</span>
+                )}
+              </p>
+            </div>
+            <Input
+              type="text"
+              value={brandFg}
+              onChange={handleBrandFgInputChange}
+              placeholder={t('dashboard.organization.theme.brand_fg_auto')}
+              className="w-24 h-10 rounded-lg border border-gray-100 !shadow-sm font-mono text-sm uppercase bg-white focus-visible:!shadow-sm focus-visible:border-gray-100 focus:outline-none"
+              maxLength={7}
+            />
+            {brandFg && (
+              <button
+                type="button"
+                onClick={handleClearBrandFg}
+                className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                title={t('dashboard.organization.theme.clear_color')}
+              >
+                <X size={18} />
+              </button>
+            )}
+          </div>
+          <p className="text-xs text-gray-400">{t('dashboard.organization.theme.brand_fg_desc')}</p>
         </div>
       </div>
 
