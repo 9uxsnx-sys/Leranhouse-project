@@ -29,6 +29,44 @@ export function isLightColor(hex: string): boolean {
   return relativeLuminance(rgb.r, rgb.g, rgb.b) > 0.4
 }
 
+/** Ink — the signal colour used when an organization has not set one. */
+export const BRAND_FALLBACK = '#27272a'
+
+/**
+ * Accepts `#rgb`, `rgb`, `#rrggbb` or `rrggbb` and normalises to `#rrggbb`.
+ * Anything else falls back to ink, so a bad value can never break the shell.
+ */
+export function normalizeBrandColor(value?: string | null): string {
+  const raw = (value || '').trim().replace(/^#/, '')
+  if (/^[0-9a-f]{3}$/i.test(raw)) {
+    return `#${raw.split('').map((c) => c + c).join('')}`
+  }
+  if (/^[0-9a-f]{6}$/i.test(raw)) return `#${raw}`
+  return BRAND_FALLBACK
+}
+
+/**
+ * The CSS custom properties every brand surface reads.
+ *
+ * Derived from one hex so an organization never has to pick six colours:
+ * the foreground is chosen by WCAG luminance, and hover/pressed/soft/ring are
+ * mixed in CSS with `color-mix`, so they follow whatever hex is configured.
+ *
+ * With no colour set the whole set resolves to ink — the interface looks
+ * exactly as it did before the brand feature existed.
+ */
+export function getBrandStyle(color?: string | null): Record<string, string> {
+  const brand = normalizeBrandColor(color)
+  return {
+    '--brand': brand,
+    '--brand-fg': isLightColor(brand) ? '#18181b' : '#ffffff',
+    '--brand-hover': `color-mix(in oklab, ${brand} 86%, black)`,
+    '--brand-pressed': `color-mix(in oklab, ${brand} 74%, black)`,
+    '--brand-soft': `color-mix(in oklab, ${brand} 10%, transparent)`,
+    '--brand-ring': `color-mix(in oklab, ${brand} 35%, transparent)`,
+  }
+}
+
 /**
  * Tailwind class sets for menu elements on a dynamic primary-color background.
  *

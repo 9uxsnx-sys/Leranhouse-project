@@ -69,7 +69,7 @@ Acceptance: no indigo appears anywhere in the product with no brand colour confi
 
 Acceptance: no blue/indigo remains on any call-to-action, progress fill or active marker. Remaining hits are semantic.
 
-### Phase 4 — Connect the brand colour — not started
+### Phase 4 — Connect the brand colour — in progress (step 1 done)
 
 Infrastructure first, then surfaces. Until the tokens exist on both shells, nothing changes visually.
 
@@ -100,7 +100,7 @@ Add the matching utilities to `styles/globals.css`: `bg-brand`, `text-brand-fg`,
 
 **Order of work** — each step ships on its own:
 
-1. Tokens + both shells + ink fallback → zero visual change. This is the checkpoint that makes the rest reversible.
+1. ✅ **Done.** Tokens in `:root` (ink defaults), `getBrandStyle()` in `services/utils/ts/colorUtils.ts`, applied on both shells — `OrgMenu` for the learner side and `ClientAdminLayout` for the dashboard. Bad or missing values normalise to ink, so nothing can break the shell. The six utilities exist in `globals.css` and stay unemitted until a surface uses them.
 2. Active nav marker + tab underline → smallest visible win.
 3. Progress fills → the learner side starts to feel branded.
 4. Primary buttons → needs the one-filled-primary-per-view audit first.

@@ -443,6 +443,32 @@
 
 /* buttons — flat fills; the old top-sheen gradient utilities were removed */
 
+/* brand — signal surfaces only (see docs/08-features/ui-theme/theme-color-plan.md).
+   Nothing consumes these yet; Phase 4 wires them up surface by surface. */
+@utility bg-brand {
+  background-color: var(--brand);
+}
+
+@utility bg-brand-hover {
+  background-color: var(--brand-hover);
+}
+
+@utility bg-brand-pressed {
+  background-color: var(--brand-pressed);
+}
+
+@utility bg-brand-soft {
+  background-color: var(--brand-soft);
+}
+
+@utility text-brand-fg {
+  color: var(--brand-fg);
+}
+
+@utility border-brand {
+  border-color: var(--brand);
+}
+
 /* progress-bar.tsx — top route-change bar (0% -> 90% linear 2s, 0.2s delay) */
 @keyframes medusa-progress {
   from {
@@ -644,8 +670,14 @@
     --input: 220 13% 91%;
     --ring: 240 6% 10%;
 
-    /* Brand accent for the public header (overridden per-org) */
-    --brand: #6366f1;
+    /* Brand signal colour — overridden per organization on both shells.
+       Defaults to ink, so with no colour configured nothing changes. */
+    --brand: #27272a;
+    --brand-fg: #ffffff;
+    --brand-hover: #3f3f46;
+    --brand-pressed: #52525b;
+    --brand-soft: rgba(39, 39, 42, 0.1);
+    --brand-ring: rgba(39, 39, 42, 0.35);
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;

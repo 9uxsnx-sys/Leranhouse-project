@@ -10,6 +10,7 @@ import { fetchRAGChatSessions, RAGChatSession } from '@services/ai/ai'
 import UserLeftMenu from './UserLeftMenu'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
+import { getBrandStyle } from '@services/utils/ts/colorUtils'
 import { usePathname } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
 import useAdminStatus from '@components/Hooks/useAdminStatus'
@@ -264,8 +265,8 @@ export const OrgMenu = ({
         className="relative flex h-screen w-full flex-col items-start lg:flex-row"
         style={{
           ...(shellHeight ? { height: shellHeight } : {}),
-          ['--brand' as string]: primaryColor || '#6366f1',
-        }}
+          ...getBrandStyle(primaryColor),
+        } as React.CSSProperties}
       >
         {/* Desktop sidebar — rendered directly, matching dashboard layout */}
         <UserLeftMenu />
