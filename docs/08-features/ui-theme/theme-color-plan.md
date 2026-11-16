@@ -101,7 +101,7 @@ Add the matching utilities to `styles/globals.css`: `bg-brand`, `text-brand-fg`,
 **Order of work** — each step ships on its own:
 
 1. ✅ **Done.** Tokens in `:root` (ink defaults), `getBrandStyle()` in `services/utils/ts/colorUtils.ts`, applied on both shells — `OrgMenu` for the learner side and `ClientAdminLayout` for the dashboard. Bad or missing values normalise to ink, so nothing can break the shell. The six utilities exist in `globals.css` and stay unemitted until a surface uses them.
-2. Active nav marker + tab underline → smallest visible win.
+2. ✅ **Done.** A 3px brand bar marks the active item in both sidebars and the account sidebar (inside the existing white pill, never a filled block), and the shared `ui/page-tabs.tsx` underline is `border-brand`. Pill-style tabs stay neutral.
 3. Progress fills → the learner side starts to feel branded.
 4. Primary buttons → needs the one-filled-primary-per-view audit first.
 5. Selection tint → optional polish.
