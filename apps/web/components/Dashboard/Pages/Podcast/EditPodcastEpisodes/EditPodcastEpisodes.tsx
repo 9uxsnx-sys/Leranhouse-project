@@ -365,7 +365,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
                                 <div
                                   className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
                                     isSelected
-                                      ? 'bg-blue-500 border-blue-500 text-white'
+                                      ? 'bg-zinc-800 border-zinc-800 text-white'
                                       : 'border-gray-300 hover:border-gray-400'
                                   }`}
                                   onClick={(e) => {
@@ -741,10 +741,10 @@ function EpisodeDetailForm({
             disabled={isSaving || !title.trim() || !dirty}
             className={`inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors ${
               isSaving
-                ? 'bg-black text-white border-black opacity-50 cursor-not-allowed'
+                ? 'bg-zinc-800 text-white border-zinc-800 opacity-50 cursor-not-allowed'
                 : !dirty
                   ? 'bg-white text-gray-600 border-gray-200 cursor-default'
-                  : 'bg-black text-white border-black hover:opacity-90 cursor-pointer'
+                  : 'bg-zinc-800 text-white border-zinc-800 hover:bg-zinc-700 cursor-pointer'
             }`}
           >
             {isSaving ? (
@@ -1017,7 +1017,7 @@ function CreateEpisodeModal({
             <button
               type="submit"
               disabled={isSubmitting || !title.trim()}
-              className="px-4 py-2 text-sm font-semibold rounded-lg bg-black text-white hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-4 py-2 text-sm font-semibold rounded-lg bg-zinc-800 text-white hover:bg-zinc-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isSubmitting && <Loader2 size={16} className="animate-spin" />}
               {t('podcasts.dashboard.episodes.create')}

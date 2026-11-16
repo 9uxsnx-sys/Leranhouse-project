@@ -472,7 +472,7 @@ const UserProfileBuilder = () => {
                   }
                 }}
               >
-                <SelectTrigger className="w-full p-0 border-0 bg-black">
+                <SelectTrigger className="w-full p-0 border-0 bg-zinc-800">
                   <div className="w-full">
                     <Button variant="default" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
                       <Plus className="h-4 w-4 me-2" />

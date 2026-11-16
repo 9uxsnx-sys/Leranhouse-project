@@ -4,7 +4,7 @@
 
 > The Button component triggers actions and form submissions. It supports five Medusa visual variants, four shadcn-style aliases, five sizes, loading state, and icon slots — and can render as a child component via Radix's `Slot` pattern.
 
-> **Planned change:** the glossy top-sheen (`after:button-*-gradient`) and the button drop shadows are scheduled for removal so every button is flat. Geometry (padding, height, radius) does not change. See [Theme colour and button cleanup](../../08-features/ui-theme/theme-color-plan.md).
+> **As-built:** every variant is a flat fill — no top-sheen, no drop shadow, no `overflow-hidden`. Geometry (padding, height, radius) is unchanged and signed off. See [Theme colour and button cleanup](../../08-features/ui-theme/theme-color-plan.md).
 
 ## Import
 
@@ -22,10 +22,10 @@ The component defines two sets of variant names — the canonical **Medusa** nam
 
 | Variant      | Visual style                                                    |
 | ------------ | --------------------------------------------------------------- |
-| `primary`    | Ink fill (`bg-ui-button-inverted`, `#27272a`), light text, white top-sheen overlay, `shadow-buttons-inverted` |
-| `secondary`  | Neutral fill (`bg-ui-button-neutral`), strong white top-sheen overlay, `shadow-buttons-neutral` |
-| `transparent`| No fill, `text-ui-fg-base`, subtle hover background, no sheen    |
-| `danger`     | Red fill (`bg-ui-button-danger`), white text, top-sheen overlay  |
+| `primary`    | Flat ink fill (`bg-ui-button-inverted`, `#27272a`), `text-ui-contrast-fg-primary` label |
+| `secondary`  | White fill (`bg-ui-button-neutral`), 1px `ui-border-base` border, ink text |
+| `transparent`| No fill, `text-ui-fg-base`, subtle hover background                          |
+| `danger`     | Flat red fill (`bg-ui-button-danger`, `#e11d48`), white text                 |
 | `link`       | Underlined text only — no padding, no background, `text-ui-fg-interactive` |
 
 ### shadcn/ui aliases
@@ -44,16 +44,18 @@ The component defines two sets of variant names — the canonical **Medusa** nam
 ```tsx
 // From the cva definition in button.tsx
 primary:
-  "shadow-buttons-inverted text-ui-contrast-fg-primary bg-ui-button-inverted after:button-inverted-gradient hover:bg-ui-button-inverted-hover ...",
+  "text-ui-contrast-fg-primary bg-ui-button-inverted hover:bg-ui-button-inverted-hover active:bg-ui-button-inverted-pressed",
 secondary:
-  "shadow-buttons-neutral text-ui-fg-base bg-ui-button-neutral after:button-neutral-gradient hover:bg-ui-button-neutral-hover ...",
+  "text-ui-fg-base bg-ui-button-neutral border border-ui-border-base hover:bg-ui-button-neutral-hover active:bg-ui-button-neutral-pressed",
 transparent:
-  "after:hidden text-ui-fg-base bg-ui-button-transparent hover:bg-ui-button-transparent-hover ...",
+  "text-ui-fg-base bg-ui-button-transparent hover:bg-ui-button-transparent-hover active:bg-ui-button-transparent-pressed disabled:!bg-transparent",
 danger:
-  "shadow-buttons-danger text-ui-fg-on-color bg-ui-button-danger after:button-danger-gradient hover:bg-ui-button-danger-hover ...",
+  "text-ui-fg-on-color bg-ui-button-danger hover:bg-ui-button-danger-hover active:bg-ui-button-danger-pressed focus-visible:ring-red-500/25",
 link:
   "text-ui-fg-interactive underline-offset-4 hover:underline focus-visible:text-ui-fg-interactive-hover",
 ```
+
+The aliases (`default` → `primary`, `destructive` → `danger`, `outline` → `secondary`, `ghost` → `transparent`) carry identical classes. Prefer the Medusa names in new code.
 
 ## Sizes
 
@@ -82,11 +84,15 @@ The `icon` size renders a square 32×32 button, ideal for icon-only toolbar acti
 
 ### Hover
 
-Each variant has a hover state defined in cva. For example, `secondary` uses `hover:bg-ui-button-neutral-hover`, and `transparent` uses `hover:bg-ui-button-neutral-hover`.
+Each variant has its own hover fill from cva: `hover:bg-ui-button-inverted-hover` (primary), `hover:bg-ui-button-neutral-hover` (secondary), `hover:bg-ui-button-transparent-hover` (transparent), `hover:bg-ui-button-danger-hover` (danger).
 
 ### Active / pressed
 
-Active state is conveyed via `active:bg-ui-bg-interactive-pressed` (primary), `active:bg-ui-button-neutral-pressed` (secondary), etc.
+`active:bg-ui-button-inverted-pressed` (primary), `active:bg-ui-button-neutral-pressed` (secondary), `active:bg-ui-button-transparent-pressed` (transparent), `active:bg-ui-button-danger-pressed` (danger).
+
+### Focus
+
+`focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-900/20`. The `danger` variant overrides the ring to `ring-red-500/25`.
 
 ### Disabled
 
@@ -94,7 +100,7 @@ Active state is conveyed via `active:bg-ui-bg-interactive-pressed` (primary), `a
 <Button disabled>Cannot submit</Button>
 ```
 
-Disabled buttons apply `opacity-50 pointer-events-none` via the group state `group-disabled/button:opacity-50`. The cursor becomes `not-allowed`.
+Disabled buttons get `disabled:bg-ui-bg-disabled`, `disabled:border-ui-border-base`, `disabled:text-ui-fg-disabled` and `disabled:cursor-not-allowed` from the base class. There is no opacity change — the fill is replaced by the disabled surface colour.
 
 ### Loading
 
@@ -102,16 +108,18 @@ Disabled buttons apply `opacity-50 pointer-events-none` via the group state `gro
 <Button isLoading>Please wait…</Button>
 ```
 
-The loading state overlays the button content with a centered spinner:
+The loading state sets the native `disabled` attribute and renders a full-size absolute overlay painted with `bg-ui-bg-disabled`, holding a centred 16px spinner:
 
-- The original children are wrapped in a `<span className="invisible">` to preserve layout width.
-- A spinner `<span>` is absolutely positioned at the center:
-  ```tsx
-  <span className="absolute inset-0 flex items-center justify-center">
-    <span className="animate-spin rounded-full border-2 border-ui-fg-subtle border-t-transparent h-4 w-4" />
+```tsx
+<span className="pointer-events-none">
+  <span className="bg-ui-bg-disabled absolute inset-0 flex items-center justify-center rounded-md">
+    <span className="size-4 animate-spin rounded-full border-2 border-ui-fg-subtle border-t-transparent" />
   </span>
-  ```
-- The button itself gets `pointer-events-none` and `bg-ui-bg-disabled` (if the variant normally uses a colored background).
+  {children}
+</span>
+```
+
+Because the overlay is opaque and the children still render after it, a `primary` button flips to the disabled grey surface while loading and the label stays visible on top of that overlay. That is the current as-built behaviour.
 
 ## Icons
 

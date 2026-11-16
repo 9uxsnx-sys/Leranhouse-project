@@ -107,7 +107,7 @@ function ProductCard({ product, orgslug, orgUuid }: { product: StoreProduct; org
                 maximumFractionDigits: 0,
               }).format(product.price_amount)}
             </div>
-            <div className="flex items-center gap-1.5 text-sm font-semibold px-3.5 py-2 rounded-xl bg-gray-900 text-white group-hover:bg-gray-800 transition-colors">
+            <div className="flex items-center gap-1.5 text-sm font-semibold px-3.5 py-2 rounded-xl bg-zinc-800 text-white group-hover:bg-zinc-700 transition-colors">
               {t('store.get_access')}
               <ArrowRight size={13} className="rtl:rotate-180" />
             </div>

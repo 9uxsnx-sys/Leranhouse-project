@@ -99,7 +99,7 @@ export default function EpisodeCard({ episode, podcast, orgslug, savedProgress }
           {/* Progress bar */}
           <div className="h-1 bg-gray-200/80 rounded-full overflow-hidden">
             <div
-              className="h-full bg-indigo-500 rounded-full transition-all duration-300 ease-out"
+              className="h-full bg-zinc-800 rounded-full transition-all duration-300 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>

@@ -15,9 +15,9 @@ const iconButtonVariants = cva(
     variants: {
       variant: {
         primary:
-          "bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/95 focus-visible:ring-2 focus-visible:ring-ring",
+          "bg-ui-button-inverted text-ui-contrast-fg-primary hover:bg-ui-button-inverted-hover active:bg-ui-button-inverted-pressed focus-visible:ring-2 focus-visible:ring-gray-900/20 focus-visible:ring-offset-2",
         transparent:
-          "text-gray-700 bg-transparent hover:bg-gray-100 active:bg-gray-200 focus-visible:bg-white focus-visible:ring-2 focus-visible:ring-ring",
+          "text-gray-700 bg-transparent hover:bg-gray-100 active:bg-gray-200 focus-visible:bg-white focus-visible:ring-2 focus-visible:ring-gray-900/20",
       },
       size: {
         "2xsmall": "h-5 w-5",

@@ -67,7 +67,7 @@ export function getMenuColorClasses(primaryColor: string) {
         'bg-black/10 text-gray-900 placeholder:text-gray-600 focus:ring-black/10 focus:border-black/20',
       searchIcon:
         'text-gray-600 group-focus-within:text-gray-800',
-      signUpBtn: 'bg-gray-900 text-white hover:bg-gray-800',
+      signUpBtn: 'bg-zinc-800 text-white hover:bg-zinc-700',
       profileHover: 'hover:bg-black/10',
       profileName: 'text-gray-900',
       profileMuted: 'text-gray-700',

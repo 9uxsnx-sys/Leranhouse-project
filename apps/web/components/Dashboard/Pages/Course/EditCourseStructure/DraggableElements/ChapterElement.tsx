@@ -308,8 +308,8 @@ function ChapterElement(props: ChapterElementProps) {
                 onClick={toggleSelectAll}
                 className={`h-5 w-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
                   allSelected
-                    ? 'bg-blue-600 border-blue-600 text-white'
-                    : 'border-blue-400 bg-white hover:border-blue-500'
+                    ? 'bg-zinc-800 border-zinc-800 text-white'
+                    : 'border-gray-300 bg-white hover:border-gray-400'
                 }`}
               >
                 {allSelected && <Check size={12} strokeWidth={3} />}

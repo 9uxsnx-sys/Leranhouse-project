@@ -323,7 +323,7 @@ function ModuleForm({ chapter, chapterIndex, orgslug, course_uuid, onBack, onLes
                             <div
                               className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
                                 isSelected
-                                  ? 'bg-blue-500 border-blue-500 text-white'
+                                  ? 'bg-zinc-800 border-zinc-800 text-white'
                                   : 'border-gray-300 hover:border-gray-400'
                               }`}
                               onClick={(e) => {

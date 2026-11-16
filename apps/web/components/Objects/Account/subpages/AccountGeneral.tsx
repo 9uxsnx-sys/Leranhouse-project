@@ -547,10 +547,10 @@ const UserEditForm = ({
             disabled={isSubmitting}
             className={`inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${
               isSubmitting
-                ? 'bg-black text-white border-black opacity-50 cursor-not-allowed'
+                ? 'bg-zinc-800 text-white border-zinc-800 opacity-50 cursor-not-allowed'
                 : !dirty && isSaved
                   ? 'bg-white text-gray-600 border-gray-200 cursor-default'
-                  : 'bg-black text-white border-black hover:opacity-90 cursor-pointer'
+                  : 'bg-zinc-800 text-white border-zinc-800 hover:bg-zinc-700 cursor-pointer'
             }`}
           >
             {isSubmitting ? (

@@ -247,7 +247,7 @@ function SaveState(props: { orgslug: string }) {
           ? 'text-neutral-500 cursor-default'
           : saveError
             ? 'bg-red-600 text-white hover:bg-red-700 cursor-pointer'
-            : 'bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer') +
+            : 'bg-zinc-800 text-white hover:bg-zinc-700 cursor-pointer') +
         (isSaving ? ' opacity-50 cursor-not-allowed' : '')
       }
       onClick={saveCourseState}

@@ -159,7 +159,7 @@ function Chapter(props: any) {
                     onClick={() => {
                       props.openNewActivityModal(props.info.list.chapter.id)
                     }}
-                    className="flex space-x-2 items-center py-5 my-3 rounded-md justify-center text-white  bg-black  hover:cursor-pointer"
+                    className="flex space-x-2 items-center py-5 my-3 rounded-md justify-center text-white  bg-zinc-800  hover:cursor-pointer"
                   >
                     <Sparkles className="" size={17} />
                     <div className="text-sm mx-auto my-auto  items-center font-bold">

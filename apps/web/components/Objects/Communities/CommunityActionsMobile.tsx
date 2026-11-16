@@ -56,7 +56,7 @@ export function CommunityActionsMobile({
             {canCreateDiscussion && onCreateDiscussion && (
               <button
                 onClick={onCreateDiscussion}
-                className="flex items-center gap-1.5 px-3 py-2 bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition-colors text-sm font-medium"
+                className="flex items-center gap-1.5 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors text-sm font-medium"
               >
                 <Plus size={14} />
                 {t('communities.new')}

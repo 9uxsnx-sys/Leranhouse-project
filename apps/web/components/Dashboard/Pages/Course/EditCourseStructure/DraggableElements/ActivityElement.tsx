@@ -246,8 +246,8 @@ function ActivityElement(props: ActivitiyElementProps) {
             onClick={(e) => { e.stopPropagation(); props.onToggleSelect?.() }}
             className={`flex-shrink-0 h-5 w-5 rounded border-2 flex items-center justify-center transition-colors ${
               props.isSelected
-                ? 'bg-blue-600 border-blue-600 text-white'
-                : 'border-gray-300 bg-white hover:border-blue-400'
+                ? 'bg-zinc-800 border-zinc-800 text-white'
+                : 'border-gray-300 bg-white hover:border-gray-400'
             }`}
           >
             {props.isSelected && <Check size={12} strokeWidth={3} />}

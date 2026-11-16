@@ -438,7 +438,7 @@ function ScormActivity({ activity, course }: ScormActivityProps) {
           </div>
           <button
             onClick={refreshContent}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 rounded-lg hover:bg-neutral-800 dark:hover:bg-neutral-100 transition-colors font-medium text-sm"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-800 dark:bg-white text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-700 dark:hover:bg-zinc-100 transition-colors font-medium text-sm"
           >
             <RefreshCw size={15} />
             <span>Try Again</span>

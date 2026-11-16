@@ -274,7 +274,7 @@ const OrgEditAPIAccess: React.FC = () => {
               type="button"
               onClick={handleAddToken}
               disabled={isActiveSaving}
-              className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border bg-black text-white border-black hover:opacity-90 cursor-pointer transition-colors"
+              className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border bg-zinc-800 text-white border-zinc-800 hover:bg-zinc-700 cursor-pointer transition-colors"
             >
               <Plus size={14} />
               <span>{t('dashboard.organization.api_access.create_token')}</span>
@@ -453,7 +453,7 @@ const OrgEditAPIAccess: React.FC = () => {
                   ? 'bg-white text-gray-600 border-gray-200 cursor-default'
                   : isSaved
                     ? 'bg-white text-gray-600 border-gray-200 cursor-default'
-                    : 'bg-black text-white border-black hover:opacity-90 cursor-pointer'
+                    : 'bg-zinc-800 text-white border-zinc-800 hover:bg-zinc-700 cursor-pointer'
               }`}
             >
               {isActiveSaving ? (

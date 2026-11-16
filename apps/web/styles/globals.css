@@ -434,89 +434,14 @@
   font-weight: 500;
 }
 
-/* buttons — effects.ts buttons-* (light mode) */
-@utility shadow-buttons-inverted {
-  box-shadow:
-    0px 0.75px 0px 0px rgba(255, 255, 255, 0.2) inset,
-    0px 1px 2px 0px rgba(0, 0, 0, 0.4),
-    0px 0px 0px 1px rgba(24, 24, 27, 1);
-}
-
-@utility shadow-buttons-inverted-focus {
-  box-shadow:
-    0px 0.75px 0px 0px rgba(255, 255, 255, 0.2) inset,
-    0px 1px 2px 0px rgba(0, 0, 0, 0.4),
-    0px 0px 0px 1px rgba(24, 24, 27, 1),
-    0px 0px 0px 2px rgba(255, 255, 255, 1),
-    0px 0px 0px 4px rgba(59, 130, 246, 0.6);
-}
-
+/* buttons — neutral outline (select triggers use it as a border substitute) */
 @utility shadow-buttons-neutral {
   box-shadow:
     0px 1px 2px 0px rgba(0, 0, 0, 0.12),
     0px 0px 0px 1px rgba(0, 0, 0, 0.08);
 }
 
-@utility shadow-buttons-neutral-focus {
-  box-shadow:
-    0px 1px 2px 0px rgba(0, 0, 0, 0.12),
-    0px 0px 0px 1px rgba(0, 0, 0, 0.08),
-    0px 0px 0px 2px rgba(255, 255, 255, 1),
-    0px 0px 0px 4px rgba(59, 130, 246, 0.6);
-}
-
-@utility shadow-buttons-danger {
-  box-shadow:
-    0px 0.75px 0px 0px rgba(255, 255, 255, 0.2) inset,
-    0px 1px 2px 0px rgba(190, 18, 60, 0.4),
-    0px 0px 0px 1px rgba(190, 18, 60, 1);
-}
-
-@utility shadow-buttons-danger-focus {
-  box-shadow:
-    0px 0.75px 0px 0px rgba(255, 255, 255, 0.2) inset,
-    0px 1px 2px 0px rgba(190, 18, 60, 0.4),
-    0px 0px 0px 1px rgba(190, 18, 60, 1),
-    0px 0px 0px 2px rgba(255, 255, 255, 1),
-    0px 0px 0px 4px rgba(59, 130, 246, 0.6);
-}
-
-/* buttons — micro top-sheen overlay (after: element) */
-@utility button-inverted-gradient {
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 100%);
-}
-
-@utility button-inverted-hover-gradient {
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 100%);
-}
-
-@utility button-inverted-pressed-gradient {
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 100%);
-}
-
-@utility button-neutral-gradient {
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 100%);
-}
-
-@utility button-neutral-hover-gradient {
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 100%);
-}
-
-@utility button-neutral-pressed-gradient {
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 100%);
-}
-
-@utility button-danger-gradient {
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 100%);
-}
-
-@utility button-danger-hover-gradient {
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 100%);
-}
-
-@utility button-danger-pressed-gradient {
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 100%);
-}
+/* buttons — flat fills; the old top-sheen gradient utilities were removed */
 
 /* progress-bar.tsx — top route-change bar (0% -> 90% linear 2s, 0.2s delay) */
 @keyframes medusa-progress {
@@ -705,7 +630,7 @@
     --card-foreground: 0 0% 10%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 10%;
-    --primary: 243 75% 59%;
+    --primary: 240 6% 10%;
     --primary-foreground: 0 0% 100%;
     --secondary: 0 0% 96.5%;
     --secondary-foreground: 0 0% 10%;
@@ -717,7 +642,7 @@
     --destructive-foreground: 0 0% 98%;
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 243 75% 59%;
+    --ring: 240 6% 10%;
 
     /* Brand accent for the public header (overridden per-org) */
     --brand: #6366f1;
@@ -761,8 +686,8 @@
     --card-foreground: 0 0% 100%;
     --popover: 0 0% 10%;
     --popover-foreground: 0 0% 100%;
-    --primary: 243 75% 59%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
     --secondary: 0 0% 15%;
     --secondary-foreground: 0 0% 100%;
     --muted: 0 0% 15%;
@@ -773,7 +698,7 @@
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 16.5%;
     --input: 0 0% 16.5%;
-    --ring: 243 75% 59%;
+    --ring: 0 0% 83%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;

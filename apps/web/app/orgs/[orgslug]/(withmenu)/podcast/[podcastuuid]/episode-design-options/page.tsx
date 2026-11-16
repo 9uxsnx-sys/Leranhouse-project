@@ -219,7 +219,7 @@ function OptionAHorizontalCard({
               <div className="flex items-center gap-2">
                 <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-indigo-500 rounded-full transition-all duration-300"
+                    className="h-full bg-zinc-800 rounded-full transition-all duration-300"
                     style={{ width: `${episode.progress}%` }}
                   />
                 </div>
@@ -277,7 +277,7 @@ function OptionBStackedCard({
               <div
                 className={`rounded-full p-2 transition-colors ${
                   episode.isPlaying
-                    ? 'bg-indigo-600 text-white'
+                    ? 'bg-zinc-800 text-white'
                     : 'bg-white/90 text-gray-900 hover:bg-white'
                 }`}
               >
@@ -324,7 +324,7 @@ function OptionBStackedCard({
                 <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-300 ${
-                      episode.completed ? 'bg-emerald-500' : 'bg-indigo-500'
+                      episode.completed ? 'bg-emerald-500' : 'bg-zinc-800'
                     }`}
                     style={{ width: `${episode.progress}%` }}
                   />
@@ -439,7 +439,7 @@ function OptionCMinimalRow({
       <button
         className={`flex-shrink-0 p-1.5 rounded-full transition-colors ${
           episode.isPlaying
-            ? 'bg-indigo-600 text-white'
+            ? 'bg-zinc-800 text-white'
             : isHovered
             ? 'bg-gray-200 text-gray-600'
             : 'text-gray-300'

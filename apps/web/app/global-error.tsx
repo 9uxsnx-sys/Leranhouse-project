@@ -44,7 +44,7 @@ export default function GlobalError({
             )}
             <button 
                 onClick={() => reset()}
-                className="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition-colors shadow-sm"
+                className="flex items-center space-x-2 bg-zinc-800 hover:bg-zinc-700 text-white px-6 py-2 rounded-lg font-medium transition-colors shadow-sm"
             >
                 <RefreshCcw size={18} />
                 <span>Try again</span>

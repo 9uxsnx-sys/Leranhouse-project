@@ -86,7 +86,7 @@ function BoardMembersTab({ boardUuid, orgId }: BoardMembersTabProps) {
               member.role === 'owner'
                 ? 'bg-purple-500'
                 : member.role === 'editor'
-                  ? 'bg-blue-500'
+                  ? 'bg-zinc-800'
                   : 'bg-gray-400'
             }`}
           />

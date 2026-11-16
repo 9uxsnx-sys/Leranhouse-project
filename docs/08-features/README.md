@@ -73,7 +73,7 @@ Unlike the admin or user guides, which explain how to use a feature, these pages
 
 | Document | Description |
 |----------|-------------|
-| [Theme Colour and Button Cleanup](./ui-theme/theme-color-plan.md) | Plan: flatten the button gradients, neutralise the indigo accent tokens, then connect the organization's brand colour to a fixed set of signal surfaces |
+| [Theme Colour and Button Cleanup](./ui-theme/theme-color-plan.md) | In progress: buttons flattened and accent tokens neutralised; brand colour still to be connected to a fixed set of signal surfaces |
 
 ## Navigation
 

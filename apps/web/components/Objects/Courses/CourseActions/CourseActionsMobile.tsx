@@ -241,7 +241,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
           </div>
           <a
             href={getUriWithOrg(orgslug, '/signup')}
-            className="w-full py-2 px-4 rounded-lg bg-neutral-900 text-white font-semibold text-sm hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2"
+            className="w-full py-2 px-4 rounded-lg bg-zinc-800 text-white font-semibold text-sm hover:bg-zinc-700 transition-colors flex items-center justify-center gap-2"
           >
             <UserPlus className="w-4 h-4" />
             Join Organization
@@ -273,7 +273,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
           <button
             onClick={handleGetAccess}
             disabled={isActionLoading}
-            className="w-full py-2 px-4 rounded-lg bg-neutral-900 text-white font-semibold text-sm hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2 disabled:bg-neutral-700"
+            className="w-full py-2 px-4 rounded-lg bg-zinc-800 text-white font-semibold text-sm hover:bg-zinc-700 transition-colors flex items-center justify-center gap-2 disabled:bg-zinc-600"
           >
             {isActionLoading ? (
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -291,7 +291,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
             className={`w-full py-2 px-4 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center gap-2 ${
               isStarted
                 ? 'bg-red-500 text-white hover:bg-red-600 disabled:bg-red-400'
-                : 'bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-700'
+                : 'bg-zinc-800 text-white hover:bg-zinc-700 disabled:bg-zinc-600'
             }`}
           >
             {isActionLoading ? (

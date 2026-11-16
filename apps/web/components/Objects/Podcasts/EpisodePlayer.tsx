@@ -350,7 +350,7 @@ export default function EpisodePlayer({ episode, podcast }: EpisodePlayerProps) 
             <button
               onClick={handlePlayPause}
               disabled={!isCurrentEpisode}
-              className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-900 text-white hover:bg-gray-800 transition-colors shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-12 h-12 flex items-center justify-center rounded-full bg-zinc-800 text-white hover:bg-zinc-700 transition-colors shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               title={isPlaying ? t('common.pause', 'Pause') : t('common.play', 'Play')}
             >
               {isPlaying ? (
@@ -391,7 +391,7 @@ export default function EpisodePlayer({ episode, podcast }: EpisodePlayerProps) 
                       }}
                       className={`block w-full text-start px-3 py-1.5 rounded-md text-sm tabular-nums transition-colors cursor-pointer ${
                         state.rate === rate
-                          ? 'bg-gray-900 text-white'
+                          ? 'bg-zinc-800 text-white'
                           : 'text-gray-600 hover:bg-gray-100'
                       }`}
                     >

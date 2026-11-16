@@ -316,10 +316,10 @@ function EditCollectionSEO({ collection, orgslug, onUpdated }: EditCollectionSEO
               disabled={isSavingRequest || (isDirty && Object.keys(formErrors).length > 0)}
               className={`inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors ${
                 isSavingRequest
-                  ? 'bg-black text-white border-black opacity-50 cursor-not-allowed'
+                  ? 'bg-zinc-800 text-white border-zinc-800 opacity-50 cursor-not-allowed'
                   : !isDirty || isTranslationLocked
                     ? 'bg-white text-gray-600 border-gray-200 cursor-default'
-                    : 'bg-black text-white border-black hover:opacity-90 cursor-pointer'
+                    : 'bg-zinc-800 text-white border-zinc-800 hover:bg-zinc-700 cursor-pointer'
               }`}
             >
               {isSavingRequest ? (

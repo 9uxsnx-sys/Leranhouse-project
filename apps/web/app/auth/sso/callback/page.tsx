@@ -263,7 +263,7 @@ export default function SSOCallbackPage() {
           <div className="space-y-3">
             <Link
               href="/auth/login"
-              className="block w-full py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors"
+              className="block w-full py-2 px-4 bg-zinc-800 text-white rounded-md hover:bg-zinc-700 transition-colors"
             >
               {t('auth.sso_callback.try_again')}
             </Link>

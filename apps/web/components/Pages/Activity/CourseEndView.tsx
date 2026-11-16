@@ -505,7 +505,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
                   href={getUriWithOrg(orgslug, `/certificates/${userCertificate.certificate_user.user_certification_uuid}/verify`)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition duration-200"
+                  className="inline-flex items-center space-x-2 bg-zinc-800 text-white px-6 py-3 rounded-full hover:bg-zinc-700 transition duration-200"
                 >
                   <Shield className="w-5 h-5" />
                   <span>{t('certificate.verify_certificate')}</span>
@@ -523,7 +523,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
           <div className="pt-6">
             <Link
               href={getUriWithOrg(orgslug, `/course/${courseUuid.replace('course_', '')}`)}
-              className="inline-flex items-center space-x-2 bg-gray-800 text-white px-6 py-3 rounded-full hover:bg-gray-700 transition duration-200"
+              className="inline-flex items-center space-x-2 bg-zinc-800 text-white px-6 py-3 rounded-full hover:bg-zinc-700 transition duration-200"
             >
               <ArrowLeft className="w-5 h-5" />
               <span>{t('courses.back_to_course')}</span>
@@ -579,7 +579,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
                 
                 <div className="w-full bg-gray-200 rounded-full h-3">
                   <div 
-                    className="bg-blue-600 h-3 rounded-full transition-all duration-500"
+                    className="bg-zinc-800 h-3 rounded-full transition-all duration-500"
                     style={{ width: `${progressInfo.percentage}%` }}
                   ></div>
                 </div>
@@ -598,7 +598,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
           <div className="pt-6">
             <Link
               href={getUriWithOrg(orgslug, `/course/${courseUuid.replace('course_', '')}`)}
-              className="inline-flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition duration-200"
+              className="inline-flex items-center space-x-2 bg-zinc-800 text-white px-6 py-3 rounded-full hover:bg-zinc-700 transition duration-200"
             >
               <ArrowLeft className="w-5 h-5" />
               <span>{t('courses.continue_learning')}</span>

@@ -1,10 +1,10 @@
-> Status: plan · Created: 2026-11-16 · Not implemented yet
+> Status: in progress · Created: 2026-11-16 · Phases 1–3 implemented, Phase 4 pending
 
 # UI theme colour and button cleanup
 
 Two things, in this order: **clean the buttons**, then **connect the brand colour**. The first is a prerequisite for the second — a themed button that still carries a glossy overlay looks wrong, and today the app ships two different button finishes.
 
-This page is the agreed plan. Nothing here is built yet. The repository checkpoint for rolling back is commit `7a85a7cb`.
+This page is the agreed plan. Phases 1–3 are built; Phase 4 (brand colour) is not. The repository checkpoint for rolling back is commit `7a85a7cb`.
 
 ## Goal
 
@@ -21,7 +21,7 @@ Move the product to a neutral-first ("Claude-style") visual system:
 - Destructive, success and warning colours are never themed.
 - With no brand colour configured, the interface must look exactly like today (ink primary button).
 
-## What the code does today
+## What the code looked like before Phases 1–3
 
 | Area | Finding |
 |---|---|
@@ -46,42 +46,76 @@ Everything else stays neutral: links (ink, underlined), focus rings (neutral), c
 
 ## Phases
 
-### Phase 1 — Flatten and unify the buttons (no theme)
+### Phase 1 — Flatten and unify the buttons (no theme) — done
 
-- Remove the `button-*-gradient` sheens and the button drop shadows from `styles/globals.css` and `components/ui/button.tsx`.
-- Keep every size, padding, height and radius exactly as it is.
-- Replace the 16 hand-written `bg-neutral-900` / `bg-gray-900` buttons with the shared `Button` so there is one finish everywhere.
+- Removed the `button-*-gradient` sheens and the button drop shadows from `styles/globals.css` and `components/ui/button.tsx`.
+- Kept every size, padding, height and radius exactly as it is.
+- Normalised the hand-written dark buttons (`bg-black`, `bg-gray-900`, `bg-neutral-900`) to one ink fill (`bg-zinc-800`, hover `bg-zinc-700`) instead of rewriting them as `<Button>`, so no geometry moved.
 - Hover = slightly darker fill; pressed = slightly darker again; focus = neutral ring; disabled unchanged.
 
-Acceptance: no visible gradient on any button, geometry unchanged, one component drives all buttons.
+Acceptance: no visible gradient on any button, geometry unchanged, one ink fill everywhere.
 
-### Phase 2 — Neutralise the accent tokens
+### Phase 2 — Neutralise the accent tokens — done
 
-- Set `--primary` to the ink colour and `--ring` to a neutral ring, so the 133 indigo spots (checkboxes, badges, focus rings, boards, playgrounds, onboarding) fall in line with the black buttons.
-- No layout change; this is a token-only edit in `styles/globals.css`.
+- `--primary` is ink (`240 6% 10%`, dark mode `0 0% 98%` with `0 0% 9%` foreground) and `--ring` is neutral, so the indigo spots (checkboxes, badges, focus rings, boards, playgrounds, onboarding) fall in line with the black buttons.
+- No layout change; this was a token-only edit in `styles/globals.css`.
 
 Acceptance: no indigo appears anywhere in the product with no brand colour configured.
 
-### Phase 3 — Remove the hard-coded blue/indigo
+### Phase 3 — Remove the hard-coded blue/indigo — done for CTAs
 
-- Replace the 64 blue/indigo classes with neutral ink/grey equivalents.
-- Analytics charts keep one neutral primary series colour; secondary series stay grey.
+- Replaced the blue/indigo **buttons, progress fills and play-state markers** with the same ink fill.
+- Kept intentional semantic colour: destructive red, success emerald, warning amber, the "paid" badge, Copilot's violet identity, the editor's colour pickers and analytics chart series.
 
-Acceptance: grep for `text-blue-`, `bg-blue-`, `text-indigo-`, `bg-indigo-` inside `apps/web` returns no hits outside intentional semantic colours.
+Acceptance: no blue/indigo remains on any call-to-action, progress fill or active marker. Remaining hits are semantic.
 
-### Phase 4 — Connect the brand colour
+### Phase 4 — Connect the brand colour — not started
 
-- Add the token set: `--brand`, `--brand-fg` (auto contrast via the existing `isLightColor`), `--brand-hover`, `--brand-soft`, `--brand-ring`.
-- Set the tokens on **both** shells — the learner `(withmenu)` layout and the dashboard layout. Today only the learner shell sets `--brand`.
-- Apply them only to the five signal spots listed above.
-- Fallback: no configured colour → ink, i.e. today's look.
+Infrastructure first, then surfaces. Until the tokens exist on both shells, nothing changes visually.
 
-Acceptance: changing Branding → Primary Color recolours the CTA, progress, active marker and selection tint, nothing else; clearing the colour restores black.
+**Token set** — derived at runtime from the single hex in `customization.general.color`. No second colour is introduced anywhere.
+
+| Token | Value | Used by |
+|---|---|---|
+| `--brand` | the org hex, sanitized; fallback `#27272a` (ink) | filled primary, progress fill, active marker, tab underline |
+| `--brand-fg` | `#ffffff` or `#18181b`, chosen by the existing `isLightColor()` | label on a brand fill |
+| `--brand-hover` | `color-mix(in oklab, var(--brand) 86%, black)` | hover |
+| `--brand-pressed` | `color-mix(in oklab, var(--brand) 74%, black)` | active |
+| `--brand-soft` | `color-mix(in oklab, var(--brand) 10%, transparent)` | selection tint |
+| `--brand-ring` | `color-mix(in oklab, var(--brand) 35%, transparent)` | selected outline |
+
+Add the matching utilities to `styles/globals.css`: `bg-brand`, `text-brand-fg`, `hover:bg-brand-hover`, `active:bg-brand-pressed`, `bg-brand-soft`, `border-brand`.
+
+**Where it is allowed** — this list is exhaustive; anything not here stays neutral.
+
+| # | Surface | Files | Note |
+|---|---|---|---|
+| 1 | Filled primary button | `ui/button.tsx` (`primary` + `default`), `ui/icon-button.tsx` (`primary`), and the 33 hand-written dark CTAs | The hand-written ones are the pills (`CourseEndView`, `CourseActionsMobile`, store card, `CourseThumbnailLanding`). If they are not converted to the token they keep ink while the component turns brand — that split is the main risk in this phase |
+| 2 | Course / podcast progress fill | `TrailCourseElement:125`, `TrailCourseCard:92`, `CourseEndView:583`, `ActivityIndicators:435`, `course.tsx:506`, `PodcastPlayer:158`, `EpisodePlayer:276`, `EpisodeCard:76,103`, `episode-design-options:222,327`, `AssignmentStudentActivity:191` | Video player chrome stays neutral (it sits on top of video and must not fight it). Password strength stays semantic |
+| 3 | Active navigation marker | `UserLeftMenu`, `DashLeftMenu`, `AccountSidebar` (`aria-current="page"`), plus `TabCard` underline | One marker per shell, not a filled nav block |
+| 4 | Selection tint | active filter chips, selected table rows, current tab underline | 8–12% alpha only. Selected checkboxes stay ink — a tinted checkbox reads weaker |
+| 5 | Charts | `components/Analytics/chartTheme.ts` | **Decision needed.** See below |
+
+**Charts are currently in an inconsistent state** — `useChartTheme()` reads `--primary` for the primary series, so after Phase 2 that series is now ink, while `CHART_PALETTE` is still an indigo→violet ramp (`#6b8de3 → #c4b5fd`). A chart today paints one black series next to three indigo ones. Either point the whole palette at `--brand` (white-label look) or make it a neutral grey ramp (Claude look). The plan's default is the grey ramp.
+
+**Order of work** — each step ships on its own:
+
+1. Tokens + both shells + ink fallback → zero visual change. This is the checkpoint that makes the rest reversible.
+2. Active nav marker + tab underline → smallest visible win.
+3. Progress fills → the learner side starts to feel branded.
+4. Primary buttons → needs the one-filled-primary-per-view audit first.
+5. Selection tint → optional polish.
+6. Charts → after the grey-ramp vs brand-ramp decision.
+
+**Not themed, on purpose:** sidebar and header surfaces, links, focus rings, checkboxes and switches, status badges, destructive/success/warning, video player chrome, certificate artwork.
+
+Acceptance: changing Branding → Primary Color recolours the primary button, progress, active marker and selection tint — and nothing else. Clearing the colour restores ink exactly. Text on a brand fill is at least 4.5:1, brand boundaries at least 3:1.
 
 ## Decisions taken
 
-- Button geometry is frozen.
-- Learner-facing CTAs get the brand colour first; dashboard CTAs stay ink unless we decide otherwise later.
+- Button geometry is frozen, and the buttons themselves are signed off as-is — no further button work in this plan.
+- The brand colour applies to **both shells** (learner and dashboard). The guard is one filled primary per view, so dashboard screens that stack two primaries must demote one to `secondary` before the brand colour lands.
+- The brand colour never touches text, links, borders, icons, surfaces or charts by default — only the four signal surfaces above.
 - Default (no colour configured) remains monochrome.
 
 ## Out of scope

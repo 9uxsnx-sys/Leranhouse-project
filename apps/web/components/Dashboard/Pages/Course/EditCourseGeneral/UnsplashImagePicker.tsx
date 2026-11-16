@@ -227,7 +227,7 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
         {!loading && images.length > 0 && (
           <button
             onClick={handleLoadMore}
-            className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            className="mt-4 w-full px-4 py-2 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-colors"
           >
             {t('dashboard.courses.general.unsplash.load_more')}
           </button>

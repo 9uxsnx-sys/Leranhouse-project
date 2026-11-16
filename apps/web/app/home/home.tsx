@@ -170,7 +170,7 @@ function HomeClient() {
               {!isLoading && !isAuthenticated && (
                 <Link
                   href="/login"
-                  className="w-full flex items-center justify-center gap-2 px-5 py-3.5 bg-gray-900 text-white rounded-2xl font-semibold text-sm nice-shadow hover:bg-gray-800 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 px-5 py-3.5 bg-zinc-800 text-white rounded-2xl font-semibold text-sm nice-shadow hover:bg-zinc-700 transition-colors"
                 >
                   <LogIn size={16} />
                   {t('auth.sign_in', { defaultValue: 'Sign in' })}

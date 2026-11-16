@@ -331,7 +331,7 @@ const OrgEditDomains: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsAddDialogOpen(true)}
-            className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border bg-black text-white border-black hover:opacity-90 cursor-pointer transition-colors"
+            className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border bg-zinc-800 text-white border-zinc-800 hover:bg-zinc-700 cursor-pointer transition-colors"
           >
             <Plus size={14} />
             <span>{t('dashboard.organization.domains.add_domain')}</span>
@@ -630,7 +630,7 @@ const OrgEditDomains: React.FC = () => {
                 type="button"
                 onClick={handleVerifyDomain}
                 disabled={isVerifying}
-                className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg bg-black text-white hover:opacity-90 transition-opacity cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg bg-zinc-800 text-white hover:bg-zinc-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isVerifying ? (
                   <>
