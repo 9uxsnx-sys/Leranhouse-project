@@ -69,6 +69,12 @@ Unlike the admin or user guides, which explain how to use a feature, these pages
 | [Consistency Plan](./dashboard-polish/consistency-plan.md) | Delivered dashboard consistency sweep: shared primitives, unified filters and selects, translation-ready strings |
 | [Glossary](./dashboard-polish/glossary.md) | Shared vocabulary for dashboard sections, actions and icons |
 
+## UI Theme
+
+| Document | Description |
+|----------|-------------|
+| [Theme Colour and Button Cleanup](./ui-theme/theme-color-plan.md) | Plan: flatten the button gradients, neutralise the indigo accent tokens, then connect the organization's brand colour to a fixed set of signal surfaces |
+
 ## Navigation
 
 | Document | Description |

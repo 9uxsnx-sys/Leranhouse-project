@@ -1,6 +1,10 @@
 # Button
 
+> Status: as-built · Last verified: 2026-11-16
+
 > The Button component triggers actions and form submissions. It supports five Medusa visual variants, four shadcn-style aliases, five sizes, loading state, and icon slots — and can render as a child component via Radix's `Slot` pattern.
+
+> **Planned change:** the glossy top-sheen (`after:button-*-gradient`) and the button drop shadows are scheduled for removal so every button is flat. Geometry (padding, height, radius) does not change. See [Theme colour and button cleanup](../../08-features/ui-theme/theme-color-plan.md).
 
 ## Import
 
@@ -18,10 +22,10 @@ The component defines two sets of variant names — the canonical **Medusa** nam
 
 | Variant      | Visual style                                                    |
 | ------------ | --------------------------------------------------------------- |
-| `primary`    | `bg-ui-bg-interactive` background, white text, `shadow-buttons-inverted` |
-| `secondary`  | `bg-ui-button-neutral` background, `shadow-buttons-neutral`     |
-| `transparent`| No background, `text-ui-fg-base`, subtle hover                   |
-| `danger`     | `bg-ui-button-danger` background (`#e11d48`), white text         |
+| `primary`    | Ink fill (`bg-ui-button-inverted`, `#27272a`), light text, white top-sheen overlay, `shadow-buttons-inverted` |
+| `secondary`  | Neutral fill (`bg-ui-button-neutral`), strong white top-sheen overlay, `shadow-buttons-neutral` |
+| `transparent`| No fill, `text-ui-fg-base`, subtle hover background, no sheen    |
+| `danger`     | Red fill (`bg-ui-button-danger`), white text, top-sheen overlay  |
 | `link`       | Underlined text only — no padding, no background, `text-ui-fg-interactive` |
 
 ### shadcn/ui aliases
@@ -40,26 +44,28 @@ The component defines two sets of variant names — the canonical **Medusa** nam
 ```tsx
 // From the cva definition in button.tsx
 primary:
-  "bg-ui-bg-interactive text-ui-fg-on-color shadow-buttons-inverted",
+  "shadow-buttons-inverted text-ui-contrast-fg-primary bg-ui-button-inverted after:button-inverted-gradient hover:bg-ui-button-inverted-hover ...",
 secondary:
-  "bg-ui-button-neutral text-ui-fg-base shadow-buttons-neutral",
+  "shadow-buttons-neutral text-ui-fg-base bg-ui-button-neutral after:button-neutral-gradient hover:bg-ui-button-neutral-hover ...",
 transparent:
-  "bg-transparent text-ui-fg-base hover:bg-ui-button-neutral-hover",
+  "after:hidden text-ui-fg-base bg-ui-button-transparent hover:bg-ui-button-transparent-hover ...",
 danger:
-  "bg-ui-button-danger text-ui-fg-on-color",
+  "shadow-buttons-danger text-ui-fg-on-color bg-ui-button-danger after:button-danger-gradient hover:bg-ui-button-danger-hover ...",
 link:
-  "text-ui-fg-interactive underline-offset-4 hover:underline !p-0 !h-auto",
+  "text-ui-fg-interactive underline-offset-4 hover:underline focus-visible:text-ui-fg-interactive-hover",
 ```
 
 ## Sizes
 
-| Size      | Height | Padding            | Text style                |
-| --------- | ------ | ------------------ | ------------------------- |
-| `small`   | `h-7`  | `px-3`             | `txt-compact-xsmall-plus` |
-| `base`    | `h-8`  | `px-3`             | `txt-compact-small-plus`  |
-| `large`   | `h-10` | `px-4`             | `txt-compact-medium-plus` |
-| `xlarge`  | `h-12` | `px-6`             | `txt-compact-large-plus`  |
-| `icon`    | `h-8`  | `w-8` (square)     | —                         |
+| Size      | Classes                                     | Notes                     |
+| --------- | ------------------------------------------- | ------------------------- |
+| `small`   | `txt-compact-small-plus px-2 py-1`          | Compact toolbar actions   |
+| `base`    | `txt-compact-small-plus px-3 py-1.5`        | Default                   |
+| `large`   | `txt-compact-medium-plus px-4 py-2.5`       | Page-level CTAs           |
+| `xlarge`  | `txt-compact-large-plus px-5 py-3.5`        | Marketing / empty states  |
+| `icon`    | `h-8 w-8 p-0`                               | Square 32×32 icon-only    |
+
+Aliases: `default` → `base`, `sm` → `small`, `lg` → `large`. All sizes use a 6px icon gap (`gap-x-1.5`).
 
 **Default size:** `base`
 
