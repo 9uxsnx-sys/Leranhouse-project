@@ -92,7 +92,7 @@ Add the matching utilities to `styles/globals.css`: `bg-brand`, `text-brand-fg`,
 |---|---|---|---|
 | 1 | Filled primary button | `ui/button.tsx` (`primary` + `default`), `ui/icon-button.tsx` (`primary`), and the 33 hand-written dark CTAs | The hand-written ones are the pills (`CourseEndView`, `CourseActionsMobile`, store card, `CourseThumbnailLanding`). If they are not converted to the token they keep ink while the component turns brand — that split is the main risk in this phase |
 | 2 | Course / podcast progress fill | `TrailCourseElement:125`, `TrailCourseCard:92`, `CourseEndView:583`, `ActivityIndicators:435`, `course.tsx:506`, `PodcastPlayer:158`, `EpisodePlayer:276`, `EpisodeCard:76,103`, `episode-design-options:222,327`, `AssignmentStudentActivity:191` | Video player chrome stays neutral (it sits on top of video and must not fight it). Password strength stays semantic |
-| 3 | Active navigation marker | `UserLeftMenu`, `DashLeftMenu`, `AccountSidebar` (`aria-current="page"`), plus `TabCard` underline | One marker per shell, not a filled nav block |
+| 3 | Active navigation marker | `UserLeftMenu`, `DashLeftMenu`, `AccountSidebar` (`aria-current="page"`), plus the learner profile tab underline in `UserProfileClient.tsx` | Desktop only. One marker per shell, not a filled nav block. The `PageTabs` `underline` branch is unused by every caller, so it is not part of the visible result |
 | 4 | Selection tint | active filter chips, selected table rows, current tab underline | 8–12% alpha only. Selected checkboxes stay ink — a tinted checkbox reads weaker |
 | 5 | Charts | `components/Analytics/chartTheme.ts` | **Decision needed.** See below |
 
@@ -101,7 +101,7 @@ Add the matching utilities to `styles/globals.css`: `bg-brand`, `text-brand-fg`,
 **Order of work** — each step ships on its own:
 
 1. ✅ **Done.** Tokens in `:root` (ink defaults), `getBrandStyle()` in `services/utils/ts/colorUtils.ts`, applied on both shells — `OrgMenu` for the learner side and `ClientAdminLayout` for the dashboard. Bad or missing values normalise to ink, so nothing can break the shell. The six utilities exist in `globals.css` and stay unemitted until a surface uses them.
-2. ✅ **Done.** A 3px brand bar marks the active item in both sidebars and the account sidebar (inside the existing white pill, never a filled block), and the shared `ui/page-tabs.tsx` underline is `border-brand`. Pill-style tabs stay neutral.
+2. ✅ **Done.** A 3px brand bar marks the active item in the learner sidebar, the dashboard sidebar and the account sidebar (inside the existing white pill, never a filled block). The learner profile tab strip in `UserProfileClient.tsx` uses `border-brand` for its active underline. `PageTabs` has an `underline` variant, but no caller sets it — its brand border is dormant and not visible.
 3. Progress fills → the learner side starts to feel branded.
 4. Primary buttons → needs the one-filled-primary-per-view audit first.
 5. Selection tint → optional polish.
@@ -116,6 +116,7 @@ Acceptance: changing Branding → Primary Color recolours the primary button, pr
 - Button geometry is frozen, and the buttons themselves are signed off as-is — no further button work in this plan.
 - The brand colour applies to **both shells** (learner and dashboard). The guard is one filled primary per view, so dashboard screens that stack two primaries must demote one to `secondary` before the brand colour lands.
 - The brand colour never touches text, links, borders, icons, surfaces or charts by default — only the four signal surfaces above.
+- Desktop only. The mobile shells are the old, untouched ones and are out of scope; they inherit shared components but are not audited or designed for in this work.
 - Default (no colour configured) remains monochrome.
 
 ## Out of scope
