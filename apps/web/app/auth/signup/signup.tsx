@@ -133,17 +133,17 @@ const LoggedInJoinScreen = ({ inviteCode, org }: JoinScreenProps) => {
         <div className="flex items-center gap-3">
           <UserAvatar rounded="rounded-xl" border="border-2" width={48} />
           <div className="text-start">
-            <p className="font-medium text-gray-900 dark:text-zinc-100">
+            <p className="font-medium text-gray-900 dark:text-dk-fg-1">
               {session.data?.user?.first_name} {session.data?.user?.last_name}
             </p>
-            <p className="text-sm text-gray-500 dark:text-zinc-400">@{session.data?.user?.username}</p>
+            <p className="text-sm text-gray-500 dark:text-dk-fg-3">@{session.data?.user?.username}</p>
           </div>
         </div>
 
         {/* Organization Info */}
-        <div className="w-full text-center py-4 bg-gray-50 dark:bg-dk-inset/40 rounded-lg">
-          <p className="text-sm text-gray-500 dark:text-zinc-400 mb-1">{t('auth.joining')}</p>
-          <p className="font-semibold text-gray-900 dark:text-zinc-100 text-lg">{activeOrg?.name}</p>
+        <div className="w-full text-center py-4 bg-gray-50 dark:bg-dk-raised rounded-lg">
+          <p className="text-sm text-gray-500 dark:text-dk-fg-3 mb-1">{t('auth.joining')}</p>
+          <p className="font-semibold text-gray-900 dark:text-dk-fg-1 text-lg">{activeOrg?.name}</p>
         </div>
 
         {/* Join Button or Verification Warning */}
@@ -220,7 +220,7 @@ const NoTokenScreen = ({ org }: NoTokenScreenProps) => {
         </AuthAlert>
       )}
 
-      <p className="text-sm text-gray-500 dark:text-zinc-400 mb-6">
+      <p className="text-sm text-gray-500 dark:text-dk-fg-3 mb-6">
         {t('auth.invite_required_desc', { org: activeOrg?.name })}
       </p>
 

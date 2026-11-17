@@ -4044,6 +4044,8 @@
                                                                  "invalid_file_type":  "Use a PNG, JPG or WebP image"
                                                              },
                                            "theme":  {
+                                                         "light_theme":  "Light theme",
+                                                         "dark_theme":  "Dark theme",
                                                          "primary_color":  "Primary Color",
                                                          "primary_color_desc":  "Choose a primary color for your organization\u0027s header and page background tint.",
                                                          "clear_color":  "Clear color",

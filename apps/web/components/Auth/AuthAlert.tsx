@@ -10,24 +10,24 @@ const VARIANTS: Record<
   { wrapper: string; icon: string; text: string }
 > = {
   error: {
-    wrapper: 'bg-rose-50 border-rose-200',
-    icon: 'text-rose-500',
-    text: 'text-rose-900',
+    wrapper: 'bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/30',
+    icon: 'text-rose-500 dark:text-rose-400',
+    text: 'text-rose-900 dark:text-rose-200',
   },
   success: {
-    wrapper: 'bg-emerald-50 border-emerald-200',
-    icon: 'text-emerald-600',
-    text: 'text-emerald-900',
+    wrapper: 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30',
+    icon: 'text-emerald-600 dark:text-emerald-400',
+    text: 'text-emerald-900 dark:text-emerald-200',
   },
   warning: {
-    wrapper: 'bg-amber-50 border-amber-200',
-    icon: 'text-amber-600',
-    text: 'text-amber-900',
+    wrapper: 'bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/30',
+    icon: 'text-amber-600 dark:text-amber-400',
+    text: 'text-amber-900 dark:text-amber-100',
   },
   info: {
-    wrapper: 'bg-gray-50 dark:bg-dk-inset/40 border-gray-200 dark:border-dk-line-strong',
-    icon: 'text-gray-500 dark:text-zinc-400',
-    text: 'text-gray-700 dark:text-zinc-200',
+    wrapper: 'bg-gray-50 dark:bg-dk-raised border-gray-200 dark:border-dk-line-strong',
+    icon: 'text-gray-500 dark:text-dk-fg-3',
+    text: 'text-gray-700 dark:text-dk-fg-2',
   },
 }
 

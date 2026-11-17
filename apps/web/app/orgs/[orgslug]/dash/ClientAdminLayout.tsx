@@ -10,7 +10,7 @@ import { CommandPaletteProvider } from '@components/Dashboard/CommandPalette/Com
 import { DashboardBreadcrumbProvider } from '@components/Objects/Breadcrumbs/DashboardBreadcrumbContext'
 import CommandPalette from '@components/Dashboard/CommandPalette/CommandPalette'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { getBrandStyle } from '@services/utils/ts/colorUtils'
+import { getBrandStyle, getOrgBrandConfig } from '@services/utils/ts/colorUtils'
 import { useTheme } from '@components/Contexts/ThemeContext'
 import React, { useEffect } from 'react'
 import { useMediaQuery } from 'usehooks-ts';
@@ -28,24 +28,36 @@ function ClientAdminLayout({
     const org = useOrg() as any
     const { resolvedTheme } = useTheme()
     const orgConfig = org?.config?.config
-    const brandColor = orgConfig?.customization?.general?.color || orgConfig?.general?.color || ''
-    const brandFg = orgConfig?.customization?.general?.brand_fg || orgConfig?.general?.brand_fg || ''
-    const brandSidebar = !!(
-        orgConfig?.customization?.general?.brand_sidebar || orgConfig?.general?.brand_sidebar
-    )
-    const brandHover = orgConfig?.customization?.general?.brand_hover || orgConfig?.general?.brand_hover || ''
+    const { light: lightBrand, dark: darkBrand } = getOrgBrandConfig(orgConfig)
 
     // Dialogs and popovers portal to <body>, outside the wrapper below, so the
     // brand variables are also published on the root element. Without this the
     // primary action inside a modal would silently fall back to ink.
     useEffect(() => {
-        const vars = getBrandStyle(brandColor, brandFg, brandSidebar, brandHover, resolvedTheme)
+        const vars = getBrandStyle(
+            lightBrand.color,
+            lightBrand.fg,
+            lightBrand.sidebarBrand,
+            lightBrand.hover,
+            resolvedTheme,
+            darkBrand
+        )
         const root = document.documentElement
         Object.entries(vars).forEach(([key, value]) => root.style.setProperty(key, value))
         return () => {
             Object.keys(vars).forEach((key) => root.style.removeProperty(key))
         }
-    }, [brandColor, brandFg, brandSidebar, brandHover, resolvedTheme])
+    }, [
+        lightBrand.color,
+        lightBrand.fg,
+        lightBrand.sidebarBrand,
+        lightBrand.hover,
+        darkBrand.color,
+        darkBrand.fg,
+        darkBrand.hover,
+        darkBrand.sidebarBrand,
+        resolvedTheme,
+    ])
 
     return (
         <SessionGate>
@@ -54,7 +66,14 @@ function ClientAdminLayout({
                   <DashboardBreadcrumbProvider>
                     <div
                         className="flex flex-col md:flex-row"
-                        style={getBrandStyle(brandColor, brandFg, brandSidebar, brandHover, resolvedTheme) as React.CSSProperties}
+                        style={getBrandStyle(
+                            lightBrand.color,
+                            lightBrand.fg,
+                            lightBrand.sidebarBrand,
+                            lightBrand.hover,
+                            resolvedTheme,
+                            darkBrand
+                        ) as React.CSSProperties}
                     >
                         {isMobile ? (
                             <DashMobileMenu />

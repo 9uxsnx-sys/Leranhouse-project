@@ -133,10 +133,10 @@ function InviteOnlySignUpComponent(props: InviteOnlySignUpProps) {
           )}
 
           {/* Invite code chip */}
-          <div className="flex items-center gap-2 mb-6 rounded-lg border border-gray-200 dark:border-dk-line-strong bg-gray-50 dark:bg-dk-inset/40 px-3.5 py-2.5">
-            <Ticket size={15} className="text-gray-400 dark:text-zinc-400 shrink-0" />
-            <span className="text-[13px] text-gray-500 dark:text-zinc-400">{t('auth.invite_code')}</span>
-            <span className="ms-auto text-[13px] font-semibold font-mono text-gray-900 dark:text-zinc-100">
+          <div className="flex items-center gap-2 mb-6 rounded-lg border border-gray-200 dark:border-dk-line-strong bg-gray-50 dark:bg-dk-inset px-3.5 py-2.5">
+            <Ticket size={15} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
+            <span className="text-[13px] text-gray-500 dark:text-dk-fg-3">{t('auth.invite_code')}</span>
+            <span className="ms-auto text-[13px] font-semibold font-mono text-gray-900 dark:text-dk-fg-1">
               {props.inviteCode}
             </span>
           </div>
@@ -218,18 +218,18 @@ function InviteOnlySignUpComponent(props: InviteOnlySignUpProps) {
                 id="invite-terms"
                 checked={agreed}
                 onCheckedChange={(v) => setAgreed(v === true)}
-                className="mt-0.5 h-[18px] w-[18px] rounded-md border-gray-300 dark:border-dk-line-strong shadow-sm data-[state=checked]:bg-gray-900 data-[state=checked]:border-gray-900 data-[state=checked]:text-white focus-visible:ring-4 focus-visible:ring-gray-900/5"
+                className="mt-0.5 h-[18px] w-[18px] rounded-md border-gray-300 dark:border-dk-line-strong shadow-sm data-[state=checked]:bg-gray-900 data-[state=checked]:border-gray-900 data-[state=checked]:text-white dark:data-[state=checked]:bg-dk-fg-1 dark:data-[state=checked]:border-dk-fg-1 dark:data-[state=checked]:text-dk-inset focus-visible:ring-4 focus-visible:ring-gray-900/5"
               />
               <label
                 htmlFor="invite-terms"
-                className="text-[13px] leading-relaxed text-gray-500 dark:text-zinc-400 cursor-pointer select-none"
+                className="text-[13px] leading-relaxed text-gray-500 dark:text-dk-fg-3 cursor-pointer select-none"
               >
                 {t('auth.agree_to')}{' '}
-                <Link href="#" className="text-gray-700 dark:text-zinc-200 underline">
+                <Link href="#" className="text-gray-700 dark:text-dk-fg-2 underline">
                   {t('auth.terms')}
                 </Link>{' '}
                 {t('auth.and')}{' '}
-                <Link href="#" className="text-gray-700 dark:text-zinc-200 underline">
+                <Link href="#" className="text-gray-700 dark:text-dk-fg-2 underline">
                   {t('auth.privacy')}
                 </Link>
               </label>
@@ -252,7 +252,7 @@ function InviteOnlySignUpComponent(props: InviteOnlySignUpProps) {
               <div className="w-full border-t border-gray-100 dark:border-dk-line" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="px-3 bg-white dark:bg-dk-card text-gray-400 dark:text-zinc-400">{t('common.or')}</span>
+              <span className="px-3 bg-white dark:bg-dk-card text-gray-400 dark:text-dk-fg-3">{t('common.or')}</span>
             </div>
           </div>
 
@@ -271,9 +271,9 @@ function InviteOnlySignUpComponent(props: InviteOnlySignUpProps) {
           </button>
 
           {/* Login link */}
-          <p className="text-center text-sm text-gray-500 dark:text-zinc-400 mt-6">
+          <p className="text-center text-sm text-gray-500 dark:text-dk-fg-3 mt-6">
             {t('auth.already_have_account')}{' '}
-            <Link href="/login" className="font-semibold text-gray-900 dark:text-zinc-100 hover:underline">
+            <Link href="/login" className="font-semibold text-gray-900 dark:text-dk-fg-1 hover:underline">
               {t('auth.sign_in')}
             </Link>
           </p>

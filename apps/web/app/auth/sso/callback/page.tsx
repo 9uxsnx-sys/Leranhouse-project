@@ -130,7 +130,7 @@ export default function SSOCallbackPage() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dk-inset/40">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-transparent">
         <div className="text-center">
           <div className="flex justify-center mb-4">
             <div className="relative">
@@ -138,10 +138,10 @@ export default function SSOCallbackPage() {
               <Loader2 className="w-6 h-6 text-indigo-600 absolute -bottom-1 -end-1 animate-spin" />
             </div>
           </div>
-          <h1 className="text-xl font-semibold text-gray-800 dark:text-zinc-200 mb-2">
+          <h1 className="text-xl font-semibold text-gray-800 dark:text-dk-fg-2 mb-2">
             {t('auth.sso_callback.authenticating')}
           </h1>
-          <p className="text-gray-500 dark:text-zinc-400">
+          <p className="text-gray-500 dark:text-dk-fg-3">
             {t('auth.sso_callback.please_wait')}
           </p>
         </div>
@@ -159,30 +159,30 @@ export default function SSOCallbackPage() {
 
   if (status === 'error') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dk-inset/40">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-transparent">
         <div className="text-center max-w-lg mx-auto p-6">
           <div className="flex justify-center mb-4">
-            <div className="p-3 bg-red-100 rounded-full">
-              <AlertTriangle className="w-12 h-12 text-red-600" />
+            <div className="p-3 bg-red-100 dark:bg-red-500/10 rounded-full">
+              <AlertTriangle className="w-12 h-12 text-red-600 dark:text-red-400" />
             </div>
           </div>
-          <h1 className="text-xl font-semibold text-gray-800 dark:text-zinc-200 mb-2">
+          <h1 className="text-xl font-semibold text-gray-800 dark:text-dk-fg-2 mb-2">
             {t('auth.sso_callback.auth_failed')}
           </h1>
 
           {/* Main error message */}
-          <p className="text-gray-600 dark:text-zinc-300 mb-4">{error?.message}</p>
+          <p className="text-gray-600 dark:text-dk-fg-2 mb-4">{error?.message}</p>
 
           {/* Error code badge */}
           {error?.errorCode && error.errorCode !== 'unknown_error' && (
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-50 text-red-700 rounded-full text-sm mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-300 rounded-full text-sm mb-4">
               <span className="font-mono">{error.errorCode}</span>
             </div>
           )}
 
           {/* Provider info */}
           {error?.provider && (
-            <p className="text-sm text-gray-500 dark:text-zinc-400 mb-4">
+            <p className="text-sm text-gray-500 dark:text-dk-fg-3 mb-4">
               Provider: {error.provider}
             </p>
           )}
@@ -192,17 +192,17 @@ export default function SSOCallbackPage() {
             <div className="mb-6">
               <button
                 onClick={() => setShowTechnicalDetails(!showTechnicalDetails)}
-                className="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200"
+                className="inline-flex items-center gap-1 text-sm text-gray-500 dark:text-dk-fg-3 hover:text-gray-700 dark:hover:text-dk-fg-1"
               >
                 <Info className="w-4 h-4" />
                 {showTechnicalDetails ? 'Hide' : 'Show'} technical details
               </button>
 
               {showTechnicalDetails && (
-                <div className="mt-2 p-3 bg-gray-100 dark:bg-dk-inset rounded-md text-start relative">
+                <div className="mt-2 p-3 bg-gray-100 dark:bg-dk-raised rounded-md text-start relative">
                   <button
                     onClick={copyToClipboard}
-                    className="absolute top-2 end-2 p-1 text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200"
+                    className="absolute top-2 end-2 p-1 text-gray-400 dark:text-dk-fg-3 hover:text-gray-600 dark:hover:text-dk-fg-1"
                     title="Copy to clipboard"
                   >
                     {copied ? (
@@ -211,7 +211,7 @@ export default function SSOCallbackPage() {
                       <Copy className="w-4 h-4" />
                     )}
                   </button>
-                  <pre className="text-xs font-mono text-gray-700 dark:text-zinc-200 whitespace-pre-wrap overflow-x-auto">
+                  <pre className="text-xs font-mono text-gray-700 dark:text-dk-fg-2 whitespace-pre-wrap overflow-x-auto">
                     {error.technicalDetails}
                   </pre>
                 </div>
@@ -221,40 +221,40 @@ export default function SSOCallbackPage() {
 
           {/* Helpful tips based on error code */}
           {error?.errorCode === 'access_denied' && (
-            <div className="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-md text-start">
-              <p className="text-sm text-amber-800">
+            <div className="mb-6 p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-md text-start">
+              <p className="text-sm text-amber-800 dark:text-amber-200">
                 <strong>Tip:</strong> If you declined the login request by mistake, try again and accept the permissions.
               </p>
             </div>
           )}
 
           {error?.errorCode === 'invalid_state' && (
-            <div className="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-md text-start">
-              <p className="text-sm text-amber-800">
+            <div className="mb-6 p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-md text-start">
+              <p className="text-sm text-amber-800 dark:text-amber-200">
                 <strong>Tip:</strong> Your session may have expired. Please try logging in again.
               </p>
             </div>
           )}
 
           {error?.errorCode === 'domain_not_allowed' && (
-            <div className="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-md text-start">
-              <p className="text-sm text-amber-800">
+            <div className="mb-6 p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-md text-start">
+              <p className="text-sm text-amber-800 dark:text-amber-200">
                 <strong>Tip:</strong> Contact your organization administrator to verify your email domain is allowed.
               </p>
             </div>
           )}
 
           {(error?.errorCode === 'auto_provision_disabled' || error?.errorCode === 'user_not_found') && (
-            <div className="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-md text-start">
-              <p className="text-sm text-amber-800">
+            <div className="mb-6 p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-md text-start">
+              <p className="text-sm text-amber-800 dark:text-amber-200">
                 <strong>Tip:</strong> Your organization requires an administrator to create your account first. Contact your organization admin to request access.
               </p>
             </div>
           )}
 
           {error?.errorCode === 'sso_misconfigured' && (
-            <div className="mb-6 p-3 bg-amber-50 border border-amber-200 rounded-md text-start">
-              <p className="text-sm text-amber-800">
+            <div className="mb-6 p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-md text-start">
+              <p className="text-sm text-amber-800 dark:text-amber-200">
                 <strong>Tip:</strong> There may be a configuration issue with SSO. Please contact your IT administrator.
               </p>
             </div>
@@ -269,7 +269,7 @@ export default function SSOCallbackPage() {
             </Link>
             <Link
               href="/"
-              className="block w-full py-2 px-4 bg-gray-100 dark:bg-dk-inset text-gray-700 dark:text-zinc-200 rounded-md hover:bg-gray-200 transition-colors"
+              className="block w-full py-2 px-4 bg-gray-100 dark:bg-dk-raised text-gray-700 dark:text-dk-fg-2 rounded-md hover:bg-gray-200 dark:hover:bg-dk-line transition-colors"
             >
               {t('auth.sso_callback.go_home')}
             </Link>
@@ -281,15 +281,15 @@ export default function SSOCallbackPage() {
 
   // Success state - redirecting
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dk-inset/40">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-transparent">
       <div className="text-center">
         <div className="flex justify-center mb-4">
-          <Shield className="w-16 h-16 text-green-600" />
+          <Shield className="w-16 h-16 text-green-600 dark:text-green-400" />
         </div>
-        <h1 className="text-xl font-semibold text-gray-800 dark:text-zinc-200 mb-2">
+        <h1 className="text-xl font-semibold text-gray-800 dark:text-dk-fg-2 mb-2">
           {t('auth.sso_callback.success')}
         </h1>
-        <p className="text-gray-500 dark:text-zinc-400">
+        <p className="text-gray-500 dark:text-dk-fg-3">
           {t('auth.sso_callback.redirecting')}
         </p>
       </div>

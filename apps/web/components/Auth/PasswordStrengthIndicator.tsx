@@ -80,7 +80,7 @@ export function PasswordStrengthIndicator({
             {/* Strength bar */}
             <div className="space-y-1">
                 <div className="flex justify-between text-xs">
-                    <span className="text-gray-500 dark:text-zinc-400">{t('auth.password_strength')}</span>
+                    <span className="text-gray-500 dark:text-dk-fg-3">{t('auth.password_strength')}</span>
                     <span className={`font-medium ${
                         strengthPercentage <= 40 ? 'text-red-600' :
                         strengthPercentage <= 60 ? 'text-orange-600' :
@@ -107,7 +107,7 @@ export function PasswordStrengthIndicator({
                             <li
                                 key={req.id}
                                 className={`flex items-center gap-1.5 ${
-                                    isValid ? 'text-green-600' : 'text-gray-500 dark:text-zinc-400'
+                                    isValid ? 'text-green-600' : 'text-gray-500 dark:text-dk-fg-3'
                                 }`}
                             >
                                 {isValid ? (

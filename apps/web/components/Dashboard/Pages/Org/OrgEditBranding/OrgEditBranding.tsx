@@ -14,10 +14,188 @@ import { useTranslation } from 'react-i18next'
 import { revalidateTags } from '@services/utils/ts/requests'
 import { mutate } from 'swr'
 import { getAPIUrl } from '@services/config/config'
-import { getContrastRatio, normalizeBrandColor, resolveBrandFg, resolveBrandHover } from '@services/utils/ts/colorUtils'
+import { getContrastRatio, normalizeBrandColor, resolveBrandFg, resolveBrandHover, deriveDarkBrand } from '@services/utils/ts/colorUtils'
 import AuthBrandingTab from './AuthBrandingTab'
 
 const SUPPORTED_FILES = constructAcceptValue(['png', 'jpg', 'svg'])
+
+type ThemeCardValues = {
+  color: string
+  fg: string
+  hover: string
+  sidebar: boolean
+}
+
+/**
+ * One theme card — the same four controls for light and dark. The card owns
+ * its previews so the resolved (or derived) colours are shown while editing,
+ * and reports every change upward so the Branding action row can save both.
+ */
+function ThemeCard({
+  title,
+  values,
+  fallbackBrand,
+  onChange,
+}: {
+  title: string
+  values: ThemeCardValues
+  /** Colour the card resolves to when no primary is set (the mode default). */
+  fallbackBrand: string
+  onChange: (patch: Partial<ThemeCardValues>) => void
+}) {
+  const { t } = useTranslation()
+
+  // Preview of the actual button colours: the resolved foreground sitting on
+  // the resolved brand background. An empty primary resolves to the mode
+  // default (ink in light, white in dark, or the lifted light brand).
+  const resolvedBrand = values.color ? normalizeBrandColor(values.color) : fallbackBrand
+  const resolvedFg = resolveBrandFg(resolvedBrand, values.fg)
+  const contrast = getContrastRatio(resolvedFg, resolvedBrand)
+  const isContrastLow = contrast < 4.5
+
+  // Hover fill: explicit when set, otherwise the automatic step. The foreground
+  // is already resolved, so the read-out shows what the label will look like.
+  const resolvedHover = resolveBrandHover(resolvedBrand, resolvedFg, values.hover)
+  const hoverContrast = getContrastRatio(resolvedFg, resolvedHover.hover)
+  const isHoverContrastLow = hoverContrast < 4.5
+
+  return (
+    <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+      <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
+        {title}
+      </h3>
+      <div className="space-y-3">
+        {/* Color Picker Container — matches upload row pattern */}
+        <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-gray-50/50 dark:bg-dk-inset/40">
+          <div className="flex-shrink-0">
+            <div
+              className="w-10 h-10 rounded-lg border border-gray-100 dark:border-dk-line shadow-sm"
+              style={{ backgroundColor: values.color || '#ffffff' }}
+            />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('dashboard.organization.theme.primary_color')}</p>
+          </div>
+          <Input
+            type="text"
+            value={values.color}
+            onChange={(e) => onChange({ color: e.target.value })}
+            placeholder={t('dashboard.organization.branding.theme.no_color')}
+            className="w-24 h-10 rounded-lg border border-gray-100 dark:border-dk-line !shadow-sm font-mono text-sm uppercase bg-white dark:bg-dk-card focus-visible:!shadow-sm focus-visible:border-gray-100 focus:outline-none"
+            maxLength={7}
+          />
+          {values.color && (
+            <button
+              type="button"
+              onClick={() => onChange({ color: '' })}
+              className="flex items-center justify-center text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+              title={t('dashboard.organization.theme.clear_color')}
+            >
+              <X size={18} />
+            </button>
+          )}
+        </div>
+        <p className="text-xs text-gray-400 dark:text-zinc-400">{t('dashboard.organization.theme.primary_color_desc')}</p>
+
+        {/* Hover fill — the colour brand buttons switch to on hover / press */}
+        <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-gray-50/50 dark:bg-dk-inset/40">
+          <div className="flex-shrink-0">
+            <div
+              className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-100 dark:border-dk-line shadow-sm text-sm font-semibold"
+              style={{ backgroundColor: resolvedHover.hover, color: resolvedFg }}
+            >
+              Aa
+            </div>
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('dashboard.organization.theme.brand_hover')}</p>
+            <p className="text-xs text-gray-400 dark:text-zinc-400">
+              {values.hover ? resolvedHover.hover.toUpperCase() : `${t('dashboard.organization.theme.brand_hover_auto')} · ${resolvedHover.hover.toUpperCase()}`}
+              {' · '}
+              {t('dashboard.organization.theme.contrast')} {hoverContrast}:1
+              {isHoverContrastLow && (
+                <span className="text-amber-600"> · {t('dashboard.organization.theme.contrast_low')}</span>
+              )}
+            </p>
+          </div>
+          <Input
+            type="text"
+            value={values.hover}
+            onChange={(e) => onChange({ hover: e.target.value })}
+            placeholder={t('dashboard.organization.theme.brand_hover_auto')}
+            className="w-24 h-10 rounded-lg border border-gray-100 dark:border-dk-line !shadow-sm font-mono text-sm uppercase bg-white dark:bg-dk-card focus-visible:!shadow-sm focus-visible:border-gray-100 focus:outline-none"
+            maxLength={7}
+          />
+          {values.hover && (
+            <button
+              type="button"
+              onClick={() => onChange({ hover: '' })}
+              className="flex items-center justify-center text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+              title={t('dashboard.organization.theme.clear_color')}
+            >
+              <X size={18} />
+            </button>
+          )}
+        </div>
+        <p className="text-xs text-gray-400 dark:text-zinc-400">{t('dashboard.organization.theme.brand_hover_desc')}</p>
+
+        {/* Brand foreground — text and icons sitting on brand surfaces */}
+        <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-gray-50/50 dark:bg-dk-inset/40">
+          <div className="flex-shrink-0">
+            <div
+              className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-100 dark:border-dk-line shadow-sm text-sm font-semibold"
+              style={{ backgroundColor: resolvedBrand, color: resolvedFg }}
+            >
+              Aa
+            </div>
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('dashboard.organization.theme.brand_fg')}</p>
+            <p className="text-xs text-gray-400 dark:text-zinc-400">
+              {values.fg ? '' : `${t('dashboard.organization.theme.brand_fg_auto')} · `}
+              {t('dashboard.organization.theme.contrast')} {contrast}:1
+              {isContrastLow && (
+                <span className="text-amber-600"> · {t('dashboard.organization.theme.contrast_low')}</span>
+              )}
+            </p>
+          </div>
+          <Input
+            type="text"
+            value={values.fg}
+            onChange={(e) => onChange({ fg: e.target.value })}
+            placeholder={t('dashboard.organization.theme.brand_fg_auto')}
+            className="w-24 h-10 rounded-lg border border-gray-100 dark:border-dk-line !shadow-sm font-mono text-sm uppercase bg-white dark:bg-dk-card focus-visible:!shadow-sm focus-visible:border-gray-100 focus:outline-none"
+            maxLength={7}
+          />
+          {values.fg && (
+            <button
+              type="button"
+              onClick={() => onChange({ fg: '' })}
+              className="flex items-center justify-center text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
+              title={t('dashboard.organization.theme.clear_color')}
+            >
+              <X size={18} />
+            </button>
+          )}
+        </div>
+        <p className="text-xs text-gray-400 dark:text-zinc-400">{t('dashboard.organization.theme.brand_fg_desc')}</p>
+
+        {/* Sidebar active tab — opt in to a brand fill on the floating pill */}
+        <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-gray-50/50 dark:bg-dk-inset/40">
+          <div className="flex-1">
+            <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('dashboard.organization.theme.brand_sidebar')}</p>
+            <p className="text-xs text-gray-400 dark:text-zinc-400">{t('dashboard.organization.theme.brand_sidebar_desc')}</p>
+          </div>
+          <Switch
+            checked={values.sidebar}
+            onCheckedChange={(checked) => onChange({ sidebar: checked })}
+            className="data-[state=checked]:bg-brand"
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function OrgEditBranding() {
   const { t } = useTranslation()
@@ -41,12 +219,21 @@ export default function OrgEditBranding() {
   const logoIconInputRef = useRef<HTMLInputElement>(null)
   const thumbnailInputRef = useRef<HTMLInputElement>(null)
 
-  // Theme state
-  const [primaryColor, setPrimaryColor] = useState<string>(org?.config?.config?.customization?.general?.color || org?.config?.config?.general?.color || '')
-  const [brandFg, setBrandFg] = useState<string>(org?.config?.config?.customization?.general?.brand_fg || org?.config?.config?.general?.brand_fg || '')
-  const [brandHover, setBrandHover] = useState<string>(org?.config?.config?.customization?.general?.brand_hover || org?.config?.config?.general?.brand_hover || '')
-  const [brandSidebar, setBrandSidebar] = useState<boolean>(
-    !!(org?.config?.config?.customization?.general?.brand_sidebar || org?.config?.config?.general?.brand_sidebar)
+  // Theme state — one set per mode. Both cards are saved together by the
+  // Branding action row.
+  const generalConfig =
+    org?.config?.config?.customization?.general || org?.config?.config?.general || {}
+  const [primaryColor, setPrimaryColor] = useState<string>(generalConfig.color || '')
+  const [brandFg, setBrandFg] = useState<string>(generalConfig.brand_fg || '')
+  const [brandHover, setBrandHover] = useState<string>(generalConfig.brand_hover || '')
+  const [brandSidebar, setBrandSidebar] = useState<boolean>(!!generalConfig.brand_sidebar)
+  const [darkPrimaryColor, setDarkPrimaryColor] = useState<string>(generalConfig.dark_color || '')
+  const [darkBrandFg, setDarkBrandFg] = useState<string>(generalConfig.dark_brand_fg || '')
+  const [darkBrandHover, setDarkBrandHover] = useState<string>(generalConfig.dark_brand_hover || '')
+  const [darkBrandSidebar, setDarkBrandSidebar] = useState<boolean>(
+    generalConfig.dark_brand_sidebar === undefined
+      ? !!generalConfig.brand_sidebar
+      : !!generalConfig.dark_brand_sidebar
   )
   const [isSaved, setIsSaved] = useState(true)
   const [isManualSaving, setIsManualSaving] = useState(false)
@@ -150,7 +337,18 @@ export default function OrgEditBranding() {
     setIsManualSaving(true)
     const loadingToast = toast.loading(t('dashboard.organization.settings.updating'))
     try {
-      await updateOrgColorConfig(org.id, primaryColor, access_token, brandFg, brandSidebar, brandHover)
+      await updateOrgColorConfig(
+        org.id,
+        primaryColor,
+        access_token,
+        brandFg,
+        brandSidebar,
+        brandHover,
+        darkPrimaryColor,
+        darkBrandFg,
+        darkBrandHover,
+        darkBrandSidebar
+      )
       await revalidateTags(['organizations'], org.slug)
       mutate(`${getAPIUrl()}orgs/slug/${org.slug}`)
       setIsSaved(true)
@@ -162,54 +360,25 @@ export default function OrgEditBranding() {
     }
   }
 
-  const handleHexInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPrimaryColor(e.target.value)
+  const updateLightTheme = (patch: Partial<ThemeCardValues>) => {
+    if (patch.color !== undefined) setPrimaryColor(patch.color)
+    if (patch.fg !== undefined) setBrandFg(patch.fg)
+    if (patch.hover !== undefined) setBrandHover(patch.hover)
+    if (patch.sidebar !== undefined) setBrandSidebar(patch.sidebar)
     setIsSaved(false)
   }
 
-  const handleClearColor = () => {
-    setPrimaryColor('')
+  const updateDarkTheme = (patch: Partial<ThemeCardValues>) => {
+    if (patch.color !== undefined) setDarkPrimaryColor(patch.color)
+    if (patch.fg !== undefined) setDarkBrandFg(patch.fg)
+    if (patch.hover !== undefined) setDarkBrandHover(patch.hover)
+    if (patch.sidebar !== undefined) setDarkBrandSidebar(patch.sidebar)
     setIsSaved(false)
   }
 
-  const handleBrandFgInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setBrandFg(e.target.value)
-    setIsSaved(false)
-  }
-
-  const handleClearBrandFg = () => {
-    setBrandFg('')
-    setIsSaved(false)
-  }
-
-  const handleBrandHoverInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setBrandHover(e.target.value)
-    setIsSaved(false)
-  }
-
-  const handleClearBrandHover = () => {
-    setBrandHover('')
-    setIsSaved(false)
-  }
-
-  const handleBrandSidebarChange = (checked: boolean) => {
-    setBrandSidebar(checked)
-    setIsSaved(false)
-  }
-
-  // Preview of the actual button colours: the resolved foreground sitting on
-  // the resolved brand background.
-  const previewBrand = normalizeBrandColor(primaryColor)
-  const previewBrandFg = resolveBrandFg(previewBrand, brandFg)
-  const previewContrast = getContrastRatio(previewBrandFg, previewBrand)
-  const isContrastLow = previewContrast < 4.5
-
-  // Hover fill: explicit when set, otherwise the automatic darkening step. The
-  // foreground is already resolved, so the read-out shows what the label will
-  // actually look like on the hover state.
-  const previewHover = resolveBrandHover(previewBrand, previewBrandFg, brandHover)
-  const previewHoverContrast = getContrastRatio(previewBrandFg, previewHover.hover)
-  const isHoverContrastLow = previewHoverContrast < 4.5
+  // With no dark colour the dark card previews the lifted light brand; with no
+  // light colour either, it previews the white dark-mode default.
+  const darkFallbackBrand = deriveDarkBrand(normalizeBrandColor(primaryColor))
 
   return (
     <div className="space-y-3">
@@ -423,144 +592,25 @@ export default function OrgEditBranding() {
         </div>
       </div>
 
-      {/* Theme Card */}
-      <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
-          {t('dashboard.organization.branding.tabs.theme')}
-        </h3>
-        <div className="space-y-3">
-          {/* Color Picker Container — matches upload row pattern */}
-          <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-gray-50/50 dark:bg-dk-inset/40">
-            {/* Color preview square */}
-            <div className="flex-shrink-0">
-              <div
-                className="w-10 h-10 rounded-lg border border-gray-100 dark:border-dk-line shadow-sm"
-                style={{ backgroundColor: primaryColor || '#ffffff' }}
-              />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('dashboard.organization.theme.primary_color')}</p>
-            </div>
-            {/* Hex input — card styling, no blue focus */}
-            <Input
-              type="text"
-              value={primaryColor}
-              onChange={handleHexInputChange}
-              placeholder={t('dashboard.organization.branding.theme.no_color')}
-              className="w-24 h-10 rounded-lg border border-gray-100 dark:border-dk-line !shadow-sm font-mono text-sm uppercase bg-white dark:bg-dk-card focus-visible:!shadow-sm focus-visible:border-gray-100 focus:outline-none"
-              maxLength={7}
-            />
-            {primaryColor && (
-              <button
-                type="button"
-                onClick={handleClearColor}
-                className="flex items-center justify-center text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
-                title={t('dashboard.organization.theme.clear_color')}
-              >
-                <X size={18} />
-              </button>
-            )}
-          </div>
-          <p className="text-xs text-gray-400 dark:text-zinc-400">{t('dashboard.organization.theme.primary_color_desc')}</p>
+      {/* Theme Cards — light and dark, saved together by the action row */}
+      <ThemeCard
+        title={t('dashboard.organization.theme.light_theme')}
+        values={{ color: primaryColor, fg: brandFg, hover: brandHover, sidebar: brandSidebar }}
+        fallbackBrand={normalizeBrandColor('')}
+        onChange={updateLightTheme}
+      />
 
-          {/* Hover fill — the colour brand buttons switch to on hover / press */}
-          <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-gray-50/50 dark:bg-dk-inset/40">
-            <div className="flex-shrink-0">
-              <div
-                className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-100 dark:border-dk-line shadow-sm text-sm font-semibold"
-                style={{ backgroundColor: previewHover.hover, color: previewBrandFg }}
-              >
-                Aa
-              </div>
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('dashboard.organization.theme.brand_hover')}</p>
-              <p className="text-xs text-gray-400 dark:text-zinc-400">
-                {brandHover ? previewHover.hover.toUpperCase() : `${t('dashboard.organization.theme.brand_hover_auto')} · ${previewHover.hover.toUpperCase()}`}
-                {' · '}
-                {t('dashboard.organization.theme.contrast')} {previewHoverContrast}:1
-                {isHoverContrastLow && (
-                  <span className="text-amber-600"> · {t('dashboard.organization.theme.contrast_low')}</span>
-                )}
-              </p>
-            </div>
-            <Input
-              type="text"
-              value={brandHover}
-              onChange={handleBrandHoverInputChange}
-              placeholder={t('dashboard.organization.theme.brand_hover_auto')}
-              className="w-24 h-10 rounded-lg border border-gray-100 dark:border-dk-line !shadow-sm font-mono text-sm uppercase bg-white dark:bg-dk-card focus-visible:!shadow-sm focus-visible:border-gray-100 focus:outline-none"
-              maxLength={7}
-            />
-            {brandHover && (
-              <button
-                type="button"
-                onClick={handleClearBrandHover}
-                className="flex items-center justify-center text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
-                title={t('dashboard.organization.theme.clear_color')}
-              >
-                <X size={18} />
-              </button>
-            )}
-          </div>
-          <p className="text-xs text-gray-400 dark:text-zinc-400">{t('dashboard.organization.theme.brand_hover_desc')}</p>
-
-          {/* Brand foreground — text and icons sitting on brand surfaces */}
-          <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-gray-50/50 dark:bg-dk-inset/40">
-            {/* Live preview: the resolved foreground on the resolved brand */}
-            <div className="flex-shrink-0">
-              <div
-                className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-100 dark:border-dk-line shadow-sm text-sm font-semibold"
-                style={{ backgroundColor: previewBrand, color: previewBrandFg }}
-              >
-                Aa
-              </div>
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('dashboard.organization.theme.brand_fg')}</p>
-              <p className="text-xs text-gray-400 dark:text-zinc-400">
-                {brandFg ? '' : `${t('dashboard.organization.theme.brand_fg_auto')} · `}
-                {t('dashboard.organization.theme.contrast')} {previewContrast}:1
-                {isContrastLow && (
-                  <span className="text-amber-600"> · {t('dashboard.organization.theme.contrast_low')}</span>
-                )}
-              </p>
-            </div>
-            <Input
-              type="text"
-              value={brandFg}
-              onChange={handleBrandFgInputChange}
-              placeholder={t('dashboard.organization.theme.brand_fg_auto')}
-              className="w-24 h-10 rounded-lg border border-gray-100 dark:border-dk-line !shadow-sm font-mono text-sm uppercase bg-white dark:bg-dk-card focus-visible:!shadow-sm focus-visible:border-gray-100 focus:outline-none"
-              maxLength={7}
-            />
-            {brandFg && (
-              <button
-                type="button"
-                onClick={handleClearBrandFg}
-                className="flex items-center justify-center text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
-                title={t('dashboard.organization.theme.clear_color')}
-              >
-                <X size={18} />
-              </button>
-            )}
-          </div>
-          <p className="text-xs text-gray-400 dark:text-zinc-400">{t('dashboard.organization.theme.brand_fg_desc')}</p>
-
-          {/* Sidebar active tab — opt in to a brand fill on the floating pill */}
-          <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-gray-50/50 dark:bg-dk-inset/40">
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('dashboard.organization.theme.brand_sidebar')}</p>
-              <p className="text-xs text-gray-400 dark:text-zinc-400">{t('dashboard.organization.theme.brand_sidebar_desc')}</p>
-            </div>
-            <Switch
-              checked={brandSidebar}
-              onCheckedChange={handleBrandSidebarChange}
-              className="data-[state=checked]:bg-brand"
-            />
-          </div>
-        </div>
-      </div>
+      <ThemeCard
+        title={t('dashboard.organization.theme.dark_theme')}
+        values={{
+          color: darkPrimaryColor,
+          fg: darkBrandFg,
+          hover: darkBrandHover,
+          sidebar: darkBrandSidebar,
+        }}
+        fallbackBrand={darkFallbackBrand}
+        onChange={updateDarkTheme}
+      />
 
       {/* Auth Page Branding Card */}
       <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">

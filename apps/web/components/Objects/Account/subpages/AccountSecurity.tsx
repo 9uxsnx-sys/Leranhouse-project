@@ -99,7 +99,11 @@ function AccountSecurity() {
     const loadingToast = toast.loading(t('user.settings.email.updating'))
     try {
       const user_id = session.data.user.id
-      await updateProfile({ email: values.new_email }, user_id, access_token)
+      await updateProfile(
+        { username: session.data.user.username, email: values.new_email },
+        user_id,
+        access_token
+      )
       toast.dismiss(loadingToast)
       toast.success(t('user.settings.email.email_updated'), { duration: 4000 })
       toast(

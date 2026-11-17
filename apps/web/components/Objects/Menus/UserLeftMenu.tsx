@@ -8,15 +8,14 @@ import {
   Route,
   LayoutDashboard,
   Globe,
-  HelpCircle,
+
   PanelLeftClose,
   Check,
-  Book,
-  MessageCircleMore,
+
+
   Headphones,
   Library,
 } from 'lucide-react'
-import { DiscordIcon } from '@components/Objects/Icons/DiscordIcon'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
@@ -36,7 +35,6 @@ import {
   HoverMenuContent,
   HoverMenuItem,
 } from "@components/ui/hover-menu"
-import { FeedbackModal } from '@components/Objects/Modals/FeedbackModal'
 import { AVAILABLE_LANGUAGES } from '@/lib/languages'
 import { getOrgLogoMediaDirectory, getOrgLogoIconMediaDirectory } from '@services/media/media'
 import { cn } from '@/lib/utils'
@@ -58,7 +56,6 @@ function UserLeftMenu() {
     }
     return pathname === path || pathname.startsWith(path + '/')
   }
-  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false)
   const access_token = session?.data?.tokens?.access_token
   const orgslug = org?.slug || ''
 
@@ -280,9 +277,6 @@ function UserLeftMenu() {
       {/* Bottom Section */}
       <div className="border-t border-gray-200 dark:border-dk-line py-3 px-3 shrink-0">
         <div className="space-y-1">
-          {/* Theme switcher — light / dark / system */}
-          <ThemeToggle collapsed={isCollapsed} className="mb-1" />
-
           {/* Collapse sidebar button (expanded state) */}
           {!isCollapsed && (
             <Tooltip>
@@ -320,6 +314,9 @@ function UserLeftMenu() {
             </Tooltip>
           )}
 
+          {/* Theme switcher — light / dark / system */}
+          <ThemeToggle collapsed={isCollapsed} className="mb-1" />
+
           {/* Language Switcher with hover menu */}
           <HoverMenu
             align="end"
@@ -333,7 +330,7 @@ function UserLeftMenu() {
                   >
                     <div className="flex flex-col">
                       <span className="font-medium text-sm">{language.nativeName}</span>
-                      <span className="text-xs text-ui-fg-muted">{t(language.translationKey)}</span>
+                      <span className="text-xs text-ui-fg-muted dark:text-dk-fg-3">{t(language.translationKey)}</span>
                     </div>
                     {i18n.language.split('-')[0] === language.code && (
                       <Check className="w-4 h-4 text-green-500" />
@@ -354,65 +351,7 @@ function UserLeftMenu() {
             </button>
           </HoverMenu>
 
-          {/* Help with hover menu */}
-          <HoverMenu
-            align="end"
-            content={
-              <HoverMenuContent className="w-56">
-                <HoverMenuItem asChild>
-                  <a
-                    href="https://docs.learnhouse.app"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2"
-                  >
-                    <Book className="w-4 h-4" />
-                    <span>{t('common.help_menu.documentation')}</span>
-                  </a>
-                </HoverMenuItem>
-                <HoverMenuItem asChild>
-                  <a
-                    href="https://learnhouse.app"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2"
-                  >
-                    <Globe className="w-4 h-4" />
-                    <span>{t('common.help_menu.website')}</span>
-                  </a>
-                </HoverMenuItem>
-                <HoverMenuItem asChild>
-                  <a
-                    href="https://discord.gg/learnhouse"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2"
-                  >
-                    <DiscordIcon size={16} />
-                    <span>{t('common.help_menu.discord')}</span>
-                  </a>
-                </HoverMenuItem>
-                <HoverMenuItem
-                  onClick={() => setFeedbackModalOpen(true)}
-                >
-                  <MessageCircleMore className="w-4 h-4" />
-                  <span>{t('common.help_menu.report_feedback')}</span>
-                </HoverMenuItem>
-              </HoverMenuContent>
-            }
-          >
-            <button aria-label={t('common.aria.open_help_menu')} className={cn(
-              "flex items-center w-full rounded-xl text-ui-fg-subtle hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover transition-all group",
-              isCollapsed ? "justify-center h-10" : "h-10 px-4 gap-x-2.5"
-            )}>
-              <HelpCircle className="w-[18px] h-[18px]" />
-              {!isCollapsed && (
-                <span className="text-sm font-medium">{t('common.help')}</span>
-              )}
-            </button>
-          </HoverMenu>
-
-          {/* Dashboard shortcut for admins */}
+{/* Dashboard shortcut for admins */}
           {rights?.dashboard?.action_access && (
             <>
               {!isCollapsed && <div className="border-t border-gray-200 dark:border-dk-line-strong mt-1 mb-3" />}
@@ -436,14 +375,7 @@ function UserLeftMenu() {
       </div>
     </nav>
 
-      {/* Feedback Modal */}
-      <FeedbackModal
-        open={feedbackModalOpen}
-        onOpenChange={setFeedbackModalOpen}
-        theme="light"
-        userName={session?.data?.user?.username}
-        userEmail={session?.data?.user?.email}
-      />
+
     </TooltipProvider>
   )
 }

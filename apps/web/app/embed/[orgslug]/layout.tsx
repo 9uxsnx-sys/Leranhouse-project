@@ -3,7 +3,7 @@
 import { use, useEffect } from 'react'
 import { OrgProvider, useOrg } from '@components/Contexts/OrgContext'
 import OrgLanguageSync from '@components/Contexts/OrgLanguageSync'
-import { getBrandStyle } from '@services/utils/ts/colorUtils'
+import { getBrandStyle, getOrgBrandConfig } from '@services/utils/ts/colorUtils'
 import { useTheme } from '@components/Contexts/ThemeContext'
 import '@styles/globals.css'
 
@@ -11,30 +11,48 @@ import '@styles/globals.css'
 function EmbedShell({ children }: { children: React.ReactNode }) {
   const org = useOrg() as any
   const { resolvedTheme } = useTheme()
-  const brandColor =
-    org?.config?.config?.customization?.general?.color ||
-    org?.config?.config?.general?.color ||
-    ''
-  const brandFg =
-    org?.config?.config?.customization?.general?.brand_fg ||
-    org?.config?.config?.general?.brand_fg ||
-    ''
-  const brandHover =
-    org?.config?.config?.customization?.general?.brand_hover ||
-    org?.config?.config?.general?.brand_hover ||
-    ''
+  const { light: lightBrand, dark: darkBrand } = getOrgBrandConfig(org?.config?.config)
 
   useEffect(() => {
-    const vars = getBrandStyle(brandColor, brandFg, false, brandHover, resolvedTheme)
+    const vars = getBrandStyle(
+      lightBrand.color,
+      lightBrand.fg,
+      lightBrand.sidebarBrand,
+      lightBrand.hover,
+      resolvedTheme,
+      darkBrand
+    )
     const root = document.documentElement
     Object.entries(vars).forEach(([key, value]) => root.style.setProperty(key, value))
     return () => {
       Object.keys(vars).forEach((key) => root.style.removeProperty(key))
     }
-  }, [brandColor, brandFg, brandHover, resolvedTheme])
+  }, [
+    lightBrand.color,
+    lightBrand.fg,
+    lightBrand.sidebarBrand,
+    lightBrand.hover,
+    darkBrand.color,
+    darkBrand.fg,
+    darkBrand.hover,
+    darkBrand.sidebarBrand,
+    resolvedTheme,
+  ])
 
   return (
-    <div className="min-h-screen" style={getBrandStyle(brandColor, brandFg, false, brandHover, resolvedTheme) as React.CSSProperties}>
+    <div
+      className="min-h-screen"
+      style={
+        getBrandStyle(
+          lightBrand.color,
+          lightBrand.fg,
+          lightBrand.sidebarBrand,
+          lightBrand.hover,
+          resolvedTheme,
+          darkBrand
+        ) as React.CSSProperties
+      }
+    >
       {children}
     </div>
   )

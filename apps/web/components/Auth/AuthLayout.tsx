@@ -14,7 +14,7 @@ export default function AuthLayout({ org, children }: AuthLayoutProps) {
   const { t } = useTranslation()
 
   return (
-    <div className="flex flex-col lg:grid lg:grid-cols-[1.6fr_1fr] xl:grid-cols-[1.75fr_1fr] h-screen bg-gray-50 dark:bg-dk-inset/40">
+    <div className="flex flex-col lg:grid lg:grid-cols-[1.6fr_1fr] xl:grid-cols-[1.75fr_1fr] h-screen bg-gray-50 dark:bg-transparent">
       {/* Left — branding image (content intentionally omitted for now) */}
       <div className="h-[180px] lg:h-full">
         <AuthBrandingPanel org={org} />
@@ -23,8 +23,8 @@ export default function AuthLayout({ org, children }: AuthLayoutProps) {
       {/* Right — form */}
       <div className="flex-1 flex items-center justify-center p-6 lg:p-12 overflow-auto">
         <div className="w-full max-w-[360px]">
-          <div className="bg-white dark:bg-dk-card rounded-xl card-shadow-rest p-8">{children}</div>
-          <p className="text-center text-xs text-gray-400 dark:text-zinc-400 mt-6">
+          <div className="bg-white dark:bg-dk-card rounded-xl card-shadow-rest dark:border dark:border-dk-line p-8">{children}</div>
+          <p className="text-center text-xs text-gray-400 dark:text-dk-fg-3 mt-6">
             {t('auth.privacy')} · {t('auth.terms')}
           </p>
         </div>

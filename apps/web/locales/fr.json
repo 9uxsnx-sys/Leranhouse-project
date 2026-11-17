@@ -4032,6 +4032,8 @@
         }
       },
       "theme": {
+        "light_theme": "Thème clair",
+        "dark_theme": "Thème sombre",
         "primary_color": "Couleur primaire",
         "primary_color_desc": "Choisissez une couleur primaire pour l'en-tête et l'arrière-plan de votre organisation.",
         "clear_color": "Effacer la couleur",

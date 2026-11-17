@@ -1,10 +1,15 @@
 'use client'
 
 import React from 'react'
-import { Monitor, Moon, Sun } from 'lucide-react'
+import { Check, Monitor, Moon, Sun } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { useTheme, type ThemeMode } from '@components/Contexts/ThemeContext'
+import {
+  HoverMenu,
+  HoverMenuContent,
+  HoverMenuItem,
+} from '@components/ui/hover-menu'
 
 const OPTIONS = [
   { mode: 'light' as ThemeMode, icon: Sun, labelKey: 'common.theme.light' },
@@ -13,65 +18,57 @@ const OPTIONS = [
 ]
 
 interface ThemeToggleProps {
-  /** Narrow sidebar: one icon that cycles instead of the segmented control. */
+  /** Narrow sidebar: icon-only trigger that still opens the same menu. */
   collapsed?: boolean
   className?: string
 }
 
+/**
+ * Theme picker as a sidebar option — the same hover menu used by the language
+ * switcher: a normal row that opens a card on hover, with a check on the
+ * active mode.
+ */
 export function ThemeToggle({ collapsed = false, className }: ThemeToggleProps) {
   const { t } = useTranslation()
   const { theme, setTheme } = useTheme()
 
-  if (collapsed) {
-    const next: ThemeMode = theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light'
-    const Current = theme === 'dark' ? Moon : theme === 'system' ? Monitor : Sun
-    return (
+  const Current = theme === 'dark' ? Moon : theme === 'system' ? Monitor : Sun
+
+  return (
+    <HoverMenu
+      align="end"
+      className={className}
+      content={
+        <HoverMenuContent className="w-52">
+          {OPTIONS.map(({ mode, icon: Icon, labelKey }) => (
+            <HoverMenuItem
+              key={mode}
+              onClick={() => setTheme(mode)}
+              className="justify-between"
+            >
+              <div className="flex items-center gap-2">
+                <Icon className="w-4 h-4" />
+                <span className="font-medium text-sm">{t(labelKey)}</span>
+              </div>
+              {theme === mode && <Check className="w-4 h-4 text-green-500" />}
+            </HoverMenuItem>
+          ))}
+        </HoverMenuContent>
+      }
+    >
       <button
-        type="button"
-        onClick={() => setTheme(next)}
         aria-label={t('common.theme.label')}
-        title={t(`common.theme.${theme}`)}
         className={cn(
-          'flex items-center justify-center w-10 h-10 mx-auto rounded-xl text-ui-fg-subtle hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover transition-all',
-          className
+          'flex items-center w-full rounded-xl text-ui-fg-subtle hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover transition-all group',
+          collapsed ? 'justify-center h-10' : 'h-10 px-4 gap-x-2.5'
         )}
       >
         <Current className="w-[18px] h-[18px]" />
+        {!collapsed && (
+          <span className="text-sm font-medium">{t('common.theme.label')}</span>
+        )}
       </button>
-    )
-  }
-
-  return (
-    <div
-      role="group"
-      aria-label={t('common.theme.label')}
-      className={cn(
-        'flex items-center gap-1 rounded-lg border border-ui-border-base bg-ui-bg-base p-1',
-        className
-      )}
-    >
-      {OPTIONS.map(({ mode, icon: Icon, labelKey }) => {
-        const isActive = theme === mode
-        return (
-          <button
-            key={mode}
-            type="button"
-            onClick={() => setTheme(mode)}
-            aria-pressed={isActive}
-            title={t(labelKey)}
-            className={cn(
-              'flex flex-1 items-center justify-center gap-1.5 h-7 rounded-md text-xs font-medium transition-colors',
-              isActive
-                ? 'bg-ui-bg-subtle-pressed text-ui-fg-base'
-                : 'text-ui-fg-muted hover:bg-ui-bg-base-hover hover:text-ui-fg-base'
-            )}
-          >
-            <Icon className="w-3.5 h-3.5" />
-            <span>{t(labelKey)}</span>
-          </button>
-        )
-      })}
-    </div>
+    </HoverMenu>
   )
 }
 

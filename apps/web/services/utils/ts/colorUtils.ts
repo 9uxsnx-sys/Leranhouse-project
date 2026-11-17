@@ -190,29 +190,85 @@ export function deriveDarkBrand(hex: string): string {
  * dark foreground uses a gentler step — 14%/26% black would take a clay brand
  * from 5.68:1 to 4.32:1 / 3.36:1, while 6%/12% keeps it at 5.07:1 / 4.51:1.
  *
- * `mode` picks the pair. In dark mode the brand is derived from the light hex
- * (§7 of the dark-mode plan) and the pinned light foreground is ignored,
- * because a label chosen for a light fill is usually wrong on a lifted one.
- * The neutral sidebar pill skips one zinc step instead of switching to white.
+ * `mode` picks the pair. In dark mode an explicit `dark` config wins; when its
+ * colour is empty the brand is derived from the light hex (§7 of the dark-mode
+ * plan), and the pinned light foreground is ignored, because a label chosen for
+ * a light fill is usually wrong on a lifted one. `dark.sidebarBrand` falls back
+ * to the light switch. The neutral sidebar pill skips one zinc step instead of
+ * switching to white.
  *
- * With no colour set the whole set resolves to ink — the interface looks
- * exactly as it did before the brand feature existed.
+ * With no colour set the whole set resolves to ink in light mode and to white
+ * (`#fafafa`) in dark mode — the per-mode platform defaults.
  */
+export type BrandConfig = {
+  color: string
+  fg: string
+  hover: string
+  sidebarBrand: boolean
+}
+
+/**
+ * Reads the light and dark brand pairs out of an organization config.
+ *
+ * Keys are read from `customization.general` (v2) and fall back per key to the
+ * legacy top-level `general` block. An absent `dark_brand_sidebar` inherits the
+ * light switch, so organizations that only ever configured light mode keep the
+ * same sidebar behaviour in dark.
+ */
+export function getOrgBrandConfig(orgConfig: any): {
+  light: BrandConfig
+  dark: BrandConfig
+} {
+  const v2 = orgConfig?.customization?.general
+  const v1 = orgConfig?.general
+  // Strings use `||` so an empty v2 value still falls back to the legacy block,
+  // matching what every shell read before this helper existed.
+  const pick = (key: string) => v2?.[key] || v1?.[key] || ''
+  const darkSidebarRaw = v2?.dark_brand_sidebar ?? v1?.dark_brand_sidebar
+
+  return {
+    light: {
+      color: pick('color'),
+      fg: pick('brand_fg'),
+      hover: pick('brand_hover'),
+      sidebarBrand: !!(v2?.brand_sidebar || v1?.brand_sidebar),
+    },
+    dark: {
+      color: pick('dark_color'),
+      fg: pick('dark_brand_fg'),
+      hover: pick('dark_brand_hover'),
+      sidebarBrand:
+        darkSidebarRaw === undefined
+          ? !!(v2?.brand_sidebar || v1?.brand_sidebar)
+          : !!darkSidebarRaw,
+    },
+  }
+}
+
 export function getBrandStyle(
   color?: string | null,
   brandFg?: string | null,
   sidebarBrand = false,
   brandHover?: string | null,
-  mode: 'light' | 'dark' = 'light'
+  mode: 'light' | 'dark' = 'light',
+  dark?: BrandConfig
 ): Record<string, string> {
   const lightBrand = normalizeBrandColor(color)
   const isDark = mode === 'dark'
 
-  const brand = isDark ? deriveDarkBrand(lightBrand) : lightBrand
-  const fg = isDark ? resolveBrandFg(brand, null) : resolveBrandFg(brand, brandFg)
+  // An explicit dark colour wins; otherwise the light brand is lifted into a
+  // dark-safe fill. With no light colour either, the fallback derives to white.
+  const darkColor = (dark?.color || '').trim()
+  const brand = isDark
+    ? darkColor
+      ? normalizeBrandColor(darkColor)
+      : deriveDarkBrand(lightBrand)
+    : lightBrand
+  const fg = isDark ? resolveBrandFg(brand, dark?.fg) : resolveBrandFg(brand, brandFg)
   const hover = isDark
-    ? resolveBrandHover(brand, fg, null)
+    ? resolveBrandHover(brand, fg, dark?.hover)
     : resolveBrandHover(brand, fg, brandHover)
+  const useSidebarBrand = isDark ? (dark?.sidebarBrand ?? sidebarBrand) : sidebarBrand
 
   // Neutral pill: white on the light sidebar, one zinc step up in dark mode.
   const neutralPill = isDark
@@ -229,9 +285,9 @@ export function getBrandStyle(
     // The floating pill behind the active sidebar item. Off keeps the neutral
     // surface; on makes it a brand fill, so the label follows the foreground
     // rather than ink.
-    '--sidebar-active-bg': sidebarBrand ? brand : neutralPill.bg,
-    '--sidebar-active-border': sidebarBrand ? brand : neutralPill.border,
-    '--sidebar-active-fg': sidebarBrand ? fg : neutralPill.fg,
+    '--sidebar-active-bg': useSidebarBrand ? brand : neutralPill.bg,
+    '--sidebar-active-border': useSidebarBrand ? brand : neutralPill.border,
+    '--sidebar-active-fg': useSidebarBrand ? fg : neutralPill.fg,
   }
 }
 

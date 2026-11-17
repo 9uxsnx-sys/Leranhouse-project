@@ -2843,6 +2843,15 @@ html[dir='rtl'] samp {
 }
 
 /* ─── Auth fields: neutralize Chrome's blue autofill background ─── */
+.dark .auth-field:-webkit-autofill,
+.dark .auth-field:-webkit-autofill:hover,
+.dark .auth-field:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #0d0d0f inset;
+  -webkit-text-fill-color: #f4f4f5;
+  caret-color: #f4f4f5;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 .auth-field:-webkit-autofill,
 .auth-field:-webkit-autofill:hover,
 .auth-field:-webkit-autofill:focus {

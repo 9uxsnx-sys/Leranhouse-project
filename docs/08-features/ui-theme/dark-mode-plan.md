@@ -523,17 +523,24 @@ Files: `components/Objects/StyledElements/Modal/Modal.tsx`,
 
 | Part | Light (verified) | Dark |
 |---|---|---|
+| Split shell | `bg-gray-50` | `bg-transparent` (page canvas — the inset well sits *below* the page) |
 | Left artwork panel | uploaded image, no overlay | unchanged — artwork is not themed |
 | Fallback gradient | `#202020 → #000000` | unchanged (already dark) |
-| Form card | `bg-white` | → `bg-ui-bg-base` |
-| Label | `text-gray-700` | → `text-ui-fg-base` |
-| Muted link | `text-gray-500` | → `text-ui-fg-muted` |
-| "or" divider | `border-t border-gray-100`, chip `bg-white text-gray-400` | → `border-ui-border-base`, chip `bg-ui-bg-base text-ui-fg-muted` |
-| Google / SSO button | `authSecondaryBtnClass` | token |
+| Form card | `bg-white` | `bg-dk-card` + `dark:border dark:border-dk-line` (the shadow is invisible on dark, the hairline carries the separation) |
+| Field | `bg-white border-gray-200 text-gray-900` | `bg-dk-inset border-dk-line-strong text-dk-fg-1`, placeholder `dk-fg-4`; autofill neutralised by `.dark .auth-field:-webkit-autofill` |
+| Label | `text-gray-700` | `dk-fg-2` |
+| Muted link | `text-gray-500` | `dk-fg-3`, hover `dk-fg-1` |
+| "or" divider | `border-t border-gray-100`, chip `bg-white text-gray-400` | `border-dk-line`, chip `bg-dk-card text-dk-fg-3` |
+| Google / SSO button | `authSecondaryBtnClass` (white on white card + border) | `bg-dk-card` + `border-dk-line-strong` + `dk-fg-2` |
+| Alert (error / success / warning / info) | `bg-*-50 border-*-200 text-*-900` | `bg-*-500/10 border-*-500/30 text-*-200`; info is `dk-raised` on `dk-line-strong` |
+| State icon circle (check / warning) | `bg-gray-100` | `bg-dk-raised` — the inset is below the card and disappears |
+| Terms checkbox | `border-gray-300`, checked `bg-gray-900 text-white` | checked `bg-dk-fg-1 border-dk-fg-1 text-dk-inset` |
 | Submit | `bg-brand text-brand-fg` | dark brand |
 
-Files: `app/auth/login/login.tsx`, `components/Auth/authStyles.ts`,
-`components/Auth/AuthBrandingPanel.tsx`.
+Files: `app/auth/**` (login, signup / OpenSignup / InviteOnlySignUp, forgot,
+reset, verify-email, sso/callback, callback/google, token-exchange),
+`components/Auth/*` (`authStyles.ts`, `AuthAlert`, `AuthLayout`, `CheckEmailState`,
+`PasswordStrengthIndicator`, `AuthBrandingPanel`).
 
 ### 5.16 Media players
 
@@ -605,9 +612,9 @@ preview with its WCAG ratio, exactly like the light card shows its resolved valu
 
 Per-card fallback, matching the light behaviour: a card with no colour configured resolves
 to the platform default for its mode — **light falls back to ink `#27272a`** (black, as
-today) and **dark falls back to `#fafafa` white** with a `#0b0b0d` foreground. An
-organization that never opens Branding therefore keeps a black brand in light and gets a
-white primary button in dark, instead of a dark-on-dark one.
+today) and **dark falls back to `#fafafa` white** with the auto-resolved ink
+foreground (`#18181b`). An organization that never opens Branding therefore keeps a black
+brand in light and gets a white primary button in dark, instead of a dark-on-dark one.
 
 ---
 
@@ -639,7 +646,7 @@ Each phase ships on its own and is verifiable in isolation.
 | **7 — Tables** ✅ | `table.tsx` + the custom dashboard tables | Header/row/selected states are distinguishable |
 | **8 — Overlays** ✅ | Dropdowns, tooltips, popovers, command palette, modals, toasts | Nothing white flashes over a dark page |
 | **9 — Charts** ✅ | `isDark` branch in `useChartTheme()` | Grid, axis, tooltip and ramps are tuned for dark |
-| **10 — Brand per mode** ◐ | `getBrandStyle(..., mode)` + `deriveDarkBrand()` shipped; the Branding → Light theme / Dark theme cards are next | Changing Dark → Primary recolours the dark button, progress and tab underline only |
+| **10 — Brand per mode** ✅ | Branding → Theme is two cards (Light theme / Dark theme) with the same four controls, saved by the single Branding action row into `dark_*` config keys; `getBrandStyle(..., mode, dark)` reads the matching pair and `deriveDarkBrand()` fills an empty dark colour | Changing Dark → Primary recolours the dark button, progress and tab underline only; light mode is unchanged |
 | **11 — Audit** ◐ | Coverage audit complete across every UI-reachable page section (learner + dashboard); route-by-route contrast check via `getContrastRatio()` still pending | No unstyled surface, no contrast failure, no pure `#000` / `#fff` |
 
 Phase 0 and 1 are invisible until the toggle exists, so they cannot regress the light theme.
@@ -697,6 +704,7 @@ These are deliberate open questions, answered by the research pass, not guessed 
 | 2026-11-17 | Reachable-surface scan result: **37 light-only lines left across 390 scanned files**, all deliberate (video scrubbers on video, dark chips that stay dark, the pass-fail pill on a coloured fill, and mobile-only components). |
 | 2026-11-17 | **Surface-ladder correction.** The one-step card (`#18181b` on `#09090b`) read as flat: cards and page blurred together. Re-based the ladder on the sidebar's active pill — `page #09090b → card #27272a → border #3f3f46`, inner wells down to `#18181b`. Applied in `.dark` tokens, the shadcn HSL block, `useChartTheme()` grid/axis, and across 291 files / 1,727 `dark:` utilities (card `zinc-900→800`, well `zinc-800→900`, hairline `zinc-800→700`, strong border `zinc-700→600`, row hover `zinc-800→700`). Neutral buttons and chips moved to `#3f3f46` so a secondary control never shares the page colour. |
 | 2026-11-17 | **Ladder locked after comparing with GitHub / Linear (v3).** v2 overshot: a 30-point fill delta made every card a bright grey slab and the secondary button became brighter than the cards. Re-measured the references — GitHub card is only 1.09:1 above its canvas with a 1.42:1 border — and rebuilt the ladder as **border-separates, fill-hints**: `page #09090b → card #141417 (1.08:1) → border #2f2f35 (1.38:1)`, wells down to `#0d0d0f`. Declared as six `--color-dk-*` theme colours (`dk-card`, `dk-raised`, `dk-track`, `dk-inset`, `dk-line`, `dk-line-strong`) so the whole ladder is one knob. Fixed three specific defects: the shadow ring no longer doubles the card border (a card was a 2px outlined box), text gained a third level (description `zinc-400`, meta `zinc-500` — both were `zinc-400`, so nothing receded), and listing search fields became recessed (`dk-inset`) instead of card-coloured. Applied across 293 files. |
+| 2026-11-17 | **Auth surface pass.** The split shell used the inset well for its page (`#0d0d0f`, below the canvas) → page colour + `dk-card` form. Fields were card-coloured (invisible on the card) with zinc text → `dk-inset` well, `dk-line-strong` hairline, `dk-fg-1` text / `dk-fg-4` placeholder, plus a `.dark .auth-field:-webkit-autofill` override (Chrome was painting autofilled fields white). Labels / links / secondary button moved off zinc onto `dk-fg-1…3`; `AuthAlert` variants got real dark fills (`*-500/10`, `*-500/30` border, `*-200` text) instead of light pastel slabs; success / error icon circles went from the invisible inset to `dk-raised`; the terms checkbox inverts to `dk-fg-1` fill with a `dk-inset` tick; and the SSO / Google callback tips and error badge gained dark states. 15 auth files. |
 
 ### Known gaps (deliberately not migrated yet)
 

@@ -47,7 +47,12 @@ function AccountPrivacy() {
 
     try {
       const user_id = user.id
+      // The user update endpoint requires the identity fields on every call
+      // (they are part of the update schema), so send the current values back
+      // alongside the privacy metadata.
       const payload = {
+        username: user.username,
+        email: user.email,
         extra_metadata: {
           ...(user.extra_metadata || {}),
           privacy: newSettings,
@@ -58,6 +63,11 @@ function AccountPrivacy() {
         // Revert on failure
         setSettings(settings)
         toast.error('Failed to update privacy setting')
+      } else {
+        // Refresh the session so the toggles still show the saved values when
+        // the page is remounted. Fire and forget: a refresh failure must not
+        // revert a save that already succeeded.
+        void session?.update?.(true)
       }
     } catch (error) {
       // Revert on error

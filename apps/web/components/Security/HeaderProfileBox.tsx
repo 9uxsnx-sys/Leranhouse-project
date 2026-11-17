@@ -77,7 +77,7 @@ export const HeaderProfileBox = ({ primaryColor = '', collapsed = false }: { pri
 
       <HoverMenuItem
         onClick={() => signOut({ callbackUrl: '/' })}
-        className="text-red-600 hover:text-red-600 hover:bg-red-50"
+        className="text-red-600 hover:text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-400 dark:hover:bg-red-500/10"
       >
         <ArrowRightOnRectangle className="h-4 w-4" />
         <span>Sign Out</span>

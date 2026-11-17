@@ -588,6 +588,10 @@ async def api_update_org_color_config(
     brand_fg: str = "",
     brand_sidebar: bool = False,
     brand_hover: str = "",
+    dark_color: str = "",
+    dark_brand_fg: str = "",
+    dark_brand_hover: str = "",
+    dark_brand_sidebar: bool = False,
     current_user: PublicUser = Depends(get_current_user),
     db_session: Session = Depends(get_db_session),
 ):
@@ -603,6 +607,10 @@ async def api_update_org_color_config(
         brand_fg=brand_fg,
         brand_sidebar=brand_sidebar,
         brand_hover=brand_hover,
+        dark_color=dark_color,
+        dark_brand_fg=dark_brand_fg,
+        dark_brand_hover=dark_brand_hover,
+        dark_brand_sidebar=dark_brand_sidebar,
     )
 
 

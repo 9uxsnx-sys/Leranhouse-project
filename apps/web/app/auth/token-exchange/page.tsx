@@ -78,15 +78,15 @@ function TokenExchangeInner() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dk-inset/40">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-transparent">
         <div className="text-center max-w-md mx-auto p-6">
           <div className="flex justify-center mb-4">
-            <div className="p-3 bg-red-100 rounded-full">
-              <AlertTriangle className="w-10 h-10 text-red-600" />
+            <div className="p-3 bg-red-100 dark:bg-red-500/10 rounded-full">
+              <AlertTriangle className="w-10 h-10 text-red-600 dark:text-red-400" />
             </div>
           </div>
-          <h1 className="text-xl font-semibold text-gray-800 dark:text-zinc-200 mb-2">Authentication Failed</h1>
-          <p className="text-gray-600 dark:text-zinc-300 mb-6">{error}</p>
+          <h1 className="text-xl font-semibold text-gray-800 dark:text-dk-fg-2 mb-2">Authentication Failed</h1>
+          <p className="text-gray-600 dark:text-dk-fg-2 mb-6">{error}</p>
           <a
             href="/login"
             className="inline-block px-6 py-2.5 bg-brand text-brand-fg rounded-lg hover:bg-brand-hover transition-colors text-sm font-semibold"
@@ -99,13 +99,13 @@ function TokenExchangeInner() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dk-inset/40">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-transparent">
       <div className="text-center">
         <div className="flex justify-center mb-4">
-          <Loader2 className="w-10 h-10 text-gray-600 dark:text-zinc-300 animate-spin" />
+          <Loader2 className="w-10 h-10 text-gray-600 dark:text-dk-fg-2 animate-spin" />
         </div>
-        <h1 className="text-lg font-semibold text-gray-800 dark:text-zinc-200 mb-1">Signing you in...</h1>
-        <p className="text-gray-500 dark:text-zinc-400 text-sm">Please wait while we set up your session.</p>
+        <h1 className="text-lg font-semibold text-gray-800 dark:text-dk-fg-2 mb-1">Signing you in...</h1>
+        <p className="text-gray-500 dark:text-dk-fg-3 text-sm">Please wait while we set up your session.</p>
       </div>
     </div>
   )
@@ -115,8 +115,8 @@ export default function TokenExchangePage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dk-inset/40">
-          <Loader2 className="w-10 h-10 text-gray-600 dark:text-zinc-300 animate-spin" />
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-transparent">
+          <Loader2 className="w-10 h-10 text-gray-600 dark:text-dk-fg-2 animate-spin" />
         </div>
       }
     >

@@ -786,7 +786,7 @@ function AccountGeneral() {
           const loadingToast = toast.loading(t('user.settings.general.saving'))
 
           setTimeout(() => {
-            updateProfile(values, userData.id, access_token)
+            updateProfile({ ...values, email: userData.email }, userData.id, access_token)
               .then(() => {
                 toast.dismiss(loadingToast)
                 setIsSaved(true)

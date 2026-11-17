@@ -8,7 +8,7 @@ import { Podcast, PodcastEpisode, PodcastMeta } from '@services/podcasts/podcast
 import { startPodcast } from '@services/podcasts/trail'
 import { createResourceCheckout } from '@services/payments/checkout'
 import toast from 'react-hot-toast'
-import { Headphones, Loader2, Clock, BookOpen, Award, User, Play, Info, RefreshCw } from 'lucide-react'
+import { Headphones, Loader2, Clock, BookOpen, Award, User, Info, RefreshCw } from 'lucide-react'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { getPodcastThumbnailMediaDirectory, getPodcastBannerMediaDirectory } from '@services/media/media'
 import { useTranslation } from 'react-i18next'
@@ -307,11 +307,10 @@ export default function PodcastClient({
                       <span className="text-sm text-gray-500 dark:text-dk-fg-3">{completedEpisodes}/{totalEpisodes}</span>
                     </div>
                     <div className="w-full h-1.5 bg-gray-100 dark:bg-dk-inset rounded-full mt-2 overflow-hidden">
-                      <div className="h-full bg-black rounded-full transition-all" style={{ width: `${progressPercent}%` }} />
+                      <div className="h-full bg-brand rounded-full transition-all" style={{ width: `${progressPercent}%` }} />
                     </div>
                     <Link href={getUriWithOrg(orgslug, `/podcast/${podcastUuid}`)} className="block w-full mt-4">
                       <Button variant="primary" size="large" className="w-full">
-                        <Play size={16} className="me-1.5" />
                         {t('podcast.page.continue_listening')}
                       </Button>
                     </Link>
@@ -319,17 +318,12 @@ export default function PodcastClient({
                 ) : (
                   <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
                     <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-4">{t('podcast.page.get_access')}</h3>
-                    {isPaidPodcast && podcastPrice !== null && podcastPrice > 0 ? (
+                    {isPaidPodcast && podcastPrice !== null && podcastPrice > 0 && (
                       <p className="text-2xl font-semibold text-gray-900 dark:text-dk-fg-1 mb-4">
-                        {new Intl.NumberFormat(i18n.language || 'en', {
-                          style: 'currency',
-                          currency: podcast.price_currency || 'DZD',
-                          maximumFractionDigits: 0,
-                        }).format(podcastPrice)}
-                      </p>
-                    ) : (
-                      <p className="text-sm text-gray-500 dark:text-dk-fg-3 mb-2 leading-snug">
-                        {t('podcast.page.get_access_hint')}
+                        {podcastPrice.toLocaleString()}{' '}
+                        <span className="text-sm font-normal text-gray-500 dark:text-dk-fg-3">
+                          {podcast.price_currency || 'DZD'}
+                        </span>
                       </p>
                     )}
                     <Button
@@ -344,8 +338,10 @@ export default function PodcastClient({
                           <Loader2 size={16} className="animate-spin" />
                           {t('course.page.please_wait')}
                         </span>
-                      ) : (
+                      ) : isPaidPodcast ? (
                         t('podcast.page.get_access')
+                      ) : (
+                        t('course.page.add_to_progress')
                       )}
                     </Button>
                   </div>

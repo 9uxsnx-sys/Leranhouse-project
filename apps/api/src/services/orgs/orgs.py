@@ -1068,6 +1068,10 @@ async def update_org_color_config(
     brand_fg: str = "",
     brand_sidebar: bool = False,
     brand_hover: str = "",
+    dark_color: str = "",
+    dark_brand_fg: str = "",
+    dark_brand_hover: str = "",
+    dark_brand_sidebar: bool = False,
 ):
     statement = select(Organization).where(Organization.id == org_id)
     org = db_session.exec(statement).first()
@@ -1091,12 +1095,20 @@ async def update_org_color_config(
         updated_config["customization"]["general"]["brand_fg"] = brand_fg
         updated_config["customization"]["general"]["brand_sidebar"] = brand_sidebar
         updated_config["customization"]["general"]["brand_hover"] = brand_hover
+        updated_config["customization"]["general"]["dark_color"] = dark_color
+        updated_config["customization"]["general"]["dark_brand_fg"] = dark_brand_fg
+        updated_config["customization"]["general"]["dark_brand_hover"] = dark_brand_hover
+        updated_config["customization"]["general"]["dark_brand_sidebar"] = dark_brand_sidebar
     else:
         updated_config.setdefault("general", {"enabled": True, "color": "", "watermark": True})
         updated_config["general"]["color"] = color
         updated_config["general"]["brand_fg"] = brand_fg
         updated_config["general"]["brand_sidebar"] = brand_sidebar
         updated_config["general"]["brand_hover"] = brand_hover
+        updated_config["general"]["dark_color"] = dark_color
+        updated_config["general"]["dark_brand_fg"] = dark_brand_fg
+        updated_config["general"]["dark_brand_hover"] = dark_brand_hover
+        updated_config["general"]["dark_brand_sidebar"] = dark_brand_sidebar
 
     org_config.config = updated_config
     org_config.update_date = str(datetime.now())

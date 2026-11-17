@@ -155,7 +155,7 @@ const HoverMenuItem = React.forwardRef<HTMLDivElement, HoverMenuItemProps>(
   ({ children, className, onClick, asChild }, ref) => {
     if (asChild) {
       return (
-        <div ref={ref} className={cn("flex items-center gap-2 px-3 py-2.5 text-sm text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover rounded-lg cursor-pointer transition-colors", className)}>
+        <div ref={ref} className={cn("flex items-center gap-2 px-3 py-2.5 text-sm text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover dark:text-dk-fg-2 dark:hover:text-dk-fg-1 rounded-lg cursor-pointer transition-colors", className)}>
           {children}
         </div>
       )
@@ -166,7 +166,7 @@ const HoverMenuItem = React.forwardRef<HTMLDivElement, HoverMenuItemProps>(
         ref={ref}
         onClick={onClick}
         className={cn(
-          "flex items-center gap-2 px-3 py-2.5 text-sm text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover rounded-lg cursor-pointer transition-colors",
+          "flex items-center gap-2 px-3 py-2.5 text-sm text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover dark:text-dk-fg-2 dark:hover:text-dk-fg-1 rounded-lg cursor-pointer transition-colors",
           className
         )}
       >
