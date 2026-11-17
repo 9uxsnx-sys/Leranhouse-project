@@ -17,17 +17,17 @@ export function DiscussionReplyModal({ discussion, communityUuid, onClose }: Dis
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative w-full max-w-2xl bg-white rounded-xl border border-gray-100 shadow-sm max-h-[90vh] flex flex-col z-10 overflow-hidden">
+      <div className="relative w-full max-w-2xl bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm max-h-[90vh] flex flex-col z-10 overflow-hidden">
         {/* Header with close button */}
         <div className="flex items-center justify-between px-6 pt-5 pb-3">
-          <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500">
+          <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1">
             Replies
           </h2>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-md hover:bg-gray-100 transition-colors"
+            className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors"
           >
-            <X size={16} className="text-gray-500" />
+            <X size={16} className="text-gray-500 dark:text-dk-fg-3" />
           </button>
         </div>
 

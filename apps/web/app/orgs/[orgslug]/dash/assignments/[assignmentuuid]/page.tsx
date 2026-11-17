@@ -47,8 +47,8 @@ function AssignmentEdit() {
     if (isMobile) {
         // TODO: Work on a better mobile experience
         return (
-          <div className="h-screen w-full bg-[#f8f8f8] flex items-center justify-center p-4">
-            <div className="bg-white p-6 rounded-lg shadow-md text-center">
+          <div className="h-screen w-full bg-[#f8f8f8] dark:bg-transparent flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-dk-card p-6 rounded-lg shadow-md text-center">
               <h2 className="text-xl font-bold mb-4">{t('dashboard.assignments.detail.mobile.title')}</h2>
               <Monitor className='mx-auto my-5' size={60} />    
               <p>{t('dashboard.assignments.detail.mobile.message1')}</p>
@@ -61,7 +61,7 @@ function AssignmentEdit() {
     return (
         <div className='flex w-full flex-col h-screen'>
             <AssignmentProvider assignment_uuid={'assignment_' + params.assignmentuuid}>
-                <div className='flex flex-col bg-white z-10 nice-shadow relative'>
+                <div className='flex flex-col bg-white dark:bg-dk-card z-10 nice-shadow relative'>
                     <div className='flex justify-between me-10 h-full'>
                         <div className="ps-10 me-10 tracking-tighter">
                             <div className="w-100 flex justify-between">
@@ -156,7 +156,7 @@ function PublishingState() {
                 <div className={`flex text-xs rounded-full px-3.5 py-2 mx-auto font-bold outline outline-1 ${!assignment?.assignment_object?.published ? 'outline-gray-300 bg-gray-200/60' : 'outline-green-300 bg-green-200/60'}`}>
                     {assignment?.assignment_object?.published ? t('dashboard.assignments.detail.publishing.published') : t('dashboard.assignments.detail.publishing.unpublished')}
                 </div>
-                <div><EllipsisVertical className='text-gray-500' size={13} /></div>
+                <div><EllipsisVertical className='text-gray-500 dark:text-zinc-400' size={13} /></div>
 
                 <ToolTip
                     side='left'
@@ -191,7 +191,7 @@ function PublishingState() {
                     content={t('dashboard.assignments.detail.publishing.unpublish_tooltip')} >
                     <div
                         onClick={() => updateAssignmentPublishState(assignment?.assignment_object?.assignment_uuid)}
-                        className='flex px-3 py-2 cursor-pointer rounded-md space-x-2 items-center bg-linear-to-bl text-gray-800 font-medium from-gray-400/50 to-gray-200/80 border border-gray-600/10 shadow-gray-900/10 shadow-lg'>
+                        className='flex px-3 py-2 cursor-pointer rounded-md space-x-2 items-center bg-linear-to-bl text-gray-800 dark:text-zinc-200 font-medium from-gray-400/50 to-gray-200/80 border border-gray-600/10 shadow-gray-900/10 shadow-lg'>
                         <BookX size={18} />
                         <p className='text-sm font-bold'>{t('dashboard.assignments.detail.publishing.unpublish')}</p>
                     </div>
@@ -232,8 +232,8 @@ function AssignmentTitle() {
 
     return (
         <div className="flex items-baseline gap-2 font-bold text-2xl">
-            <span className="text-gray-400">{t('dashboard.assignments.detail.title_prefix')}</span>
-            <span className="text-gray-900 truncate max-w-[500px]">{name || '...'}</span>
+            <span className="text-gray-400 dark:text-zinc-400">{t('dashboard.assignments.detail.title_prefix')}</span>
+            <span className="text-gray-900 dark:text-zinc-100 truncate max-w-[500px]">{name || '...'}</span>
         </div>
     );
 }

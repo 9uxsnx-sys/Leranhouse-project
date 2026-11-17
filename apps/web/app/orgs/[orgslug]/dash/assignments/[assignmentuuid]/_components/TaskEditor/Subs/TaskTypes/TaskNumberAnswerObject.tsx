@@ -244,7 +244,7 @@ function TaskNumberAnswerObject({
                   'dashboard.assignments.editor.task_editor.number_answer.prompt_placeholder'
                 )}
                 rows={2}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-md bg-white resize-y"
+                className="px-3 py-2 text-sm border border-gray-200 dark:border-dk-line-strong rounded-md bg-white dark:bg-dk-card resize-y"
               />
             </div>
 
@@ -263,7 +263,7 @@ function TaskNumberAnswerObject({
                       correct_value: Number.parseFloat(e.target.value) || 0,
                     }))
                   }
-                  className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-white"
+                  className="px-3 py-1.5 text-sm border border-gray-200 dark:border-dk-line-strong rounded-md bg-white dark:bg-dk-card"
                 />
               </div>
               <div className="flex flex-col space-y-1">
@@ -281,7 +281,7 @@ function TaskNumberAnswerObject({
                       tolerance: Math.max(0, Number.parseFloat(e.target.value) || 0),
                     }))
                   }
-                  className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-white"
+                  className="px-3 py-1.5 text-sm border border-gray-200 dark:border-dk-line-strong rounded-md bg-white dark:bg-dk-card"
                 />
               </div>
             </div>
@@ -298,7 +298,7 @@ function TaskNumberAnswerObject({
                 placeholder={t(
                   'dashboard.assignments.editor.task_editor.number_answer.unit_placeholder'
                 )}
-                className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-white"
+                className="px-3 py-1.5 text-sm border border-gray-200 dark:border-dk-line-strong rounded-md bg-white dark:bg-dk-card"
               />
               <p className="text-[10px] text-slate-400">
                 {t('dashboard.assignments.editor.task_editor.number_answer.unit_hint')}
@@ -318,7 +318,7 @@ function TaskNumberAnswerObject({
                   'dashboard.assignments.editor.task_editor.number_answer.explanation_placeholder'
                 )}
                 rows={2}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-md bg-white resize-y"
+                className="px-3 py-2 text-sm border border-gray-200 dark:border-dk-line-strong rounded-md bg-white dark:bg-dk-card resize-y"
               />
             </div>
 
@@ -350,7 +350,7 @@ function TaskNumberAnswerObject({
                 placeholder={t(
                   'dashboard.assignments.editor.task_editor.number_answer.your_answer_placeholder'
                 )}
-                className="w-full max-w-[200px] px-3 py-2 text-sm border-2 border-gray-200 rounded-md bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-200 outline-none font-mono"
+                className="w-full max-w-[200px] px-3 py-2 text-sm border-2 border-gray-200 dark:border-dk-line-strong rounded-md bg-white dark:bg-dk-card focus:border-blue-400 focus:ring-2 focus:ring-blue-200 outline-none font-mono"
               />
               {contents.unit && (
                 <span className="text-sm font-medium text-slate-500">{contents.unit}</span>
@@ -381,14 +381,14 @@ function TaskNumberAnswerObject({
               <label className="text-xs font-semibold text-slate-500">
                 {t('dashboard.assignments.editor.task_editor.number_answer.student_answer_label')}
               </label>
-              <div className="px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-md font-mono">
+              <div className="px-3 py-2 text-sm bg-gray-50 dark:bg-dk-inset/40 border border-gray-200 dark:border-dk-line-strong rounded-md font-mono">
                 {studentAnswer ? (
                   <>
                     {studentAnswer}
                     {contents.unit && <span className="text-slate-500 ms-1.5 font-sans">{contents.unit}</span>}
                   </>
                 ) : (
-                  <span className="text-gray-400 italic font-sans">
+                  <span className="text-gray-400 dark:text-zinc-400 italic font-sans">
                     {t('dashboard.assignments.editor.task_editor.number_answer.no_answer')}
                   </span>
                 )}

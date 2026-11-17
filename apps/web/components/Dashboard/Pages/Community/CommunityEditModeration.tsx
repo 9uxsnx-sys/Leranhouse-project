@@ -191,7 +191,7 @@ const CommunityEditModeration: React.FC = () => {
             isSubmitting
               ? 'bg-brand text-brand-fg border-brand opacity-50 cursor-not-allowed'
               : !hasChanges
-                ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                ? 'bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong cursor-default'
                 : 'bg-brand text-brand-fg border-brand hover:bg-brand-hover cursor-pointer'
           }`}
         >
@@ -213,8 +213,8 @@ const CommunityEditModeration: React.FC = () => {
       </div>
 
       {/* Card: Length limits */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+      <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
           {t('dashboard.courses.communities.moderation.length_title')}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -240,8 +240,8 @@ const CommunityEditModeration: React.FC = () => {
       </div>
 
       {/* Card: Rate limits */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+      <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
           {t('dashboard.courses.communities.moderation.rate_limits_title')}
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -267,8 +267,8 @@ const CommunityEditModeration: React.FC = () => {
       </div>
 
       {/* Card: Account requirements */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+      <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
           {t('dashboard.courses.communities.moderation.account_requirements_title')}
         </h3>
         <div className="space-y-4">
@@ -279,8 +279,8 @@ const CommunityEditModeration: React.FC = () => {
             hint={t('dashboard.courses.communities.moderation.min_account_age_hint')}
           />
           <label className="flex items-center gap-3 cursor-pointer">
-            <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${settings.block_links ? 'bg-black' : 'bg-gray-300'}`}>
-              <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${settings.block_links ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
+            <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${settings.block_links ? 'bg-black dark:bg-zinc-100' : 'bg-gray-300 dark:bg-dk-track'}`}>
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${settings.block_links ? 'translate-x-[18px] dark:bg-zinc-900' : 'translate-x-[2px] dark:bg-zinc-300'}`} />
               <input
                 type="checkbox"
                 className="sr-only"
@@ -288,11 +288,11 @@ const CommunityEditModeration: React.FC = () => {
                 onChange={(e) => setToggle('block_links')(e.target.checked)}
               />
             </div>
-            <span className="text-sm text-gray-600 select-none">{t('dashboard.courses.communities.moderation.block_links_label')}</span>
+            <span className="text-sm text-gray-600 dark:text-zinc-300 select-none">{t('dashboard.courses.communities.moderation.block_links_label')}</span>
           </label>
           <label className="flex items-center gap-3 cursor-pointer">
-            <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${settings.require_email_verified ? 'bg-black' : 'bg-gray-300'}`}>
-              <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${settings.require_email_verified ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
+            <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${settings.require_email_verified ? 'bg-black dark:bg-zinc-100' : 'bg-gray-300 dark:bg-dk-track'}`}>
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${settings.require_email_verified ? 'translate-x-[18px] dark:bg-zinc-900' : 'translate-x-[2px] dark:bg-zinc-300'}`} />
               <input
                 type="checkbox"
                 className="sr-only"
@@ -300,34 +300,34 @@ const CommunityEditModeration: React.FC = () => {
                 onChange={(e) => setToggle('require_email_verified')(e.target.checked)}
               />
             </div>
-            <span className="text-sm text-gray-600 select-none">{t('dashboard.courses.communities.moderation.require_email_verified_label')}</span>
+            <span className="text-sm text-gray-600 dark:text-zinc-300 select-none">{t('dashboard.courses.communities.moderation.require_email_verified_label')}</span>
           </label>
         </div>
       </div>
 
       {/* Card: Blocked words */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+      <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
           {t('dashboard.courses.communities.moderation.blocked_words_section_title')}
         </h3>
 
-        <div className="rounded-xl border border-gray-200 bg-ui-bg-field">
+        <div className="rounded-xl border border-gray-200 dark:border-dk-line-strong bg-ui-bg-field">
           {words.length === 0 ? (
             <div className="px-4 py-8 text-center">
-              <p className="text-sm text-gray-400">{t('dashboard.courses.communities.moderation.no_blocked_words')}</p>
+              <p className="text-sm text-gray-400 dark:text-zinc-400">{t('dashboard.courses.communities.moderation.no_blocked_words')}</p>
             </div>
           ) : (
             <div className="max-h-[400px] overflow-y-auto">
               {words.map((word, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between px-4 py-2.5 border-b border-gray-200 last:border-b-0 hover:bg-gray-50"
+                  className="flex items-center justify-between px-4 py-2.5 border-b border-gray-200 dark:border-dk-line-strong last:border-b-0 hover:bg-gray-50 dark:hover:bg-dk-raised"
                 >
-                  <span className="text-sm text-gray-700">{word}</span>
+                  <span className="text-sm text-gray-700 dark:text-zinc-200">{word}</span>
                   <button
                     type="button"
                     onClick={() => handleRemoveWord(word)}
-                    className="p-1 text-gray-400 hover:text-red-500 rounded transition-colors"
+                    className="p-1 text-gray-400 dark:text-zinc-400 hover:text-red-500 rounded transition-colors"
                   >
                     <X size={13} />
                   </button>
@@ -338,7 +338,7 @@ const CommunityEditModeration: React.FC = () => {
 
           {error && <p className="text-xs text-red-500 px-4 pt-3">{error}</p>}
 
-          <div className="flex items-center gap-2 px-4 py-2.5 border-t border-gray-200">
+          <div className="flex items-center gap-2 px-4 py-2.5 border-t border-gray-200 dark:border-dk-line-strong">
             <input
               ref={inputRef}
               type="text"
@@ -349,7 +349,7 @@ const CommunityEditModeration: React.FC = () => {
               }}
               onKeyDown={handleKeyDown}
               placeholder={t('dashboard.courses.communities.moderation.add_word_placeholder')}
-              className="flex-1 text-sm text-gray-700 bg-transparent border-none outline-none placeholder:text-gray-300"
+              className="flex-1 text-sm text-gray-700 dark:text-zinc-200 bg-transparent border-none outline-none placeholder:text-gray-300"
             />
             <button
               type="button"
@@ -377,7 +377,7 @@ interface NumberFieldProps {
 function NumberField({ label, value, onChange, hint }: NumberFieldProps) {
   return (
     <div>
-      <Label className="text-sm font-medium text-gray-700 mb-1">{label}</Label>
+      <Label className="text-sm font-medium text-gray-700 dark:text-zinc-200 mb-1">{label}</Label>
       <Input
         type="number"
         min={0}

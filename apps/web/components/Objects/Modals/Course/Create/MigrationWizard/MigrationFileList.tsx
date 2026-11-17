@@ -14,7 +14,7 @@ function getFileIcon(ext: string) {
     return <Image size={14} className="text-green-500" />
   if (['mp3', 'wav'].includes(ext))
     return <Music size={14} className="text-purple-500" />
-  return <FileText size={14} className="text-gray-500" />
+  return <FileText size={14} className="text-gray-500 dark:text-dk-fg-3" />
 }
 
 interface MigrationFileListProps {
@@ -30,8 +30,8 @@ export default function MigrationFileList({
   const unassigned = files.filter((f) => !assignedFileIds.has(f.file_id))
 
   return (
-    <div className="bg-white rounded-xl nice-shadow p-4 h-full">
-      <h3 className="text-sm font-semibold text-gray-700 mb-3">
+    <div className="bg-white dark:bg-dk-card rounded-xl nice-shadow p-4 h-full">
+      <h3 className="text-sm font-semibold text-gray-700 dark:text-dk-fg-1 mb-3">
         {t('migration.unassigned_files')} ({unassigned.length})
       </h3>
       <Droppable droppableId="unassigned-files" type="FILE">
@@ -40,7 +40,7 @@ export default function MigrationFileList({
             ref={provided.innerRef}
             {...provided.droppableProps}
             className={`space-y-1 min-h-[100px] rounded-lg p-2 transition-colors ${
-              snapshot.isDraggingOver ? 'bg-gray-50' : ''
+              snapshot.isDraggingOver ? 'bg-gray-50 dark:bg-dk-inset/40' : ''
             }`}
           >
             {unassigned.map((file, index) => (
@@ -57,12 +57,12 @@ export default function MigrationFileList({
                     className={`flex items-center space-x-2 px-2 py-1.5 rounded-md text-sm ${
                       snapshot.isDragging
                         ? 'bg-blue-50 shadow-md'
-                        : 'hover:bg-gray-50'
+                        : 'hover:bg-gray-50 dark:hover:bg-dk-raised'
                     }`}
                   >
-                    <GripVertical size={12} className="text-gray-300" />
+                    <GripVertical size={12} className="text-gray-300 dark:text-zinc-600" />
                     {getFileIcon(file.extension)}
-                    <span className="truncate text-gray-700">
+                    <span className="truncate text-gray-700 dark:text-dk-fg-1">
                       {file.filename}
                     </span>
                   </div>
@@ -71,7 +71,7 @@ export default function MigrationFileList({
             ))}
             {provided.placeholder}
             {unassigned.length === 0 && (
-              <p className="text-xs text-gray-400 text-center py-4">
+              <p className="text-xs text-gray-400 dark:text-dk-fg-3 text-center py-4">
                 {t('migration.all_files_assigned')}
               </p>
             )}

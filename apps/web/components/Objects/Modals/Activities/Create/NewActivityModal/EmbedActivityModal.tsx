@@ -35,7 +35,7 @@ function EmbedActivityModal({ submitActivity, chapterId, course }: any) {
           backgroundSize: '14px 14px',
         }}
       >
-        <span className="flex items-center gap-2 bg-white nice-shadow rounded-full px-4 py-1.5 text-sm font-medium text-gray-600">
+        <span className="flex items-center gap-2 bg-white dark:bg-dk-card nice-shadow rounded-full px-4 py-1.5 text-sm font-medium text-gray-600 dark:text-dk-fg-2">
           <Globe size={18} weight="duotone" className="text-cyan-400" />
           Embed
         </span>
@@ -43,7 +43,7 @@ function EmbedActivityModal({ submitActivity, chapterId, course }: any) {
 
       <div className="rounded-xl nice-shadow p-4 space-y-4">
         <Form.Field name="embed-activity-name" className="space-y-1.5">
-          <Form.Label className="text-sm font-medium text-gray-700">
+          <Form.Label className="text-sm font-medium text-gray-700 dark:text-dk-fg-1">
             Activity name
           </Form.Label>
           <Form.Message match="valueMissing" className="text-xs text-red-500">
@@ -55,13 +55,13 @@ function EmbedActivityModal({ submitActivity, chapterId, course }: any) {
               type="text"
               required
               placeholder="Enter a name..."
-              className="w-full h-9 px-3 text-sm rounded-lg bg-gray-50 border border-gray-200 outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors"
+              className="w-full h-9 px-3 text-sm rounded-lg bg-gray-50 dark:bg-dk-inset/40 border border-gray-200 dark:border-dk-line-strong outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors"
             />
           </Form.Control>
         </Form.Field>
 
         <Form.Field name="embed-activity-url" className="space-y-1.5">
-          <Form.Label className="text-sm font-medium text-gray-700">
+          <Form.Label className="text-sm font-medium text-gray-700 dark:text-dk-fg-1">
             Embed URL
           </Form.Label>
           <Form.Message match="valueMissing" className="text-xs text-red-500">
@@ -76,13 +76,13 @@ function EmbedActivityModal({ submitActivity, chapterId, course }: any) {
               type="url"
               required
               placeholder="https://docs.google.com/document/d/..."
-              className="w-full h-9 px-3 text-sm rounded-lg bg-gray-50 border border-gray-200 outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors"
+              className="w-full h-9 px-3 text-sm rounded-lg bg-gray-50 dark:bg-dk-inset/40 border border-gray-200 dark:border-dk-line-strong outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors"
             />
           </Form.Control>
         </Form.Field>
 
         <Form.Field name="embed-activity-desc" className="space-y-1.5">
-          <Form.Label className="text-sm font-medium text-gray-700">
+          <Form.Label className="text-sm font-medium text-gray-700 dark:text-dk-fg-1">
             Description
           </Form.Label>
           <Form.Control asChild>
@@ -90,7 +90,7 @@ function EmbedActivityModal({ submitActivity, chapterId, course }: any) {
               onChange={(e) => setActivityDescription(e.target.value)}
               placeholder="Optional description..."
               rows={3}
-              className="w-full px-3 py-2 text-sm rounded-lg bg-gray-50 border border-gray-200 outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors resize-none"
+              className="w-full px-3 py-2 text-sm rounded-lg bg-gray-50 dark:bg-dk-inset/40 border border-gray-200 dark:border-dk-line-strong outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors resize-none"
             />
           </Form.Control>
         </Form.Field>

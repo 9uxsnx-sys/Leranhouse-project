@@ -40,7 +40,7 @@ export function BarsChart({ data, xKey, series, height = 260, formatter, xTickFo
           width={44}
           tickFormatter={(v) => (v === 0 ? '' : formatNumber(v))}
         />
-        <Tooltip content={<ChartTooltip formatter={formatter} />} cursor={{ fill: 'rgba(0,0,0,0.03)' }} />
+        <Tooltip content={<ChartTooltip formatter={formatter} />} cursor={{ fill: t.cursorFill }} />
         {series.map((s, i) => (
           <Bar
             key={s.key}

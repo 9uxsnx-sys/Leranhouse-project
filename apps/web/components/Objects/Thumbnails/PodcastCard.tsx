@@ -57,14 +57,14 @@ export function PodcastCard({ id, title, description, thumbnailImage, episodeCou
   return (
     <Link
       href={href || `/podcast/${id}`}
-      className="flex flex-col h-full bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden"
+      className="flex flex-col h-full bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line rounded-xl shadow-sm overflow-hidden transition-colors hover:border-gray-200 dark:hover:border-dk-line-strong"
     >
       {/* 16:9 Cover Image */}
-      <div className="relative overflow-hidden bg-gray-100 shrink-0" style={{ aspectRatio: '16/9' }}>
+      <div className="relative overflow-hidden bg-gray-100 dark:bg-dk-inset shrink-0" style={{ aspectRatio: '16/9' }}>
         {imageUrl ? (
           <img className="w-full h-full object-cover" src={imageUrl} alt={title} />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-300">
+          <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-zinc-600">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
               <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
@@ -75,10 +75,10 @@ export function PodcastCard({ id, title, description, thumbnailImage, episodeCou
       {/* Content */}
       <div className="px-4 pt-3 pb-4 flex flex-col flex-1">
         <div className="flex flex-col gap-1">
-          <h3 dir="auto" className="text-[15px] font-semibold leading-snug line-clamp-2 text-gray-900">
+          <h3 dir="auto" className="text-[15px] font-semibold leading-snug line-clamp-2 text-gray-900 dark:text-dk-fg-1">
             {title}
           </h3>
-          <p dir="auto" className={`text-[13px] font-normal leading-relaxed line-clamp-3 ${description ? 'text-[#6B7280]' : 'invisible'}`}>
+          <p dir="auto" className={`text-[13px] font-normal leading-relaxed line-clamp-3 ${description ? 'text-[#6B7280] dark:text-dk-fg-2' : 'invisible'}`}>
             {description || 'placeholder'}
           </p>
         </div>

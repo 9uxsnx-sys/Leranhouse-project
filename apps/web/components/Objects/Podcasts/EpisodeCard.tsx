@@ -38,7 +38,7 @@ export default function EpisodeCard({ episode, podcast, orgslug, savedProgress }
 
   return (
     <div
-      className={`bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden transition-all duration-200 cursor-pointer ${
+      className={`bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line rounded-xl shadow-sm overflow-hidden transition-all duration-200 cursor-pointer ${
         isHovered ? 'bg-black/[0.02]' : ''
       }`}
       onClick={handleClick}
@@ -50,7 +50,7 @@ export default function EpisodeCard({ episode, podcast, orgslug, savedProgress }
         {/* Number */}
         <span
           className={`flex-shrink-0 w-6 text-end text-sm font-semibold leading-none me-1.5 ${
-            isCurrentEpisode ? 'text-indigo-600' : 'text-gray-400'
+            isCurrentEpisode ? 'text-indigo-600' : 'text-gray-400 dark:text-dk-fg-3'
           }`}
         >
           {episode.episode_number}
@@ -70,14 +70,14 @@ export default function EpisodeCard({ episode, podcast, orgslug, savedProgress }
       {/* Saved progress bar — shown for non-current episodes with saved progress */}
       {savedPercent > 0 && !isCurrentEpisode && (
         <div className="px-5 pb-4">
-          <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-1 bg-gray-100 dark:bg-dk-inset rounded-full overflow-hidden">
             <div
-              className="h-full bg-gray-400 rounded-full"
+              className="h-full bg-gray-400 dark:bg-zinc-600 rounded-full"
               style={{ width: `${savedPercent}%` }}
             />
           </div>
           <div className="flex justify-end mt-1">
-            <span className="text-[11px] text-gray-400 tabular-nums">
+            <span className="text-[11px] text-gray-400 dark:text-dk-fg-3 tabular-nums">
               {formatDuration(Math.floor(savedProgress!.playback_position))}
             </span>
           </div>
@@ -105,10 +105,10 @@ export default function EpisodeCard({ episode, podcast, orgslug, savedProgress }
           </div>
           {/* Time labels */}
           <div className="flex justify-between mt-1.5">
-            <span className="text-[11px] text-gray-400 tabular-nums">
+            <span className="text-[11px] text-gray-400 dark:text-dk-fg-3 tabular-nums">
               {formatDuration(Math.floor(state.currentTime))}
             </span>
-            <span className="text-[11px] text-gray-400 tabular-nums">
+            <span className="text-[11px] text-gray-400 dark:text-dk-fg-3 tabular-nums">
               {formatDuration(Math.floor(state.duration))}
             </span>
           </div>

@@ -97,6 +97,12 @@
     "recent": "الأخيرة",
     "expand": "توسيع",
     "collapse": "تصغير",
+    "theme": {
+        "label": "المظهر",
+        "light": "فاتح",
+        "dark": "داكن",
+        "system": "النظام"
+    },
     "view_all": "عرض الكل",
     "select": "تحديد",
     "deselect": "إلغاء التحديد",

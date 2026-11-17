@@ -142,13 +142,13 @@ function NewTaskModal({ closeModal, assignment_uuid }: any) {
               backgroundImage: `repeating-linear-gradient(135deg, transparent, transparent 5px, rgba(${type.stripeRgb},0.5) 5px, rgba(${type.stripeRgb},0.5) 6px)`,
             }}
           >
-            <div className={`w-14 h-14 rounded-full bg-white nice-shadow flex items-center justify-center mb-3 ${type.iconColor}`}>
+            <div className={`w-14 h-14 rounded-full bg-white dark:bg-dk-card nice-shadow flex items-center justify-center mb-3 ${type.iconColor}`}>
               <IconComponent size={28} weight="duotone" />
             </div>
             <p className={`text-sm font-bold ${type.titleColor}`}>
               {t(type.labelKey)}
             </p>
-            <p className="text-[11px] text-gray-600 leading-tight mt-1 max-w-[180px]">
+            <p className="text-[11px] text-gray-600 dark:text-zinc-300 leading-tight mt-1 max-w-[180px]">
               {t(type.descKey)}
             </p>
           </button>

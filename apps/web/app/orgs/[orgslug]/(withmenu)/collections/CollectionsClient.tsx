@@ -161,13 +161,13 @@ function CollectionsClient(props: CollectionsClientProps) {
           <div className="flex items-center gap-3">
             {/* Search — custom search bar with icon */}
             <div className="relative w-80">
-              <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-dk-fg-3 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('collections.dashboard.search_placeholder')}
-                className="w-full h-7 ps-8 pe-2 text-sm bg-white shadow-borders-base rounded-md placeholder:text-gray-400 focus:outline-none"
+                className="w-full h-7 ps-8 pe-2 text-sm text-gray-900 dark:text-dk-fg-1 bg-white dark:bg-dk-card shadow-borders-base rounded-md placeholder:text-gray-400 dark:placeholder:text-dk-fg-4 focus:outline-none"
               />
             </div>
 
@@ -199,7 +199,7 @@ function CollectionsClient(props: CollectionsClientProps) {
                 </span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white min-w-0 w-36">
+            <DropdownMenuContent align="end" className="bg-white dark:bg-dk-raised min-w-0 w-36">
               <DropdownMenuItem onClick={() => setActiveFilter('all')}>
                 {t('collections.filter.all_collections')}
               </DropdownMenuItem>
@@ -301,7 +301,7 @@ function CollectionsClient(props: CollectionsClientProps) {
                     onClick={() => goToPage(page as number)}
                     className={`w-7 h-7 txt-compact-small-plus rounded-md transition-colors ${
                       currentPage === page
-                        ? 'bg-ui-bg-base shadow-borders-base text-ui-fg-base'
+                        ? 'bg-ui-bg-base shadow-borders-base text-ui-fg-base dark:bg-dk-raised'
                         : 'text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-base-hover'
                     }`}
                   >

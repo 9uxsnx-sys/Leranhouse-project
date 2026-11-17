@@ -376,10 +376,10 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                                         value={question.questionText}
                                         onChange={(e) => handleQuestionChange(qIndex, e.target.value)}
                                         placeholder={t('dashboard.assignments.editor.task_editor.quiz.question_placeholder')}
-                                        className="w-full px-3 text-neutral-600 bg-[#00008b00] border-2 border-gray-200 rounded-md border-dotted text-sm font-bold"
+                                        className="w-full px-3 text-neutral-600 bg-[#00008b00] border-2 border-gray-200 dark:border-dk-line-strong rounded-md border-dotted text-sm font-bold dark:text-zinc-300"
                                     />
                                 ) : (
-                                    <p className="w-full px-3 text-neutral-600 bg-[#00008b00] border-2 border-gray-200 rounded-md border-dotted text-sm font-bold">
+                                    <p className="w-full px-3 text-neutral-600 bg-[#00008b00] border-2 border-gray-200 dark:border-dk-line-strong rounded-md border-dotted text-sm font-bold dark:text-zinc-300">
                                         {question.questionText}
                                     </p>
                                 )}
@@ -397,7 +397,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                                     <div className="flex" key={oIndex}>
                                         <div
                                             onClick={() => view === 'student' && !submissionIsGraded && chooseOption(qIndex, oIndex)}
-                                            className={"answer outline outline-3 outline-white pe-2 shadow-sm w-full flex items-center space-x-2 h-[30px] hover:bg-opacity-100 hover:shadow-md rounded-lg bg-white text-sm duration-150 ease-linear nice-shadow " + (view == 'student' && !submissionIsGraded ? 'cursor-pointer active:scale-110' : '')}
+                                            className={"answer outline outline-3 outline-white pe-2 shadow-sm w-full flex items-center space-x-2 h-[30px] hover:bg-opacity-100 hover:shadow-md rounded-lg bg-white dark:bg-dk-card text-sm duration-150 ease-linear nice-shadow " + (view == 'student' && !submissionIsGraded ? 'cursor-pointer active:scale-110' : '')}
                                         >
                                             <div className="font-bold text-base flex items-center h-full w-[40px] rounded-s-md text-slate-800 bg-slate-100/80">
                                                 <p className="mx-auto font-bold text-sm">{String.fromCharCode(65 + oIndex)}</p>
@@ -408,10 +408,10 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                                                     value={option.text}
                                                     onChange={(e) => handleOptionChange(qIndex, oIndex, e.target.value)}
                                                     placeholder={t('dashboard.assignments.editor.task_editor.quiz.option_placeholder')}
-                                                    className="w-full mx-2 px-3 pe-6 text-neutral-600 bg-[#00008b00] border-2 border-gray-200 rounded-md border-dotted text-sm font-bold"
+                                                    className="w-full mx-2 px-3 pe-6 text-neutral-600 bg-[#00008b00] border-2 border-gray-200 dark:border-dk-line-strong rounded-md border-dotted text-sm font-bold dark:text-zinc-300"
                                                 />
                                             ) : (
-                                                <p className="w-full mx-2 px-3 pe-6 text-neutral-600 bg-[#00008b00] text-sm font-bold">
+                                                <p className="w-full mx-2 px-3 pe-6 text-neutral-600 bg-[#00008b00] text-sm font-bold dark:text-zinc-300">
                                                     {option.text}
                                                 </p>
                                             )}
@@ -524,7 +524,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                                         {view === 'teacher' && oIndex === question.options.length - 1 && questions[qIndex].options.length <= 4 && (
                                             <div className="flex justify-center mx-auto px-2">
                                                 <div
-                                                    className="outline text-xs outline-3 outline-white px-2 shadow-sm w-full flex items-center h-[30px] hover:bg-opacity-100 hover:shadow-md rounded-lg bg-white duration-150 cursor-pointer ease-linear nice-shadow"
+                                                    className="outline text-xs outline-3 outline-white px-2 shadow-sm w-full flex items-center h-[30px] hover:bg-opacity-100 hover:shadow-md rounded-lg bg-white dark:bg-dk-card duration-150 cursor-pointer ease-linear nice-shadow"
                                                     onClick={() => addOption(qIndex)}
                                                 >
                                                     <Plus size={14} className="inline-block" />
@@ -541,7 +541,7 @@ function TaskQuizObject({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
                 {view === 'teacher' && questions.length <= 5 && (
                     <div className="flex justify-center mx-auto px-2">
                         <div
-                            className="flex w-full my-2 py-2 px-4 bg-white text-slate text-xs rounded-md nice-shadow hover:shadow-xs cursor-pointer space-x-3 items-center transition duration-150 ease-linear"
+                            className="flex w-full my-2 py-2 px-4 bg-white dark:bg-dk-card text-slate text-xs rounded-md nice-shadow hover:shadow-xs cursor-pointer space-x-3 items-center transition duration-150 ease-linear"
                             onClick={addQuestion}
                         >
                             <PlusCircle size={14} className="inline-block" />

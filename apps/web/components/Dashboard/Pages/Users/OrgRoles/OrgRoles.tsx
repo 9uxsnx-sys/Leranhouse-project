@@ -169,7 +169,7 @@ const RightsDetailView = ({ rights }: { rights: any }) => {
     const { t } = useTranslation()
     if (!rights || Object.keys(rights).length === 0) {
         return (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-gray-500 dark:text-zinc-400">
                 {t('dashboard.users.roles.rights.no_permissions_configured')}
             </div>
         )
@@ -178,8 +178,8 @@ const RightsDetailView = ({ rights }: { rights: any }) => {
     return (
         <div className="space-y-4 max-h-[60vh] overflow-y-auto">
             {Object.entries(rights).map(([resource, actions]: [string, any]) => (
-                <div key={resource} className="border border-gray-200 rounded-lg overflow-hidden">
-                    <div className="bg-gray-50 px-4 py-2 font-medium text-gray-700 border-b border-gray-200">
+                <div key={resource} className="border border-gray-200 dark:border-dk-line-strong rounded-lg overflow-hidden">
+                    <div className="bg-gray-50 dark:bg-dk-inset/40 px-4 py-2 font-medium text-gray-700 dark:text-zinc-200 border-b border-gray-200 dark:border-dk-line-strong">
                         {formatResourceName(resource, t)}
                     </div>
                     <div className="p-3">
@@ -190,13 +190,13 @@ const RightsDetailView = ({ rights }: { rights: any }) => {
                                     className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm ${
                                         enabled
                                             ? 'bg-green-50 text-green-700'
-                                            : 'bg-gray-50 text-gray-400'
+                                            : 'bg-gray-50 dark:bg-dk-inset/40 text-gray-400 dark:text-zinc-400'
                                     }`}
                                 >
                                     {enabled ? (
                                         <Check className="w-4 h-4 text-green-600" />
                                     ) : (
-                                        <XCircle className="w-4 h-4 text-gray-300" />
+                                        <XCircle className="w-4 h-4 text-gray-300 dark:text-zinc-600" />
                                     )}
                                     <span>{formatActionName(action, t)}</span>
                                 </div>
@@ -233,7 +233,7 @@ const PermissionSection = ({
     const [isExpanded, setIsExpanded] = useState(false)
 
     return (
-        <div className="bg-gray-50 rounded-xl overflow-hidden mb-3 border border-gray-100">
+        <div className="bg-gray-50 dark:bg-dk-inset/40 rounded-xl overflow-hidden mb-3 border border-gray-100 dark:border-dk-line">
             {/* Header - clickable to expand/collapse */}
             <button
                 type="button"
@@ -241,16 +241,16 @@ const PermissionSection = ({
                 className="w-full flex items-center justify-between px-4 py-3 text-start hover:bg-gray-100/50 transition-colors"
             >
                 <div className="flex items-center gap-2.5">
-                    <Icon className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                    <span className="text-sm font-semibold text-gray-800">{title}</span>
+                    <Icon className="w-4 h-4 text-gray-500 dark:text-zinc-400 flex-shrink-0" />
+                    <span className="text-sm font-semibold text-gray-800 dark:text-zinc-200">{title}</span>
                 </div>
                 <div className="flex items-center gap-2">
                     {!isExpanded && selectedCount > 0 && (
-                        <span className="text-xs text-gray-400 tabular-nums">{selectedCount}/{permissions.length}</span>
+                        <span className="text-xs text-gray-400 dark:text-zinc-400 tabular-nums">{selectedCount}/{permissions.length}</span>
                     )}
                     <ChevronRight
                         size={16}
-                        className={`text-gray-400 transition-transform duration-200 ${
+                        className={`text-gray-400 dark:text-zinc-400 transition-transform duration-200 ${
                             isExpanded ? 'rotate-90' : ''
                         }`}
                     />
@@ -266,13 +266,13 @@ const PermissionSection = ({
                 <div className="overflow-hidden">
                 {/* Info row: counter + select all */}
                 <div className="flex items-center justify-between px-4 py-2">
-                    <span className="text-xs text-gray-400 tabular-nums">
+                    <span className="text-xs text-gray-400 dark:text-zinc-400 tabular-nums">
                         {t('dashboard.users.roles.rights.selected_of', { selected: selectedCount, total: permissions.length })}
                     </span>
                     <button
                         type="button"
                         onClick={() => onSelectAll(section, !allSelected)}
-                        className="text-xs text-gray-800 hover:text-gray-600 font-medium transition-colors"
+                        className="text-xs text-gray-800 dark:text-zinc-200 hover:text-gray-600 dark:hover:text-zinc-200 font-medium transition-colors"
                     >
                         {allSelected ? t('dashboard.users.roles.modals.create.permissions.deselect_all') : t('dashboard.users.roles.modals.create.permissions.select_all')}
                     </button>
@@ -282,7 +282,7 @@ const PermissionSection = ({
                 <div className="px-4 pb-3 pt-2">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                         {permissions.map((permission) => (
-                            <label key={permission} className="flex items-center gap-2 cursor-pointer p-1.5 rounded-md hover:bg-gray-100 transition-colors">
+                            <label key={permission} className="flex items-center gap-2 cursor-pointer p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors">
                                 <div className="relative w-4 h-4 flex-shrink-0">
                                     <input
                                         type="checkbox"
@@ -290,11 +290,11 @@ const PermissionSection = ({
                                         onChange={(e) => onRightChange(section, permission, e.target.checked)}
                                         className="sr-only peer"
                                     />
-                                    <div className="w-full h-full rounded border border-gray-300 bg-white peer-checked:bg-gray-600 peer-checked:border-gray-600 flex items-center justify-center transition-colors">
+                                    <div className="w-full h-full rounded border border-gray-300 dark:border-dk-line-strong bg-white dark:bg-dk-card peer-checked:bg-gray-600 peer-checked:border-gray-600 flex items-center justify-center transition-colors">
                                         <Check size={12} className="text-white hidden peer-checked:block" strokeWidth={3} />
                                     </div>
                                 </div>
-                                <span className="text-xs text-gray-700 capitalize">
+                                <span className="text-xs text-gray-700 dark:text-zinc-200 capitalize">
                                     {formatActionName(permission, t)}
                                 </span>
                             </label>
@@ -586,7 +586,7 @@ function OrgRoles() {
                                         isSaving
                                             ? 'bg-brand text-brand-fg border-brand opacity-50 cursor-not-allowed'
                                             : !formik.dirty && isSaved
-                                                ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                                                ? 'bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong cursor-default'
                                                 : 'bg-brand text-brand-fg border-brand hover:bg-brand-hover cursor-pointer'
                                     }`}
                                 >
@@ -605,8 +605,8 @@ function OrgRoles() {
                         </div>
 
                         {/* ── BASIC INFORMATION ── */}
-                        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                            <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('common.sections.overview')}</h3>
+                        <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                            <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('common.sections.overview')}</h3>
                             <div className="space-y-4">
                                 <FormField name="name">
                                     <FormLabelAndMessage label={t('dashboard.users.roles.modals.edit.form.role_name')} message={formik.errors.name as string} />
@@ -638,8 +638,8 @@ function OrgRoles() {
                         </div>
 
                         {/* ── PERMISSIONS ── */}
-                        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                            <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('common.sections.permissions')}</h3>
+                        <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                            <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('common.sections.permissions')}</h3>
                             <div className="space-y-4">
                                 <PermissionSection
                                     title={t('dashboard.users.roles.rights.sections.courses')}
@@ -755,17 +755,17 @@ function OrgRoles() {
             {/* Toolbar Row */}
             <div className="flex items-center gap-3 mb-5">
                 <div className="relative w-80">
-                    <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                    <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-zinc-400 pointer-events-none" />
                     <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder={t('dashboard.users.roles.search_placeholder')}
-                        className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
+                        className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 dark:text-zinc-200 bg-white dark:bg-dk-card shadow-borders-base rounded-md placeholder:text-gray-500 dark:placeholder:text-zinc-400 focus:outline-none"
                     />
                 </div>
 
-                <span className="text-xs text-gray-400 whitespace-nowrap">
+                <span className="text-xs text-gray-400 dark:text-zinc-400 whitespace-nowrap">
                     {filteredRoles.length} {filteredRoles.length === 1
                         ? t('dashboard.users.roles.count.singular')
                         : t('dashboard.users.roles.count.plural')}
@@ -787,7 +787,7 @@ function OrgRoles() {
                     <div className="flex items-center space-x-2">
                         <button
                             disabled
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-semibold rounded-lg bg-gray-200 text-gray-400 cursor-not-allowed transition-colors"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-semibold rounded-lg bg-gray-200 dark:bg-dk-track text-gray-400 dark:text-zinc-400 cursor-not-allowed transition-colors"
                         >
                             <Lock size={14} />
                             <span>{t('dashboard.users.roles.actions.create_short')}</span>
@@ -799,11 +799,11 @@ function OrgRoles() {
                 {/* Filter dropdown */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label={t('dashboard.users.roles.filters.filter_roles')}>
+                        <IconButton size="small" variant="transparent" className="bg-white dark:bg-dk-card hover:bg-gray-50 dark:hover:bg-dk-raised shadow-borders-base" aria-label={t('dashboard.users.roles.filters.filter_roles')}>
                             <ConceptIcon.filter size={14} />
                         </IconButton>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="min-w-[170px] rounded-lg border border-gray-200 bg-white p-1 shadow-md" sideOffset={6}>
+                    <DropdownMenuContent align="end" className="min-w-[170px] rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card p-1 shadow-md" sideOffset={6}>
                         {[
                             { value: 'all', label: t('dashboard.users.roles.filters.all') },
                             { value: 'system', label: t('dashboard.users.roles.filters.system') },
@@ -814,8 +814,8 @@ function OrgRoles() {
                                 onClick={() => setRoleFilter(option.value as 'all' | 'system' | 'custom')}
                                 className="justify-between text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
                             >
-                                <span className="text-gray-700 text-xs">{option.label}</span>
-                                {roleFilter === option.value && <ConceptIcon.check size={12} className="text-gray-500" />}
+                                <span className="text-gray-700 dark:text-zinc-200 text-xs">{option.label}</span>
+                                {roleFilter === option.value && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
                             </DropdownMenuItem>
                         ))}
                     </DropdownMenuContent>
@@ -826,18 +826,18 @@ function OrgRoles() {
             <div className="space-y-3">
                 {isLoadingRoles ? (
                     <div className="py-20 flex justify-center">
-                        <Loader2 size={36} className="animate-spin text-gray-300" />
+                        <Loader2 size={36} className="animate-spin text-gray-300 dark:text-zinc-600" />
                     </div>
                 ) : filteredRoles.length === 0 ? (
-                    <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-100">
-                        <Shield size={40} className="mx-auto mb-3 text-gray-300" />
-                        <p className="text-sm text-gray-400">
+                    <div className="text-center py-12 bg-gray-50 dark:bg-dk-inset/40 rounded-lg border border-gray-100 dark:border-dk-line">
+                        <Shield size={40} className="mx-auto mb-3 text-gray-300 dark:text-zinc-600" />
+                        <p className="text-sm text-gray-400 dark:text-zinc-400">
                             {searchQuery || roleFilter !== 'all'
                                 ? t('dashboard.users.roles.no_results')
                                 : t('dashboard.users.roles.no_roles')
                             }
                         </p>
-                        <p className="text-xs text-gray-300 mt-1">
+                        <p className="text-xs text-gray-300 dark:text-zinc-600 mt-1">
                             {searchQuery || roleFilter !== 'all'
                                 ? t('dashboard.users.roles.no_results_hint')
                                 : t('dashboard.users.roles.no_roles_hint')
@@ -851,15 +851,15 @@ function OrgRoles() {
                             <div
                                 key={role.id}
                                 onClick={() => handleRoleClick(role)}
-                                className={`w-full text-start px-5 py-4 rounded-xl bg-white shadow-borders-base transition-colors flex items-center justify-between group ${
+                                className={`w-full text-start px-5 py-4 rounded-xl bg-white dark:bg-dk-card shadow-borders-base transition-colors flex items-center justify-between group ${
                                     isSystem ? 'opacity-70 cursor-default' : 'hover:border-gray-200 cursor-pointer'
                                 }`}
                             >
                                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                                    <Shield size={18} className="text-gray-400 flex-shrink-0" />
+                                    <Shield size={18} className="text-gray-400 dark:text-zinc-400 flex-shrink-0" />
 
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-medium text-gray-900 truncate">
+                                        <p className="text-sm font-medium text-gray-900 dark:text-zinc-100 truncate">
                                             {role.name}
                                         </p>
                                     </div>
@@ -869,12 +869,12 @@ function OrgRoles() {
                                     <DropdownMenuTrigger asChild>
                                         <button
                                             onClick={(e) => e.stopPropagation()}
-                                            className="h-7 w-7 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors flex-shrink-0"
+                                            className="h-7 w-7 flex items-center justify-center rounded-md text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors flex-shrink-0"
                                         >
                                             <MoreVertical size={16} />
                                         </button>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="w-40 rounded-lg border border-gray-200 bg-white p-1 shadow-md">
+                                    <DropdownMenuContent align="end" className="w-40 rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card p-1 shadow-md">
                                         <DropdownMenuItem
                                             onClick={(e) => {
                                                 e.stopPropagation()

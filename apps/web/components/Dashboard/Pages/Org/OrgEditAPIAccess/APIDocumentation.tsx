@@ -270,8 +270,8 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
     return (
       <div className="pb-4">
         <div className="flex justify-center items-center py-12">
-          <RefreshCw className="animate-spin text-gray-400 me-2" size={24} />
-          <span className="text-gray-500">{t('dashboard.organization.api_access.docs.loading')}</span>
+          <RefreshCw className="animate-spin text-gray-400 dark:text-zinc-400 me-2" size={24} />
+          <span className="text-gray-500 dark:text-zinc-400">{t('dashboard.organization.api_access.docs.loading')}</span>
         </div>
       </div>
     )
@@ -298,9 +298,9 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
   return (
     <div className="space-y-3">
       {groups.map((group) => (
-        <div key={group.tag} className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <div key={group.tag} className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
           {/* Group Header */}
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{group.tag}</h3>
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{group.tag}</h3>
 
           {/* Endpoints List */}
           <div className="space-y-2">
@@ -309,26 +309,26 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
               const isExpanded = expandedEndpoints.has(epKey)
 
               return (
-                <div key={epKey} className="rounded-xl bg-gray-50 shadow-borders-base overflow-hidden">
+                <div key={epKey} className="rounded-xl bg-gray-50 dark:bg-dk-inset/40 shadow-borders-base overflow-hidden">
                   {/* Endpoint Container (clickable) */}
                   <div
                     onClick={() => toggleEndpoint(epKey)}
-                    className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors"
+                    className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors"
                   >
                     <Badge
                       className={`${
-                        METHOD_COLORS[endpoint.method.toLowerCase()] || 'bg-gray-100 text-gray-700'
+                        METHOD_COLORS[endpoint.method.toLowerCase()] || 'bg-gray-100 dark:bg-dk-inset text-gray-700 dark:text-zinc-200'
                       } text-xs font-mono min-w-[60px] justify-center shrink-0`}
                     >
                       {endpoint.method}
                     </Badge>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-800 truncate">{endpoint.summary}</p>
-                      <p className="text-xs text-gray-400 font-mono truncate">{endpoint.path}</p>
+                      <p className="text-sm font-medium text-gray-800 dark:text-zinc-200 truncate">{endpoint.summary}</p>
+                      <p className="text-xs text-gray-400 dark:text-zinc-400 font-mono truncate">{endpoint.path}</p>
                     </div>
                     <ChevronRight
                       size={16}
-                      className={`text-gray-400 shrink-0 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                      className={`text-gray-400 dark:text-zinc-400 shrink-0 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
                     />
                   </div>
 
@@ -338,30 +338,30 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
                       isExpanded ? 'max-h-[2000px]' : 'max-h-0'
                     }`}
                   >
-                    <div className="border-t border-gray-100 bg-gray-50">
+                    <div className="border-t border-gray-100 dark:border-dk-line bg-gray-50 dark:bg-dk-inset/40">
                       <div className="px-4 py-4 space-y-4" onClick={(e) => e.stopPropagation()}>
                         {/* Description */}
                         {endpoint.description && (
-                          <p className="text-sm text-gray-600">{endpoint.description}</p>
+                          <p className="text-sm text-gray-600 dark:text-zinc-300">{endpoint.description}</p>
                         )}
 
                         {/* Parameters */}
                         {endpoint.parameters && endpoint.parameters.length > 0 && (
                           <div>
-                            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t('dashboard.organization.api_access.docs.parameters')}</h4>
-                            <div className="bg-white rounded-lg border border-gray-100 divide-y divide-gray-100">
+                            <h4 className="text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wide mb-2">{t('dashboard.organization.api_access.docs.parameters')}</h4>
+                            <div className="bg-white dark:bg-dk-card rounded-lg border border-gray-100 dark:border-dk-line divide-y divide-gray-100 dark:divide-dk-line">
                               {endpoint.parameters.map((param: any) => (
                                 <div key={param.name} className="flex items-center gap-3 px-3 py-2">
-                                  <code className="text-sm text-gray-800 font-medium">{param.name}</code>
+                                  <code className="text-sm text-gray-800 dark:text-zinc-200 font-medium">{param.name}</code>
                                   <Badge variant="outline" className="text-xs">{param.in}</Badge>
                                   {param.required && (
                                     <span className="text-xs text-red-500">{t('dashboard.organization.api_access.docs.required')}</span>
                                   )}
-                                  <span className="text-xs text-gray-400 ms-auto">
+                                  <span className="text-xs text-gray-400 dark:text-zinc-400 ms-auto">
                                     {param.schema?.type || 'any'}
                                   </span>
                                   {param.description && (
-                                    <span className="text-xs text-gray-500 truncate max-w-[200px]">{param.description}</span>
+                                    <span className="text-xs text-gray-500 dark:text-zinc-400 truncate max-w-[200px]">{param.description}</span>
                                   )}
                                 </div>
                               ))}
@@ -374,24 +374,24 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
                           const bodySchema = resolveRef(endpoint.requestBody.content['application/json'].schema)
                           return (
                             <div>
-                              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                              <h4 className="text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wide mb-2">
                                 {t('dashboard.organization.api_access.docs.request_body')}
-                                <span className="font-mono text-gray-400 ms-2">
+                                <span className="font-mono text-gray-400 dark:text-zinc-400 ms-2">
                                   {getSchemaTypeLabel(endpoint.requestBody.content['application/json'].schema)}
                                 </span>
                               </h4>
                               {bodySchema?.properties && (
-                                <div className="bg-white rounded-lg border border-gray-100 divide-y divide-gray-100">
+                                <div className="bg-white dark:bg-dk-card rounded-lg border border-gray-100 dark:border-dk-line divide-y divide-gray-100 dark:divide-dk-line">
                                   {Object.entries(bodySchema.properties).map(([key, prop]: [string, any]) => {
                                     const resolvedProp = resolveRef(prop)
                                     const isRequired = bodySchema.required?.includes(key)
                                     return (
                                       <div key={key} className="flex items-center gap-3 px-3 py-2">
-                                        <code className="text-sm text-gray-800 font-medium">{key}</code>
+                                        <code className="text-sm text-gray-800 dark:text-zinc-200 font-medium">{key}</code>
                                         {isRequired && <span className="text-xs text-red-500">{t('dashboard.organization.api_access.docs.required')}</span>}
-                                        <span className="text-xs text-gray-400 ms-auto">{resolvedProp?.type || 'any'}</span>
+                                        <span className="text-xs text-gray-400 dark:text-zinc-400 ms-auto">{resolvedProp?.type || 'any'}</span>
                                         {resolvedProp?.description && (
-                                          <span className="text-xs text-gray-500 truncate max-w-[200px]">{resolvedProp.description}</span>
+                                          <span className="text-xs text-gray-500 dark:text-zinc-400 truncate max-w-[200px]">{resolvedProp.description}</span>
                                         )}
                                       </div>
                                     )
@@ -405,13 +405,13 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
                         {/* Response Schemas */}
                         {endpoint.responses && Object.keys(endpoint.responses).length > 0 && (
                           <div>
-                            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t('dashboard.organization.api_access.docs.responses')}</h4>
+                            <h4 className="text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wide mb-2">{t('dashboard.organization.api_access.docs.responses')}</h4>
                             <div className="space-y-2">
                               {Object.entries(endpoint.responses).map(([code, res]: [string, any]) => {
                                 const responseSchema = res?.content?.['application/json']?.schema
                                 const resolvedSchema = responseSchema ? resolveRef(responseSchema) : null
                                 return (
-                                  <div key={code} className="bg-white rounded-lg border border-gray-100 overflow-hidden">
+                                  <div key={code} className="bg-white dark:bg-dk-card rounded-lg border border-gray-100 dark:border-dk-line overflow-hidden">
                                     <div className="flex items-center gap-2 px-3 py-2">
                                       <Badge
                                         className={`text-xs ${
@@ -419,14 +419,14 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
                                             ? 'bg-green-100 text-green-800'
                                             : code.startsWith('4')
                                             ? 'bg-red-100 text-red-800'
-                                            : 'bg-gray-100 text-gray-800'
+                                            : 'bg-gray-100 dark:bg-dk-inset text-gray-800 dark:text-zinc-200'
                                         }`}
                                       >
                                         {code}
                                       </Badge>
-                                      <span className="text-xs text-gray-600">{res.description || ''}</span>
+                                      <span className="text-xs text-gray-600 dark:text-zinc-300">{res.description || ''}</span>
                                       {responseSchema && (
-                                        <span className="text-xs text-gray-400 font-mono ms-auto">
+                                        <span className="text-xs text-gray-400 dark:text-zinc-400 font-mono ms-auto">
                                           {getSchemaTypeLabel(responseSchema)}
                                         </span>
                                       )}
@@ -437,10 +437,10 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
                                           const resolvedProp = resolveRef(prop)
                                           return (
                                             <div key={key} className="flex items-center gap-2 text-xs">
-                                              <code className="text-gray-700">{key}</code>
-                                              <span className="text-gray-400">{resolvedProp?.type || 'any'}</span>
+                                              <code className="text-gray-700 dark:text-zinc-200">{key}</code>
+                                              <span className="text-gray-400 dark:text-zinc-400">{resolvedProp?.type || 'any'}</span>
                                               {resolvedProp?.description && (
-                                                <span className="text-gray-500 truncate">- {resolvedProp.description}</span>
+                                                <span className="text-gray-500 dark:text-zinc-400 truncate">- {resolvedProp.description}</span>
                                               )}
                                             </div>
                                           )
@@ -464,7 +464,7 @@ const APIDocumentation: React.FC<APIDocumentationProps> = ({ searchQuery }) => {
       ))}
 
       {groups.length === 0 && (
-        <div className="text-center py-12 text-gray-400">
+        <div className="text-center py-12 text-gray-400 dark:text-zinc-400">
           <p className="text-sm">{t('dashboard.organization.api_access.docs.no_results')}</p>
         </div>
       )}

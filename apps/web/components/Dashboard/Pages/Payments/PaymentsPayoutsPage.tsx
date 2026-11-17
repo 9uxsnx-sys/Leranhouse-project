@@ -115,8 +115,8 @@ export default function PaymentsPayoutsPage() {
       header: t('dashboard.payments.payouts.teacher'),
       render: (row) => (
         <div className="min-w-0">
-          <p className="text-sm font-medium text-gray-900 truncate">{row.name}</p>
-          <p className="text-[11px] text-gray-400 truncate">
+          <p className="text-sm font-medium text-gray-900 dark:text-zinc-100 truncate">{row.name}</p>
+          <p className="text-[11px] text-gray-400 dark:text-zinc-400 truncate">
             {t('dashboard.payments.payouts.course_count', { count: row.courses })}
           </p>
         </div>
@@ -130,7 +130,7 @@ export default function PaymentsPayoutsPage() {
       sortable: true,
       value: (row) => row.gross,
       render: (row) => (
-        <span className="tabular-nums text-gray-700">{money(row.gross)}</span>
+        <span className="tabular-nums text-gray-700 dark:text-zinc-200">{money(row.gross)}</span>
       ),
     },
     {
@@ -139,7 +139,7 @@ export default function PaymentsPayoutsPage() {
       align: 'right',
       width: '100px',
       render: (row) => (
-        <span className="tabular-nums text-gray-500">
+        <span className="tabular-nums text-gray-500 dark:text-zinc-400">
           {Math.round(row.share * 100)}%
         </span>
       ),
@@ -152,7 +152,7 @@ export default function PaymentsPayoutsPage() {
       sortable: true,
       value: (row) => row.payout,
       render: (row) => (
-        <span className="tabular-nums font-semibold text-gray-900">
+        <span className="tabular-nums font-semibold text-gray-900 dark:text-zinc-100">
           {money(row.payout)}
         </span>
       ),
@@ -163,7 +163,7 @@ export default function PaymentsPayoutsPage() {
     <div className="flex items-center justify-between gap-4">
       <label
         htmlFor={`payout-cost-${key}`}
-        className="text-sm text-gray-600"
+        className="text-sm text-gray-600 dark:text-zinc-300"
       >
         {t(`dashboard.payments.payouts.costs.${key}`)}
       </label>
@@ -180,9 +180,9 @@ export default function PaymentsPayoutsPage() {
               [key]: Number.isNaN(value) ? 0 : value,
             }))
           }}
-          className="h-8 w-36 rounded-lg border border-gray-200 bg-white ps-2.5 pe-12 text-end text-sm tabular-nums text-gray-900 placeholder:text-gray-300 outline-none transition-colors hover:border-gray-300 focus:border-gray-300"
+          className="h-8 w-36 rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card ps-2.5 pe-12 text-end text-sm tabular-nums text-gray-900 dark:text-zinc-100 placeholder:text-gray-300 outline-none transition-colors hover:border-gray-300 dark:hover:border-dk-line-strong focus:border-gray-300"
         />
-        <span className="pointer-events-none absolute end-2.5 top-1/2 -translate-y-1/2 text-[11px] text-gray-400">
+        <span className="pointer-events-none absolute end-2.5 top-1/2 -translate-y-1/2 text-[11px] text-gray-400 dark:text-zinc-400">
           {currency}
         </span>
       </div>
@@ -213,30 +213,30 @@ export default function PaymentsPayoutsPage() {
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="relative inline-flex w-32 items-center justify-center px-7 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 transition-colors hover:bg-gray-50"
+              className="relative inline-flex w-32 items-center justify-center px-7 py-1 text-sm font-semibold rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 transition-colors hover:bg-gray-50 dark:hover:bg-dk-raised"
             >
               <span className="truncate">
                 {months.find((option) => option.value === month)?.label}
               </span>
               <ChevronDown
                 size={14}
-                className="absolute end-2 top-1/2 -translate-y-1/2 text-gray-400"
+                className="absolute end-2 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-400"
               />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="start"
-            className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] rounded-lg border border-gray-200 bg-white p-1 shadow-md"
+            className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card p-1 shadow-md"
           >
             {months.map((option) => (
               <DropdownMenuItem
                 key={option.value}
                 onClick={() => setMonth(option.value)}
-                className="justify-between gap-6 rounded-md px-2.5 py-1.5 text-sm text-gray-700 data-[highlighted]:bg-gray-100 focus:bg-gray-100"
+                className="justify-between gap-6 rounded-md px-2.5 py-1.5 text-sm text-gray-700 dark:text-zinc-200 data-[highlighted]:bg-gray-100 focus:bg-gray-100"
               >
                 <span className="truncate">{option.label}</span>
                 {option.value === month && (
-                  <Check size={14} className="shrink-0 text-gray-500" />
+                  <Check size={14} className="shrink-0 text-gray-500 dark:text-zinc-400" />
                 )}
               </DropdownMenuItem>
             ))}
@@ -251,7 +251,7 @@ export default function PaymentsPayoutsPage() {
             saving
               ? 'bg-brand text-brand-fg border-brand opacity-50 cursor-not-allowed'
               : !dirty
-                ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                ? 'bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong cursor-default'
                 : 'bg-brand text-brand-fg border-brand hover:bg-brand-hover cursor-pointer'
           }`}
         >
@@ -281,7 +281,7 @@ export default function PaymentsPayoutsPage() {
                 description={t('dashboard.payments.payouts.load_error_description')}
               />
             ) : (
-              <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+              <Loader2 className="w-6 h-6 text-gray-400 dark:text-zinc-400 animate-spin" />
             )}
           </div>
         </SectionCard>
@@ -296,18 +296,18 @@ export default function PaymentsPayoutsPage() {
                   {costField('marketing')}
                   {costField('other')}
                   <div className="flex items-center justify-between gap-4">
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-gray-500 dark:text-zinc-400">
                       {t('dashboard.payments.payouts.costs.fees')}
                     </span>
-                    <span className="w-36 pe-2.5 text-end text-sm tabular-nums text-gray-500">
+                    <span className="w-36 pe-2.5 text-end text-sm tabular-nums text-gray-500 dark:text-zinc-400">
                       {money(gatewayFees)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between gap-4 pt-2">
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-medium text-gray-700 dark:text-zinc-200">
                       {t('dashboard.payments.payouts.total_costs')}
                     </span>
-                    <span className="text-sm font-semibold tabular-nums text-gray-900">
+                    <span className="text-sm font-semibold tabular-nums text-gray-900 dark:text-zinc-100">
                       {money(totalCosts)}
                     </span>
                   </div>
@@ -320,40 +320,40 @@ export default function PaymentsPayoutsPage() {
               <SectionCard title={t('dashboard.payments.payouts.profit_split')}>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-500">
+                    <span className="text-gray-500 dark:text-zinc-400">
                       {t('dashboard.payments.payouts.gross_revenue')}
                     </span>
-                    <span className="tabular-nums text-gray-900">
+                    <span className="tabular-nums text-gray-900 dark:text-zinc-100">
                       {money(grossRevenue)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-500">
+                    <span className="text-gray-500 dark:text-zinc-400">
                       {t('dashboard.payments.payouts.costs.fees')}
                     </span>
-                    <span className="tabular-nums text-gray-900">
+                    <span className="tabular-nums text-gray-900 dark:text-zinc-100">
                       −{money(gatewayFees)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-500">
+                    <span className="text-gray-500 dark:text-zinc-400">
                       {t('dashboard.payments.payouts.costs_label')}
                     </span>
-                    <span className="tabular-nums text-gray-900">
+                    <span className="tabular-nums text-gray-900 dark:text-zinc-100">
                       −{money(operatingCosts)}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between text-sm pt-3 border-t border-gray-100">
-                    <span className="font-medium text-gray-700">
+                  <div className="flex items-center justify-between text-sm pt-3 border-t border-gray-100 dark:border-dk-line">
+                    <span className="font-medium text-gray-700 dark:text-zinc-200">
                       {t('dashboard.payments.payouts.net_profit')}
                     </span>
-                    <span className="tabular-nums font-semibold text-gray-900">
+                    <span className="tabular-nums font-semibold text-gray-900 dark:text-zinc-100">
                       {money(netProfit)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-500">
+                    <span className="text-gray-500 dark:text-zinc-400">
                       {t('dashboard.payments.payouts.teacher_pool')}
                     </span>
                     <span className="tabular-nums font-semibold text-green-600">
@@ -361,20 +361,20 @@ export default function PaymentsPayoutsPage() {
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-500">
+                    <span className="text-gray-500 dark:text-zinc-400">
                       {t('dashboard.payments.payouts.platform_pool')}
                     </span>
-                    <span className="tabular-nums text-gray-900">
+                    <span className="tabular-nums text-gray-900 dark:text-zinc-100">
                       {money(platformPool)}
                     </span>
                   </div>
 
                   {unattributed > 0 && (
-                    <div className="flex items-center justify-between text-sm pt-3 border-t border-gray-100">
-                      <span className="text-gray-500">
+                    <div className="flex items-center justify-between text-sm pt-3 border-t border-gray-100 dark:border-dk-line">
+                      <span className="text-gray-500 dark:text-zinc-400">
                         {t('dashboard.payments.payouts.unattributed')}
                       </span>
-                      <span className="tabular-nums text-gray-500">
+                      <span className="tabular-nums text-gray-500 dark:text-zinc-400">
                         {money(unattributed)}
                       </span>
                     </div>
@@ -387,7 +387,7 @@ export default function PaymentsPayoutsPage() {
           <SectionCard
             title={t('dashboard.payments.payouts.teacher_payouts')}
             right={
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-gray-400 dark:text-zinc-400">
                 {t('dashboard.payments.payouts.paid_orders', {
                   count: Number(data?.order_count || 0),
                 })}
@@ -408,10 +408,10 @@ export default function PaymentsPayoutsPage() {
                 rows={rows}
                 footer={
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-gray-500">
+                    <span className="text-xs font-medium text-gray-500 dark:text-zinc-400">
                       {t('dashboard.payments.payouts.total_payout')}
                     </span>
-                    <span className="text-sm font-semibold tabular-nums text-gray-900">
+                    <span className="text-sm font-semibold tabular-nums text-gray-900 dark:text-zinc-100">
                       {money(totalPayout)}
                     </span>
                   </div>

@@ -68,13 +68,13 @@ function Modal({ open, onClose, title, children }: { open: boolean; onClose: () 
     <div className="fixed inset-0 z-modal-backdrop flex items-center justify-center bg-black/20 backdrop-blur-sm">
       {/* Invisible click-outside catcher */}
       <div className="absolute inset-0" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-xl border border-gray-100 w-full max-w-md mx-4 p-6 z-modal-content">
+      <div className="relative bg-white dark:bg-dk-card rounded-2xl shadow-xl border border-gray-100 dark:border-dk-line w-full max-w-md mx-4 p-6 z-modal-content">
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-base font-semibold text-gray-900">{title}</h3>
+          <h3 className="text-base font-semibold text-gray-900 dark:text-dk-fg-1">{title}</h3>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            className="p-1.5 rounded-lg text-gray-400 dark:text-dk-fg-3 hover:text-gray-600 dark:hover:text-dk-fg-1 hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors"
           >
             <X size={18} />
           </button>
@@ -169,24 +169,24 @@ function AccountSecurity() {
     <>
       <div className="space-y-6">
         {/* Single Card: Security */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+        <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
             {t('account.security')}
           </h3>
 
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100 dark:divide-dk-line">
             {/* ─── Email Row ─── */}
             <div className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-gray-900">
+                <span className="text-sm font-medium text-gray-900 dark:text-dk-fg-1">
                   {t('user.settings.email.title')}
                 </span>
-                <span className="text-sm text-gray-400 mt-0.5">{maskEmail(currentEmail)}</span>
+                <span className="text-sm text-gray-400 dark:text-dk-fg-3 mt-0.5">{maskEmail(currentEmail)}</span>
               </div>
               <button
                 type="button"
                 onClick={() => setModalType('email')}
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-900 hover:underline"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-dk-fg-1 hover:underline"
               >
                 Change
               </button>
@@ -195,15 +195,15 @@ function AccountSecurity() {
             {/* ─── Password Row ─── */}
             <div className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-gray-900">
+                <span className="text-sm font-medium text-gray-900 dark:text-dk-fg-1">
                   {t('user.settings.password.title')}
                 </span>
-                <span className="text-sm text-gray-400 mt-0.5">********</span>
+                <span className="text-sm text-gray-400 dark:text-dk-fg-3 mt-0.5">********</span>
               </div>
               <button
                 type="button"
                 onClick={() => setModalType('password')}
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-900 hover:underline"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-dk-fg-1 hover:underline"
               >
                 Change
               </button>
@@ -212,11 +212,11 @@ function AccountSecurity() {
         </div>
 
         {/* ─── Delete Account Card ─── */}
-        <div className="bg-white rounded-xl border border-red-100 shadow-sm p-6">
+        <div className="bg-white dark:bg-dk-card rounded-xl border border-red-100 shadow-sm p-6">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <AlertTriangle size={16} className="text-red-400 flex-shrink-0" />
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-gray-500 dark:text-dk-fg-3">
                 {t('user.settings.privacy.delete_warning_description')}
               </span>
             </div>
@@ -434,7 +434,7 @@ function DeleteConfirmModalContent({ onConfirm, onCancel, t }: { onConfirm: () =
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-gray-700 dark:text-dk-fg-1 bg-gray-100 dark:bg-dk-inset hover:bg-gray-200 rounded-xl transition-colors"
         >
           {t('user.settings.privacy.cancel')}
         </button>

@@ -46,6 +46,7 @@ import { getOrgLogoMediaDirectory, getOrgLogoIconMediaDirectory } from '@service
 import { cn } from '@/lib/utils'
 import { AnimatePresence, motion } from 'framer-motion'
 import { SubNav, type SubNavItem } from '@components/ui/sub-nav'
+import { ThemeToggle } from '@components/Objects/Theme/ThemeToggle'
 
 
 // Nav item base and active classes (light theme variant)
@@ -168,7 +169,7 @@ function DashLeftMenu() {
     <nav
       aria-label={t('common.aria.dashboard_sidebar_navigation')}
       className={cn(
-        "flex flex-col shrink-0 h-screen sticky top-0 z-overlay border-e border-gray-200 bg-ui-bg-subtle transition-all duration-300",
+        "flex flex-col shrink-0 h-screen sticky top-0 z-overlay border-e border-gray-200 dark:border-dk-line bg-ui-bg-subtle transition-all duration-300",
         isCollapsed ? "w-[72px]" : "w-64"
       )}
     >
@@ -369,8 +370,11 @@ function DashLeftMenu() {
       </div>
 
       {/* Bottom Section */}
-      <div className="border-t border-gray-200 py-3 px-3 shrink-0">
+      <div className="border-t border-gray-200 dark:border-dk-line py-3 px-3 shrink-0">
         <div className="space-y-1">
+          {/* Theme switcher — light / dark / system */}
+          <ThemeToggle collapsed={isCollapsed} className="mb-1" />
+
           {/* Collapse sidebar button (expanded state) */}
           {!isCollapsed && (
             <Tooltip>
@@ -501,7 +505,7 @@ function DashLeftMenu() {
           </HoverMenu>
 
           {/* Divider */}
-          {!isCollapsed && <div className="border-t border-gray-200 mt-1 mb-3" />}
+          {!isCollapsed && <div className="border-t border-gray-200 dark:border-dk-line-strong mt-1 mb-3" />}
 
           {/* User Menu - same style as user sidebar */}
           {!isCollapsed && <HeaderProfileBox />}

@@ -68,8 +68,8 @@ const AdminEditOptions: React.FC<AdminEditOptionsProps> = ({ course, orgslug, de
       <div className="absolute top-2 end-2 z-20">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="p-1 bg-white rounded-full hover:bg-gray-100 transition-colors shadow-md">
-              <MoreVertical size={20} className="text-gray-700" />
+            <button className="p-1 bg-white dark:bg-dk-card rounded-full hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors shadow-md">
+              <MoreVertical size={20} className="text-gray-700 dark:text-dk-fg-1" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
@@ -134,7 +134,7 @@ const CourseThumbnailLanding: React.FC<PropsType> = ({ course, orgslug, customLi
     : '/empty_thumbnail.png'
 
   return (
-    <div className="relative flex flex-col bg-white rounded-xl nice-shadow overflow-hidden min-w-[280px] w-full max-w-sm shrink-0 m-2">
+    <div className="relative flex flex-col bg-white dark:bg-dk-card rounded-xl nice-shadow overflow-hidden min-w-[280px] w-full max-w-sm shrink-0 m-2">
       <AdminEditOptions
         course={course}
         orgslug={orgslug}
@@ -148,14 +148,14 @@ const CourseThumbnailLanding: React.FC<PropsType> = ({ course, orgslug, customLi
       </Link>
       <div className='flex flex-col w-full p-4 space-y-3'>
         <div className="space-y-2">
-          <h2 dir="auto" className="font-bold text-gray-800 leading-tight text-base min-h-[2.75rem] line-clamp-2">{course.name}</h2>
-          <p dir="auto" className='text-xs text-gray-700 leading-normal min-h-[3.75rem] line-clamp-3'>{course.description}</p>
+          <h2 dir="auto" className="font-bold text-gray-800 dark:text-dk-fg-1 leading-tight text-base min-h-[2.75rem] line-clamp-2">{course.name}</h2>
+          <p dir="auto" className='text-xs text-gray-700 dark:text-dk-fg-1 leading-normal min-h-[3.75rem] line-clamp-3'>{course.description}</p>
         </div>
         
         <div className="flex flex-wrap items-center justify-between gap-2">
           {course.update_date && (
-            <div className="inline-flex h-5 min-w-[140px] items-center justify-center px-2 rounded-md bg-gray-100/80 border border-gray-200">
-              <span className="text-[10px] font-medium text-gray-600 truncate">
+            <div className="inline-flex h-5 min-w-[140px] items-center justify-center px-2 rounded-md bg-gray-100/80 border border-gray-200 dark:border-dk-line-strong">
+              <span className="text-[10px] font-medium text-gray-600 dark:text-dk-fg-2 truncate">
                 {t('common.updated')} {new Date(course.update_date).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric', year: 'numeric' })}
               </span>
             </div>
@@ -185,7 +185,7 @@ const CourseThumbnailLanding: React.FC<PropsType> = ({ course, orgslug, customLi
                   className="relative -ms-1"
                   style={{ zIndex: 0 }}
                 >
-                  <div className="flex items-center justify-center w-[32px] h-[32px] text-[11px] font-medium text-gray-600 bg-gray-100 border-2 border-white rounded-full">
+                  <div className="flex items-center justify-center w-[32px] h-[32px] text-[11px] font-medium text-gray-600 dark:text-dk-fg-2 bg-gray-100 dark:bg-dk-inset border-2 border-white rounded-full">
                     +{remainingAuthorsCount}
                   </div>
                 </div>

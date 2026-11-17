@@ -143,9 +143,9 @@ function CourseThumbnail({ course, orgslug, customLink, isDashboard = false, isS
             size="small"
             onClick={handleSelectClick}
             aria-label={isSelected ? t('common.deselect') : t('common.select')}
-            className="bg-white/90 backdrop-blur-sm"
+            className="bg-white/90 dark:bg-dk-card/90 backdrop-blur-sm"
           >
-            {isSelected ? <CheckSquare className="h-4 w-4 text-black" /> : <Square className="h-4 w-4 text-gray-500" />}
+            {isSelected ? <CheckSquare className="h-4 w-4 text-black" /> : <Square className="h-4 w-4 text-gray-500 dark:text-dk-fg-3" />}
           </IconButton>
         </div>
       )}
@@ -191,7 +191,7 @@ export const AdminEditOptions = ({ course, orgSlug, deleteCourse, cloneCourse, e
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = React.useState(false)
 
-  const itemClass = "w-full text-start flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+  const itemClass = "w-full text-start flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] font-medium text-gray-700 dark:text-dk-fg-1 hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors"
   const itemClassDanger = "w-full text-start flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] font-medium text-red-600 hover:bg-red-50 transition-colors"
 
   return (
@@ -210,7 +210,7 @@ export const AdminEditOptions = ({ course, orgSlug, deleteCourse, cloneCourse, e
               variant="transparent"
               size="small"
               aria-label={t('common.aria.actions_menu')}
-              className="bg-white/90 backdrop-blur-sm"
+              className="bg-white/90 dark:bg-dk-card/90 backdrop-blur-sm"
             >
               <EllipsisHorizontal />
             </IconButton>

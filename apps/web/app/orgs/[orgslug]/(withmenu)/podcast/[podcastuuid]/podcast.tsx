@@ -21,7 +21,6 @@ import { getCurrentLanguageNativeName } from '@/lib/languages'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { useRegisterBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
 import CourseLearnings from '@components/Objects/Courses/CourseLearnings/CourseLearnings'
-import CourseCommunitySection from '@components/Objects/Communities/CourseCommunitySection'
 import EpisodeCard from '@components/Objects/Podcasts/EpisodeCard'
 
 import { Heading } from '@/components/ui/heading'
@@ -174,7 +173,7 @@ export default function PodcastClient({
     return (
       <GeneralWrapperStyled>
         <div className="flex items-center justify-center min-h-[50vh]">
-          <p className="text-gray-500">{t('podcast.page.no_permission')}</p>
+          <p className="text-gray-500 dark:text-dk-fg-3">{t('podcast.page.no_permission')}</p>
         </div>
       </GeneralWrapperStyled>
     )
@@ -184,7 +183,7 @@ export default function PodcastClient({
     return (
       <GeneralWrapperStyled>
         <div className="flex items-center justify-center min-h-[50vh]">
-          <p className="text-gray-500">{t('podcast.page.failed_to_load')}</p>
+          <p className="text-gray-500 dark:text-dk-fg-3">{t('podcast.page.failed_to_load')}</p>
         </div>
       </GeneralWrapperStyled>
     )
@@ -194,7 +193,7 @@ export default function PodcastClient({
     <GeneralWrapperStyled>
       <div className={bottomPadding}>
         {/* ── HERO BANNER IMAGE (centered, constrained) ── */}
-        <div className="relative w-full mx-auto max-w-7xl aspect-[3/1] rounded-xl overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-gray-100 ring-1 ring-inset ring-black/5">
+        <div className="relative w-full mx-auto max-w-7xl aspect-[3/1] rounded-xl overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-gray-100 ring-1 ring-inset ring-black/5 dark:ring-white/10">
           {podcast.banner_image ? (
             <img
               src={getPodcastBannerMediaDirectory(org?.org_uuid, podcast?.podcast_uuid, podcast?.banner_image)}
@@ -204,7 +203,7 @@ export default function PodcastClient({
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500/5 via-white to-indigo-500/10">
               <div className="text-center">
-                <div className="w-20 h-20 rounded-2xl bg-white shadow-sm ring-1 ring-black/5 flex items-center justify-center mx-auto">
+                <div className="w-20 h-20 rounded-2xl bg-white dark:bg-dk-card shadow-sm ring-1 ring-black/5 dark:ring-white/10 flex items-center justify-center mx-auto">
                   <Headphones className="w-10 h-10 text-indigo-400" />
                 </div>
               </div>
@@ -293,15 +292,6 @@ export default function PodcastClient({
                   </div>
                 </div>
               )}
-
-              {/* ── LINKED COMMUNITY ── */}
-              {podcast?.podcast_uuid && (
-                <CourseCommunitySection
-                  resourceUuid={podcast.podcast_uuid}
-                  resourceType="podcast"
-                  orgslug={orgslug}
-                />
-              )}
             </div>
 
             {/* ═══════════════ RIGHT SIDEBAR ═══════════════ */}
@@ -310,13 +300,13 @@ export default function PodcastClient({
 
                 {/* ── SIDEBAR 1: In Progress / Get Access ── */}
                 {isEnrolled ? (
-                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('podcast.page.in_progress')}</h3>
+                  <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('podcast.page.in_progress')}</h3>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold text-gray-900">{t('podcast.page.progress_complete', { percent: progressPercent })}</span>
-                      <span className="text-sm text-gray-500">{completedEpisodes}/{totalEpisodes}</span>
+                      <span className="text-sm font-semibold text-gray-900 dark:text-dk-fg-1">{t('podcast.page.progress_complete', { percent: progressPercent })}</span>
+                      <span className="text-sm text-gray-500 dark:text-dk-fg-3">{completedEpisodes}/{totalEpisodes}</span>
                     </div>
-                    <div className="w-full h-1.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
+                    <div className="w-full h-1.5 bg-gray-100 dark:bg-dk-inset rounded-full mt-2 overflow-hidden">
                       <div className="h-full bg-black rounded-full transition-all" style={{ width: `${progressPercent}%` }} />
                     </div>
                     <Link href={getUriWithOrg(orgslug, `/podcast/${podcastUuid}`)} className="block w-full mt-4">
@@ -327,10 +317,10 @@ export default function PodcastClient({
                     </Link>
                   </div>
                 ) : (
-                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-4">{t('podcast.page.get_access')}</h3>
+                  <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-4">{t('podcast.page.get_access')}</h3>
                     {isPaidPodcast && podcastPrice !== null && podcastPrice > 0 ? (
-                      <p className="text-2xl font-semibold text-gray-900 mb-4">
+                      <p className="text-2xl font-semibold text-gray-900 dark:text-dk-fg-1 mb-4">
                         {new Intl.NumberFormat(i18n.language || 'en', {
                           style: 'currency',
                           currency: podcast.price_currency || 'DZD',
@@ -338,7 +328,7 @@ export default function PodcastClient({
                         }).format(podcastPrice)}
                       </p>
                     ) : (
-                      <p className="text-sm text-gray-500 mb-2 leading-snug">
+                      <p className="text-sm text-gray-500 dark:text-dk-fg-3 mb-2 leading-snug">
                         {t('podcast.page.get_access_hint')}
                       </p>
                     )}
@@ -362,59 +352,59 @@ export default function PodcastClient({
                 )}
 
                 {/* ── SIDEBAR 2: Podcast Stats ── */}
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('podcast.page.includes_title')}</h3>
+                <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('podcast.page.includes_title')}</h3>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
-                      <Headphones size={16} className="text-gray-400 shrink-0" />
-                      <span className="text-sm text-gray-600">{t('podcast.page.episode', { count: episodes.length })}</span>
+                      <Headphones size={16} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
+                      <span className="text-sm text-gray-600 dark:text-dk-fg-2">{t('podcast.page.episode', { count: episodes.length })}</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Clock size={16} className="text-gray-400 shrink-0" />
-                      <span className="text-sm text-gray-600">
+                      <Clock size={16} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
+                      <span className="text-sm text-gray-600 dark:text-dk-fg-2">
                         {t('podcast.page.total_suffix', {
                           duration: formatDuration(meta.total_duration ? meta.total_duration * 60 : totalDurationSeconds),
                         })}
                       </span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <BookOpen size={16} className="text-gray-400 shrink-0" />
-                      <span className="text-sm text-gray-600">{t('podcast.page.host', { count: hostCount })}</span>
+                      <BookOpen size={16} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
+                      <span className="text-sm text-gray-600 dark:text-dk-fg-2">{t('podcast.page.host', { count: hostCount })}</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <Award size={16} className="text-gray-400 shrink-0" />
-                      <span className="text-sm text-gray-600">{t('podcast.page.premium_content')}</span>
+                      <Award size={16} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
+                      <span className="text-sm text-gray-600 dark:text-dk-fg-2">{t('podcast.page.premium_content')}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* ── SIDEBAR 3: Host ── */}
                 {(podcast.authors && podcast.authors.length > 0) || (meta.hosts && meta.hosts.length > 0) ? (
-                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('podcasts.hosted_by')}</h3>
+                  <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('podcasts.hosted_by')}</h3>
                     <div className="space-y-3">
                       {meta.hosts && meta.hosts.length > 0 ? (
                         meta.hosts.map((host: any, index: number) => (
                           <div key={index} className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-dk-track overflow-hidden shrink-0">
                               {host.avatar ? (
                                 <img src={host.avatar} alt={host.name} className="w-full h-full object-cover" />
                               ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-dk-fg-3">
                                   <User size={14} />
                                 </div>
                               )}
                             </div>
                             <div>
-                              <p className="text-sm font-medium tracking-wide text-gray-900">{host.name}</p>
-                              {host.title && <p className="text-xs text-gray-500">{host.title}</p>}
+                              <p className="text-sm font-medium tracking-wide text-gray-900 dark:text-dk-fg-1">{host.name}</p>
+                              {host.title && <p className="text-xs text-gray-500 dark:text-dk-fg-3">{host.title}</p>}
                             </div>
                           </div>
                         ))
                       ) : (
                         podcast.authors && podcast.authors.map((author: any, index: number) => (
                           <div key={index} className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-dk-track overflow-hidden shrink-0">
                               {author.user.avatar_image ? (
                                 <img
                                   src={author.user.avatar_image}
@@ -422,16 +412,16 @@ export default function PodcastClient({
                                   className="w-full h-full object-cover"
                                 />
                               ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-dk-fg-3">
                                   <User size={14} />
                                 </div>
                               )}
                             </div>
                             <div>
-                              <p className="text-sm font-semibold text-gray-900">
+                              <p className="text-sm font-semibold text-gray-900 dark:text-dk-fg-1">
                                 {author.user.first_name} {author.user.last_name}
                               </p>
-                              <p className="text-xs text-gray-500 capitalize">
+                              <p className="text-xs text-gray-500 dark:text-dk-fg-3 capitalize">
                                 {author.authorship === 'CREATOR' ? t('podcast.page.host_label') : author.authorship.toLowerCase()}
                               </p>
                             </div>
@@ -443,11 +433,11 @@ export default function PodcastClient({
                 ) : null}
 
                 {/* ── SIDEBAR 5: Updates ── */}
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('podcast.page.updates_title')}</h3>
+                <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('podcast.page.updates_title')}</h3>
                   <div className="flex items-center gap-3">
-                    <RefreshCw size={16} className="text-gray-400 shrink-0" />
-                    <span className="text-sm text-gray-600">
+                    <RefreshCw size={16} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
+                    <span className="text-sm text-gray-600 dark:text-dk-fg-2">
                       {t('podcast.page.last_updated', {
                         date: podcast.update_date
                           ? new Date(podcast.update_date).toLocaleDateString(i18n.language || 'en', { year: 'numeric', month: 'short', day: 'numeric' })

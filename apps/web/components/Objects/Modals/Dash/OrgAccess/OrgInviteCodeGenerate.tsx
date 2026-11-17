@@ -98,7 +98,7 @@ function OrgInviteCodeGenerate(props: OrgInviteCodeGenerateProps) {
                         value={String(usergroup_id)}
                         onValueChange={(value) => setUsergroup_id(Number(value))}
                     >
-                        <SelectTrigger className='w-full p-2 rounded-md text-sm bg-white border border-blue-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none'>
+                        <SelectTrigger className='w-full p-2 rounded-md text-sm bg-white dark:bg-dk-card border border-blue-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none'>
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>

@@ -94,24 +94,24 @@ export default function AuthBrandingTab() {
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50">
+      <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-gray-50/50 dark:bg-dk-inset/40">
         <div className="flex-shrink-0">
           {hasImage ? (
-            <div className="w-10 h-10 rounded-lg border border-gray-100 shadow-sm overflow-hidden bg-white">
+            <div className="w-10 h-10 rounded-lg border border-gray-100 dark:border-dk-line shadow-sm overflow-hidden bg-white dark:bg-dk-card">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={preview} alt="" className="w-full h-full object-cover" />
             </div>
           ) : (
-            <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
+            <ImageIcon size={24} className="text-gray-400 dark:text-zinc-400" strokeWidth={1.5} />
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-700">
+          <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">
             {t('dashboard.organization.auth_branding.background_image')}
           </p>
         </div>
         {isUploading ? (
-          <div className="w-[18px] h-[18px] border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+          <div className="w-[18px] h-[18px] border-2 border-gray-300 dark:border-dk-line-strong border-t-gray-600 rounded-full animate-spin" />
         ) : (
           <>
             <input
@@ -127,7 +127,7 @@ export default function AuthBrandingTab() {
               className={
                 hasImage
                   ? 'flex items-center justify-center text-red-400 hover:text-red-600 transition-colors cursor-pointer'
-                  : 'flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer'
+                  : 'flex items-center justify-center text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-colors cursor-pointer'
               }
               title={
                 hasImage
@@ -140,7 +140,7 @@ export default function AuthBrandingTab() {
           </>
         )}
       </div>
-      <p className="text-xs text-gray-400">
+      <p className="text-xs text-gray-400 dark:text-zinc-400">
         {t('dashboard.organization.auth_branding.background_image_desc')}
       </p>
     </div>

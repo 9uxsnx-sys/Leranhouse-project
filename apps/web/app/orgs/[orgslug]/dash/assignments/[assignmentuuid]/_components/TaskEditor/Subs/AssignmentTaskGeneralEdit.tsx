@@ -89,7 +89,7 @@ export function AssignmentTaskGeneralEdit() {
             <FormField name="hint">
                 <div className='flex space-x-3 justify-between items-center'>
                     <FormLabelAndMessage label={t('dashboard.assignments.editor.task_editor.general.reference_file')} message={formik.errors.hint} />
-                    <div className='flex space-x-1.5 text-xs items-center text-gray-500 '>
+                    <div className='flex space-x-1.5 text-xs items-center text-gray-500 dark:text-zinc-400 '>
                         <Info size={16} />
                         <p>{t('dashboard.assignments.editor.task_editor.general.reference_file_info')}</p>
                     </div>
@@ -197,7 +197,7 @@ function UpdateTaskRef() {
 
 
     return (
-        <div className="w-auto bg-gray-50 rounded-xl outline outline-1 outline-gray-200 h-[200px] shadow-sm">
+        <div className="w-auto bg-gray-50 dark:bg-dk-inset/40 rounded-xl outline outline-1 outline-gray-200 h-[200px] shadow-sm">
             <div className="flex flex-col justify-center items-center h-full">
                 <div className="flex flex-col justify-center items-center">
                     <div className="flex flex-col justify-center items-center">
@@ -209,7 +209,7 @@ function UpdateTaskRef() {
 
                     </div>
                     {assignmentTaskState.assignmentTask.reference_file && !isLoading && (
-                        <div className='flex flex-col rounded-lg bg-white text-gray-400 shadow-lg nice-shadow px-5 py-3 space-y-1 items-center relative'>
+                        <div className='flex flex-col rounded-lg bg-white dark:bg-dk-card text-gray-400 dark:text-zinc-400 shadow-lg nice-shadow px-5 py-3 space-y-1 items-center relative'>
                             <div className='absolute top-0 end-0 transform translate-x-1/2 rtl:-translate-x-1/2 -translate-y-1/2 bg-green-500 rounded-full px-1.5 py-1.5 text-white flex justify-center items-center'>
                                 <Cloud size={15} />
                             </div>

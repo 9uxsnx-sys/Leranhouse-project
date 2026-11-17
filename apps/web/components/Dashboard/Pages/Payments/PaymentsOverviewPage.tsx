@@ -58,11 +58,11 @@ export default function PaymentsOverviewPage() {
         <Link
           href={getUriWithOrg(org?.slug ?? '', '/store')}
           target="_blank"
-          className="flex items-center gap-2 px-3 h-7 rounded-md border border-gray-200 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          className="flex items-center gap-2 px-3 h-7 rounded-md border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-xs font-medium text-gray-700 dark:text-zinc-200 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors"
         >
           <ShoppingBag size={13} />
           <span>{t('dashboard.payments.overview.preview_shop')}</span>
-          <ExternalLink size={11} className="text-gray-400" />
+          <ExternalLink size={11} className="text-gray-400 dark:text-zinc-400" />
         </Link>
       </div>
 

@@ -88,22 +88,22 @@ function AccountPrivacy() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+      <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
           {t('account.privacy')}
         </h3>
 
-        <div className="divide-y divide-gray-100">
+        <div className="divide-y divide-gray-100 dark:divide-dk-line">
           {toggles.map((toggle) => (
             <div
               key={toggle.key}
               className="flex items-start justify-between py-4 first:pt-0 last:pb-0 gap-4"
             >
               <div className="flex items-start gap-3 min-w-0">
-                <EyeOff size={18} className="text-gray-400 flex-shrink-0 mt-0.5" />
+                <EyeOff size={18} className="text-gray-400 dark:text-dk-fg-3 flex-shrink-0 mt-0.5" />
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-900">{toggle.label}</p>
-                  <p className="text-sm text-gray-400 mt-0.5">{toggle.description}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-dk-fg-1">{toggle.label}</p>
+                  <p className="text-sm text-gray-400 dark:text-dk-fg-3 mt-0.5">{toggle.description}</p>
                 </div>
               </div>
               <Switch

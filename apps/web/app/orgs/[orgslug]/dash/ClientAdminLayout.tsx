@@ -11,6 +11,7 @@ import { DashboardBreadcrumbProvider } from '@components/Objects/Breadcrumbs/Das
 import CommandPalette from '@components/Dashboard/CommandPalette/CommandPalette'
 import { useOrg } from '@components/Contexts/OrgContext'
 import { getBrandStyle } from '@services/utils/ts/colorUtils'
+import { useTheme } from '@components/Contexts/ThemeContext'
 import React, { useEffect } from 'react'
 import { useMediaQuery } from 'usehooks-ts';
 
@@ -25,6 +26,7 @@ function ClientAdminLayout({
 
     // Same source as the learner shell: customization.general.color, v1 fallback general.color
     const org = useOrg() as any
+    const { resolvedTheme } = useTheme()
     const orgConfig = org?.config?.config
     const brandColor = orgConfig?.customization?.general?.color || orgConfig?.general?.color || ''
     const brandFg = orgConfig?.customization?.general?.brand_fg || orgConfig?.general?.brand_fg || ''
@@ -37,13 +39,13 @@ function ClientAdminLayout({
     // brand variables are also published on the root element. Without this the
     // primary action inside a modal would silently fall back to ink.
     useEffect(() => {
-        const vars = getBrandStyle(brandColor, brandFg, brandSidebar, brandHover)
+        const vars = getBrandStyle(brandColor, brandFg, brandSidebar, brandHover, resolvedTheme)
         const root = document.documentElement
         Object.entries(vars).forEach(([key, value]) => root.style.setProperty(key, value))
         return () => {
             Object.keys(vars).forEach((key) => root.style.removeProperty(key))
         }
-    }, [brandColor, brandFg, brandSidebar, brandHover])
+    }, [brandColor, brandFg, brandSidebar, brandHover, resolvedTheme])
 
     return (
         <SessionGate>
@@ -52,7 +54,7 @@ function ClientAdminLayout({
                   <DashboardBreadcrumbProvider>
                     <div
                         className="flex flex-col md:flex-row"
-                        style={getBrandStyle(brandColor, brandFg, brandSidebar, brandHover) as React.CSSProperties}
+                        style={getBrandStyle(brandColor, brandFg, brandSidebar, brandHover, resolvedTheme) as React.CSSProperties}
                     >
                         {isMobile ? (
                             <DashMobileMenu />

@@ -40,8 +40,8 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
 
   if (isMobile) {
     return (
-      <div className="h-screen w-full bg-[#f8f8f8] flex items-center justify-center p-4">
-        <div className="bg-white p-6 rounded-lg shadow-md text-center">
+      <div className="h-screen w-full bg-[#f8f8f8] dark:bg-transparent flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-dk-card p-6 rounded-lg shadow-md text-center">
           <h2 className="text-xl font-bold mb-4">{t('dashboard.users.settings.mobile.title')}</h2>
           <Monitor className='mx-auto my-5' size={60} />
           <p>{t('dashboard.users.settings.mobile.message1')}</p>
@@ -88,7 +88,7 @@ function UsersSettingsPage(props: { params: Promise<SettingsParams> }) {
   ]
 
   return (
-    <div className="min-h-screen w-full bg-[#f8f8f8]">
+    <div className="min-h-screen w-full bg-[#f8f8f8] dark:bg-transparent">
       {/* Row 1: Page title */}
       <div className="max-w-7xl mx-auto w-full pt-8 px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl md:text-4xl font-semibold text-ui-fg-base leading-tight">

@@ -97,26 +97,26 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
   const getVerificationStatusColor = () => {
     switch (verificationStatus) {
       case 'valid':
-        return 'text-green-600 bg-green-50 border-green-200';
+        return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/25';
       case 'invalid':
-        return 'text-red-600 bg-red-50 border-red-200';
+        return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/25';
       case 'loading':
-        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+        return 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-500/10 border-yellow-200 dark:border-yellow-500/25';
       default:
-        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+        return 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-500/10 border-yellow-200 dark:border-yellow-500/25';
     }
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-        <div className="bg-white rounded-2xl p-8 nice-shadow max-w-4xl w-full space-y-6">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-dk-inset/40">
+        <div className="bg-white dark:bg-dk-card rounded-2xl p-8 nice-shadow max-w-4xl w-full space-y-6">
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('certificate.verification.verifying_title')}</h1>
-            <p className="text-gray-600">{t('certificate.verification.verifying_description')}</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-dk-fg-1 mb-2">{t('certificate.verification.verifying_title')}</h1>
+            <p className="text-gray-600 dark:text-dk-fg-2">{t('certificate.verification.verifying_description')}</p>
           </div>
         </div>
       </div>
@@ -125,30 +125,30 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
 
   if (error || verificationStatus === 'invalid') {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-        <div className="bg-white rounded-2xl p-8 nice-shadow max-w-2xl w-full space-y-6">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-dk-inset/40">
+        <div className="bg-white dark:bg-dk-card rounded-2xl p-8 nice-shadow max-w-2xl w-full space-y-6">
           <div className="flex flex-col items-center space-y-4">
-            <div className="bg-red-100 p-4 rounded-full">
+            <div className="bg-red-100 dark:bg-red-500/15 p-4 rounded-full">
               <XCircle className="w-16 h-16 text-red-600" />
             </div>
             
-            <h1 className="text-3xl font-bold text-gray-900 text-center">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-dk-fg-1 text-center">
               {t('certificate.verification.not_found_title')}
             </h1>
             
-            <p className="text-gray-600 text-center">
+            <p className="text-gray-600 dark:text-dk-fg-2 text-center">
               <Trans
                 i18nKey="certificate.verification.could_not_find"
                 values={{ id: certificateUuid }}
-                components={{ code: <span className="font-mono bg-gray-100 px-2 py-1 rounded" /> }}
+                components={{ code: <span className="font-mono bg-gray-100 dark:bg-dk-inset px-2 py-1 rounded" /> }}
               />
             </p>
             
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 w-full">
-              <p className="text-red-800 text-sm">
+            <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/25 rounded-lg p-4 w-full">
+              <p className="text-red-800 dark:text-red-300 text-sm">
                 {t('certificate.verification.could_mean')}
               </p>
-              <ul className="text-red-700 text-sm mt-2 list-disc list-inside space-y-1">
+              <ul className="text-red-700 dark:text-red-300 text-sm mt-2 list-disc list-inside space-y-1">
                 <li>{t('certificate.verification.reason_id')}</li>
                 <li>{t('certificate.verification.reason_revoked')}</li>
                 <li>{t('certificate.verification.reason_expired')}</li>
@@ -159,7 +159,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
             <div className="pt-4">
               <Link
                 href="/"
-                className="inline-flex items-center space-x-2 bg-gray-800 text-white px-6 py-3 rounded-full hover:bg-gray-700 transition duration-200"
+                className="inline-flex items-center space-x-2 bg-gray-800 dark:bg-zinc-100 text-white dark:text-zinc-900 px-6 py-3 rounded-full hover:bg-gray-700 dark:hover:bg-zinc-200 transition duration-200"
               >
                 <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
                 <span>{t('certificate.verification.go_home')}</span>
@@ -178,18 +178,18 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
   const qrCodeLink = getUriWithOrg(org?.org_slug || '', `/certificates/${certificateData.certificate_user.user_certification_uuid}/verify`);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-dk-inset/40 py-8">
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
-        <div className="bg-white rounded-2xl p-6 mb-8 nice-shadow">
+        <div className="bg-white dark:bg-dk-card rounded-2xl p-6 mb-8 nice-shadow">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="bg-green-100 p-3 rounded-full">
+              <div className="bg-green-100 dark:bg-green-500/15 p-3 rounded-full">
                 <Shield className="w-8 h-8 text-green-600" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">{t('certificate.verification.title')}</h1>
-                <p className="text-gray-600">{t('certificate.verification.subtitle')}</p>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-dk-fg-1">{t('certificate.verification.title')}</h1>
+                <p className="text-gray-600 dark:text-dk-fg-2">{t('certificate.verification.subtitle')}</p>
               </div>
             </div>
             
@@ -205,8 +205,8 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
           {/* Certificate Preview and Course Info */}
           <div className="lg:col-span-2 space-y-6">
             {/* Certificate Preview */}
-            <div className="bg-white rounded-2xl p-6 nice-shadow">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('certificate.verification.preview_title')}</h2>
+            <div className="bg-white dark:bg-dk-card rounded-2xl p-6 nice-shadow">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-dk-fg-1 mb-4">{t('certificate.verification.preview_title')}</h2>
               <div className="max-w-2xl mx-auto" id="certificate-preview">
                 <CertificatePreview
                   certificationName={certificateData.certification.config.certification_name}
@@ -226,11 +226,11 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
             </div>
 
             {/* Course Information */}
-            <div className="bg-white shadow-md shadow-gray-300/25 outline outline-1 outline-neutral-200/40 rounded-lg overflow-hidden p-4">
+            <div className="bg-white dark:bg-dk-card shadow-md dark:shadow-none shadow-gray-300/25 outline outline-1 outline-neutral-200/40 dark:outline-zinc-800 rounded-lg overflow-hidden p-4">
               <div className="flex items-start space-x-4">
                 {/* Course Thumbnail */}
                 <div className="flex-shrink-0">
-                  <div className="w-20 h-12 bg-gray-100 rounded-lg overflow-hidden ring-1 ring-inset ring-black/10">
+                  <div className="w-20 h-12 bg-gray-100 dark:bg-dk-inset rounded-lg overflow-hidden ring-1 ring-inset ring-black/10">
                     {certificateData.course.thumbnail_image ? (
                       <img
                         src={getCourseThumbnailMediaDirectory(
@@ -242,8 +242,8 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                        <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="w-full h-full bg-gray-200 dark:bg-dk-track flex items-center justify-center">
+                        <svg className="w-6 h-6 text-gray-400 dark:text-dk-fg-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                         </svg>
                       </div>
@@ -255,27 +255,27 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
                 <div className="flex-1 min-w-0">
                   <div className="space-y-1">
                     <div>
-                      <h4 className="font-semibold text-gray-900 text-base leading-tight">{certificateData.course.name}</h4>
+                      <h4 className="font-semibold text-gray-900 dark:text-dk-fg-1 text-base leading-tight">{certificateData.course.name}</h4>
                       {certificateData.course.description && (
-                        <p className="text-sm text-gray-600 line-clamp-2 mt-1">{certificateData.course.description}</p>
+                        <p className="text-sm text-gray-600 dark:text-dk-fg-2 line-clamp-2 mt-1">{certificateData.course.description}</p>
                       )}
                     </div>
 
                     {certificateData.course.authors && certificateData.course.authors.length > 0 && (
-                      <div className="flex items-center space-x-1 text-sm text-neutral-400 font-normal">
+                      <div className="flex items-center space-x-1 text-sm text-neutral-400 dark:text-dk-fg-3 font-normal">
                         <span>{t('certificate.verification.by')}</span>
                         <div className="flex items-center space-x-1">
                           {certificateData.course.authors
                             .filter((author: any) => author.authorship_status === 'ACTIVE')
                             .slice(0, 2)
                             .map((author: any, index: number) => (
-                              <span key={author.user.user_uuid} className="text-neutral-600">
+                              <span key={author.user.user_uuid} className="text-neutral-600 dark:text-dk-fg-2">
                                 {author.user.first_name} {author.user.last_name}
                                 {index < Math.min(2, certificateData.course.authors.filter((a: any) => a.authorship_status === 'ACTIVE').length - 1) && ', '}
                               </span>
                             ))}
                           {certificateData.course.authors.filter((author: any) => author.authorship_status === 'ACTIVE').length > 2 && (
-                            <span className="text-neutral-400">
+                            <span className="text-neutral-400 dark:text-dk-fg-3">
                               {t('certificate.verification.more', { count: certificateData.course.authors.filter((author: any) => author.authorship_status === 'ACTIVE').length - 2 })}
                             </span>
                           )}
@@ -289,7 +289,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
                 <div className="flex-shrink-0">
                   <Link
                     href={getUriWithOrg(org?.org_slug || '', `/course/${certificateData.course.course_uuid.replace('course_', '')}`)}
-                    className="inline-flex items-center space-x-1 text-neutral-400 hover:text-neutral-600 transition-colors text-sm"
+                    className="inline-flex items-center space-x-1 text-neutral-400 dark:text-dk-fg-3 hover:text-neutral-600 dark:hover:text-dk-fg-1 transition-colors text-sm"
                   >
                     <span>{t('certificate.verification.view_course')}</span>
                     <svg className="w-3 h-3 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -303,30 +303,30 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
 
           {/* Certificate Details */}
           <div className="space-y-6">
-            <div className="bg-white rounded-2xl p-6 nice-shadow">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('certificate.verification.info_title')}</h2>
+            <div className="bg-white dark:bg-dk-card rounded-2xl p-6 nice-shadow">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-dk-fg-1 mb-4">{t('certificate.verification.info_title')}</h2>
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('certificate.certificate_id')}</label>
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <code className="text-sm text-gray-900 break-all">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-dk-fg-1 mb-1">{t('certificate.certificate_id')}</label>
+                  <div className="bg-gray-50 dark:bg-dk-inset/40 p-3 rounded-lg">
+                    <code className="text-sm text-gray-900 dark:text-dk-fg-1 break-all">
                       {certificateData.certificate_user.user_certification_uuid}
                     </code>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('certificate.verification.course_name')}</label>
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <span className="text-gray-900">{certificateData.course.name}</span>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-dk-fg-1 mb-1">{t('certificate.verification.course_name')}</label>
+                  <div className="bg-gray-50 dark:bg-dk-inset/40 p-3 rounded-lg">
+                    <span className="text-gray-900 dark:text-dk-fg-1">{certificateData.course.name}</span>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('certificate.verification.certification_type')}</label>
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <span className="text-gray-900 capitalize">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-dk-fg-1 mb-1">{t('certificate.verification.certification_type')}</label>
+                  <div className="bg-gray-50 dark:bg-dk-inset/40 p-3 rounded-lg">
+                    <span className="text-gray-900 dark:text-dk-fg-1 capitalize">
                       {(() => {
                         const key = certificationTypeKey(certificateData.certification.config.certification_type)
                         return key ? t(key) : certificateData.certification.config.certification_type.replace('_', ' ')
@@ -336,9 +336,9 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('certificate.verification.awarded_date')}</label>
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <span className="text-gray-900">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-dk-fg-1 mb-1">{t('certificate.verification.awarded_date')}</label>
+                  <div className="bg-gray-50 dark:bg-dk-inset/40 p-3 rounded-lg">
+                    <span className="text-gray-900 dark:text-dk-fg-1">
                       {new Date(certificateData.certificate_user.created_at).toLocaleDateString(i18n.language || 'en', {
                         year: 'numeric',
                         month: 'long',
@@ -352,21 +352,21 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
 
                 {certificateData.certification.config.certificate_instructor && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('certificate.verification.instructor')}</label>
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <span className="text-gray-900">{certificateData.certification.config.certificate_instructor}</span>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-dk-fg-1 mb-1">{t('certificate.verification.instructor')}</label>
+                    <div className="bg-gray-50 dark:bg-dk-inset/40 p-3 rounded-lg">
+                      <span className="text-gray-900 dark:text-dk-fg-1">{certificateData.certification.config.certificate_instructor}</span>
                     </div>
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
+            <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/25 rounded-2xl p-6">
               <div className="flex items-center space-x-3 mb-3">
-                <Shield className="w-6 h-6 text-blue-600" />
-                <h3 className="text-lg font-semibold text-blue-800">{t('certificate.verification.security_title')}</h3>
+                <Shield className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-300">{t('certificate.verification.security_title')}</h3>
               </div>
-              <ul className="text-blue-700 text-sm space-y-2">
+              <ul className="text-blue-700 dark:text-blue-300 text-sm space-y-2">
                 <li>• {t('certificate.verification.security_db')}</li>
                 <li>• {t('certificate.verification.security_qr')}</li>
                 <li>• {t('certificate.verification.security_id')}</li>
@@ -380,7 +380,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
         <div className="mt-8 text-center">
           <Link
             href="/"
-            className="inline-flex items-center space-x-2 bg-gray-800 text-white px-6 py-3 rounded-full hover:bg-gray-700 transition duration-200"
+            className="inline-flex items-center space-x-2 bg-gray-800 dark:bg-zinc-100 text-white dark:text-zinc-900 px-6 py-3 rounded-full hover:bg-gray-700 dark:hover:bg-zinc-200 transition duration-200"
           >
             <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
             <span>{t('certificate.verification.go_home')}</span>

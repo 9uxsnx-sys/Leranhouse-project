@@ -163,8 +163,8 @@ const OrgAuditLogs = () => {
       value: (log) => log.created_at || '',
       render: (log) => (
         <div className="flex flex-col">
-          <span className="text-sm font-medium text-gray-900">{dayjs(log.created_at).format('MMM DD, YYYY')}</span>
-          <span className="text-[11px] text-gray-400">{dayjs(log.created_at).format('HH:mm:ss')}</span>
+          <span className="text-sm font-medium text-gray-900 dark:text-zinc-100">{dayjs(log.created_at).format('MMM DD, YYYY')}</span>
+          <span className="text-[11px] text-gray-400 dark:text-zinc-400">{dayjs(log.created_at).format('HH:mm:ss')}</span>
         </div>
       ),
     },
@@ -183,11 +183,11 @@ const OrgAuditLogs = () => {
             showProfilePopup={true}
           />
           <div className="flex flex-col min-w-0">
-            <span className="text-sm font-medium text-gray-900 truncate">
+            <span className="text-sm font-medium text-gray-900 dark:text-zinc-100 truncate">
               @{log.username || t('dashboard.organization.audit_logs.system_user')}
             </span>
             {log.user_id && (
-              <span className="text-[11px] text-gray-400 font-mono">{t('dashboard.organization.audit_logs.user_id', { id: log.user_id })}</span>
+              <span className="text-[11px] text-gray-400 dark:text-zinc-400 font-mono">{t('dashboard.organization.audit_logs.user_id', { id: log.user_id })}</span>
             )}
           </div>
         </div>
@@ -198,11 +198,11 @@ const OrgAuditLogs = () => {
       header: t('dashboard.organization.audit_logs.table.resource'),
       width: '170px',
       render: (log) => (
-        <div className="flex items-center gap-1.5 text-gray-600 min-w-0">
-          <Activity className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+        <div className="flex items-center gap-1.5 text-gray-600 dark:text-zinc-300 min-w-0">
+          <Activity className="w-3.5 h-3.5 text-gray-400 dark:text-zinc-400 shrink-0" />
           <span className="text-sm capitalize truncate">{log.resource}</span>
           {log.resource_id && (
-            <span className="text-[10px] bg-gray-50 border border-gray-200 px-1 rounded text-gray-400 font-mono truncate">
+            <span className="text-[10px] bg-gray-50 dark:bg-dk-inset/40 border border-gray-200 dark:border-dk-line-strong px-1 rounded text-gray-400 dark:text-zinc-400 font-mono truncate">
               {log.resource_id}
             </span>
           )}
@@ -214,7 +214,7 @@ const OrgAuditLogs = () => {
       header: t('dashboard.organization.audit_logs.table.path_method'),
       render: (log) => (
         <div className="flex flex-col gap-1 min-w-0">
-          <div className="flex items-center gap-1.5 text-[11px] text-gray-500 font-mono truncate max-w-[260px]">
+          <div className="flex items-center gap-1.5 text-[11px] text-gray-500 dark:text-zinc-400 font-mono truncate max-w-[260px]">
             <Terminal className="w-3 h-3 shrink-0" />
             <span className="truncate">{log.path}</span>
           </div>
@@ -234,7 +234,7 @@ const OrgAuditLogs = () => {
       header: t('dashboard.organization.audit_logs.table.ip_address'),
       width: '140px',
       render: (log) => (
-        <div className="flex items-center gap-1.5 text-xs text-gray-400 font-mono">
+        <div className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-zinc-400 font-mono">
           <Globe className="w-3 h-3" />
           {log.ip_address || '—'}
         </div>
@@ -272,20 +272,20 @@ const OrgAuditLogs = () => {
             isDialogOpen={openModalId === log.id}
             onOpenChange={(open) => setOpenModalId(open ? log.id : null)}
             dialogContent={
-              <div className="bg-gray-900 rounded-lg p-4 mt-2 overflow-auto max-h-[400px]">
+              <div className="bg-gray-900 rounded-lg p-4 mt-2 overflow-auto max-h-[400px] dark:bg-zinc-100">
                 <pre className="text-xs text-green-400 font-mono">
                   {JSON.stringify(log.payload, null, 2)}
                 </pre>
               </div>
             }
             dialogTrigger={
-              <button className="p-1.5 hover:bg-gray-100 rounded-md transition-colors group">
-                <Eye className="w-4 h-4 text-gray-400 group-hover:text-indigo-600" />
+              <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-dk-raised rounded-md transition-colors group">
+                <Eye className="w-4 h-4 text-gray-400 dark:text-zinc-400 group-hover:text-indigo-600" />
               </button>
             }
           />
         ) : (
-          <span className="text-gray-300 text-xs">—</span>
+          <span className="text-gray-300 dark:text-zinc-600 text-xs">—</span>
         ),
     },
   ]
@@ -299,12 +299,12 @@ const OrgAuditLogs = () => {
       descriptionKey="common.plans.feature_restricted.audit_logs.description"
     >
       <>
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm mx-auto">
-        <div className="px-6 py-5 border-b border-gray-100">
+        <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm mx-auto">
+        <div className="px-6 py-5 border-b border-gray-100 dark:border-dk-line">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="font-bold text-xl text-gray-800">{t('dashboard.organization.audit_logs.title')}</h1>
-              <p className="text-sm text-gray-500 mt-0.5">
+              <h1 className="font-bold text-xl text-gray-800 dark:text-zinc-200">{t('dashboard.organization.audit_logs.title')}</h1>
+              <p className="text-sm text-gray-500 dark:text-zinc-400 mt-0.5">
                 {t('dashboard.organization.audit_logs.subtitle')}
               </p>
             </div>
@@ -314,24 +314,24 @@ const OrgAuditLogs = () => {
                 className={`p-2 rounded-md hover:bg-gray-200 transition-colors ${isValidating ? 'animate-spin' : ''}`}
                 title={t('dashboard.organization.audit_logs.refresh')}
                >
-                <RefreshCw className="w-4 h-4 text-gray-600" />
+                <RefreshCw className="w-4 h-4 text-gray-600 dark:text-zinc-300" />
                </button>
 
                <button 
                 onClick={handleExport}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-sm font-semibold rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors"
                 title={t('dashboard.organization.audit_logs.export')}
                >
                 <Download size={14} />
                 <span>{t('dashboard.organization.audit_logs.export')}</span>
                </button>
 
-               <div className="flex items-center gap-0 border border-gray-200 rounded-md overflow-hidden bg-white">
+               <div className="flex items-center gap-0 border border-gray-200 dark:border-dk-line-strong rounded-md overflow-hidden bg-white dark:bg-dk-card">
                 <Select
                   value={searchField}
                   onValueChange={(val) => setSearchField(val)}
                 >
-                  <SelectTrigger className="w-[110px] h-9 text-[10px] border-none bg-gray-50 rounded-none focus:ring-0">
+                  <SelectTrigger className="w-[110px] h-9 text-[10px] border-none bg-gray-50 dark:bg-dk-inset/40 rounded-none focus:ring-0">
                     <SelectValue placeholder={t('dashboard.organization.audit_logs.search_by')} />
                   </SelectTrigger>
                   <SelectContent>
@@ -344,7 +344,7 @@ const OrgAuditLogs = () => {
                   </SelectContent>
                 </Select>
                 <div className="relative">
-                  <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                  <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-zinc-400" />
                   <Input
                     placeholder={t('dashboard.organization.audit_logs.placeholders.search')}
                     className="ps-9 w-[180px] h-9 text-xs border-none focus-visible:ring-0 rounded-none"
@@ -399,7 +399,7 @@ const OrgAuditLogs = () => {
               >
                 <SelectTrigger className="w-[130px] h-9 text-sm">
                   <div className="flex items-center gap-2">
-                    <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                    <Calendar className="w-3.5 h-3.5 text-gray-400 dark:text-zinc-400" />
                     <SelectValue placeholder={t('dashboard.organization.audit_logs.filters.date')} />
                   </div>
                 </SelectTrigger>
@@ -423,7 +423,7 @@ const OrgAuditLogs = () => {
                       setFilters({ ...filters, start_date: date })
                     }}
                   />
-                  <span className="text-gray-400 text-xs">{t('dashboard.organization.audit_logs.date_ranges.to')}</span>
+                  <span className="text-gray-400 dark:text-zinc-400 text-xs">{t('dashboard.organization.audit_logs.date_ranges.to')}</span>
                   <Input
                     type="date"
                     className="h-9 text-xs w-[130px]"
@@ -442,8 +442,8 @@ const OrgAuditLogs = () => {
         <div className="pt-4">
           {isLoading && !data ? (
             <div className="py-16 flex flex-col items-center gap-2">
-              <RefreshCw className="w-6 h-6 text-gray-400 animate-spin" />
-              <span className="text-sm text-gray-500">{t('dashboard.organization.audit_logs.loading')}</span>
+              <RefreshCw className="w-6 h-6 text-gray-400 dark:text-zinc-400 animate-spin" />
+              <span className="text-sm text-gray-500 dark:text-zinc-400">{t('dashboard.organization.audit_logs.loading')}</span>
             </div>
           ) : logs.length === 0 ? (
             <EmptyState

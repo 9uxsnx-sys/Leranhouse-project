@@ -101,9 +101,9 @@ export default function CourseLearnerRetention({
                 <p className="text-[10px] uppercase tracking-wider text-indigo-400 font-semibold">{t('analytics.course_analytics.learner_retention.cohort_size')}</p>
                 <p className="text-2xl font-bold text-indigo-600">{cohortSize}</p>
               </div>
-              <div className="bg-gray-50 rounded-xl px-5 py-3">
+              <div className="bg-gray-50 rounded-xl px-5 py-3 dark:bg-dk-inset/40">
                 <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.learner_retention.current_retention')}</p>
-                <p className="text-2xl font-bold text-gray-700">{latestRetention}%</p>
+                <p className="text-2xl font-bold text-gray-700 dark:text-zinc-200">{latestRetention}%</p>
               </div>
             </div>
             <ModalChart />
@@ -119,7 +119,7 @@ export default function CourseLearnerRetention({
         <div>
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-gray-900"><AnimatedNumber value={latestRetention} suffix="%" /></span>
+              <span className="text-2xl font-bold text-gray-900 dark:text-zinc-100"><AnimatedNumber value={latestRetention} suffix="%" /></span>
               <span className="text-xs text-gray-400">{t('analytics.course_analytics.units.retention')}</span>
             </div>
             <span className="text-xs text-indigo-400">{cohortSize} {t('analytics.course_analytics.units.in_cohort')}</span>

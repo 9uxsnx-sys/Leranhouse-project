@@ -400,7 +400,7 @@ function EditCourseAccess(props: EditCourseAccessProps) {
                         rounded="rounded-full"
                         predefined_avatar={row.user.avatar_image === '' ? 'empty' : undefined}
                     />
-                    <span className="font-medium text-gray-900 truncate">
+                    <span className="font-medium text-gray-900 dark:text-zinc-100 truncate">
                         {row.user.first_name} {row.user.last_name}
                     </span>
                 </div>
@@ -410,13 +410,13 @@ function EditCourseAccess(props: EditCourseAccessProps) {
             key: 'username',
             header: t('dashboard.courses.access.users.table.username'),
             width: '170px',
-            render: (row) => <span className="text-gray-500">@{row.user.username}</span>,
+            render: (row) => <span className="text-gray-500 dark:text-zinc-400">@{row.user.username}</span>,
         },
         {
             key: 'email',
             header: t('dashboard.courses.access.users.table.email'),
             width: '240px',
-            render: (row) => <span className="text-gray-500 truncate">{row.user.email}</span>,
+            render: (row) => <span className="text-gray-500 dark:text-zinc-400 truncate">{row.user.email}</span>,
         },
         {
             key: 'status',
@@ -441,7 +441,7 @@ function EditCourseAccess(props: EditCourseAccessProps) {
             sortable: true,
             value: (row) => row.enrolled_at || row.joined_at || '',
             render: (row) => (
-                <span className="text-[13px] text-gray-400 whitespace-nowrap">
+                <span className="text-[13px] text-gray-400 dark:text-zinc-400 whitespace-nowrap">
                     {formatDate(isSearching ? row.joined_at : row.enrolled_at)}
                 </span>
             ),
@@ -456,7 +456,7 @@ function EditCourseAccess(props: EditCourseAccessProps) {
                     <DropdownMenu modal={false}>
                         <DropdownMenuTrigger asChild>
                             <button
-                                className="p-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
+                                className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-dk-raised text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-all"
                                 aria-label={t('common.view_details')}
                             >
                                 <MoreHorizontal size={16} />
@@ -464,15 +464,15 @@ function EditCourseAccess(props: EditCourseAccessProps) {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                             align="end"
-                            className="min-w-[150px] rounded-lg border border-gray-200 bg-white p-1 shadow-md"
+                            className="min-w-[150px] rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card p-1 shadow-md"
                             sideOffset={6}
                         >
                             <DropdownMenuItem
                                 onClick={() => setDetailUser(row)}
                                 className="gap-2 text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
                             >
-                                <Info size={14} className="text-gray-400" />
-                                <span className="text-gray-700 text-xs">
+                                <Info size={14} className="text-gray-400 dark:text-zinc-400" />
+                                <span className="text-gray-700 dark:text-zinc-200 text-xs">
                                     {t('dashboard.courses.access.details')}
                                 </span>
                             </DropdownMenuItem>
@@ -501,8 +501,8 @@ function EditCourseAccess(props: EditCourseAccessProps) {
             value: (group) => group.name || '',
             render: (group) => (
                 <div className="flex items-center gap-2.5 min-w-0">
-                    <Users size={16} className="shrink-0 text-gray-400" />
-                    <span className="font-medium text-gray-900 truncate">{group.name}</span>
+                    <Users size={16} className="shrink-0 text-gray-400 dark:text-zinc-400" />
+                    <span className="font-medium text-gray-900 dark:text-zinc-100 truncate">{group.name}</span>
                 </div>
             ),
         },
@@ -510,7 +510,7 @@ function EditCourseAccess(props: EditCourseAccessProps) {
             key: 'description',
             header: t('dashboard.courses.access.groups.table.description'),
             render: (group) => (
-                <span className="text-gray-500 truncate">{group.description || '—'}</span>
+                <span className="text-gray-500 dark:text-zinc-400 truncate">{group.description || '—'}</span>
             ),
         },
         {
@@ -520,8 +520,8 @@ function EditCourseAccess(props: EditCourseAccessProps) {
             sortable: true,
             value: (group) => group.members_count ?? 0,
             render: (group) => (
-                <span className="inline-flex items-center gap-1.5 text-gray-500">
-                    <Users size={14} className="text-gray-400" />
+                <span className="inline-flex items-center gap-1.5 text-gray-500 dark:text-zinc-400">
+                    <Users size={14} className="text-gray-400 dark:text-zinc-400" />
                     {group.members_count ?? 0}
                 </span>
             ),
@@ -534,7 +534,7 @@ function EditCourseAccess(props: EditCourseAccessProps) {
             sortable: true,
             value: (group) => group.linked_at || '',
             render: (group) => (
-                <span className="text-[13px] text-gray-400 whitespace-nowrap">
+                <span className="text-[13px] text-gray-400 dark:text-zinc-400 whitespace-nowrap">
                     {formatDate(group.linked_at)}
                 </span>
             ),
@@ -549,7 +549,7 @@ function EditCourseAccess(props: EditCourseAccessProps) {
                     <DropdownMenu modal={false}>
                         <DropdownMenuTrigger asChild>
                             <button
-                                className="p-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
+                                className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-dk-raised text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-all"
                                 aria-label={t('common.view_details')}
                             >
                                 <MoreHorizontal size={16} />
@@ -557,7 +557,7 @@ function EditCourseAccess(props: EditCourseAccessProps) {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                             align="end"
-                            className="min-w-[150px] rounded-lg border border-gray-200 bg-white p-1 shadow-md"
+                            className="min-w-[150px] rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card p-1 shadow-md"
                             sideOffset={6}
                         >
                             <DropdownMenuItem
@@ -592,13 +592,13 @@ function EditCourseAccess(props: EditCourseAccessProps) {
             {/* ── TOOLBAR ── */}
             <div className="flex items-center gap-3 mb-5">
                 <div className="relative w-80">
-                    <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                    <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-zinc-400 pointer-events-none" />
                     <input
                         type="text"
                         value={searchValue}
                         onChange={(e) => setSearchValue(e.target.value)}
                         placeholder={searchPlaceholder}
-                        className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
+                        className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 dark:text-zinc-200 bg-white dark:bg-dk-card shadow-borders-base rounded-md placeholder:text-gray-500 dark:placeholder:text-zinc-400 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400"
                     />
                 </div>
 
@@ -607,8 +607,8 @@ function EditCourseAccess(props: EditCourseAccessProps) {
                 <button
                     onClick={handleToolbarAction}
                     disabled={isBulkWorking}
-                    className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white border-gray-200 hover:bg-gray-50 disabled:opacity-50 ${
-                        isSearching ? 'text-gray-600' : 'text-red-600'
+                    className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white dark:bg-dk-card border-gray-200 dark:border-dk-line hover:bg-gray-50 dark:hover:bg-dk-raised disabled:opacity-50 ${
+                        isSearching ? 'text-gray-600 dark:text-zinc-300' : 'text-red-600'
                     } ${selectedCount === 0 ? 'invisible pointer-events-none' : ''}`}
                 >
                     {isBulkWorking ? (
@@ -636,7 +636,7 @@ function EditCourseAccess(props: EditCourseAccessProps) {
                 <button
                     onClick={cycleMode}
                     disabled={isSwitchingMode}
-                    className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50 disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong hover:bg-gray-50 dark:hover:bg-dk-raised disabled:opacity-50"
                 >
                     {isSwitchingMode ? (
                         <Loader2 size={14} className="animate-spin" />
@@ -649,7 +649,7 @@ function EditCourseAccess(props: EditCourseAccessProps) {
                 <button
                     onClick={togglePublish}
                     disabled={isSwitchingPublish}
-                    className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50 disabled:opacity-50"
+                    className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong hover:bg-gray-50 dark:hover:bg-dk-raised disabled:opacity-50"
                 >
                     {isSwitchingPublish ? (
                         <Loader2 size={14} className="animate-spin" />
@@ -682,7 +682,7 @@ function EditCourseAccess(props: EditCourseAccessProps) {
                 ) : isInitialAccessLoading ? (
                     <TableCard>
                         <div className="py-16 flex justify-center">
-                            <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+                            <Loader2 className="w-6 h-6 text-gray-400 dark:text-zinc-400 animate-spin" />
                         </div>
                     </TableCard>
                 ) : accessRows.length === 0 ? (
@@ -717,7 +717,7 @@ function EditCourseAccess(props: EditCourseAccessProps) {
                 linkedValidating && !linkedGroups ? (
                     <TableCard>
                         <div className="py-16 flex justify-center">
-                            <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+                            <Loader2 className="w-6 h-6 text-gray-400 dark:text-zinc-400 animate-spin" />
                         </div>
                     </TableCard>
                 ) : groupRows.length === 0 ? (
@@ -771,13 +771,13 @@ function EditCourseAccess(props: EditCourseAccessProps) {
                     />
                     <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
                         <div
-                            className="pointer-events-auto w-[340px] rounded-xl border border-gray-200 bg-white shadow-lg"
+                            className="pointer-events-auto w-[340px] rounded-xl border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card shadow-lg"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="flex justify-end pt-3 pe-3">
                                 <button
                                     onClick={() => setDetailUser(null)}
-                                    className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
+                                    className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-dk-raised text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-all"
                                 >
                                     <X size={16} />
                                 </button>
@@ -798,31 +798,31 @@ function EditCourseAccess(props: EditCourseAccessProps) {
                                     rounded="rounded-full"
                                     predefined_avatar={detailUser.user.avatar_image === '' ? 'empty' : undefined}
                                 />
-                                <span className="mt-3 text-base font-semibold text-gray-800">
+                                <span className="mt-3 text-base font-semibold text-gray-800 dark:text-zinc-200">
                                     {detailUser.user.first_name} {detailUser.user.last_name}
                                 </span>
-                                <span className="text-xs text-gray-400">
+                                <span className="text-xs text-gray-400 dark:text-zinc-400">
                                     @{detailUser.user.username}
                                 </span>
-                                <span className="text-sm text-gray-500 mt-0.5">
+                                <span className="text-sm text-gray-500 dark:text-zinc-400 mt-0.5">
                                     {detailUser.user.email}
                                 </span>
                             </div>
 
-                            <div className="border-t border-gray-100" />
+                            <div className="border-t border-gray-100 dark:border-dk-line" />
 
                             <div className="px-6 py-4 space-y-3">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-xs text-gray-400">
+                                    <span className="text-xs text-gray-400 dark:text-zinc-400">
                                         {t('dashboard.users.active_users.table.role')}
                                     </span>
-                                    <span className="text-sm text-gray-700">
+                                    <span className="text-sm text-gray-700 dark:text-zinc-200">
                                         {detailUser.role?.name || '—'}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-xs text-gray-400">{t('common.status')}</span>
-                                    <span className="flex items-center gap-1.5 text-sm text-gray-700">
+                                    <span className="text-xs text-gray-400 dark:text-zinc-400">{t('common.status')}</span>
+                                    <span className="flex items-center gap-1.5 text-sm text-gray-700 dark:text-zinc-200">
                                         <span
                                             className={`w-2 h-2 rounded-full ${
                                                 detailUser.user.email_verified ? 'bg-green-500' : 'bg-amber-500'
@@ -835,30 +835,30 @@ function EditCourseAccess(props: EditCourseAccessProps) {
                                 </div>
                             </div>
 
-                            <div className="border-t border-gray-100" />
+                            <div className="border-t border-gray-100 dark:border-dk-line" />
 
                             <div className="px-6 py-4 space-y-3">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-xs text-gray-400">
+                                    <span className="text-xs text-gray-400 dark:text-zinc-400">
                                         {t('dashboard.courses.access.users.table.enrolled')}
                                     </span>
-                                    <span className="text-sm text-gray-700">
+                                    <span className="text-sm text-gray-700 dark:text-zinc-200">
                                         {formatDate(detailUser.enrolled_at)}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-xs text-gray-400">
+                                    <span className="text-xs text-gray-400 dark:text-zinc-400">
                                         {t('dashboard.users.users.table.joined')}
                                     </span>
-                                    <span className="text-sm text-gray-700">
+                                    <span className="text-sm text-gray-700 dark:text-zinc-200">
                                         {formatDate(detailUser.joined_at)}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-xs text-gray-400">
+                                    <span className="text-xs text-gray-400 dark:text-zinc-400">
                                         {t('dashboard.users.users.table.last_login')}
                                     </span>
-                                    <span className="text-sm text-gray-700">
+                                    <span className="text-sm text-gray-700 dark:text-zinc-200">
                                         {formatDate(detailUser.user.last_login_at)}
                                     </span>
                                 </div>

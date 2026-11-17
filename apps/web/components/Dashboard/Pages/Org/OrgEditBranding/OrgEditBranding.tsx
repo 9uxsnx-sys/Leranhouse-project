@@ -225,7 +225,7 @@ export default function OrgEditBranding() {
               isActiveSaving
                 ? 'bg-brand text-brand-fg border-brand opacity-50 cursor-not-allowed'
                 : isSaved
-                  ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                  ? 'bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong cursor-default'
                   : 'bg-brand text-brand-fg border-brand hover:bg-brand-hover cursor-pointer'
             }`}
           >
@@ -248,21 +248,21 @@ export default function OrgEditBranding() {
       </div>
 
       {/* Logo & Favicon Card */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+      <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
           {t('dashboard.organization.branding.images.header')}
         </h3>
         <div className="space-y-3">
           {/* Logo Upload */}
-          <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50">
+          <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-gray-50/50 dark:bg-dk-inset/40">
             <div className="flex-shrink-0">
-              <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
+              <ImageIcon size={24} className="text-gray-400 dark:text-zinc-400" strokeWidth={1.5} />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-700">{t('dashboard.organization.images.tabs.logo')}</p>
+              <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('dashboard.organization.images.tabs.logo')}</p>
             </div>
             {isLogoUploading ? (
-              <div className="w-[18px] h-[18px] border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+              <div className="w-[18px] h-[18px] border-2 border-gray-300 dark:border-dk-line-strong border-t-gray-600 rounded-full animate-spin" />
             ) : (
               <>
                 <input
@@ -285,7 +285,7 @@ export default function OrgEditBranding() {
                   <button
                     type="button"
                     onClick={() => logoInputRef.current?.click()}
-                    className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                    className="flex items-center justify-center text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
                     title={t('dashboard.organization.branding.images.upload_logo')}
                   >
                     <UploadCloud size={18} />
@@ -296,15 +296,15 @@ export default function OrgEditBranding() {
           </div>
 
           {/* Favicon Upload */}
-          <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50">
+          <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-gray-50/50 dark:bg-dk-inset/40">
             <div className="flex-shrink-0">
-              <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
+              <ImageIcon size={24} className="text-gray-400 dark:text-zinc-400" strokeWidth={1.5} />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-700">{t('dashboard.organization.branding.images.favicon')}</p>
+              <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('dashboard.organization.branding.images.favicon')}</p>
             </div>
             {isFaviconUploading ? (
-              <div className="w-[18px] h-[18px] border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+              <div className="w-[18px] h-[18px] border-2 border-gray-300 dark:border-dk-line-strong border-t-gray-600 rounded-full animate-spin" />
             ) : (
               <>
                 <input
@@ -327,7 +327,7 @@ export default function OrgEditBranding() {
                   <button
                     type="button"
                     onClick={() => faviconInputRef.current?.click()}
-                    className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                    className="flex items-center justify-center text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
                     title={t('dashboard.organization.branding.images.upload_favicon')}
                   >
                     <UploadCloud size={18} />
@@ -338,15 +338,15 @@ export default function OrgEditBranding() {
           </div>
 
           {/* Logomark Upload */}
-          <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50">
+          <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-gray-50/50 dark:bg-dk-inset/40">
             <div className="flex-shrink-0">
-              <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
+              <ImageIcon size={24} className="text-gray-400 dark:text-zinc-400" strokeWidth={1.5} />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-700">{t('dashboard.organization.branding.images.logomark')}</p>
+              <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('dashboard.organization.branding.images.logomark')}</p>
             </div>
             {isLogoIconUploading ? (
-              <div className="w-[18px] h-[18px] border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+              <div className="w-[18px] h-[18px] border-2 border-gray-300 dark:border-dk-line-strong border-t-gray-600 rounded-full animate-spin" />
             ) : (
               <>
                 <input
@@ -369,7 +369,7 @@ export default function OrgEditBranding() {
                   <button
                     type="button"
                     onClick={() => logoIconInputRef.current?.click()}
-                    className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                    className="flex items-center justify-center text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
                     title={t('dashboard.organization.branding.images.upload_logomark')}
                   >
                     <UploadCloud size={18} />
@@ -380,15 +380,15 @@ export default function OrgEditBranding() {
           </div>
 
           {/* Thumbnail Upload */}
-          <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50">
+          <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-gray-50/50 dark:bg-dk-inset/40">
             <div className="flex-shrink-0">
-              <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
+              <ImageIcon size={24} className="text-gray-400 dark:text-zinc-400" strokeWidth={1.5} />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-700">{t('dashboard.organization.images.tabs.thumbnail')}</p>
+              <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('dashboard.organization.images.tabs.thumbnail')}</p>
             </div>
             {isThumbnailUploading ? (
-              <div className="w-[18px] h-[18px] border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+              <div className="w-[18px] h-[18px] border-2 border-gray-300 dark:border-dk-line-strong border-t-gray-600 rounded-full animate-spin" />
             ) : (
               <>
                 <input
@@ -411,7 +411,7 @@ export default function OrgEditBranding() {
                   <button
                     type="button"
                     onClick={() => thumbnailInputRef.current?.click()}
-                    className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                    className="flex items-center justify-center text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
                     title={t('dashboard.organization.branding.images.upload_thumbnail')}
                   >
                     <UploadCloud size={18} />
@@ -424,22 +424,22 @@ export default function OrgEditBranding() {
       </div>
 
       {/* Theme Card */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+      <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
           {t('dashboard.organization.branding.tabs.theme')}
         </h3>
         <div className="space-y-3">
           {/* Color Picker Container — matches upload row pattern */}
-          <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50">
+          <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-gray-50/50 dark:bg-dk-inset/40">
             {/* Color preview square */}
             <div className="flex-shrink-0">
               <div
-                className="w-10 h-10 rounded-lg border border-gray-100 shadow-sm"
+                className="w-10 h-10 rounded-lg border border-gray-100 dark:border-dk-line shadow-sm"
                 style={{ backgroundColor: primaryColor || '#ffffff' }}
               />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-700">{t('dashboard.organization.theme.primary_color')}</p>
+              <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('dashboard.organization.theme.primary_color')}</p>
             </div>
             {/* Hex input — card styling, no blue focus */}
             <Input
@@ -447,35 +447,35 @@ export default function OrgEditBranding() {
               value={primaryColor}
               onChange={handleHexInputChange}
               placeholder={t('dashboard.organization.branding.theme.no_color')}
-              className="w-24 h-10 rounded-lg border border-gray-100 !shadow-sm font-mono text-sm uppercase bg-white focus-visible:!shadow-sm focus-visible:border-gray-100 focus:outline-none"
+              className="w-24 h-10 rounded-lg border border-gray-100 dark:border-dk-line !shadow-sm font-mono text-sm uppercase bg-white dark:bg-dk-card focus-visible:!shadow-sm focus-visible:border-gray-100 focus:outline-none"
               maxLength={7}
             />
             {primaryColor && (
               <button
                 type="button"
                 onClick={handleClearColor}
-                className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                className="flex items-center justify-center text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
                 title={t('dashboard.organization.theme.clear_color')}
               >
                 <X size={18} />
               </button>
             )}
           </div>
-          <p className="text-xs text-gray-400">{t('dashboard.organization.theme.primary_color_desc')}</p>
+          <p className="text-xs text-gray-400 dark:text-zinc-400">{t('dashboard.organization.theme.primary_color_desc')}</p>
 
           {/* Hover fill — the colour brand buttons switch to on hover / press */}
-          <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50">
+          <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-gray-50/50 dark:bg-dk-inset/40">
             <div className="flex-shrink-0">
               <div
-                className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-100 shadow-sm text-sm font-semibold"
+                className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-100 dark:border-dk-line shadow-sm text-sm font-semibold"
                 style={{ backgroundColor: previewHover.hover, color: previewBrandFg }}
               >
                 Aa
               </div>
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-700">{t('dashboard.organization.theme.brand_hover')}</p>
-              <p className="text-xs text-gray-400">
+              <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('dashboard.organization.theme.brand_hover')}</p>
+              <p className="text-xs text-gray-400 dark:text-zinc-400">
                 {brandHover ? previewHover.hover.toUpperCase() : `${t('dashboard.organization.theme.brand_hover_auto')} · ${previewHover.hover.toUpperCase()}`}
                 {' · '}
                 {t('dashboard.organization.theme.contrast')} {previewHoverContrast}:1
@@ -489,36 +489,36 @@ export default function OrgEditBranding() {
               value={brandHover}
               onChange={handleBrandHoverInputChange}
               placeholder={t('dashboard.organization.theme.brand_hover_auto')}
-              className="w-24 h-10 rounded-lg border border-gray-100 !shadow-sm font-mono text-sm uppercase bg-white focus-visible:!shadow-sm focus-visible:border-gray-100 focus:outline-none"
+              className="w-24 h-10 rounded-lg border border-gray-100 dark:border-dk-line !shadow-sm font-mono text-sm uppercase bg-white dark:bg-dk-card focus-visible:!shadow-sm focus-visible:border-gray-100 focus:outline-none"
               maxLength={7}
             />
             {brandHover && (
               <button
                 type="button"
                 onClick={handleClearBrandHover}
-                className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                className="flex items-center justify-center text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
                 title={t('dashboard.organization.theme.clear_color')}
               >
                 <X size={18} />
               </button>
             )}
           </div>
-          <p className="text-xs text-gray-400">{t('dashboard.organization.theme.brand_hover_desc')}</p>
+          <p className="text-xs text-gray-400 dark:text-zinc-400">{t('dashboard.organization.theme.brand_hover_desc')}</p>
 
           {/* Brand foreground — text and icons sitting on brand surfaces */}
-          <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50">
+          <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-gray-50/50 dark:bg-dk-inset/40">
             {/* Live preview: the resolved foreground on the resolved brand */}
             <div className="flex-shrink-0">
               <div
-                className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-100 shadow-sm text-sm font-semibold"
+                className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-100 dark:border-dk-line shadow-sm text-sm font-semibold"
                 style={{ backgroundColor: previewBrand, color: previewBrandFg }}
               >
                 Aa
               </div>
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-700">{t('dashboard.organization.theme.brand_fg')}</p>
-              <p className="text-xs text-gray-400">
+              <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('dashboard.organization.theme.brand_fg')}</p>
+              <p className="text-xs text-gray-400 dark:text-zinc-400">
                 {brandFg ? '' : `${t('dashboard.organization.theme.brand_fg_auto')} · `}
                 {t('dashboard.organization.theme.contrast')} {previewContrast}:1
                 {isContrastLow && (
@@ -531,27 +531,27 @@ export default function OrgEditBranding() {
               value={brandFg}
               onChange={handleBrandFgInputChange}
               placeholder={t('dashboard.organization.theme.brand_fg_auto')}
-              className="w-24 h-10 rounded-lg border border-gray-100 !shadow-sm font-mono text-sm uppercase bg-white focus-visible:!shadow-sm focus-visible:border-gray-100 focus:outline-none"
+              className="w-24 h-10 rounded-lg border border-gray-100 dark:border-dk-line !shadow-sm font-mono text-sm uppercase bg-white dark:bg-dk-card focus-visible:!shadow-sm focus-visible:border-gray-100 focus:outline-none"
               maxLength={7}
             />
             {brandFg && (
               <button
                 type="button"
                 onClick={handleClearBrandFg}
-                className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                className="flex items-center justify-center text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
                 title={t('dashboard.organization.theme.clear_color')}
               >
                 <X size={18} />
               </button>
             )}
           </div>
-          <p className="text-xs text-gray-400">{t('dashboard.organization.theme.brand_fg_desc')}</p>
+          <p className="text-xs text-gray-400 dark:text-zinc-400">{t('dashboard.organization.theme.brand_fg_desc')}</p>
 
           {/* Sidebar active tab — opt in to a brand fill on the floating pill */}
-          <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50">
+          <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-gray-50/50 dark:bg-dk-inset/40">
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-700">{t('dashboard.organization.theme.brand_sidebar')}</p>
-              <p className="text-xs text-gray-400">{t('dashboard.organization.theme.brand_sidebar_desc')}</p>
+              <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('dashboard.organization.theme.brand_sidebar')}</p>
+              <p className="text-xs text-gray-400 dark:text-zinc-400">{t('dashboard.organization.theme.brand_sidebar_desc')}</p>
             </div>
             <Switch
               checked={brandSidebar}
@@ -563,8 +563,8 @@ export default function OrgEditBranding() {
       </div>
 
       {/* Auth Page Branding Card */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+      <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
           {t('dashboard.organization.branding.tabs.auth')}
         </h3>
         <AuthBrandingTab />

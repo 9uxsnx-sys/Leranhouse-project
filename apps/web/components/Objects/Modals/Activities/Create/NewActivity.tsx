@@ -40,7 +40,7 @@ const EmbedServicesIcon = () => (
       {[...EMBED_SERVICES, ...EMBED_SERVICES].map((s, i) => (
         <div
           key={i}
-          className="flex-shrink-0 rounded-full flex items-center justify-center bg-white nice-shadow"
+          className="flex-shrink-0 rounded-full flex items-center justify-center bg-white dark:bg-dk-card nice-shadow"
           style={{ width: 30, height: 30 }}
         >
           <s.Icon size={14} color={s.color} />
@@ -152,7 +152,7 @@ function NewActivityModal({
                       className={activity.color.icon}
                     />
                   )}
-                  <span className="text-xs font-medium text-gray-500 bg-white nice-shadow rounded-full px-3 py-1">
+                  <span className="text-xs font-medium text-gray-500 dark:text-dk-fg-3 bg-white dark:bg-dk-card nice-shadow rounded-full px-3 py-1">
                     {t(activity.labelKey)}
                   </span>
                 </div>

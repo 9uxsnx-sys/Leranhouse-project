@@ -4,6 +4,7 @@ import '../lib/i18n'
 import { SessionProvider } from '@components/Contexts/AuthContext'
 import LHSessionProvider from '@components/Contexts/LHSessionContext'
 import I18nProvider from '@components/Contexts/I18nContext'
+import { ThemeProvider } from '@components/Contexts/ThemeContext'
 
 /** Suppress AbortError noise from Next.js internal fetch cancellations */
 function AbortErrorSuppressor({ children }: { children: React.ReactNode }) {
@@ -65,12 +66,14 @@ function AbortErrorSuppressor({ children }: { children: React.ReactNode }) {
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <SessionProvider refetchInterval={600000}>
-      <LHSessionProvider>
-        <I18nProvider>
-          <AbortErrorSuppressor>{children}</AbortErrorSuppressor>
-        </I18nProvider>
-      </LHSessionProvider>
-    </SessionProvider>
+    <ThemeProvider>
+      <SessionProvider refetchInterval={600000}>
+        <LHSessionProvider>
+          <I18nProvider>
+            <AbortErrorSuppressor>{children}</AbortErrorSuppressor>
+          </I18nProvider>
+        </LHSessionProvider>
+      </SessionProvider>
+    </ThemeProvider>
   )
 }

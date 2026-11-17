@@ -390,9 +390,9 @@ export function CopilotChat({ orgslug }: CopilotProps) {
           onClick={() => setSidebarOpen(false)}
         />
         <div className="fixed inset-y-0 start-0 z-50 w-[280px] p-3 md:relative md:inset-auto md:z-auto md:flex-shrink-0 md:my-5 md:me-3 md:p-0">
-          <div className="flex flex-col h-full w-full bg-white dark:bg-neutral-900 rounded-2xl nice-shadow overflow-hidden md:mt-0 mt-[72px]">
+          <div className="flex flex-col h-full w-full bg-white dark:bg-dk-inset rounded-2xl nice-shadow overflow-hidden md:mt-0 mt-[72px]">
             {/* Sidebar header */}
-            <div className="flex items-center justify-between h-12 px-4 border-b border-neutral-100 dark:border-neutral-800/60">
+            <div className="flex items-center justify-between h-12 px-4 border-b border-neutral-100 dark:border-dk-line/60">
               <button
                 onClick={handleNewChat}
                 className="flex items-center gap-2 px-3 py-1.5 text-[13px] font-medium rounded-lg bg-violet-600 hover:bg-violet-700 text-white transition-colors"
@@ -402,7 +402,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
               </button>
               <button
                 onClick={() => setSidebarOpen(false)}
-                className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all"
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-dk-fg-2 hover:bg-neutral-100 dark:hover:bg-dk-raised transition-all"
               >
                 <X size={15} />
               </button>
@@ -413,12 +413,12 @@ export function CopilotChat({ orgslug }: CopilotProps) {
               {sessions.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-32 text-center px-4">
                   <ChatCircleDots size={24} className="text-neutral-300 dark:text-neutral-600 mb-2" />
-                  <p className="text-xs text-neutral-400 dark:text-neutral-500">{t('copilot.no_conversations')}</p>
+                  <p className="text-xs text-neutral-400 dark:text-dk-fg-4">{t('copilot.no_conversations')}</p>
                 </div>
               ) : (
                 groupSessionsByDate(sessions).map((group) => (
                   <div key={group.labelKey} className="mb-3">
-                    <p className="text-[10px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider px-2 py-1.5">
+                    <p className="text-[10px] font-semibold text-neutral-400 dark:text-dk-fg-4 uppercase tracking-wider px-2 py-1.5">
                       {t(`copilot.sessions.${group.labelKey}`)}
                     </p>
                     {group.sessions.map((s) => (
@@ -443,14 +443,14 @@ export function CopilotChat({ orgslug }: CopilotProps) {
       {!sidebarOpen && (
         <button
           onClick={() => setSidebarOpen(true)}
-          className="hidden md:flex flex-shrink-0 self-start mt-5 me-2 p-2 rounded-xl bg-white dark:bg-neutral-900 nice-shadow text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all"
+          className="hidden md:flex flex-shrink-0 self-start mt-5 me-2 p-2 rounded-xl bg-white dark:bg-dk-inset nice-shadow text-neutral-400 hover:text-neutral-600 dark:text-dk-fg-4 dark:hover:text-dk-fg-2 hover:bg-neutral-50 dark:hover:bg-dk-raised transition-all"
         >
           <List size={16} />
         </button>
       )}
 
       {/* Main chat area */}
-      <div className="flex flex-col flex-1 min-h-0 min-w-0 my-3 md:my-5 bg-white dark:bg-neutral-900 rounded-2xl nice-shadow overflow-hidden">
+      <div className="flex flex-col flex-1 min-h-0 min-w-0 my-3 md:my-5 bg-white dark:bg-dk-inset rounded-2xl nice-shadow overflow-hidden">
         {/* Top bar */}
         {(aichatUuid && currentSessionTitle) ? (
           <ChatTopBar
@@ -462,10 +462,10 @@ export function CopilotChat({ orgslug }: CopilotProps) {
             showMenuButton
           />
         ) : (
-          <div className="flex items-center h-12 px-4 border-b border-neutral-100 dark:border-neutral-800/60 md:hidden">
+          <div className="flex items-center h-12 px-4 border-b border-neutral-100 dark:border-dk-line/60 md:hidden">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all"
+              className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-dk-fg-2 hover:bg-neutral-100 dark:hover:bg-dk-raised transition-all"
             >
               <List size={18} />
             </button>
@@ -478,7 +478,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
           {isLoadingSession && (
             <div className="flex flex-col items-center justify-center h-full">
               <SpinnerGap size={20} className="animate-spin text-violet-400 mb-2" />
-              <span className="text-sm text-neutral-400 dark:text-neutral-500">{t('copilot.loading_conversation')}</span>
+              <span className="text-sm text-neutral-400 dark:text-dk-fg-4">{t('copilot.loading_conversation')}</span>
             </div>
           )}
 
@@ -499,19 +499,19 @@ export function CopilotChat({ orgslug }: CopilotProps) {
               </div>
               <div className="space-y-2">
                 <h2 className="text-xl font-bold text-neutral-900 dark:text-white">{t('copilot.title')}</h2>
-                <p className="text-sm text-neutral-500 dark:text-neutral-400 max-w-md leading-relaxed">
+                <p className="text-sm text-neutral-500 dark:text-dk-fg-3 max-w-md leading-relaxed">
                   {t('copilot.empty_description')}
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 {/* Mode toggle */}
-                <div className="flex items-center rounded-xl bg-neutral-50 dark:bg-neutral-800 nice-shadow p-0.5">
+                <div className="flex items-center rounded-xl bg-neutral-50 dark:bg-dk-inset nice-shadow p-0.5">
                   <button
                     onClick={() => setChatMode('course_only')}
                     className={`flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-lg transition-all ${
                       chatMode === 'course_only'
-                        ? 'bg-white dark:bg-neutral-700 text-neutral-800 dark:text-white shadow-sm'
-                        : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300'
+                        ? 'bg-white dark:bg-dk-track text-neutral-800 dark:text-white shadow-sm'
+                        : 'text-neutral-500 dark:text-dk-fg-3 hover:text-neutral-700 dark:hover:text-dk-fg-2'
                     }`}
                   >
                     <BookOpen size={15} weight="duotone" />
@@ -521,8 +521,8 @@ export function CopilotChat({ orgslug }: CopilotProps) {
                     onClick={() => setChatMode('general')}
                     className={`flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-lg transition-all ${
                       chatMode === 'general'
-                        ? 'bg-white dark:bg-neutral-700 text-neutral-800 dark:text-white shadow-sm'
-                        : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300'
+                        ? 'bg-white dark:bg-dk-track text-neutral-800 dark:text-white shadow-sm'
+                        : 'text-neutral-500 dark:text-dk-fg-3 hover:text-neutral-700 dark:hover:text-dk-fg-2'
                     }`}
                   >
                     <GlobeSimple size={15} weight="duotone" />
@@ -533,7 +533,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setCourseDropdownOpen(!courseDropdownOpen)}
-                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium rounded-xl bg-neutral-50 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 nice-shadow transition-all"
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium rounded-xl bg-neutral-50 dark:bg-dk-inset text-neutral-700 dark:text-dk-fg-2 hover:bg-neutral-100 dark:hover:bg-dk-raised nice-shadow transition-all"
                   >
                     {selectedCourse ? <Books size={17} weight="duotone" className="text-violet-500" /> : <Sparkle size={17} weight="duotone" className="text-violet-500" />}
                     <span>{selectedCourseName}</span>
@@ -582,7 +582,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
                     <button
                       key={i}
                       onClick={() => sendMessage(s)}
-                      className="group flex items-center gap-2.5 w-fit max-w-full text-start px-3.5 py-2.5 text-[13px] rounded-xl text-neutral-600 dark:text-neutral-300 bg-neutral-50 dark:bg-neutral-800/50 hover:bg-violet-50 dark:hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-300 nice-shadow transition-all"
+                      className="group flex items-center gap-2.5 w-fit max-w-full text-start px-3.5 py-2.5 text-[13px] rounded-xl text-neutral-600 dark:text-dk-fg-2 bg-neutral-50 dark:bg-dk-inset/50 hover:bg-violet-50 dark:hover:bg-violet-500/10 hover:text-violet-700 dark:hover:text-violet-300 nice-shadow transition-all"
                     >
                       <ArrowRight size={13} weight="bold" className="flex-shrink-0 text-neutral-400 group-hover:text-violet-500 transition-colors" />
                       <span className="truncate">{s}</span>
@@ -592,9 +592,9 @@ export function CopilotChat({ orgslug }: CopilotProps) {
               ) : (
                 <div className="flex flex-col gap-1.5">
                   {[1, 2, 3].map((i) => (
-                    <div key={i} className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-neutral-50 dark:bg-neutral-800/50 animate-pulse">
-                      <div className="w-3 h-3 rounded-full bg-neutral-200 dark:bg-neutral-700" />
-                      <div className={`h-3 rounded-md bg-neutral-200 dark:bg-neutral-700 ${i === 1 ? 'w-48' : i === 2 ? 'w-56' : 'w-40'}`} />
+                    <div key={i} className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-neutral-50 dark:bg-dk-inset/50 animate-pulse">
+                      <div className="w-3 h-3 rounded-full bg-neutral-200 dark:bg-dk-track" />
+                      <div className={`h-3 rounded-md bg-neutral-200 dark:bg-dk-track ${i === 1 ? 'w-48' : i === 2 ? 'w-56' : 'w-40'}`} />
                     </div>
                   ))}
                 </div>
@@ -612,14 +612,14 @@ export function CopilotChat({ orgslug }: CopilotProps) {
         </div>
 
         {/* Input */}
-        <div className="flex items-center gap-2 md:gap-3 px-3 md:px-5 py-3 border-t border-neutral-100 dark:border-neutral-800/60">
+        <div className="flex items-center gap-2 md:gap-3 px-3 md:px-5 py-3 border-t border-neutral-100 dark:border-dk-line/60">
           {/* Mode toggle */}
           <button
             onClick={() => setChatMode(chatMode === 'course_only' ? 'general' : 'course_only')}
             className={`flex items-center gap-1.5 px-2.5 py-2 text-xs font-medium rounded-lg transition-all ${
               chatMode === 'general'
                 ? 'bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400'
-                : 'text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800'
+                : 'text-neutral-500 dark:text-dk-fg-3 hover:bg-neutral-50 dark:hover:bg-dk-raised'
             }`}
             title={chatMode === 'general' ? t('copilot.general_knowledge_mode') : t('copilot.course_only_mode')}
           >
@@ -630,7 +630,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setCourseDropdownOpen(!courseDropdownOpen)}
-                className="flex items-center gap-1.5 px-2.5 py-2 text-xs font-medium rounded-lg text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all"
+                className="flex items-center gap-1.5 px-2.5 py-2 text-xs font-medium rounded-lg text-neutral-500 dark:text-dk-fg-3 hover:bg-neutral-50 dark:hover:bg-dk-raised transition-all"
               >
                 {selectedCourse ? <Books size={13} weight="duotone" className="text-violet-500" /> : <Sparkle size={13} weight="duotone" className="text-violet-500" />}
                 <CaretDown size={10} className={`text-neutral-400 transition-transform ${courseDropdownOpen ? 'rotate-180' : ''}`} />
@@ -646,7 +646,7 @@ export function CopilotChat({ orgslug }: CopilotProps) {
             aria-label={t('copilot.ask_aria')}
             placeholder={isLoadingSession ? t('copilot.loading_conversation') : isWaiting ? t('copilot.thinking') : chatMode === 'general' ? t('copilot.ask_anything_placeholder') : t('copilot.ask_placeholder')}
             disabled={isInputDisabled}
-            className="flex-1 bg-transparent outline-none text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 disabled:opacity-40"
+            className="flex-1 bg-transparent outline-none text-sm text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-dk-fg-4 disabled:opacity-40"
           />
           <button
             onClick={() => sendMessage(input)}
@@ -692,11 +692,11 @@ export function ChatTopBar({ title, isFavorite, onRename, onToggleFavorite, onTo
   }
 
   return (
-    <div className="flex items-center gap-3 h-12 px-4 md:px-5 border-b border-neutral-100 dark:border-neutral-800/60">
+    <div className="flex items-center gap-3 h-12 px-4 md:px-5 border-b border-neutral-100 dark:border-dk-line/60">
       {showMenuButton && onToggleSidebar && (
         <button
           onClick={onToggleSidebar}
-          className="md:hidden flex-shrink-0 p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all"
+          className="md:hidden flex-shrink-0 p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-dk-fg-2 hover:bg-neutral-100 dark:hover:bg-dk-raised transition-all"
         >
           <List size={18} />
         </button>
@@ -712,7 +712,7 @@ export function ChatTopBar({ title, isFavorite, onRename, onToggleFavorite, onTo
               if (e.key === 'Escape') { setEditValue(title); setIsEditing(false) }
             }}
             onBlur={handleSubmit}
-            className="flex-1 min-w-0 bg-neutral-50 dark:bg-neutral-800 rounded-lg px-3 py-1.5 text-sm font-medium text-neutral-900 dark:text-white outline-none ring-1 ring-violet-300 dark:ring-violet-500/40"
+            className="flex-1 min-w-0 bg-neutral-50 dark:bg-dk-inset rounded-lg px-3 py-1.5 text-sm font-medium text-neutral-900 dark:text-white outline-none ring-1 ring-violet-300 dark:ring-violet-500/40"
             maxLength={80}
           />
           <button
@@ -724,12 +724,12 @@ export function ChatTopBar({ title, isFavorite, onRename, onToggleFavorite, onTo
         </div>
       ) : (
         <div className="flex items-center gap-2 flex-1 min-w-0 group">
-          <h3 className="text-sm font-medium text-neutral-800 dark:text-neutral-200 truncate">
+          <h3 className="text-sm font-medium text-neutral-800 dark:text-dk-fg-1 truncate">
             {title}
           </h3>
           <button
             onClick={() => setIsEditing(true)}
-            className="flex-shrink-0 p-1 rounded-md text-neutral-300 dark:text-neutral-600 opacity-0 group-hover:opacity-100 hover:text-neutral-500 dark:hover:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all"
+            className="flex-shrink-0 p-1 rounded-md text-neutral-300 dark:text-neutral-600 opacity-0 group-hover:opacity-100 hover:text-neutral-500 dark:hover:text-dk-fg-3 hover:bg-neutral-100 dark:hover:bg-dk-raised transition-all"
           >
             <PencilSimple size={13} />
           </button>
@@ -741,7 +741,7 @@ export function ChatTopBar({ title, isFavorite, onRename, onToggleFavorite, onTo
         className={`flex-shrink-0 p-1.5 rounded-lg transition-all ${
           isFavorite
             ? 'text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10'
-            : 'text-neutral-300 dark:text-neutral-600 hover:text-amber-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+            : 'text-neutral-300 dark:text-neutral-600 hover:text-amber-400 hover:bg-neutral-100 dark:hover:bg-dk-raised'
         }`}
         title={isFavorite ? t('copilot.favorite_remove') : t('copilot.favorite_add')}
       >
@@ -767,13 +767,13 @@ export function SessionItem({ session, isActive, onSelect, onDelete }: {
       className={`group w-full text-start px-3 py-2 rounded-xl text-sm transition-all flex items-center gap-2 ${
         isActive
           ? 'bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 font-medium'
-          : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800/60'
+          : 'text-neutral-600 dark:text-dk-fg-3 hover:bg-neutral-50 dark:hover:bg-dk-raised/60'
       }`}
     >
       {session.favorite ? (
         <Star size={13} weight="fill" className="flex-shrink-0 text-amber-500" />
       ) : (
-        <ChatCircleDots size={14} weight={isActive ? 'fill' : 'regular'} className="flex-shrink-0 text-neutral-400 dark:text-neutral-500" />
+        <ChatCircleDots size={14} weight={isActive ? 'fill' : 'regular'} className="flex-shrink-0 text-neutral-400 dark:text-dk-fg-4" />
       )}
       <span className="truncate flex-1">{session.title}</span>
       {hovered && (
@@ -806,14 +806,14 @@ export function AssistantMessage({ content, sources, orgslug, isStreaming, isWai
     <div className="space-y-1.5">
       {/* Source course intro line */}
       {courseNames.length > 0 && !isWaiting && (
-        <div className="flex items-center gap-1.5 text-[11px] text-neutral-400 dark:text-neutral-500 font-medium">
+        <div className="flex items-center gap-1.5 text-[11px] text-neutral-400 dark:text-dk-fg-4 font-medium">
           <BookOpen size={11} weight="bold" className="text-violet-400" />
           <span>{t('copilot.answering_from', { courses: courseNames.join(', ') })}</span>
         </div>
       )}
 
       {/* Message bubble — full width, relative for badge positioning */}
-      <div className="relative rounded-2xl px-4 py-3 bg-neutral-50 dark:bg-neutral-800/60 nice-shadow">
+      <div className="relative rounded-2xl px-4 py-3 bg-neutral-50 dark:bg-dk-inset/60 nice-shadow">
         {isWaiting ? (
           <ThinkingIndicator />
         ) : (
@@ -846,7 +846,7 @@ function CitationBadge({ num, sources, orgslug }: { num: number; sources: Stream
   const source = sources[num - 1]
   if (!source) {
     return (
-      <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-md bg-neutral-100 dark:bg-neutral-700 text-[10px] font-bold text-neutral-400 dark:text-neutral-500 align-middle mx-0.5">
+      <span className="inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-md bg-neutral-100 dark:bg-dk-track text-[10px] font-bold text-neutral-400 dark:text-dk-fg-4 align-middle mx-0.5">
         {num}
       </span>
     )
@@ -938,7 +938,7 @@ export function CopilotMarkdown({ content, sources = [], orgslug, isStreaming = 
       strong: ({ children, ...props }: any) => <strong {...props}>{processChildren(children)}</strong>,
       em: ({ children, ...props }: any) => <em {...props}>{processChildren(children)}</em>,
       blockquote: ({ children, ...props }: any) => (
-        <div className="not-prose my-2 px-3.5 py-2.5 rounded-lg bg-neutral-200/60 dark:bg-neutral-700/70 text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed" {...props}>
+        <div className="not-prose my-2 px-3.5 py-2.5 rounded-lg bg-neutral-200/60 dark:bg-dk-track/70 text-sm text-neutral-700 dark:text-dk-fg-2 leading-relaxed" {...props}>
           {children}
         </div>
       ),
@@ -964,25 +964,25 @@ export function CourseDropdown({ courses, selectedCourse, onSelect, position = '
   const { t } = useTranslation()
   const positionClass = position === 'top' ? 'bottom-full mb-1' : 'top-full mt-1'
   return (
-    <div className={`absolute start-0 ${positionClass} w-72 max-h-72 overflow-y-auto rounded-xl bg-white dark:bg-neutral-900 nice-shadow z-50 py-1`}>
+    <div className={`absolute start-0 ${positionClass} w-72 max-h-72 overflow-y-auto rounded-xl bg-white dark:bg-dk-inset nice-shadow z-50 py-1`}>
       <button
         onClick={() => onSelect(null)}
-        className={`w-full text-start px-3.5 py-2.5 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors flex items-center gap-2.5 ${
-          !selectedCourse ? 'text-violet-600 dark:text-violet-400 font-medium bg-violet-50/60 dark:bg-violet-500/10' : 'text-neutral-700 dark:text-neutral-300'
+        className={`w-full text-start px-3.5 py-2.5 text-sm hover:bg-neutral-50 dark:hover:bg-dk-raised transition-colors flex items-center gap-2.5 ${
+          !selectedCourse ? 'text-violet-600 dark:text-violet-400 font-medium bg-violet-50/60 dark:bg-violet-500/10' : 'text-neutral-700 dark:text-dk-fg-2'
         }`}
       >
         <Sparkle size={15} weight="duotone" className="text-violet-500 flex-shrink-0" />
         <span>{t('copilot.all_courses')}</span>
       </button>
-      <div className="h-px bg-neutral-100 dark:bg-neutral-800 mx-2 my-1" />
+      <div className="h-px bg-neutral-100 dark:bg-dk-inset mx-2 my-1" />
       {Array.isArray(courses) && courses.map((course: any) => (
         <button
           key={course.course_uuid}
           onClick={() => onSelect(course.course_uuid)}
-          className={`w-full text-start px-3.5 py-2.5 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors flex items-center gap-2.5 ${
+          className={`w-full text-start px-3.5 py-2.5 text-sm hover:bg-neutral-50 dark:hover:bg-dk-raised transition-colors flex items-center gap-2.5 ${
             selectedCourse === course.course_uuid
               ? 'text-violet-600 dark:text-violet-400 font-medium bg-violet-50/60 dark:bg-violet-500/10'
-              : 'text-neutral-700 dark:text-neutral-300'
+              : 'text-neutral-700 dark:text-dk-fg-2'
           }`}
         >
           <Books size={15} weight="duotone" className="text-neutral-400 flex-shrink-0" />
@@ -1005,11 +1005,11 @@ export function SourcesCompact({ sources, orgslug }: { sources: StreamSourceData
           : null
 
         const inner = (
-          <span className="inline-flex items-center gap-1.5 text-[11px] text-neutral-400 dark:text-neutral-500 hover:text-violet-600 dark:hover:text-violet-400 transition-colors group">
+          <span className="inline-flex items-center gap-1.5 text-[11px] text-neutral-400 dark:text-dk-fg-4 hover:text-violet-600 dark:hover:text-violet-400 transition-colors group">
             <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-violet-100 dark:bg-violet-500/15 text-[9px] font-bold text-violet-600 dark:text-violet-400 flex-shrink-0">
               {i + 1}
             </span>
-            <span className="truncate max-w-xs font-medium text-neutral-500 dark:text-neutral-400 group-hover:text-violet-600 dark:group-hover:text-violet-400">
+            <span className="truncate max-w-xs font-medium text-neutral-500 dark:text-dk-fg-3 group-hover:text-violet-600 dark:group-hover:text-violet-400">
               {source.activity_name || t('copilot.unknown')}
             </span>
           </span>

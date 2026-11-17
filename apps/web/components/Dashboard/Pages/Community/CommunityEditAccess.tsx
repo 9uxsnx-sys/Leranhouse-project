@@ -8,7 +8,7 @@ import { useCommunity } from '@components/Contexts/CommunityContext'
 import { swrFetcher } from '@services/utils/ts/requests'
 import useSWR from 'swr'
 import { getAPIUrl, getUriWithOrg } from '@services/config/config'
-import { BookOpen, Headphones, Info, Lock, ExternalLink } from 'lucide-react'
+import { BookOpen, Headphones, Info, ExternalLink } from 'lucide-react'
 
 const CommunityEditAccess: React.FC = () => {
   const { t } = useTranslation()
@@ -34,14 +34,14 @@ const CommunityEditAccess: React.FC = () => {
 
   if (!linkedType || !linkedUuid) {
     return (
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+      <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
         <div className="flex items-start gap-3">
           <Info size={18} className="text-amber-500 shrink-0 mt-0.5" />
           <div>
-            <h2 className="text-sm font-semibold text-gray-900">
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-dk-fg-1">
               {t('communities.access_inherited_title')}
             </h2>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-gray-500 dark:text-dk-fg-3">
               {t('communities.access_inherited_no_parent')}
             </p>
           </div>
@@ -63,45 +63,27 @@ const CommunityEditAccess: React.FC = () => {
 
   return (
     <div className="space-y-3">
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <div className="flex items-start gap-3">
-          <div className="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center shrink-0">
-            <Lock size={16} />
-          </div>
-          <div className="min-w-0">
-            <h2 className="text-sm font-semibold text-gray-900">
-              {t('communities.access_inherited_title')}
-            </h2>
-            <p className="mt-1 text-sm text-gray-500 leading-relaxed">
-              {isCourse
-                ? t('communities.access_inherited_course_description')
-                : t('communities.access_inherited_podcast_description')}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-4">
+      <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-4">
           {t('communities.linked_resource')}
         </h3>
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
-            <span className="w-8 h-8 rounded-full bg-gray-50 text-gray-500 flex items-center justify-center shrink-0">
+            <span className="w-8 h-8 rounded-full bg-gray-50 dark:bg-dk-raised text-gray-500 dark:text-dk-fg-3 flex items-center justify-center shrink-0">
               <ResourceIcon size={15} />
             </span>
             <div className="min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
+              <p className="text-sm font-medium text-gray-900 dark:text-dk-fg-1 truncate">
                 {linkedResource?.name || t('communities.not_available')}
               </p>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-400 dark:text-dk-fg-4">
                 {isCourse ? t('communities.linked_course') : t('communities.linked_podcast')}
               </p>
             </div>
           </div>
           <Link
             href={settingsHref}
-            className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors shrink-0"
+            className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-dk-fg-2 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors shrink-0"
           >
             <ExternalLink size={14} />
             {t('communities.manage_parent_access')}

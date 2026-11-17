@@ -36,7 +36,7 @@ export default function PlaygroundCard({ playground, orgslug, canEdit }: Playgro
   const editLink = `/editor/playground/${playground.playground_uuid}/edit`
 
   return (
-    <div className="group relative flex flex-col bg-white rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01]">
+    <div className="group relative flex flex-col bg-white dark:bg-dk-card rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01]">
       {/* Edit button — top right, appears on hover */}
       {canEdit && (
         <div className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -44,13 +44,13 @@ export default function PlaygroundCard({ playground, orgslug, canEdit }: Playgro
             href={editLink}
             className="p-1.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md flex items-center justify-center"
           >
-            <Pencil className="w-3.5 h-3.5 text-gray-700" />
+            <Pencil className="w-3.5 h-3.5 text-gray-700 dark:text-zinc-200" />
           </Link>
         </div>
       )}
 
       {/* Thumbnail */}
-      <Link href={playgroundLink} className="block relative aspect-video overflow-hidden bg-gray-50">
+      <Link href={playgroundLink} className="block relative aspect-video overflow-hidden bg-gray-50 dark:bg-dk-inset/40">
         {thumbnailUrl ? (
           <div
             className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
@@ -58,7 +58,7 @@ export default function PlaygroundCard({ playground, orgslug, canEdit }: Playgro
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 transition-transform duration-500 group-hover:scale-105">
-            <Cube size={36} className="text-gray-300" />
+            <Cube size={36} className="text-gray-300 dark:text-zinc-600" />
           </div>
         )}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
@@ -81,21 +81,21 @@ export default function PlaygroundCard({ playground, orgslug, canEdit }: Playgro
       <div className="p-3 flex flex-col space-y-1.5">
         <Link
           href={playgroundLink}
-          className="text-base font-bold text-gray-900 leading-tight hover:text-black transition-colors line-clamp-1"
+          className="text-base font-bold text-gray-900 dark:text-zinc-100 leading-tight hover:text-black transition-colors line-clamp-1"
         >
           {playground.name}
         </Link>
 
         {playground.description && (
-          <p className="text-[11px] text-gray-500 line-clamp-2 min-h-[1.5rem]">
+          <p className="text-[11px] text-gray-500 dark:text-zinc-400 line-clamp-2 min-h-[1.5rem]">
             {playground.description}
           </p>
         )}
 
-        <div className="pt-1.5 flex items-center justify-end border-t border-gray-100">
+        <div className="pt-1.5 flex items-center justify-end border-t border-gray-100 dark:border-dk-line">
           <Link
             href={playgroundLink}
-            className="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
+            className="text-[10px] font-bold text-gray-400 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-100 transition-colors uppercase tracking-wider"
           >
             Open Playground →
           </Link>

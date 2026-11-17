@@ -166,10 +166,10 @@ function ResetPasswordClient({ org }: ResetPasswordClientProps) {
               </button>
             </form>
 
-            <p className="text-center text-sm text-gray-500 mt-6">
+            <p className="text-center text-sm text-gray-500 dark:text-zinc-400 mt-6">
               <Link
                 href="/login"
-                className="inline-flex items-center gap-1.5 font-semibold text-gray-900 hover:underline"
+                className="inline-flex items-center gap-1.5 font-semibold text-gray-900 dark:text-zinc-100 hover:underline"
               >
                 <ArrowLeft size={14} />
                 {t('auth.back_to_sign_in')}
@@ -178,13 +178,13 @@ function ResetPasswordClient({ org }: ResetPasswordClientProps) {
           </motion.div>
         ) : (
           <motion.div key="done" {...fade} className="text-center py-2">
-            <div className="mx-auto w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-              <Check size={22} className="text-gray-800" />
+            <div className="mx-auto w-12 h-12 rounded-full bg-gray-100 dark:bg-dk-inset flex items-center justify-center">
+              <Check size={22} className="text-gray-800 dark:text-zinc-200" />
             </div>
-            <h2 className="mt-4 text-base font-semibold text-gray-900">
+            <h2 className="mt-4 text-base font-semibold text-gray-900 dark:text-zinc-100">
               {t('auth.password_changed_title')}
             </h2>
-            <p className="mt-1.5 text-sm text-gray-500">
+            <p className="mt-1.5 text-sm text-gray-500 dark:text-zinc-400">
               {t('auth.password_changed_message')}
             </p>
 

@@ -83,7 +83,7 @@ export default function ExportAnalyticsButton({
       <button
         onClick={() => setOpen(!open)}
         disabled={downloading}
-        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors disabled:opacity-50"
+        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors disabled:opacity-50 dark:bg-dk-inset dark:text-zinc-200"
       >
         <Download size={14} />
         {downloading
@@ -93,16 +93,16 @@ export default function ExportAnalyticsButton({
       </button>
 
       {open && (
-        <div className="absolute end-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 min-w-[120px]">
+        <div className="absolute end-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 min-w-[120px] dark:bg-dk-card dark:border-dk-line-strong">
           <button
             onClick={() => handleExport('json')}
-            className="w-full text-start px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 rounded-t-lg"
+            className="w-full text-start px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 rounded-t-lg dark:text-zinc-200 dark:hover:bg-dk-raised/60"
           >
             {t('analytics.export.json')}
           </button>
           <button
             onClick={() => handleExport('csv')}
-            className="w-full text-start px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 rounded-b-lg"
+            className="w-full text-start px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 rounded-b-lg dark:text-zinc-200 dark:hover:bg-dk-raised/60"
           >
             {t('analytics.export.csv')}
           </button>

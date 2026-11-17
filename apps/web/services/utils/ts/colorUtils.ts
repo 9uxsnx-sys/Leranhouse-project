@@ -160,6 +160,24 @@ export function resolveBrandHover(
 }
 
 /**
+ * The dark-mode counterpart of a light brand colour.
+ *
+ * A saturated mid-tone that reads well on white vibrates on `#18181b`, so it is
+ * lifted toward white while keeping its hue. Two edge cases are handled
+ * explicitly: a near-ink brand becomes a light fill (a dark fill would vanish
+ * into the dark surface), and a near-white brand is pulled down slightly so it
+ * stays distinct from the card around it.
+ */
+export function deriveDarkBrand(hex: string): string {
+  const rgb = hexToRgb(hex)
+  if (!rgb) return BRAND_FALLBACK
+  const lum = relativeLuminance(rgb.r, rgb.g, rgb.b)
+  if (lum < 0.04) return '#fafafa'
+  if (lum > 0.72) return mixTowardBlack(hex, 10)
+  return mixTowardWhite(hex, 22)
+}
+
+/**
  * The CSS custom properties every brand surface reads.
  *
  * Derived from one hex so an organization never has to pick six colours:
@@ -172,6 +190,11 @@ export function resolveBrandHover(
  * dark foreground uses a gentler step — 14%/26% black would take a clay brand
  * from 5.68:1 to 4.32:1 / 3.36:1, while 6%/12% keeps it at 5.07:1 / 4.51:1.
  *
+ * `mode` picks the pair. In dark mode the brand is derived from the light hex
+ * (§7 of the dark-mode plan) and the pinned light foreground is ignored,
+ * because a label chosen for a light fill is usually wrong on a lifted one.
+ * The neutral sidebar pill skips one zinc step instead of switching to white.
+ *
  * With no colour set the whole set resolves to ink — the interface looks
  * exactly as it did before the brand feature existed.
  */
@@ -179,11 +202,23 @@ export function getBrandStyle(
   color?: string | null,
   brandFg?: string | null,
   sidebarBrand = false,
-  brandHover?: string | null
+  brandHover?: string | null,
+  mode: 'light' | 'dark' = 'light'
 ): Record<string, string> {
-  const brand = normalizeBrandColor(color)
-  const fg = resolveBrandFg(brand, brandFg)
-  const hover = resolveBrandHover(brand, fg, brandHover)
+  const lightBrand = normalizeBrandColor(color)
+  const isDark = mode === 'dark'
+
+  const brand = isDark ? deriveDarkBrand(lightBrand) : lightBrand
+  const fg = isDark ? resolveBrandFg(brand, null) : resolveBrandFg(brand, brandFg)
+  const hover = isDark
+    ? resolveBrandHover(brand, fg, null)
+    : resolveBrandHover(brand, fg, brandHover)
+
+  // Neutral pill: white on the light sidebar, one zinc step up in dark mode.
+  const neutralPill = isDark
+    ? { bg: '#27272a', border: '#3f3f46', fg: '#fafafa' }
+    : { bg: '#ffffff', border: '#f3f4f6', fg: '#18181b' }
+
   return {
     '--brand': brand,
     '--brand-fg': fg,
@@ -191,12 +226,12 @@ export function getBrandStyle(
     '--brand-pressed': hover.pressed,
     '--brand-soft': `color-mix(in oklab, ${brand} 10%, transparent)`,
     '--brand-ring': `color-mix(in oklab, ${brand} 35%, transparent)`,
-    // The floating pill behind the active sidebar item. Off keeps the original
-    // white surface; on makes it a brand fill, so the label follows the
-    // foreground rather than ink.
-    '--sidebar-active-bg': sidebarBrand ? brand : '#ffffff',
-    '--sidebar-active-border': sidebarBrand ? brand : '#f3f4f6',
-    '--sidebar-active-fg': sidebarBrand ? fg : '#18181b',
+    // The floating pill behind the active sidebar item. Off keeps the neutral
+    // surface; on makes it a brand fill, so the label follows the foreground
+    // rather than ink.
+    '--sidebar-active-bg': sidebarBrand ? brand : neutralPill.bg,
+    '--sidebar-active-border': sidebarBrand ? brand : neutralPill.border,
+    '--sidebar-active-fg': sidebarBrand ? fg : neutralPill.fg,
   }
 }
 

@@ -61,7 +61,7 @@ function CreateBoardForm({ onCreated, orgId, accessToken }: {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 p-1">
       <div>
-        <label className="text-sm font-medium text-gray-700">{t('boards.name')}</label>
+        <label className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('boards.name')}</label>
         <input
           type="text"
           value={name}
@@ -72,7 +72,7 @@ function CreateBoardForm({ onCreated, orgId, accessToken }: {
         />
       </div>
       <div>
-        <label className="text-sm font-medium text-gray-700">{t('boards.description')}</label>
+        <label className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('boards.description')}</label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -250,7 +250,7 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
       descriptionKey="Create collaborative boards for real-time brainstorming and planning."
     >
     <FeatureDisabledView featureName="boards" orgslug={orgslug} context="dashboard">
-      <div className="h-full w-full bg-[#f8f8f8] pl-10 pr-10">
+      <div className="h-full w-full bg-[#f8f8f8] dark:bg-transparent pl-10 pr-10">
         <div className="mb-6 pt-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4">
             <div className="flex items-center space-x-4">
@@ -289,18 +289,18 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
         {allBoards.length > 0 && (
           <div className="mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
             <div className="relative w-full sm:w-80">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-zinc-400 w-4 h-4" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('boards.search_placeholder')}
-                className="w-full pl-10 pr-10 py-2.5 bg-white nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0"
+                className="w-full pl-10 pr-10 py-2.5 bg-white dark:bg-dk-card nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -316,18 +316,18 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
                 orgId={org_id}
               >
                 <div className="flex items-center gap-2 ml-auto">
-                  <span className="text-sm font-medium text-gray-500 px-2">
+                  <span className="text-sm font-medium text-gray-500 dark:text-zinc-400 px-2">
                     {t('boards.selected_count', { count: selectedBoards.size })}
                   </span>
                   <button
                     onClick={selectAllBoards}
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 bg-white nice-shadow rounded-lg transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 dark:text-zinc-300 hover:text-gray-900 dark:hover:text-zinc-100 bg-white dark:bg-dk-card nice-shadow rounded-lg transition-colors"
                   >
                     <span>{t('boards.select_all')}</span>
                   </button>
                   <button
                     onClick={clearSelection}
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 bg-white nice-shadow rounded-lg transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 dark:text-zinc-300 hover:text-gray-900 dark:hover:text-zinc-100 bg-white dark:bg-dk-card nice-shadow rounded-lg transition-colors"
                   >
                     <X className="w-4 h-4" />
                     <span>{t('boards.clear_selection')}</span>
@@ -337,7 +337,7 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
                     confirmationMessage={t('boards.delete_selected_confirm', { count: selectedBoards.size })}
                     dialogTitle={t('boards.delete_boards_title')}
                     dialogTrigger={
-                      <button className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 bg-white nice-shadow rounded-lg transition-colors">
+                      <button className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:text-red-700 bg-white dark:bg-dk-card nice-shadow rounded-lg transition-colors">
                         <Trash2 className="w-4 h-4" />
                         <span>{t('boards.delete_selected')}</span>
                       </button>
@@ -353,7 +353,7 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
 
         {/* Search Results Info */}
         {searchQuery && (
-          <div className="mb-4 text-sm text-gray-500">
+          <div className="mb-4 text-sm text-gray-500 dark:text-zinc-400">
             {filteredBoards.length !== 1
               ? t('boards.pagination.results_plural', { count: filteredBoards.length, query: searchQuery })
               : t('boards.pagination.results', { count: filteredBoards.length, query: searchQuery })}
@@ -364,11 +364,11 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="animate-pulse rounded-xl bg-white nice-shadow overflow-hidden">
-                <div className="aspect-video bg-gray-200" />
+              <div key={i} className="animate-pulse rounded-xl bg-white dark:bg-dk-card nice-shadow overflow-hidden">
+                <div className="aspect-video bg-gray-200 dark:bg-dk-track" />
                 <div className="p-3 space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-3/4" />
-                  <div className="h-3 bg-gray-100 rounded w-full" />
+                  <div className="h-4 bg-gray-200 dark:bg-dk-track rounded w-3/4" />
+                  <div className="h-3 bg-gray-100 dark:bg-dk-inset rounded w-full" />
                 </div>
               </div>
             ))}
@@ -393,9 +393,9 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
             {filteredBoards.length === 0 && searchQuery && (
               <div className="col-span-full flex justify-center items-center py-8">
                 <div className="text-center">
-                  <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                  <h2 className="text-xl font-semibold text-gray-600 mb-2">{t('boards.no_boards_found')}</h2>
-                  <p className="text-gray-400">{t('boards.try_different_search')}</p>
+                  <Search className="w-12 h-12 text-gray-300 dark:text-zinc-600 mx-auto mb-4" />
+                  <h2 className="text-xl font-semibold text-gray-600 dark:text-zinc-300 mb-2">{t('boards.no_boards_found')}</h2>
+                  <p className="text-gray-400 dark:text-zinc-400">{t('boards.try_different_search')}</p>
                 </div>
               </div>
             )}
@@ -404,11 +404,11 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
             {allBoards.length === 0 && !searchQuery && (
               <div className="col-span-full flex justify-center items-center py-8">
                 <div className="text-center">
-                  <div className="rounded-full bg-gray-100 p-4 w-fit mx-auto mb-4">
-                    <ChalkboardSimple size={24} className="text-gray-400" />
+                  <div className="rounded-full bg-gray-100 dark:bg-dk-inset p-4 w-fit mx-auto mb-4">
+                    <ChalkboardSimple size={24} className="text-gray-400 dark:text-zinc-400" />
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-600 mb-2">{t('boards.no_boards_yet')}</h2>
-                  <p className="text-lg text-gray-400">
+                  <h2 className="text-2xl font-bold text-gray-600 dark:text-zinc-300 mb-2">{t('boards.no_boards_yet')}</h2>
+                  <p className="text-lg text-gray-400 dark:text-zinc-400">
                     {t('boards.no_boards_description')}
                   </p>
                 </div>
@@ -423,7 +423,7 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
             <button
               onClick={() => goToPage(currentPage - 1)}
               disabled={currentPage === 1}
-              className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 bg-white nice-shadow rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 dark:text-zinc-300 bg-white dark:bg-dk-card nice-shadow rounded-lg hover:bg-gray-50 dark:hover:bg-dk-raised disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
               <span className="hidden sm:inline">{t('boards.pagination.previous')}</span>
@@ -433,14 +433,14 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
               {getVisiblePageNumbers().map((page, index) => (
                 <React.Fragment key={index}>
                   {page === '...' ? (
-                    <span className="px-2 py-1 text-gray-400">...</span>
+                    <span className="px-2 py-1 text-gray-400 dark:text-zinc-400">...</span>
                   ) : (
                     <button
                       onClick={() => goToPage(page as number)}
                       className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                         currentPage === page
                           ? 'bg-brand text-brand-fg'
-                          : 'bg-white text-gray-600 nice-shadow hover:bg-gray-50'
+                          : 'bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 nice-shadow hover:bg-gray-50 dark:hover:bg-dk-raised'
                       }`}
                     >
                       {page}
@@ -453,7 +453,7 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
             <button
               onClick={() => goToPage(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 bg-white nice-shadow rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 dark:text-zinc-300 bg-white dark:bg-dk-card nice-shadow rounded-lg hover:bg-gray-50 dark:hover:bg-dk-raised disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <span className="hidden sm:inline">{t('boards.pagination.next')}</span>
               <ChevronRight className="w-4 h-4" />
@@ -462,7 +462,7 @@ export default function BoardListClient({ org_id, orgslug }: BoardListClientProp
         )}
 
         {totalPages > 1 && (
-          <div className="mb-6 text-center text-sm text-gray-500">
+          <div className="mb-6 text-center text-sm text-gray-500 dark:text-zinc-400">
             {t('boards.pagination.page_of', { current: currentPage, total: totalPages })}
           </div>
         )}
@@ -496,7 +496,7 @@ function BoardCard({ board, orgslug, orgUuid, orgId, isSelected, onToggleSelect,
   }
 
   return (
-    <div className={`group relative flex flex-col bg-white rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01] ${isSelected ? 'ring-2 ring-black ring-offset-2' : ''}`}>
+    <div className={`group relative flex flex-col bg-white dark:bg-dk-card rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01] ${isSelected ? 'ring-2 ring-black ring-offset-2' : ''}`}>
       {/* Selection checkbox */}
       <button
         onClick={handleSelectClick}
@@ -508,7 +508,7 @@ function BoardCard({ board, orgslug, orgUuid, orgId, isSelected, onToggleSelect,
         {isSelected ? (
           <CheckSquare className="w-4 h-4 text-black" />
         ) : (
-          <Square className="w-4 h-4 text-gray-500" />
+          <Square className="w-4 h-4 text-gray-500 dark:text-zinc-400" />
         )}
       </button>
 
@@ -523,7 +523,7 @@ function BoardCard({ board, orgslug, orgUuid, orgId, isSelected, onToggleSelect,
 
       <Link
         href={settingsLink}
-        className="block relative aspect-video overflow-hidden bg-gray-50"
+        className="block relative aspect-video overflow-hidden bg-gray-50 dark:bg-dk-inset/40"
       >
         <div
           className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
@@ -547,19 +547,19 @@ function BoardCard({ board, orgslug, orgUuid, orgId, isSelected, onToggleSelect,
 
       <div className="p-3 flex flex-col space-y-1.5">
         <div className="flex items-start justify-between">
-          <Link href={settingsLink} className="text-base font-bold text-gray-900 leading-tight hover:text-black transition-colors line-clamp-1">
+          <Link href={settingsLink} className="text-base font-bold text-gray-900 dark:text-zinc-100 leading-tight hover:text-black transition-colors line-clamp-1">
             {board.name}
           </Link>
         </div>
 
         {board.description && (
-          <p className="text-[11px] text-gray-500 line-clamp-2 min-h-[1.5rem]">
+          <p className="text-[11px] text-gray-500 dark:text-zinc-400 line-clamp-2 min-h-[1.5rem]">
             {board.description}
           </p>
         )}
 
-        <div className="pt-1.5 flex items-center justify-between border-t border-gray-100">
-          <div className="flex items-center gap-2 text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+        <div className="pt-1.5 flex items-center justify-between border-t border-gray-100 dark:border-dk-line">
+          <div className="flex items-center gap-2 text-[9px] font-bold text-gray-400 dark:text-zinc-400 uppercase tracking-widest">
             <Users size={12} />
             <span>{board.member_count !== 1
               ? t('boards.member_count_plural', { count: board.member_count })
@@ -567,7 +567,7 @@ function BoardCard({ board, orgslug, orgUuid, orgId, isSelected, onToggleSelect,
           </div>
           <Link
             href={settingsLink}
-            className="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
+            className="text-[10px] font-bold text-gray-400 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-100 transition-colors uppercase tracking-wider"
           >
             {t('boards.settings')}
           </Link>
@@ -600,7 +600,7 @@ function BoardCardOptions({ board, orgslug, orgId, onDuplicate, onDelete }: {
         <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
           <DropdownMenuTrigger asChild>
             <button aria-label="Board actions" className="p-1.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md">
-              <MoreVertical size={18} className="text-gray-700" />
+              <MoreVertical size={18} className="text-gray-700 dark:text-zinc-200" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-52">
@@ -620,7 +620,7 @@ function BoardCardOptions({ board, orgslug, orgId, onDuplicate, onDelete }: {
                 confirmationMessage={t('boards.duplicate_board_confirm')}
                 dialogTitle={t('boards.duplicate_board_title', { name: board.name })}
                 dialogTrigger={
-                  <button className="w-full text-left flex items-center px-2 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded-md transition-colors">
+                  <button className="w-full text-left flex items-center px-2 py-1.5 text-sm text-gray-700 dark:text-zinc-200 hover:bg-gray-50 dark:hover:bg-dk-raised rounded-md transition-colors">
                     <Copy className="mr-2 h-4 w-4" /> {t('boards.duplicate_board')}
                   </button>
                 }

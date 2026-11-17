@@ -243,7 +243,7 @@ function CollectionsHome(params: CollectionsHomeProps) {
   if (isLoading) {
     return (
       <div className="pt-8 px-6 flex justify-center py-24">
-        <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+        <Loader2 className="w-6 h-6 text-gray-400 dark:text-zinc-400 animate-spin" />
       </div>
     )
   }
@@ -318,7 +318,7 @@ function CollectionsHome(params: CollectionsHomeProps) {
                   <Button
                     variant="secondary"
                     size="small"
-                    className="gap-x-1.5 text-red-600 border-red-200 hover:bg-red-50"
+                    className="gap-x-1.5 text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-500/10"
                   >
                     <Trash2 size={14} />
                     <span>{t('collections.select.delete_selected')}</span>
@@ -336,28 +336,28 @@ function CollectionsHome(params: CollectionsHomeProps) {
               <IconButton
                 size="small"
                 variant="transparent"
-                className="bg-white hover:bg-gray-50 shadow-borders-base"
+                className="bg-white dark:bg-dk-card hover:bg-gray-50 dark:hover:bg-dk-raised shadow-borders-base"
                 aria-label={t('common.filter')}
               >
                 <ConceptIcon.filter size={14} />
               </IconButton>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white min-w-0 w-48">
+            <DropdownMenuContent align="end" className="bg-white dark:bg-dk-raised min-w-0 w-48">
               <DropdownMenuItem onClick={() => setActiveFilter('all')} className="flex items-center justify-between">
                 <span>{t('collections.filter.all_collections')}</span>
-                {activeFilter === 'all' && <ConceptIcon.check size={12} className="text-gray-500" />}
+                {activeFilter === 'all' && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setActiveFilter('public')} className="flex items-center justify-between">
                 <span>{t('collections.filter.public')}</span>
-                {activeFilter === 'public' && <ConceptIcon.check size={12} className="text-gray-500" />}
+                {activeFilter === 'public' && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setActiveFilter('users_only')} className="flex items-center justify-between">
                 <span>{t('collections.filter.private')}</span>
-                {activeFilter === 'users_only' && <ConceptIcon.check size={12} className="text-gray-500" />}
+                {activeFilter === 'users_only' && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setActiveFilter('paid')} className="flex items-center justify-between">
                 <span>{t('collections.filter.paid')}</span>
-                {activeFilter === 'paid' && <ConceptIcon.check size={12} className="text-gray-500" />}
+                {activeFilter === 'paid' && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -377,7 +377,7 @@ function CollectionsHome(params: CollectionsHomeProps) {
                   onClick={(e) => e.stopPropagation()}
                   className="sr-only peer"
                 />
-                <div className="w-full h-full rounded-md border border-gray-300 bg-white peer-checked:bg-gray-500 peer-checked:border-gray-500 flex items-center justify-center transition-all duration-200 shadow-sm peer-hover:border-gray-400 peer-checked:shadow-md">
+                <div className="w-full h-full rounded-md border border-gray-300 dark:border-dk-line-strong bg-white dark:bg-dk-card peer-checked:bg-gray-500 peer-checked:border-gray-500 flex items-center justify-center transition-all duration-200 shadow-sm peer-hover:border-gray-400 peer-checked:shadow-md">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className="scale-0 peer-checked:scale-100 transition-transform duration-200">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
@@ -474,7 +474,7 @@ function CollectionsHome(params: CollectionsHomeProps) {
                     onClick={() => goToPage(page as number)}
                     className={`w-7 h-7 txt-compact-small-plus rounded-md transition-colors ${
                       currentPage === page
-                        ? 'bg-ui-bg-base shadow-borders-base text-ui-fg-base'
+                        ? 'bg-ui-bg-base shadow-borders-base text-ui-fg-base dark:bg-dk-raised'
                         : 'text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-base-hover'
                     }`}
                   >
@@ -506,7 +506,7 @@ function CollectionsHome(params: CollectionsHomeProps) {
         dialogContent={
           <div className="space-y-4">
             <label className="block">
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-gray-700 dark:text-zinc-200">
                 {t('collections.collection_name')}
               </span>
               <input
@@ -519,7 +519,7 @@ function CollectionsHome(params: CollectionsHomeProps) {
                 }}
                 placeholder={t('collections.enter_collection_name_placeholder')}
                 maxLength={100}
-                className="mt-1 block w-full h-9 px-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
+                className="mt-1 block w-full h-9 px-3 text-sm border border-gray-300 dark:border-dk-line-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent"
               />
             </label>
             <div className="flex items-center justify-end gap-2">
@@ -556,7 +556,7 @@ const CollectionEditOptions = ({
   const [isOpen, setIsOpen] = React.useState(false)
 
   const itemClass =
-    'w-full text-start flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] font-medium text-gray-700 hover:bg-gray-100 transition-colors'
+    'w-full text-start flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] font-medium text-gray-700 dark:text-zinc-200 hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors'
   const itemClassDanger =
     'w-full text-start flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] font-medium text-red-600 hover:bg-red-50 transition-colors'
 

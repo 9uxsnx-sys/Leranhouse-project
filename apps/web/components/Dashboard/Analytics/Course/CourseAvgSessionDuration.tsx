@@ -95,9 +95,9 @@ export default function CourseAvgSessionDuration({
                 <p className="text-[10px] uppercase tracking-wider text-purple-400 font-semibold">{t('analytics.course_analytics.avg_session_duration.total_time')}</p>
                 <p className="text-2xl font-bold text-purple-600">{formatSeconds(totalSeconds)}</p>
               </div>
-              <div className="bg-gray-50 rounded-xl px-5 py-3">
+              <div className="bg-gray-50 rounded-xl px-5 py-3 dark:bg-dk-inset/40">
                 <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.avg_session_duration.avg_per_day')}</p>
-                <p className="text-2xl font-bold text-gray-700">{avgMinutes}m</p>
+                <p className="text-2xl font-bold text-gray-700 dark:text-zinc-200">{avgMinutes}m</p>
               </div>
             </div>
             <ModalChart />
@@ -113,7 +113,7 @@ export default function CourseAvgSessionDuration({
         <div>
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-gray-900">{avgMinutes}m</span>
+              <span className="text-2xl font-bold text-gray-900 dark:text-zinc-100">{avgMinutes}m</span>
               <span className="text-xs text-gray-400">{t('analytics.course_analytics.units.avg_per_day')}</span>
             </div>
             <span className="text-xs text-purple-400">{formatSeconds(totalSeconds)} {t('analytics.course_analytics.units.total')}</span>

@@ -230,13 +230,13 @@ const OrgEditAutomations: React.FC = () => {
       </div>
 
       {/* ===== Main Card ===== */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+      <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+        <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
           {t('common.sections.webhook_endpoints')}
         </h2>
 
         {endpointsLoading ? (
-          <div className="flex items-center justify-center py-12 text-gray-400">
+          <div className="flex items-center justify-center py-12 text-gray-400 dark:text-zinc-400">
             <Loader2 size={24} className="animate-spin" />
           </div>
         ) : endpoints && endpoints.length > 0 ? (
@@ -245,25 +245,25 @@ const OrgEditAutomations: React.FC = () => {
               <div
                 key={endpoint.webhook_uuid}
                 onClick={() => openDetail(endpoint.webhook_uuid)}
-                className="flex items-center justify-between px-5 py-5 rounded-xl bg-gray-50 shadow-borders-base cursor-pointer hover:bg-gray-100 transition-colors"
+                className="flex items-center justify-between px-5 py-5 rounded-xl bg-gray-50 dark:bg-dk-inset/40 shadow-borders-base cursor-pointer hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors"
               >
                 <div className="flex items-center gap-4 flex-1 min-w-0">
-                  <Zap size={16} className="text-gray-400 shrink-0" />
+                  <Zap size={16} className="text-gray-400 dark:text-zinc-400 shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-medium truncate">
                         {endpoint.url || t('dashboard.organization.automations.new_endpoint')}
                       </span>
-                      <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full border bg-gray-100 text-gray-500 border-transparent">
+                      <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full border bg-gray-100 dark:bg-dk-inset text-gray-500 dark:text-zinc-400 border-transparent">
                         {endpoint.is_active ? t('dashboard.organization.automations.status.active') : t('dashboard.organization.automations.status.inactive')}
                       </span>
                     </div>
                     <div className="flex items-center gap-3 mt-0.5">
-                      <p className="text-xs text-gray-500 truncate">
+                      <p className="text-xs text-gray-500 dark:text-zinc-400 truncate">
                         {endpoint.description || t('dashboard.organization.automations.no_description')}
                       </p>
                       {endpoint.events.length > 0 && (
-                        <span className="text-[11px] text-gray-400 shrink-0">
+                        <span className="text-[11px] text-gray-400 dark:text-zinc-400 shrink-0">
                           {t('dashboard.organization.automations.events_count', { count: endpoint.events.length })}
                         </span>
                       )}
@@ -274,7 +274,7 @@ const OrgEditAutomations: React.FC = () => {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-gray-500 dark:text-zinc-400">
             <Zap size={48} className="mx-auto mb-4 opacity-50" />
             <p>{t('dashboard.organization.automations.empty.title')}</p>
             <p className="text-sm">{t('dashboard.organization.automations.empty.description')}</p>
@@ -298,7 +298,7 @@ const OrgEditAutomations: React.FC = () => {
           <button
             type="button"
             onClick={goBackToList}
-            className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 transition-colors cursor-pointer"
           >
             <ChevronRight size={16} className="rotate-180" />
             <span>{t('common.back')}</span>
@@ -309,7 +309,7 @@ const OrgEditAutomations: React.FC = () => {
               <button
                 type="button"
                 onClick={() => { setIsActive(!isActive); setIsSaved(false) }}
-                className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong hover:bg-gray-50 dark:hover:bg-dk-raised"
               >
                 <span className={`w-2.5 h-2.5 rounded-full ${isActive ? 'bg-green-500' : 'bg-red-500'}`} />
                 {isActive ? t('dashboard.organization.automations.status.active') : t('dashboard.organization.automations.status.inactive')}
@@ -322,9 +322,9 @@ const OrgEditAutomations: React.FC = () => {
               disabled={isActiveSaving}
               className={`inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors ${
                 isActiveSaving
-                  ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                  ? 'bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong cursor-default'
                   : isSaved
-                    ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                    ? 'bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong cursor-default'
                     : 'bg-brand text-brand-fg border-brand hover:bg-brand-hover cursor-pointer'
               }`}
             >
@@ -347,13 +347,13 @@ const OrgEditAutomations: React.FC = () => {
         </div>
 
         {/* ===== Endpoint Details Card ===== */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-4">
+        <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-5">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-4">
             {t('common.sections.endpoint_details')}
           </h3>
           <div className="space-y-4">
             <div>
-              <label className="text-xs font-semibold text-gray-500 mb-1.5 block">
+              <label className="text-xs font-semibold text-gray-500 dark:text-zinc-400 mb-1.5 block">
                 {t('dashboard.organization.automations.fields.endpoint_url')}
               </label>
               <input
@@ -365,7 +365,7 @@ const OrgEditAutomations: React.FC = () => {
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-500 mb-1.5 block">
+              <label className="text-xs font-semibold text-gray-500 dark:text-zinc-400 mb-1.5 block">
                 {t('dashboard.organization.automations.fields.description')}
               </label>
               <textarea
@@ -380,11 +380,11 @@ const OrgEditAutomations: React.FC = () => {
         </div>
 
         {/* ===== Events Card ===== */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-4">
+        <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-5">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-4">
             {t('common.sections.events')}
           </h3>
-          <p className="text-xs text-gray-400 mb-3">
+          <p className="text-xs text-gray-400 dark:text-zinc-400 mb-3">
             {t('dashboard.organization.automations.events.select_hint')}
           </p>
           <div className="space-y-2">
@@ -395,21 +395,21 @@ const OrgEditAutomations: React.FC = () => {
               const [isExpanded, setIsExpanded] = React.useState(false)
 
               return (
-                <div key={category.label} className="bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
+                <div key={category.label} className="bg-gray-50 dark:bg-dk-inset/40 rounded-xl overflow-hidden border border-gray-100 dark:border-dk-line">
                   {/* Header - clickable to expand/collapse */}
                   <button
                     type="button"
                     onClick={() => setIsExpanded(!isExpanded)}
                     className="w-full flex items-center justify-between px-4 py-3 text-start hover:bg-gray-100/50 transition-colors"
                   >
-                    <span className="text-sm font-semibold text-gray-800">{category.label}</span>
+                    <span className="text-sm font-semibold text-gray-800 dark:text-zinc-200">{category.label}</span>
                     <div className="flex items-center gap-2">
                       {!isExpanded && selectedCount > 0 && (
-                        <span className="text-xs text-gray-400 tabular-nums">{selectedCount}/{categoryEventIds.length}</span>
+                        <span className="text-xs text-gray-400 dark:text-zinc-400 tabular-nums">{selectedCount}/{categoryEventIds.length}</span>
                       )}
                       <ChevronRight
                         size={16}
-                        className={`text-gray-400 transition-transform duration-200 ${
+                        className={`text-gray-400 dark:text-zinc-400 transition-transform duration-200 ${
                           isExpanded ? 'rotate-90' : ''
                         }`}
                       />
@@ -425,13 +425,13 @@ const OrgEditAutomations: React.FC = () => {
                     <div className="overflow-hidden">
                       {/* Info row: counter + select all */}
                       <div className="flex items-center justify-between px-4 py-2">
-                        <span className="text-xs text-gray-400 tabular-nums">
+                        <span className="text-xs text-gray-400 dark:text-zinc-400 tabular-nums">
                           {t('dashboard.organization.automations.events.selected_of', { selected: selectedCount, total: categoryEventIds.length })}
                         </span>
                         <button
                           type="button"
                           onClick={() => toggleCategory(category.events)}
-                          className="text-xs text-gray-800 hover:text-gray-600 font-medium transition-colors"
+                          className="text-xs text-gray-800 dark:text-zinc-200 hover:text-gray-600 dark:hover:text-zinc-200 font-medium transition-colors"
                         >
                           {allSelected ? t('dashboard.organization.automations.events.deselect_all') : t('dashboard.organization.automations.events.select_all')}
                         </button>
@@ -441,7 +441,7 @@ const OrgEditAutomations: React.FC = () => {
                       <div className="px-4 pb-3 pt-2">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                           {category.events.map((event) => (
-                            <label key={event.id} className="flex items-center gap-2 cursor-pointer p-1.5 rounded-md hover:bg-gray-100 transition-colors">
+                            <label key={event.id} className="flex items-center gap-2 cursor-pointer p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors">
                               <div className="relative w-4 h-4 flex-shrink-0">
                                 <input
                                   type="checkbox"
@@ -449,11 +449,11 @@ const OrgEditAutomations: React.FC = () => {
                                   onChange={() => toggleEvent(event.id)}
                                   className="sr-only peer"
                                 />
-                                <div className="w-full h-full rounded border border-gray-300 bg-white peer-checked:bg-gray-600 peer-checked:border-gray-600 flex items-center justify-center transition-colors">
+                                <div className="w-full h-full rounded border border-gray-300 dark:border-dk-line-strong bg-white dark:bg-dk-card peer-checked:bg-gray-600 peer-checked:border-gray-600 flex items-center justify-center transition-colors">
                                   <Check size={12} className="text-white hidden peer-checked:block" strokeWidth={3} />
                                 </div>
                               </div>
-                              <span className="text-sm text-gray-700">
+                              <span className="text-sm text-gray-700 dark:text-zinc-200">
                                 {event.description}
                               </span>
                             </label>
@@ -474,7 +474,7 @@ const OrgEditAutomations: React.FC = () => {
             <button
               type="button"
               onClick={() => selectedEndpointId && handleDelete(selectedEndpointId)}
-              className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
             >
               <ConceptIcon.delete size={14} />
               <span>{t('common.delete')}</span>

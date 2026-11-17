@@ -23,7 +23,7 @@ export default function MigrationPromptForm({
   return (
     <div className="space-y-3">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-gray-700 dark:text-dk-fg-1 mb-1">
           {t('migration.course_name')} *
         </label>
         <Input
@@ -35,7 +35,7 @@ export default function MigrationPromptForm({
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-gray-700 dark:text-dk-fg-1 mb-1">
           {t('migration.description')}
         </label>
         <Input

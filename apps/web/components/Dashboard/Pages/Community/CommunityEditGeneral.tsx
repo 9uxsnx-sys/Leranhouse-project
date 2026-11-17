@@ -187,7 +187,7 @@ const CommunityEditGeneral: React.FC = () => {
               <Link
                 href={getUriWithOrg(org?.slug, '') + `/community/${communityUuid}`}
                 target="_blank"
-                className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+                className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors"
               >
                 <Eye size={14} />
                 <span>{t('dashboard.courses.preview')}</span>
@@ -195,7 +195,7 @@ const CommunityEditGeneral: React.FC = () => {
 
               <div className="flex items-center gap-2">
                 <span
-                  className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600"
+                  className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300"
                   title={
                     isSourceLocale
                       ? t('dashboard.courses.general.locale.source')
@@ -204,7 +204,7 @@ const CommunityEditGeneral: React.FC = () => {
                 >
                   <span className={`w-1.5 h-1.5 rounded-full ${!dirty ? 'bg-teal-500' : 'bg-amber-400'}`} />
                   <span>{getCurrentLanguageNativeName(contentLocale)}</span>
-                  <span className="text-gray-400">
+                  <span className="text-gray-400 dark:text-zinc-400">
                     {isSourceLocale
                       ? t('dashboard.courses.general.locale.source')
                       : translation
@@ -220,7 +220,7 @@ const CommunityEditGeneral: React.FC = () => {
                     isSubmitting
                       ? 'bg-brand text-brand-fg border-brand opacity-50 cursor-not-allowed'
                       : !dirty
-                        ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                        ? 'bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong cursor-default'
                         : 'bg-brand text-brand-fg border-brand hover:bg-brand-hover cursor-pointer'
                   }`}
                 >
@@ -243,7 +243,7 @@ const CommunityEditGeneral: React.FC = () => {
                   type="button"
                   onClick={togglePublishStatus}
                   disabled={isPublishing}
-                  className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50 ${isPublishing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong hover:bg-gray-50 dark:hover:bg-dk-raised ${isPublishing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                 >
                   {isPublishing ? (
                     <Loader2 size={14} className="animate-spin" />
@@ -264,8 +264,8 @@ const CommunityEditGeneral: React.FC = () => {
             </div>
 
             {/* ── GENERAL INFO CARD ── */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-              <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+            <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+              <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
                 {t('dashboard.courses.communities.general.title')}
               </h2>
 

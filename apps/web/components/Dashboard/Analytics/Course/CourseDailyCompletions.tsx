@@ -55,13 +55,13 @@ export default function CourseDailyCompletions({
                 <p className="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold">{t('analytics.course_analytics.common.total')}</p>
                 <p className="text-2xl font-bold text-emerald-600">{totalCompletions}</p>
               </div>
-              <div className="bg-gray-50 rounded-xl px-5 py-3">
+              <div className="bg-gray-50 rounded-xl px-5 py-3 dark:bg-dk-inset/40">
                 <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.common.peak_day')}</p>
-                <p className="text-2xl font-bold text-gray-700">{peakDay}</p>
+                <p className="text-2xl font-bold text-gray-700 dark:text-zinc-200">{peakDay}</p>
               </div>
-              <div className="bg-gray-50 rounded-xl px-5 py-3">
+              <div className="bg-gray-50 rounded-xl px-5 py-3 dark:bg-dk-inset/40">
                 <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.common.daily_avg')}</p>
-                <p className="text-2xl font-bold text-gray-700">{avgDaily}</p>
+                <p className="text-2xl font-bold text-gray-700 dark:text-zinc-200">{avgDaily}</p>
               </div>
             </div>
             <div style={{ height: 380 }}>
@@ -92,7 +92,7 @@ export default function CourseDailyCompletions({
       ) : (
         <div>
           <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-2xl font-bold text-gray-900"><AnimatedNumber value={totalCompletions} /></span>
+            <span className="text-2xl font-bold text-gray-900 dark:text-zinc-100"><AnimatedNumber value={totalCompletions} /></span>
             <span className="text-xs text-gray-400">{t('analytics.course_analytics.units.total_completions')}</span>
           </div>
           <div style={{ height: 160 }}>

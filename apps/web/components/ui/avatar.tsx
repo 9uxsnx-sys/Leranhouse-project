@@ -42,7 +42,7 @@ const avatarVariants = cva(
 )
 
 const fallbackVariants = cva(
-  "pointer-events-none flex select-none items-center justify-center bg-gray-100 text-gray-700",
+  "pointer-events-none flex select-none items-center justify-center bg-gray-100 dark:bg-dk-inset text-gray-700 dark:text-zinc-300",
   {
     variants: {
       variant: {

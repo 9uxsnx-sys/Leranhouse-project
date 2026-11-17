@@ -233,24 +233,24 @@ export default function OnboardingBar() {
               exit={{ y: 20, opacity: 0 }}
               transition={{ duration: 0.15, ease }}
               onClick={toggleMinimized}
-              className="pointer-events-auto mb-6 me-4 flex items-center gap-3 px-4 py-2.5 bg-white/85 backdrop-blur-lg text-gray-900 rounded-xl nice-shadow cursor-pointer hover:bg-white transition-colors"
+              className="pointer-events-auto mb-6 me-4 flex items-center gap-3 px-4 py-2.5 bg-white/85 dark:bg-dk-raised/90 backdrop-blur-lg text-gray-900 dark:text-dk-fg-1 rounded-xl nice-shadow cursor-pointer hover:bg-white dark:hover:bg-dk-raised transition-colors"
             >
-              <Rocket size={18} className="text-gray-700" />
+              <Rocket size={18} className="text-gray-700 dark:text-zinc-200" />
               <div className="flex flex-col items-start">
                 <span className="text-xs font-bold">{t('onboarding.getting_started')}</span>
                 <div className="flex items-center gap-2 mt-1">
-                  <div className="h-1.5 w-24 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-1.5 w-24 bg-gray-100 dark:bg-dk-inset rounded-full overflow-hidden">
                     <div
                       className="h-full bg-brand rounded-full transition-all duration-300"
                       style={{ width: `${progress * 100}%` }}
                     />
                   </div>
-                  <span className="text-[10px] text-gray-400 font-medium">
+                  <span className="text-[10px] text-gray-400 dark:text-zinc-400 font-medium">
                     {steps.filter((s) => s.completed).length}/{steps.length}
                   </span>
                 </div>
               </div>
-              <ChevronUp size={14} className="text-gray-400" />
+              <ChevronUp size={14} className="text-gray-400 dark:text-zinc-400" />
             </motion.button>
           ) : (
             <motion.div
@@ -263,7 +263,7 @@ export default function OnboardingBar() {
                 expanded ? 'max-w-3xl' : 'max-w-xl'
               }`}
             >
-              <div className="bg-white/85 backdrop-blur-lg rounded-xl nice-shadow overflow-hidden">
+              <div className="bg-white/85 dark:bg-dk-raised/95 backdrop-blur-lg rounded-xl nice-shadow overflow-hidden">
                 <AnimatePresence mode="wait">
                 {showFarewell ? (
                   <motion.div
@@ -279,10 +279,10 @@ export default function OnboardingBar() {
                         <WelcomeGlobe />
                       </div>
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 mt-2">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-zinc-100 mt-2">
                       {t('onboarding.farewell.title')}
                     </h3>
-                    <p className="text-sm text-gray-400 mt-1">
+                    <p className="text-sm text-gray-400 dark:text-zinc-400 mt-1">
                       {t('onboarding.farewell.description')}
                     </p>
                     <motion.button
@@ -305,12 +305,12 @@ export default function OnboardingBar() {
                   <div className="flex items-center gap-2.5">
                     <Rocket
                       size={20}
-                      className="text-gray-700"
+                      className="text-gray-700 dark:text-zinc-200"
                     />
-                    <span className="text-sm font-bold text-gray-900">
+                    <span className="text-sm font-bold text-gray-900 dark:text-zinc-100">
                       {t('onboarding.getting_started')}
                     </span>
-                    <span className="text-[11px] text-gray-400 font-medium">
+                    <span className="text-[11px] text-gray-400 dark:text-zinc-400 font-medium">
                       {allCompleted
                         ? t('onboarding.all_done')
                         : `${currentStepIndex + 1}/${steps.length}`}
@@ -320,7 +320,7 @@ export default function OnboardingBar() {
                     {isDev && (
                       <button
                         onClick={reset}
-                        className="p-1 text-gray-400 hover:text-red-500 rounded-lg transition-colors"
+                        className="p-1 text-gray-400 dark:text-zinc-400 hover:text-red-500 rounded-lg transition-colors"
                         title="Reset onboarding (dev only)"
                       >
                         <RotateCcw size={16} />
@@ -328,7 +328,7 @@ export default function OnboardingBar() {
                     )}
                     <button
                       onClick={toggleExpanded}
-                      className="p-1 text-gray-400 hover:text-gray-600 rounded-lg transition-colors"
+                      className="p-1 text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 rounded-lg transition-colors"
                     >
                       {expanded ? (
                         <Minimize2 size={16} />
@@ -338,7 +338,7 @@ export default function OnboardingBar() {
                     </button>
                     <button
                       onClick={toggleMinimized}
-                      className="p-1 text-gray-400 hover:text-gray-600 rounded-lg transition-colors"
+                      className="p-1 text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 rounded-lg transition-colors"
                     >
                       <ChevronDown size={16} />
                     </button>
@@ -346,7 +346,7 @@ export default function OnboardingBar() {
                 </div>
 
                 {/* Progress */}
-                <div className="mx-4 h-1 bg-gray-100 rounded-full overflow-hidden">
+                <div className="mx-4 h-1 bg-gray-100 dark:bg-dk-inset rounded-full overflow-hidden">
                   <div
                     className="h-full bg-brand rounded-full transition-all duration-300"
                     style={{ width: `${progress * 100}%` }}
@@ -374,10 +374,10 @@ export default function OnboardingBar() {
                           className="relative text-emerald-400"
                         />
                         <div className="relative">
-                          <p className="text-sm font-semibold text-gray-900">
+                          <p className="text-sm font-semibold text-gray-900 dark:text-zinc-100">
                             {t('onboarding.all_set')}
                           </p>
-                          <p className="text-xs text-gray-400">
+                          <p className="text-xs text-gray-400 dark:text-zinc-400">
                             {t('onboarding.all_set_desc')}
                           </p>
                         </div>
@@ -422,7 +422,7 @@ export default function OnboardingBar() {
                                         step.skipped ? (
                                           <SkipForward
                                             size={24}
-                                            className="text-gray-400 shrink-0"
+                                            className="text-gray-400 dark:text-zinc-400 shrink-0"
                                           />
                                         ) : (
                                           <CheckCircle2
@@ -434,7 +434,7 @@ export default function OnboardingBar() {
                                         <Icon
                                           size={24}
                                           className={`shrink-0 ${
-                                            config?.iconColor || 'text-gray-400'
+                                            config?.iconColor || 'text-gray-400 dark:text-zinc-400'
                                           }`}
                                         />
                                       )}
@@ -443,15 +443,15 @@ export default function OnboardingBar() {
                                           <p
                                             className={`text-sm font-medium ${
                                               step.completed
-                                                ? 'text-gray-400 line-through'
-                                                : 'text-gray-700'
+                                                ? 'text-gray-400 dark:text-zinc-400 line-through'
+                                                : 'text-gray-700 dark:text-zinc-200'
                                             }`}
                                           >
                                             {t(`onboarding.steps.${step.id}.title`)}
                                           </p>
                                         </div>
                                         {!step.completed && (
-                                          <p className="text-xs text-gray-400 mt-0.5">
+                                          <p className="text-xs text-gray-400 dark:text-zinc-400 mt-0.5">
                                             {t(`onboarding.steps.${step.id}.description`)}
                                           </p>
                                         )}
@@ -479,13 +479,13 @@ export default function OnboardingBar() {
                                           {ACTIVITY_TYPES.map((activity) => (
                                             <div
                                               key={activity.labelKey}
-                                              className="flex flex-col items-center gap-1.5 flex-1 py-2 rounded-lg bg-white nice-shadow"
+                                              className="flex flex-col items-center gap-1.5 flex-1 py-2 rounded-lg bg-white dark:bg-dk-card nice-shadow"
                                             >
                                               <activity.icon
                                                 size={20}
                                                 className={activity.color}
                                               />
-                                              <span className="text-[10px] font-medium text-gray-500">
+                                              <span className="text-[10px] font-medium text-gray-500 dark:text-zinc-400">
                                                 {t(activity.labelKey)}
                                               </span>
                                             </div>
@@ -500,19 +500,19 @@ export default function OnboardingBar() {
                                     isOnContentPage && (
                                       <div className="relative px-3 pb-3">
                                         <div className="flex items-center gap-2">
-                                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white nice-shadow flex-1">
+                                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white dark:bg-dk-card nice-shadow flex-1">
                                             <div className="flex items-center justify-center w-5 h-5 rounded-full bg-brand text-brand-fg text-[10px] font-bold shrink-0">
                                               1
                                             </div>
-                                            <ConceptIcon.add size={16} className="text-gray-500 shrink-0" />
-                                            <span className="text-[11px] font-medium text-gray-600">
+                                            <ConceptIcon.add size={16} className="text-gray-500 dark:text-zinc-400 shrink-0" />
+                                            <span className="text-[11px] font-medium text-gray-600 dark:text-zinc-300">
                                               {t('onboarding.steps.experience_editor.add_activity')}
                                             </span>
                                           </div>
 
-                                          <span className="text-gray-300 shrink-0">→</span>
+                                          <span className="text-gray-300 dark:text-zinc-600 shrink-0">→</span>
 
-                                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white nice-shadow flex-1">
+                                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white dark:bg-dk-card nice-shadow flex-1">
                                             <div className="flex items-center justify-center w-5 h-5 rounded-full bg-brand text-brand-fg text-[10px] font-bold shrink-0">
                                               2
                                             </div>
@@ -520,14 +520,14 @@ export default function OnboardingBar() {
                                               size={16}
                                               className="text-blue-400 shrink-0"
                                             />
-                                            <span className="text-[11px] font-medium text-gray-600">
+                                            <span className="text-[11px] font-medium text-gray-600 dark:text-zinc-300">
                                               {t('onboarding.steps.experience_editor.dynamic_page')}
                                             </span>
                                           </div>
 
-                                          <span className="text-gray-300 shrink-0">→</span>
+                                          <span className="text-gray-300 dark:text-zinc-600 shrink-0">→</span>
 
-                                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white nice-shadow flex-1">
+                                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white dark:bg-dk-card nice-shadow flex-1">
                                             <div className="flex items-center justify-center w-5 h-5 rounded-full bg-brand text-brand-fg text-[10px] font-bold shrink-0">
                                               3
                                             </div>
@@ -535,7 +535,7 @@ export default function OnboardingBar() {
                                               size={16}
                                               className="text-emerald-400 shrink-0"
                                             />
-                                            <span className="text-[11px] font-medium text-gray-600">
+                                            <span className="text-[11px] font-medium text-gray-600 dark:text-zinc-300">
                                               {t('onboarding.steps.experience_editor.click_edit')}
                                             </span>
                                           </div>
@@ -548,50 +548,50 @@ export default function OnboardingBar() {
                                     !step.completed &&
                                     isInEditor && (
                                       <div className="relative px-3 pb-3 space-y-2">
-                                        <p className="text-[11px] font-semibold text-gray-500 px-1">
+                                        <p className="text-[11px] font-semibold text-gray-500 dark:text-zinc-400 px-1">
                                           {t('onboarding.steps.experience_editor.editor_features')}
                                         </p>
                                         <div className="grid grid-cols-2 gap-2">
-                                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white nice-shadow">
-                                            <Command size={16} className="text-gray-500 shrink-0" />
-                                            <span className="text-[11px] font-medium text-gray-600">
+                                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white dark:bg-dk-card nice-shadow">
+                                            <Command size={16} className="text-gray-500 dark:text-zinc-400 shrink-0" />
+                                            <span className="text-[11px] font-medium text-gray-600 dark:text-zinc-300">
                                               {t('onboarding.steps.experience_editor.slash_commands')}
                                             </span>
                                           </div>
-                                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white nice-shadow">
+                                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white dark:bg-dk-card nice-shadow">
                                             <Type size={16} className="text-blue-400 shrink-0" />
-                                            <span className="text-[11px] font-medium text-gray-600">
+                                            <span className="text-[11px] font-medium text-gray-600 dark:text-zinc-300">
                                               {t('onboarding.steps.experience_editor.headings_lists')}
                                             </span>
                                           </div>
-                                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white nice-shadow">
+                                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white dark:bg-dk-card nice-shadow">
                                             <ImageIcon size={16} className="text-violet-400 shrink-0" />
-                                            <span className="text-[11px] font-medium text-gray-600">
+                                            <span className="text-[11px] font-medium text-gray-600 dark:text-zinc-300">
                                               {t('onboarding.steps.experience_editor.images_media')}
                                             </span>
                                           </div>
-                                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white nice-shadow">
+                                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white dark:bg-dk-card nice-shadow">
                                             <Video size={16} className="text-rose-400 shrink-0" />
-                                            <span className="text-[11px] font-medium text-gray-600">
+                                            <span className="text-[11px] font-medium text-gray-600 dark:text-zinc-300">
                                               {t('onboarding.steps.experience_editor.video_embeds')}
                                             </span>
                                           </div>
-                                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white nice-shadow">
+                                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white dark:bg-dk-card nice-shadow">
                                             <Table size={16} className="text-amber-400 shrink-0" />
-                                            <span className="text-[11px] font-medium text-gray-600">
+                                            <span className="text-[11px] font-medium text-gray-600 dark:text-zinc-300">
                                               {t('onboarding.steps.experience_editor.tables_callouts')}
                                             </span>
                                           </div>
-                                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white nice-shadow">
+                                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white dark:bg-dk-card nice-shadow">
                                             <Zap size={16} className="text-emerald-400 shrink-0" />
-                                            <span className="text-[11px] font-medium text-gray-600">
+                                            <span className="text-[11px] font-medium text-gray-600 dark:text-zinc-300">
                                               {t('onboarding.steps.experience_editor.interactive_blocks')}
                                             </span>
                                           </div>
                                         </div>
                                         <button
                                           onClick={() => completeStep('experience_editor')}
-                                          className="w-full flex items-center justify-center gap-2 py-2 mt-1 text-xs font-medium text-gray-600 bg-white nice-shadow rounded-lg hover:bg-gray-50 transition-colors"
+                                          className="w-full flex items-center justify-center gap-2 py-2 mt-1 text-xs font-medium text-gray-600 dark:text-zinc-300 bg-white dark:bg-dk-card nice-shadow rounded-lg hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors"
                                         >
                                           <Check size={14} />
                                           {t('onboarding.got_it')}
@@ -608,7 +608,7 @@ export default function OnboardingBar() {
                                           target="_blank"
                                           rel="noopener noreferrer"
                                           onClick={() => completeStep('teach_the_world')}
-                                          className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white nice-shadow hover:bg-gray-50 transition-colors"
+                                          className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white dark:bg-dk-card nice-shadow hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors"
                                         >
                                           <img
                                             src="/UNI_LOGO.png"
@@ -616,21 +616,21 @@ export default function OnboardingBar() {
                                             className="h-9 w-auto shrink-0 rounded"
                                           />
                                           <div className="min-w-0">
-                                            <p className="text-xs font-semibold text-gray-700">
+                                            <p className="text-xs font-semibold text-gray-700 dark:text-zinc-200">
                                               {t('onboarding.steps.teach_the_world.university')}
                                             </p>
-                                            <p className="text-[11px] text-gray-400">
+                                            <p className="text-[11px] text-gray-400 dark:text-zinc-400">
                                               {t('onboarding.steps.teach_the_world.university_desc')}
                                             </p>
                                           </div>
-                                          <span className="text-gray-300 shrink-0 ms-auto">→</span>
+                                          <span className="text-gray-300 dark:text-zinc-600 shrink-0 ms-auto">→</span>
                                         </a>
                                         <a
                                           href="https://classroom.learnhouse.io"
                                           target="_blank"
                                           rel="noopener noreferrer"
                                           onClick={() => completeStep('teach_the_world')}
-                                          className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white nice-shadow hover:bg-gray-50 transition-colors"
+                                          className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white dark:bg-dk-card nice-shadow hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors"
                                         >
                                           <img
                                             src="/theclassroom.png"
@@ -638,14 +638,14 @@ export default function OnboardingBar() {
                                             className="h-9 w-auto shrink-0 rounded"
                                           />
                                           <div className="min-w-0">
-                                            <p className="text-xs font-semibold text-gray-700">
+                                            <p className="text-xs font-semibold text-gray-700 dark:text-zinc-200">
                                               {t('onboarding.steps.teach_the_world.classroom')}
                                             </p>
-                                            <p className="text-[11px] text-gray-400">
+                                            <p className="text-[11px] text-gray-400 dark:text-zinc-400">
                                               {t('onboarding.steps.teach_the_world.classroom_desc')}
                                             </p>
                                           </div>
-                                          <span className="text-gray-300 shrink-0 ms-auto">→</span>
+                                          <span className="text-gray-300 dark:text-zinc-600 shrink-0 ms-auto">→</span>
                                         </a>
                                         <button
                                           onClick={() => {
@@ -670,7 +670,7 @@ export default function OnboardingBar() {
                           <div>
                             <button
                               onClick={toggleShowAllSteps}
-                              className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors rounded-lg hover:bg-gray-50"
+                              className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-dk-raised"
                             >
                               <MoreHorizontal size={18} />
                               {showAllSteps

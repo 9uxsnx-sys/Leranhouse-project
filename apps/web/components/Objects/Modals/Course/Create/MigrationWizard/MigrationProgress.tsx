@@ -27,10 +27,10 @@ export default function MigrationProgress({
           <div className="mb-6">
             <BarLoader color="#000" width={120} />
           </div>
-          <p className="text-sm font-semibold text-gray-900">
+          <p className="text-sm font-semibold text-gray-900 dark:text-dk-fg-1">
             {t('migration.creating_course')}
           </p>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-gray-500 dark:text-dk-fg-3 mt-1">
             {t('migration.creating_description')}
           </p>
         </>
@@ -41,10 +41,10 @@ export default function MigrationProgress({
           <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mb-4">
             <CheckCircle2 size={28} className="text-green-600" />
           </div>
-          <p className="text-sm font-semibold text-gray-900">
+          <p className="text-sm font-semibold text-gray-900 dark:text-dk-fg-1">
             {t('migration.course_created')}
           </p>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-gray-500 dark:text-dk-fg-3 mt-1">
             {t('migration.created_summary', {
               chapters: result.chapters_created,
               activities: result.activities_created,
@@ -65,10 +65,10 @@ export default function MigrationProgress({
           <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mb-4">
             <XCircle size={28} className="text-red-600" />
           </div>
-          <p className="text-sm font-semibold text-gray-900">
+          <p className="text-sm font-semibold text-gray-900 dark:text-dk-fg-1">
             {t('migration.creation_failed')}
           </p>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-gray-500 dark:text-dk-fg-3 mt-1">
             {result?.error || t('migration.creation_error_generic')}
           </p>
           <button

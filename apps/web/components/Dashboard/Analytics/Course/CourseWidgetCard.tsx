@@ -49,12 +49,12 @@ export default function CourseWidgetCard({
         <div className="flex items-start gap-3 mb-4">
           {icon}
           <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-semibold text-gray-700">{title}</h3>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-zinc-200">{title}</h3>
             <p className="text-xs text-gray-400">{subtitle}</p>
           </div>
           {!noExpand && (
             <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="p-1.5 rounded-lg bg-gray-100 text-gray-400">
+              <div className="p-1.5 rounded-lg bg-gray-100 text-gray-400 dark:bg-dk-inset">
                 <Maximize2 size={12} />
               </div>
             </div>
@@ -69,7 +69,7 @@ export default function CourseWidgetCard({
       {!noExpand && (
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent className="sm:max-w-4xl max-h-[85vh] overflow-hidden flex flex-col p-0">
-            <DialogHeader className="px-6 pt-6 pb-3 border-b border-gray-100">
+            <DialogHeader className="px-6 pt-6 pb-3 border-b border-gray-100 dark:border-dk-line">
               <DialogTitle className="flex items-center gap-3 text-base">
                 {icon}
                 {title}
@@ -225,7 +225,7 @@ export function PaginationBar({
   }
 
   return (
-    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+    <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-dk-line">
       <span className="text-xs text-gray-400">
         {t('analytics.course_analytics.pagination.range', { from, to, total })}
       </span>
@@ -233,7 +233,7 @@ export function PaginationBar({
         <button
           onClick={prev}
           disabled={!hasPrev}
-          className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors dark:hover:bg-dk-raised"
         >
           <ChevronLeft size={14} className="text-gray-500" />
         </button>
@@ -247,7 +247,7 @@ export function PaginationBar({
               className={`min-w-[28px] h-7 rounded-lg text-xs font-medium transition-colors ${
                 p === page
                   ? 'bg-brand text-brand-fg'
-                  : 'text-gray-500 hover:bg-gray-100'
+                  : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-dk-raised'
               }`}
             >
               {p + 1}
@@ -257,7 +257,7 @@ export function PaginationBar({
         <button
           onClick={next}
           disabled={!hasNext}
-          className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="p-1.5 rounded-lg hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors dark:hover:bg-dk-raised"
         >
           <ChevronRight size={14} className="text-gray-500" />
         </button>

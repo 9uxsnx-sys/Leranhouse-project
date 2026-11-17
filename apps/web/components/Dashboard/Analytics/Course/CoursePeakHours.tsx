@@ -140,7 +140,7 @@ export default function CoursePeakHours({
               </div>
               <div>
                 <p className="text-gray-400 text-xs">{t('analytics.course_analytics.peak_hours.peak_events')}</p>
-                <p className="text-xl font-bold text-gray-900">{maxCount}</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-zinc-100">{maxCount}</p>
               </div>
             </div>
             <div className="overflow-x-auto">

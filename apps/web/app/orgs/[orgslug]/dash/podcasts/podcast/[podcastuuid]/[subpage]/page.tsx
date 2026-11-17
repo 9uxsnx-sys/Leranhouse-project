@@ -90,7 +90,7 @@ function PodcastOverviewPage(props: { params: Promise<PodcastOverviewParams> }) 
   ]
 
   return (
-    <div className="min-h-screen w-full bg-[#f8f8f8]">
+    <div className="min-h-screen w-full bg-[#f8f8f8] dark:bg-transparent">
       <PodcastProvider podcastuuid={podcastuuid}>
         {/* Row 1: Page title */}
         <div className="max-w-7xl mx-auto w-full pt-8 px-4 sm:px-6 lg:px-8">

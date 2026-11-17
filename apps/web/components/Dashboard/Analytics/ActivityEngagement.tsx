@@ -35,8 +35,8 @@ export default function ActivityEngagement({ days = '30' }: { days?: string }) {
   const rows = Array.from(merged.values())
 
   return (
-    <div className="bg-white rounded-xl nice-shadow p-5 min-h-[300px] overflow-hidden min-w-0">
-      <h3 className="text-sm font-semibold text-gray-700 mb-4">{t('analytics.overview.activity_engagement')}</h3>
+    <div className="bg-white rounded-xl nice-shadow p-5 min-h-[300px] overflow-hidden min-w-0 dark:bg-dk-card">
+      <h3 className="text-sm font-semibold text-gray-700 mb-4 dark:text-zinc-200">{t('analytics.overview.activity_engagement')}</h3>
       {isLoading ? (
         <div className="h-48 flex items-center justify-center text-gray-300">{t('analytics.common.loading')}</div>
       ) : rows.length === 0 ? (
@@ -45,7 +45,7 @@ export default function ActivityEngagement({ days = '30' }: { days?: string }) {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-start text-gray-400 text-xs uppercase tracking-wider border-b border-gray-100">
+              <tr className="text-start text-gray-400 text-xs uppercase tracking-wider border-b border-gray-100 dark:border-dk-line">
                 <th className="pb-2">{t('analytics.overview.activity')}</th>
                 <th className="pb-2">{t('analytics.common.type')}</th>
                 <th className="pb-2 text-end">{t('analytics.common.views')}</th>
@@ -63,7 +63,7 @@ export default function ActivityEngagement({ days = '30' }: { days?: string }) {
                 const name = row.activity_name || row.activity_uuid
                 return (
                   <tr key={row.activity_uuid} className="border-b border-gray-50">
-                    <td className="py-2 font-medium text-gray-700 truncate max-w-[180px]">
+                    <td className="py-2 font-medium text-gray-700 truncate max-w-[180px] dark:text-zinc-200">
                       {href ? (
                         <Link href={href} className="text-blue-600 hover:underline">
                           {name}

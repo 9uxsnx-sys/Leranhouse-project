@@ -211,13 +211,13 @@ function Courses(props: CourseProps) {
           <div className="flex items-center gap-3">
             {/* Search — custom search bar with icon */}
             <div className="relative w-80">
-              <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-dk-fg-3 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('courses.search_courses')}
-                className="w-full h-7 ps-8 pe-2 text-sm bg-white shadow-borders-base rounded-md placeholder:text-gray-400 focus:outline-none"
+                className="w-full h-7 ps-8 pe-2 text-sm text-gray-900 dark:text-dk-fg-1 bg-white dark:bg-dk-card shadow-borders-base rounded-md placeholder:text-gray-400 dark:placeholder:text-dk-fg-4 focus:outline-none"
               />
             </div>
 
@@ -242,7 +242,7 @@ function Courses(props: CourseProps) {
                 <span>{activeFilter === 'All' ? t('common.all_courses') : difficultyLabel(activeFilter)}</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white min-w-0 w-28">
+            <DropdownMenuContent align="end" className="bg-white dark:bg-dk-raised min-w-0 w-28">
               <DropdownMenuItem onClick={() => setActiveFilter('All')}>{t('common.all_courses')}</DropdownMenuItem>
               {DIFFICULTY_OPTIONS.map((option) => (
                 <DropdownMenuItem key={option} onClick={() => setActiveFilter(option)}>

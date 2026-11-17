@@ -197,7 +197,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
     const RoleDropdown = ({ contributor }: { contributor: Contributor }) => {
         if (contributor.authorship === 'CREATOR') {
             return (
-                <span className="opacity-50 text-gray-700 text-sm">
+                <span className="opacity-50 text-gray-700 dark:text-zinc-200 text-sm">
                     {t(`dashboard.courses.contributors.roles.${contributor.authorship.toLowerCase()}`)}
                 </span>
             );
@@ -206,13 +206,13 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
         return (
             <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
-                    <span className="cursor-pointer px-1.5 py-0.5 rounded hover:bg-gray-100 transition-colors text-gray-700 text-sm">
+                    <span className="cursor-pointer px-1.5 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors text-gray-700 dark:text-zinc-200 text-sm">
                         {t(`dashboard.courses.contributors.roles.${contributor.authorship.toLowerCase()}`)}
                     </span>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                     align="center"
-                    className="min-w-[120px] rounded-lg border border-gray-200 bg-white p-1 shadow-md"
+                    className="min-w-[120px] rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card p-1 shadow-md"
                     sideOffset={6}
                 >
                     {['CONTRIBUTOR', 'MAINTAINER', 'REPORTER'].map((role) => (
@@ -221,8 +221,8 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                             onClick={() => updateContributor(contributor.user_id, { authorship: role as ContributorRole })}
                             className="justify-between text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
                         >
-                            <span className="text-gray-700 text-xs">{t(`dashboard.courses.contributors.roles.${role.toLowerCase()}`)}</span>
-                            {contributor.authorship === role && <Check size={12} className="text-gray-500" />}
+                            <span className="text-gray-700 dark:text-zinc-200 text-xs">{t(`dashboard.courses.contributors.roles.${role.toLowerCase()}`)}</span>
+                            {contributor.authorship === role && <Check size={12} className="text-gray-500 dark:text-zinc-400" />}
                         </DropdownMenuItem>
                     ))}
                 </DropdownMenuContent>
@@ -246,7 +246,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                 className={`inline-flex items-center gap-1.5 text-sm ${
                     isCreator
                         ? 'opacity-50 cursor-not-allowed'
-                        : 'cursor-pointer hover:bg-gray-100 rounded px-1 py-0.5 -ms-1 -my-0.5 transition-colors'
+                        : 'cursor-pointer hover:bg-gray-100 dark:hover:bg-dk-raised rounded px-1 py-0.5 -ms-1 -my-0.5 transition-colors'
                 }`}
             >
                 <span className={`w-2.5 h-2.5 rounded ${isActive ? 'bg-green-500' : 'bg-red-500'}`} />
@@ -261,13 +261,13 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
         return (
             <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
-                    <span className="cursor-pointer px-1.5 py-0.5 rounded hover:bg-gray-100 transition-colors text-gray-700 text-sm">
+                    <span className="cursor-pointer px-1.5 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors text-gray-700 dark:text-zinc-200 text-sm">
                         {t('dashboard.courses.contributors.roles.user')}
                     </span>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                     align="center"
-                    className="min-w-[120px] rounded-lg border border-gray-200 bg-white p-1 shadow-md"
+                    className="min-w-[120px] rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card p-1 shadow-md"
                     sideOffset={6}
                 >
                     {(['CONTRIBUTOR', 'MAINTAINER', 'REPORTER'] as ContributorRole[]).map((role) => (
@@ -276,7 +276,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                             onClick={() => addSearchUserAsContributor(user.username, user.user_uuid, role)}
                             className="justify-between text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
                         >
-                            <span className="text-gray-700 text-xs">{t(`dashboard.courses.contributors.roles.${role.toLowerCase()}`)}</span>
+                            <span className="text-gray-700 dark:text-zinc-200 text-xs">{t(`dashboard.courses.contributors.roles.${role.toLowerCase()}`)}</span>
                         </DropdownMenuItem>
                     ))}
                 </DropdownMenuContent>
@@ -342,7 +342,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                         rounded="rounded-full"
                         predefined_avatar={c.user.avatar_image === '' ? 'empty' : undefined}
                     />
-                    <span className="font-medium text-gray-900 truncate">{c.user.first_name} {c.user.last_name}</span>
+                    <span className="font-medium text-gray-900 dark:text-zinc-100 truncate">{c.user.first_name} {c.user.last_name}</span>
                 </div>
             ),
         },
@@ -350,13 +350,13 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
             key: 'username',
             header: t('dashboard.courses.contributors.table.username'),
             width: '170px',
-            render: (c) => <span className="text-gray-500">@{c.user.username}</span>,
+            render: (c) => <span className="text-gray-500 dark:text-zinc-400">@{c.user.username}</span>,
         },
         {
             key: 'email',
             header: t('dashboard.courses.contributors.table.email'),
             width: '240px',
-            render: (c) => <span className="text-gray-500 truncate">{c.user.email}</span>,
+            render: (c) => <span className="text-gray-500 dark:text-zinc-400 truncate">{c.user.email}</span>,
         },
         {
             key: 'role',
@@ -386,7 +386,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
             sortable: true,
             value: (c) => c.creation_date,
             render: (c) => (
-                <span className="text-[13px] text-gray-400 whitespace-nowrap">{formatDate(c.creation_date)}</span>
+                <span className="text-[13px] text-gray-400 dark:text-zinc-400 whitespace-nowrap">{formatDate(c.creation_date)}</span>
             ),
         },
     ];
@@ -406,7 +406,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                         rounded="rounded-full"
                         predefined_avatar={u.avatar_image ? undefined : 'empty'}
                     />
-                    <span className="font-medium text-gray-900 truncate">{u.first_name} {u.last_name}</span>
+                    <span className="font-medium text-gray-900 dark:text-zinc-100 truncate">{u.first_name} {u.last_name}</span>
                 </div>
             ),
         },
@@ -414,13 +414,13 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
             key: 'username',
             header: t('dashboard.courses.contributors.table.username'),
             width: '170px',
-            render: (u) => <span className="text-gray-500">@{u.username}</span>,
+            render: (u) => <span className="text-gray-500 dark:text-zinc-400">@{u.username}</span>,
         },
         {
             key: 'email',
             header: t('dashboard.courses.contributors.table.email'),
             width: '240px',
-            render: (u) => <span className="text-gray-500 truncate">{u.email}</span>,
+            render: (u) => <span className="text-gray-500 dark:text-zinc-400 truncate">{u.email}</span>,
         },
         {
             key: 'role',
@@ -446,7 +446,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                         {existing ? (
                             <StatusToggle contributor={existing} />
                         ) : (
-                            <span className="inline-flex items-center gap-1.5 text-sm text-gray-400">
+                            <span className="inline-flex items-center gap-1.5 text-sm text-gray-400 dark:text-zinc-400">
                                 <span className="w-2.5 h-2.5 rounded bg-red-500" />
                                 {t('dashboard.courses.contributors.statuses.inactive')}
                             </span>
@@ -461,7 +461,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
             width: '150px',
             align: 'right',
             render: (u) => (
-                <span className="text-[13px] text-gray-400 whitespace-nowrap">
+                <span className="text-[13px] text-gray-400 dark:text-zinc-400 whitespace-nowrap">
                     {u.creation_date ? formatDate(u.creation_date) : '—'}
                 </span>
             ),
@@ -474,19 +474,19 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                 <div>
                     <div className="flex items-center gap-3 mb-5">
                         <div className="relative w-80">
-                            <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                            <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-zinc-400 pointer-events-none" />
                             <input
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder={t('dashboard.courses.contributors.search.placeholder')}
-                                className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
+                                className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 dark:text-zinc-200 bg-white dark:bg-dk-card shadow-borders-base rounded-md placeholder:text-gray-500 dark:placeholder:text-zinc-400 focus:outline-none"
                             />
                         </div>
                         <div className="flex-1" />
                         <button
                             onClick={() => setIsOpenToContributors((prev: boolean | undefined) => !prev)}
-                            className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                            className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong hover:bg-gray-50 dark:hover:bg-dk-raised"
                         >
                             <span className={`w-2.5 h-2.5 rounded ${isOpenToContributors ? 'bg-green-500' : 'bg-red-500'}`} />
                             {isOpenToContributors 
@@ -496,7 +496,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                         {selectedContributors.length > 0 && (
                             <button
                                 onClick={handleBulkRemove}
-                                className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-red-600 border-gray-200 hover:bg-gray-50"
+                                className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white dark:bg-dk-card text-red-600 border-gray-200 dark:border-dk-line-strong hover:bg-gray-50 dark:hover:bg-dk-raised"
                             >
                                 {t('dashboard.courses.contributors.actions.remove_count', { count: selectedContributors.length })}
                             </button>
@@ -506,7 +506,7 @@ function EditCourseContributors(props: EditCourseContributorsProps) {
                     <TableCard>
                         {searching ? (
                             isSearching ? (
-                                <div className="py-16 text-center text-sm text-gray-500">
+                                <div className="py-16 text-center text-sm text-gray-500 dark:text-zinc-400">
                                     {t('dashboard.courses.contributors.search.searching')}
                                 </div>
                             ) : searchResults.length === 0 ? (

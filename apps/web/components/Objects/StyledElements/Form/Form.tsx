@@ -23,7 +23,7 @@ export const FormLabelAndMessage = (props: {
   <div className="flex items-center space-x-3">
     <FormLabel className="grow text-sm">{props.label}</FormLabel>
     {(props.message && (
-      <div className="text-red-700 text-sm items-center  rounded-md flex  space-x-1">
+      <div className="text-red-700 dark:text-red-400 text-sm items-center  rounded-md flex  space-x-1">
         <Info size={10} />
         <div>{props.message}</div>
       </div>
@@ -47,7 +47,7 @@ FormField.displayName = 'FormField'
 
 export const FormLabel = React.forwardRef<HTMLLabelElement, React.ComponentPropsWithoutRef<typeof Form.Label>>(
   ({ className, ...props }, ref) => (
-    <Form.Label ref={ref} className={`font-medium leading-[35px] text-black ${className || ''}`} {...props} />
+    <Form.Label ref={ref} className={`font-medium leading-[35px] text-black dark:text-dk-fg-2 ${className || ''}`} {...props} />
   )
 )
 FormLabel.displayName = 'FormLabel'
@@ -92,7 +92,7 @@ export const ButtonBlack = React.forwardRef<HTMLButtonElement, React.ButtonHTMLA
   ({ className, state, ...props }, ref) => (
     <button
       ref={ref}
-      className={`inline-flex items-center justify-center rounded-lg px-[15px] text-[15px] leading-none font-medium h-[35px] bg-brand text-brand-fg hover:bg-brand-hover hover:cursor-pointer focus:shadow-[0_0_0_2px_black] outline-none border-none ${
+      className={`inline-flex items-center justify-center rounded-lg px-[15px] text-[15px] leading-none font-medium h-[35px] bg-brand text-brand-fg hover:bg-brand-hover hover:cursor-pointer focus:shadow-[0_0_0_2px_black] dark:focus:shadow-[0_0_0_2px_#fafafa] outline-none border-none ${
         state === 'loading' ? 'pointer-events-none bg-[#808080]' : ''
       } ${className || ''}`}
       {...props}

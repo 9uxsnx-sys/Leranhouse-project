@@ -416,13 +416,13 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
             >
                 {view === 'grading' && (
                     <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-                        <h3 className="text-sm font-semibold text-gray-800 mb-2">{t('dashboard.assignments.editor.task_editor.form.submission_summary')}</h3>
+                        <h3 className="text-sm font-semibold text-gray-800 dark:text-zinc-200 mb-2">{t('dashboard.assignments.editor.task_editor.form.submission_summary')}</h3>
                         <div className="grid grid-cols-3 gap-4 text-sm">
                             <div className="text-center">
                                 <div className="text-lg font-bold text-blue-600">
                                     {questions.flatMap(q => q.blanks).length}
                                 </div>
-                                <div className="text-gray-600">{t('dashboard.assignments.editor.task_editor.form.total_blanks')}</div>
+                                <div className="text-gray-600 dark:text-zinc-300">{t('dashboard.assignments.editor.task_editor.form.total_blanks')}</div>
                             </div>
                             <div className="text-center">
                                 <div className="text-lg font-bold text-green-600">
@@ -431,7 +431,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
                                         return userAnswer && userAnswer.answer.toLowerCase().trim() === blank.correctAnswer.toLowerCase().trim();
                                     }).length}
                                 </div>
-                                <div className="text-gray-600">{t('dashboard.assignments.editor.task_editor.form.correct')}</div>
+                                <div className="text-gray-600 dark:text-zinc-300">{t('dashboard.assignments.editor.task_editor.form.correct')}</div>
                             </div>
                             <div className="text-center">
                                 <div className="text-lg font-bold text-red-600">
@@ -440,7 +440,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
                                         return userAnswer && userAnswer.answer.toLowerCase().trim() === blank.correctAnswer.toLowerCase().trim();
                                     }).length}
                                 </div>
-                                <div className="text-gray-600">{t('dashboard.assignments.editor.task_editor.form.incorrect')}</div>
+                                <div className="text-gray-600 dark:text-zinc-300">{t('dashboard.assignments.editor.task_editor.form.incorrect')}</div>
                             </div>
                         </div>
                     </div>
@@ -454,10 +454,10 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
                                         value={question.questionText}
                                         onChange={(e) => handleQuestionChange(qIndex, e.target.value)}
                                         placeholder={t('dashboard.assignments.editor.task_editor.form.question_placeholder')}
-                                        className="w-full px-3 text-neutral-600 bg-[#00008b00] border-2 border-gray-200 rounded-md border-dotted text-sm font-bold"
+                                        className="w-full px-3 text-neutral-600 bg-[#00008b00] border-2 border-gray-200 dark:border-dk-line-strong rounded-md border-dotted text-sm font-bold dark:text-zinc-300"
                                     />
                                 ) : (
-                                    <p className="w-full px-3 text-neutral-600 bg-[#00008b00] border-2 border-gray-200 rounded-md border-dotted text-sm font-bold">
+                                    <p className="w-full px-3 text-neutral-600 bg-[#00008b00] border-2 border-gray-200 dark:border-dk-line-strong rounded-md border-dotted text-sm font-bold dark:text-zinc-300">
                                         {question.questionText}
                                     </p>
                                 )}
@@ -475,7 +475,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
                             <div className="flex flex-col space-y-2">
                                 {question.blanks.map((blank, bIndex) => (
                                     <div key={bIndex} className="flex">
-                                        <div className={"blank-item outline-3 outline-white pe-2 shadow-sm w-full flex items-center space-x-2 min-h-[40px] hover:bg-opacity-100 hover:shadow-md rounded-lg bg-white text-sm duration-150 ease-linear nice-shadow " + (view == 'student' ? 'active:scale-105' : '')}>
+                                        <div className={"blank-item outline-3 outline-white pe-2 shadow-sm w-full flex items-center space-x-2 min-h-[40px] hover:bg-opacity-100 hover:shadow-md rounded-lg bg-white dark:bg-dk-card text-sm duration-150 ease-linear nice-shadow " + (view == 'student' ? 'active:scale-105' : '')}>
                                             <div className="font-bold text-base flex items-center justify-center h-full w-[40px] rounded-s-md text-slate-800 bg-slate-100/80">
                                                 <Type size={14} />
                                             </div>
@@ -485,19 +485,19 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
                                                         value={blank.placeholder}
                                                         onChange={(e) => handleBlankChange(qIndex, bIndex, 'placeholder', e.target.value)}
                                                         placeholder={t('dashboard.assignments.editor.task_editor.form.blank_placeholder')}
-                                                        className="w-full mx-2 px-3 pe-6 text-neutral-600 bg-[#00008b00] border-2 border-gray-200 rounded-md border-dotted text-sm font-bold"
+                                                        className="w-full mx-2 px-3 pe-6 text-neutral-600 bg-[#00008b00] border-2 border-gray-200 dark:border-dk-line-strong rounded-md border-dotted text-sm font-bold dark:text-zinc-300"
                                                     />
                                                     <input
                                                         value={blank.correctAnswer}
                                                         onChange={(e) => handleBlankChange(qIndex, bIndex, 'correctAnswer', e.target.value)}
                                                         placeholder={t('dashboard.assignments.editor.task_editor.form.correct_answer_placeholder')}
-                                                        className="w-full mx-2 px-3 pe-6 text-neutral-600 bg-lime-50 border-2 border-lime-200 rounded-md border-dotted text-sm font-bold"
+                                                        className="w-full mx-2 px-3 pe-6 text-neutral-600 bg-lime-50 border-2 border-lime-200 rounded-md border-dotted text-sm font-bold dark:text-zinc-300"
                                                     />
                                                     <input
                                                         value={blank.hint || ''}
                                                         onChange={(e) => handleBlankChange(qIndex, bIndex, 'hint', e.target.value)}
                                                         placeholder={t('dashboard.assignments.editor.task_editor.general.hint_optional')}
-                                                        className="w-full mx-2 px-3 pe-6 text-neutral-600 bg-blue-50 border-2 border-blue-200 rounded-md border-dotted text-xs"
+                                                        className="w-full mx-2 px-3 pe-6 text-neutral-600 bg-blue-50 border-2 border-blue-200 rounded-md border-dotted text-xs dark:text-zinc-300"
                                                     />
                                                 </div>
                                             ) : view === 'grading' ? (
@@ -508,10 +508,10 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
                                                                 (submission) => submission.questionUUID === question.questionUUID && submission.blankUUID === blank.blankUUID
                                                             )?.answer || ''}
                                                             readOnly
-                                                            className="flex-1 px-3 pe-6 text-neutral-600 bg-gray-50 border-2 border-gray-200 rounded-md text-sm font-bold"
+                                                            className="flex-1 px-3 pe-6 text-neutral-600 bg-gray-50 dark:bg-dk-inset/40 border-2 border-gray-200 dark:border-dk-line-strong rounded-md text-sm font-bold dark:text-zinc-300"
                                                         />
                                                     </div>
-                                                    <div className="mx-2 text-xs text-gray-600">
+                                                    <div className="mx-2 text-xs text-gray-600 dark:text-zinc-300">
                                                         <span className="font-semibold">Expected:</span> {blank.correctAnswer}
                                                     </div>
                                                     {blank.hint && (
@@ -530,7 +530,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
                                                         readOnly={submissionIsGraded}
                                                         placeholder={blank.placeholder}
                                                         data-blank-id={blank.blankUUID}
-                                                        className="w-full mx-2 px-3 pe-6 text-neutral-600 bg-[#00008b00] border-2 border-gray-200 rounded-md focus:border-blue-400 focus:ring-2 focus:ring-blue-200 text-sm font-bold transition-all"
+                                                        className="w-full mx-2 px-3 pe-6 text-neutral-600 bg-[#00008b00] border-2 border-gray-200 dark:border-dk-line-strong rounded-md focus:border-blue-400 focus:ring-2 focus:ring-blue-200 text-sm font-bold transition-all dark:text-zinc-300"
                                                     />
                                                     {showCorrectAnswers && (
                                                         <div className="mx-2 text-xs text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md inline-flex items-center space-x-1 w-fit">
@@ -596,7 +596,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
                                         {view === 'teacher' && bIndex === question.blanks.length - 1 && question.blanks.length <= 4 && (
                                             <div className="flex justify-center mx-auto px-2">
                                                 <div
-                                                    className="outline-3 outline-white px-2 shadow-sm w-full flex items-center h-[40px] hover:bg-opacity-100 hover:shadow-md rounded-lg bg-white duration-150 cursor-pointer ease-linear nice-shadow"
+                                                    className="outline-3 outline-white px-2 shadow-sm w-full flex items-center h-[40px] hover:bg-opacity-100 hover:shadow-md rounded-lg bg-white dark:bg-dk-card duration-150 cursor-pointer ease-linear nice-shadow"
                                                     onClick={() => addBlank(qIndex)}
                                                 >
                                                     <Plus size={14} className="inline-block" />
@@ -613,7 +613,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
                 {view === 'teacher' && questions.length <= 5 && (
                     <div className="flex justify-center mx-auto px-2">
                         <div
-                            className="flex w-full my-2 py-2 px-4 bg-white text-slate text-xs rounded-md nice-shadow hover:shadow-xs cursor-pointer space-x-3 items-center transition duration-150 ease-linear"
+                            className="flex w-full my-2 py-2 px-4 bg-white dark:bg-dk-card text-slate text-xs rounded-md nice-shadow hover:shadow-xs cursor-pointer space-x-3 items-center transition duration-150 ease-linear"
                             onClick={addQuestion}
                         >
                             <PlusCircle size={14} className="inline-block" />

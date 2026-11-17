@@ -119,16 +119,16 @@ export function CreateDiscussionCard({
           100% { opacity: 1; transform: translateY(0); }
         }
       `}</style>
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+      <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
         {/* Header with back button */}
         <div className="flex items-center gap-3 mb-5">
           <button
             onClick={onClose}
-            className="p-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+            className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-dk-raised text-gray-400 dark:text-dk-fg-3 hover:text-gray-600 dark:hover:text-dk-fg-1 transition-colors"
           >
             <ArrowLeft size={18} />
           </button>
-          <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500">
+          <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1">
             {t('communities.create_discussion.title')}
           </h2>
         </div>
@@ -136,7 +136,7 @@ export function CreateDiscussionCard({
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Category / Label */}
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-2 block">
+            <label className="text-sm font-medium text-gray-700 dark:text-dk-fg-1 mb-2 block">
               {t('communities.create_discussion.category_label')}
             </label>
             <div className="flex flex-wrap gap-1.5">
@@ -147,8 +147,8 @@ export function CreateDiscussionCard({
                   onClick={() => setSelectedLabel(label.id)}
                   className={`px-3 py-1.5 rounded-lg transition-all text-sm ${
                     selectedLabel === label.id
-                      ? 'bg-gray-100 text-gray-900 ring-1 ring-inset ring-gray-300'
-                      : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 ring-1 ring-inset ring-gray-200'
+                      ? 'bg-gray-100 dark:bg-dk-inset text-gray-900 dark:text-dk-fg-1 ring-1 ring-inset ring-gray-300'
+                      : 'text-gray-500 dark:text-dk-fg-3 hover:bg-gray-50 dark:hover:bg-dk-raised hover:text-gray-700 dark:hover:text-dk-fg-1 ring-1 ring-inset ring-gray-200'
                   }`}
                 >
                   {t(`communities.labels.${label.id}`)}
@@ -159,7 +159,7 @@ export function CreateDiscussionCard({
 
           {/* Title */}
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-2 block">
+            <label className="text-sm font-medium text-gray-700 dark:text-dk-fg-1 mb-2 block">
               Title
             </label>
             <input
@@ -176,7 +176,7 @@ export function CreateDiscussionCard({
 
           {/* Content */}
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-2 block">
+            <label className="text-sm font-medium text-gray-700 dark:text-dk-fg-1 mb-2 block">
               Details
             </label>
             <textarea
@@ -199,14 +199,14 @@ export function CreateDiscussionCard({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-md bg-gray-100 hover:bg-gray-200 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+              className="px-4 py-2 rounded-md bg-gray-100 dark:bg-dk-inset hover:bg-gray-200 text-sm text-gray-600 dark:text-dk-fg-2 hover:text-gray-800 transition-colors"
             >
               {t('communities.create_discussion.cancel')}
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-2 rounded-md bg-gray-900 hover:bg-gray-800 text-sm text-white font-medium disabled:opacity-50 transition-colors flex items-center gap-2"
+              className="px-4 py-2 rounded-md bg-gray-900 dark:bg-zinc-100 hover:bg-gray-800 dark:hover:bg-zinc-200 text-sm text-white dark:text-zinc-900 font-medium disabled:opacity-50 transition-colors flex items-center gap-2"
             >
               {isSubmitting ? (
                 <Loader2 size={14} className="animate-spin" />

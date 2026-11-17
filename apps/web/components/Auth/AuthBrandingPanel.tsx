@@ -39,7 +39,7 @@ export default function AuthBrandingPanel({ org }: AuthBrandingPanelProps) {
   }
 
   return (
-    <div className="relative w-full h-full overflow-hidden bg-gray-100">
+    <div className="relative w-full h-full overflow-hidden bg-gray-100 dark:bg-dk-inset">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={imageUrl}

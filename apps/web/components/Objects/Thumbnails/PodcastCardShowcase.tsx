@@ -49,14 +49,14 @@ function OptionA({ p }: { p: ShowcasePodcast }) {
   return (
     <Link
       href="#"
-      className="flex flex-col bg-white border border-[#E7E7E7] rounded-[12px] overflow-hidden transition-all duration-200 hover:-translate-y-[1px] hover:border-[#DADADA] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] group"
+      className="flex flex-col bg-white dark:bg-dk-card border border-[#E7E7E7] rounded-[12px] overflow-hidden transition-all duration-200 hover:-translate-y-[1px] hover:border-[#DADADA] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] group"
     >
       {/* 1:1 square cover art */}
-      <div className="relative overflow-hidden bg-gray-100 shrink-0" style={{ aspectRatio: '1/1' }}>
+      <div className="relative overflow-hidden bg-gray-100 dark:bg-dk-inset shrink-0" style={{ aspectRatio: '1/1' }}>
         {imageUrl ? (
           <img className="w-full h-full object-cover" src={imageUrl} alt={p.title} />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-300">
+          <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-zinc-600">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
               <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
@@ -65,7 +65,7 @@ function OptionA({ p }: { p: ShowcasePodcast }) {
         )}
         {/* Play button overlay on hover */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-          <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+          <div className="w-12 h-12 rounded-full bg-white/90 dark:bg-dk-card/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="black">
               <path d="M8 5v14l11-7z" />
             </svg>
@@ -74,8 +74,8 @@ function OptionA({ p }: { p: ShowcasePodcast }) {
       </div>
       {/* Minimal info */}
       <div className="px-3 pt-2.5 pb-3">
-        <h3 className="text-[14px] font-semibold leading-snug line-clamp-1 text-gray-900">{p.title}</h3>
-        <p className="text-[12px] text-gray-400 mt-0.5">
+        <h3 className="text-[14px] font-semibold leading-snug line-clamp-1 text-gray-900 dark:text-dk-fg-1">{p.title}</h3>
+        <p className="text-[12px] text-gray-400 dark:text-dk-fg-3 mt-0.5">
           {p.episodeCount} {p.episodeCount === 1 ? 'episode' : 'episodes'}
         </p>
       </div>
@@ -91,14 +91,14 @@ function OptionB({ p }: { p: ShowcasePodcast }) {
   return (
     <Link
       href="#"
-      className="flex gap-3 bg-white border border-[#E7E7E7] rounded-[12px] overflow-hidden transition-all duration-200 hover:-translate-y-[1px] hover:border-[#DADADA] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-3"
+      className="flex gap-3 bg-white dark:bg-dk-card border border-[#E7E7E7] rounded-[12px] overflow-hidden transition-all duration-200 hover:-translate-y-[1px] hover:border-[#DADADA] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] p-3"
     >
       {/* Small square thumbnail */}
-      <div className="w-[80px] h-[80px] shrink-0 rounded-lg overflow-hidden bg-gray-100">
+      <div className="w-[80px] h-[80px] shrink-0 rounded-lg overflow-hidden bg-gray-100 dark:bg-dk-inset">
         {imageUrl ? (
           <img className="w-full h-full object-cover" src={imageUrl} alt={p.title} />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-300">
+          <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-zinc-600">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
               <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
@@ -108,9 +108,9 @@ function OptionB({ p }: { p: ShowcasePodcast }) {
       </div>
       {/* Info */}
       <div className="flex flex-col justify-center min-w-0 flex-1">
-        <h3 className="text-[14px] font-semibold leading-snug line-clamp-1 text-gray-900">{p.title}</h3>
-        <p className="text-[12px] text-gray-500 line-clamp-1 mt-0.5">{p.description}</p>
-        <p className="text-[11px] text-gray-400 mt-1">
+        <h3 className="text-[14px] font-semibold leading-snug line-clamp-1 text-gray-900 dark:text-dk-fg-1">{p.title}</h3>
+        <p className="text-[12px] text-gray-500 dark:text-dk-fg-3 line-clamp-1 mt-0.5">{p.description}</p>
+        <p className="text-[11px] text-gray-400 dark:text-dk-fg-3 mt-1">
           {p.episodeCount} {p.episodeCount === 1 ? 'episode' : 'episodes'} &middot; {formatDuration(p.totalDurationSeconds)}
         </p>
       </div>
@@ -126,14 +126,14 @@ function OptionC({ p }: { p: ShowcasePodcast }) {
   return (
     <Link
       href="#"
-      className="flex flex-col bg-white border border-[#E7E7E7] rounded-[12px] overflow-hidden transition-all duration-200 hover:-translate-y-[1px] hover:border-[#DADADA] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] group"
+      className="flex flex-col bg-white dark:bg-dk-card border border-[#E7E7E7] rounded-[12px] overflow-hidden transition-all duration-200 hover:-translate-y-[1px] hover:border-[#DADADA] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] group"
     >
       {/* 16:9 thumbnail with badge */}
-      <div className="relative overflow-hidden bg-gray-100 shrink-0" style={{ aspectRatio: '16/9' }}>
+      <div className="relative overflow-hidden bg-gray-100 dark:bg-dk-inset shrink-0" style={{ aspectRatio: '16/9' }}>
         {imageUrl ? (
           <img className="w-full h-full object-cover" src={imageUrl} alt={p.title} />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-300">
+          <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-zinc-600">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
               <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
@@ -147,11 +147,11 @@ function OptionC({ p }: { p: ShowcasePodcast }) {
       </div>
       {/* Content with prominent metadata */}
       <div className="px-4 pt-3 pb-4 flex flex-col flex-1">
-        <h3 className="text-[16px] font-bold leading-snug line-clamp-2 text-gray-900">{p.title}</h3>
-        <p className="text-[13px] text-gray-500 mt-1 font-medium">
+        <h3 className="text-[16px] font-bold leading-snug line-clamp-2 text-gray-900 dark:text-dk-fg-1">{p.title}</h3>
+        <p className="text-[13px] text-gray-500 dark:text-dk-fg-3 mt-1 font-medium">
           {formatDuration(p.totalDurationSeconds)} total
         </p>
-        <p className="text-[12px] text-gray-400 mt-auto pt-2">
+        <p className="text-[12px] text-gray-400 dark:text-dk-fg-3 mt-auto pt-2">
           {p.creationDate ? `Updated ${formatDate(p.creationDate)}` : ''}
         </p>
       </div>
@@ -167,17 +167,17 @@ function OptionD({ p }: { p: ShowcasePodcast }) {
   return (
     <Link
       href="#"
-      className="flex flex-col bg-white border border-[#E7E7E7] rounded-[12px] overflow-hidden transition-all duration-200 hover:-translate-y-[1px] hover:border-[#DADADA] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] group"
+      className="flex flex-col bg-white dark:bg-dk-card border border-[#E7E7E7] rounded-[12px] overflow-hidden transition-all duration-200 hover:-translate-y-[1px] hover:border-[#DADADA] hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] group"
     >
       {/* Square thumbnail with gradient overlay */}
-      <div className="relative overflow-hidden bg-gray-100 shrink-0" style={{ aspectRatio: '1/1' }}>
+      <div className="relative overflow-hidden bg-gray-100 dark:bg-dk-inset shrink-0" style={{ aspectRatio: '1/1' }}>
         {imageUrl ? (
           <>
             <img className="w-full h-full object-cover" src={imageUrl} alt={p.title} />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
           </>
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-300">
+          <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-zinc-600">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
               <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
@@ -185,14 +185,14 @@ function OptionD({ p }: { p: ShowcasePodcast }) {
           </div>
         )}
         {/* Headphone icon badge */}
-        <div className="absolute top-2 start-2 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center">
+        <div className="absolute top-2 start-2 w-7 h-7 rounded-full bg-white/90 dark:bg-dk-card/90 flex items-center justify-center">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
             <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
           </svg>
         </div>
         {/* Play button */}
-        <div className="absolute bottom-2 end-2 w-8 h-8 rounded-full bg-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow">
+        <div className="absolute bottom-2 end-2 w-8 h-8 rounded-full bg-white/90 dark:bg-dk-card/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="black">
             <path d="M8 5v14l11-7z" />
           </svg>
@@ -200,8 +200,8 @@ function OptionD({ p }: { p: ShowcasePodcast }) {
       </div>
       {/* Content with accent bar */}
       <div className="px-3 pt-2.5 pb-3 flex flex-col gap-1">
-        <h3 className="text-[14px] font-semibold leading-snug line-clamp-2 text-gray-900">{p.title}</h3>
-        <p className="text-[12px] text-gray-400 line-clamp-1">
+        <h3 className="text-[14px] font-semibold leading-snug line-clamp-2 text-gray-900 dark:text-dk-fg-1">{p.title}</h3>
+        <p className="text-[12px] text-gray-400 dark:text-dk-fg-3 line-clamp-1">
           {p.episodeCount} {p.episodeCount === 1 ? 'episode' : 'episodes'} &middot; {formatDuration(p.totalDurationSeconds)}
         </p>
       </div>

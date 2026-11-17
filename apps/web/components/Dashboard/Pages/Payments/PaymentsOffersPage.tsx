@@ -327,15 +327,15 @@ export default function PaymentsOffersPage() {
             render: (row) => (
                 <div className="flex items-center gap-2.5 min-w-0">
                     {row.kind === 'course' ? (
-                        <BookOpen size={16} className="shrink-0 text-gray-400" />
+                        <BookOpen size={16} className="shrink-0 text-gray-400 dark:text-zinc-400" />
                     ) : row.kind === 'collection' ? (
-                        <Layers size={16} className="shrink-0 text-gray-400" />
+                        <Layers size={16} className="shrink-0 text-gray-400 dark:text-zinc-400" />
                     ) : (
-                        <Headphones size={16} className="shrink-0 text-gray-400" />
+                        <Headphones size={16} className="shrink-0 text-gray-400 dark:text-zinc-400" />
                     )}
-                    <span className="font-medium text-gray-900 truncate">{row.name}</span>
+                    <span className="font-medium text-gray-900 dark:text-zinc-100 truncate">{row.name}</span>
                     {!row.published && (
-                        <span className="text-[11px] text-gray-400 shrink-0">
+                        <span className="text-[11px] text-gray-400 dark:text-zinc-400 shrink-0">
                             {t('dashboard.payments.offers.draft')}
                         </span>
                     )}
@@ -347,7 +347,7 @@ export default function PaymentsOffersPage() {
             header: t('dashboard.payments.offers.table.type'),
             width: '130px',
             render: (row) => (
-                <span className="inline-flex items-center gap-1.5 text-gray-600">
+                <span className="inline-flex items-center gap-1.5 text-gray-600 dark:text-zinc-300">
                     <span className="w-2.5 h-2.5 rounded bg-gray-300" />
                     {row.kind === 'course'
                         ? t('dashboard.payments.offers.type_course')
@@ -362,7 +362,7 @@ export default function PaymentsOffersPage() {
             header: t('dashboard.payments.offers.table.access'),
             width: '130px',
             render: (row) => (
-                <span className="inline-flex items-center gap-1.5 text-gray-600">
+                <span className="inline-flex items-center gap-1.5 text-gray-600 dark:text-zinc-300">
                     <span className={`w-2.5 h-2.5 rounded ${ACCESS_DOT[row.access_type]}`} />
                     {accessLabel(row)}
                 </span>
@@ -381,9 +381,9 @@ export default function PaymentsOffersPage() {
                         placeholder="—"
                         inputMode="numeric"
                         aria-label={t('dashboard.payments.offers.table.price')}
-                        className="w-24 bg-transparent text-end text-sm text-gray-900 placeholder:text-gray-300 outline-none rounded-md px-1.5 py-0.5 tabular-nums transition-colors hover:bg-gray-50 focus:bg-white focus:ring-1 focus:ring-gray-200"
+                        className="w-24 bg-transparent text-end text-sm text-gray-900 dark:text-zinc-100 placeholder:text-gray-300 outline-none rounded-md px-1.5 py-0.5 tabular-nums transition-colors hover:bg-gray-50 dark:hover:bg-dk-raised focus:bg-white focus:ring-1 focus:ring-gray-200 dark:hover:bg-dk-raised/60"
                     />
-                    <span className="text-[11px] font-medium text-gray-400">DZD</span>
+                    <span className="text-[11px] font-medium text-gray-400 dark:text-zinc-400">DZD</span>
                 </div>
             ),
         },
@@ -393,7 +393,7 @@ export default function PaymentsOffersPage() {
             width: '140px',
             align: 'right',
             render: (row) => (
-                <span className="text-[13px] text-gray-400 whitespace-nowrap">
+                <span className="text-[13px] text-gray-400 dark:text-zinc-400 whitespace-nowrap">
                     {formatDate(row.creation_date)}
                 </span>
             ),
@@ -405,13 +405,13 @@ export default function PaymentsOffersPage() {
             {/* ── TOOLBAR ── */}
             <div className="flex items-center gap-3 mb-5">
                 <div className="relative w-80">
-                    <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                    <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-zinc-400 pointer-events-none" />
                     <input
                         type="text"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder={t('dashboard.payments.offers.search_placeholder')}
-                        className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
+                        className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 dark:text-zinc-200 bg-white dark:bg-dk-card shadow-borders-base rounded-md placeholder:text-gray-500 dark:placeholder:text-zinc-400 focus:outline-none"
                     />
                 </div>
 
@@ -420,8 +420,8 @@ export default function PaymentsOffersPage() {
                 <button
                     onClick={savePrices}
                     disabled={dirtyRows.length === 0 || saving}
-                    className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed ${
-                        justSaved ? 'text-emerald-600' : 'text-gray-600'
+                    className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white dark:bg-dk-card border-gray-200 dark:border-dk-line hover:bg-gray-50 dark:hover:bg-dk-raised disabled:opacity-50 disabled:cursor-not-allowed ${
+                        justSaved ? 'text-emerald-600' : 'text-gray-600 dark:text-zinc-300'
                     }`}
                 >
                     {saving ? (
@@ -441,7 +441,7 @@ export default function PaymentsOffersPage() {
                         <IconButton
                             size="small"
                             variant="transparent"
-                            className="bg-white hover:bg-gray-50 shadow-borders-base relative"
+                            className="bg-white dark:bg-dk-card hover:bg-gray-50 dark:hover:bg-dk-raised shadow-borders-base relative"
                             aria-label={t('dashboard.payments.offers.filter')}
                         >
                             <ConceptIcon.filter size={14} />
@@ -452,7 +452,7 @@ export default function PaymentsOffersPage() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                         align="end"
-                        className="min-w-[190px] rounded-lg border border-gray-200 bg-white p-1 shadow-md"
+                        className="min-w-[190px] rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card p-1 shadow-md"
                         sideOffset={6}
                     >
                         {/* Type */}
@@ -581,7 +581,7 @@ export default function PaymentsOffersPage() {
             ) : isInitialLoading ? (
                 <TableCard>
                     <div className="py-16 flex justify-center">
-                        <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+                        <Loader2 className="w-6 h-6 text-gray-400 dark:text-zinc-400 animate-spin" />
                     </div>
                 </TableCard>
             ) : resources.length === 0 ? (
@@ -609,7 +609,7 @@ export default function PaymentsOffersPage() {
 
 function MenuSectionLabel({ label }: { label: string }) {
     return (
-        <div className="px-2.5 pt-1.5 pb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+        <div className="px-2.5 pt-1.5 pb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-zinc-400">
             {label}
         </div>
     )
@@ -629,8 +629,8 @@ function FilterItem({
             onClick={onClick}
             className="justify-between text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
         >
-            <span className="text-gray-700 text-xs">{label}</span>
-            {active && <Check size={12} className="text-gray-500" />}
+            <span className="text-gray-700 dark:text-zinc-200 text-xs">{label}</span>
+            {active && <Check size={12} className="text-gray-500 dark:text-zinc-400" />}
         </DropdownMenuItem>
     )
 }

@@ -68,7 +68,7 @@ export default function CourseActivityTypeBreakdown({
             {/* Detail table */}
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-start text-xs text-gray-400 border-b border-gray-100">
+                <tr className="text-start text-xs text-gray-400 border-b border-gray-100 dark:border-dk-line">
                   <th className="pb-2 font-medium">{t('analytics.course_analytics.common.type')}</th>
                   <th className="pb-2 font-medium text-end">{t('analytics.course_analytics.common.views')}</th>
                   <th className="pb-2 font-medium text-end">{t('analytics.course_analytics.common.completions')}</th>
@@ -81,11 +81,11 @@ export default function CourseActivityTypeBreakdown({
                   const pct = totalViews > 0 ? Math.round((row.views / totalViews) * 100) : 0
                   return (
                     <tr key={i} className="border-b border-gray-50 last:border-0">
-                      <td className="py-2.5 font-medium text-gray-700 flex items-center gap-2">
+                      <td className="py-2.5 font-medium text-gray-700 flex items-center gap-2 dark:text-zinc-200">
                         <div className="w-3 h-3 rounded-sm" style={{ background: typeColor(row.activity_type) }} />
                         {getTypeLabel(row.activity_type)}
                       </td>
-                      <td className="py-2.5 text-end text-gray-600">{row.views}</td>
+                      <td className="py-2.5 text-end text-gray-600 dark:text-zinc-300">{row.views}</td>
                       <td className="py-2.5 text-end text-emerald-600 font-medium">{row.completions}</td>
                       <td className="py-2.5 text-end text-gray-500">{row.completion_rate}%</td>
                       <td className="py-2.5 text-end text-gray-400">{pct}%</td>
@@ -127,7 +127,7 @@ export default function CourseActivityTypeBreakdown({
               return (
                 <div key={i} className="flex items-center gap-2">
                   <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ background: typeColor(row.activity_type) }} />
-                  <span className="text-xs text-gray-600 flex-1">
+                  <span className="text-xs text-gray-600 flex-1 dark:text-zinc-300">
                     {getTypeLabel(row.activity_type)}
                   </span>
                   <span className="text-xs text-gray-400">{pct}%</span>

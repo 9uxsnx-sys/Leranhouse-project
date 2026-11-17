@@ -33,7 +33,7 @@ function TimeBar({
     <div className="flex items-center gap-3 py-1.5">
       <Link
         href={href}
-        className={`${compact ? 'w-[130px]' : 'w-[180px]'} shrink-0 text-sm text-gray-700 font-medium truncate hover:text-indigo-600 hover:underline transition-colors`}
+        className={`${compact ? 'w-[130px]' : 'w-[180px]'} shrink-0 text-sm text-gray-700 font-medium truncate hover:text-indigo-600 hover:underline transition-colors dark:text-zinc-200`}
         title={`${row.chapterName ? row.chapterName + ' — ' : ''}${row.displayName}`}
       >
         {row.displayName}
@@ -81,13 +81,13 @@ function TimeModalContent({
           <p className="text-[10px] uppercase tracking-wider text-amber-400 font-semibold">{t('analytics.overview.activities')}</p>
           <p className="text-2xl font-bold text-amber-600">{rows.length}</p>
         </div>
-        <div className="bg-gray-50 rounded-xl px-5 py-3">
+        <div className="bg-gray-50 rounded-xl px-5 py-3 dark:bg-dk-inset/40">
           <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.common.avg_time')}</p>
-          <p className="text-2xl font-bold text-gray-700">{formatDuration(overallAvg)}</p>
+          <p className="text-2xl font-bold text-gray-700 dark:text-zinc-200">{formatDuration(overallAvg)}</p>
         </div>
-        <div className="bg-gray-50 rounded-xl px-5 py-3">
+        <div className="bg-gray-50 rounded-xl px-5 py-3 dark:bg-dk-inset/40">
           <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.common.total_samples')}</p>
-          <p className="text-2xl font-bold text-gray-700">{totalSamples}</p>
+          <p className="text-2xl font-bold text-gray-700 dark:text-zinc-200">{totalSamples}</p>
         </div>
       </div>
       <div className="space-y-1">

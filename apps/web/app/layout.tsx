@@ -33,9 +33,20 @@ export default async function RootLayout({
   const language = localeCode(cookieStore.get('i18next')?.value) || 'en'
   const direction = getDirection(language)
 
+  // Theme is resolved on the server so `class="dark"` is on <html> in the very
+  // first byte — no flash of light theme. `system` cannot be known here, so a
+  // tiny blocking script resolves it before the body paints.
+  const themeCookie = cookieStore.get('lh_theme')?.value
+  const isDarkTheme = themeCookie === 'dark'
+  const isSystemTheme = themeCookie === 'system'
+
+  const htmlClassName = [inter.variable, notoArabic.variable, isDarkTheme ? 'dark' : '']
+    .filter(Boolean)
+    .join(' ')
+
   return (
     <html
-      className={`${inter.variable} ${notoArabic.variable}`}
+      className={htmlClassName}
       lang={language}
       dir={direction}
       suppressHydrationWarning
@@ -49,6 +60,14 @@ export default async function RootLayout({
             Reads the optional ?bgcolor param (hex-validated) or defaults to dark. */}
         {/* eslint-disable-next-line @next/next/no-sync-scripts */}
         <script src="/embed-bg.js" />
+        {/* `system` theme: resolve the OS preference before the body paints so
+            there is no flash. Kept in sync with ThemeContext. */}
+        {isSystemTheme && (
+          /* eslint-disable-next-line @next/next/no-sync-scripts */
+          <script dangerouslySetInnerHTML={{
+            __html: `(function(){try{var q=window.matchMedia('(prefers-color-scheme: dark)');document.documentElement.classList.toggle('dark',q.matches);}catch(e){}})();`,
+          }} />
+        )}
         {/* Suppress AbortErrors from the Next.js dev overlay.
             Critical insight from Next.js 16 source:
             - reportGlobalError captures the original window.reportError at MODULE LOAD TIME,

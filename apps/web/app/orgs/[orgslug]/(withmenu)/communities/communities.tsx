@@ -167,13 +167,13 @@ function CommunitiesClient(props: CommunitiesClientProps) {
           {/* Search + results count group (left side) */}
           <div className="flex items-center gap-3">
             <div className="relative w-80">
-              <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+              <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-dk-fg-3 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('communities.search_communities')}
-                className="w-full h-7 ps-8 pe-2 text-sm bg-white shadow-borders-base rounded-md placeholder:text-gray-400 focus:outline-none"
+                className="w-full h-7 ps-8 pe-2 text-sm text-gray-900 dark:text-dk-fg-1 bg-white dark:bg-dk-card shadow-borders-base rounded-md placeholder:text-gray-400 dark:placeholder:text-dk-fg-4 focus:outline-none"
               />
             </div>
 
@@ -197,22 +197,22 @@ function CommunitiesClient(props: CommunitiesClientProps) {
                 <span>{filterLabel}</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white min-w-0 w-40">
+            <DropdownMenuContent align="end" className="bg-white dark:bg-dk-raised min-w-0 w-40">
               <DropdownMenuItem onSelect={() => setActiveFilter('all')} className="flex items-center justify-between">
                 <span>{t('communities.all_communities')}</span>
-                {activeFilter === 'all' && <CheckSquare size={12} className="text-gray-500" />}
+                {activeFilter === 'all' && <CheckSquare size={12} className="text-gray-500 dark:text-dk-fg-3" />}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setActiveFilter('newest')} className="flex items-center justify-between">
                 <span>{t('communities.newest')}</span>
-                {activeFilter === 'newest' && <CheckSquare size={12} className="text-gray-500" />}
+                {activeFilter === 'newest' && <CheckSquare size={12} className="text-gray-500 dark:text-dk-fg-3" />}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setActiveFilter('course')} className="flex items-center justify-between">
                 <span>{t('communities.course_communities')}</span>
-                {activeFilter === 'course' && <CheckSquare size={12} className="text-gray-500" />}
+                {activeFilter === 'course' && <CheckSquare size={12} className="text-gray-500 dark:text-dk-fg-3" />}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setActiveFilter('podcast')} className="flex items-center justify-between">
                 <span>{t('communities.podcast_communities')}</span>
-                {activeFilter === 'podcast' && <CheckSquare size={12} className="text-gray-500" />}
+                {activeFilter === 'podcast' && <CheckSquare size={12} className="text-gray-500 dark:text-dk-fg-3" />}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

@@ -27,9 +27,9 @@ export function PodcastSidebar({ podcast }: PodcastSidebarProps) {
   return (
     <div className="space-y-4">
       {/* Container 1: Podcast Info — Card */}
-      <div className="rounded-xl bg-white border border-black/10 overflow-hidden">
+      <div className="rounded-xl bg-white dark:bg-dk-card border border-black/10 overflow-hidden">
         {/* 1:1 square thumbnail */}
-        <div className="aspect-[4/3] overflow-hidden bg-gray-50">
+        <div className="aspect-[4/3] overflow-hidden bg-gray-50 dark:bg-dk-inset/40">
           <img
             src={thumbnailUrl}
             alt={podcast.name}
@@ -38,11 +38,11 @@ export function PodcastSidebar({ podcast }: PodcastSidebarProps) {
         </div>
         {/* Title + description */}
         <div className="px-5 pt-4 pb-5">
-          <h3 dir="auto" className="text-base font-semibold text-gray-900">
+          <h3 dir="auto" className="text-base font-semibold text-gray-900 dark:text-dk-fg-1">
             {podcast.name}
           </h3>
           {podcast.description && (
-            <p dir="auto" className="text-sm text-gray-500 mt-1.5 leading-relaxed">
+            <p dir="auto" className="text-sm text-gray-500 dark:text-dk-fg-3 mt-1.5 leading-relaxed">
               {podcast.description}
             </p>
           )}
@@ -53,7 +53,7 @@ export function PodcastSidebar({ podcast }: PodcastSidebarProps) {
       <Container className="pt-6 pb-6">
         <Heading level="h3">Updates</Heading>
         <div className="mt-4">
-          <div className="relative ps-5 before:absolute before:start-[3px] before:top-2 before:bottom-2 before:w-px before:bg-gray-300 space-y-4">
+          <div className="relative ps-5 before:absolute before:start-[3px] before:top-2 before:bottom-2 before:w-px before:bg-gray-300 dark:before:bg-zinc-700 space-y-4">
             {MOCK_UPDATES.map((update, idx) => (
               <div key={idx} className="relative">
                 <Text weight="plus" size="small">{update.title}</Text>

@@ -29,7 +29,7 @@ function getFileIcon(ext: string) {
     return <Image size={16} className="text-green-500" />
   if (['mp3', 'wav'].includes(ext))
     return <Music size={16} className="text-purple-500" />
-  return <FileText size={16} className="text-gray-500" />
+  return <FileText size={16} className="text-gray-500 dark:text-dk-fg-3" />
 }
 
 function formatFileSize(bytes: number): string {
@@ -112,10 +112,10 @@ export default function MigrationDropZone({
         }
         className={`relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200 ${
           isDragging
-            ? 'border-black bg-gray-50 scale-[1.02]'
+            ? 'border-black bg-gray-50 dark:bg-dk-inset/40 scale-[1.02]'
             : files.length > 0
               ? 'border-green-300 bg-green-50'
-              : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+              : 'border-gray-200 dark:border-dk-line-strong hover:border-gray-300 dark:hover:border-dk-line-strong hover:bg-gray-50 dark:hover:bg-dk-raised'
         } ${uploading ? 'pointer-events-none opacity-50' : ''}`}
       >
         <input
@@ -133,10 +133,10 @@ export default function MigrationDropZone({
                 <Upload size={28} className="text-green-600" />
               </div>
               <div className="space-y-1">
-                <p className="font-semibold text-gray-900">
+                <p className="font-semibold text-gray-900 dark:text-dk-fg-1">
                   {files.length} {files.length === 1 ? 'file' : 'files'} selected
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-dk-fg-3">
                   {formatFileSize(files.reduce((sum, f) => sum + f.size, 0))} total
                 </p>
                 <p className="text-xs text-green-600 font-medium">
@@ -146,14 +146,14 @@ export default function MigrationDropZone({
             </>
           ) : (
             <>
-              <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center">
-                <Upload size={28} className="text-gray-400" />
+              <div className="w-14 h-14 rounded-full bg-gray-100 dark:bg-dk-inset flex items-center justify-center">
+                <Upload size={28} className="text-gray-400 dark:text-dk-fg-3" />
               </div>
               <div className="space-y-1">
-                <p className="font-medium text-gray-700">
+                <p className="font-medium text-gray-700 dark:text-dk-fg-1">
                   {t('migration.drop_files')}
                 </p>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-gray-400 dark:text-dk-fg-3">
                   {t('migration.accepted_formats')}
                 </p>
               </div>
@@ -173,14 +173,14 @@ export default function MigrationDropZone({
             return (
               <div
                 key={`${file.name}-${index}`}
-                className="flex items-center justify-between rounded-lg px-3 py-2 bg-gray-50 hover:bg-gray-100 transition-colors"
+                className="flex items-center justify-between rounded-lg px-3 py-2 bg-gray-50 dark:bg-dk-inset/40 hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors"
               >
                 <div className="flex items-center space-x-2.5 min-w-0">
                   {getFileIcon(ext)}
-                  <span className="text-sm text-gray-700 truncate">
+                  <span className="text-sm text-gray-700 dark:text-dk-fg-1 truncate">
                     {file.name}
                   </span>
-                  <span className="text-xs text-gray-400 flex-shrink-0">
+                  <span className="text-xs text-gray-400 dark:text-dk-fg-3 flex-shrink-0">
                     {formatFileSize(file.size)}
                   </span>
                 </div>
@@ -190,7 +190,7 @@ export default function MigrationDropZone({
                       e.stopPropagation()
                       removeFile(index)
                     }}
-                    className="text-gray-300 hover:text-red-500 flex-shrink-0 ms-2 transition-colors"
+                    className="text-gray-300 dark:text-zinc-600 hover:text-red-500 flex-shrink-0 ms-2 transition-colors"
                   >
                     <X size={14} />
                   </button>

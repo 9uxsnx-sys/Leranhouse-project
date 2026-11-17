@@ -72,7 +72,7 @@ export function CommentUpvoteButton({
         'flex items-center gap-1 px-2 py-1 rounded-md transition-all duration-200 text-xs',
         hasVoted
           ? 'bg-red-50 text-red-600 hover:bg-red-100'
-          : 'bg-gray-50 text-gray-500 hover:bg-gray-100',
+          : 'bg-gray-50 dark:bg-dk-inset/40 text-gray-500 dark:text-dk-fg-3 hover:bg-gray-100 dark:hover:bg-dk-raised',
         !canVote && 'opacity-50 cursor-not-allowed',
         isLoading && 'opacity-70'
       )}

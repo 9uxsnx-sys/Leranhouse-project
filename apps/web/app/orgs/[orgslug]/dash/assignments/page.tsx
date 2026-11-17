@@ -158,7 +158,7 @@ function AssignmentsHome() {
         {/* Stats bar */}
         <div className="flex flex-wrap gap-3">
           <StatPill
-            icon={<Backpack size={14} className="text-gray-500" />}
+            icon={<Backpack size={14} className="text-gray-500 dark:text-zinc-400" />}
             label={t('dashboard.assignments.home.stats.total')}
             value={stats.total}
           />
@@ -168,7 +168,7 @@ function AssignmentsHome() {
             value={stats.published}
           />
           <StatPill
-            icon={<EyeOff size={14} className="text-gray-500" />}
+            icon={<EyeOff size={14} className="text-gray-500 dark:text-zinc-400" />}
             label={t('dashboard.assignments.home.stats.drafts')}
             value={stats.drafts}
           />
@@ -183,18 +183,18 @@ function AssignmentsHome() {
         <div className='flex flex-col sm:flex-row gap-3 items-stretch sm:items-center'>
           {/* Search input */}
           <div className='relative flex-1 max-w-md'>
-            <Search size={14} className='absolute start-3 top-1/2 -translate-y-1/2 text-gray-400' />
+            <Search size={14} className='absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-400' />
             <input
               type='text'
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('dashboard.assignments.home.search_placeholder')}
-              className='w-full ps-9 pe-8 py-2 text-sm bg-white nice-shadow rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 placeholder:text-gray-400'
+              className='w-full ps-9 pe-8 py-2 text-sm bg-white dark:bg-dk-card nice-shadow rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 placeholder:text-gray-400 dark:placeholder:text-zinc-500'
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className='absolute end-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600'
+                className='absolute end-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200'
                 aria-label={t('common.aria.clear_search')}
               >
                 <X size={14} />
@@ -238,14 +238,14 @@ function AssignmentsHome() {
 
         {/* Content */}
         {!courseAssignments && (
-          <div className='flex items-center justify-center py-16 text-sm text-gray-400 font-medium'>
+          <div className='flex items-center justify-center py-16 text-sm text-gray-400 dark:text-zinc-400 font-medium'>
             {t('dashboard.assignments.home.loading')}
           </div>
         )}
 
         {courseAssignments && filteredCourseRows.length === 0 && (
-          <div className='flex flex-col items-center justify-center py-16 text-gray-400 gap-3'>
-            <div className='bg-gray-100 rounded-2xl p-4'>
+          <div className='flex flex-col items-center justify-center py-16 text-gray-400 dark:text-zinc-400 gap-3'>
+            <div className='bg-gray-100 dark:bg-dk-inset rounded-2xl p-4'>
               <Inbox size={28} />
             </div>
             <p className='text-sm font-semibold'>
@@ -260,7 +260,7 @@ function AssignmentsHome() {
                   setStatusFilter('all')
                   setAutoGradedOnly(false)
                 }}
-                className='text-xs text-gray-500 hover:text-gray-700 underline'
+                className='text-xs text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 underline'
               >
                 {t('dashboard.assignments.home.clear_filters')}
               </button>
@@ -284,7 +284,7 @@ function AssignmentsHome() {
 
         {/* Filter result summary */}
         {courseAssignments && filteredCourseRows.length > 0 && (
-          <p className='text-xs text-gray-400 pt-1'>
+          <p className='text-xs text-gray-400 dark:text-zinc-400 pt-1'>
             {t('dashboard.assignments.home.showing_count', {
               shown: filteredAssignmentTotal,
               total: stats.total,
@@ -308,12 +308,12 @@ function StatPill({
   value: number
 }) {
   return (
-    <div className='flex items-center gap-2 bg-white nice-shadow rounded-xl px-3.5 py-2'>
+    <div className='flex items-center gap-2 bg-white dark:bg-dk-card nice-shadow rounded-xl px-3.5 py-2'>
       {icon}
-      <span className='text-[10px] uppercase tracking-wider font-semibold text-gray-400'>
+      <span className='text-[10px] uppercase tracking-wider font-semibold text-gray-400 dark:text-zinc-400'>
         {label}
       </span>
-      <span className='text-sm font-bold text-gray-900'>{value}</span>
+      <span className='text-sm font-bold text-gray-900 dark:text-zinc-100'>{value}</span>
     </div>
   )
 }
@@ -335,7 +335,7 @@ function FilterPill({
     <button
       onClick={onClick}
       className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full transition-colors whitespace-nowrap ${
-        active ? activeClass : 'bg-white nice-shadow text-gray-600 hover:bg-gray-50'
+        active ? activeClass : 'bg-white dark:bg-dk-card nice-shadow text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised'
       }`}
     >
       {icon}
@@ -372,13 +372,13 @@ function CourseCard({
         <div className='flex items-center gap-3 min-w-0'>
           <MiniThumbnail course={course} />
           <div className='flex flex-col min-w-0'>
-            <span className='text-[10px] uppercase tracking-wider font-bold text-gray-400'>
+            <span className='text-[10px] uppercase tracking-wider font-bold text-gray-400 dark:text-zinc-400'>
               {t('dashboard.assignments.home.course_label')} · {assignments.length}
               {assignments.length !== originalCount && (
-                <span className='text-gray-300'> / {originalCount}</span>
+                <span className='text-gray-300 dark:text-zinc-600'> / {originalCount}</span>
               )}
             </span>
-            <p className='font-bold text-lg text-gray-900 truncate leading-tight'>
+            <p className='font-bold text-lg text-gray-900 dark:text-zinc-100 truncate leading-tight'>
               {course.name}
             </p>
           </div>
@@ -432,7 +432,7 @@ function AssignmentCard({
   }
 
   return (
-    <div className='group flex flex-col bg-white nice-shadow rounded-xl p-4 hover:bg-gray-50/40 transition-colors'>
+    <div className='group flex flex-col bg-white dark:bg-dk-card nice-shadow rounded-xl p-4 hover:bg-gray-50/40 transition-colors'>
       {/* Status indicator strip on the very top */}
       <div className='flex items-center justify-between mb-2'>
         {assignment.published ? (
@@ -441,13 +441,13 @@ function AssignmentCard({
             {t('dashboard.assignments.detail.publishing.published')}
           </span>
         ) : (
-          <span className='flex items-center gap-1 text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500'>
+          <span className='flex items-center gap-1 text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-gray-100 dark:bg-dk-inset text-gray-500 dark:text-zinc-400'>
             <EyeOff size={10} />
             {t('dashboard.assignments.detail.publishing.unpublished')}
           </span>
         )}
         {assignment.due_date && (
-          <span className='flex items-center gap-1 text-[10px] font-medium text-gray-500'>
+          <span className='flex items-center gap-1 text-[10px] font-medium text-gray-500 dark:text-zinc-400'>
             <Calendar size={11} />
             <span>{assignment.due_date}</span>
           </span>
@@ -458,13 +458,13 @@ function AssignmentCard({
       <Link
         href={editorHref}
         prefetch
-        className='block text-base font-bold text-gray-900 leading-tight hover:text-black mb-1 line-clamp-2 break-words'
+        className='block text-base font-bold text-gray-900 dark:text-zinc-100 leading-tight hover:text-black mb-1 line-clamp-2 break-words'
       >
         {assignment.title || t('dashboard.assignments.home.untitled')}
       </Link>
 
       {/* Description — fixed min-height so cards align even when one has no description */}
-      <p className='text-xs text-gray-500 line-clamp-2 min-h-[2rem] mb-3 break-words'>
+      <p className='text-xs text-gray-500 dark:text-zinc-400 line-clamp-2 min-h-[2rem] mb-3 break-words'>
         {assignment.description || ''}
       </p>
 
@@ -492,11 +492,11 @@ function AssignmentCard({
 
       {/* Footer actions — pinned to the bottom of the card. Restored to the
           classic white pill-with-nice-shadow look. */}
-      <div className='flex items-center gap-2 mt-auto pt-3 border-t border-gray-100'>
+      <div className='flex items-center gap-2 mt-auto pt-3 border-t border-gray-100 dark:border-dk-line'>
         <Link
           href={editorHref}
           prefetch
-          className='bg-white rounded-full flex space-x-1.5 nice-shadow items-center px-3 py-1 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors'
+          className='bg-white dark:bg-dk-card rounded-full flex space-x-1.5 nice-shadow items-center px-3 py-1 text-xs font-bold text-gray-700 dark:text-zinc-200 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors'
         >
           <Layers2 size={13} />
           <p>{t('dashboard.assignments.home.editor')}</p>
@@ -504,7 +504,7 @@ function AssignmentCard({
         <Link
           href={submissionsHref}
           prefetch
-          className='bg-white rounded-full flex space-x-1.5 nice-shadow items-center px-3 py-1 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors'
+          className='bg-white dark:bg-dk-card rounded-full flex space-x-1.5 nice-shadow items-center px-3 py-1 text-xs font-bold text-gray-700 dark:text-zinc-200 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors'
         >
           <UserRoundPen size={13} />
           <p>{t('dashboard.assignments.home.submissions')}</p>

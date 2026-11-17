@@ -114,8 +114,8 @@ export default function CourseAnalyticsTab({ courseUUID }: { courseUUID: string 
   if (analyticsStatus && !isConfigured) {
     return (
       <div className="flex flex-col items-center justify-center h-96 text-center p-6">
-        <div className="bg-white rounded-2xl border border-gray-100 p-10 max-w-md nice-shadow">
-          <h2 className="text-lg font-bold text-gray-900 mb-2">{t('analytics.course_analytics.not_configured_title')}</h2>
+        <div className="bg-white rounded-2xl border border-gray-100 p-10 max-w-md nice-shadow dark:bg-dk-card dark:border-dk-line">
+          <h2 className="text-lg font-bold text-gray-900 mb-2 dark:text-zinc-100">{t('analytics.course_analytics.not_configured_title')}</h2>
           <p className="text-sm text-gray-500 leading-relaxed">
             {t('analytics.course_analytics.not_configured_desc')}
           </p>
@@ -130,14 +130,14 @@ export default function CourseAnalyticsTab({ courseUUID }: { courseUUID: string 
     <div className="p-6 space-y-6 max-w-[1600px] mx-auto w-full">
       {/* Date range selector */}
       <div className="flex justify-end items-center gap-2">
-        <div className="flex gap-1 bg-gray-100 rounded-lg p-0.5">
+        <div className="flex gap-1 bg-gray-100 rounded-lg p-0.5 dark:bg-dk-inset">
           {DATE_RANGES.map((r) => (
             <button
               key={r.value}
               onClick={() => setDays(r.value)}
               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                 days === r.value
-                  ? 'bg-white text-gray-900 shadow-sm'
+                  ? 'bg-white text-gray-900 shadow-sm dark:bg-dk-card dark:text-zinc-100'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >

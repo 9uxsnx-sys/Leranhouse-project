@@ -46,7 +46,7 @@ export function RankedBars({ data, categoryKey, valueKey, height = 260, formatte
           width={axisWidth}
           tick={{ fontSize: 11, fill: t.axis }}
         />
-        <Tooltip content={<ChartTooltip formatter={formatter} />} cursor={{ fill: 'rgba(0,0,0,0.03)' }} />
+        <Tooltip content={<ChartTooltip formatter={formatter} />} cursor={{ fill: t.cursorFill }} />
         <Bar dataKey={valueKey} fill={t.primary} radius={[0, 4, 4, 0]} maxBarSize={18} />
       </BarChart>
     </ResponsiveContainer>

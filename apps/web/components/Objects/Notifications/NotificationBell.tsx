@@ -167,12 +167,12 @@ export function NotificationBell() {
         <DropdownMenuTrigger asChild>
           <button
             type="button"
-            className="relative inline-flex h-7 w-7 items-center justify-center rounded-md text-ui-fg-muted hover:bg-gray-100 hover:text-ui-fg-subtle transition-colors focus:outline-none [&_svg]:w-4 [&_svg]:h-4"
+            className="relative inline-flex h-7 w-7 items-center justify-center rounded-md text-ui-fg-muted hover:bg-gray-100 dark:hover:bg-dk-raised hover:text-ui-fg-subtle transition-colors focus:outline-none [&_svg]:w-4 [&_svg]:h-4"
             aria-label={t('common.notifications', 'Notifications')}
           >
             {unreadCount > 0 ? <BellAlertDone /> : <BellAlert />}
             {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -end-0.5 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-gray-900 text-white text-[10px] font-semibold leading-none">
+              <span className="absolute -top-0.5 -end-0.5 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-gray-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-[10px] font-semibold leading-none">
                 {unreadCount > 99 ? '99+' : unreadCount}
               </span>
             )}
@@ -182,7 +182,7 @@ export function NotificationBell() {
         <DropdownMenuContent
           align="end"
           sideOffset={8}
-          className="w-[360px] p-0 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-md"
+          className="w-[360px] p-0 overflow-hidden rounded-xl border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card shadow-md"
         >
           {/* Header */}
           <div className="flex items-center justify-between gap-3 px-4 pt-4 pb-2">
@@ -193,7 +193,7 @@ export function NotificationBell() {
               type="button"
               onClick={handleMarkAllRead}
               disabled={markingAll || unreadCount === 0}
-              className="text-xs font-medium text-gray-500 hover:text-gray-800 disabled:opacity-40 disabled:cursor-default transition-colors"
+              className="text-xs font-medium text-gray-500 dark:text-dk-fg-3 hover:text-gray-800 disabled:opacity-40 disabled:cursor-default transition-colors"
             >
               {markingAll ? 'Marking…' : 'Mark all read'}
             </button>
@@ -203,7 +203,7 @@ export function NotificationBell() {
           <div className="max-h-[360px] overflow-y-auto overscroll-contain p-1">
             {items.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
-                <BellAlert className="w-8 h-8 text-gray-300 mb-3" />
+                <BellAlert className="w-8 h-8 text-gray-300 dark:text-zinc-600 mb-3" />
                 <p className="text-sm text-ui-fg-muted">
                   {t('notifications.page.empty_title', 'No notifications yet')}
                 </p>
@@ -216,10 +216,10 @@ export function NotificationBell() {
                     key={notif.id}
                     type="button"
                     onClick={() => handleSelect(notif)}
-                    className="w-full text-start px-3 py-3 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="w-full text-start px-3 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors"
                   >
                     <div className="flex items-start gap-3">
-                      <span className="shrink-0 w-7 h-7 rounded-full bg-gray-100 text-gray-500 flex items-center justify-center [&_svg]:w-3.5 [&_svg]:h-3.5">
+                      <span className="shrink-0 w-7 h-7 rounded-full bg-gray-100 dark:bg-dk-inset text-gray-500 dark:text-dk-fg-3 flex items-center justify-center [&_svg]:w-3.5 [&_svg]:h-3.5">
                         {categoryIcon(notif.category)}
                       </span>
 
@@ -227,19 +227,19 @@ export function NotificationBell() {
                         <span
                           className={cn(
                             'block text-sm leading-5 truncate',
-                            read ? 'text-gray-600' : 'font-medium text-ui-fg-base'
+                            read ? 'text-gray-600 dark:text-dk-fg-2' : 'font-medium text-ui-fg-base'
                           )}
                         >
                           {notif.title || notif.event_type}
                         </span>
-                        <span className="mt-1 flex items-center gap-2 text-[11px] leading-4 text-gray-500">
+                        <span className="mt-1 flex items-center gap-2 text-[11px] leading-4 text-gray-500 dark:text-dk-fg-3">
                           <span>{formatRelative(notif.created_at)}</span>
                           <span className="truncate">{categoryLabel(notif.category)}</span>
                         </span>
                       </span>
 
                       {!read && (
-                        <span className="mt-2 w-1.5 h-1.5 rounded-full bg-gray-900 shrink-0" />
+                        <span className="mt-2 w-1.5 h-1.5 rounded-full bg-gray-900 dark:bg-zinc-100 shrink-0" />
                       )}
                     </div>
                   </button>
@@ -278,7 +278,7 @@ export function NotificationBell() {
                       .split(/\n{2,}/)
                       .filter(Boolean)
                       .map((paragraph, index) => (
-                        <p key={index} className="text-[15px] text-gray-600 leading-7 text-pretty">
+                        <p key={index} className="text-[15px] text-gray-600 dark:text-dk-fg-2 leading-7 text-pretty">
                           {paragraph}
                         </p>
                       ))}

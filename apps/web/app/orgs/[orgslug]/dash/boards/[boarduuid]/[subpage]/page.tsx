@@ -67,7 +67,7 @@ function BoardSettingsPage(props: { params: Promise<BoardSettingsParams> }) {
 
   if (isLoading || !board) {
     return (
-      <div className="h-screen w-full bg-[#f8f8f8] flex items-center justify-center">
+      <div className="h-screen w-full bg-[#f8f8f8] dark:bg-transparent flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
       </div>
     )
@@ -78,7 +78,7 @@ function BoardSettingsPage(props: { params: Promise<BoardSettingsParams> }) {
     : '/empty_thumbnail.png'
 
   return (
-    <div className="h-screen w-full bg-[#f8f8f8] grid grid-rows-[auto_1fr]">
+    <div className="h-screen w-full bg-[#f8f8f8] dark:bg-transparent grid grid-rows-[auto_1fr]">
       {/* Top bar with board info and tabs */}
       <div className="pl-10 pr-10 text-sm tracking-tight bg-[#fcfbfc] z-10 nice-shadow relative">
         {/* Board info row */}
@@ -92,7 +92,7 @@ function BoardSettingsPage(props: { params: Promise<BoardSettingsParams> }) {
               />
             </Link>
             <div className="flex flex-col justify-center pl-5">
-              <div className="text-gray-400 font-semibold text-sm">Board Settings</div>
+              <div className="text-gray-400 dark:text-zinc-400 font-semibold text-sm">Board Settings</div>
               <div className="text-black font-bold text-xl -mt-1 first-letter:uppercase">
                 {board.name}
               </div>

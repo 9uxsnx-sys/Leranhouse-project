@@ -139,13 +139,13 @@ function Trail(params: any) {
           <div className="flex items-center gap-3 mb-8">
             <div className="flex items-center gap-3">
               <div className="relative w-80">
-                <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-dk-fg-3 pointer-events-none" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t('trail.search_placeholder')}
-                  className="w-full h-7 ps-8 pe-2 text-sm bg-white shadow-borders-base rounded-md placeholder:text-gray-400 focus:outline-none"
+                  className="w-full h-7 ps-8 pe-2 text-sm text-gray-900 dark:text-dk-fg-1 bg-white dark:bg-dk-card shadow-borders-base rounded-md placeholder:text-gray-400 dark:placeholder:text-dk-fg-4 focus:outline-none"
                 />
               </div>
               {searchQuery && (
@@ -157,11 +157,11 @@ function Trail(params: any) {
             <div className="flex-1" />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 focus-visible:ring-0 shadow-borders-base" aria-label={t('trail.filter')}>
+                <IconButton size="small" variant="transparent" className="bg-white dark:bg-dk-card hover:bg-gray-50 dark:hover:bg-dk-raised focus-visible:ring-0 shadow-borders-base" aria-label={t('trail.filter')}>
                   <SlidersHorizontal size={15} />
                 </IconButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-white min-w-0 w-32">
+              <DropdownMenuContent align="end" className="bg-white dark:bg-dk-raised min-w-0 w-32">
                 <DropdownMenuItem onSelect={() => setFilterStatus('all')}>
                   {filterStatus === 'all' && <span className="text-indigo-600 me-1.5">✓</span>}{t('trail.all')}
                 </DropdownMenuItem>
@@ -187,14 +187,14 @@ function Trail(params: any) {
           {!trail ? (
             <PageLoading />
           ) : filteredRuns.length === 0 && !searchQuery && filterStatus === 'all' ? (
-            <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/30">
-              <div className="p-4 bg-white rounded-full nice-shadow mb-4">
-                <BookOpen className="w-8 h-8 text-gray-300" strokeWidth={1.5} />
+            <div className="col-span-full flex flex-col justify-center items-center py-12 px-4 border-2 border-dashed border-gray-100 dark:border-dk-line rounded-2xl bg-gray-50/30 dark:bg-dk-inset/40">
+              <div className="p-4 bg-white dark:bg-dk-card rounded-full nice-shadow mb-4">
+                <BookOpen className="w-8 h-8 text-gray-300 dark:text-zinc-600" strokeWidth={1.5} />
               </div>
-              <h1 className="text-xl font-bold text-gray-600 mb-2">
+              <h1 className="text-xl font-bold text-gray-600 dark:text-dk-fg-2 mb-2">
                 {t('user.no_courses_in_progress')}
               </h1>
-              <p className="text-md text-gray-400 mb-6 text-center max-w-xs">
+              <p className="text-md text-gray-400 dark:text-dk-fg-3 mb-6 text-center max-w-xs">
                 {t('user.start_course_to_see_progress')}
               </p>
             </div>
@@ -243,7 +243,7 @@ function Trail(params: any) {
                       onClick={() => goToPage(page as number)}
                       className={`w-7 h-7 txt-compact-small-plus rounded-md transition-colors ${
                         currentPage === page
-                          ? 'bg-ui-bg-base shadow-borders-base text-ui-fg-base'
+                          ? 'bg-ui-bg-base shadow-borders-base text-ui-fg-base dark:bg-dk-raised'
                           : 'text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-base-hover'
                       }`}
                     >

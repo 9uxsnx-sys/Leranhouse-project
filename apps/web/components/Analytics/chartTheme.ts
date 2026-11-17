@@ -16,13 +16,16 @@
  */
 import { useEffect, useMemo, useState } from 'react'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { isLightColor, normalizeBrandColor } from '@services/utils/ts/colorUtils'
+import { useTheme } from '@components/Contexts/ThemeContext'
+import { deriveDarkBrand, isLightColor, normalizeBrandColor } from '@services/utils/ts/colorUtils'
 
 export interface ChartTheme {
   primary: string
   primarySoft: string
   grid: string
   axis: string
+  /** Hover band behind the active bar/tick — dark on light, light on dark. */
+  cursorFill: string
   positive: string
   negative: string
   categorical: string[]
@@ -30,8 +33,12 @@ export interface ChartTheme {
 
 const GRID = '#e4e4e7'
 const AXIS = '#71717a'
+const GRID_DARK = '#2f2f35'
+const AXIS_DARK = '#a1a1aa'
 const POSITIVE = '#10b981'
 const NEGATIVE = '#f43f5e'
+const POSITIVE_DARK = '#34d399'
+const NEGATIVE_DARK = '#fb7185'
 
 type Rgb = { r: number; g: number; b: number }
 const WHITE: Rgb = { r: 255, g: 255, b: 255 }
@@ -97,14 +104,20 @@ export function buildBrandRamp(brand: string): string[] {
 
 export function useChartTheme(): ChartTheme {
   const org = useOrg() as any
+  const { resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === 'dark'
   const orgConfig = org?.config?.config
   const brand = normalizeBrandColor(
     orgConfig?.customization?.general?.color || orgConfig?.general?.color || ''
   )
 
-  const [neutrals, setNeutrals] = useState({ grid: GRID, axis: AXIS })
+  const [neutrals, setNeutrals] = useState({
+    grid: isDark ? GRID_DARK : GRID,
+    axis: isDark ? AXIS_DARK : AXIS,
+  })
 
   // Grid and axis stay neutral tokens; they are not part of the brand signal.
+  // Re-read on theme change so the chart does not keep light-mode greys.
   useEffect(() => {
     try {
       const s = getComputedStyle(document.documentElement)
@@ -112,24 +125,47 @@ export function useChartTheme(): ChartTheme {
         const raw = s.getPropertyValue(name).trim()
         return raw ? `hsl(${raw})` : fallback
       }
-      setNeutrals({ grid: hsl('--border', GRID), axis: hsl('--muted-foreground', AXIS) })
+      setNeutrals({
+        grid: hsl('--border', isDark ? GRID_DARK : GRID),
+        axis: hsl('--muted-foreground', isDark ? AXIS_DARK : AXIS),
+      })
     } catch {
       /* SSR / no document — keep fallbacks */
     }
-  }, [])
+  }, [isDark])
 
   return useMemo(() => {
+    if (isDark) {
+      // A dark surface needs the lifted brand and a slightly brighter ramp.
+      // `chartPrimary`'s near-white darkening is skipped: on dark it would
+      // push the fill toward the surface instead of away from it.
+      const base = deriveDarkBrand(brand)
+      return {
+        primary: base,
+        primarySoft: withAlpha(base, 0.18),
+        grid: neutrals.grid,
+        axis: neutrals.axis,
+        cursorFill: 'rgba(255, 255, 255, 0.05)',
+        positive: POSITIVE_DARK,
+        negative: NEGATIVE_DARK,
+        categorical: [0, 0.18, 0.34, 0.5, 0.64].map((amount) =>
+          amount === 0 ? base : blend(base, WHITE, amount)
+        ),
+      }
+    }
+
     const primary = chartPrimary(brand)
     return {
       primary,
       primarySoft: withAlpha(primary, 0.12),
       grid: neutrals.grid,
       axis: neutrals.axis,
+      cursorFill: 'rgba(0, 0, 0, 0.03)',
       positive: POSITIVE,
       negative: NEGATIVE,
       categorical: buildBrandRamp(brand),
     }
-  }, [brand, neutrals.grid, neutrals.axis])
+  }, [brand, isDark, neutrals.grid, neutrals.axis])
 }
 
 export function formatNumber(n: number): string {

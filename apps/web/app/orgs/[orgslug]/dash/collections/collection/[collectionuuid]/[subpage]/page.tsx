@@ -81,21 +81,21 @@ function CollectionEditorPage(props: { params: Promise<CollectionEditorParams> }
 
   if (adminLoading || isLoading) {
     return (
-      <div className="h-screen w-full bg-[#f8f8f8] flex items-center justify-center">
-        <Loader2 className="h-8 w-8 text-gray-400 animate-spin" />
+      <div className="h-screen w-full bg-[#f8f8f8] dark:bg-transparent flex items-center justify-center">
+        <Loader2 className="h-8 w-8 text-gray-400 dark:text-zinc-400 animate-spin" />
       </div>
     )
   }
 
   if (error || !collection) {
     return (
-      <div className="h-screen w-full bg-[#f8f8f8] flex items-center justify-center">
+      <div className="h-screen w-full bg-[#f8f8f8] dark:bg-transparent flex items-center justify-center">
         <div className="text-center">
-          <Lock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <Lock className="mx-auto h-12 w-12 text-gray-400 dark:text-zinc-400 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-zinc-100 mb-2">
             {t('collections.dashboard.not_found_title')}
           </h3>
-          <p className="text-gray-500">
+          <p className="text-gray-500 dark:text-zinc-400">
             {error?.status === 403
               ? t('collections.dashboard.forbidden')
               : t('collections.dashboard.not_found_description')}
@@ -108,7 +108,7 @@ function CollectionEditorPage(props: { params: Promise<CollectionEditorParams> }
   const canEdit = isAdmin || org?.is_admin
 
   return (
-    <div className="min-h-screen w-full bg-[#f8f8f8]">
+    <div className="min-h-screen w-full bg-[#f8f8f8] dark:bg-transparent">
       <div className="max-w-7xl mx-auto w-full pt-8 px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl md:text-4xl font-semibold text-ui-fg-base leading-tight">
           {collection.name}
@@ -132,7 +132,7 @@ function CollectionEditorPage(props: { params: Promise<CollectionEditorParams> }
       <div className="w-full mx-auto max-w-7xl mt-8 pb-10 px-4 sm:px-6 lg:px-8">
         <main className="max-w-7xl mx-auto">
           {!canEdit ? (
-            <div className="text-center py-24 text-gray-500">
+            <div className="text-center py-24 text-gray-500 dark:text-zinc-400">
               {t('collections.dashboard.forbidden')}
             </div>
           ) : (

@@ -70,10 +70,10 @@ function AssignmentTasks({ assignment_uuid }: any) {
 
                 {tasks.length > 0 && (
                     <div className='px-1 pt-1 pb-0.5 flex items-center justify-between'>
-                        <span className='text-[10px] font-semibold text-gray-400 uppercase tracking-wider'>
+                        <span className='text-[10px] font-semibold text-gray-400 dark:text-zinc-400 uppercase tracking-wider'>
                             {t('dashboard.assignments.editor.tasks_count', { count: tasks.length })}
                         </span>
-                        <span className='text-[10px] font-medium text-gray-300'>{t('dashboard.assignments.editor.newest_first')}</span>
+                        <span className='text-[10px] font-medium text-gray-300 dark:text-zinc-600'>{t('dashboard.assignments.editor.newest_first')}</span>
                     </div>
                 )}
 
@@ -96,8 +96,8 @@ function AssignmentTasks({ assignment_uuid }: any) {
                             onClick={() => setSelectTask(task.assignment_task_uuid)}
                             className={`group relative text-start rounded-xl border transition-all overflow-hidden
                                 ${isSelected
-                                    ? 'border-gray-900 bg-white shadow-[0_4px_14px_rgba(15,23,42,0.08)]'
-                                    : 'border-gray-100 bg-white hover:border-gray-200 hover:shadow-[0_2px_8px_rgba(15,23,42,0.05)]'}
+                                    ? 'border-gray-900 bg-white dark:bg-dk-card shadow-[0_4px_14px_rgba(15,23,42,0.08)]'
+                                    : 'border-gray-100 dark:border-dk-line bg-white dark:bg-dk-card hover:border-gray-200 hover:shadow-[0_2px_8px_rgba(15,23,42,0.05)]'}
                             `}
                         >
                             {/* Accent bar when selected */}
@@ -111,35 +111,35 @@ function AssignmentTasks({ assignment_uuid }: any) {
                             <div className='p-3 ps-[14px]'>
                                 {/* Meta row */}
                                 <div className='flex items-center justify-between mb-1.5'>
-                                    <div className='flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400'>
-                                        <span className='inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-100 text-gray-500 font-bold'>
+                                    <div className='flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-zinc-400'>
+                                        <span className='inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-100 dark:bg-dk-inset text-gray-500 dark:text-zinc-400 font-bold'>
                                             {position}
                                         </span>
                                         <span>{typeLabel}</span>
                                     </div>
-                                    <Icon size={13} className='text-gray-300' />
+                                    <Icon size={13} className='text-gray-300 dark:text-zinc-600' />
                                 </div>
 
                                 {/* Title */}
-                                <div className='text-sm font-semibold text-gray-800 leading-snug break-words'>
-                                    {task.title || <span className='text-gray-300 italic font-normal'>{t('dashboard.assignments.editor.untitled_task')}</span>}
+                                <div className='text-sm font-semibold text-gray-800 dark:text-zinc-200 leading-snug break-words'>
+                                    {task.title || <span className='text-gray-300 dark:text-zinc-600 italic font-normal'>{t('dashboard.assignments.editor.untitled_task')}</span>}
                                 </div>
 
                                 {/* Description */}
                                 {descriptionPreview && (
-                                    <p className='mt-1.5 text-xs text-gray-500 leading-relaxed line-clamp-2'>
+                                    <p className='mt-1.5 text-xs text-gray-500 dark:text-zinc-400 leading-relaxed line-clamp-2'>
                                         {descriptionPreview}
                                     </p>
                                 )}
 
                                 {/* Footer */}
-                                <div className='mt-2.5 pt-2 border-t border-gray-50 flex items-center justify-between text-[11px] text-gray-400'>
+                                <div className='mt-2.5 pt-2 border-t border-gray-50 flex items-center justify-between text-[11px] text-gray-400 dark:text-zinc-400'>
                                     <div className='flex items-center gap-1'>
                                         <Clock size={10} />
                                         <span>{createdLabel ?? '—'}</span>
                                     </div>
                                     {typeof task.max_grade_value === 'number' && task.max_grade_value !== 100 && (
-                                        <span className='font-medium text-gray-500'>{t('dashboard.assignments.editor.out_of', { points: task.max_grade_value })}</span>
+                                        <span className='font-medium text-gray-500 dark:text-zinc-400'>{t('dashboard.assignments.editor.out_of', { points: task.max_grade_value })}</span>
                                     )}
                                 </div>
                             </div>
@@ -148,8 +148,8 @@ function AssignmentTasks({ assignment_uuid }: any) {
                 })}
 
                 {tasks.length === 0 && assignments && (
-                    <div className='rounded-xl border border-dashed border-gray-200 bg-gray-50/50 px-4 py-8 text-center'>
-                        <div className='text-xs text-gray-400'>{t('dashboard.assignments.editor.no_tasks')}</div>
+                    <div className='rounded-xl border border-dashed border-gray-200 dark:border-dk-line-strong bg-gray-50/50 dark:bg-dk-inset/40 px-4 py-8 text-center'>
+                        <div className='text-xs text-gray-400 dark:text-zinc-400'>{t('dashboard.assignments.editor.no_tasks')}</div>
                     </div>
                 )}
             </div>

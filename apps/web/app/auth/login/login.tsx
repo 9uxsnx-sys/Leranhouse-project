@@ -311,10 +311,10 @@ const LoginClient = (props: LoginClientProps) => {
       {/* Divider */}
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-100" />
+          <div className="w-full border-t border-gray-100 dark:border-dk-line" />
         </div>
         <div className="relative flex justify-center text-xs">
-          <span className="px-3 bg-white text-gray-400">{t('common.or')}</span>
+          <span className="px-3 bg-white dark:bg-dk-card text-gray-400 dark:text-zinc-400">{t('common.or')}</span>
         </div>
       </div>
 
@@ -347,9 +347,9 @@ const LoginClient = (props: LoginClientProps) => {
       </div>
 
       {/* Sign up */}
-      <p className="text-center text-sm text-gray-500 mt-6">
+      <p className="text-center text-sm text-gray-500 dark:text-zinc-400 mt-6">
         {t('auth.no_account')}{' '}
-        <Link href="/signup" className="font-semibold text-gray-900 hover:underline">
+        <Link href="/signup" className="font-semibold text-gray-900 dark:text-zinc-100 hover:underline">
           {t('auth.sign_up')}
         </Link>
       </p>

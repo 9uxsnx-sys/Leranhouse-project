@@ -98,7 +98,7 @@ export function PlaygroundReactionButton({ playgroundUuid }: PlaygroundReactionB
                     className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium transition-all border ${
                       existing?.has_reacted
                         ? 'bg-indigo-100 border-indigo-300 text-indigo-700'
-                        : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                        : 'bg-gray-50 dark:bg-dk-inset/40 border-gray-200 dark:border-dk-line-strong text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-dk-raised'
                     } ${!isAuthenticated ? 'cursor-default' : 'cursor-pointer'}`}
                   >
                     <span className="text-base leading-none">{emoji}</span>
@@ -121,7 +121,7 @@ export function PlaygroundReactionButton({ playgroundUuid }: PlaygroundReactionB
             <Popover open={isPickerOpen} onOpenChange={setIsPickerOpen}>
               <PopoverTrigger asChild>
                 <button
-                  className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-dashed border-gray-300 text-gray-400 hover:border-gray-400 hover:text-gray-500 hover:bg-gray-50 transition-colors"
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-dashed border-gray-300 dark:border-dk-line-strong text-gray-400 dark:text-zinc-400 hover:border-gray-400 hover:text-gray-500 dark:hover:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors"
                   title="More reactions"
                 >
                   <SmilePlus size={15} />
@@ -142,7 +142,7 @@ export function PlaygroundReactionButton({ playgroundUuid }: PlaygroundReactionB
                         onClick={() => handleToggle(emoji)}
                         disabled={isLoading}
                         className={`w-9 h-9 flex items-center justify-center text-xl rounded-lg transition-colors ${
-                          existing?.has_reacted ? 'bg-indigo-100' : 'hover:bg-gray-100'
+                          existing?.has_reacted ? 'bg-indigo-100' : 'hover:bg-gray-100 dark:hover:bg-dk-raised'
                         }`}
                       >
                         {emoji}
@@ -167,7 +167,7 @@ export function PlaygroundReactionButton({ playgroundUuid }: PlaygroundReactionB
                     className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-medium transition-all border ${
                       reaction.has_reacted
                         ? 'bg-indigo-100 border-indigo-300 text-indigo-700'
-                        : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                        : 'bg-gray-50 dark:bg-dk-inset/40 border-gray-200 dark:border-dk-line-strong text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-dk-raised'
                     } ${!isAuthenticated ? 'cursor-default' : 'cursor-pointer'}`}
                   >
                     <span className="text-base leading-none">{reaction.emoji}</span>

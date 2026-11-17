@@ -25,7 +25,7 @@ function DropoffRow({
     <div className="flex items-center gap-3 py-1.5">
       <Link
         href={href}
-        className={`${compact ? 'w-[130px]' : 'w-[180px]'} shrink-0 text-sm text-gray-700 font-medium truncate hover:text-rose-600 hover:underline transition-colors`}
+        className={`${compact ? 'w-[130px]' : 'w-[180px]'} shrink-0 text-sm text-gray-700 font-medium truncate hover:text-rose-600 hover:underline transition-colors dark:text-zinc-200`}
         title={`${row.chapterName ? row.chapterName + ' — ' : ''}${row.displayName}`}
       >
         {row.displayName}
@@ -71,9 +71,9 @@ function DropoffModalContent({
           <p className="text-[10px] uppercase tracking-wider text-rose-400 font-semibold">{t('analytics.course_analytics.activity_dropoff.total_dropoffs')}</p>
           <p className="text-2xl font-bold text-rose-600">{totalDropoffs}</p>
         </div>
-        <div className="bg-gray-50 rounded-xl px-5 py-3">
+        <div className="bg-gray-50 rounded-xl px-5 py-3 dark:bg-dk-inset/40">
           <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.activity_dropoff.dropoff_points')}</p>
-          <p className="text-2xl font-bold text-gray-700">{rows.length}</p>
+          <p className="text-2xl font-bold text-gray-700 dark:text-zinc-200">{rows.length}</p>
         </div>
       </div>
       <div className="space-y-1">

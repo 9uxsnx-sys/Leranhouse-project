@@ -66,7 +66,7 @@ export default function AnalyticsTabs() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-[#f8f8f8]">
+    <div className="min-h-screen w-full bg-[#f8f8f8] dark:bg-transparent">
       {/* Row 1: Page title */}
       <div className="max-w-7xl mx-auto w-full pt-8 px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl md:text-4xl font-semibold text-ui-fg-base leading-tight">{t('analytics.title')}</h1>
@@ -103,7 +103,7 @@ export default function AnalyticsTabs() {
                   type="button"
                   onClick={() => setCommunityTable((i) => (i + 1) % COMMUNITY_TABLES.length)}
                   title={t('analytics.learners_tab.switch_table')}
-                  className="inline-flex items-center gap-1.5 h-7 px-3 text-sm text-gray-700 bg-white shadow-borders-base rounded-md hover:bg-gray-50 focus:outline-none transition-colors"
+                  className="inline-flex items-center gap-1.5 h-7 px-3 text-sm text-gray-700 bg-white shadow-borders-base rounded-md hover:bg-gray-50 focus:outline-none transition-colors dark:text-zinc-200 dark:bg-dk-card dark:hover:bg-dk-raised/60"
                 >
                   <Repeat2 size={14} className="text-gray-400" />
                   {t(COMMUNITY_TABLES[communityTable].labelKey)}

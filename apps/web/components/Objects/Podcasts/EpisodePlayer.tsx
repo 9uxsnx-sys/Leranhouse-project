@@ -247,7 +247,7 @@ export default function EpisodePlayer({ episode, podcast }: EpisodePlayerProps) 
   }, [isCurrentEpisode, togglePlay, seekTo, setVolume, volume, toggleMute, play, playEpisode, episode, podcast, audioRef])
 
   return (
-    <div className="bg-white border border-gray-100 shadow-sm rounded-xl">
+    <div className="bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line shadow-sm rounded-xl">
       {/* Audio element */}
       {audioUrl && (
         <audio ref={audioRef} preload="metadata" />
@@ -255,10 +255,10 @@ export default function EpisodePlayer({ episode, podcast }: EpisodePlayerProps) 
 
       {/* Episode title area */}
       <div className="px-5 pt-4 pb-2">
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+        <p className="text-xs font-semibold text-gray-400 dark:text-dk-fg-3 uppercase tracking-wider">
           {t('podcast.episode.now_playing', 'Now Playing')}
         </p>
-        <h3 className="text-sm font-medium text-gray-900 mt-0.5 truncate">
+        <h3 className="text-sm font-medium text-gray-900 dark:text-dk-fg-1 mt-0.5 truncate">
           {episode.title}
         </h3>
       </div>
@@ -268,7 +268,7 @@ export default function EpisodePlayer({ episode, podcast }: EpisodePlayerProps) 
         {/* Progress bar */}
         <div
           ref={progressRef}
-          className="relative h-2 bg-gray-100 rounded-full cursor-pointer mb-3"
+          className="relative h-2 bg-gray-100 dark:bg-dk-inset rounded-full cursor-pointer mb-3"
           onMouseDown={handleMouseDown}
         >
           <div
@@ -279,10 +279,10 @@ export default function EpisodePlayer({ episode, podcast }: EpisodePlayerProps) 
 
         {/* Time labels */}
         <div className="flex justify-between mb-4">
-          <span className="text-xs text-gray-500 tabular-nums font-medium">
+          <span className="text-xs text-gray-500 dark:text-dk-fg-3 tabular-nums font-medium">
             {formatDuration(Math.floor(currentTime))}
           </span>
-          <span className="text-xs text-gray-400 tabular-nums">
+          <span className="text-xs text-gray-400 dark:text-dk-fg-3 tabular-nums">
             {formatDuration(Math.floor(duration))}
           </span>
         </div>
@@ -293,7 +293,7 @@ export default function EpisodePlayer({ episode, podcast }: EpisodePlayerProps) 
           <div className="relative group/volume">
             <button
               onClick={toggleMute}
-              className="w-9 h-9 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+              className="w-9 h-9 flex items-center justify-center rounded-full text-gray-400 dark:text-dk-fg-3 hover:text-gray-600 dark:hover:text-dk-fg-1 hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors cursor-pointer"
               title={volume === 0 ? t('podcast.episode.unmute', 'Unmute') : t('podcast.episode.mute', 'Mute')}
             >
               {volume === 0 ? <VolumeX size={16} /> : <Volume2 size={16} />}
@@ -322,13 +322,13 @@ export default function EpisodePlayer({ episode, podcast }: EpisodePlayerProps) 
                 onKeyDown={handleVolumeKeyDown}
                 className="relative w-full h-4 flex items-center cursor-pointer touch-none outline-none"
               >
-                <div className="h-1 w-full rounded-full bg-gray-200" />
+                <div className="h-1 w-full rounded-full bg-gray-200 dark:bg-dk-track" />
                 <div
-                  className="absolute h-1 rounded-full bg-gray-900"
+                  className="absolute h-1 rounded-full bg-gray-900 dark:bg-zinc-100"
                   style={{ insetInlineStart: 0, width: `${volume * 100}%` }}
                 />
                 <div
-                  className="absolute h-2 w-2 rounded-full bg-gray-900"
+                  className="absolute h-2 w-2 rounded-full bg-gray-900 dark:bg-zinc-100"
                   style={{ insetInlineStart: `calc(${volume * 100}% - 4px)` }}
                 />
               </div>
@@ -340,7 +340,7 @@ export default function EpisodePlayer({ episode, podcast }: EpisodePlayerProps) 
             {/* Skip Back 15s */}
             <button
               onClick={() => seekTo(Math.max(0, currentTime - 15))}
-              className="w-9 h-9 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+              className="w-9 h-9 flex items-center justify-center rounded-full text-gray-400 dark:text-dk-fg-3 hover:text-gray-600 dark:hover:text-dk-fg-1 hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors cursor-pointer"
               title={t('podcast.episode.skip_back', 'Skip back 15s')}
             >
               <SkipBack size={16} />
@@ -363,7 +363,7 @@ export default function EpisodePlayer({ episode, podcast }: EpisodePlayerProps) 
             {/* Skip Forward 15s */}
             <button
               onClick={() => seekTo(Math.min(duration, currentTime + 15))}
-              className="w-9 h-9 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+              className="w-9 h-9 flex items-center justify-center rounded-full text-gray-400 dark:text-dk-fg-3 hover:text-gray-600 dark:hover:text-dk-fg-1 hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors cursor-pointer"
               title={t('podcast.episode.skip_forward', 'Skip forward 15s')}
             >
               <SkipForward size={16} />
@@ -375,13 +375,13 @@ export default function EpisodePlayer({ episode, podcast }: EpisodePlayerProps) 
             <div className="relative">
               <button
                 onClick={() => setShowSpeedMenu(!showSpeedMenu)}
-                className="w-11 h-9 flex items-center justify-center rounded-full text-sm font-medium tabular-nums text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+                className="w-11 h-9 flex items-center justify-center rounded-full text-sm font-medium tabular-nums text-gray-400 dark:text-dk-fg-3 hover:text-gray-600 dark:hover:text-dk-fg-1 hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors cursor-pointer"
                 title={t('podcast.episode.playback_speed', 'Playback speed')}
               >
                 {state.rate}x
               </button>
               {showSpeedMenu && (
-                <div className="absolute bottom-full end-0 mb-2 bg-white border border-gray-200 rounded-lg shadow-lg p-1 z-10">
+                <div className="absolute bottom-full end-0 mb-2 bg-white dark:bg-dk-card border border-gray-200 dark:border-dk-line-strong rounded-lg shadow-lg p-1 z-10">
                   {PLAYBACK_RATES.map((rate) => (
                     <button
                       key={rate}
@@ -392,7 +392,7 @@ export default function EpisodePlayer({ episode, podcast }: EpisodePlayerProps) 
                       className={`block w-full text-start px-3 py-1.5 rounded-md text-sm tabular-nums transition-colors cursor-pointer ${
                         state.rate === rate
                           ? 'bg-zinc-800 text-white'
-                          : 'text-gray-600 hover:bg-gray-100'
+                          : 'text-gray-600 dark:text-dk-fg-2 hover:bg-gray-100 dark:hover:bg-dk-raised'
                       }`}
                     >
                       {rate}x
@@ -406,8 +406,8 @@ export default function EpisodePlayer({ episode, podcast }: EpisodePlayerProps) 
               onClick={toggleLoop}
               className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors cursor-pointer ${
                 state.isLooping
-                  ? 'text-gray-900 bg-gray-100'
-                  : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                  ? 'text-gray-900 dark:text-dk-fg-1 bg-gray-100 dark:bg-dk-inset'
+                  : 'text-gray-400 dark:text-dk-fg-3 hover:text-gray-600 dark:hover:text-dk-fg-1 hover:bg-gray-100 dark:hover:bg-dk-raised'
               }`}
               title={t('podcast.episode.loop', 'Loop episode')}
             >

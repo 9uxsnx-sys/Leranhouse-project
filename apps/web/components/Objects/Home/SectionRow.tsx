@@ -18,7 +18,7 @@ export function SectionRow({ title, seeAllHref, seeAllLabel = 'See All', childre
         <h2 className="text-[22px] font-semibold text-ui-fg-base">{title}</h2>
         <Link
           href={seeAllHref}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-400 hover:text-gray-600 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-400 dark:text-dk-fg-3 hover:text-gray-600 dark:hover:text-dk-fg-1 transition-colors"
         >
           {seeAllLabel}
           <ArrowRight className="w-4 h-4" />

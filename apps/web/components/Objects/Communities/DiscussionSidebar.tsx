@@ -51,9 +51,9 @@ export function DiscussionSidebar({
   return (
     <div className="space-y-4">
       {/* Author Card */}
-      <div className="bg-white nice-shadow rounded-lg overflow-hidden">
-        <div className="p-4 border-b border-gray-100">
-          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">
+      <div className="bg-white dark:bg-dk-card nice-shadow rounded-lg overflow-hidden">
+        <div className="p-4 border-b border-gray-100 dark:border-dk-line">
+          <div className="text-xs font-medium text-gray-500 dark:text-dk-fg-3 uppercase tracking-wide mb-3">
             {t('communities.sidebar.posted_by')}
           </div>
           <div className="flex items-center gap-3">
@@ -67,8 +67,8 @@ export function DiscussionSidebar({
               shadow="shadow-none"
             />
             <div className="min-w-0">
-              <div className="font-medium text-gray-900 truncate">{authorName}</div>
-              <div className="text-xs text-gray-500">{timeAgo}</div>
+              <div className="font-medium text-gray-900 dark:text-dk-fg-1 truncate">{authorName}</div>
+              <div className="text-xs text-gray-500 dark:text-dk-fg-3">{timeAgo}</div>
             </div>
           </div>
         </div>
@@ -77,7 +77,7 @@ export function DiscussionSidebar({
         <div className="px-4 py-3 space-y-3">
           {/* Upvotes */}
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">{t('communities.sidebar.upvotes')}</span>
+            <span className="text-sm text-gray-600 dark:text-dk-fg-2">{t('communities.sidebar.upvotes')}</span>
             <UpvoteButton
               discussionUuid={discussion.discussion_uuid}
               initialVoteCount={discussion.upvote_count}
@@ -88,7 +88,7 @@ export function DiscussionSidebar({
 
           {/* Label */}
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">{t('communities.sidebar.category')}</span>
+            <span className="text-sm text-gray-600 dark:text-dk-fg-2">{t('communities.sidebar.category')}</span>
             <span
               className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium"
               style={{
@@ -102,13 +102,13 @@ export function DiscussionSidebar({
 
           {/* Date */}
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">{t('communities.sidebar.created')}</span>
-            <span className="text-sm text-gray-900">{createdDate}</span>
+            <span className="text-sm text-gray-600 dark:text-dk-fg-2">{t('communities.sidebar.created')}</span>
+            <span className="text-sm text-gray-900 dark:text-dk-fg-1">{createdDate}</span>
           </div>
 
           {/* Status badges */}
           {(discussion.is_pinned || discussion.is_locked) && (
-            <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+            <div className="flex items-center gap-2 pt-2 border-t border-gray-100 dark:border-dk-line">
               {discussion.is_pinned && (
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 rounded-full">
                   <Pin size={10} />
@@ -116,7 +116,7 @@ export function DiscussionSidebar({
                 </span>
               )}
               {discussion.is_locked && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-gray-100 dark:bg-dk-inset text-gray-600 dark:text-dk-fg-2 rounded-full">
                   <Lock size={10} />
                   {t('communities.sidebar.locked')}
                 </span>
@@ -127,23 +127,23 @@ export function DiscussionSidebar({
       </div>
 
       {/* Reactions Card */}
-      <div className="bg-white nice-shadow rounded-lg overflow-hidden p-4">
-        <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">
+      <div className="bg-white dark:bg-dk-card nice-shadow rounded-lg overflow-hidden p-4">
+        <div className="text-xs font-medium text-gray-500 dark:text-dk-fg-3 uppercase tracking-wide mb-3">
           {t('communities.sidebar.reactions')}
         </div>
         <ReactionButton discussionUuid={discussion.discussion_uuid} />
       </div>
 
       {/* Community Link */}
-      <div className="bg-white nice-shadow rounded-lg overflow-hidden p-4">
-        <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+      <div className="bg-white dark:bg-dk-card nice-shadow rounded-lg overflow-hidden p-4">
+        <div className="text-xs font-medium text-gray-500 dark:text-dk-fg-3 uppercase tracking-wide mb-2">
           {t('communities.sidebar.community')}
         </div>
         <Link
           href={getUriWithOrg(orgslug, `/community/${communityId}`)}
-          className="group flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-indigo-600 transition-colors"
+          className="group flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-dk-fg-1 hover:text-indigo-600 transition-colors"
         >
-          <MessageCircle size={14} className="text-gray-400 group-hover:text-indigo-500" />
+          <MessageCircle size={14} className="text-gray-400 dark:text-dk-fg-3 group-hover:text-indigo-500" />
           {community.name}
         </Link>
       </div>

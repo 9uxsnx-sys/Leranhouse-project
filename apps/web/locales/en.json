@@ -105,6 +105,12 @@
                    "recent":  "Recent",
                    "expand":  "Expand",
                    "collapse":  "Collapse",
+                   "theme":  {
+                                     "label":  "Theme",
+                                     "light":  "Light",
+                                     "dark":  "Dark",
+                                     "system":  "System"
+                                 },
                    "help":  "Help",
                    "help_menu":  {
                                      "documentation":  "Documentation",

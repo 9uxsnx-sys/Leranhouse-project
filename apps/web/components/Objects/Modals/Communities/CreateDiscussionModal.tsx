@@ -169,8 +169,8 @@ export function CreateDiscussionModal({
                   onClick={() => setSelectedLabel(label.id)}
                   className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-all text-sm ${
                     selectedLabel === label.id
-                      ? 'bg-gray-100 text-gray-900'
-                      : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+                      ? 'bg-gray-100 dark:bg-dk-inset text-gray-900 dark:text-dk-fg-1'
+                      : 'text-gray-500 dark:text-dk-fg-3 hover:bg-gray-50 dark:hover:bg-dk-raised hover:text-gray-700 dark:hover:text-dk-fg-1'
                   }`}
                 >
                   <span style={{ color: label.color }}>

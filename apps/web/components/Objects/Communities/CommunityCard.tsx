@@ -32,12 +32,12 @@ function CommunityCard(props: PropsType) {
 
   return (
     <div
-      className="group relative flex flex-col bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden w-full"
+      className="group relative flex flex-col bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line rounded-xl shadow-sm overflow-hidden w-full"
     >
 
       <Link
         href={communityLink}
-        className="block relative aspect-video overflow-hidden bg-gray-50"
+        className="block relative aspect-video overflow-hidden bg-gray-50 dark:bg-dk-inset/40"
       >
         {props.community.thumbnail_image && org?.org_uuid ? (
           <img
@@ -50,7 +50,7 @@ function CommunityCard(props: PropsType) {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="flex flex-col items-center justify-center h-full w-full text-gray-300 gap-2">
+          <div className="flex flex-col items-center justify-center h-full w-full text-gray-300 dark:text-zinc-600 gap-2">
             <Users size={40} strokeWidth={1.5} />
           </div>
         )}
@@ -60,19 +60,19 @@ function CommunityCard(props: PropsType) {
         <Link
           href={communityLink}
           dir="auto"
-          className="text-base font-bold text-gray-900 leading-tight hover:text-black transition-colors line-clamp-1"
+          className="text-base font-bold text-gray-900 dark:text-dk-fg-1 leading-tight hover:text-black dark:hover:text-white transition-colors line-clamp-1"
         >
           {props.community.name}
         </Link>
 
         {props.community.description && (
-          <p dir="auto" className="text-[11px] text-gray-500 line-clamp-2 min-h-[1.5rem]">
+          <p dir="auto" className="text-[11px] text-gray-500 dark:text-dk-fg-3 line-clamp-2 min-h-[1.5rem]">
             {props.community.description}
           </p>
         )}
 
-        <div className="pt-1.5 flex items-center justify-between border-t border-gray-100">
-          <div className="flex items-center gap-1.5 text-gray-500">
+        <div className="pt-1.5 flex items-center justify-between border-t border-gray-100 dark:border-dk-line">
+          <div className="flex items-center gap-1.5 text-gray-500 dark:text-dk-fg-3">
             <MessageCircle size={12} />
             <span className="text-[10px] font-bold uppercase tracking-wider">
               {props.community.public ? t('courses.public') : t('courses.private')}
@@ -82,14 +82,14 @@ function CommunityCard(props: PropsType) {
           {variant === 'dashboard' ? (
             <Link
               href={getUriWithOrg(props.orgslug, `/dash/communities/${communityId}/general`)}
-              className="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
+              className="text-[10px] font-bold text-gray-400 dark:text-dk-fg-3 hover:text-gray-900 dark:hover:text-dk-fg-1 transition-colors uppercase tracking-wider"
             >
               {t('dashboard.courses.communities.card.open_settings')}
             </Link>
           ) : (
             <Link
               href={communityLink}
-              className="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
+              className="text-[10px] font-bold text-gray-400 dark:text-dk-fg-3 hover:text-gray-900 dark:hover:text-dk-fg-1 transition-colors uppercase tracking-wider"
             >
               {t('dashboard.courses.communities.card.view_community')}
             </Link>

@@ -41,14 +41,14 @@ function FunnelStep({
             {index + 1}
           </div>
           {index < total - 1 && (
-            <div className="w-px flex-1 bg-gray-200 my-1" />
+            <div className="w-px flex-1 bg-gray-200 my-1 dark:bg-dk-track" />
           )}
         </div>
         <div className="flex-1 pb-5 min-w-0">
           <div className="flex items-center gap-2 mb-2">
             <Link
               href={href}
-              className="text-sm font-semibold text-gray-800 truncate hover:text-indigo-600 hover:underline transition-colors"
+              className="text-sm font-semibold text-gray-800 truncate hover:text-indigo-600 hover:underline transition-colors dark:text-zinc-100"
               title={`${row.chapterName ? row.chapterName + ' — ' : ''}${row.displayName}`}
             >
               {row.displayName}
@@ -100,7 +100,7 @@ function CompactFunnelRow({ row, maxViews }: { row: any; maxViews: number }) {
 
   return (
     <div className="flex items-center gap-3">
-      <span className="w-[110px] shrink-0 text-xs text-gray-600 font-medium truncate">
+      <span className="w-[110px] shrink-0 text-xs text-gray-600 font-medium truncate dark:text-zinc-300">
         {row.displayName}
       </span>
       <div className="flex-1 relative" style={{ width: `${barWidth}%` }}>
@@ -151,9 +151,9 @@ function FunnelModalContent({
           <p className="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold">{t('analytics.course_analytics.common.total_completions')}</p>
           <p className="text-2xl font-bold text-emerald-600">{totalCompletions}</p>
         </div>
-        <div className="bg-gray-50 rounded-xl px-5 py-3 flex-1">
+        <div className="bg-gray-50 rounded-xl px-5 py-3 flex-1 dark:bg-dk-inset/40">
           <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">{t('analytics.course_analytics.common.avg_rate')}</p>
-          <p className="text-2xl font-bold text-gray-700">{avgRate}%</p>
+          <p className="text-2xl font-bold text-gray-700 dark:text-zinc-200">{avgRate}%</p>
         </div>
         {lowConversion.length > 0 && (
           <div className="bg-rose-50 rounded-xl px-5 py-3 flex-1">
@@ -261,7 +261,7 @@ export default function CourseActivityFunnel({
         <div>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-gray-900"><AnimatedNumber value={avgRate} suffix="%" /></span>
+              <span className="text-2xl font-bold text-gray-900 dark:text-zinc-100"><AnimatedNumber value={avgRate} suffix="%" /></span>
               <span className="text-xs text-gray-400">{t('analytics.course_analytics.common.avg_completion')}</span>
             </div>
             <span className="text-xs text-gray-400">{t('analytics.course_analytics.common.activities_count', { count: rows.length })}</span>

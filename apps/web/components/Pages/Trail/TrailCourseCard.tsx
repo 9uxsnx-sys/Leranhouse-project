@@ -63,9 +63,9 @@ function TrailCourseCard(props: TrailCourseCardProps) {
   const courseLink = getUriWithOrg(props.orgslug, '/course/' + courseid)
 
   return (
-    <div className="flex flex-col h-full bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
+    <div className="flex flex-col h-full bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line rounded-xl shadow-sm overflow-hidden">
       {/* 16:9 Cover Image */}
-      <Link href={courseLink} className="relative overflow-hidden bg-gray-100 shrink-0" style={{ aspectRatio: '16/9' }}>
+      <Link href={courseLink} className="relative overflow-hidden bg-gray-100 dark:bg-dk-inset shrink-0" style={{ aspectRatio: '16/9' }}>
         {props.course.thumbnail_image && org?.org_uuid ? (
           <img
             src={getCourseThumbnailMediaDirectory(
@@ -77,14 +77,14 @@ function TrailCourseCard(props: TrailCourseCardProps) {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-300">
+          <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-zinc-600">
             <BookOpen size={40} strokeWidth={1.5} />
           </div>
         )}
       </Link>
 
       {/* Progress bar — between image and content */}
-      <div className="h-1 bg-gray-100">
+      <div className="h-1 bg-gray-100 dark:bg-dk-inset">
         <div
           className={`h-full transition-all ${
             isCompleted ? 'bg-green-500' : 'bg-brand'
@@ -97,11 +97,11 @@ function TrailCourseCard(props: TrailCourseCardProps) {
       <div className="px-4 pt-3 pb-4 flex flex-col flex-1">
         <div className="flex flex-col gap-1">
           <Link href={courseLink} className="no-underline">
-            <h3 dir="auto" className="text-[15px] font-semibold leading-snug line-clamp-2 text-gray-900 hover:text-gray-700 transition-colors">
+            <h3 dir="auto" className="text-[15px] font-semibold leading-snug line-clamp-2 text-gray-900 dark:text-dk-fg-1 hover:text-gray-700 dark:hover:text-dk-fg-1 transition-colors">
               {course.name}
             </h3>
           </Link>
-          <p className="text-[13px] font-normal leading-relaxed line-clamp-1 text-[#6B7280]">
+          <p className="text-[13px] font-normal leading-relaxed line-clamp-1 text-[#6B7280] dark:text-dk-fg-2">
             {t('trail.lessons_completed', {
               completed: course_completed_steps,
               total: course_total_steps,
@@ -113,7 +113,7 @@ function TrailCourseCard(props: TrailCourseCardProps) {
 
         {/* Bottom row: progress percentage + action link */}
         <div className="mt-auto pt-2 flex items-center justify-between">
-          <span className="text-[12px] text-gray-400">
+          <span className="text-[12px] text-gray-400 dark:text-dk-fg-4">
             {course_progress}% &middot; {isCompleted ? t('common.completed') : t('courses.course_progress')}
           </span>
 
@@ -130,7 +130,7 @@ function TrailCourseCard(props: TrailCourseCardProps) {
           ) : (
             <Link
               href={courseLink}
-              className="text-[11px] font-semibold text-gray-400 hover:text-gray-900 transition-colors"
+              className="text-[11px] font-semibold text-gray-400 dark:text-dk-fg-3 hover:text-gray-900 dark:hover:text-dk-fg-1 transition-colors"
             >
               {t('courses.continue_learning')}
             </Link>

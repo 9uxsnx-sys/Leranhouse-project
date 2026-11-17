@@ -188,10 +188,10 @@ function ManageUsers(props: ManageUsersProps) {
     <div className="py-3 space-y-4">
       {/* Search Input */}
       <div className="relative">
-        <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-dk-fg-3" />
         <input
           placeholder={t('dashboard.users.usergroups.modals.manage_users.search_placeholder')}
-          className="ps-10 pe-4 py-2 w-full border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
+          className="ps-10 pe-4 py-2 w-full border border-gray-200 dark:border-dk-line-strong rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all"
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
         />
@@ -263,7 +263,7 @@ function ManageUsers(props: ManageUsersProps) {
               }
             }}
           />
-          <label htmlFor="select-all" className="text-sm text-gray-600 cursor-pointer">
+          <label htmlFor="select-all" className="text-sm text-gray-600 dark:text-dk-fg-2 cursor-pointer">
             {t('dashboard.users.usergroups.modals.manage_users.selection.select_all_visible')}
           </label>
         </div>
@@ -278,10 +278,10 @@ function ManageUsers(props: ManageUsersProps) {
         ) : orgUsers.length === 0 ? (
           <div className="py-12 text-center">
             <div className="flex flex-col items-center gap-3">
-              <div className="bg-gray-100 p-4 rounded-full">
-                <Users className="w-8 h-8 text-gray-400" />
+              <div className="bg-gray-100 dark:bg-dk-inset p-4 rounded-full">
+                <Users className="w-8 h-8 text-gray-400 dark:text-dk-fg-3" />
               </div>
-              <p className="text-gray-400 text-sm font-medium">
+              <p className="text-gray-400 dark:text-dk-fg-3 text-sm font-medium">
                 {debouncedSearch
                   ? t('dashboard.users.usergroups.modals.manage_users.no_results')
                   : t('dashboard.users.usergroups.modals.manage_users.no_users')
@@ -297,7 +297,7 @@ function ManageUsers(props: ManageUsersProps) {
             return (
               <div
                 key={user.user.id}
-                className={`group flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-all duration-200 ${isSelected ? 'bg-indigo-50/50' : ''}`}
+                className={`group flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-dk-raised rounded-lg transition-all duration-200 ${isSelected ? 'bg-indigo-50/50' : ''}`}
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <Checkbox
@@ -312,10 +312,10 @@ function ManageUsers(props: ManageUsersProps) {
                   />
                   <div className="flex flex-col min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-gray-800 text-sm truncate">
+                      <span className="font-semibold text-gray-800 dark:text-dk-fg-1 text-sm truncate">
                         {user.user.first_name + ' ' + user.user.last_name}
                       </span>
-                      <span className="text-xs bg-gray-100 px-2 py-0.5 rounded-full text-gray-500 font-medium">
+                      <span className="text-xs bg-gray-100 dark:bg-dk-inset px-2 py-0.5 rounded-full text-gray-500 dark:text-dk-fg-3 font-medium">
                         @{user.user.username}
                       </span>
                     </div>
@@ -328,7 +328,7 @@ function ManageUsers(props: ManageUsersProps) {
                       {t('dashboard.users.usergroups.modals.manage_users.status.in_group')}
                     </Badge>
                   ) : (
-                    <Badge variant="secondary" className="bg-gray-100 text-gray-600">
+                    <Badge variant="secondary" className="bg-gray-100 dark:bg-dk-inset text-gray-600 dark:text-dk-fg-2">
                       {t('dashboard.users.usergroups.modals.manage_users.status.not_in_group')}
                     </Badge>
                   )}

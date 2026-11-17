@@ -48,7 +48,7 @@ export default function EpisodeOutlineSidebar({
   const cleanPodcastUuid = podcastUuid.replace('podcast_', '')
 
   return (
-    <div className="rounded-xl bg-white border border-gray-100 shadow-sm overflow-hidden">
+    <div className="rounded-xl bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line shadow-sm overflow-hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between px-5 py-4 text-start transition-colors hover:bg-black/[0.02]"
@@ -100,8 +100,8 @@ export default function EpisodeOutlineSidebar({
                     )}
                   >
                     {isCurrent ? (
-                      <div className="w-3.5 h-3.5 rounded-full bg-black flex items-center justify-center shrink-0">
-                        <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                      <div className="w-3.5 h-3.5 rounded-full bg-black dark:bg-zinc-100 flex items-center justify-center shrink-0">
+                        <div className="w-1.5 h-1.5 rounded-full bg-white dark:bg-dk-card" />
                       </div>
                     ) : completed ? (
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />

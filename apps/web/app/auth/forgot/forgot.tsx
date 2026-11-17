@@ -105,10 +105,10 @@ function ForgotPasswordClient({ org }: ForgotPasswordClientProps) {
               </button>
             </form>
 
-            <p className="text-center text-sm text-gray-500 mt-6">
+            <p className="text-center text-sm text-gray-500 dark:text-zinc-400 mt-6">
               <Link
                 href="/login"
-                className="inline-flex items-center gap-1.5 font-semibold text-gray-900 hover:underline"
+                className="inline-flex items-center gap-1.5 font-semibold text-gray-900 dark:text-zinc-100 hover:underline"
               >
                 <ArrowLeft size={14} />
                 {t('auth.back_to_sign_in')}

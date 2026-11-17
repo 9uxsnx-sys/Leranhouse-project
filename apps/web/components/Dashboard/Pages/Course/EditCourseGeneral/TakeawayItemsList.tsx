@@ -149,11 +149,11 @@ const TakeawayItemsList = ({ value, onChange, error }: TakeawayItemsListProps) =
 
   return (
     <div className="space-y-1.5">
-      <div className="rounded-xl border border-gray-200 bg-ui-bg-field">
+      <div className="rounded-xl border border-gray-200 dark:border-dk-line-strong bg-ui-bg-field">
         {isEmpty && (
           <div className="px-4 py-8 text-center">
-            <div className="text-sm text-gray-400 mb-1">{t('dashboard.courses.general.takeaways.empty_title')}</div>
-            <div className="text-xs text-gray-300">
+            <div className="text-sm text-gray-400 dark:text-zinc-400 mb-1">{t('dashboard.courses.general.takeaways.empty_title')}</div>
+            <div className="text-xs text-gray-300 dark:text-zinc-600">
               {t('dashboard.courses.general.takeaways.empty_description')}
             </div>
           </div>
@@ -164,7 +164,7 @@ const TakeawayItemsList = ({ value, onChange, error }: TakeawayItemsListProps) =
           return (
             <div
               key={idx}
-              className={`group border-b border-gray-200 last:border-b-0 ${isDragging ? 'opacity-40' : ''}`}
+              className={`group border-b border-gray-200 dark:border-dk-line-strong last:border-b-0 ${isDragging ? 'opacity-40' : ''}`}
               onDragOver={onDragOver}
               onDrop={onMainDrop(idx)}
             >
@@ -174,7 +174,7 @@ const TakeawayItemsList = ({ value, onChange, error }: TakeawayItemsListProps) =
                   draggable
                   onDragStart={onMainDragStart(idx)}
                   onDragEnd={() => setDragIdx(null)}
-                  className="shrink-0 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing p-0.5 mt-1.5"
+                  className="shrink-0 text-gray-300 dark:text-zinc-600 hover:text-gray-500 dark:hover:text-zinc-300 cursor-grab active:cursor-grabbing p-0.5 mt-1.5"
                   title={t('dashboard.courses.general.takeaways.drag_to_reorder')}
                 >
                   <GripVertical size={14} />
@@ -184,12 +184,12 @@ const TakeawayItemsList = ({ value, onChange, error }: TakeawayItemsListProps) =
                   value={item.title}
                   onChange={(e) => updateTitle(idx, e.target.value)}
                   placeholder={t('dashboard.courses.general.takeaways.main_placeholder')}
-                  className="flex-1 min-w-0 text-sm font-medium text-gray-700 bg-transparent border-none outline-none placeholder:text-gray-300 py-1"
+                  className="flex-1 min-w-0 text-sm font-medium text-gray-700 dark:text-zinc-200 bg-transparent border-none outline-none placeholder:text-gray-300 py-1"
                 />
                 <button
                   type="button"
                   onClick={() => removeMain(idx)}
-                  className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors shrink-0 mt-0.5"
+                  className="p-1.5 text-gray-400 dark:text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors shrink-0 mt-0.5"
                   title={t('dashboard.courses.general.takeaways.remove')}
                 >
                   <X size={13} />
@@ -211,7 +211,7 @@ const TakeawayItemsList = ({ value, onChange, error }: TakeawayItemsListProps) =
                         draggable
                         onDragStart={onSubDragStart(idx, subIdx)}
                         onDragEnd={() => setDragSub(null)}
-                        className="shrink-0 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing p-0.5"
+                        className="shrink-0 text-gray-300 dark:text-zinc-600 hover:text-gray-500 dark:hover:text-zinc-300 cursor-grab active:cursor-grabbing p-0.5"
                         title={t('dashboard.courses.general.takeaways.drag_to_reorder')}
                       >
                         <GripVertical size={12} />
@@ -221,12 +221,12 @@ const TakeawayItemsList = ({ value, onChange, error }: TakeawayItemsListProps) =
                         value={sub}
                         onChange={(e) => updateSubItem(idx, subIdx, e.target.value)}
                         placeholder={t('dashboard.courses.general.takeaways.sub_placeholder')}
-                        className="flex-1 min-w-0 text-sm text-gray-600 bg-transparent border-none outline-none placeholder:text-gray-300 py-1"
+                        className="flex-1 min-w-0 text-sm text-gray-600 dark:text-zinc-300 bg-transparent border-none outline-none placeholder:text-gray-300 py-1"
                       />
                       <button
                         type="button"
                         onClick={() => removeSubItem(idx, subIdx)}
-                        className="p-1 text-gray-400 hover:text-red-500 rounded transition-colors shrink-0"
+                        className="p-1 text-gray-400 dark:text-zinc-400 hover:text-red-500 rounded transition-colors shrink-0"
                         title={t('dashboard.courses.general.takeaways.remove_sub')}
                       >
                         <X size={11} />
@@ -237,7 +237,7 @@ const TakeawayItemsList = ({ value, onChange, error }: TakeawayItemsListProps) =
                 <button
                   type="button"
                   onClick={() => addSubItem(idx)}
-                  className="text-xs text-gray-500 hover:text-gray-700 py-1"
+                  className="text-xs text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 py-1"
                 >
                   {t('dashboard.courses.general.takeaways.add_sub_button')}
                 </button>
@@ -249,7 +249,7 @@ const TakeawayItemsList = ({ value, onChange, error }: TakeawayItemsListProps) =
         <button
           type="button"
           onClick={addMain}
-          className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors rounded-b-xl"
+          className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors rounded-b-xl dark:hover:bg-dk-raised/60"
         >
           <Plus size={13} className="text-blue-500 shrink-0" />
           {t('dashboard.courses.general.takeaways.add_button')}

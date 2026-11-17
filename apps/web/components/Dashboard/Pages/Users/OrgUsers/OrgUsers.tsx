@@ -188,13 +188,13 @@ function OrgUsers() {
     return (
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
-          <span className="cursor-pointer px-1.5 py-0.5 rounded hover:bg-gray-100 transition-colors text-gray-700 text-sm">
+          <span className="cursor-pointer px-1.5 py-0.5 rounded hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors text-gray-700 dark:text-zinc-200 text-sm">
             {user.role.name}
           </span>
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="center"
-          className="min-w-[120px] rounded-lg border border-gray-200 bg-white p-1 shadow-md"
+          className="min-w-[120px] rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card p-1 shadow-md"
           sideOffset={6}
         >
           {roles?.map((role: any) => (
@@ -203,8 +203,8 @@ function OrgUsers() {
               onClick={() => handleRoleChange(user.user.id, role.id)}
               className="justify-between text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
             >
-              <span className="text-gray-700 text-xs">{role.name}</span>
-              {user.role.id === role.id && <Check size={12} className="text-gray-500" />}
+              <span className="text-gray-700 dark:text-zinc-200 text-xs">{role.name}</span>
+              {user.role.id === role.id && <Check size={12} className="text-gray-500 dark:text-zinc-400" />}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
@@ -238,7 +238,7 @@ function OrgUsers() {
             rounded="rounded-full"
             predefined_avatar={u.user.avatar_image === '' ? 'empty' : undefined}
           />
-          <span className="font-medium text-gray-900 truncate">
+          <span className="font-medium text-gray-900 dark:text-zinc-100 truncate">
             {u.user.first_name} {u.user.last_name}
           </span>
         </div>
@@ -248,13 +248,13 @@ function OrgUsers() {
       key: 'username',
       header: t('dashboard.users.users.table.username'),
       width: '170px',
-      render: (u) => <span className="text-gray-500">@{u.user.username}</span>,
+      render: (u) => <span className="text-gray-500 dark:text-zinc-400">@{u.user.username}</span>,
     },
     {
       key: 'email',
       header: t('dashboard.users.users.table.email'),
       width: '240px',
-      render: (u) => <span className="text-gray-500 truncate">{u.user.email}</span>,
+      render: (u) => <span className="text-gray-500 dark:text-zinc-400 truncate">{u.user.email}</span>,
     },
     {
       key: 'role',
@@ -284,7 +284,7 @@ function OrgUsers() {
       sortable: true,
       value: (u) => u.joined_at || '',
       render: (u) => (
-        <span className="text-[13px] text-gray-400 whitespace-nowrap">{formatDate(u.joined_at)}</span>
+        <span className="text-[13px] text-gray-400 dark:text-zinc-400 whitespace-nowrap">{formatDate(u.joined_at)}</span>
       ),
     },
     {
@@ -298,7 +298,7 @@ function OrgUsers() {
             e.stopPropagation()
             setDetailUser(u)
           }}
-          className="p-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
+          className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-dk-raised text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-all"
           title={t('common.view_details')}
         >
           <MoreHorizontal size={16} />
@@ -315,13 +315,13 @@ function OrgUsers() {
       <div className="flex items-center gap-3 mb-5">
         {/* Search bar */}
         <div className="relative w-80">
-          <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+          <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-zinc-400 pointer-events-none" />
           <input
             type="text"
             value={searchValue}
             onChange={(e) => handleSearchChange(e.target.value)}
             placeholder={t('dashboard.users.active_users.search_placeholder')}
-            className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
+            className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 dark:text-zinc-200 bg-white dark:bg-dk-card shadow-borders-base rounded-md placeholder:text-gray-500 dark:placeholder:text-zinc-400 focus:outline-none"
           />
         </div>
 
@@ -330,7 +330,7 @@ function OrgUsers() {
         {/* Bulk remove button — always rendered to prevent layout bounce */}
         <button
           onClick={handleBatchRemove}
-          className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-red-600 border-gray-200 hover:bg-gray-50 ${
+          className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white dark:bg-dk-card text-red-600 border-gray-200 dark:border-dk-line hover:bg-gray-50 dark:hover:bg-dk-raised ${
             selectedUserIds.size === 0 ? 'invisible pointer-events-none' : ''
           }`}
         >
@@ -341,13 +341,13 @@ function OrgUsers() {
         {/* Filter dropdown with Role, Status, Group, and Sort */}
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
-            <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label={t('dashboard.users.users.filters.filter_users')}>
+            <IconButton size="small" variant="transparent" className="bg-white dark:bg-dk-card hover:bg-gray-50 dark:hover:bg-dk-raised shadow-borders-base" aria-label={t('dashboard.users.users.filters.filter_users')}>
               <ConceptIcon.filter size={14} />
             </IconButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="min-w-[170px] rounded-lg border border-gray-200 bg-white p-1 shadow-md"
+            className="min-w-[170px] rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card p-1 shadow-md"
             sideOffset={6}
           >
             {/* Role section */}
@@ -360,8 +360,8 @@ function OrgUsers() {
                 onClick={() => setRoleFilter(option.value)}
                 className="justify-between text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
               >
-                <span className="text-gray-700 text-xs">{option.label}</span>
-                {roleFilter === option.value && <Check size={12} className="text-gray-500" />}
+                <span className="text-gray-700 dark:text-zinc-200 text-xs">{option.label}</span>
+                {roleFilter === option.value && <Check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
             ))}
 
@@ -378,8 +378,8 @@ function OrgUsers() {
                 onClick={() => setStatusFilter(option.value)}
                 className="justify-between text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
               >
-                <span className="text-gray-700 text-xs">{option.label}</span>
-                {statusFilter === option.value && <Check size={12} className="text-gray-500" />}
+                <span className="text-gray-700 dark:text-zinc-200 text-xs">{option.label}</span>
+                {statusFilter === option.value && <Check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
             ))}
 
@@ -395,8 +395,8 @@ function OrgUsers() {
                 onClick={() => setGroupFilter(option.value)}
                 className="justify-between text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
               >
-                <span className="text-gray-700 text-xs">{option.label}</span>
-                {groupFilter === option.value && <Check size={12} className="text-gray-500" />}
+                <span className="text-gray-700 dark:text-zinc-200 text-xs">{option.label}</span>
+                {groupFilter === option.value && <Check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
             ))}
 
@@ -412,8 +412,8 @@ function OrgUsers() {
                 onClick={() => setSortBy(option.value as 'name-asc' | 'name-desc')}
                 className="justify-between text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
               >
-                <span className="text-gray-700 text-xs">{option.label}</span>
-                {sortBy === option.value && <Check size={12} className="text-gray-500" />}
+                <span className="text-gray-700 dark:text-zinc-200 text-xs">{option.label}</span>
+                {sortBy === option.value && <Check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -464,14 +464,14 @@ function OrgUsers() {
           {/* Panel */}
           <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
             <div
-              className="pointer-events-auto w-[340px] rounded-xl border border-gray-200 bg-white shadow-lg"
+              className="pointer-events-auto w-[340px] rounded-xl border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card shadow-lg"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close button */}
               <div className="flex justify-end pt-3 pe-3">
                 <button
                   onClick={() => setDetailUser(null)}
-                  className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
+                  className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-dk-raised text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-all"
                 >
                   <X size={16} />
                 </button>
@@ -486,29 +486,29 @@ function OrgUsers() {
                   rounded="rounded-full"
                   predefined_avatar={detailUser.user.avatar_image === '' ? 'empty' : undefined}
                 />
-                <span className="mt-3 text-base font-semibold text-gray-800">
+                <span className="mt-3 text-base font-semibold text-gray-800 dark:text-zinc-200">
                   {detailUser.user.first_name} {detailUser.user.last_name}
                 </span>
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-gray-400 dark:text-zinc-400">
                   @{detailUser.user.username}
                 </span>
-                <span className="text-sm text-gray-500 mt-0.5">
+                <span className="text-sm text-gray-500 dark:text-zinc-400 mt-0.5">
                   {detailUser.user.email}
                 </span>
               </div>
 
               {/* Divider */}
-              <div className="border-t border-gray-100" />
+              <div className="border-t border-gray-100 dark:border-dk-line" />
 
               {/* Info rows */}
               <div className="px-6 py-4 space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-400">{t('dashboard.users.active_users.table.role')}</span>
-                  <span className="text-sm text-gray-700">{detailUser.role.name}</span>
+                  <span className="text-xs text-gray-400 dark:text-zinc-400">{t('dashboard.users.active_users.table.role')}</span>
+                  <span className="text-sm text-gray-700 dark:text-zinc-200">{detailUser.role.name}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-400">{t('common.status')}</span>
-                  <span className="flex items-center gap-1.5 text-sm text-gray-700">
+                  <span className="text-xs text-gray-400 dark:text-zinc-400">{t('common.status')}</span>
+                  <span className="flex items-center gap-1.5 text-sm text-gray-700 dark:text-zinc-200">
                     <span className={`w-2 h-2 rounded-full ${detailUser.user.email_verified ? 'bg-green-500' : 'bg-amber-500'}`} />
                     {detailUser.user.email_verified ? t('dashboard.users.users.status.verified') : t('dashboard.users.users.status.unverified')}
                   </span>
@@ -518,15 +518,15 @@ function OrgUsers() {
               {detailUser.usergroups?.length > 0 && (
                 <>
                   {/* Divider */}
-                  <div className="border-t border-gray-100" />
+                  <div className="border-t border-gray-100 dark:border-dk-line" />
 
                   {/* Groups */}
                   <div className="px-6 py-4 space-y-2.5">
-                    <span className="text-xs text-gray-400 block">{t('dashboard.users.users.groups')}</span>
+                    <span className="text-xs text-gray-400 dark:text-zinc-400 block">{t('dashboard.users.users.groups')}</span>
                     {detailUser.usergroups.map((g: any) => (
                       <div key={g.id} className="flex justify-between items-center">
-                        <span className="text-sm text-gray-700">{g.name}</span>
-                        <span className="text-sm text-gray-400">{g.user_count ?? '-'}</span>
+                        <span className="text-sm text-gray-700 dark:text-zinc-200">{g.name}</span>
+                        <span className="text-sm text-gray-400 dark:text-zinc-400">{g.user_count ?? '-'}</span>
                       </div>
                     ))}
                   </div>
@@ -534,17 +534,17 @@ function OrgUsers() {
               )}
 
               {/* Divider */}
-              <div className="border-t border-gray-100" />
+              <div className="border-t border-gray-100 dark:border-dk-line" />
 
               {/* Date rows */}
               <div className="px-6 py-4 space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-400">{t('dashboard.users.users.table.joined')}</span>
-                  <span className="text-sm text-gray-700">{formatDate(detailUser.joined_at)}</span>
+                  <span className="text-xs text-gray-400 dark:text-zinc-400">{t('dashboard.users.users.table.joined')}</span>
+                  <span className="text-sm text-gray-700 dark:text-zinc-200">{formatDate(detailUser.joined_at)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-400">{t('dashboard.users.users.table.last_login')}</span>
-                  <span className="text-sm text-gray-700">{formatDate(detailUser.user.last_login_at)}</span>
+                  <span className="text-xs text-gray-400 dark:text-zinc-400">{t('dashboard.users.users.table.last_login')}</span>
+                  <span className="text-sm text-gray-700 dark:text-zinc-200">{formatDate(detailUser.user.last_login_at)}</span>
                 </div>
               </div>
             </div>

@@ -47,7 +47,7 @@ function ModuleCard({
   onToggle: () => void
 }) {
   return (
-    <div className="rounded-xl bg-white border border-gray-100 shadow-sm overflow-hidden">
+    <div className="rounded-xl bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line shadow-sm overflow-hidden">
       {/* ── Header (always visible, clickable) ── */}
       <button
         onClick={onToggle}

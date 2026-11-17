@@ -202,12 +202,12 @@ export default function MigrationClient({ orgslug }: MigrationClientProps) {
       : steps.findIndex((s) => s.key === step)
 
   return (
-    <div className="h-full w-full bg-[#f8f8f8] ps-10 pe-10">
+    <div className="h-full w-full bg-[#f8f8f8] dark:bg-transparent ps-10 pe-10">
       <div className="mb-6 pt-6">
         <h1 className="text-3xl font-bold mt-4">
           {t('migration.title')}
         </h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-gray-500 dark:text-zinc-400 mt-1">
           {t('migration.subtitle')}
         </p>
       </div>
@@ -218,7 +218,7 @@ export default function MigrationClient({ orgslug }: MigrationClientProps) {
           {steps.map((s, index) => (
             <React.Fragment key={s.key}>
               {index > 0 && (
-                <div className="w-12 h-[2px] bg-gray-200">
+                <div className="w-12 h-[2px] bg-gray-200 dark:bg-dk-track">
                   <div
                     className={`h-full transition-all duration-300 ${
                       index <= currentStepIndex
@@ -234,7 +234,7 @@ export default function MigrationClient({ orgslug }: MigrationClientProps) {
                     ? 'text-black'
                     : index < currentStepIndex
                       ? 'text-green-600'
-                      : 'text-gray-400'
+                      : 'text-gray-400 dark:text-zinc-400'
                 }`}
               >
                 <div
@@ -243,7 +243,7 @@ export default function MigrationClient({ orgslug }: MigrationClientProps) {
                       ? 'bg-green-500 text-white'
                       : index === currentStepIndex
                         ? 'bg-brand text-brand-fg'
-                        : 'bg-gray-200 text-gray-500'
+                        : 'bg-gray-200 dark:bg-dk-track text-gray-500 dark:text-zinc-400'
                   }`}
                 >
                   {index < currentStepIndex ? (
@@ -264,7 +264,7 @@ export default function MigrationClient({ orgslug }: MigrationClientProps) {
       {/* Step: Upload */}
       {step === 'upload' && (
         <div className="max-w-2xl mx-auto">
-          <div className="bg-white rounded-xl nice-shadow p-6 space-y-5">
+          <div className="bg-white dark:bg-dk-card rounded-xl nice-shadow p-6 space-y-5">
             <MigrationDropZone
               files={files}
               onFilesChange={setFiles}
@@ -273,7 +273,7 @@ export default function MigrationClient({ orgslug }: MigrationClientProps) {
 
             {files.length > 0 && (
               <>
-                <div className="border-t border-gray-100 pt-5">
+                <div className="border-t border-gray-100 dark:border-dk-line pt-5">
                   <MigrationPromptForm
                     courseName={courseName}
                     onCourseNameChange={setCourseName}
@@ -284,7 +284,7 @@ export default function MigrationClient({ orgslug }: MigrationClientProps) {
                 </div>
 
                 {uploading && uploadProgress && (
-                  <p className="text-xs text-gray-500 text-center">{uploadProgress}</p>
+                  <p className="text-xs text-gray-500 dark:text-zinc-400 text-center">{uploadProgress}</p>
                 )}
 
                 <div className="flex items-center space-x-3 justify-end pt-2">
@@ -309,7 +309,7 @@ export default function MigrationClient({ orgslug }: MigrationClientProps) {
                   <button
                     onClick={() => handleUploadAndOrganize(false)}
                     disabled={!canProceedToUpload || uploading}
-                    className={`rounded-lg border border-gray-200 bg-white transition-all duration-100 ease-linear antialiased p-2 px-5 text-xs font-bold text-gray-700 nice-shadow flex space-x-2 items-center ${
+                    className={`rounded-lg border border-gray-200 dark:border-dk-line bg-white dark:bg-dk-card transition-all duration-100 ease-linear antialiased p-2 px-5 text-xs font-bold text-gray-700 dark:text-zinc-200 nice-shadow flex space-x-2 items-center ${
                       !canProceedToUpload || uploading
                         ? 'opacity-50 cursor-not-allowed'
                         : 'hover:scale-105'
@@ -353,7 +353,7 @@ export default function MigrationClient({ orgslug }: MigrationClientProps) {
       {/* Step: Creating / Complete */}
       {(step === 'creating' || step === 'complete') && (
         <div className="max-w-md mx-auto">
-          <div className="bg-white rounded-xl nice-shadow p-8">
+          <div className="bg-white dark:bg-dk-card rounded-xl nice-shadow p-8">
             <MigrationProgress
               status={createStatus}
               result={createResult}

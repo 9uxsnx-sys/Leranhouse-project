@@ -97,6 +97,12 @@
     "recent": "Récent",
     "expand": "Développer",
     "collapse": "Réduire",
+    "theme": {
+        "label": "Thème",
+        "light": "Clair",
+        "dark": "Sombre",
+        "system": "Système"
+    },
     "view_all": "Voir tout",
     "select": "Sélectionner",
     "deselect": "Désélectionner",

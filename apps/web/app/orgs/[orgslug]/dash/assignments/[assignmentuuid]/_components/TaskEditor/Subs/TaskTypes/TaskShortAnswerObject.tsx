@@ -281,7 +281,7 @@ function TaskShortAnswerObject({
                   'dashboard.assignments.editor.task_editor.short_answer.prompt_placeholder'
                 )}
                 rows={2}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-md bg-white resize-y"
+                className="px-3 py-2 text-sm border border-gray-200 dark:border-dk-line-strong rounded-md bg-white dark:bg-dk-card resize-y"
               />
             </div>
 
@@ -297,7 +297,7 @@ function TaskShortAnswerObject({
                     match_mode: e.target.value as MatchMode,
                   }))
                 }
-                className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-white"
+                className="px-3 py-1.5 text-sm border border-gray-200 dark:border-dk-line-strong rounded-md bg-white dark:bg-dk-card"
               >
                 <option value="case_insensitive">
                   {t('dashboard.assignments.editor.task_editor.short_answer.match_modes.case_insensitive')}
@@ -336,7 +336,7 @@ function TaskShortAnswerObject({
                     placeholder={t(
                       'dashboard.assignments.editor.task_editor.short_answer.answer_placeholder'
                     )}
-                    className="flex-1 px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-white"
+                    className="flex-1 px-3 py-1.5 text-sm border border-gray-200 dark:border-dk-line-strong rounded-md bg-white dark:bg-dk-card"
                   />
                   {contents.correct_answers.length > 1 && (
                     <button
@@ -364,7 +364,7 @@ function TaskShortAnswerObject({
                   'dashboard.assignments.editor.task_editor.short_answer.explanation_placeholder'
                 )}
                 rows={2}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-md bg-white resize-y"
+                className="px-3 py-2 text-sm border border-gray-200 dark:border-dk-line-strong rounded-md bg-white dark:bg-dk-card resize-y"
               />
             </div>
           </>
@@ -386,7 +386,7 @@ function TaskShortAnswerObject({
               placeholder={t(
                 'dashboard.assignments.editor.task_editor.short_answer.your_answer_placeholder'
               )}
-              className="w-full px-3 py-2 text-sm border-2 border-gray-200 rounded-md bg-white focus:border-blue-400 focus:ring-2 focus:ring-blue-200 outline-none"
+              className="w-full px-3 py-2 text-sm border-2 border-gray-200 dark:border-dk-line-strong rounded-md bg-white dark:bg-dk-card focus:border-blue-400 focus:ring-2 focus:ring-blue-200 outline-none"
             />
             {showCorrectAnswers && contents.correct_answers.length > 0 && (
               <div className="flex flex-col space-y-1.5 p-3 rounded-md bg-emerald-50 border border-emerald-200">
@@ -398,7 +398,7 @@ function TaskShortAnswerObject({
                   {contents.correct_answers.map((answer, i) => (
                     <span
                       key={i}
-                      className="px-2 py-0.5 text-xs font-medium bg-white text-emerald-700 rounded-md"
+                      className="px-2 py-0.5 text-xs font-medium bg-white dark:bg-dk-card text-emerald-700 rounded-md"
                     >
                       {answer}
                     </span>
@@ -422,9 +422,9 @@ function TaskShortAnswerObject({
               <label className="text-xs font-semibold text-slate-500">
                 {t('dashboard.assignments.editor.task_editor.short_answer.student_answer_label')}
               </label>
-              <div className="px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-md">
+              <div className="px-3 py-2 text-sm bg-gray-50 dark:bg-dk-inset/40 border border-gray-200 dark:border-dk-line-strong rounded-md">
                 {studentAnswer || (
-                  <span className="text-gray-400 italic">
+                  <span className="text-gray-400 dark:text-zinc-400 italic">
                     {t('dashboard.assignments.editor.task_editor.short_answer.no_answer')}
                   </span>
                 )}

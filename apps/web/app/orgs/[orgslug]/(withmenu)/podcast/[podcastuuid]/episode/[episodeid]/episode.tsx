@@ -299,7 +299,7 @@ export default function EpisodeClient({
     return (
       <GeneralWrapperStyled>
         <div className="flex items-center justify-center min-h-[50vh]">
-          <p className="text-gray-500">
+          <p className="text-gray-500 dark:text-dk-fg-3">
             {t('podcast.page.no_permission')}
           </p>
         </div>
@@ -311,7 +311,7 @@ export default function EpisodeClient({
     return (
       <GeneralWrapperStyled>
         <div className="flex items-center justify-center min-h-[50vh]">
-          <p className="text-gray-500">
+          <p className="text-gray-500 dark:text-dk-fg-3">
             {t('podcast.page.failed_to_load')}
           </p>
         </div>
@@ -336,7 +336,7 @@ export default function EpisodeClient({
             {/* 1. What You'll Learn (first, like lesson page) */}
             {learningObjectives.length > 0 && (
               <section id="what-youll-learn" className="scroll-mt-24">
-                <div className="rounded-xl bg-white border border-gray-100 shadow-sm px-5 py-5">
+                <div className="rounded-xl bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line shadow-sm px-5 py-5">
                   <div className="flex flex-col gap-0.5">
                     <Heading level="h2">{t('lesson.preview.what_youll_learn')}</Heading>
                     <Text size="base" className="text-ui-fg-muted">{t('lesson.preview.what_youll_learn_lead')}</Text>
@@ -387,7 +387,7 @@ export default function EpisodeClient({
                 <Heading level="h1" className="!text-2xl mb-5">
                   {t('lesson.preview.key_takeaways', 'Key Takeaways')}
                 </Heading>
-                <div className="rounded-xl bg-white border border-gray-100 shadow-sm px-5 py-5">
+                <div className="rounded-xl bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line shadow-sm px-5 py-5">
                   <ul className="space-y-4">
                     {keyPoints.map(
                       (
@@ -439,7 +439,7 @@ export default function EpisodeClient({
               </Heading>
               {nextEpisode ? (
                 <div
-                  className="bg-white border border-gray-100 rounded-xl shadow-sm p-5 cursor-pointer hover:bg-gray-50/60 transition-colors"
+                  className="bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line rounded-xl shadow-sm p-5 cursor-pointer hover:bg-gray-50/60 transition-colors"
                   onClick={() => navigateToEpisode(nextEpisode)}
                 >
                   <div className="flex items-start gap-3">
@@ -455,7 +455,7 @@ export default function EpisodeClient({
                   </div>
                 </div>
               ) : (
-                <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-5">
+                <div className="bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line rounded-xl shadow-sm p-5">
                   <div className="flex items-start gap-3">
                     <BookOpen className="w-5 h-5 text-ui-fg-muted mt-0.5 shrink-0" />
                     <div>
@@ -475,7 +475,7 @@ export default function EpisodeClient({
             </section>
 
             {/* 5. Navigation Footer */}
-            <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+            <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-dk-line-strong">
               <Button
                 variant="ghost"
                 size="small"

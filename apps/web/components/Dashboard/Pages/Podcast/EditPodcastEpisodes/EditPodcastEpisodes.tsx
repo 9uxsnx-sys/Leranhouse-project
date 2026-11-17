@@ -228,7 +228,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
   if (isLoading || !podcast) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-gray-400 dark:text-zinc-400" />
       </div>
     )
   }
@@ -252,18 +252,18 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
           <div className="flex items-center gap-3 mb-5">
             {/* Search Bar */}
             <div className="relative w-80">
-              <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+              <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-zinc-400 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('podcasts.dashboard.episodes.search_placeholder')}
-                className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
+                className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 dark:text-zinc-200 bg-white dark:bg-dk-card shadow-borders-base rounded-md placeholder:text-gray-500 dark:placeholder:text-zinc-400 focus:outline-none"
               />
             </div>
 
             {/* Episode count */}
-            <span className="text-xs text-gray-400 whitespace-nowrap">
+            <span className="text-xs text-gray-400 dark:text-zinc-400 whitespace-nowrap">
               {t('podcasts.dashboard.episodes.episode_count', { count: displayEpisodes.length })}
             </span>
 
@@ -300,7 +300,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
             <IconButton
               size="small"
               variant="transparent"
-              className="bg-white hover:bg-gray-50 shadow-borders-base"
+              className="bg-white dark:bg-dk-card hover:bg-gray-50 dark:hover:bg-dk-raised shadow-borders-base"
               onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
               aria-label={t('podcasts.dashboard.episodes.sort_aria')}
             >
@@ -348,7 +348,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
                             }}
                             role="button"
                             tabIndex={0}
-                            className={`w-full text-start px-5 py-4 rounded-xl bg-white border border-gray-100 shadow-sm transition-colors flex items-center justify-between group ${
+                            className={`w-full text-start px-5 py-4 rounded-xl bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line shadow-sm transition-colors flex items-center justify-between group ${
                               isSelectMode
                                 ? isSelected
                                   ? 'ring-2 ring-blue-500/40 border-blue-200 cursor-pointer'
@@ -366,7 +366,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
                                   className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
                                     isSelected
                                       ? 'bg-zinc-800 border-zinc-800 text-white'
-                                      : 'border-gray-300 hover:border-gray-400'
+                                      : 'border-gray-300 dark:border-dk-line-strong hover:border-gray-400'
                                   }`}
                                   onClick={(e) => {
                                     e.stopPropagation()
@@ -383,15 +383,15 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
                                 /* Drag Handle */
                                 <div
                                   {...provided.dragHandleProps}
-                                  className="flex-shrink-0 active:cursor-grabbing text-gray-300 hover:text-gray-400 transition-colors"
+                                  className="flex-shrink-0 active:cursor-grabbing text-gray-300 dark:text-zinc-600 hover:text-gray-400 transition-colors"
                                   style={{ cursor: 'grab' }}
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   <GripVertical size={16} />
                                 </div>
                               )}
-                              <Music size={18} className="text-gray-400 flex-shrink-0" />
-                              <p className="text-sm font-medium text-gray-900 truncate">
+                              <Music size={18} className="text-gray-400 dark:text-zinc-400 flex-shrink-0" />
+                              <p className="text-sm font-medium text-gray-900 dark:text-zinc-100 truncate">
                                 {episode.title || t('podcasts.dashboard.episodes.untitled')}
                               </p>
                               {episode.published ? (
@@ -408,7 +408,7 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
                               <DropdownMenuTrigger asChild>
                                 <button
                                   onClick={(e) => e.stopPropagation()}
-                                  className="h-7 w-7 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors flex-shrink-0"
+                                  className="h-7 w-7 flex items-center justify-center rounded-md text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors flex-shrink-0"
                                 >
                                   <MoreVertical size={16} />
                                 </button>
@@ -445,12 +445,12 @@ function EditPodcastEpisodes({ orgslug, podcastuuid }: EditPodcastEpisodesProps)
                   {provided.placeholder}
 
                   {displayEpisodes.length === 0 && (
-                    <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-100">
-                      <Music size={40} className="mx-auto mb-3 text-gray-300" />
-                      <p className="text-sm text-gray-400">
+                    <div className="text-center py-12 bg-gray-50 dark:bg-dk-inset/40 rounded-lg border border-gray-100 dark:border-dk-line">
+                      <Music size={40} className="mx-auto mb-3 text-gray-300 dark:text-zinc-600" />
+                      <p className="text-sm text-gray-400 dark:text-zinc-400">
                         {searchQuery ? t('podcasts.dashboard.episodes.no_search_match') : t('podcasts.dashboard.episodes.no_episodes_yet')}
                       </p>
-                      <p className="text-xs text-gray-300 mt-1">
+                      <p className="text-xs text-gray-300 dark:text-zinc-600 mt-1">
                         {searchQuery ? t('podcasts.dashboard.episodes.try_different_search') : t('podcasts.dashboard.episodes.click_new_to_add')}
                       </p>
                     </div>
@@ -699,7 +699,7 @@ function EpisodeDetailForm({
         <Link
           href={getUriWithOrg(orgslug, '') + `/podcast/${podcastuuid}`}
           target="_blank"
-          className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+          className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors"
         >
           <Eye size={14} />
           <span>{t('common.preview')}</span>
@@ -711,14 +711,14 @@ function EpisodeDetailForm({
               type="button"
               onClick={copyFromSource}
               disabled={isCopying}
-              className="hidden sm:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className="hidden sm:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors disabled:opacity-50"
             >
               {isCopying ? <Loader2 size={14} className="animate-spin" /> : <Copy size={14} />}
               <span>{t('dashboard.courses.general.locale.copy_from_source')}</span>
             </button>
           )}
           <span
-            className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600"
+            className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300"
             title={
               isSourceLocale
                 ? t('dashboard.courses.general.locale.source')
@@ -727,7 +727,7 @@ function EpisodeDetailForm({
           >
             <span className={`w-1.5 h-1.5 rounded-full ${!dirty ? 'bg-teal-500' : 'bg-amber-400'}`} />
             <span>{getCurrentLanguageNativeName(contentLocale)}</span>
-            <span className="text-gray-400">
+            <span className="text-gray-400 dark:text-zinc-400">
               {isSourceLocale
                 ? t('dashboard.courses.general.locale.source')
                 : translation
@@ -743,7 +743,7 @@ function EpisodeDetailForm({
               isSaving
                 ? 'bg-brand text-brand-fg border-brand opacity-50 cursor-not-allowed'
                 : !dirty
-                  ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                  ? 'bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong cursor-default'
                   : 'bg-brand text-brand-fg border-brand hover:bg-brand-hover cursor-pointer'
             }`}
           >
@@ -762,7 +762,7 @@ function EpisodeDetailForm({
             type="button"
             onClick={togglePublishStatus}
             disabled={isPublishing}
-            className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50 ${isPublishing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+            className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong hover:bg-gray-50 dark:hover:bg-dk-raised ${isPublishing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
           >
             {isPublishing ? (
               <Loader2 size={14} className="animate-spin" />
@@ -779,8 +779,8 @@ function EpisodeDetailForm({
       </div>
 
       {/* Basic Information */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+      <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
           {t('common.sections.overview')}
         </h3>
         <div className="space-y-4">
@@ -812,8 +812,8 @@ function EpisodeDetailForm({
       </div>
 
       {/* What You'll Learn */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+      <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
           {t('common.sections.what_you_will_learn')}
         </h3>
         <LearningItemsList
@@ -823,8 +823,8 @@ function EpisodeDetailForm({
       </div>
 
       {/* Key Takeaways */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+      <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
           {t('common.sections.key_takeaways')}
         </h3>
         <TakeawayItemsList
@@ -834,24 +834,24 @@ function EpisodeDetailForm({
       </div>
 
       {/* Media */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+      <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
           {t('common.sections.media')}
         </h3>
-        <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50">
+        <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-gray-50/50 dark:bg-dk-inset/40">
           <div className="flex-shrink-0">
-            <Music size={24} className="text-gray-400" strokeWidth={1.5} />
+            <Music size={24} className="text-gray-400 dark:text-zinc-400" strokeWidth={1.5} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-700">{t('podcasts.dashboard.episodes.episode_audio')}</p>
+            <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('podcasts.dashboard.episodes.episode_audio')}</p>
             {currentAudioUrl && (
-              <p className="text-xs text-gray-400 truncate mt-0.5">
+              <p className="text-xs text-gray-400 dark:text-zinc-400 truncate mt-0.5">
                 {episode.audio_file} &middot; {formatDuration(episode.duration_seconds)}
               </p>
             )}
           </div>
           {isAudioUploading ? (
-            <Loader2 size={18} className="animate-spin text-gray-400" />
+            <Loader2 size={18} className="animate-spin text-gray-400 dark:text-zinc-400" />
           ) : (
             <>
               <input
@@ -863,7 +863,7 @@ function EpisodeDetailForm({
               />
               <label
                 htmlFor={`audio-upload-${episode.episode_uuid}`}
-                className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                className="flex items-center justify-center text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
                 title={currentAudioUrl ? t('podcasts.dashboard.episodes.replace_audio_title') : t('podcasts.dashboard.episodes.upload_audio_title')}
               >
                 <UploadCloud size={18} />
@@ -951,7 +951,7 @@ function CreateEpisodeModal({
       dialogContent={
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-1">
               {t('podcasts.dashboard.episodes.title_label')} *
             </label>
             <Input
@@ -965,7 +965,7 @@ function CreateEpisodeModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-1">
               {t('podcasts.dashboard.episodes.description_label')}
             </label>
             <Textarea
@@ -978,7 +978,7 @@ function CreateEpisodeModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-1">
               {t('podcasts.dashboard.episodes.audio_label')}
             </label>
             <input
@@ -990,27 +990,27 @@ function CreateEpisodeModal({
             />
             <label
               htmlFor="audio-upload"
-              className="flex items-center justify-center px-4 py-3 border-2 border-dashed border-gray-200 rounded-lg hover:border-gray-300 cursor-pointer transition-colors"
+              className="flex items-center justify-center px-4 py-3 border-2 border-dashed border-gray-200 dark:border-dk-line-strong rounded-lg hover:border-gray-300 dark:hover:border-dk-line-strong cursor-pointer transition-colors"
             >
               {audioFile ? (
-                <span className="text-sm text-gray-700">{audioFile.name}</span>
+                <span className="text-sm text-gray-700 dark:text-zinc-200">{audioFile.name}</span>
               ) : (
-                <span className="text-sm text-gray-500 flex items-center">
+                <span className="text-sm text-gray-500 dark:text-zinc-400 flex items-center">
                   <ConceptIcon.upload size={16} className="me-2" />
                   {t('podcasts.dashboard.episodes.upload_audio')}
                 </span>
               )}
             </label>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-gray-500 dark:text-zinc-400">
               {t('podcasts.dashboard.episodes.audio_hint')}
             </p>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-dk-line">
             <button
               type="button"
               onClick={handleClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-zinc-200 hover:bg-gray-100 dark:hover:bg-dk-raised rounded-lg transition-colors"
             >
               {t('podcasts.modals.create.cancel')}
             </button>

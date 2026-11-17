@@ -267,7 +267,7 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
         <div>
           {/* Header Row */}
           <div className="flex items-center justify-between mb-6">
-            <span className="text-sm font-semibold tracking-wide uppercase text-gray-500">
+            <span className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1">
               {t('dashboard.courses.certification.title')}
             </span>
             <div className="flex items-center space-x-3">
@@ -279,7 +279,7 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
                   onChange={(e) => handleCertificationToggle(e.target.checked)}
                   disabled={isCreating}
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+                <div className="w-11 h-6 bg-gray-200 dark:bg-dk-track peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black dark:peer-checked:bg-zinc-100 dark:after:bg-zinc-300 dark:after:border-zinc-300 dark:peer-checked:after:bg-zinc-900 dark:peer-checked:after:border-zinc-900"></div>
               </label>
               {isCreating && (
                 <div className="animate-spin">
@@ -303,8 +303,8 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
               <div className="lg:col-span-3 space-y-3">
                 <Form.Root>
                   {/* Basic Information Card */}
-                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5 block">
+                  <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5 block">
                       {t('dashboard.courses.certification.sections.basic_info.title')}
                     </span>
 
@@ -368,8 +368,8 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
                   </div>
 
                   {/* Certificate Design Card */}
-                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5 block">
+                  <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                    <span className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5 block">
                       {t('dashboard.courses.certification.sections.certificate_design.title')}
                     </span>
 
@@ -381,14 +381,14 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
                             key={patternValue}
                             className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
                               formik.values.certificate_pattern === patternValue
-                                ? 'border-black bg-gray-50'
-                                : 'border-gray-200 hover:border-gray-300'
+                                ? 'border-black bg-gray-50 dark:bg-dk-inset'
+                                : 'border-gray-200 dark:border-dk-line-strong hover:border-gray-300 dark:hover:border-dk-line-strong'
                             }`}
                             onClick={() => formik.setFieldValue('certificate_pattern', patternValue)}
                           >
                             <div className="text-center">
-                              <div className="text-sm font-medium text-gray-900">{t(`dashboard.courses.certification.patterns.${patternValue}.name`)}</div>
-                              <div className="text-xs text-gray-500 mt-1">{t(`dashboard.courses.certification.patterns.${patternValue}.description`)}</div>
+                              <div className="text-sm font-medium text-gray-900 dark:text-zinc-100">{t(`dashboard.courses.certification.patterns.${patternValue}.name`)}</div>
+                              <div className="text-xs text-gray-500 dark:text-zinc-400 mt-1">{t(`dashboard.courses.certification.patterns.${patternValue}.description`)}</div>
                             </div>
                           </div>
                         ))}
@@ -415,8 +415,8 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
 
               {/* Preview Card */}
               <div className="lg:col-span-2">
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 sticky top-6 min-h-[320px]">
-                  <span className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5 block">
+                <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6 sticky top-6 min-h-[320px]">
+                  <span className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5 block">
                     {t('dashboard.courses.certification.sections.preview.title')}
                   </span>
                   
@@ -434,17 +434,17 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
 
           {/* Disabled State */}
           {!formik.values.enable_certification && (
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-8 text-center">
-              <Award className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="font-medium text-gray-700 mb-2">{t('dashboard.courses.certification.states.disabled.title')}</h3>
-              <p className="text-sm text-gray-500 mb-4">
+            <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-8 text-center">
+              <Award className="w-16 h-16 text-gray-300 dark:text-zinc-600 mx-auto mb-4" />
+              <h3 className="font-medium text-gray-700 dark:text-zinc-200 mb-2">{t('dashboard.courses.certification.states.disabled.title')}</h3>
+              <p className="text-sm text-gray-500 dark:text-zinc-400 mb-4">
                 {t('dashboard.courses.certification.states.disabled.message')}
               </p>
               <button
                 type="button"
                 onClick={() => handleCertificationToggle(true)}
                 disabled={isCreating}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-black bg-white border border-gray-200 rounded-lg hover:bg-gray-50 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-black bg-white dark:bg-dk-card border border-gray-200 dark:border-dk-line-strong rounded-lg hover:bg-gray-50 dark:hover:bg-dk-raised focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Award size={16} />
                 {isCreating ? t('dashboard.courses.certification.states.disabled.creating') : t('dashboard.courses.certification.states.disabled.button')}
@@ -454,12 +454,12 @@ function EditCourseCertification(props: EditCourseCertificationProps) {
 
           {/* Creating State */}
           {formik.values.enable_certification && !hasExistingCertification && isCreating && (
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-8 text-center">
+            <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-8 text-center">
               <div className="animate-spin mx-auto mb-4">
-                <Settings className="w-16 h-16 text-gray-400" />
+                <Settings className="w-16 h-16 text-gray-400 dark:text-zinc-400" />
               </div>
-              <h3 className="font-medium text-gray-700 mb-2">{t('dashboard.courses.certification.states.creating.title')}</h3>
-              <p className="text-sm text-gray-500">
+              <h3 className="font-medium text-gray-700 dark:text-zinc-200 mb-2">{t('dashboard.courses.certification.states.creating.title')}</h3>
+              <p className="text-sm text-gray-500 dark:text-zinc-400">
                 {t('dashboard.courses.certification.states.creating.message')}
               </p>
             </div>

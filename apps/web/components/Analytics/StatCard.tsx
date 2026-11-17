@@ -34,15 +34,15 @@ export function StatCard({
   const up = (delta ?? 0) >= 0
 
   return (
-    <div className="w-full max-w-[300px] h-[150px] overflow-hidden bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+    <div className="w-full max-w-[300px] h-[150px] overflow-hidden bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
       {/* Title + icon */}
       <div className="flex h-7 items-start justify-between gap-3">
-        <p className="text-[11px] font-semibold tracking-wide uppercase text-gray-400 truncate">{label}</p>
-        {Icon && <Icon size={16} className="text-gray-300 shrink-0" strokeWidth={1.75} />}
+        <p className="text-[11px] font-semibold tracking-wide uppercase text-gray-400 dark:text-dk-fg-3 truncate">{label}</p>
+        {Icon && <Icon size={16} className="text-gray-300 dark:text-zinc-600 shrink-0" strokeWidth={1.75} />}
       </div>
 
       {/* Hero number */}
-      <p className="mt-2.5 text-[32px] leading-none font-semibold tracking-tight text-gray-900 tabular-nums">
+      <p className="mt-2.5 text-[32px] leading-none font-semibold tracking-tight text-gray-900 dark:text-dk-fg-1 tabular-nums">
         {value}
       </p>
 
@@ -58,7 +58,7 @@ export function StatCard({
             {up ? '+' : ''}
             {delta}%
           </span>
-          <span className="text-gray-400">{changeLabel}</span>
+          <span className="text-gray-400 dark:text-dk-fg-3">{changeLabel}</span>
         </div>
       )}
     </div>

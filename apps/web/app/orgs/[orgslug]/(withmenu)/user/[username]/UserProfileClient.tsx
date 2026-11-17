@@ -173,19 +173,19 @@ function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProp
             />
           </div>
           <div className="flex flex-col gap-1 pt-2">
-            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 leading-snug tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-dk-fg-1 leading-snug tracking-tight">
               {userData.first_name} {userData.last_name}
             </h1>
             {userData.username && (
-              <p className="text-sm text-gray-400">@{userData.username}</p>
+              <p className="text-sm text-gray-400 dark:text-dk-fg-3">@{userData.username}</p>
             )}
             {userData.bio && (
-              <p className="text-sm text-gray-600 max-w-xl leading-relaxed">{userData.bio}</p>
+              <p className="text-sm text-gray-600 dark:text-dk-fg-2 max-w-xl leading-relaxed">{userData.bio}</p>
             )}
-            <div className="flex items-center gap-5 text-sm text-gray-500 mt-1">
+            <div className="flex items-center gap-5 text-sm text-gray-500 dark:text-dk-fg-3 mt-1">
               {tabs.map((tab) => (
                 <span key={tab.id}>
-                  <span className="font-semibold text-gray-900">{tab.count}</span>
+                  <span className="font-semibold text-gray-900 dark:text-dk-fg-1">{tab.count}</span>
                   <span className="ml-1">{tab.label}</span>
                 </span>
               ))}
@@ -195,7 +195,7 @@ function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProp
       </div>
 
       {/* ── Tab Switcher ── */}
-      <div className="border-b border-gray-200 px-4 sm:px-8 mb-6">
+      <div className="border-b border-gray-200 dark:border-dk-line-strong px-4 sm:px-8 mb-6">
         <div className="flex gap-0 -mb-px">
           {tabs.map((tab) => (
             <button
@@ -203,8 +203,8 @@ function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProp
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === tab.id
-                  ? 'border-brand text-gray-900'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ? 'border-brand text-gray-900 dark:text-dk-fg-1'
+                  : 'border-transparent text-gray-500 dark:text-dk-fg-3 hover:text-gray-700 dark:hover:text-dk-fg-1 hover:border-gray-300 dark:hover:border-dk-line-strong'
               }`}
             >
               {tab.icon}
@@ -248,7 +248,7 @@ function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProp
                     )
                   })
                 ) : (
-                  <div className="col-span-full text-center py-16 text-gray-400">
+                  <div className="col-span-full text-center py-16 text-gray-400 dark:text-dk-fg-3">
                     <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-50" />
                     <p className="text-lg font-medium">No courses yet</p>
                     <p className="text-sm mt-1">
@@ -279,7 +279,7 @@ function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProp
                     />
                   ))
                 ) : (
-                  <div className="col-span-full text-center py-16 text-gray-400">
+                  <div className="col-span-full text-center py-16 text-gray-400 dark:text-dk-fg-3">
                     <Mic className="w-12 h-12 mx-auto mb-3 opacity-50" />
                     <p className="text-lg font-medium">No podcasts yet</p>
                     <p className="text-sm mt-1">
@@ -310,7 +310,7 @@ function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProp
                     />
                   ))
                 ) : (
-                  <div className="col-span-full text-center py-16 text-gray-400">
+                  <div className="col-span-full text-center py-16 text-gray-400 dark:text-dk-fg-3">
                     <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
                     <p className="text-lg font-medium">No communities yet</p>
                     <p className="text-sm mt-1">Communities this user has access to will appear here.</p>

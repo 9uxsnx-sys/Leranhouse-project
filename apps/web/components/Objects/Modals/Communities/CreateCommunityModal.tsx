@@ -173,15 +173,15 @@ export function CreateCommunityModal({
               <Form className="space-y-6">
                 {/* Linked resource */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-dk-fg-1 mb-2">
                     {t('dashboard.courses.communities.modals.create.form.resource_label')} *
                   </label>
-                  <p className="text-xs text-gray-500 mb-3">
+                  <p className="text-xs text-gray-500 dark:text-dk-fg-3 mb-3">
                     {t('dashboard.courses.communities.modals.create.form.resource_hint')}
                   </p>
 
                   {/* Course / Podcast switch */}
-                  <div className="inline-flex items-center gap-1 p-1 mb-3 rounded-lg bg-gray-100">
+                  <div className="inline-flex items-center gap-1 p-1 mb-3 rounded-lg bg-gray-100 dark:bg-dk-inset">
                     <button
                       type="button"
                       onClick={() => {
@@ -191,8 +191,8 @@ export function CreateCommunityModal({
                       }}
                       className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                         resourceType === 'course'
-                          ? 'bg-white text-gray-900 shadow-sm'
-                          : 'text-gray-500 hover:text-gray-700'
+                          ? 'bg-white dark:bg-dk-card text-gray-900 dark:text-dk-fg-1 shadow-sm'
+                          : 'text-gray-500 dark:text-dk-fg-3 hover:text-gray-700 dark:hover:text-dk-fg-1'
                       }`}
                     >
                       <BookOpen size={14} />
@@ -207,8 +207,8 @@ export function CreateCommunityModal({
                       }}
                       className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
                         resourceType === 'podcast'
-                          ? 'bg-white text-gray-900 shadow-sm'
-                          : 'text-gray-500 hover:text-gray-700'
+                          ? 'bg-white dark:bg-dk-card text-gray-900 dark:text-dk-fg-1 shadow-sm'
+                          : 'text-gray-500 dark:text-dk-fg-3 hover:text-gray-700 dark:hover:text-dk-fg-1'
                       }`}
                     >
                       <Headphones size={14} />
@@ -220,7 +220,7 @@ export function CreateCommunityModal({
                   <div className="relative mb-2">
                     <Search
                       size={16}
-                      className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400"
+                      className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-dk-fg-3"
                     />
                     <input
                       type="text"
@@ -231,26 +231,26 @@ export function CreateCommunityModal({
                           ? t('dashboard.courses.communities.modals.create.form.search_courses')
                           : t('dashboard.courses.communities.modals.create.form.search_podcasts')
                       }
-                      className="w-full ps-9 pe-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-black/20 focus:border-transparent outline-none transition-all"
+                      className="w-full ps-9 pe-3 py-2 border border-gray-200 dark:border-dk-line-strong rounded-lg text-sm focus:ring-2 focus:ring-black/20 focus:border-transparent outline-none transition-all"
                     />
                   </div>
 
                   {/* Options */}
                   <Field name="resource_uuid">
                     {({ field, form }: any) => (
-                      <div className="max-h-52 overflow-y-auto border border-gray-100 rounded-lg">
+                      <div className="max-h-52 overflow-y-auto border border-gray-100 dark:border-dk-line rounded-lg">
                         {isLoadingResources ? (
                           <div className="flex items-center justify-center py-8">
-                            <Loader2 size={20} className="animate-spin text-gray-400" />
+                            <Loader2 size={20} className="animate-spin text-gray-400 dark:text-dk-fg-3" />
                           </div>
                         ) : filteredOptions.length === 0 ? (
-                          <div className="text-center py-8 text-sm text-gray-500">
+                          <div className="text-center py-8 text-sm text-gray-500 dark:text-dk-fg-3">
                             {resourceType === 'course'
                               ? t('dashboard.courses.communities.modals.create.form.no_courses')
                               : t('dashboard.courses.communities.modals.create.form.no_podcasts')}
                           </div>
                         ) : (
-                          <div className="divide-y divide-gray-100">
+                          <div className="divide-y divide-gray-100 dark:divide-dk-line">
                             {filteredOptions.map((option) => {
                               const alreadyLinked = linkedUuids.has(option.uuid)
                               const isSelected = field.value === option.uuid
@@ -263,15 +263,15 @@ export function CreateCommunityModal({
                                   className={`w-full text-start px-4 py-3 transition-colors ${
                                     alreadyLinked
                                       ? 'opacity-50 cursor-not-allowed'
-                                      : 'hover:bg-gray-50'
-                                  } ${isSelected ? 'bg-gray-100 border-s-2 border-black' : ''}`}
+                                      : 'hover:bg-gray-50 dark:hover:bg-dk-raised'
+                                  } ${isSelected ? 'bg-gray-100 dark:bg-dk-inset border-s-2 border-black' : ''}`}
                                 >
                                   <div className="flex items-center justify-between gap-2">
-                                    <p className="font-medium text-gray-900 text-sm truncate">
+                                    <p className="font-medium text-gray-900 dark:text-dk-fg-1 text-sm truncate">
                                       {option.name}
                                     </p>
                                     {alreadyLinked && (
-                                      <span className="shrink-0 text-[11px] text-gray-400">
+                                      <span className="shrink-0 text-[11px] text-gray-400 dark:text-dk-fg-3">
                                         {t(
                                           'dashboard.courses.communities.modals.create.form.already_linked'
                                         )}
@@ -279,7 +279,7 @@ export function CreateCommunityModal({
                                     )}
                                   </div>
                                   {option.description && (
-                                    <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">
+                                    <p className="text-xs text-gray-500 dark:text-dk-fg-3 mt-0.5 line-clamp-1">
                                       {option.description}
                                     </p>
                                   )}
@@ -302,7 +302,7 @@ export function CreateCommunityModal({
                 <div>
                   <label
                     htmlFor="name"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block text-sm font-medium text-gray-700 dark:text-dk-fg-1 mb-1"
                   >
                     {t('dashboard.courses.communities.modals.create.form.name_label')} *
                   </label>
@@ -311,7 +311,7 @@ export function CreateCommunityModal({
                     name="name"
                     id="name"
                     placeholder={t('dashboard.courses.communities.modals.create.form.name_placeholder')}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black/20 focus:border-transparent outline-none transition-all"
+                    className="w-full px-4 py-2.5 border border-gray-200 dark:border-dk-line-strong rounded-lg focus:ring-2 focus:ring-black/20 focus:border-transparent outline-none transition-all"
                   />
                   <ErrorMessage
                     name="name"
@@ -324,7 +324,7 @@ export function CreateCommunityModal({
                 <div>
                   <label
                     htmlFor="description"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block text-sm font-medium text-gray-700 dark:text-dk-fg-1 mb-1"
                   >
                     {t('dashboard.courses.communities.modals.create.form.description_label')}
                   </label>
@@ -334,7 +334,7 @@ export function CreateCommunityModal({
                     id="description"
                     rows={3}
                     placeholder={t('dashboard.courses.communities.modals.create.form.description_placeholder')}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black/20 focus:border-transparent outline-none transition-all resize-none"
+                    className="w-full px-4 py-2.5 border border-gray-200 dark:border-dk-line-strong rounded-lg focus:ring-2 focus:ring-black/20 focus:border-transparent outline-none transition-all resize-none"
                   />
                   <ErrorMessage
                     name="description"
@@ -344,11 +344,11 @@ export function CreateCommunityModal({
                 </div>
 
                 {/* Actions */}
-                <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-dk-line">
                   <button
                     type="button"
                     onClick={onClose}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-dk-fg-1 hover:bg-gray-100 dark:hover:bg-dk-raised rounded-lg transition-colors"
                   >
                     {t('dashboard.courses.communities.modals.create.cancel')}
                   </button>

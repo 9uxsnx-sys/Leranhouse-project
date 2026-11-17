@@ -71,7 +71,7 @@ export default function NotificationsManagement({
   const active = TABS.some((t) => t.id === subpage) ? subpage : 'events'
 
   return (
-    <div className="min-h-screen w-full bg-[#f8f8f8]">
+    <div className="min-h-screen w-full bg-[#f8f8f8] dark:bg-transparent">
       {/* Row 1: Page title */}
       <div className="max-w-7xl mx-auto w-full pt-8 px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl md:text-4xl font-semibold text-ui-fg-base leading-tight">
@@ -242,7 +242,7 @@ function EventsSection() {
             }}
             disabled={togglingEvent === event.event_type}
             className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
-              event.is_enabled ? 'bg-black' : 'bg-gray-300'
+              event.is_enabled ? 'bg-black dark:bg-zinc-100' : 'bg-gray-300 dark:bg-dk-track'
             } ${
               togglingEvent === event.event_type
                 ? 'opacity-50 cursor-not-allowed'
@@ -251,7 +251,9 @@ function EventsSection() {
           >
             <span
               className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
-                event.is_enabled ? 'translate-x-[18px]' : 'translate-x-[2px]'
+                event.is_enabled
+                  ? 'translate-x-[18px] dark:bg-zinc-900'
+                  : 'translate-x-[2px] dark:bg-zinc-300'
               }`}
             />
           </button>
@@ -270,12 +272,12 @@ function EventsSection() {
                 {event.description || event.event_type}
               </span>
               {event.is_customized && (
-                <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded-full bg-gray-100 text-gray-600">
+                <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded-full bg-gray-100 dark:bg-dk-inset text-gray-600 dark:text-zinc-300">
                   Custom
                 </span>
               )}
               {!event.has_audience && (
-                <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded-full bg-gray-100 text-gray-500">
+                <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded-full bg-gray-100 dark:bg-dk-inset text-gray-500 dark:text-zinc-400">
                   No audience
                 </span>
               )}
@@ -291,7 +293,7 @@ function EventsSection() {
         width: '18%',
         value: (row) => row.category || '',
         render: (event) => (
-          <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-600">
+          <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 dark:bg-dk-inset text-gray-600 dark:text-zinc-300">
             {event.category || 'Other'}
           </span>
         ),
@@ -306,7 +308,7 @@ function EventsSection() {
               {event.audience_description}
             </span>
           ) : (
-            <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded-full bg-gray-100 text-gray-500">
+            <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium rounded-full bg-gray-100 dark:bg-dk-inset text-gray-500 dark:text-zinc-400">
               No audience
             </span>
           ),
@@ -322,7 +324,7 @@ function EventsSection() {
               <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  className="p-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                  className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-dk-raised text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
                   aria-label="Event actions"
                 >
                   <MoreHorizontal size={16} />
@@ -330,14 +332,14 @@ function EventsSection() {
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="min-w-[170px] rounded-lg border border-gray-200 bg-white p-1 shadow-md"
+                className="min-w-[170px] rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card p-1 shadow-md"
                 sideOffset={6}
               >
                 <DropdownMenuItem
                   onClick={() => openEditor(event)}
                   className="text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
                 >
-                  <span className="text-gray-700 text-xs">Edit template</span>
+                  <span className="text-gray-700 dark:text-zinc-200 text-xs">Edit template</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -361,7 +363,7 @@ function EventsSection() {
           <button
             type="button"
             onClick={() => setEditingEvent(null)}
-            className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors cursor-pointer"
           >
             <ChevronLeft size={14} className="rtl:rotate-180" />
             <span>Back</span>
@@ -376,7 +378,7 @@ function EventsSection() {
                 isSaving
                   ? 'bg-brand text-brand-fg border-brand opacity-50 cursor-not-allowed'
                   : isSaved
-                    ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                    ? 'bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong cursor-default'
                     : 'bg-brand text-brand-fg border-brand hover:bg-brand-hover cursor-pointer'
               }`}
             >
@@ -395,7 +397,7 @@ function EventsSection() {
         <SectionCard
           title="Notification template"
           right={
-            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 text-gray-600">
+            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-gray-100 dark:bg-dk-inset text-gray-600 dark:text-zinc-300">
               {selectedEvent.category || 'Other'}
             </span>
           }
@@ -720,7 +722,7 @@ function AnnouncementsSection() {
               </div>
             ) : (
               <div>
-                <div className="divide-y divide-gray-100">
+                <div className="divide-y divide-gray-100 dark:divide-dk-line">
                   {paginatedAnnouncements.map((announcement) => (
                     <div key={announcement.id} className="py-3">
                       <div className="flex items-start justify-between gap-4">
@@ -744,7 +746,7 @@ function AnnouncementsSection() {
 
                 {/* Pagination */}
                 {totalAnnouncementPages > 1 && (
-                  <div className="flex items-center justify-between border-t border-gray-100 pt-3 mt-1">
+                  <div className="flex items-center justify-between border-t border-gray-100 dark:border-dk-line pt-3 mt-1">
                     <span className="text-xs text-ui-fg-muted">
                       Page {announcementPage} of {totalAnnouncementPages}
                     </span>
@@ -753,7 +755,7 @@ function AnnouncementsSection() {
                         type="button"
                         onClick={() => setAnnouncementPage((p) => Math.max(1, p - 1))}
                         disabled={announcementPage === 1}
-                        className="px-2 py-1 text-xs font-medium rounded border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        className="px-2 py-1 text-xs font-medium rounded border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                       >
                         Previous
                       </button>
@@ -761,7 +763,7 @@ function AnnouncementsSection() {
                         type="button"
                         onClick={() => setAnnouncementPage((p) => Math.min(totalAnnouncementPages, p + 1))}
                         disabled={announcementPage === totalAnnouncementPages}
-                        className="px-2 py-1 text-xs font-medium rounded border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        className="px-2 py-1 text-xs font-medium rounded border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                       >
                         Next
                       </button>
@@ -810,7 +812,7 @@ function RecipientsSection({
   return (
     <SectionCard title="Recipients">
       <div
-        className="bg-ui-bg-field border border-gray-100 rounded-xl overflow-hidden cursor-pointer outline-none"
+        className="bg-ui-bg-field border border-gray-100 dark:border-dk-line rounded-xl overflow-hidden cursor-pointer outline-none"
         onClick={() => setExpanded(!expanded)}
         role="button"
         tabIndex={0}
@@ -843,7 +845,7 @@ function RecipientsSection({
               transition={{ duration: 0.2, ease: 'easeInOut' }}
               className="overflow-hidden"
             >
-              <div className="border-t border-gray-100 max-h-72 overflow-y-auto">
+              <div className="border-t border-gray-100 dark:border-dk-line max-h-72 overflow-y-auto">
                 {userGroups.length === 0 ? (
                   <p className="py-6 text-center text-sm text-ui-fg-muted">No user groups available</p>
                 ) : (
@@ -864,7 +866,7 @@ function RecipientsSection({
                             onChange={() => toggleGroup(g.id)}
                             className="sr-only peer"
                           />
-                          <div className="w-full h-full rounded border border-gray-300 bg-white peer-checked:bg-gray-500 peer-checked:border-gray-500 flex items-center justify-center transition-all shadow-sm">
+                          <div className="w-full h-full rounded border border-gray-300 dark:border-dk-line-strong bg-white dark:bg-dk-card peer-checked:bg-gray-500 peer-checked:border-gray-500 flex items-center justify-center transition-all shadow-sm">
                             <svg
                               width="12"
                               height="12"
@@ -881,7 +883,7 @@ function RecipientsSection({
                           </div>
                         </div>
                         <span className="flex items-center gap-2 text-sm text-ui-fg-base">
-                          <Users size={14} className="text-gray-400 shrink-0" />
+                          <Users size={14} className="text-gray-400 dark:text-zinc-400 shrink-0" />
                           {g.name}
                         </span>
                         <span className="text-xs text-ui-fg-muted ms-auto truncate">

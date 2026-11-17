@@ -315,7 +315,7 @@ function CropDialogContent({
         <button
           type="button"
           onClick={onCancel}
-          className="px-3 py-1.5 text-sm font-semibold text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition active:scale-[0.98]"
+          className="px-3 py-1.5 text-sm font-semibold text-neutral-700 dark:text-dk-fg-1 hover:text-neutral-900 dark:hover:text-dk-fg-1 hover:bg-neutral-100 dark:hover:bg-dk-raised rounded-lg transition active:scale-[0.98]"
         >
           Cancel
         </button>
@@ -390,8 +390,8 @@ const UserEditForm = ({
     <Form>
       <div className="space-y-6">
         {/* Card 1: Profile Information */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+        <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
             {t('user.settings.general.profile_information')}
           </h3>
           <div className="space-y-5">
@@ -428,7 +428,7 @@ const UserEditForm = ({
             <div>
               <Label htmlFor="bio" className="font-medium leading-[35px] text-black text-sm">
                 {t('user.settings.general.bio')}
-                <span className="text-gray-500 text-sm ms-2">
+                <span className="text-gray-500 dark:text-dk-fg-3 text-sm ms-2">
                   ({t('user.settings.general.characters_left', { count: 400 - (values.bio?.length || 0) })})
                 </span>
               </Label>
@@ -449,21 +449,21 @@ const UserEditForm = ({
         </div>
 
         {/* Card 2: Profile Picture & Banner */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+        <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
             {t('user.settings.general.profile_picture')}
           </h3>
           <div className="space-y-3">
             {/* Avatar Row */}
-            <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-ui-bg-field">
+            <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-ui-bg-field">
               <div className="flex-shrink-0">
-                <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
+                <ImageIcon size={24} className="text-gray-400 dark:text-dk-fg-3" strokeWidth={1.5} />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-700">{t('user.settings.general.profile_picture')}</p>
+                <p className="text-sm font-medium text-gray-700 dark:text-dk-fg-1">{t('user.settings.general.profile_picture')}</p>
               </div>
               {profilePicture.isLoading ? (
-                <div className="w-[18px] h-[18px] border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                <div className="w-[18px] h-[18px] border-2 border-gray-300 dark:border-dk-line-strong border-t-gray-600 rounded-full animate-spin" />
               ) : (
                 <>
                   <input
@@ -486,7 +486,7 @@ const UserEditForm = ({
                     <button
                       type="button"
                       onClick={() => avatarInputRef.current?.click()}
-                      className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                      className="flex items-center justify-center text-gray-400 dark:text-dk-fg-3 hover:text-gray-600 dark:hover:text-dk-fg-1 transition-colors cursor-pointer"
                       title={t('user.settings.general.change_avatar')}
                     >
                       <UploadCloud size={18} />
@@ -497,15 +497,15 @@ const UserEditForm = ({
             </div>
 
             {/* Banner Row */}
-            <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-ui-bg-field">
+            <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-ui-bg-field">
               <div className="flex-shrink-0">
-                <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
+                <ImageIcon size={24} className="text-gray-400 dark:text-dk-fg-3" strokeWidth={1.5} />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-700">{t('user.settings.appearance.profile_banner')}</p>
+                <p className="text-sm font-medium text-gray-700 dark:text-dk-fg-1">{t('user.settings.appearance.profile_banner')}</p>
               </div>
               {banner.isUploading ? (
-                <div className="w-[18px] h-[18px] border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                <div className="w-[18px] h-[18px] border-2 border-gray-300 dark:border-dk-line-strong border-t-gray-600 rounded-full animate-spin" />
               ) : (
                 <>
                   <input
@@ -528,7 +528,7 @@ const UserEditForm = ({
                     <button
                       type="button"
                       onClick={() => bannerInputRef.current?.click()}
-                      className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                      className="flex items-center justify-center text-gray-400 dark:text-dk-fg-3 hover:text-gray-600 dark:hover:text-dk-fg-1 transition-colors cursor-pointer"
                       title="Upload banner"
                     >
                       <UploadCloud size={18} />
@@ -549,7 +549,7 @@ const UserEditForm = ({
               isSubmitting
                 ? 'bg-brand text-brand-fg border-brand opacity-50 cursor-not-allowed'
                 : !dirty && isSaved
-                  ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                  ? 'bg-white dark:bg-dk-card text-gray-600 dark:text-dk-fg-2 border-gray-200 dark:border-dk-line-strong cursor-default'
                   : 'bg-brand text-brand-fg border-brand hover:bg-brand-hover cursor-pointer'
             }`}
           >
@@ -766,7 +766,7 @@ function AccountGeneral() {
   if (!userData) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-zinc-100"></div>
       </div>
     );
   }

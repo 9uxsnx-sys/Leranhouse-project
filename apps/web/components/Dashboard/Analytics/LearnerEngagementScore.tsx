@@ -13,7 +13,7 @@ function getAvatarUrl(user: any): string | null {
 }
 
 function UserAvatarSmall({ user }: { user?: any }) {
-  if (!user) return <div className="w-7 h-7 rounded-full bg-gray-200 flex-shrink-0" />
+  if (!user) return <div className="w-7 h-7 rounded-full bg-gray-200 flex-shrink-0 dark:bg-dk-track" />
   const avatarUrl = getAvatarUrl(user)
   if (avatarUrl) {
     return (
@@ -54,8 +54,8 @@ export default function LearnerEngagementScore({ days = '30' }: { days?: string 
   const users: Record<number, any> = data?.users ?? {}
 
   return (
-    <div className="bg-white rounded-xl nice-shadow p-5 min-h-[300px] overflow-hidden min-w-0">
-      <h3 className="text-sm font-semibold text-gray-700 mb-1">{t('analytics.advanced_widgets.learner_engagement_score.title')}</h3>
+    <div className="bg-white rounded-xl nice-shadow p-5 min-h-[300px] overflow-hidden min-w-0 dark:bg-dk-card">
+      <h3 className="text-sm font-semibold text-gray-700 mb-1 dark:text-zinc-200">{t('analytics.advanced_widgets.learner_engagement_score.title')}</h3>
       <p className="text-xs text-gray-400 mb-4">{t('analytics.advanced_widgets.learner_engagement_score.description')}</p>
       {isLoading ? (
         <div className="h-48 flex items-center justify-center text-gray-300">{t('analytics.common.loading')}</div>
@@ -65,7 +65,7 @@ export default function LearnerEngagementScore({ days = '30' }: { days?: string 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-start text-gray-400 text-xs uppercase tracking-wider border-b border-gray-100">
+              <tr className="text-start text-gray-400 text-xs uppercase tracking-wider border-b border-gray-100 dark:border-dk-line">
                 <th className="pb-2">{t('analytics.advanced_widgets.learner_engagement_score.learner')}</th>
                 <th className="pb-2 text-end">{t('analytics.common.score')}</th>
                 <th className="pb-2 text-end">{t('analytics.advanced_widgets.learner_engagement_score.pages')}</th>
@@ -85,7 +85,7 @@ export default function LearnerEngagementScore({ days = '30' }: { days?: string 
                         className="flex items-center gap-2 hover:underline"
                       >
                         <UserAvatarSmall user={user} />
-                        <span className="text-gray-700 font-medium truncate max-w-[140px]">
+                        <span className="text-gray-700 font-medium truncate max-w-[140px] dark:text-zinc-200">
                           {userName(user, t)}
                         </span>
                       </a>

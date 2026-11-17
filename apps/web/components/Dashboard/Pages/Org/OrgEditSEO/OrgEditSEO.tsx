@@ -148,7 +148,7 @@ const OrgEditSEO: React.FC = () => {
                         isActiveSaving
                           ? 'bg-brand text-brand-fg border-brand opacity-50 cursor-not-allowed'
                           : isSaved
-                            ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                            ? 'bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong cursor-default'
                             : 'bg-brand text-brand-fg border-brand hover:bg-brand-hover cursor-pointer'
                       }`}
                     >
@@ -171,14 +171,14 @@ const OrgEditSEO: React.FC = () => {
                 </div>
 
                 {/* ===== Card 1: Quick Links ===== */}
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+                <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
                     {t('common.sections.quick_links')}
                   </h3>
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-dk-inset/40 rounded-lg">
                       <div className="flex items-center space-x-2 min-w-0 flex-1">
-                        <span className="text-sm font-medium text-gray-700 shrink-0">{t('dashboard.organization.seo.sitemap')}</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-zinc-200 shrink-0">{t('dashboard.organization.seo.sitemap')}</span>
                         <a
                           href={sitemapUrl}
                           target="_blank"
@@ -192,23 +192,23 @@ const OrgEditSEO: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => copyToClipboard(sitemapUrl)}
-                          className="inline-flex items-center justify-center p-1.5 rounded-md text-gray-500 hover:bg-gray-200 transition-colors"
+                          className="inline-flex items-center justify-center p-1.5 rounded-md text-gray-500 dark:text-zinc-400 hover:bg-gray-200 transition-colors"
                         >
                           <Copy size={14} />
                         </button>
                         <a href={sitemapUrl} target="_blank" rel="noopener noreferrer">
                           <button
                             type="button"
-                            className="inline-flex items-center justify-center p-1.5 rounded-md text-gray-500 hover:bg-gray-200 transition-colors"
+                            className="inline-flex items-center justify-center p-1.5 rounded-md text-gray-500 dark:text-zinc-400 hover:bg-gray-200 transition-colors"
                           >
                             <ExternalLink size={14} />
                           </button>
                         </a>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-dk-inset/40 rounded-lg">
                       <div className="flex items-center space-x-2 min-w-0 flex-1">
-                        <span className="text-sm font-medium text-gray-700 shrink-0">{t('dashboard.organization.seo.robots')}</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-zinc-200 shrink-0">{t('dashboard.organization.seo.robots')}</span>
                         <a
                           href={robotsUrl}
                           target="_blank"
@@ -222,14 +222,14 @@ const OrgEditSEO: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => copyToClipboard(robotsUrl)}
-                          className="inline-flex items-center justify-center p-1.5 rounded-md text-gray-500 hover:bg-gray-200 transition-colors"
+                          className="inline-flex items-center justify-center p-1.5 rounded-md text-gray-500 dark:text-zinc-400 hover:bg-gray-200 transition-colors"
                         >
                           <Copy size={14} />
                         </button>
                         <a href={robotsUrl} target="_blank" rel="noopener noreferrer">
                           <button
                             type="button"
-                            className="inline-flex items-center justify-center p-1.5 rounded-md text-gray-500 hover:bg-gray-200 transition-colors"
+                            className="inline-flex items-center justify-center p-1.5 rounded-md text-gray-500 dark:text-zinc-400 hover:bg-gray-200 transition-colors"
                           >
                             <ExternalLink size={14} />
                           </button>
@@ -240,8 +240,8 @@ const OrgEditSEO: React.FC = () => {
                 </div>
 
                 {/* ===== Card 2: Default Meta Tags ===== */}
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+                <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
                     {t('common.sections.default_meta_tags')}
                   </h3>
                   <div className="space-y-4">
@@ -271,22 +271,22 @@ const OrgEditSEO: React.FC = () => {
                 </div>
 
                 {/* ===== Card 3: Social & Open Graph ===== */}
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+                <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
                     {t('common.sections.social_opengraph')}
                   </h3>
                   <div className="space-y-4">
                     <div>
-                      <label className="text-sm font-semibold text-gray-700">{t('dashboard.organization.seo.og_image.label')}</label>
-                      <p className="text-xs text-gray-500 mb-2 mt-0">
+                      <label className="text-sm font-semibold text-gray-700 dark:text-zinc-200">{t('dashboard.organization.seo.og_image.label')}</label>
+                      <p className="text-xs text-gray-500 dark:text-zinc-400 mb-2 mt-0">
                         {t('dashboard.organization.seo.og_image.description')}
                       </p>
-                      <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-ui-bg-field">
+                      <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-ui-bg-field">
                         <div className="flex-shrink-0">
-                          <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
+                          <ImageIcon size={24} className="text-gray-400 dark:text-zinc-400" strokeWidth={1.5} />
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-700">
+                          <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">
                             {existingOgImageUrl || ogImagePreview ? t('dashboard.organization.seo.og_image.set') : t('dashboard.organization.seo.og_image.not_set')}
                           </p>
                         </div>
@@ -310,7 +310,7 @@ const OrgEditSEO: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => ogImageInputRef.current?.click()}
-                            className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                            className="flex items-center justify-center text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
                             title={t('dashboard.organization.seo.og_image.upload')}
                           >
                             <UploadCloud size={18} />
@@ -322,7 +322,7 @@ const OrgEditSEO: React.FC = () => {
                           <img
                             src={ogImagePreview || existingOgImageUrl || ''}
                             alt={t('dashboard.organization.seo.og_image.preview_alt')}
-                            className="w-full aspect-video object-cover rounded-lg border border-gray-200"
+                            className="w-full aspect-video object-cover rounded-lg border border-gray-200 dark:border-dk-line-strong"
                           />
                         </div>
                       )}
@@ -342,8 +342,8 @@ const OrgEditSEO: React.FC = () => {
                 </div>
 
                 {/* ===== Card 4: Search Engine Verification ===== */}
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+                <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
                     {t('common.sections.search_verification')}
                   </h3>
                   <div className="space-y-4">
@@ -362,22 +362,22 @@ const OrgEditSEO: React.FC = () => {
                 </div>
 
                 {/* ===== Card 5: Indexing Controls ===== */}
-                <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+                <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
                     {t('common.sections.indexing_controls')}
                   </h3>
                   <div className="space-y-4">
                     <label className="flex items-center gap-3 cursor-pointer">
                       <div
                         className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                          values.noindex_communities ? 'bg-black' : 'bg-gray-300'
+                          values.noindex_communities ? 'bg-black dark:bg-zinc-100' : 'bg-gray-300 dark:bg-dk-track'
                         }`}
                       >
                         <span
                           className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
                             values.noindex_communities
-                              ? 'translate-x-[18px]'
-                              : 'translate-x-[2px]'
+                              ? 'translate-x-[18px] dark:bg-zinc-900'
+                              : 'translate-x-[2px] dark:bg-zinc-300'
                           }`}
                         />
                         <input
@@ -392,7 +392,7 @@ const OrgEditSEO: React.FC = () => {
                           id="noindex_communities"
                         />
                       </div>
-                      <span className="text-sm text-gray-600 select-none">{t('dashboard.organization.seo.hide_communities')}</span>
+                      <span className="text-sm text-gray-600 dark:text-zinc-300 select-none">{t('dashboard.organization.seo.hide_communities')}</span>
                     </label>
                   </div>
                 </div>

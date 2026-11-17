@@ -50,7 +50,7 @@ export const HeaderProfileBox = ({ primaryColor = '', collapsed = false }: { pri
   const menuContent = (
     <HoverMenuContent className="min-w-[220px]">
       {/* User info header */}
-      <div className="flex items-center gap-x-3 px-3 py-2 mb-1 border-b border-gray-100">
+      <div className="flex items-center gap-x-3 px-3 py-2 mb-1 border-b border-gray-100 dark:border-dk-line">
         <Avatar src={avatarSrc} fallback={avatarFallback} variant="rounded" size="small" />
         <div className="block min-w-0 max-w-[187px] overflow-hidden whitespace-nowrap">
           <p className="text-sm font-medium truncate capitalize">
@@ -73,7 +73,7 @@ export const HeaderProfileBox = ({ primaryColor = '', collapsed = false }: { pri
         </Link>
       </HoverMenuItem>
 
-      <div className="border-t border-gray-100 my-1 mx-2" />
+      <div className="border-t border-gray-100 dark:border-dk-line my-1 mx-2" />
 
       <HoverMenuItem
         onClick={() => signOut({ callbackUrl: '/' })}

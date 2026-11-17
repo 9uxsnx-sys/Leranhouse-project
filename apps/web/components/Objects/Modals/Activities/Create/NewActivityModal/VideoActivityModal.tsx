@@ -107,7 +107,7 @@ function VideoModal({
             'repeating-linear-gradient(-45deg, transparent, transparent 6px, rgba(196,181,253,0.25) 6px, rgba(196,181,253,0.25) 7px)',
         }}
       >
-        <span className="flex items-center gap-2 bg-white nice-shadow rounded-full px-4 py-1.5 text-sm font-medium text-gray-600">
+        <span className="flex items-center gap-2 bg-white dark:bg-dk-card nice-shadow rounded-full px-4 py-1.5 text-sm font-medium text-gray-600 dark:text-dk-fg-2">
           <PlayCircle size={18} weight="duotone" className="text-violet-400" />
           Video
         </span>
@@ -115,7 +115,7 @@ function VideoModal({
 
       <div className="rounded-xl nice-shadow p-4 space-y-4">
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-gray-700">
+          <label className="text-sm font-medium text-gray-700 dark:text-dk-fg-1">
             Activity name
           </label>
           <input
@@ -124,20 +124,20 @@ function VideoModal({
             type="text"
             required
             placeholder="Enter a name..."
-            className="w-full h-9 px-3 text-sm rounded-lg bg-gray-50 border border-gray-200 outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors"
+            className="w-full h-9 px-3 text-sm rounded-lg bg-gray-50 dark:bg-dk-inset/40 border border-gray-200 dark:border-dk-line-strong outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors"
           />
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-sm font-medium text-gray-700">Source</label>
-          <div className="grid grid-cols-2 gap-0 rounded-lg overflow-hidden border border-gray-200">
+          <label className="text-sm font-medium text-gray-700 dark:text-dk-fg-1">Source</label>
+          <div className="grid grid-cols-2 gap-0 rounded-lg overflow-hidden border border-gray-200 dark:border-dk-line-strong">
             <button
               type="button"
               onClick={() => setSelectedView('file')}
               className={`flex items-center justify-center py-2.5 gap-2 text-sm font-medium transition-colors ${
                 selectedView === 'file'
-                  ? 'bg-gray-100 text-gray-900'
-                  : 'bg-white text-gray-500 hover:bg-gray-50'
+                  ? 'bg-gray-100 dark:bg-dk-inset text-gray-900 dark:text-dk-fg-1'
+                  : 'bg-white dark:bg-dk-card text-gray-500 dark:text-dk-fg-3 hover:bg-gray-50 dark:hover:bg-dk-raised'
               }`}
             >
               <Upload size={16} weight="duotone" />
@@ -146,10 +146,10 @@ function VideoModal({
             <button
               type="button"
               onClick={() => setSelectedView('youtube')}
-              className={`flex items-center justify-center py-2.5 gap-2 text-sm font-medium border-s border-gray-200 transition-colors ${
+              className={`flex items-center justify-center py-2.5 gap-2 text-sm font-medium border-s border-gray-200 dark:border-dk-line transition-colors ${
                 selectedView === 'youtube'
-                  ? 'bg-gray-100 text-gray-900'
-                  : 'bg-white text-gray-500 hover:bg-gray-50'
+                  ? 'bg-gray-100 dark:bg-dk-inset text-gray-900 dark:text-dk-fg-1'
+                  : 'bg-white dark:bg-dk-card text-gray-500 dark:text-dk-fg-3 hover:bg-gray-50 dark:hover:bg-dk-raised'
               }`}
             >
               <YoutubeLogo size={16} weight="duotone" />
@@ -160,7 +160,7 @@ function VideoModal({
 
         {selectedView === 'file' && (
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-gray-700 dark:text-dk-fg-1">
               Video file
             </label>
             <input
@@ -168,14 +168,14 @@ function VideoModal({
               accept={SUPPORTED_FILES}
               onChange={handleVideoChange}
               required
-              className="w-full text-sm text-gray-500 file:me-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition-colors"
+              className="w-full text-sm text-gray-500 dark:text-dk-fg-3 file:me-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition-colors"
             />
           </div>
         )}
 
         {selectedView === 'youtube' && (
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-gray-700 dark:text-dk-fg-1">
               YouTube URL
             </label>
             <input
@@ -184,17 +184,17 @@ function VideoModal({
               type="text"
               required
               placeholder="https://youtube.com/watch?v=..."
-              className="w-full h-9 px-3 text-sm rounded-lg bg-gray-50 border border-gray-200 outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors"
+              className="w-full h-9 px-3 text-sm rounded-lg bg-gray-50 dark:bg-dk-inset/40 border border-gray-200 dark:border-dk-line-strong outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors"
             />
           </div>
         )}
       </div>
 
       <div className="rounded-xl nice-shadow p-4 space-y-4">
-        <h3 className="text-sm font-medium text-gray-700">Video Settings</h3>
+        <h3 className="text-sm font-medium text-gray-700 dark:text-dk-fg-1">Video Settings</h3>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-gray-500">
+            <label className="text-xs font-medium text-gray-500 dark:text-dk-fg-3">
               Start Time
             </label>
             <div className="flex gap-2">
@@ -214,9 +214,9 @@ function VideoModal({
                     })
                   }}
                   placeholder="0"
-                  className="w-full h-9 px-3 text-sm rounded-lg bg-gray-50 border border-gray-200 outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors"
+                  className="w-full h-9 px-3 text-sm rounded-lg bg-gray-50 dark:bg-dk-inset/40 border border-gray-200 dark:border-dk-line-strong outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors"
                 />
-                <span className="text-[11px] text-gray-400 mt-0.5 block">
+                <span className="text-[11px] text-gray-400 dark:text-dk-fg-3 mt-0.5 block">
                   Min
                 </span>
               </div>
@@ -240,9 +240,9 @@ function VideoModal({
                     })
                   }}
                   placeholder="0"
-                  className="w-full h-9 px-3 text-sm rounded-lg bg-gray-50 border border-gray-200 outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors"
+                  className="w-full h-9 px-3 text-sm rounded-lg bg-gray-50 dark:bg-dk-inset/40 border border-gray-200 dark:border-dk-line-strong outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors"
                 />
-                <span className="text-[11px] text-gray-400 mt-0.5 block">
+                <span className="text-[11px] text-gray-400 dark:text-dk-fg-3 mt-0.5 block">
                   Sec
                 </span>
               </div>
@@ -250,7 +250,7 @@ function VideoModal({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-gray-500">
+            <label className="text-xs font-medium text-gray-500 dark:text-dk-fg-3">
               End Time (optional)
             </label>
             <div className="flex gap-2">
@@ -270,9 +270,9 @@ function VideoModal({
                     }
                   }}
                   placeholder="0"
-                  className="w-full h-9 px-3 text-sm rounded-lg bg-gray-50 border border-gray-200 outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors"
+                  className="w-full h-9 px-3 text-sm rounded-lg bg-gray-50 dark:bg-dk-inset/40 border border-gray-200 dark:border-dk-line-strong outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors"
                 />
-                <span className="text-[11px] text-gray-400 mt-0.5 block">
+                <span className="text-[11px] text-gray-400 dark:text-dk-fg-3 mt-0.5 block">
                   Min
                 </span>
               </div>
@@ -296,9 +296,9 @@ function VideoModal({
                     }
                   }}
                   placeholder="0"
-                  className="w-full h-9 px-3 text-sm rounded-lg bg-gray-50 border border-gray-200 outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors"
+                  className="w-full h-9 px-3 text-sm rounded-lg bg-gray-50 dark:bg-dk-inset/40 border border-gray-200 dark:border-dk-line-strong outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors"
                 />
-                <span className="text-[11px] text-gray-400 mt-0.5 block">
+                <span className="text-[11px] text-gray-400 dark:text-dk-fg-3 mt-0.5 block">
                   Sec
                 </span>
               </div>
@@ -314,9 +314,9 @@ function VideoModal({
               onChange={(e) =>
                 setVideoDetails({ ...videoDetails, autoplay: e.target.checked })
               }
-              className="rounded border-gray-300 text-black focus:ring-black"
+              className="rounded border-gray-300 dark:border-dk-line-strong text-black focus:ring-black"
             />
-            <span className="text-sm text-gray-600">Autoplay</span>
+            <span className="text-sm text-gray-600 dark:text-dk-fg-2">Autoplay</span>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
             <input
@@ -325,9 +325,9 @@ function VideoModal({
               onChange={(e) =>
                 setVideoDetails({ ...videoDetails, muted: e.target.checked })
               }
-              className="rounded border-gray-300 text-black focus:ring-black"
+              className="rounded border-gray-300 dark:border-dk-line-strong text-black focus:ring-black"
             />
-            <span className="text-sm text-gray-600">Start muted</span>
+            <span className="text-sm text-gray-600 dark:text-dk-fg-2">Start muted</span>
           </label>
         </div>
       </div>

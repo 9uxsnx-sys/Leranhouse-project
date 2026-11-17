@@ -23,7 +23,7 @@ export default function MiniInfoTooltip({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 10 }}
-      className={`absolute -top-20 start-1/2 transform -translate-x-1/2 bg-white rounded-lg nice-shadow p-3 ${width}`}
+      className={`absolute -top-20 start-1/2 transform -translate-x-1/2 bg-white dark:bg-dk-card rounded-lg nice-shadow p-3 ${width}`}
     >
       <div className="flex items-center space-x-3">
         {icon && (
@@ -31,12 +31,12 @@ export default function MiniInfoTooltip({
             {icon}
           </div>
         )}
-        <p className="text-sm text-gray-700">{message}</p>
+        <p className="text-sm text-gray-700 dark:text-dk-fg-1">{message}</p>
       </div>
-      <div className="absolute -bottom-2 start-1/2 transform -translate-x-1/2 w-4 h-4 bg-white rotate-45"></div>
+      <div className="absolute -bottom-2 start-1/2 transform -translate-x-1/2 w-4 h-4 bg-white dark:bg-dk-card rotate-45"></div>
       <button
         onClick={onClose}
-        className="absolute top-1 end-1 text-gray-400 hover:text-gray-600"
+        className="absolute top-1 end-1 text-gray-400 dark:text-dk-fg-3 hover:text-gray-600 dark:hover:text-dk-fg-1"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M18 6L6 18M6 6l12 12" />

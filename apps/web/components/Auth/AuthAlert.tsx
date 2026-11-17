@@ -25,9 +25,9 @@ const VARIANTS: Record<
     text: 'text-amber-900',
   },
   info: {
-    wrapper: 'bg-gray-50 border-gray-200',
-    icon: 'text-gray-500',
-    text: 'text-gray-700',
+    wrapper: 'bg-gray-50 dark:bg-dk-inset/40 border-gray-200 dark:border-dk-line-strong',
+    icon: 'text-gray-500 dark:text-zinc-400',
+    text: 'text-gray-700 dark:text-zinc-200',
   },
 }
 

@@ -49,12 +49,12 @@ const Toggle = ({
   <label className="flex items-start gap-3 cursor-pointer">
     <div
       className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors mt-0.5 ${
-        checked ? 'bg-black' : 'bg-gray-300'
+        checked ? 'bg-black dark:bg-zinc-100' : 'bg-gray-300 dark:bg-dk-track'
       } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
     >
       <span
         className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
-          checked ? 'translate-x-[18px]' : 'translate-x-[2px]'
+          checked ? 'translate-x-[18px] dark:bg-zinc-900' : 'translate-x-[2px] dark:bg-zinc-300'
         }`}
       />
       <input
@@ -66,7 +66,7 @@ const Toggle = ({
       />
     </div>
     <div className="min-w-0">
-      <span className="text-sm text-gray-600 select-none">{label}</span>
+      <span className="text-sm text-gray-600 dark:text-zinc-300 select-none">{label}</span>
     </div>
   </label>
 )
@@ -148,7 +148,7 @@ const PaymentsConfigurationPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 text-sm text-gray-500">
+      <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6 text-sm text-gray-500 dark:text-zinc-400">
         {t('dashboard.payments.configuration.loading')}
       </div>
     )
@@ -156,7 +156,7 @@ const PaymentsConfigurationPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 text-sm text-red-500">
+      <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6 text-sm text-red-500">
         {t('dashboard.payments.configuration.error_loading')}
       </div>
     )
@@ -169,7 +169,7 @@ const PaymentsConfigurationPage: React.FC = () => {
       ? t('dashboard.payments.configuration.status_active')
       : t('dashboard.payments.configuration.status_inactive')
   const statusClass = !configured
-    ? 'text-gray-500 bg-gray-100'
+    ? 'text-gray-500 dark:text-zinc-400 bg-gray-100 dark:bg-dk-inset'
     : config?.active
       ? 'text-green-700 bg-green-100'
       : 'text-amber-700 bg-amber-100'
@@ -194,7 +194,7 @@ const PaymentsConfigurationPage: React.FC = () => {
               isSaving
                 ? 'bg-brand text-brand-fg border-brand opacity-50 cursor-not-allowed'
                 : !isDirty
-                  ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                  ? 'bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong cursor-default'
                   : 'bg-brand text-brand-fg border-brand hover:bg-brand-hover cursor-pointer'
             }`}
           >
@@ -216,15 +216,15 @@ const PaymentsConfigurationPage: React.FC = () => {
         </div>
 
         {/* ── CONFIGURATION ── */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+        <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
             {t('dashboard.payments.configuration.provider_title')}
           </h3>
 
           <div className="space-y-4">
             <FormField name="mode">
               <FormLabelAndMessage label={t('dashboard.payments.configuration.mode_label')} />
-              <div className="inline-flex rounded-lg border border-gray-200 p-0.5 bg-gray-50 w-fit">
+              <div className="inline-flex rounded-lg border border-gray-200 dark:border-dk-line-strong p-0.5 bg-gray-50 dark:bg-dk-inset/40 w-fit">
                 {(['test', 'live'] as PaymentMode[]).map((mode) => (
                   <button
                     key={mode}
@@ -232,8 +232,8 @@ const PaymentsConfigurationPage: React.FC = () => {
                     onClick={() => setField('mode', mode)}
                     className={`px-3 py-1 text-sm rounded-md transition-colors ${
                       form.mode === mode
-                        ? 'bg-white shadow-sm text-gray-900 font-medium'
-                        : 'text-gray-500 hover:text-gray-700'
+                        ? 'bg-white dark:bg-dk-card shadow-sm text-gray-900 dark:text-zinc-100 font-medium'
+                        : 'text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200'
                     }`}
                   >
                     {mode === 'test'
@@ -298,7 +298,7 @@ const PaymentsConfigurationPage: React.FC = () => {
               </FormField>
             </div>
 
-            <div className="border-t border-gray-100 pt-4">
+            <div className="border-t border-gray-100 dark:border-dk-line pt-4">
               <Toggle
                 checked={form.active}
                 onChange={(checked) => setField('active', checked)}

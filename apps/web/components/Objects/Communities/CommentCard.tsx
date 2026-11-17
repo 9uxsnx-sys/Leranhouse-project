@@ -187,7 +187,7 @@ export function CommentCard({
               rows={2}
               autoFocus
               className={`w-full px-3 py-2 text-sm border rounded-lg outline-none transition-all resize-none ${
-                error ? 'border-red-300' : 'border-gray-200 focus:border-gray-300'
+                error ? 'border-red-300' : 'border-gray-200 dark:border-dk-line-strong focus:border-gray-300'
               }`}
             />
             <div className="flex items-center gap-2">
@@ -202,7 +202,7 @@ export function CommentCard({
               <button
                 onClick={cancelEdit}
                 disabled={isSubmitting}
-                className="px-3 py-1 text-xs text-gray-600 hover:text-gray-900 transition-colors"
+                className="px-3 py-1 text-xs text-gray-600 dark:text-dk-fg-2 hover:text-gray-900 dark:hover:text-dk-fg-1 transition-colors"
               >
                 {t('communities.comments.cancel')}
               </button>
@@ -212,15 +212,15 @@ export function CommentCard({
           <>
             {/* Name + Time + Actions row */}
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-gray-900">{authorName}</span>
-              <span className="text-xs text-gray-400">{timeAgo}</span>
+              <span className="text-sm font-medium text-gray-900 dark:text-dk-fg-1">{authorName}</span>
+              <span className="text-xs text-gray-400 dark:text-dk-fg-3">{timeAgo}</span>
               <div className="flex-1" />
               {showMenu && (
                 <div className={`transition-opacity ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button aria-label="Comment actions" className="p-1 hover:bg-gray-100 rounded-md transition-colors">
-                        <MoreHorizontal size={14} className="text-gray-400" />
+                      <button aria-label="Comment actions" className="p-1 hover:bg-gray-100 dark:hover:bg-dk-raised rounded-md transition-colors">
+                        <MoreHorizontal size={14} className="text-gray-400 dark:text-dk-fg-3" />
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-36">
@@ -246,7 +246,7 @@ export function CommentCard({
             </div>
 
             {/* Content text */}
-            <p dir="auto" className="text-sm text-gray-700 mt-0.5 whitespace-pre-wrap">{comment.content}</p>
+            <p dir="auto" className="text-sm text-gray-700 dark:text-dk-fg-1 mt-0.5 whitespace-pre-wrap">{comment.content}</p>
 
             {/* Upvote button */}
             <div className="flex items-center gap-4 mt-1.5">
@@ -254,7 +254,7 @@ export function CommentCard({
                 onClick={handleVote}
                 disabled={!canVote || isVoting}
                 className={`flex items-center gap-1 text-xs transition-colors ${
-                  hasVoted ? 'text-red-500' : 'text-gray-400 hover:text-red-500'
+                  hasVoted ? 'text-red-500' : 'text-gray-400 dark:text-dk-fg-3 hover:text-red-500'
                 } ${!canVote ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <Heart

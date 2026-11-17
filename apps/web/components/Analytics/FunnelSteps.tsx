@@ -22,13 +22,13 @@ export function FunnelSteps({ steps }: FunnelStepsProps) {
         return (
           <div key={s.label}>
             <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="font-medium text-gray-700">{s.label}</span>
-              <span className="text-gray-500 tabular-nums">
+              <span className="font-medium text-gray-700 dark:text-dk-fg-1">{s.label}</span>
+              <span className="text-gray-500 dark:text-dk-fg-3 tabular-nums">
                 {formatNumber(s.value)}
-                {i > 0 && <span className="text-gray-300"> · {conv}%</span>}
+                {i > 0 && <span className="text-gray-300 dark:text-zinc-600"> · {conv}%</span>}
               </span>
             </div>
-            <div className="h-8 rounded-lg bg-gray-100 overflow-hidden">
+            <div className="h-8 rounded-lg bg-gray-100 dark:bg-dk-inset overflow-hidden">
               <div
                 className="h-full rounded-lg transition-all"
                 style={{ width: `${pct}%`, background: t.primary, opacity: 1 - i * 0.14 }}

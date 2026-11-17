@@ -40,7 +40,7 @@ function LearnerRow({
     : ''
 
   return (
-    <div className="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-gray-50">
+    <div className="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dk-raised/60">
       {index < 3 ? (
         <Medal size={compact ? 16 : 20} className={RANK_COLORS[index]} />
       ) : (
@@ -56,22 +56,22 @@ function LearnerRow({
         width={compact ? 24 : 32}
       />
       <div className="flex-1 min-w-0">
-        <p className={`${compact ? 'text-xs' : 'text-sm'} font-medium text-gray-900 truncate`}>{name}</p>
+        <p className={`${compact ? 'text-xs' : 'text-sm'} font-medium text-gray-900 truncate dark:text-zinc-100`}>{name}</p>
       </div>
       {compact ? (
-        <span className="text-xs font-bold text-gray-900">{row.completions} {t('analytics.course_analytics.units.done')}</span>
+        <span className="text-xs font-bold text-gray-900 dark:text-zinc-100">{row.completions} {t('analytics.course_analytics.units.done')}</span>
       ) : (
         <div className="flex items-center gap-4 text-xs">
           <div className="text-center">
-            <p className="font-bold text-gray-900">{row.completions}</p>
+            <p className="font-bold text-gray-900 dark:text-zinc-100">{row.completions}</p>
             <p className="text-gray-400">{t('analytics.course_analytics.units.done')}</p>
           </div>
           <div className="text-center">
-            <p className="font-bold text-gray-900">{row.unique_activities_completed}</p>
+            <p className="font-bold text-gray-900 dark:text-zinc-100">{row.unique_activities_completed}</p>
             <p className="text-gray-400">{t('analytics.course_analytics.units.unique')}</p>
           </div>
           <div className="text-center">
-            <p className="font-bold text-gray-900">{formatDuration(row.total_seconds_spent)}</p>
+            <p className="font-bold text-gray-900 dark:text-zinc-100">{formatDuration(row.total_seconds_spent)}</p>
             <p className="text-gray-400">{t('analytics.course_analytics.units.time')}</p>
           </div>
         </div>
@@ -137,7 +137,7 @@ export default function CourseTopLearners({
       ) : (
         <div className="h-40">
           <div className="flex items-baseline gap-2 mb-2">
-            <span className="text-2xl font-bold text-gray-900">
+            <span className="text-2xl font-bold text-gray-900 dark:text-zinc-100">
               <AnimatedNumber value={rows.length} />
             </span>
             <span className="text-xs text-gray-400">{t('analytics.course_analytics.units.active_learners')}</span>

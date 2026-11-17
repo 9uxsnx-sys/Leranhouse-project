@@ -182,7 +182,7 @@ export function OrgHomeClient({
       {/* Empty state */}
       {resolvedCourses.length === 0 && resolvedPodcasts.length === 0 && resolvedTrendingCourses.length === 0 && resolvedTrendingPodcasts.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16">
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-400 dark:text-dk-fg-3 text-sm">
             {t('home.no_content', { defaultValue: 'No content available yet' })}
           </p>
         </div>

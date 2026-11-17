@@ -308,7 +308,7 @@ function OrgUserGroups() {
                         rounded="rounded-full"
                         predefined_avatar={u.avatar_image === '' ? 'empty' : undefined}
                     />
-                    <span className="font-medium text-gray-900 truncate">
+                    <span className="font-medium text-gray-900 dark:text-zinc-100 truncate">
                         {u.first_name} {u.last_name}
                     </span>
                 </div>
@@ -318,13 +318,13 @@ function OrgUserGroups() {
             key: 'username',
             header: t('dashboard.users.usergroups.table.username'),
             width: '170px',
-            render: (u) => <span className="text-gray-500">@{u.username}</span>,
+            render: (u) => <span className="text-gray-500 dark:text-zinc-400">@{u.username}</span>,
         },
         {
             key: 'email',
             header: t('dashboard.users.usergroups.table.email'),
             width: '240px',
-            render: (u) => <span className="text-gray-500 truncate">{u.email}</span>,
+            render: (u) => <span className="text-gray-500 dark:text-zinc-400 truncate">{u.email}</span>,
         },
         {
             key: 'status',
@@ -347,7 +347,7 @@ function OrgUserGroups() {
             sortable: true,
             value: (u) => u.creation_date || '',
             render: (u) => (
-                <span className="text-[13px] text-gray-400 whitespace-nowrap">{formatDate(u.creation_date)}</span>
+                <span className="text-[13px] text-gray-400 dark:text-zinc-400 whitespace-nowrap">{formatDate(u.creation_date)}</span>
             ),
         },
         {
@@ -361,7 +361,7 @@ function OrgUserGroups() {
                         e.stopPropagation()
                         setDetailUser(u)
                     }}
-                    className="p-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
+                    className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-dk-raised text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-all"
                     title={t('common.view_details')}
                 >
                     <MoreHorizontal size={16} />
@@ -384,7 +384,7 @@ function OrgUserGroups() {
                     {/* ── ACTION ROW (matches Users/Contributors pattern) ── */}
                     <div className="flex items-center gap-3 mb-5">
                         <div className="relative w-80">
-                            <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                            <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-zinc-400 pointer-events-none" />
                             <input
                             type="text"
                             value={membersSearch}
@@ -393,7 +393,7 @@ function OrgUserGroups() {
                                 setSelectedMemberIds(new Set())
                             }}
                             placeholder={t('dashboard.users.usergroups.members.search_placeholder')}
-                            className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
+                            className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 dark:text-zinc-200 bg-white dark:bg-dk-card shadow-borders-base rounded-md placeholder:text-gray-500 dark:placeholder:text-zinc-400 focus:outline-none"
                         />
                         </div>
 
@@ -402,7 +402,7 @@ function OrgUserGroups() {
                         {/* Action button — always rendered to prevent layout bounce, shows Remove or Add based on search state */}
                         <button
                             onClick={isMembersSearchActive ? handleAddMembers : handleRemoveMembers}
-                            className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white border-gray-200 hover:bg-gray-50 ${
+                            className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white dark:bg-dk-card border-gray-200 dark:border-dk-line hover:bg-gray-50 dark:hover:bg-dk-raised ${
                                 isMembersSearchActive ? 'text-black' : 'text-red-600'
                             } ${
                                 hasSelectedMembers ? '' : 'invisible pointer-events-none'
@@ -414,13 +414,13 @@ function OrgUserGroups() {
 
                         <DropdownMenu modal={false}>
                             <DropdownMenuTrigger asChild>
-                                <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" aria-label={t('dashboard.users.usergroups.members.filter')}>
+                                <IconButton size="small" variant="transparent" className="bg-white dark:bg-dk-card hover:bg-gray-50 dark:hover:bg-dk-raised shadow-borders-base" aria-label={t('dashboard.users.usergroups.members.filter')}>
                                     <ConceptIcon.filter size={14} />
                                 </IconButton>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent
                                 align="end"
-                                className="min-w-[170px] rounded-lg border border-gray-200 bg-white p-1 shadow-md"
+                                className="min-w-[170px] rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card p-1 shadow-md"
                                 sideOffset={6}
                             >
                                 {[
@@ -433,8 +433,8 @@ function OrgUserGroups() {
                                         onClick={() => { setMembersStatusFilter(option.value) }}
                                         className="justify-between text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
                                     >
-                                        <span className="text-gray-700 text-xs">{option.label}</span>
-                                        {membersStatusFilter === option.value && <Check size={12} className="text-gray-500" />}
+                                        <span className="text-gray-700 dark:text-zinc-200 text-xs">{option.label}</span>
+                                        {membersStatusFilter === option.value && <Check size={12} className="text-gray-500 dark:text-zinc-400" />}
                                     </DropdownMenuItem>
                                 ))}
 
@@ -449,8 +449,8 @@ function OrgUserGroups() {
                                         onClick={() => setMembersSortBy(option.value as 'name-asc' | 'name-desc')}
                                         className="justify-between text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
                                     >
-                                        <span className="text-gray-700 text-xs">{option.label}</span>
-                                        {membersSortBy === option.value && <Check size={12} className="text-gray-500" />}
+                                        <span className="text-gray-700 dark:text-zinc-200 text-xs">{option.label}</span>
+                                        {membersSortBy === option.value && <Check size={12} className="text-gray-500 dark:text-zinc-400" />}
                                     </DropdownMenuItem>
                                 ))}
                             </DropdownMenuContent>
@@ -488,7 +488,7 @@ function OrgUserGroups() {
                                     footer={
                                       totalMemberPages > 1 ? (
                                         <div className="flex items-center justify-between">
-                                          <span className="text-xs text-gray-500">
+                                          <span className="text-xs text-gray-500 dark:text-zinc-400">
                                             Page {membersPage} of {totalMemberPages}
                                           </span>
                                           <div className="flex items-center gap-1">
@@ -496,7 +496,7 @@ function OrgUserGroups() {
                                               type="button"
                                               onClick={() => setMembersPage((p) => Math.max(1, p - 1))}
                                               disabled={membersPage === 1}
-                                              className="px-2 py-1 text-xs font-medium rounded border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                              className="px-2 py-1 text-xs font-medium rounded border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                                             >
                                               Previous
                                             </button>
@@ -504,7 +504,7 @@ function OrgUserGroups() {
                                               type="button"
                                               onClick={() => setMembersPage((p) => Math.min(totalMemberPages, p + 1))}
                                               disabled={membersPage === totalMemberPages}
-                                              className="px-2 py-1 text-xs font-medium rounded border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                              className="px-2 py-1 text-xs font-medium rounded border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                                             >
                                               Next
                                             </button>
@@ -526,13 +526,13 @@ function OrgUserGroups() {
                             />
                             <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
                                 <div
-                                    className="pointer-events-auto w-[340px] rounded-xl border border-gray-200 bg-white shadow-lg"
+                                    className="pointer-events-auto w-[340px] rounded-xl border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card shadow-lg"
                                     onClick={(e) => e.stopPropagation()}
                                 >
                                     <div className="flex justify-end pt-3 pe-3">
                                         <button
                                             onClick={() => setDetailUser(null)}
-                                            className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
+                                            className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-dk-raised text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-all"
                                         >
                                             <X size={16} />
                                         </button>
@@ -546,39 +546,39 @@ function OrgUserGroups() {
                                             rounded="rounded-full"
                                             predefined_avatar={detailUser.avatar_image === '' ? 'empty' : undefined}
                                         />
-                                        <span className="mt-3 text-base font-semibold text-gray-800">
+                                        <span className="mt-3 text-base font-semibold text-gray-800 dark:text-zinc-200">
                                             {detailUser.first_name} {detailUser.last_name}
                                         </span>
-                                        <span className="text-xs text-gray-400">
+                                        <span className="text-xs text-gray-400 dark:text-zinc-400">
                                             @{detailUser.username}
                                         </span>
-                                        <span className="text-sm text-gray-500 mt-0.5">
+                                        <span className="text-sm text-gray-500 dark:text-zinc-400 mt-0.5">
                                             {detailUser.email}
                                         </span>
                                     </div>
 
-                                    <div className="border-t border-gray-100" />
+                                    <div className="border-t border-gray-100 dark:border-dk-line" />
 
                                     <div className="px-6 py-4 space-y-3">
                                         <div className="flex justify-between items-center">
-                                            <span className="text-xs text-gray-400">{t('common.status')}</span>
-                                            <span className="flex items-center gap-1.5 text-sm text-gray-700">
+                                            <span className="text-xs text-gray-400 dark:text-zinc-400">{t('common.status')}</span>
+                                            <span className="flex items-center gap-1.5 text-sm text-gray-700 dark:text-zinc-200">
                                                 <span className={`w-2 h-2 rounded-full ${detailUser.email_verified ? 'bg-green-500' : 'bg-amber-500'}`} />
                                                 {detailUser.email_verified ? t('dashboard.users.usergroups.members.status.verified') : t('dashboard.users.usergroups.members.status.unverified')}
                                             </span>
                                         </div>
                                     </div>
 
-                                    <div className="border-t border-gray-100" />
+                                    <div className="border-t border-gray-100 dark:border-dk-line" />
 
                                     <div className="px-6 py-4 space-y-3">
                                         <div className="flex justify-between items-center">
-                                            <span className="text-xs text-gray-400">{t('dashboard.users.usergroups.table.joined')}</span>
-                                            <span className="text-sm text-gray-700">{formatDate(detailUser.creation_date)}</span>
+                                            <span className="text-xs text-gray-400 dark:text-zinc-400">{t('dashboard.users.usergroups.table.joined')}</span>
+                                            <span className="text-sm text-gray-700 dark:text-zinc-200">{formatDate(detailUser.creation_date)}</span>
                                         </div>
                                         <div className="flex justify-between items-center">
-                                            <span className="text-xs text-gray-400">{t('dashboard.users.usergroups.table.last_login')}</span>
-                                            <span className="text-sm text-gray-700">{formatDate(detailUser.last_login_at)}</span>
+                                            <span className="text-xs text-gray-400 dark:text-zinc-400">{t('dashboard.users.usergroups.table.last_login')}</span>
+                                            <span className="text-sm text-gray-700 dark:text-zinc-200">{formatDate(detailUser.last_login_at)}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -645,7 +645,7 @@ function OrgUserGroups() {
                                     isSaving
                                         ? 'bg-brand text-brand-fg border-brand opacity-50 cursor-not-allowed'
                                         : justSaved
-                                        ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                                        ? 'bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong cursor-default'
                                         : 'bg-brand text-brand-fg border-brand hover:bg-brand-hover cursor-pointer'
                                 }`}
                             >
@@ -662,11 +662,11 @@ function OrgUserGroups() {
                     </div>
 
                     {/* ── BASIC INFORMATION ── */}
-                    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('common.sections.overview')}</h3>
+                    <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('common.sections.overview')}</h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-1.5">
                                     {t('dashboard.users.usergroups.modals.edit.form.name')}
                                 </label>
                                 <Input
@@ -677,7 +677,7 @@ function OrgUserGroups() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                                <label className="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-1.5">
                                     {t('dashboard.users.usergroups.modals.edit.form.description')}
                                 </label>
                                 <Textarea
@@ -707,17 +707,17 @@ function OrgUserGroups() {
             {/* Toolbar Row */}
             <div className="flex items-center gap-3 mb-5">
                 <div className="relative w-80">
-                    <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                    <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-zinc-400 pointer-events-none" />
                     <input
                         type="text"
                         value={searchValue}
                         onChange={(e) => setSearchValue(e.target.value)}
                         placeholder={t('dashboard.users.usergroups.search_placeholder')}
-                        className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
+                        className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 dark:text-zinc-200 bg-white dark:bg-dk-card shadow-borders-base rounded-md placeholder:text-gray-500 dark:placeholder:text-zinc-400 focus:outline-none"
                     />
                 </div>
 
-                <span className="text-xs text-gray-400 whitespace-nowrap">
+                <span className="text-xs text-gray-400 dark:text-zinc-400 whitespace-nowrap">
                     {filteredUsergroups.length} {filteredUsergroups.length === 1
                         ? t('dashboard.users.usergroups.count.singular')
                         : t('dashboard.users.usergroups.count.plural')}
@@ -742,7 +742,7 @@ function OrgUserGroups() {
                 <IconButton
                     size="small"
                     variant="transparent"
-                    className="bg-white hover:bg-gray-50 shadow-borders-base"
+                    className="bg-white dark:bg-dk-card hover:bg-gray-50 dark:hover:bg-dk-raised shadow-borders-base"
                     onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
                     aria-label={t('dashboard.users.usergroups.actions.sort_groups')}
                 >
@@ -757,15 +757,15 @@ function OrgUserGroups() {
                         <LearnHouseSpinner size={36} />
                     </div>
                 ) : filteredUsergroups.length === 0 ? (
-                    <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-100">
-                        <Users size={40} className="mx-auto mb-3 text-gray-300" />
-                        <p className="text-sm text-gray-400">
+                    <div className="text-center py-12 bg-gray-50 dark:bg-dk-inset/40 rounded-lg border border-gray-100 dark:border-dk-line">
+                        <Users size={40} className="mx-auto mb-3 text-gray-300 dark:text-zinc-600" />
+                        <p className="text-sm text-gray-400 dark:text-zinc-400">
                             {searchValue
                                 ? t('dashboard.users.usergroups.no_results')
                                 : t('dashboard.users.usergroups.no_groups')
                             }
                         </p>
-                        <p className="text-xs text-gray-300 mt-1">
+                        <p className="text-xs text-gray-300 dark:text-zinc-600 mt-1">
                             {searchValue
                                 ? t('dashboard.users.usergroups.no_results_hint')
                                 : t('dashboard.users.usergroups.actions.create')
@@ -779,7 +779,7 @@ function OrgUserGroups() {
                             <div
                                 key={usergroup.id}
                                 onClick={() => handleGroupClick(usergroup.id)}
-                                className={`w-full text-start px-5 py-4 rounded-xl bg-white shadow-borders-base transition-colors flex items-center justify-between group ${
+                                className={`w-full text-start px-5 py-4 rounded-xl bg-white dark:bg-dk-card shadow-borders-base transition-colors flex items-center justify-between group ${
                                     isSelectMode
                                         ? isSelected
                                             ? 'ring-2 ring-blue-500/40 border-blue-200 cursor-pointer'
@@ -793,7 +793,7 @@ function OrgUserGroups() {
                                             className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
                                                 isSelected
                                                     ? 'bg-zinc-800 border-zinc-800 text-white'
-                                                    : 'border-gray-300 hover:border-gray-400'
+                                                    : 'border-gray-300 dark:border-dk-line-strong hover:border-gray-400'
                                             }`}
                                             onClick={(e) => {
                                                 e.stopPropagation()
@@ -808,10 +808,10 @@ function OrgUserGroups() {
                                         </div>
                                     ) : null}
 
-                                    <Users size={18} className="text-gray-400 flex-shrink-0" />
+                                    <Users size={18} className="text-gray-400 dark:text-zinc-400 flex-shrink-0" />
 
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-medium text-gray-900 truncate">
+                                        <p className="text-sm font-medium text-gray-900 dark:text-zinc-100 truncate">
                                             {usergroup.name}
                                         </p>
                                     </div>
@@ -821,7 +821,7 @@ function OrgUserGroups() {
                                     <DropdownMenuTrigger asChild>
                                         <button
                                             onClick={(e) => e.stopPropagation()}
-                                            className="h-7 w-7 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors flex-shrink-0"
+                                            className="h-7 w-7 flex items-center justify-center rounded-md text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors flex-shrink-0"
                                         >
                                             <MoreVertical size={16} />
                                         </button>

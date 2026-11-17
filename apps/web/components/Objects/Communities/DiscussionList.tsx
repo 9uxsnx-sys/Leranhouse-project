@@ -246,13 +246,13 @@ export function DiscussionList({
       <div>
         {filteredDiscussions.length === 0 && !isLoading ? (
           <div className="flex flex-col items-center justify-center py-16 px-4">
-            <div className="p-4 bg-gray-50 rounded-full mb-4">
-              <MessageCircle size={28} className="text-gray-300" />
+            <div className="p-4 bg-gray-50 dark:bg-dk-inset/40 rounded-full mb-4">
+              <MessageCircle size={28} className="text-gray-300 dark:text-zinc-600" />
             </div>
             {searchQuery ? (
               <>
-                <h3 className="text-base font-semibold text-gray-600 mb-1">{t('communities.discussion_list.no_results')}</h3>
-                <p className="text-sm text-gray-400 text-center max-w-xs mb-4">
+                <h3 className="text-base font-semibold text-gray-600 dark:text-dk-fg-2 mb-1">{t('communities.discussion_list.no_results')}</h3>
+                <p className="text-sm text-gray-400 dark:text-dk-fg-3 text-center max-w-xs mb-4">
                   {t('communities.discussion_list.no_results_description')}
                 </p>
                 <button
@@ -264,8 +264,8 @@ export function DiscussionList({
               </>
             ) : (
               <>
-                <h3 className="text-base font-semibold text-gray-600 mb-1">{t('communities.discussion_list.no_discussions')}</h3>
-                <p className="text-sm text-gray-400 text-center max-w-xs mb-4">
+                <h3 className="text-base font-semibold text-gray-600 dark:text-dk-fg-2 mb-1">{t('communities.discussion_list.no_discussions')}</h3>
+                <p className="text-sm text-gray-400 dark:text-dk-fg-3 text-center max-w-xs mb-4">
                   {t('communities.discussion_list.no_discussions_description')}
                 </p>
                 {canCreateDiscussion && onCreateClick && (
@@ -284,7 +284,7 @@ export function DiscussionList({
           <div className="flex flex-col gap-4">
             {isLoading && discussions.length === 0 ? (
               <div className="flex justify-center py-8">
-                <Loader2 size={24} className="animate-spin text-gray-400" />
+                <Loader2 size={24} className="animate-spin text-gray-400 dark:text-dk-fg-3" />
               </div>
             ) : (
               filteredDiscussions.map((discussion) => (

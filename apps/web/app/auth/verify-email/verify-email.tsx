@@ -62,11 +62,11 @@ function VerifyEmailClient({ org }: VerifyEmailClientProps) {
       <AnimatePresence mode="wait" initial={false}>
         {state === 'verifying' && (
           <motion.div key="verifying" {...fade} className="text-center py-6">
-            <Loader2 size={28} className="mx-auto animate-spin text-gray-400" />
-            <h2 className="mt-4 text-base font-semibold text-gray-900">
+            <Loader2 size={28} className="mx-auto animate-spin text-gray-400 dark:text-zinc-400" />
+            <h2 className="mt-4 text-base font-semibold text-gray-900 dark:text-zinc-100">
               {t('auth.verifying_your_email')}
             </h2>
-            <p className="mt-1.5 text-sm text-gray-500">
+            <p className="mt-1.5 text-sm text-gray-500 dark:text-zinc-400">
               {t('auth.verifying_take_moment')}
             </p>
           </motion.div>
@@ -74,13 +74,13 @@ function VerifyEmailClient({ org }: VerifyEmailClientProps) {
 
         {state === 'success' && (
           <motion.div key="success" {...fade} className="text-center py-2">
-            <div className="mx-auto w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-              <Check size={22} className="text-gray-800" />
+            <div className="mx-auto w-12 h-12 rounded-full bg-gray-100 dark:bg-dk-inset flex items-center justify-center">
+              <Check size={22} className="text-gray-800 dark:text-zinc-200" />
             </div>
-            <h2 className="mt-4 text-base font-semibold text-gray-900">
+            <h2 className="mt-4 text-base font-semibold text-gray-900 dark:text-zinc-100">
               {t('auth.email_verified_success')}
             </h2>
-            <p className="mt-1.5 text-sm text-gray-500">
+            <p className="mt-1.5 text-sm text-gray-500 dark:text-zinc-400">
               {t('auth.email_verified_message')}
             </p>
 
@@ -94,13 +94,13 @@ function VerifyEmailClient({ org }: VerifyEmailClientProps) {
 
         {state === 'error' && (
           <motion.div key="error" {...fade} className="text-center py-2">
-            <div className="mx-auto w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-              <AlertTriangle size={22} className="text-gray-800" />
+            <div className="mx-auto w-12 h-12 rounded-full bg-gray-100 dark:bg-dk-inset flex items-center justify-center">
+              <AlertTriangle size={22} className="text-gray-800 dark:text-zinc-200" />
             </div>
-            <h2 className="mt-4 text-base font-semibold text-gray-900">
+            <h2 className="mt-4 text-base font-semibold text-gray-900 dark:text-zinc-100">
               {t('auth.link_invalid_or_expired')}
             </h2>
-            <p className="mt-1.5 text-sm text-gray-500">
+            <p className="mt-1.5 text-sm text-gray-500 dark:text-zinc-400">
               {error || t('auth.verification_trouble')}
             </p>
 
@@ -110,10 +110,10 @@ function VerifyEmailClient({ org }: VerifyEmailClientProps) {
               </Link>
             </div>
 
-            <p className="text-center text-sm text-gray-500 mt-6">
+            <p className="text-center text-sm text-gray-500 dark:text-zinc-400 mt-6">
               <Link
                 href="/login"
-                className="inline-flex items-center gap-1.5 font-semibold text-gray-900 hover:underline"
+                className="inline-flex items-center gap-1.5 font-semibold text-gray-900 dark:text-zinc-100 hover:underline"
               >
                 <ArrowLeft size={14} />
                 {t('auth.back_to_sign_in')}

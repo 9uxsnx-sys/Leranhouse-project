@@ -50,15 +50,15 @@ const CourseProgress: React.FC<CourseProgressProps> = ({ course, orgslug, isOpen
   const getActivityTypeIcon = (activityType: string) => {
     switch (activityType) {
       case 'TYPE_VIDEO':
-        return <Video size={16} className="text-gray-400" />
+        return <Video size={16} className="text-gray-400 dark:text-dk-fg-3" />
       case 'TYPE_DOCUMENT':
-        return <FileText size={16} className="text-gray-400" />
+        return <FileText size={16} className="text-gray-400 dark:text-dk-fg-3" />
       case 'TYPE_DYNAMIC':
-        return <Layers size={16} className="text-gray-400" />
+        return <Layers size={16} className="text-gray-400 dark:text-dk-fg-3" />
       case 'TYPE_ASSIGNMENT':
-        return <BookOpenCheck size={16} className="text-gray-400" />
+        return <BookOpenCheck size={16} className="text-gray-400 dark:text-dk-fg-3" />
       default:
-        return <FileText size={16} className="text-gray-400" />
+        return <FileText size={16} className="text-gray-400 dark:text-dk-fg-3" />
     }
   }
 
@@ -70,12 +70,12 @@ const CourseProgress: React.FC<CourseProgressProps> = ({ course, orgslug, isOpen
   const dialogContent = (
     <div className="space-y-4">
       {course.chapters.map((chapter: any) => (
-        <div key={chapter.chapter_uuid} className="bg-gray-50 rounded-lg overflow-hidden">
-          <div className="px-4 py-3 bg-gray-100 font-semibold text-gray-700 flex items-center space-x-2">
-            <Folder size={16} className="text-gray-400" />
+        <div key={chapter.chapter_uuid} className="bg-gray-50 dark:bg-dk-inset/40 rounded-lg overflow-hidden">
+          <div className="px-4 py-3 bg-gray-100 dark:bg-dk-inset font-semibold text-gray-700 dark:text-dk-fg-1 flex items-center space-x-2">
+            <Folder size={16} className="text-gray-400 dark:text-dk-fg-3" />
             <span>{chapter.name}</span>
           </div>
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100 dark:divide-dk-line">
             {chapter.activities.map((activity: any) => {
               const activityId = activity.activity_uuid.replace('activity_', '')
               const courseId = course.course_uuid.replace('course_', '')
@@ -84,7 +84,7 @@ const CourseProgress: React.FC<CourseProgressProps> = ({ course, orgslug, isOpen
                   key={activity.activity_uuid}
                   href={getUriWithOrg(orgslug, '') + `/course/${courseId}/activity/${activityId}`}
                 >
-                  <div className="px-4 py-3 hover:bg-gray-100 transition-colors flex items-center group">
+                  <div className="px-4 py-3 hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors flex items-center group">
                     <div className="flex items-center space-x-3 flex-1">
                       {isActivityDone(activity) ? (
                         <div className="relative">
@@ -92,16 +92,16 @@ const CourseProgress: React.FC<CourseProgressProps> = ({ course, orgslug, isOpen
                           <Check size={18} className="stroke-[2.5] text-teal-600 absolute top-0 start-0" />
                         </div>
                       ) : (
-                        <Square size={18} className="stroke-[2] text-gray-300" />
+                        <Square size={18} className="stroke-[2] text-gray-300 dark:text-zinc-600" />
                       )}
                       <div className="flex items-center space-x-2">
                         {getActivityTypeIcon(activity.activity_type)}
-                        <span dir="auto" className="text-gray-700 group-hover:text-gray-900">
+                        <span dir="auto" className="text-gray-700 dark:text-dk-fg-1 group-hover:text-gray-900">
                           {activity.name}
                         </span>
                       </div>
                     </div>
-                    <ArrowRight size={16} className="text-gray-400 group-hover:text-gray-600" />
+                    <ArrowRight size={16} className="text-gray-400 dark:text-dk-fg-3 group-hover:text-gray-600" />
                   </div>
                 </Link>
               )

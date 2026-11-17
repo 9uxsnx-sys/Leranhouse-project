@@ -98,9 +98,9 @@ export default function PlaygroundChatPanel({
   const canSend = !!input.trim() && !isGenerating && !disabled && remaining > 0
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-white dark:bg-dk-card">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-gray-100 flex-shrink-0">
+      <div className="px-4 py-3 border-b border-gray-100 dark:border-dk-line flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkle size={15} weight="fill" className="text-neutral-400" />
@@ -145,7 +145,7 @@ export default function PlaygroundChatPanel({
               <select
                 value={selectedCourseUuid}
                 onChange={(e) => onCourseChange?.(e.target.value)}
-                className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-xs font-medium text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 dark:border-dk-line-strong text-xs font-medium text-gray-700 dark:text-zinc-200 bg-white dark:bg-dk-card focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
               >
                 {orgCourses.map((c) => (
                   <option key={c.course_uuid} value={c.course_uuid}>
@@ -163,7 +163,7 @@ export default function PlaygroundChatPanel({
               <div
                 key={i}
                 className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                  i < iterationCount ? 'bg-sky-500' : 'bg-gray-100'
+                  i < iterationCount ? 'bg-sky-500' : 'bg-gray-100 dark:bg-dk-inset'
                 }`}
               />
             ))}
@@ -239,7 +239,7 @@ export default function PlaygroundChatPanel({
       )}
 
       {/* Input */}
-      <div className="p-3 border-t border-gray-100 flex-shrink-0">
+      <div className="p-3 border-t border-gray-100 dark:border-dk-line flex-shrink-0">
         <div
           className="nice-shadow rounded-xl bg-neutral-50 overflow-hidden flex flex-col"
           style={{ outline: input ? '1.5px solid #0ea5e9' : undefined }}

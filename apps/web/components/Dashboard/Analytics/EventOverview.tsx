@@ -197,10 +197,10 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
 
   return (
     <>
-    <div className="bg-white nice-shadow rounded-xl overflow-hidden">
-      <div className="grid grid-cols-5 divide-x divide-gray-100">
+    <div className="bg-white nice-shadow rounded-xl overflow-hidden dark:bg-dk-card">
+      <div className="grid grid-cols-5 divide-x divide-gray-100 dark:divide-dk-line">
         <div
-          className="px-5 py-4 cursor-pointer hover:bg-gray-50 transition-colors group relative"
+          className="px-5 py-4 cursor-pointer hover:bg-gray-50 transition-colors group relative dark:hover:bg-dk-raised/60"
           onClick={() => setActiveModal('live')}
         >
           <Maximize2 size={14} className="absolute top-3 end-3 text-gray-300 transition-opacity" />
@@ -208,7 +208,7 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
             <Radio size={14} className="text-green-500" />
             <span className="text-xs font-medium text-gray-400">{t('analytics.overview.live_now')}</span>
           </div>
-          <div className="text-2xl font-bold text-gray-900">
+          <div className="text-2xl font-bold text-gray-900 dark:text-zinc-100">
             {liveLoading ? '\u2014' : liveCount.toLocaleString()}
           </div>
           <p className="text-[11px] text-gray-300 mt-0.5">{t('analytics.overview.last_5_minutes')}</p>
@@ -217,7 +217,7 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
           return (
             <div
               key={card.labelKey}
-              className={`px-5 py-4 ${card.modalKey ? 'cursor-pointer hover:bg-gray-50 transition-colors group relative' : ''}`}
+              className={`px-5 py-4 ${card.modalKey ? 'cursor-pointer hover:bg-gray-50 transition-colors group relative' : ''} dark:hover:bg-dk-raised/60`}
               onClick={card.modalKey ? () => setActiveModal(card.modalKey!) : undefined}
             >
               {card.modalKey && <Maximize2 size={14} className="absolute top-3 end-3 text-gray-300 transition-opacity" />}
@@ -227,7 +227,7 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
                   {card.label}
                 </span>
               </div>
-              <div className="text-2xl font-bold text-gray-900">
+              <div className="text-2xl font-bold text-gray-900 dark:text-zinc-100">
                 {isLoading ? '\u2014' : card.total.toLocaleString()}
               </div>
               <p className="text-[11px] text-gray-300 mt-0.5">
@@ -238,8 +238,8 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
         })}
       </div>
 
-      <div className="border-t border-gray-100 px-5 pt-4 pb-2">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">
+      <div className="border-t border-gray-100 px-5 pt-4 pb-2 dark:border-dk-line">
+        <h3 className="text-sm font-semibold text-gray-700 mb-3 dark:text-zinc-200">
           {t('analytics.overview.daily_active_users')}
         </h3>
         {dauLoading ? (
@@ -292,11 +292,11 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
         )}
       </div>
 
-      <div className="border-t border-gray-100 grid grid-cols-3 divide-x divide-gray-100">
+      <div className="border-t border-gray-100 grid grid-cols-3 divide-x divide-gray-100 dark:border-dk-line dark:divide-dk-line">
         <div className="p-5">
           <div className="flex items-center gap-2 mb-3">
             <Globe size={15} className="text-blue-400" />
-            <h3 className="text-sm font-semibold text-gray-700">{t('analytics.overview.countries')}</h3>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-zinc-200">{t('analytics.overview.countries')}</h3>
           </div>
           {countryLoading ? (
             <div className="h-[160px] flex items-center justify-center text-gray-300">{t('analytics.common.loading')}</div>
@@ -310,12 +310,12 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
                 return (
                   <div key={i} className="flex items-center gap-2">
                     <span className="text-xs w-6 text-gray-400 font-mono">{row.country_code}</span>
-                    <div className="flex-1 h-5 bg-gray-50 rounded overflow-hidden relative">
+                    <div className="flex-1 h-5 bg-gray-50 rounded overflow-hidden relative dark:bg-dk-inset/40">
                       <div
                         className="h-full bg-blue-100 rounded"
                         style={{ width: `${pct}%` }}
                       />
-                      <span className="absolute inset-0 flex items-center px-2 text-[11px] text-gray-600 font-medium truncate">
+                      <span className="absolute inset-0 flex items-center px-2 text-[11px] text-gray-600 font-medium truncate dark:text-zinc-300">
                         {row.country_code}
                       </span>
                     </div>
@@ -332,7 +332,7 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
         <div className="p-5">
           <div className="flex items-center gap-2 mb-3">
             <MonitorSmartphone size={15} className="text-indigo-400" />
-            <h3 className="text-sm font-semibold text-gray-700">{t('analytics.overview.devices')}</h3>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-zinc-200">{t('analytics.overview.devices')}</h3>
           </div>
           {deviceLoading ? (
             <div className="h-[160px] flex items-center justify-center text-gray-300">{t('analytics.common.loading')}</div>
@@ -375,10 +375,10 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
                   return (
                     <div key={i} className="flex items-center gap-2">
                       {DEVICE_ICONS[row.device_type] || DEVICE_ICONS.unknown}
-                      <span className="text-xs text-gray-600 capitalize flex-1">
+                      <span className="text-xs text-gray-600 capitalize flex-1 dark:text-zinc-300">
                         {row.device_type}
                       </span>
-                      <span className="text-xs font-medium text-gray-900 tabular-nums">
+                      <span className="text-xs font-medium text-gray-900 tabular-nums dark:text-zinc-100">
                         {pct}%
                       </span>
                       <span className="text-[11px] text-gray-400 tabular-nums w-10 text-end">
@@ -395,7 +395,7 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
         <div className="p-5">
           <div className="flex items-center gap-2 mb-3">
             <Link size={15} className="text-green-400" />
-            <h3 className="text-sm font-semibold text-gray-700">{t('analytics.overview.top_referrers')}</h3>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-zinc-200">{t('analytics.overview.top_referrers')}</h3>
           </div>
           {referrerLoading ? (
             <div className="h-[160px] flex items-center justify-center text-gray-300">{t('analytics.common.loading')}</div>
@@ -408,12 +408,12 @@ export default function EventOverview({ days = '30' }: { days?: string }) {
                 const pct = Math.round((row.visits / maxVisits) * 100)
                 return (
                   <div key={i} className="flex items-center gap-2">
-                    <div className="flex-1 h-5 bg-gray-50 rounded overflow-hidden relative">
+                    <div className="flex-1 h-5 bg-gray-50 rounded overflow-hidden relative dark:bg-dk-inset/40">
                       <div
                         className="h-full bg-green-100 rounded"
                         style={{ width: `${pct}%` }}
                       />
-                      <span className="absolute inset-0 flex items-center px-2 text-[11px] text-gray-600 font-medium truncate">
+                      <span className="absolute inset-0 flex items-center px-2 text-[11px] text-gray-600 font-medium truncate dark:text-zinc-300">
                         {row.referrer_domain}
                       </span>
                     </div>

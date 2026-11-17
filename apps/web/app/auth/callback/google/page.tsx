@@ -238,15 +238,15 @@ export default function GoogleCallbackPage() {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dk-inset/40">
         <div className="text-center">
           <div className="flex justify-center mb-4">
-            <Loader2 className="w-12 h-12 text-gray-600 animate-spin" />
+            <Loader2 className="w-12 h-12 text-gray-600 dark:text-zinc-300 animate-spin" />
           </div>
-          <h1 className="text-xl font-semibold text-gray-800 mb-2">
+          <h1 className="text-xl font-semibold text-gray-800 dark:text-zinc-200 mb-2">
             Completing sign in...
           </h1>
-          <p className="text-gray-500">Please wait while we authenticate you.</p>
+          <p className="text-gray-500 dark:text-zinc-400">Please wait while we authenticate you.</p>
         </div>
       </div>
     )
@@ -254,18 +254,18 @@ export default function GoogleCallbackPage() {
 
   if (status === 'csrf_error') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dk-inset/40">
         <div className="text-center max-w-md mx-auto p-6">
           <div className="flex justify-center mb-4">
             <div className="p-3 bg-amber-100 rounded-full">
               <ShieldAlert className="w-12 h-12 text-amber-600" />
             </div>
           </div>
-          <h1 className="text-xl font-semibold text-gray-800 mb-2">
+          <h1 className="text-xl font-semibold text-gray-800 dark:text-zinc-200 mb-2">
             Security Check Failed
           </h1>
-          <p className="text-gray-600 mb-2">{error}</p>
-          <p className="text-gray-500 text-sm mb-6">
+          <p className="text-gray-600 dark:text-zinc-300 mb-2">{error}</p>
+          <p className="text-gray-500 dark:text-zinc-400 text-sm mb-6">
             This can happen if the login session expired or if you followed an old link.
             Please start the login process again.
           </p>
@@ -278,7 +278,7 @@ export default function GoogleCallbackPage() {
             </Link>
             <Link
               href="/"
-              className="block w-full py-2 px-4 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+              className="block w-full py-2 px-4 bg-gray-100 dark:bg-dk-inset text-gray-700 dark:text-zinc-200 rounded-md hover:bg-gray-200 transition-colors"
             >
               Go Home
             </Link>
@@ -290,17 +290,17 @@ export default function GoogleCallbackPage() {
 
   if (status === 'error') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dk-inset/40">
         <div className="text-center max-w-md mx-auto p-6">
           <div className="flex justify-center mb-4">
             <div className="p-3 bg-red-100 rounded-full">
               <AlertTriangle className="w-12 h-12 text-red-600" />
             </div>
           </div>
-          <h1 className="text-xl font-semibold text-gray-800 mb-2">
+          <h1 className="text-xl font-semibold text-gray-800 dark:text-zinc-200 mb-2">
             Authentication Failed
           </h1>
-          <p className="text-gray-600 mb-6">{error}</p>
+          <p className="text-gray-600 dark:text-zinc-300 mb-6">{error}</p>
           <div className="space-y-3">
             <Link
               href="/login"
@@ -310,7 +310,7 @@ export default function GoogleCallbackPage() {
             </Link>
             <Link
               href="/"
-              className="block w-full py-2 px-4 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+              className="block w-full py-2 px-4 bg-gray-100 dark:bg-dk-inset text-gray-700 dark:text-zinc-200 rounded-md hover:bg-gray-200 transition-colors"
             >
               Go Home
             </Link>
@@ -322,15 +322,15 @@ export default function GoogleCallbackPage() {
 
   // Success state - redirecting
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-dk-inset/40">
       <div className="text-center">
         <div className="flex justify-center mb-4">
           <Loader2 className="w-12 h-12 text-green-600 animate-spin" />
         </div>
-        <h1 className="text-xl font-semibold text-gray-800 mb-2">
+        <h1 className="text-xl font-semibold text-gray-800 dark:text-zinc-200 mb-2">
           Success!
         </h1>
-        <p className="text-gray-500">Redirecting you now...</p>
+        <p className="text-gray-500 dark:text-zinc-400">Redirecting you now...</p>
       </div>
     </div>
   )

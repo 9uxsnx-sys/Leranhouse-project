@@ -40,7 +40,7 @@ const ConfirmationModal = (params: ModalParams) => {
           </div>
           <div className="pt-1 w-auto grow">
             <div className="text-xl font-bold text-black">{params.dialogTitle}</div>
-            <div className="text-md text-gray-500 leading-tight mt-1">
+            <div className="text-md text-gray-500 dark:text-dk-fg-3 leading-tight mt-1">
               {params.confirmationMessage}
             </div>
             <div className="flex flex-row-reverse mt-4">

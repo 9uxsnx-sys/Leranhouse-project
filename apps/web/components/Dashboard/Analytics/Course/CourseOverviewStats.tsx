@@ -25,13 +25,13 @@ function StatCard({
   ringPercent?: number
 }) {
   return (
-    <div className="bg-white rounded-xl nice-shadow p-5 flex items-center gap-4 group hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200">
+    <div className="bg-white rounded-xl nice-shadow p-5 flex items-center gap-4 group hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200 dark:bg-dk-card">
       <div className={`p-3 rounded-lg ${bgColor}`}>
         <Icon size={20} className="text-white" />
       </div>
       <div className="flex-1">
         <p className="text-xs text-gray-400 font-medium">{label}</p>
-        <p className="text-2xl font-bold text-gray-900">
+        <p className="text-2xl font-bold text-gray-900 dark:text-zinc-100">
           {numericValue != null ? (
             <AnimatedNumber value={numericValue} suffix={suffix} />
           ) : (
@@ -61,7 +61,7 @@ export default function CourseOverviewStats({
     return (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="bg-white rounded-xl nice-shadow p-5 h-24 animate-pulse" />
+          <div key={i} className="bg-white rounded-xl nice-shadow p-5 h-24 animate-pulse dark:bg-dk-card" />
         ))}
       </div>
     )

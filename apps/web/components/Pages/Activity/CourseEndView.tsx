@@ -429,7 +429,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
           />
         </div>
         
-        <div className="bg-white rounded-2xl p-8 nice-shadow max-w-4xl w-full space-y-6 relative z-10">
+        <div className="bg-white dark:bg-dk-card rounded-2xl p-8 nice-shadow max-w-4xl w-full space-y-6 relative z-10">
           <div className="flex flex-col items-center space-y-6">
             {thumbnailImage && (
               <img
@@ -448,23 +448,23 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
             </div>
           </div>
           
-          <h1 className="text-4xl font-bold text-gray-900">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-dk-fg-1">
             {t('courses.congratulations')}
           </h1>
           
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-gray-600 dark:text-dk-fg-2">
             {t('courses.successfully_completed')}
-            <span className="font-semibold text-gray-900"> {courseName}</span>
+            <span className="font-semibold text-gray-900 dark:text-dk-fg-1"> {courseName}</span>
           </p>
           
-          <p className="text-gray-500">
+          <p className="text-gray-500 dark:text-dk-fg-3">
             {t('certificate.dedication_message')}
           </p>
 
           {isLoadingCertificate ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span className="ms-3 text-gray-600">{t('certificate.loading_certificate')}</span>
+              <span className="ms-3 text-gray-600 dark:text-dk-fg-2">{t('certificate.loading_certificate')}</span>
             </div>
           ) : certificateError ? (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
@@ -474,7 +474,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
             </div>
           ) : userCertificate ? (
             <div className="space-y-4">
-              <h2 className="text-2xl font-semibold text-gray-900">{t('certificate.your_certificate')}</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-dk-fg-1">{t('certificate.your_certificate')}</h2>
               <div className="max-w-2xl mx-auto" id="certificate-preview">
                 <div id="certificate-content">
                   <CertificatePreview
@@ -513,8 +513,8 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
               </div>
             </div>
           ) : (
-            <div className="bg-gray-50 rounded-lg p-6">
-              <p className="text-gray-600">
+            <div className="bg-gray-50 dark:bg-dk-inset/40 rounded-lg p-6">
+              <p className="text-gray-600 dark:text-dk-fg-2">
                 {t('certificate.no_certificate_available')}
               </p>
             </div>
@@ -536,7 +536,7 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
     // Show progress and encouragement for incomplete course
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-4">
-        <div className="bg-white rounded-2xl p-8 nice-shadow max-w-2xl w-full space-y-6">
+        <div className="bg-white dark:bg-dk-card rounded-2xl p-8 nice-shadow max-w-2xl w-full space-y-6">
           <div className="flex flex-col items-center space-y-6">
             {thumbnailImage && (
               <img
@@ -555,43 +555,43 @@ const CourseEndView: React.FC<CourseEndViewProps> = ({
             </div>
           </div>
           
-          <h1 className="text-4xl font-bold text-gray-900">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-dk-fg-1">
             {t('courses.keep_going')}
           </h1>
           
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-gray-600 dark:text-dk-fg-2">
             {t('courses.making_great_progress')}
-            <span className="font-semibold text-gray-900"> {courseName}</span>
+            <span className="font-semibold text-gray-900 dark:text-dk-fg-1"> {courseName}</span>
           </p>
           
           {progressInfo && (
-            <div className="bg-gray-50 rounded-lg p-6 space-y-4">
+            <div className="bg-gray-50 dark:bg-dk-inset/40 rounded-lg p-6 space-y-4">
               <div className="flex items-center justify-center space-x-2">
-                <BookOpen className="w-5 h-5 text-gray-600" />
-                <span className="text-lg font-semibold text-gray-700">{t('courses.course_progress')}</span>
+                <BookOpen className="w-5 h-5 text-gray-600 dark:text-dk-fg-2" />
+                <span className="text-lg font-semibold text-gray-700 dark:text-dk-fg-1">{t('courses.course_progress')}</span>
               </div>
               
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">{t('courses.progress')}</span>
-                  <span className="font-semibold text-gray-900">{progressInfo.percentage}%</span>
+                  <span className="text-gray-600 dark:text-dk-fg-2">{t('courses.progress')}</span>
+                  <span className="font-semibold text-gray-900 dark:text-dk-fg-1">{progressInfo.percentage}%</span>
                 </div>
                 
-                <div className="w-full bg-gray-200 rounded-full h-3">
+                <div className="w-full bg-gray-200 dark:bg-dk-track rounded-full h-3">
                   <div 
                     className="bg-brand h-3 rounded-full transition-all duration-500"
                     style={{ width: `${progressInfo.percentage}%` }}
                   ></div>
                 </div>
                 
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-gray-500 dark:text-dk-fg-3">
                   {t('courses.completed_of', { completed: progressInfo.completed, total: progressInfo.total })}
                 </div>
               </div>
             </div>
           )}
           
-          <p className="text-gray-500">
+          <p className="text-gray-500 dark:text-dk-fg-3">
             {t('courses.keep_going_description')}
           </p>
 

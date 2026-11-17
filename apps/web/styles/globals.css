@@ -166,6 +166,32 @@
 
 }
 
+/* Dark surface ladder — the six steps every dark card, well and hairline uses.
+   Kept as theme colours so a component reads `dark:bg-dk-card` /
+   `dark:border-dk-line` instead of a hard-coded zinc step, and the whole ladder
+   can be retuned in one place. They are only ever used behind a `dark:` prefix,
+   so light mode never sees them. */
+@theme {
+  --color-dk-card: #141417;
+  --color-dk-raised: #1d1d21;
+  --color-dk-track: #26262b;
+  --color-dk-inset: #0d0d0f;
+  --color-dk-line: #2f2f35;
+  --color-dk-line-strong: #41414a;
+
+  /* Card text scale — five semantic levels, never pure white:
+       fg-1  heading        #F4F4F5  16.6:1 on the card
+       fg-2  body           #D4D4D8  12.5:1
+       fg-3  secondary      #A1A1AA   7.0:1
+       fg-4  muted metadata #85858F   4.9:1
+       fg-5  disabled       #62626B   3.0:1   */
+  --color-dk-fg-1: #f4f4f5;
+  --color-dk-fg-2: #d4d4d8;
+  --color-dk-fg-3: #a1a1aa;
+  --color-dk-fg-4: #85858f;
+  --color-dk-fg-5: #62626b;
+}
+
 /* Medusa UI design tokens — ui-preset theme/tokens/colors.ts (light mode).
    Generates bg-ui-*, text-ui-*, border-ui-* utility classes in Tailwind v4. */
 @theme {
@@ -244,6 +270,174 @@
   --color-ui-tag-purple-text: #5b21b6;
   --color-ui-tag-purple-border: #ddd6fe;
   --color-ui-tag-purple-icon: #a78bfa;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Dark mode tokens.
+
+   The semantic Medusa tokens above are the single control point: every
+   `bg-ui-*` / `text-ui-*` / `border-ui-*` utility reads them through var(),
+   so redefining them here recolours every token-driven surface at once.
+
+   The rule that keeps the light design language intact:
+     page  #09090b  →  card #141417  →  border #2f2f35
+   The fill delta is deliberately small (1.08:1, same as GitHub's #0d1117 →
+   #161b22) because on a dark canvas a large fill delta turns every card into a
+   bright grey slab. Separation comes from the hairline, not the fill:
+   border-to-card is 1.38:1 (GitHub: 1.42:1). Inner wells step *down* to
+   #0d0d0f so they read as recessed rather than as a second card.
+
+   Declared outside a cascade layer so these values win over the @theme
+   defaults regardless of emit order.
+   ───────────────────────────────────────────────────────────────────────── */
+.dark {
+  color-scheme: dark;
+
+  --color-canvas: #09090b;
+
+  --color-ui-bg-base: #141417;
+  --color-ui-bg-base-hover: #1d1d21;
+  --color-ui-bg-subtle: #111113;
+  --color-ui-bg-subtle-hover: #1d1d21;
+  --color-ui-bg-subtle-pressed: #26262b;
+  --color-ui-bg-interactive: #fafafa;
+  --color-ui-bg-overlay: rgba(0, 0, 0, 0.6);
+  --color-ui-bg-component: #141417;
+  --color-ui-bg-component-hover: #1d1d21;
+  --color-ui-bg-component-pressed: #26262b;
+  --color-ui-bg-field: #0d0d0f;
+  --color-ui-bg-field-hover: #141417;
+  --color-ui-bg-disabled: #0d0d0f;
+  --color-ui-bg-highlight: rgba(59, 130, 246, 0.14);
+  --color-ui-bg-switch-off: #3f3f46;
+  --color-ui-bg-switch-off-hover: #52525b;
+
+  --color-ui-fg-base: #f4f4f5;
+  --color-ui-fg-subtle: #d4d4d8;
+  --color-ui-fg-muted: #a1a1aa;
+  /* stays white: it labels saturated fills (danger) that keep their colour */
+  --color-ui-fg-on-color: #ffffff;
+  --color-ui-fg-on-inverted: #0b0b0d;
+  --color-ui-fg-interactive: #fafafa;
+  --color-ui-fg-interactive-hover: #e4e4e7;
+  --color-ui-fg-disabled: #62626b;
+  --color-ui-fg-error: #fb7185;
+
+  --color-ui-border-base: #2f2f35;
+  --color-ui-border-strong: #41414a;
+  --color-ui-border-interactive: #a1a1aa;
+  --color-ui-border-error: #fb7185;
+  --color-ui-border-danger: #f43f5e;
+  --color-ui-border-loud: rgba(250, 250, 250, 1);
+  --color-ui-border-menu-top: #2f2f35;
+  --color-ui-border-menu-bot: #383840;
+
+  /* buttons — inverted flips in dark: light fill, dark label */
+  --color-ui-button-inverted: #fafafa;
+  --color-ui-button-inverted-hover: #e4e4e7;
+  --color-ui-button-inverted-pressed: #d4d4d8;
+  --color-ui-button-neutral: #1d1d21;
+  --color-ui-button-neutral-hover: #26262b;
+  --color-ui-button-neutral-pressed: #313138;
+  --color-ui-button-transparent: rgba(20, 20, 23, 0);
+  --color-ui-button-transparent-hover: #1d1d21;
+  --color-ui-button-transparent-pressed: #26262b;
+  --color-ui-button-danger: #e11d48;
+  --color-ui-button-danger-hover: #be123c;
+  --color-ui-button-danger-pressed: #9f1239;
+
+  /* contrast — tooltips and inverted surfaces */
+  --color-ui-contrast-fg-primary: rgba(9, 9, 11, 0.88);
+  --color-ui-contrast-fg-secondary: rgba(9, 9, 11, 0.56);
+  --color-ui-contrast-bg-base: #fafafa;
+
+  /* tags — coloured badges become low-alpha tints so they do not glow */
+  --color-ui-tag-neutral-bg: #1d1d21;
+  --color-ui-tag-neutral-text: #d4d4d8;
+  --color-ui-tag-neutral-border: #2f2f35;
+  --color-ui-tag-neutral-icon: #a1a1aa;
+  --color-ui-tag-green-bg: rgba(16, 185, 129, 0.14);
+  --color-ui-tag-green-text: #6ee7b7;
+  --color-ui-tag-green-border: rgba(16, 185, 129, 0.28);
+  --color-ui-tag-green-icon: #34d399;
+  --color-ui-tag-red-bg: rgba(244, 63, 94, 0.14);
+  --color-ui-tag-red-text: #fda4af;
+  --color-ui-tag-red-border: rgba(244, 63, 94, 0.28);
+  --color-ui-tag-red-icon: #fb7185;
+  --color-ui-tag-blue-bg: rgba(59, 130, 246, 0.16);
+  --color-ui-tag-blue-text: #93c5fd;
+  --color-ui-tag-blue-border: rgba(59, 130, 246, 0.3);
+  --color-ui-tag-blue-icon: #60a5fa;
+  --color-ui-tag-orange-bg: rgba(249, 115, 22, 0.16);
+  --color-ui-tag-orange-text: #fdba74;
+  --color-ui-tag-orange-border: rgba(249, 115, 22, 0.3);
+  --color-ui-tag-orange-icon: #fb923c;
+  --color-ui-tag-purple-bg: rgba(167, 139, 250, 0.16);
+  --color-ui-tag-purple-text: #c4b5fd;
+  --color-ui-tag-purple-border: rgba(167, 139, 250, 0.3);
+  --color-ui-tag-purple-icon: #a78bfa;
+
+  /* neutral defaults for the floating sidebar pill; an organization that
+     brands it overrides these inline through getBrandStyle() */
+  --sidebar-active-bg: #27272a;
+  --sidebar-active-border: #3f3f46;
+  --sidebar-active-fg: #fafafa;
+}
+
+/* A card is defined by its hairline, so the small elevation utilities stop
+   drawing a second ring — that ring used to sit on top of an explicit border
+   and turn every card into a 2px outlined box. They keep a soft shadow, which
+   only reads on the floating surfaces where it matters. Large elevations keep
+   the 1px ring because a modal needs a hard edge against whatever it covers. */
+.dark .shadow-sm,
+.dark .shadow,
+.dark .shadow-md {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.6);
+}
+
+.dark .shadow-lg,
+.dark .shadow-xl,
+.dark .shadow-2xl,
+.dark .shadow-elevation-card-rest,
+.dark .shadow-elevation-card-hover,
+.dark .shadow-elevation-flyout,
+.dark .shadow-elevation-modal,
+.dark .shadow-elevation-tooltip,
+.dark .shadow-buttons-neutral {
+  box-shadow:
+    0 12px 32px -8px rgba(0, 0, 0, 0.7),
+    0 0 0 1px var(--color-ui-border-base);
+}
+
+/* Fields and secondary buttons keep their 1px resting ring, without the
+   drop shadow that would be invisible anyway. */
+.dark .shadow-borders-base {
+  box-shadow: 0 0 0 1px var(--color-ui-border-base);
+}
+
+/* Focus stays neutral: a surface-coloured gap plus a light ring. */
+.dark .shadow-borders-focus {
+  box-shadow:
+    0 0 0 1px #141417,
+    0 0 0 3px rgba(161, 161, 170, 0.5);
+}
+
+.dark .shadow-borders-interactive-with-active {
+  box-shadow:
+    0 0 0 4px rgba(161, 161, 170, 0.2),
+    0 0 0 1px rgba(161, 161, 170, 0.9);
+}
+
+/* Switch: the white inner bevels read as a glow on dark, so the handle keeps
+   a plain drop shadow and the track loses its inset highlight. */
+.dark .shadow-details-switch-background {
+  box-shadow: 0 0 0 1px var(--color-ui-border-base);
+}
+
+.dark .shadow-details-switch-handle {
+  box-shadow:
+    0 1px 2px 0 rgba(0, 0, 0, 0.5),
+    0 0 0 0.5px rgba(0, 0, 0, 0.4);
 }
 
 /* Medusa UI effect utilities — ui-preset theme/tokens/effects.ts (light mode).
@@ -573,12 +767,8 @@
     box-sizing: border-box;
   }
 
-  @media (prefers-color-scheme: dark) {
-    body {
-      color: black;
-      background: #fbfbfb;
-    }
-  }
+  /* Dark mode is a deliberate choice (`.dark` on <html>), never the OS
+     preference on its own — the shell resolves `system` explicitly. */
 
   /* Basic editor styles */
   .ProseMirror {
@@ -718,25 +908,27 @@
     --z-max: 9999;
   }
   .dark {
-    --background: 0 0% 7%;
-    --foreground: 0 0% 100%;
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 100%;
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 100%;
+    /* shadcn tokens harmonised to the same zinc ladder as the Medusa tokens
+       above, so a shadcn popover and a Medusa card never sit on two greys. */
+    --background: 240 10% 4%;
+    --foreground: 240 5% 96%;
+    --card: 240 6% 8%;
+    --card-foreground: 240 5% 96%;
+    --popover: 240 6% 8%;
+    --popover-foreground: 240 5% 96%;
     --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 220 9% 63%;
-    --accent: 0 0% 15%;
-    --accent-foreground: 0 0% 100%;
+    --primary-foreground: 240 6% 6%;
+    --secondary: 240 6% 5%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 6% 5%;
+    --muted-foreground: 240 5% 55%;
+    --accent: 240 6% 12%;
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 16.5%;
-    --input: 0 0% 16.5%;
-    --ring: 0 0% 83%;
+    --border: 240 5% 20%;
+    --input: 240 5% 20%;
+    --ring: 240 5% 65%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;

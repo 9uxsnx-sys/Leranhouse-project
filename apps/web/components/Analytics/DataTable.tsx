@@ -131,7 +131,7 @@ export function DataTable<T extends Record<string, any>>({
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="border-b border-gray-100">
+            <tr className="border-b border-gray-100 dark:border-dk-line">
               {selectionEnabled && (
                 <th className="w-[40px] pb-2.5 ps-6 pe-0 text-start align-middle">
                   <span className="flex items-center justify-center w-4 h-4">
@@ -151,10 +151,10 @@ export function DataTable<T extends Record<string, any>>({
                     style={{ width: col.width }}
                     onClick={canSort ? () => toggleSort(col) : undefined}
                     className={cn(
-                      'px-6 pb-2.5 text-[13px] font-semibold tracking-wide uppercase text-gray-500 whitespace-nowrap align-middle',
+                      'px-6 pb-2.5 text-[13px] font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-3 whitespace-nowrap align-middle',
                       selectionEnabled && col === columns[0] && 'ps-4',
                       alignClass(col.align),
-                      canSort && 'cursor-pointer select-none transition-colors hover:text-gray-700'
+                      canSort && 'cursor-pointer select-none transition-colors hover:text-gray-700 dark:hover:text-dk-fg-1'
                     )}
                   >
                     <span className={cn('inline-flex items-center gap-1.5', col.align === 'right' && 'flex-row-reverse')}>
@@ -162,7 +162,7 @@ export function DataTable<T extends Record<string, any>>({
                       {canSort && (
                         <ArrowUpDown
                           size={12}
-                          className={cn(sortKey === col.key ? 'text-gray-600' : 'text-gray-300')}
+                          className={cn(sortKey === col.key ? 'text-gray-600 dark:text-dk-fg-2' : 'text-gray-300 dark:text-zinc-600')}
                         />
                       )}
                     </span>
@@ -171,7 +171,7 @@ export function DataTable<T extends Record<string, any>>({
               })}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-gray-100 dark:divide-dk-line">
             {sorted.map((row, i) => {
               const selected = selectionEnabled && selectedIds!.has(rowId(row))
               return (
@@ -179,9 +179,9 @@ export function DataTable<T extends Record<string, any>>({
                   key={i}
                   onClick={onRowClick || selectionEnabled ? () => handleRowClick(row) : undefined}
                   className={cn(
-                    'transition-colors hover:bg-gray-50/70',
+                    'transition-colors hover:bg-gray-50/70 dark:hover:bg-dk-raised/60',
                     (onRowClick || selectionEnabled) && 'cursor-pointer',
-                    selected && 'bg-gray-50',
+                    selected && 'bg-gray-50 dark:bg-dk-raised/60',
                     rowClassName?.(row)
                   )}
                 >
@@ -203,7 +203,7 @@ export function DataTable<T extends Record<string, any>>({
                     <td
                       key={col.key}
                       className={cn(
-                        'px-6 py-3.5 align-middle text-sm text-gray-700',
+                        'px-6 py-3.5 align-middle text-sm text-gray-700 dark:text-dk-fg-1',
                         selectionEnabled && col === columns[0] && 'ps-4',
                         alignClass(col.align)
                       )}
@@ -217,7 +217,7 @@ export function DataTable<T extends Record<string, any>>({
           </tbody>
         </table>
       </div>
-      {footer && <div className="border-t border-gray-100 px-6 py-3">{footer}</div>}
+      {footer && <div className="border-t border-gray-100 dark:border-dk-line px-6 py-3">{footer}</div>}
     </div>
   )
 }
@@ -242,11 +242,11 @@ function Checkbox({
         disabled={disabled}
         className="sr-only peer"
       />
-      <div className="w-full h-full rounded border border-gray-300 bg-white peer-checked:bg-gray-600 peer-checked:border-gray-600 flex items-center justify-center transition-colors peer-disabled:opacity-40">
+      <div className="w-full h-full rounded border border-gray-300 dark:border-dk-line-strong bg-white dark:bg-dk-card peer-checked:bg-gray-600 dark:peer-checked:bg-dk-fg-2 peer-checked:border-gray-600 dark:peer-checked:border-dk-fg-2 flex items-center justify-center transition-colors peer-disabled:opacity-40">
         {!checked && indeterminate ? (
-          <span className="w-2 h-[2px] rounded bg-gray-500" />
+          <span className="w-2 h-[2px] rounded bg-gray-500 dark:bg-dk-fg-1" />
         ) : (
-          <Check size={12} className="text-white hidden peer-checked:block" strokeWidth={3} />
+          <Check size={12} className="text-white dark:text-zinc-900 hidden peer-checked:block" strokeWidth={3} />
         )}
       </div>
     </label>

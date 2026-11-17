@@ -103,13 +103,13 @@ export function DiscussionDetail({
   }
 
   return (
-    <div className="bg-white nice-shadow rounded-lg overflow-hidden">
+    <div className="bg-white dark:bg-dk-card nice-shadow rounded-lg overflow-hidden">
       {/* Header */}
       <div className="p-6 pb-0">
         {/* Title Row */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-bold text-gray-900 break-words flex items-start gap-3">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-dk-fg-1 break-words flex items-start gap-3">
               {discussion.emoji && (
                 <span className="text-3xl flex-shrink-0">{discussion.emoji}</span>
               )}
@@ -120,7 +120,7 @@ export function DiscussionDetail({
           {isAuthor && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button aria-label="Discussion detail" className="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                <button aria-label="Discussion detail" className="flex-shrink-0 p-2 text-gray-400 dark:text-dk-fg-3 hover:text-gray-600 dark:hover:text-dk-fg-1 hover:bg-gray-100 dark:hover:bg-dk-raised rounded-lg transition-colors">
                   <MoreVertical size={18} />
                 </button>
               </DropdownMenuTrigger>
@@ -162,8 +162,8 @@ export function DiscussionDetail({
             shadow="shadow-none"
           />
           <div>
-            <div className="text-sm font-medium text-gray-900">{authorName}</div>
-            <div className="text-xs text-gray-500">{timeAgo}</div>
+            <div className="text-sm font-medium text-gray-900 dark:text-dk-fg-1">{authorName}</div>
+            <div className="text-xs text-gray-500 dark:text-dk-fg-3">{timeAgo}</div>
           </div>
         </div>
       </div>
@@ -175,12 +175,12 @@ export function DiscussionDetail({
             <DiscussionContent content={parseDiscussionContent(discussion.content)} />
           </div>
         ) : (
-          <p className="text-gray-500 italic">{t('communities.discussion_detail.no_details')}</p>
+          <p className="text-gray-500 dark:text-dk-fg-3 italic">{t('communities.discussion_detail.no_details')}</p>
         )}
       </div>
 
       {/* Comments Section */}
-      <div className="border-t border-gray-100">
+      <div className="border-t border-gray-100 dark:border-dk-line">
         <CommentSection
           discussionUuid={discussion.discussion_uuid}
           communityUuid={communityUuid}

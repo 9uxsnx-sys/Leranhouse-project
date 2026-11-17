@@ -67,19 +67,19 @@ export default function PlaygroundPreview({
   }, [html, isStreaming, writeToIframe])
 
   return (
-    <div className="flex-1 relative bg-gray-50/50">
+    <div className="flex-1 relative bg-gray-50/50 dark:bg-dk-inset/40">
       {/* Empty state */}
       {!html && !isStreaming && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center text-gray-400">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white nice-shadow flex items-center justify-center">
-              <svg className="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="text-center text-gray-400 dark:text-zinc-400">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white dark:bg-dk-card nice-shadow flex items-center justify-center">
+              <svg className="w-8 h-8 text-gray-300 dark:text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                   d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
-            <p className="text-sm font-semibold text-gray-500">Live Preview</p>
-            <p className="text-xs text-gray-400 mt-1">Your generated content will appear here</p>
+            <p className="text-sm font-semibold text-gray-500 dark:text-zinc-400">Live Preview</p>
+            <p className="text-xs text-gray-400 dark:text-zinc-400 mt-1">Your generated content will appear here</p>
           </div>
         </div>
       )}

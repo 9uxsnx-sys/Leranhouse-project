@@ -10,13 +10,13 @@ import { useChartTheme, formatNumber } from './chartTheme'
 export function ChartTooltip({ active, payload, label, formatter }: any) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-lg border border-gray-100 bg-white px-3 py-2 shadow-md">
-      {label != null && <p className="text-[11px] font-medium text-gray-400 mb-1">{label}</p>}
+    <div className="rounded-lg border border-gray-100 dark:border-dk-line bg-white dark:bg-dk-raised px-3 py-2 shadow-md">
+      {label != null && <p className="text-[11px] font-medium text-gray-400 dark:text-dk-fg-3 mb-1">{label}</p>}
       {payload.map((p: any, i: number) => (
         <div key={i} className="flex items-center gap-2 text-[12px]">
           <span className="w-2 h-2 rounded-full shrink-0" style={{ background: p.color || p.fill }} />
-          <span className="text-gray-500">{p.name}</span>
-          <span className="ms-auto ps-3 font-semibold text-gray-900 tabular-nums">
+          <span className="text-gray-500 dark:text-dk-fg-3">{p.name}</span>
+          <span className="ms-auto ps-3 font-semibold text-gray-900 dark:text-dk-fg-1 tabular-nums">
             {formatter ? formatter(p.value) : formatNumber(p.value)}
           </span>
         </div>

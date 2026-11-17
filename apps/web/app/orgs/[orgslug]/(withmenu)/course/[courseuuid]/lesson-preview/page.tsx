@@ -54,7 +54,7 @@ const ScormActivity = lazy(() => import('../../../../../../../ee/components/Acti
 const LoadingFallback = () => (
   <div className="flex items-center justify-center h-64">
     <div className="relative w-6 h-6">
-      <div className="absolute top-0 start-0 w-full h-full border-2 border-gray-100 rounded-full"></div>
+      <div className="absolute top-0 start-0 w-full h-full border-2 border-gray-100 dark:border-dk-line rounded-full"></div>
       <div className="absolute top-0 start-0 w-full h-full border-2 border-gray-400 rounded-full animate-spin border-t-transparent"></div>
     </div>
   </div>
@@ -176,7 +176,7 @@ function CourseOutlineSidebar({ currentActivityId, chapters, completedIds, onNav
   }
 
   return (
-    <div className="rounded-xl bg-white border border-gray-100 shadow-sm overflow-hidden">
+    <div className="rounded-xl bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line shadow-sm overflow-hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between px-5 py-4 text-start transition-colors hover:bg-black/[0.02]"
@@ -228,8 +228,8 @@ function CourseOutlineSidebar({ currentActivityId, chapters, completedIds, onNav
                         className="flex items-center gap-2.5 px-2 py-1.5 rounded text-sm cursor-pointer hover:bg-ui-bg-subtle"
                       >
                         {isCurrent ? (
-                          <div className="w-3.5 h-3.5 rounded-full bg-black flex items-center justify-center shrink-0">
-                            <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                          <div className="w-3.5 h-3.5 rounded-full bg-black dark:bg-zinc-100 flex items-center justify-center shrink-0">
+                            <div className="w-1.5 h-1.5 rounded-full bg-white dark:bg-dk-card" />
                           </div>
                         ) : isDone ? (
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
@@ -318,7 +318,7 @@ function KnowledgeCheckCard({ question, answer }: { question: string; answer: st
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="rounded-xl bg-white border border-gray-100 shadow-sm overflow-hidden">
+    <div className="rounded-xl bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line shadow-sm overflow-hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between px-5 py-3 text-start transition-colors"
@@ -374,7 +374,7 @@ class ActivityErrorBoundary extends Component<
   render() {
     if (this.state.hasError) {
       return (
-        <div className="aspect-video bg-white rounded-xl flex items-center justify-center border border-gray-100 shadow-sm">
+        <div className="aspect-video bg-white dark:bg-dk-card rounded-xl flex items-center justify-center border border-gray-100 dark:border-dk-line shadow-sm">
           <div className="text-center">
             <Play className="w-12 h-12 text-ui-fg-muted mx-auto mb-2" />
             <Text size="small" className="text-ui-fg-muted">{this.props.t('lesson.preview.unsupported_activity')}</Text>
@@ -440,7 +440,7 @@ function renderActivityContent(activity: any, courseuuid: string, t: (key: strin
       return <ScormActivity course={{ course_uuid: courseuuid }} activity={activity} />
     default:
       return (
-        <div className="aspect-video bg-white rounded-xl flex items-center justify-center border border-gray-100 shadow-sm">
+        <div className="aspect-video bg-white dark:bg-dk-card rounded-xl flex items-center justify-center border border-gray-100 dark:border-dk-line shadow-sm">
           <div className="text-center">
             <Play className="w-12 h-12 text-ui-fg-muted mx-auto mb-2" />
             <Text size="small" className="text-ui-fg-muted">{t('lesson.preview.unsupported_activity')}</Text>
@@ -766,7 +766,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
             {/* What You'll Learn */}
             {objectives.length > 0 && (
               <section id="what-youll-learn" className="scroll-mt-24">
-                <div className="rounded-xl bg-white border border-gray-100 shadow-sm px-5 py-5">
+                <div className="rounded-xl bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line shadow-sm px-5 py-5">
                   <div className="flex flex-col gap-0.5">
                     <Heading level="h2">{t('lesson.preview.what_youll_learn')}</Heading>
                     <Text size="base" className="text-ui-fg-muted">{t('lesson.preview.what_youll_learn_lead')}</Text>
@@ -795,10 +795,10 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
                        learner reads is authored in the dashboard lesson form
                        (objectives, takeaways, resources, knowledge checks).
                        The video slot is kept as the lesson's anchor. */
-                    <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-gray-100 ring-1 ring-inset ring-black/5">
+                    <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-gray-100 ring-1 ring-inset ring-black/5 dark:ring-white/10">
                       <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-white to-indigo-500/10" />
                       <div className="relative w-full h-full flex flex-col items-center justify-center gap-3">
-                        <div className="w-16 h-16 rounded-full bg-white/80 ring-1 ring-black/5 shadow-sm flex items-center justify-center">
+                        <div className="w-16 h-16 rounded-full bg-white/80 ring-1 ring-black/5 dark:ring-white/10 shadow-sm flex items-center justify-center">
                           <Play className="w-6 h-6 text-ui-fg-base ms-0.5" fill="currentColor" />
                         </div>
                         <Text size="small" className="text-ui-fg-muted">
@@ -813,7 +813,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
               ) : currentActivity ? (
                 <LoadingFallback />
               ) : (
-                <div className="aspect-video bg-white rounded-xl flex items-center justify-center border border-gray-100 shadow-sm">
+                <div className="aspect-video bg-white dark:bg-dk-card rounded-xl flex items-center justify-center border border-gray-100 dark:border-dk-line shadow-sm">
                   <div className="text-center">
                     <Play className="w-12 h-12 text-ui-fg-muted mx-auto mb-2" />
                     <Text size="small" className="text-ui-fg-muted">{t('lesson.preview.no_activity_content')}</Text>
@@ -828,7 +828,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
                 <Heading level="h1" className="!text-2xl mb-5">
                   {t('lesson.preview.key_takeaways')}
                 </Heading>
-                <div className="rounded-xl bg-white border border-gray-100 shadow-sm px-5 py-5">
+                <div className="rounded-xl bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line shadow-sm px-5 py-5">
                   <ul className="space-y-4">
                     {takeaways.map((takeaway: { title: string; items: string[] }, idx: number) => (
                       <li key={idx}>
@@ -856,7 +856,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
             {resources.length > 0 && (
               <section id="resources" className="scroll-mt-24">
                 <Heading level="h1" className="!text-2xl mb-5">{t('lesson.preview.resources')}</Heading>
-                <div className="rounded-xl bg-white border border-gray-100 shadow-sm px-5 py-5">
+                <div className="rounded-xl bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line shadow-sm px-5 py-5">
                   <div className="flex flex-col gap-0.5">
                     <Heading level="h2">{t('lesson.preview.whats_included')}</Heading>
                     <Text size="base" className="text-ui-fg-muted">{t('lesson.preview.resources_lead')}</Text>
@@ -898,7 +898,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
               <Heading level="h1" className="!text-2xl mb-5">{t('lesson.preview.up_next')}</Heading>
               {nextActivity ? (
                 <div
-                  className="bg-white border border-gray-100 rounded-xl shadow-sm p-5 cursor-pointer hover:bg-gray-50/60 transition-colors"
+                  className="bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line rounded-xl shadow-sm p-5 cursor-pointer hover:bg-gray-50/60 transition-colors"
                   onClick={() => navigateTo(nextActivity)}
                 >
                   <div className="flex items-start gap-3">
@@ -914,7 +914,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
                   </div>
                 </div>
               ) : (
-                <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-5">
+                <div className="bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line rounded-xl shadow-sm p-5">
                   <div className="flex items-start gap-3">
                     <BookOpen className="w-5 h-5 text-ui-fg-muted mt-0.5 shrink-0" />
                     <div>
@@ -931,7 +931,7 @@ function LessonPreviewContent({ courseuuid, activityid, orgslug }: { courseuuid:
             </section>
 
             {/* Footer: manual completion via the center button. */}
-            <div className="flex items-center justify-between pt-4 border-t border-gray-200 scroll-mt-24">
+            <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-dk-line-strong scroll-mt-24">
               <Button
                 variant="ghost"
                 size="small"

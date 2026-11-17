@@ -427,7 +427,7 @@ function ScormActivity({ activity, course }: ScormActivityProps) {
 
   if (error) {
     return (
-      <div className="w-full flex items-center justify-center bg-neutral-50 dark:bg-neutral-900" style={{ height: 'calc(100vh - 140px)', minHeight: '500px' }}>
+      <div className="w-full flex items-center justify-center bg-neutral-50 dark:bg-dk-inset" style={{ height: 'calc(100vh - 140px)', minHeight: '500px' }}>
         <div className="text-center space-y-5 p-8">
           <div className="w-14 h-14 mx-auto rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
             <AlertCircle size={28} className="text-red-500" />
@@ -477,7 +477,7 @@ function ScormActivity({ activity, course }: ScormActivityProps) {
         <div className="absolute inset-0 flex items-center justify-center bg-white dark:bg-neutral-950 z-10">
           <div className="text-center space-y-4">
             <div className="relative w-10 h-10 mx-auto">
-              <div className="absolute inset-0 rounded-full border-2 border-neutral-200 dark:border-neutral-800"></div>
+              <div className="absolute inset-0 rounded-full border-2 border-neutral-200 dark:border-dk-line"></div>
               <div className="absolute inset-0 rounded-full border-2 border-neutral-800 dark:border-white border-t-transparent animate-spin"></div>
             </div>
             <p className="text-sm text-neutral-500 dark:text-neutral-400">Loading content...</p>
@@ -487,10 +487,10 @@ function ScormActivity({ activity, course }: ScormActivityProps) {
 
       {/* Initializing state */}
       {!apiInjected && !error && (
-        <div className="flex items-center justify-center bg-neutral-50 dark:bg-neutral-900" style={{ height: 'calc(100vh - 140px)', minHeight: '500px' }}>
+        <div className="flex items-center justify-center bg-neutral-50 dark:bg-dk-inset" style={{ height: 'calc(100vh - 140px)', minHeight: '500px' }}>
           <div className="text-center space-y-4">
             <div className="relative w-10 h-10 mx-auto">
-              <div className="absolute inset-0 rounded-full border-2 border-neutral-200 dark:border-neutral-800"></div>
+              <div className="absolute inset-0 rounded-full border-2 border-neutral-200 dark:border-dk-line"></div>
               <div className="absolute inset-0 rounded-full border-2 border-neutral-800 dark:border-white border-t-transparent animate-spin"></div>
             </div>
             <div className="space-y-1">

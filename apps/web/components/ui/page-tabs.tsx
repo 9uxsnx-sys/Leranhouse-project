@@ -62,8 +62,8 @@ function PageTabs({
       role="tablist"
       className={cn(
         isPill
-          ? 'bg-gray-50/80 rounded-xl p-1 flex items-center w-full overflow-x-auto'
-          : 'flex items-center gap-1 border-b border-gray-200 w-fit',
+          ? 'bg-gray-50/80 dark:bg-dk-card rounded-xl p-1 flex items-center w-full overflow-x-auto'
+          : 'flex items-center gap-1 border-b border-gray-200 dark:border-dk-line-strong w-fit',
         className
       )}
     >
@@ -76,7 +76,7 @@ function PageTabs({
             {isActive && isPill && (
               <motion.div
                 layoutId={indicatorId}
-                className="absolute inset-0 bg-white rounded-lg shadow-sm border border-neutral-200/80"
+                className="absolute inset-0 bg-white dark:bg-dk-raised rounded-lg shadow-sm border border-neutral-200/80 dark:border-dk-line-strong"
                 transition={{ type: 'spring', stiffness: 380, damping: 30 }}
               />
             )}
@@ -96,8 +96,8 @@ function PageTabs({
               ? 'text-ui-fg-base'
               : 'text-ui-fg-base border-brand'
             : isPill
-              ? 'text-gray-500 hover:text-gray-700'
-              : 'text-gray-500 border-transparent hover:text-gray-700',
+              ? 'text-gray-500 dark:text-dk-fg-3 hover:text-gray-700 dark:hover:text-dk-fg-1'
+              : 'text-gray-500 dark:text-dk-fg-3 border-transparent hover:text-gray-700 dark:hover:text-dk-fg-1',
           tab.disabled && 'opacity-50 cursor-not-allowed',
           // A tooltip needs hover, so keep pointer events alive when one is set.
           tab.disabled && !tab.tooltip && 'pointer-events-none'

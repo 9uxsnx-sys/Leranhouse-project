@@ -123,21 +123,21 @@ export default function PaymentsTransactionsPage() {
       header: t('dashboard.payments.transactions.learner'),
       render: (row) => (
         <div className="min-w-0">
-          <p className="text-sm font-medium text-gray-900 truncate">{row.user.name}</p>
-          <p className="text-[11px] text-gray-400 truncate">{row.user.email}</p>
+          <p className="text-sm font-medium text-gray-900 dark:text-zinc-100 truncate">{row.user.name}</p>
+          <p className="text-[11px] text-gray-400 dark:text-zinc-400 truncate">{row.user.email}</p>
         </div>
       ),
     },
     {
       key: 'resource',
       header: t('dashboard.payments.transactions.resource', 'Resource'),
-      render: (row) => <span className="text-gray-700 truncate">{row.resource}</span>,
+      render: (row) => <span className="text-gray-700 dark:text-zinc-200 truncate">{row.resource}</span>,
     },
     {
       key: 'method',
       header: t('dashboard.payments.transactions.method'),
       width: '120px',
-      render: (row) => <span className="text-gray-600">{row.method}</span>,
+      render: (row) => <span className="text-gray-600 dark:text-zinc-300">{row.method}</span>,
     },
     {
       key: 'amount',
@@ -145,9 +145,9 @@ export default function PaymentsTransactionsPage() {
       align: 'right',
       width: '140px',
       render: (row) => (
-        <span className="tabular-nums text-gray-900">
+        <span className="tabular-nums text-gray-900 dark:text-zinc-100">
           {row.amount.toLocaleString(locale)}{' '}
-          <span className="text-gray-400">{row.currency}</span>
+          <span className="text-gray-400 dark:text-zinc-400">{row.currency}</span>
         </span>
       ),
     },
@@ -163,7 +163,7 @@ export default function PaymentsTransactionsPage() {
       align: 'right',
       width: '140px',
       render: (row) => (
-        <span className="text-[13px] text-gray-400 whitespace-nowrap">
+        <span className="text-[13px] text-gray-400 dark:text-zinc-400 whitespace-nowrap">
           {row.date ? formatDate(row.date, locale) : '—'}
         </span>
       ),
@@ -203,7 +203,7 @@ export default function PaymentsTransactionsPage() {
       ) : (
         <SectionCard bleed>
           {isLoading && !data ? (
-            <div className="flex items-center justify-center gap-2 py-16 text-sm text-gray-500">
+            <div className="flex items-center justify-center gap-2 py-16 text-sm text-gray-500 dark:text-zinc-400">
               <Loader2 size={16} className="animate-spin" />
               {t('common.loading')}
             </div>

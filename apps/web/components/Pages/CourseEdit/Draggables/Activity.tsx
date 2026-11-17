@@ -65,18 +65,18 @@ function Activity(props: any) {
     >
       {(provided) => (
         <div
-          className="flex flex-row py-2 my-2 rounded-md bg-gray-50 text-gray-500 hover:bg-gray-100 hover:scale-102 hover:shadow-sm space-x-1 w-auto items-center ring-1 ring-inset ring-gray-400/10 shadow-xs transition-all delay-100 duration-75 ease-linear"
+          className="flex flex-row py-2 my-2 rounded-md bg-gray-50 dark:bg-dk-inset/40 text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-dk-raised hover:scale-102 hover:shadow-sm space-x-1 w-auto items-center ring-1 ring-inset ring-gray-400/10 shadow-xs transition-all delay-100 duration-75 ease-linear"
           key={props.activity.id}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           ref={provided.innerRef}
         >
-          <div className="px-3 text-gray-300 space-x-1 w-28">
+          <div className="px-3 text-gray-300 dark:text-zinc-600 space-x-1 w-28">
             {props.activity.type === 'video' && (
               <>
                 <div className="flex space-x-2 items-center">
                   <Video size={16} />{' '}
-                  <div className="text-xs bg-gray-200 text-gray-400 font-bold px-2 py-1 rounded-full mx-auto justify-center align-middle">
+                  <div className="text-xs bg-gray-200 dark:bg-dk-track text-gray-400 dark:text-zinc-400 font-bold px-2 py-1 rounded-full mx-auto justify-center align-middle">
                     Video
                   </div>{' '}
                 </div>
@@ -88,7 +88,7 @@ function Activity(props: any) {
                   <div className="w-[30px]">
                     <File size={16} />{' '}
                   </div>
-                  <div className="text-xs bg-gray-200 text-gray-400 font-bold px-2 py-1 rounded-full">
+                  <div className="text-xs bg-gray-200 dark:bg-dk-track text-gray-400 dark:text-zinc-400 font-bold px-2 py-1 rounded-full">
                     Document
                   </div>{' '}
                 </div>
@@ -98,7 +98,7 @@ function Activity(props: any) {
               <>
                 <div className="flex space-x-2 items-center">
                   <Sparkles size={16} />{' '}
-                  <div className="text-xs bg-gray-200 text-gray-400 font-bold px-2 py-1 rounded-full">
+                  <div className="text-xs bg-gray-200 dark:bg-dk-track text-gray-400 dark:text-zinc-400 font-bold px-2 py-1 rounded-full">
                     Dynamic
                   </div>{' '}
                 </div>
@@ -108,10 +108,10 @@ function Activity(props: any) {
 
           <div className="grow items-center space-x-2 flex mx-auto justify-center">
             {selectedActivity === props.activity.id ? (
-              <div className="chapter-modification-zone text-[7px] text-gray-600 shadow-inner bg-gray-200/60 py-1 px-4 rounded-lg space-x-3">
+              <div className="chapter-modification-zone text-[7px] text-gray-600 dark:text-zinc-300 shadow-inner bg-gray-200/60 py-1 px-4 rounded-lg space-x-3">
                 <input
                   type="text"
-                  className="bg-transparent outline-hidden text-xs text-gray-500"
+                  className="bg-transparent outline-hidden text-xs text-gray-500 dark:text-zinc-400"
                   placeholder="Activity name"
                   value={
                     modifiedActivity
@@ -170,14 +170,14 @@ function Activity(props: any) {
                 `/course/${props.courseid
                 }/activity/${props.activity.uuid.replace('activity_', '')}`
               }
-              className=" hover:cursor-pointer p-1 px-3 bg-gray-200 rounded-md"
+              className=" hover:cursor-pointer p-1 px-3 bg-gray-200 dark:bg-dk-track rounded-md"
               rel="noopener noreferrer"
             >
-              <Eye strokeWidth={2} size={15} className="text-gray-600" />
+              <Eye strokeWidth={2} size={15} className="text-gray-600 dark:text-zinc-300" />
             </Link>
           </div>
           <div className="flex flex-row pe-3 space-x-1 items-center">
-            <MoreVertical size={15} className="text-gray-300" />
+            <MoreVertical size={15} className="text-gray-300 dark:text-zinc-600" />
             <ConfirmationModal
               confirmationMessage="Are you sure you want to delete this activity ?"
               confirmationButtonText="Delete Activity"

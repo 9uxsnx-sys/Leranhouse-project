@@ -134,14 +134,14 @@ function ActivityShareDropdown({
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-haspopup="true"
-        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white nice-shadow text-neutral-600 hover:text-neutral-800 transition-colors text-sm font-medium"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-dk-card nice-shadow text-neutral-600 dark:text-dk-fg-2 hover:text-neutral-800 dark:hover:text-dk-fg-1 transition-colors text-sm font-medium"
       >
         <Share2 size={14} />
         <span>{t('activities.share')}</span>
       </button>
 
       {isOpen && (
-        <div className="absolute end-0 top-10 z-50 bg-white rounded-lg nice-shadow py-1 min-w-[180px]">
+        <div className="absolute end-0 top-10 z-50 bg-white dark:bg-dk-card rounded-lg nice-shadow py-1 min-w-[180px]">
           {shareLinks.map((link) => {
             const Icon = link.icon
             return (
@@ -151,7 +151,7 @@ function ActivityShareDropdown({
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-600 transition-all duration-200 ${link.color}`}
+                className={`flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-600 dark:text-dk-fg-2 transition-all duration-200 ${link.color}`}
               >
                 <Icon size={16} />
                 <span>{link.name}</span>
@@ -159,14 +159,14 @@ function ActivityShareDropdown({
             )
           })}
 
-          <div className="border-t border-gray-100 my-1" />
+          <div className="border-t border-gray-100 dark:border-dk-line my-1" />
 
           <button
             onClick={copyToClipboard}
             className={`flex items-center gap-2.5 w-full px-3 py-2 text-sm transition-all duration-200 ${
               copied
                 ? 'bg-green-500 text-white'
-                : 'text-neutral-600 hover:bg-neutral-100'
+                : 'text-neutral-600 dark:text-dk-fg-2 hover:bg-neutral-100 dark:hover:bg-dk-raised'
             }`}
           >
             {copied ? <Check size={16} /> : <Link2 size={16} />}
@@ -179,7 +179,7 @@ function ActivityShareDropdown({
               className={`flex items-center gap-2.5 w-full px-3 py-2 text-sm transition-all duration-200 ${
                 embedCopied
                   ? 'bg-green-500 text-white'
-                  : 'text-neutral-600 hover:bg-neutral-100'
+                  : 'text-neutral-600 dark:text-dk-fg-2 hover:bg-neutral-100 dark:hover:bg-dk-raised'
               }`}
             >
               {embedCopied ? <Check size={16} /> : <Code2 size={16} />}

@@ -17,7 +17,7 @@ const iconButtonVariants = cva(
         primary:
           "bg-brand text-brand-fg hover:bg-brand-hover active:bg-brand-pressed focus-visible:ring-2 focus-visible:ring-gray-900/20 focus-visible:ring-offset-2",
         transparent:
-          "text-gray-700 bg-transparent hover:bg-gray-100 active:bg-gray-200 focus-visible:bg-white focus-visible:ring-2 focus-visible:ring-gray-900/20",
+          "text-gray-700 dark:text-zinc-300 bg-transparent hover:bg-gray-100 dark:hover:bg-dk-raised active:bg-gray-200 dark:active:bg-zinc-700 focus-visible:bg-white dark:focus-visible:bg-zinc-900 focus-visible:ring-2 focus-visible:ring-gray-900/20 dark:focus-visible:ring-zinc-100/20",
       },
       size: {
         "2xsmall": "h-5 w-5",

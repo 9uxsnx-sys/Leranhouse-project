@@ -323,26 +323,26 @@ function EditCourseTranslations(props: Props) {
   const statusClass = (status: string) => {
     switch (status) {
       case 'source':
-        return 'bg-gray-100 text-gray-600'
+        return 'bg-gray-100 dark:bg-dk-inset text-gray-600 dark:text-zinc-300'
       case 'complete':
         return 'bg-teal-50 text-teal-700'
       case 'partial':
         return 'bg-amber-50 text-amber-700'
       default:
-        return 'bg-gray-50 text-gray-500'
+        return 'bg-gray-50 dark:bg-dk-inset text-gray-500 dark:text-zinc-400'
     }
   }
 
   return (
     <div className="space-y-3">
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-1">
+      <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-1">
           {t('dashboard.courses.translations.title')}
         </h3>
-        <p className="text-sm text-gray-500 mb-5">{t('dashboard.courses.translations.subtitle')}</p>
+        <p className="text-sm text-gray-500 dark:text-zinc-400 mb-5">{t('dashboard.courses.translations.subtitle')}</p>
 
         {isLoading ? (
-          <div className="flex items-center gap-2 text-sm text-gray-500">
+          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-zinc-400">
             <Loader2 size={16} className="animate-spin" />
             {t('dashboard.courses.settings.loading')}
           </div>
@@ -350,7 +350,7 @@ function EditCourseTranslations(props: Props) {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-start text-xs uppercase tracking-wide text-gray-400">
+                <tr className="text-start text-xs uppercase tracking-wide text-gray-400 dark:text-zinc-400">
                   <th className="text-start font-medium pb-3 pe-4">
                     {t('dashboard.courses.translations.columns.language')}
                   </th>
@@ -369,17 +369,17 @@ function EditCourseTranslations(props: Props) {
               </thead>
               <tbody>
                 {rows.map(({ language, row, isSource, status }) => (
-                  <tr key={language.code} className="border-t border-gray-100 align-middle">
+                  <tr key={language.code} className="border-t border-gray-100 dark:border-dk-line align-middle">
                     <td className="py-3 pe-4 whitespace-nowrap">
-                      <span className="font-medium text-gray-900">{language.nativeName}</span>
-                      <span className="text-gray-400 ms-2 uppercase text-xs">{language.code}</span>
+                      <span className="font-medium text-gray-900 dark:text-zinc-100">{language.nativeName}</span>
+                      <span className="text-gray-400 dark:text-zinc-400 ms-2 uppercase text-xs">{language.code}</span>
                     </td>
                     {CONTENT_FIELDS.map(field => (
                       <td key={field} className="py-3 pe-4">
                         {hasValue(row, field) ? (
                           <Check size={15} className="text-teal-600" />
                         ) : (
-                          <span className="text-gray-300">—</span>
+                          <span className="text-gray-300 dark:text-zinc-600">—</span>
                         )}
                       </td>
                     ))}
@@ -394,7 +394,7 @@ function EditCourseTranslations(props: Props) {
                           type="button"
                           onClick={() => handleExport(language.code, row)}
                           title={t('dashboard.courses.translations.actions.export')}
-                          className="p-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+                          className="p-1.5 rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors"
                         >
                           <Download size={14} />
                         </button>
@@ -403,7 +403,7 @@ function EditCourseTranslations(props: Props) {
                           onClick={() => fileInputs.current[language.code]?.click()}
                           disabled={busyLocale === language.code}
                           title={t('dashboard.courses.translations.actions.import')}
-                          className="p-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                          className="p-1.5 rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors disabled:opacity-50"
                         >
                           <Upload size={14} />
                         </button>
@@ -423,7 +423,7 @@ function EditCourseTranslations(props: Props) {
                             onClick={() => handleCopyFromSource(language.code)}
                             disabled={busyLocale === language.code}
                             title={t('dashboard.courses.translations.actions.copy_from_source')}
-                            className="p-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                            className="p-1.5 rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors disabled:opacity-50"
                           >
                             {busyLocale === language.code ? (
                               <Loader2 size={14} className="animate-spin" />
@@ -450,7 +450,7 @@ function EditCourseTranslations(props: Props) {
                               onClick={() => setConfirmDelete(language.code)}
                               onBlur={() => setConfirmDelete(current => (current === language.code ? null : current))}
                               title={t('dashboard.courses.translations.actions.delete')}
-                              className="p-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+                              className="p-1.5 rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors"
                             >
                               <Trash2 size={14} />
                             </button>

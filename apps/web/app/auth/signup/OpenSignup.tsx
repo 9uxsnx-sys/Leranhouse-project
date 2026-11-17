@@ -204,18 +204,18 @@ function OpenSignUpComponent() {
                 id="signup-terms"
                 checked={agreed}
                 onCheckedChange={(v) => setAgreed(v === true)}
-                className="mt-0.5 h-[18px] w-[18px] rounded-md border-gray-300 shadow-sm data-[state=checked]:bg-gray-900 data-[state=checked]:border-gray-900 data-[state=checked]:text-white focus-visible:ring-4 focus-visible:ring-gray-900/5"
+                className="mt-0.5 h-[18px] w-[18px] rounded-md border-gray-300 dark:border-dk-line-strong shadow-sm data-[state=checked]:bg-gray-900 data-[state=checked]:border-gray-900 data-[state=checked]:text-white focus-visible:ring-4 focus-visible:ring-gray-900/5"
               />
               <label
                 htmlFor="signup-terms"
-                className="text-[13px] leading-relaxed text-gray-500 cursor-pointer select-none"
+                className="text-[13px] leading-relaxed text-gray-500 dark:text-zinc-400 cursor-pointer select-none"
               >
                 {t('auth.agree_to')}{' '}
-                <Link href="#" className="text-gray-700 underline">
+                <Link href="#" className="text-gray-700 dark:text-zinc-200 underline">
                   {t('auth.terms')}
                 </Link>{' '}
                 {t('auth.and')}{' '}
-                <Link href="#" className="text-gray-700 underline">
+                <Link href="#" className="text-gray-700 dark:text-zinc-200 underline">
                   {t('auth.privacy')}
                 </Link>
               </label>
@@ -233,10 +233,10 @@ function OpenSignUpComponent() {
           {/* Divider */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-100" />
+              <div className="w-full border-t border-gray-100 dark:border-dk-line" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="px-3 bg-white text-gray-400">{t('common.or')}</span>
+              <span className="px-3 bg-white dark:bg-dk-card text-gray-400 dark:text-zinc-400">{t('common.or')}</span>
             </div>
           </div>
 
@@ -255,9 +255,9 @@ function OpenSignUpComponent() {
           </button>
 
           {/* Login link */}
-          <p className="text-center text-sm text-gray-500 mt-6">
+          <p className="text-center text-sm text-gray-500 dark:text-zinc-400 mt-6">
             {t('auth.already_have_account')}{' '}
-            <Link href="/login" className="font-semibold text-gray-900 hover:underline">
+            <Link href="/login" className="font-semibold text-gray-900 dark:text-zinc-100 hover:underline">
               {t('auth.sign_in')}
             </Link>
           </p>

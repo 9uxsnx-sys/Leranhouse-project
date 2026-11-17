@@ -6,10 +6,10 @@ import { ArrowLeft, Check, Clock, Loader2, X } from 'lucide-react'
 export type PaymentResultVariant = 'processing' | 'active' | 'pending' | 'failure'
 
 const VARIANTS = {
-  processing: { Icon: Loader2, iconClass: 'text-gray-400 animate-spin' },
-  active: { Icon: Check, iconClass: 'text-gray-900' },
-  pending: { Icon: Clock, iconClass: 'text-gray-700' },
-  failure: { Icon: X, iconClass: 'text-gray-900' },
+  processing: { Icon: Loader2, iconClass: 'text-gray-400 dark:text-dk-fg-3 animate-spin' },
+  active: { Icon: Check, iconClass: 'text-gray-900 dark:text-dk-fg-1' },
+  pending: { Icon: Clock, iconClass: 'text-gray-700 dark:text-dk-fg-1' },
+  failure: { Icon: X, iconClass: 'text-gray-900 dark:text-dk-fg-1' },
 } as const
 
 interface PaymentResultCardProps {
@@ -51,18 +51,18 @@ export default function PaymentResultCard({
         className={`mx-auto ${visual.iconClass}`}
       />
 
-      <h1 className="mt-7 text-2xl md:text-[28px] font-semibold tracking-tight text-gray-900">
+      <h1 className="mt-7 text-2xl md:text-[28px] font-semibold tracking-tight text-gray-900 dark:text-dk-fg-1">
         {title}
       </h1>
-      <p className="mt-3 text-sm text-gray-500 leading-relaxed">{description}</p>
+      <p className="mt-3 text-sm text-gray-500 dark:text-dk-fg-3 leading-relaxed">{description}</p>
 
       {(metaLabel || orderRef) && (
         <div className="mt-5 space-y-1">
           {metaLabel && (
-            <p className="text-sm font-medium text-gray-700">{metaLabel}</p>
+            <p className="text-sm font-medium text-gray-700 dark:text-dk-fg-1">{metaLabel}</p>
           )}
           {orderRef && (
-            <p className="text-xs font-mono text-gray-400 truncate">{orderRef}</p>
+            <p className="text-xs font-mono text-gray-400 dark:text-dk-fg-3 truncate">{orderRef}</p>
           )}
         </div>
       )}
@@ -71,7 +71,7 @@ export default function PaymentResultCard({
         <button
           type="button"
           onClick={onBack}
-          className="h-11 px-7 inline-flex items-center justify-center gap-2 rounded-lg bg-gray-900 text-sm font-semibold text-white shadow-sm hover:bg-black transition-colors cursor-pointer"
+          className="h-11 px-7 inline-flex items-center justify-center gap-2 rounded-lg bg-gray-900 dark:bg-zinc-100 text-sm font-semibold text-white dark:text-zinc-900 shadow-sm hover:bg-black dark:hover:bg-zinc-200 transition-colors cursor-pointer"
         >
           <ArrowLeft size={15} />
           {backLabel}
@@ -81,7 +81,7 @@ export default function PaymentResultCard({
           <button
             type="button"
             onClick={onSecondary}
-            className="text-sm font-semibold text-gray-900 hover:underline cursor-pointer"
+            className="text-sm font-semibold text-gray-900 dark:text-dk-fg-1 hover:underline cursor-pointer"
           >
             {secondaryLabel}
           </button>

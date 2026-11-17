@@ -52,8 +52,8 @@ const EmbedActivity = lazy(() => import('@components/Objects/Activities/Embed/Em
 const LoadingFallback = () => (
   <div className="flex items-center justify-center h-64">
     <div className="relative w-6 h-6">
-      <div className="absolute top-0 start-0 w-full h-full border-2 border-gray-100 rounded-full"></div>
-      <div className="absolute top-0 start-0 w-full h-full border-2 border-gray-400 rounded-full animate-spin border-t-transparent"></div>
+      <div className="absolute top-0 start-0 w-full h-full border-2 border-gray-100 dark:border-dk-line rounded-full"></div>
+      <div className="absolute top-0 start-0 w-full h-full border-2 border-gray-400 dark:border-zinc-500 rounded-full animate-spin border-t-transparent"></div>
     </div>
   </div>
 );
@@ -214,7 +214,7 @@ function ActivityClient(props: ActivityClientProps) {
   const session = useLHSession() as any;
   const pathname = usePathname()
   const access_token = session?.data?.tokens?.access_token;
-  const [bgColor, setBgColor] = React.useState('bg-white')
+  const [bgColor, setBgColor] = React.useState('bg-white dark:bg-dk-card')
   const [assignment, setAssignment] = React.useState(null) as any;
   const [markStatusButtonActive, setMarkStatusButtonActive] = React.useState(false);
   const [isFocusMode, setIsFocusMode] = React.useState(false);
@@ -381,11 +381,11 @@ function ActivityClient(props: ActivityClientProps) {
 
   useEffect(() => {
     if (activity.activity_type == 'TYPE_DYNAMIC' || activity.activity_type == 'TYPE_SCORM') {
-      setBgColor(isFocusMode ? 'bg-white' : 'bg-white nice-shadow');
+      setBgColor(isFocusMode ? 'bg-white dark:bg-dk-card' : 'bg-white dark:bg-dk-card nice-shadow');
     }
     else if (activity.activity_type == 'TYPE_ASSIGNMENT') {
       setMarkStatusButtonActive(false);
-      setBgColor(isFocusMode ? 'bg-white' : 'bg-white nice-shadow');
+      setBgColor(isFocusMode ? 'bg-white dark:bg-dk-card' : 'bg-white dark:bg-dk-card nice-shadow');
       getAssignmentUI();
     }
     else {
@@ -398,14 +398,14 @@ function ActivityClient(props: ActivityClientProps) {
     const isAuthenticated = session?.status === 'authenticated'
     return (
       <GeneralWrapperStyled>
-        <div className="max-w-2xl mx-auto my-16 bg-white rounded-2xl border border-gray-200/80 shadow-sm p-8 text-center">
+        <div className="max-w-2xl mx-auto my-16 bg-white dark:bg-dk-card rounded-2xl border border-gray-200/80 shadow-sm p-8 text-center">
           <div className="mx-auto w-14 h-14 rounded-full bg-rose-50 flex items-center justify-center mb-4">
             <Lock className="text-rose-500" size={24} />
           </div>
-          <h1 className="text-xl font-semibold text-gray-900 mb-2">
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-dk-fg-1 mb-2">
             {t('course.locked_title', 'This activity is locked')}
           </h1>
-          <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+          <p className="text-sm text-gray-500 dark:text-dk-fg-3 mb-6 leading-relaxed">
             {isAuthenticated
               ? t('course.locked_restricted', 'You need to be a member of the right user group to access this. Ask a course admin to add you.')
               : t('course.locked_auth_required', 'You need to sign in to access this activity.')}
@@ -421,7 +421,7 @@ function ActivityClient(props: ActivityClientProps) {
             )}
             <Link
               href={getUriWithOrg(orgslug, '') + `/course/${courseuuid}`}
-              className="inline-flex items-center justify-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors"
+              className="inline-flex items-center justify-center px-4 py-2 bg-gray-100 dark:bg-dk-inset text-gray-700 dark:text-dk-fg-1 rounded-lg text-sm font-semibold hover:bg-gray-200 transition-colors"
             >
               {t('course.back_to_course', 'Back to course')}
             </Link>
@@ -445,7 +445,7 @@ function ActivityClient(props: ActivityClientProps) {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.3 }}
-                  className="fixed inset-0 bg-white"
+                  className="fixed inset-0 bg-white dark:bg-dk-card"
                   style={{ zIndex: 'var(--z-overlay)' }}
                 >
                   {/* Focus Mode Top Bar */}
@@ -454,7 +454,7 @@ function ActivityClient(props: ActivityClientProps) {
                     animate={{ y: 0 }}
                     exit={{ y: -100 }}
                     transition={{ duration: 0.3 }}
-                    className="fixed top-0 start-0 end-0 bg-white/90 backdrop-blur-xl border-b border-gray-100"
+                    className="fixed top-0 start-0 end-0 bg-white/90 dark:bg-dk-card/90 backdrop-blur-xl border-b border-gray-100 dark:border-dk-line"
                     style={{ zIndex: 'var(--z-modal-content)' }}
                   >
                     <div className="container mx-auto px-4 py-2">
@@ -489,12 +489,12 @@ function ActivityClient(props: ActivityClientProps) {
                               />
                             </svg>
                             <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-xs font-bold text-gray-800">
+                              <span className="text-xs font-bold text-gray-800 dark:text-dk-fg-1">
                                 {Math.round(((trailData?.runs?.find((run: any) => run.course_uuid === course.course_uuid)?.steps?.filter((step: any) => step.complete)?.length || 0) / (course.chapters?.reduce((acc: number, chapter: any) => acc + chapter.activities.length, 0) || 1)) * 100)}%
                               </span>
                             </div>
                           </div>
-                          <div className="text-xs text-gray-600">
+                          <div className="text-xs text-gray-600 dark:text-dk-fg-2">
                             {trailData?.runs?.find((run: any) => run.course_uuid === course.course_uuid)?.steps?.filter((step: any) => step.complete)?.length || 0} {t('common.of')} {course.chapters?.reduce((acc: number, chapter: any) => acc + chapter.activities.length, 0) || 0}
                           </div>
                         </motion.div>
@@ -525,8 +525,8 @@ function ActivityClient(props: ActivityClientProps) {
                             </Link>
                           </div>
                           <div className="flex flex-col -space-y-1">
-                            <p className="font-bold text-gray-700 text-sm">{t('search.course')} </p>
-                            <h1 className="font-bold text-gray-950 text-lg first-letter:uppercase">
+                            <p className="font-bold text-gray-700 dark:text-dk-fg-1 text-sm">{t('search.course')} </p>
+                            <h1 className="font-bold text-gray-950 dark:text-dk-fg-1 text-lg first-letter:uppercase">
                               {course.name}
                             </h1>
                           </div>
@@ -559,10 +559,10 @@ function ActivityClient(props: ActivityClientProps) {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => setIsFocusMode(false)}
-                            className="bg-white nice-shadow p-2 rounded-full cursor-pointer hover:bg-gray-50"
+                            className="bg-white dark:bg-dk-card nice-shadow p-2 rounded-full cursor-pointer hover:bg-gray-50 dark:hover:bg-dk-raised"
                             title={t('activities.exit_focus_mode')}
                           >
-                            <Minimize2 size={16} className="text-gray-700" />
+                            <Minimize2 size={16} className="text-gray-700 dark:text-dk-fg-1" />
                           </motion.button>
                         </motion.div>
                       </div>
@@ -601,7 +601,7 @@ function ActivityClient(props: ActivityClientProps) {
                       animate={{ y: 0 }}
                       exit={{ y: 100 }}
                       transition={{ duration: 0.3 }}
-                      className="fixed bottom-0 start-0 end-0 bg-white/90 backdrop-blur-xl border-t border-gray-100"
+                      className="fixed bottom-0 start-0 end-0 bg-white/90 dark:bg-dk-card/90 backdrop-blur-xl border-t border-gray-100 dark:border-dk-line"
                       style={{ zIndex: 'var(--z-modal-content)' }}
                     >
                       <div className="container mx-auto px-4">
@@ -611,15 +611,15 @@ function ActivityClient(props: ActivityClientProps) {
                               onClick={() => navigateToActivity(prevActivity)}
                               className={`flex items-center space-x-1.5 p-2 rounded-md transition-all duration-200 cursor-pointer ${
                                 prevActivity
-                                  ? 'text-gray-700'
-                                  : 'opacity-50 text-gray-400 cursor-not-allowed'
+                                  ? 'text-gray-700 dark:text-dk-fg-1'
+                                  : 'opacity-50 text-gray-400 dark:text-dk-fg-3 cursor-not-allowed'
                               }`}
                               disabled={!prevActivity}
                               title={prevActivity ? `${t('common.previous')}: ${prevActivity.name}` : t('activities.no_previous_activity')}
                             >
-                              <ChevronLeft size={20} className="text-gray-800 shrink-0" />
+                              <ChevronLeft size={20} className="text-gray-800 dark:text-dk-fg-1 shrink-0" />
                               <div className="flex flex-col items-start">
-                                <span className="text-xs text-gray-500">{t('common.previous')}</span>
+                                <span className="text-xs text-gray-500 dark:text-dk-fg-3">{t('common.previous')}</span>
                                 <span className="text-sm capitalize font-semibold text-start">
                                   {prevActivity ? prevActivity.name : t('activities.no_previous_activity')}
                                 </span>
@@ -640,19 +640,19 @@ function ActivityClient(props: ActivityClientProps) {
                               onClick={() => navigateToActivity(nextActivity)}
                               className={`flex items-center space-x-1.5 p-2 rounded-md transition-all duration-200 cursor-pointer ${
                                 nextActivity
-                                  ? 'text-gray-700'
-                                  : 'opacity-50 text-gray-400 cursor-not-allowed'
+                                  ? 'text-gray-700 dark:text-dk-fg-1'
+                                  : 'opacity-50 text-gray-400 dark:text-dk-fg-3 cursor-not-allowed'
                               }`}
                               disabled={!nextActivity}
                               title={nextActivity ? `${t('common.next')}: ${nextActivity.name}` : t('activities.no_next_activity')}
                             >
                               <div className="flex flex-col items-end">
-                                <span className="text-xs text-gray-500">{t('common.next')}</span>
+                                <span className="text-xs text-gray-500 dark:text-dk-fg-3">{t('common.next')}</span>
                                 <span className="text-sm capitalize font-semibold text-end">
                                   {nextActivity ? nextActivity.name : t('activities.no_next_activity')}
                                 </span>
                               </div>
-                              <ChevronRight size={20} className="text-gray-800 shrink-0" />
+                              <ChevronRight size={20} className="text-gray-800 dark:text-dk-fg-1 shrink-0" />
                             </button>
                           </div>
                         </div>
@@ -677,10 +677,10 @@ function ActivityClient(props: ActivityClientProps) {
                     {/* ── Simplified Header ── */}
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5">
+                        <p className="text-xs font-semibold text-gray-500 dark:text-dk-fg-3 uppercase tracking-wider mb-0.5">
                           {getChapterNameByActivityId(course, activity.id)}
                         </p>
-                        <h1 id="lesson-title" dir="auto" className="font-bold text-gray-950 text-xl sm:text-3xl first-letter:uppercase">
+                        <h1 id="lesson-title" dir="auto" className="font-bold text-gray-950 dark:text-dk-fg-1 text-xl sm:text-3xl first-letter:uppercase">
                           {activity.name}
                         </h1>
                         {/* Authors */}
@@ -701,7 +701,7 @@ function ActivityClient(props: ActivityClientProps) {
                                 </div>
                               ))}
                             </div>
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-gray-500 dark:text-dk-fg-3">
                               {course.authors.filter((a: any) => a.authorship_status === 'ACTIVE').slice(0, 2).map((a: any) => 
                                 a.user.first_name && a.user.last_name ? `${a.user.first_name} ${a.user.last_name}` : `@${a.user.username}`
                               ).join(' & ')}
@@ -712,7 +712,7 @@ function ActivityClient(props: ActivityClientProps) {
                       <div className="flex items-center gap-2 shrink-0">
                         <button
                           onClick={() => setIsFocusMode(true)}
-                          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+                          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-dk-card border border-gray-200 dark:border-dk-line-strong rounded-lg text-xs font-semibold text-gray-600 dark:text-dk-fg-2 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors cursor-pointer"
                         >
                           <Maximize2 size={14} />
                           {t('activities.focus_mode')}
@@ -730,8 +730,8 @@ function ActivityClient(props: ActivityClientProps) {
 
                     {/* ── Unpublished / Paid Access ── */}
                     {activity && activity.published == false && (
-                      <div className="p-5 rounded-lg bg-gray-100 border border-gray-200">
-                        <p className="text-sm font-semibold text-gray-700">{t('activities.not_published_yet')}</p>
+                      <div className="p-5 rounded-lg bg-gray-100 dark:bg-dk-inset border border-gray-200 dark:border-dk-line-strong">
+                        <p className="text-sm font-semibold text-gray-700 dark:text-dk-fg-1">{t('activities.not_published_yet')}</p>
                       </div>
                     )}
                     {activity && activity.published == true && activity.content.paid_access == false && (
@@ -747,9 +747,9 @@ function ActivityClient(props: ActivityClientProps) {
                           {/* 1. What You'll Learn */}
                           {activity.description && (
                             <section id="lesson-what-youll-learn">
-                              <div className="bg-gray-50 border border-gray-100 rounded-xl p-5">
-                                <h2 className="text-sm font-bold text-gray-900 mb-2">{t('activities.what_you_ll_learn', 'What You\'ll Learn')}</h2>
-                                <p className="text-sm text-gray-600 leading-relaxed">{activity.description}</p>
+                              <div className="bg-gray-50 dark:bg-dk-inset/40 border border-gray-100 dark:border-dk-line rounded-xl p-5">
+                                <h2 className="text-sm font-bold text-gray-900 dark:text-dk-fg-1 mb-2">{t('activities.what_you_ll_learn', 'What You\'ll Learn')}</h2>
+                                <p className="text-sm text-gray-600 dark:text-dk-fg-2 leading-relaxed">{activity.description}</p>
                               </div>
                             </section>
                           )}
@@ -759,11 +759,11 @@ function ActivityClient(props: ActivityClientProps) {
                             <div className={`relative ${activity.activity_type === 'TYPE_SCORM' ? 'rounded-xl overflow-hidden' : ''}`}>
                               <button
                                 onClick={() => setIsFocusMode(true)}
-                                className={`absolute top-3 end-3 hidden sm:flex bg-white/90 hover:bg-white border border-gray-200 nice-shadow p-2 rounded-full cursor-pointer transition-all duration-200 group overflow-hidden pointer-events-auto`}
+                                className={`absolute top-3 end-3 hidden sm:flex bg-white/90 dark:bg-dk-card/90 hover:bg-white dark:hover:bg-dk-raised border border-gray-200 dark:border-dk-line-strong nice-shadow p-2 rounded-full cursor-pointer transition-all duration-200 group overflow-hidden pointer-events-auto`}
                                 style={{ zIndex: 'var(--z-interactive)' }}
                                 title={t('activities.focus_mode')}
                               >
-                                <Maximize2 size={15} className="text-gray-600" />
+                                <Maximize2 size={15} className="text-gray-600 dark:text-dk-fg-2" />
                               </button>
                               {activityContent}
                             </div>
@@ -772,9 +772,9 @@ function ActivityClient(props: ActivityClientProps) {
                           {/* 3. Practice / Exercise (for assignments, show after content) */}
                           {activity.activity_type === 'TYPE_ASSIGNMENT' && assignment && (
                             <section id="lesson-exercise">
-                              <div className="border border-gray-200 rounded-xl p-5">
-                                <h2 className="text-sm font-bold text-gray-900 mb-3">{t('activities.practice', 'Practice / Exercise')}</h2>
-                                <div className="text-sm text-gray-600">
+                              <div className="border border-gray-200 dark:border-dk-line-strong rounded-xl p-5">
+                                <h2 className="text-sm font-bold text-gray-900 dark:text-dk-fg-1 mb-3">{t('activities.practice', 'Practice / Exercise')}</h2>
+                                <div className="text-sm text-gray-600 dark:text-dk-fg-2">
                                   <AssignmentSubmissionProvider assignment_uuid={assignment?.assignment_uuid}>
                                     <AssignmentProvider assignment_uuid={assignment?.assignment_uuid}>
                                       <AssignmentsTaskProvider>
@@ -789,30 +789,30 @@ function ActivityClient(props: ActivityClientProps) {
 
                           {/* 4. Downloadable Resources */}
                           <section id="lesson-resources">
-                            <div className="border border-gray-200 rounded-xl p-5">
-                              <h2 className="text-sm font-bold text-gray-900 mb-3">{t('activities.resources', 'Downloadable Resources')}</h2>
+                            <div className="border border-gray-200 dark:border-dk-line-strong rounded-xl p-5">
+                              <h2 className="text-sm font-bold text-gray-900 dark:text-dk-fg-1 mb-3">{t('activities.resources', 'Downloadable Resources')}</h2>
                               <div className="space-y-2">
-                                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                                  <div className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-400">
+                                <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-dk-inset/40 rounded-lg border border-gray-100 dark:border-dk-line">
+                                  <div className="w-8 h-8 rounded-lg bg-white dark:bg-dk-card border border-gray-200 dark:border-dk-line-strong flex items-center justify-center text-gray-400 dark:text-dk-fg-3">
                                     <FileText size={15} />
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-semibold text-gray-700 truncate">lesson-materials.zip</p>
-                                    <p className="text-[10px] text-gray-400">2.4 MB</p>
+                                    <p className="text-xs font-semibold text-gray-700 dark:text-dk-fg-1 truncate">lesson-materials.zip</p>
+                                    <p className="text-[10px] text-gray-400 dark:text-dk-fg-3">2.4 MB</p>
                                   </div>
-                                  <button className="text-xs font-semibold text-gray-900 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                                  <button className="text-xs font-semibold text-gray-900 dark:text-dk-fg-1 bg-white dark:bg-dk-card border border-gray-200 dark:border-dk-line-strong px-3 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors cursor-pointer">
                                     {t('common.download', 'Download')}
                                   </button>
                                 </div>
-                                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                                  <div className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-gray-400">
+                                <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-dk-inset/40 rounded-lg border border-gray-100 dark:border-dk-line">
+                                  <div className="w-8 h-8 rounded-lg bg-white dark:bg-dk-card border border-gray-200 dark:border-dk-line-strong flex items-center justify-center text-gray-400 dark:text-dk-fg-3">
                                     <FileText size={15} />
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-semibold text-gray-700 truncate">exercise-template.pdf</p>
-                                    <p className="text-[10px] text-gray-400">0.8 MB</p>
+                                    <p className="text-xs font-semibold text-gray-700 dark:text-dk-fg-1 truncate">exercise-template.pdf</p>
+                                    <p className="text-[10px] text-gray-400 dark:text-dk-fg-3">0.8 MB</p>
                                   </div>
-                                  <button className="text-xs font-semibold text-gray-900 bg-white border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                                  <button className="text-xs font-semibold text-gray-900 dark:text-dk-fg-1 bg-white dark:bg-dk-card border border-gray-200 dark:border-dk-line-strong px-3 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors cursor-pointer">
                                     {t('common.download', 'Download')}
                                   </button>
                                 </div>
@@ -822,16 +822,16 @@ function ActivityClient(props: ActivityClientProps) {
 
                           {/* 5. Knowledge Check */}
                           <section id="lesson-knowledge-check">
-                            <div className="border border-gray-200 rounded-xl p-5">
-                              <h2 className="text-sm font-bold text-gray-900 mb-3">{t('activities.knowledge_check', 'Knowledge Check')}</h2>
+                            <div className="border border-gray-200 dark:border-dk-line-strong rounded-xl p-5">
+                              <h2 className="text-sm font-bold text-gray-900 dark:text-dk-fg-1 mb-3">{t('activities.knowledge_check', 'Knowledge Check')}</h2>
                               <div className="space-y-3">
-                                <div className="p-3 bg-gray-50 rounded-lg border border-gray-100">
-                                  <p className="text-xs font-semibold text-gray-800 mb-2">1. What was the main concept covered in this lesson?</p>
+                                <div className="p-3 bg-gray-50 dark:bg-dk-inset/40 rounded-lg border border-gray-100 dark:border-dk-line">
+                                  <p className="text-xs font-semibold text-gray-800 dark:text-dk-fg-1 mb-2">1. What was the main concept covered in this lesson?</p>
                                   <div className="space-y-1.5">
                                     {['Option A', 'Option B', 'Option C'].map((opt) => (
-                                      <label key={opt} className="flex items-center gap-2 p-2 rounded-md hover:bg-white transition-colors cursor-pointer">
+                                      <label key={opt} className="flex items-center gap-2 p-2 rounded-md hover:bg-white dark:hover:bg-dk-raised transition-colors cursor-pointer">
                                         <input type="radio" name="kq1" className="w-3.5 h-3.5 accent-gray-900" />
-                                        <span className="text-xs text-gray-600">{opt}</span>
+                                        <span className="text-xs text-gray-600 dark:text-dk-fg-2">{opt}</span>
                                       </label>
                                     ))}
                                   </div>
@@ -843,13 +843,13 @@ function ActivityClient(props: ActivityClientProps) {
                           {/* 6. What's Next */}
                           {nextActivity && (
                             <section id="lesson-whats-next">
-                              <div className="border border-gray-200 rounded-xl p-5">
-                                <h2 className="text-sm font-bold text-gray-900 mb-1">{t('activities.whats_next', 'What\'s Next')}</h2>
-                                <p className="text-xs text-gray-500 mb-3">{t('activities.up_next', 'Up next')}: {nextActivity.name}</p>
-                                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                              <div className="border border-gray-200 dark:border-dk-line-strong rounded-xl p-5">
+                                <h2 className="text-sm font-bold text-gray-900 dark:text-dk-fg-1 mb-1">{t('activities.whats_next', 'What\'s Next')}</h2>
+                                <p className="text-xs text-gray-500 dark:text-dk-fg-3 mb-3">{t('activities.up_next', 'Up next')}: {nextActivity.name}</p>
+                                <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-dk-inset/40 rounded-lg border border-gray-100 dark:border-dk-line">
                                   <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-semibold text-gray-800">{nextActivity.name}</p>
-                                    <p className="text-xs text-gray-500 mt-0.5">{getChapterNameByActivityId(course, nextActivity.id)}</p>
+                                    <p className="text-sm font-semibold text-gray-800 dark:text-dk-fg-1">{nextActivity.name}</p>
+                                    <p className="text-xs text-gray-500 dark:text-dk-fg-3 mt-0.5">{getChapterNameByActivityId(course, nextActivity.id)}</p>
                                   </div>
                                   <button
                                     onClick={() => navigateToActivity(nextActivity)}
@@ -865,7 +865,7 @@ function ActivityClient(props: ActivityClientProps) {
 
                           {/* 7. Navigation Buttons */}
                           {activity && activity.published == true && activity.content.paid_access != false && (
-                            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 pt-2 border-t border-gray-100">
+                            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 pt-2 border-t border-gray-100 dark:border-dk-line">
                               <div>
                                 <PreviousActivityButton
                                   course={course}
@@ -1159,7 +1159,7 @@ export function MarkStatus(props: {
         <div className="flex items-center space-x-2">
           <div className="relative">
             <div
-              className={`${isLoading ? 'opacity-90' : ''} bg-gray-800 rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white hover:cursor-pointer transition-all duration-200 ${isLoading ? 'cursor-not-allowed' : 'hover:bg-gray-700'}`}
+              className={`${isLoading ? 'opacity-90' : ''} bg-gray-800 dark:bg-dk-track rounded-md px-4 nice-shadow flex flex-col p-2.5 text-white hover:cursor-pointer transition-all duration-200 ${isLoading ? 'cursor-not-allowed' : 'hover:bg-gray-700 dark:hover:bg-zinc-600'}`}
               onClick={!isLoading ? markActivityAsCompleteFront : undefined}
             >
               <span className="text-[10px] font-bold mb-1 uppercase">{t('common.status')}</span>
@@ -1201,7 +1201,7 @@ export function MarkStatus(props: {
                 icon={infoIcon}
                 message={t('activities.mark_tooltip')}
                 onClose={handleUnmarkedTooltipClose}
-                iconColor="text-gray-600"
+                iconColor="text-gray-600 dark:text-dk-fg-2"
                 iconSize={24}
                 width="w-64"
               />
@@ -1255,9 +1255,9 @@ function NextActivityButton({ course, currentActivityId, orgslug }: { course: an
   return (
     <div
       onClick={navigateToActivity}
-      className="bg-gray-200 rounded-md px-3 sm:px-4 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] flex flex-col p-2 sm:p-2.5 text-gray-600 hover:cursor-pointer transition delay-150 duration-300 ease-in-out hover:bg-gray-200"
+      className="bg-gray-200 dark:bg-dk-track rounded-md px-3 sm:px-4 shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] flex flex-col p-2 sm:p-2.5 text-gray-600 dark:text-dk-fg-2 hover:cursor-pointer transition delay-150 duration-300 ease-in-out hover:bg-gray-200"
     >
-      <span className="text-[10px] font-bold text-gray-500 mb-1 uppercase">{t('common.next')}</span>
+      <span className="text-[10px] font-bold text-gray-500 dark:text-dk-fg-3 mb-1 uppercase">{t('common.next')}</span>
       <div className="flex items-center space-x-1">
         <span className="text-xs sm:text-sm font-semibold truncate max-w-[120px] sm:max-w-[200px]">{nextActivity.name}</span>
         <ChevronRight size={17} className="shrink-0" />
@@ -1308,9 +1308,9 @@ function PreviousActivityButton({ course, currentActivityId, orgslug }: { course
   return (
     <div
       onClick={navigateToActivity}
-      className="bg-white rounded-md px-3 sm:px-4 nice-shadow flex flex-col p-2 sm:p-2.5 text-gray-600 hover:cursor-pointer transition delay-150 duration-300 ease-in-out"
+      className="bg-white dark:bg-dk-card rounded-md px-3 sm:px-4 nice-shadow flex flex-col p-2 sm:p-2.5 text-gray-600 dark:text-dk-fg-2 hover:cursor-pointer transition delay-150 duration-300 ease-in-out"
     >
-      <span className="text-[10px] font-bold text-gray-500 mb-1 uppercase">{t('common.previous')}</span>
+      <span className="text-[10px] font-bold text-gray-500 dark:text-dk-fg-3 mb-1 uppercase">{t('common.previous')}</span>
       <div className="flex items-center space-x-1">
         <ChevronLeft size={17} className="shrink-0" />
         <span className="text-xs sm:text-sm font-semibold truncate max-w-[120px] sm:max-w-[200px]">{previousActivity.name}</span>
@@ -1351,19 +1351,19 @@ function CourseOutlineSidebar({ course, currentActivityId, orgslug, trailData }:
   };
 
   return (
-    <div className="bg-white border border-gray-200/80 rounded-xl overflow-hidden">
-      <div className="px-4 py-3 border-b border-gray-100">
-        <h3 className="text-sm font-semibold text-gray-900">{t('courses.course_content')}</h3>
+    <div className="bg-white dark:bg-dk-card border border-gray-200/80 rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-gray-100 dark:border-dk-line">
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-dk-fg-1">{t('courses.course_content')}</h3>
       </div>
       <div className="max-h-[calc(100vh-320px)] overflow-y-auto">
         {course.chapters.map((chapter: any, chIdx: number) => (
           <div key={chapter.id}>
-            <div className="px-4 py-2 bg-gray-50 border-b border-gray-100">
+            <div className="px-4 py-2 bg-gray-50 dark:bg-dk-inset/40 border-b border-gray-100 dark:border-dk-line">
               <div className="flex items-center gap-1.5">
-                <span className="text-[10px] font-bold text-gray-400 bg-white border border-gray-200 rounded-full w-4 h-4 flex items-center justify-center shrink-0">
+                <span className="text-[10px] font-bold text-gray-400 dark:text-dk-fg-3 bg-white dark:bg-dk-card border border-gray-200 dark:border-dk-line-strong rounded-full w-4 h-4 flex items-center justify-center shrink-0">
                   {chIdx + 1}
                 </span>
-                <span className="text-xs font-semibold text-gray-700 truncate">{chapter.name}</span>
+                <span className="text-xs font-semibold text-gray-700 dark:text-dk-fg-1 truncate">{chapter.name}</span>
               </div>
             </div>
             <div className="divide-y divide-gray-50">
@@ -1387,22 +1387,22 @@ function CourseOutlineSidebar({ course, currentActivityId, orgslug, trailData }:
                     <div
                       className={`flex items-start gap-2.5 px-4 py-2.5 transition-colors cursor-pointer ${
                         isCurrent
-                          ? 'bg-gray-50 border-s-2 border-gray-900 ps-[14px]'
-                          : 'hover:bg-gray-50 border-s-2 border-transparent ps-4'
+                          ? 'bg-gray-50 dark:bg-dk-inset/40 border-s-2 border-gray-900 dark:border-zinc-100 ps-[14px]'
+                          : 'hover:bg-gray-50 dark:hover:bg-dk-raised border-s-2 border-transparent ps-4'
                       }`}
                     >
                       <div className="mt-0.5 shrink-0">
                         {isComplete ? (
                           <Check size={13} className="stroke-[3] text-teal-600" />
                         ) : (
-                          <div className="w-[13px] h-[13px] rounded-full border-2 border-gray-200" />
+                          <div className="w-[13px] h-[13px] rounded-full border-2 border-gray-200 dark:border-dk-line-strong" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p dir="auto" className={`text-xs leading-snug ${isCurrent ? 'font-semibold text-gray-900' : 'font-medium text-gray-600'}`}>
+                        <p dir="auto" className={`text-xs leading-snug ${isCurrent ? 'font-semibold text-gray-900 dark:text-dk-fg-1' : 'font-medium text-gray-600 dark:text-dk-fg-2'}`}>
                           {activity.name}
                         </p>
-                        <div className="flex items-center gap-1 mt-0.5 text-[10px] text-gray-400">
+                        <div className="flex items-center gap-1 mt-0.5 text-[10px] text-gray-400 dark:text-dk-fg-3">
                           {getActivityTypeIcon(activity.activity_type)}
                           <span>{getActivityTypeLabel(activity.activity_type)}</span>
                         </div>
@@ -1462,9 +1462,9 @@ function OnThisPageSidebar() {
   };
 
   return (
-    <div className="bg-white border border-gray-200/80 rounded-xl overflow-hidden">
-      <div className="px-4 py-3 border-b border-gray-100">
-        <h3 className="text-sm font-semibold text-gray-900">{t('activities.on_this_page', 'On This Page')}</h3>
+    <div className="bg-white dark:bg-dk-card border border-gray-200/80 rounded-xl overflow-hidden">
+      <div className="px-4 py-3 border-b border-gray-100 dark:border-dk-line">
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-dk-fg-1">{t('activities.on_this_page', 'On This Page')}</h3>
       </div>
       <div className="px-2 py-2 space-y-0.5">
         {sections.map(({ id, label }) => (
@@ -1473,8 +1473,8 @@ function OnThisPageSidebar() {
             onClick={() => handleClick(id)}
             className={`w-full text-start px-2 py-1.5 rounded-md text-xs transition-colors cursor-pointer ${
               activeId === id
-                ? 'bg-gray-100 text-gray-900 font-semibold'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50 font-medium'
+                ? 'bg-gray-100 dark:bg-dk-inset text-gray-900 dark:text-dk-fg-1 font-semibold'
+                : 'text-gray-500 dark:text-dk-fg-3 hover:text-gray-700 dark:hover:text-dk-fg-1 hover:bg-gray-50 dark:hover:bg-dk-raised font-medium'
             }`}
           >
             {label}
@@ -1729,7 +1729,7 @@ function AssignmentTools(props: {
                 }`} />
 
                 <div className="relative flex flex-col items-center text-center space-y-3">
-                  <div className={`relative w-[72px] h-[72px] rounded-full flex items-center justify-center nice-shadow bg-white`}>
+                  <div className={`relative w-[72px] h-[72px] rounded-full flex items-center justify-center nice-shadow bg-white dark:bg-dk-card`}>
                     {isPassing ? (
                       <Trophy size={34} className="text-emerald-600" strokeWidth={2.2} />
                     ) : (
@@ -1751,11 +1751,11 @@ function AssignmentTools(props: {
                         ? t('dashboard.assignments.submissions.preview.passing')
                         : t('dashboard.assignments.submissions.preview.not_passing')}
                     </p>
-                    <h2 className="text-5xl font-black text-gray-900 tracking-tight leading-none">
+                    <h2 className="text-5xl font-black text-gray-900 dark:text-dk-fg-1 tracking-tight leading-none">
                       {displayGrade}
                     </h2>
                     {(pointsSummary || percentageDisplay) && (
-                      <p className="text-sm text-gray-500 font-medium pt-1">
+                      <p className="text-sm text-gray-500 dark:text-dk-fg-3 font-medium pt-1">
                         {[percentageDisplay, pointsSummary].filter(Boolean).join(' · ')}
                       </p>
                     )}
@@ -1767,7 +1767,7 @@ function AssignmentTools(props: {
               <div className="px-6 pt-5 pb-6 space-y-5">
                 {tasks && tasks.length > 0 && (
                   <div className="space-y-2.5">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-dk-fg-3">
                       {t('assignments.task_breakdown')}
                     </p>
                     <div className="space-y-1.5">
@@ -1777,7 +1777,7 @@ function AssignmentTools(props: {
                         return (
                           <div
                             key={tb.assignment_task_uuid}
-                            className="relative overflow-hidden rounded-lg bg-gray-50 px-3 py-2.5"
+                            className="relative overflow-hidden rounded-lg bg-gray-50 dark:bg-dk-inset/40 px-3 py-2.5"
                           >
                             {tb.submitted && (
                               <div
@@ -1788,13 +1788,13 @@ function AssignmentTools(props: {
                               />
                             )}
                             <div className="relative flex items-center justify-between gap-3">
-                              <span className="text-sm text-gray-700 truncate" title={tb.description || `Task ${tb.index}`}>
-                                <span className="font-bold text-gray-400 me-1.5">{tb.index}.</span>
+                              <span className="text-sm text-gray-700 dark:text-dk-fg-1 truncate" title={tb.description || `Task ${tb.index}`}>
+                                <span className="font-bold text-gray-400 dark:text-dk-fg-3 me-1.5">{tb.index}.</span>
                                 {tb.description || `Task ${tb.index}`}
                               </span>
                               <span className={`text-xs font-bold flex-none ${
                                 !tb.submitted
-                                  ? 'text-gray-400'
+                                  ? 'text-gray-400 dark:text-dk-fg-3'
                                   : passedTask
                                     ? 'text-emerald-700'
                                     : 'text-rose-700'
@@ -1811,12 +1811,12 @@ function AssignmentTools(props: {
 
                 {feedback && (
                   <div className="space-y-2">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-dk-fg-3">
                       <MessageSquare size={11} />
                       <span>{t('dashboard.assignments.submissions.feedback.label')}</span>
                     </div>
-                    <div className="p-3 rounded-lg bg-gray-50 border border-gray-100">
-                      <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                    <div className="p-3 rounded-lg bg-gray-50 dark:bg-dk-inset/40 border border-gray-100 dark:border-dk-line">
+                      <p className="text-sm text-gray-700 dark:text-dk-fg-1 leading-relaxed whitespace-pre-wrap">
                         {feedback}
                       </p>
                     </div>
@@ -1824,7 +1824,7 @@ function AssignmentTools(props: {
                 )}
 
                 {!tasks?.length && !feedback && (
-                  <p className="text-sm text-gray-400 text-center py-4">
+                  <p className="text-sm text-gray-400 dark:text-dk-fg-3 text-center py-4">
                     {t('assignments.no_grade_details')}
                   </p>
                 )}
@@ -1834,14 +1834,14 @@ function AssignmentTools(props: {
                     {canRetry ? (
                       <div className="rounded-xl border border-fuchsia-100 bg-gradient-to-br from-fuchsia-50 via-pink-50 to-rose-50 p-4">
                         <div className="flex items-start gap-3">
-                          <div className="w-9 h-9 rounded-full bg-white nice-shadow flex items-center justify-center text-fuchsia-600 shrink-0">
+                          <div className="w-9 h-9 rounded-full bg-white dark:bg-dk-card nice-shadow flex items-center justify-center text-fuchsia-600 shrink-0">
                             <RotateCcw size={16} />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-gray-900">
+                            <p className="text-sm font-bold text-gray-900 dark:text-dk-fg-1">
                               {t('assignments.retry_assignment_title')}
                             </p>
-                            <p className="text-xs text-gray-600 mt-1 leading-snug">
+                            <p className="text-xs text-gray-600 dark:text-dk-fg-2 mt-1 leading-snug">
                               {t('assignments.retry_assignment_confirm')}
                             </p>
                             <p className="text-[11px] text-fuchsia-700 mt-2 font-semibold flex items-center gap-1.5">
@@ -1884,10 +1884,10 @@ function AssignmentTools(props: {
                         />
                       </div>
                     ) : (
-                      <div className="rounded-xl border border-gray-100 bg-gray-50 p-3">
+                      <div className="rounded-xl border border-gray-100 dark:border-dk-line bg-gray-50 dark:bg-dk-inset/40 p-3">
                         <div className="flex items-center gap-2">
-                          <RotateCcw size={14} className="text-gray-400 shrink-0" />
-                          <p className="text-xs text-gray-500 font-medium">
+                          <RotateCcw size={14} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
+                          <p className="text-xs text-gray-500 dark:text-dk-fg-3 font-medium">
                             {t('assignments.retry_no_attempts_left')} ·{' '}
                             {t('assignments.attempt_count_bounded', {
                               current: currentAttempt,

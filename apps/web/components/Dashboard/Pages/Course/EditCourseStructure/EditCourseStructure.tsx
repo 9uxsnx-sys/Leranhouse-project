@@ -285,18 +285,18 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
       <div className="flex items-center gap-3 mb-5">
         {/* Search Bar */}
         <div className="relative w-80">
-          <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+          <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-zinc-400 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t('dashboard.courses.structure.course_structure.search_modules_placeholder')}
-            className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
+            className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 dark:text-zinc-200 bg-white dark:bg-dk-card shadow-borders-base rounded-md placeholder:text-gray-500 dark:placeholder:text-zinc-400 focus:outline-none"
           />
         </div>
 
         {/* Module count */}
-        <span className="text-xs text-gray-400 whitespace-nowrap">
+        <span className="text-xs text-gray-400 dark:text-zinc-400 whitespace-nowrap">
           {t('dashboard.courses.structure.course_structure.module_count', { count: displayChapters.length })}
         </span>
 
@@ -331,7 +331,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
         </Button>
 
         {/* Sort toggle button */}
-        <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base" onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')} aria-label={t('dashboard.courses.structure.course_structure.sort_modules')}>
+        <IconButton size="small" variant="transparent" className="bg-white dark:bg-dk-card hover:bg-gray-50 dark:hover:bg-dk-raised shadow-borders-base" onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')} aria-label={t('dashboard.courses.structure.course_structure.sort_modules')}>
           <ArrowUpDown size={15} />
         </IconButton>
       </div>
@@ -377,7 +377,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
                         }}
                         role="button"
                         tabIndex={0}
-                        className={`w-full text-start px-5 py-4 rounded-xl bg-white border border-gray-100 shadow-sm transition-colors flex items-center justify-between group ${
+                        className={`w-full text-start px-5 py-4 rounded-xl bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line shadow-sm transition-colors flex items-center justify-between group ${
                           isSelectMode
                             ? isSelected
                               ? 'ring-2 ring-blue-500/40 border-blue-200 cursor-pointer'
@@ -395,7 +395,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
                               className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
                                 isSelected
                                   ? 'bg-zinc-800 border-zinc-800 text-white'
-                                  : 'border-gray-300 hover:border-gray-400'
+                                  : 'border-gray-300 dark:border-dk-line-strong hover:border-gray-400'
                               }`}
                               onClick={(e) => {
                                 e.stopPropagation()
@@ -412,14 +412,14 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
                             /* Drag Handle */
                             <div
                               {...provided.dragHandleProps}
-                              className="flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-400 transition-colors"
+                              className="flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-300 dark:text-zinc-600 hover:text-gray-400 transition-colors"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <GripVertical size={16} />
                             </div>
                           )}
-                          <Folder size={18} className="text-gray-400 flex-shrink-0" />
-                          <p className="text-sm font-medium text-gray-900 truncate">
+                          <Folder size={18} className="text-gray-400 dark:text-zinc-400 flex-shrink-0" />
+                          <p className="text-sm font-medium text-gray-900 dark:text-zinc-100 truncate">
                             {chapterName(chapter) || t('dashboard.courses.structure.course_structure.untitled_module')}
                           </p>
                         </div>
@@ -427,7 +427,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
                           <DropdownMenuTrigger asChild>
                             <button
                               onClick={(e) => e.stopPropagation()}
-                              className="h-7 w-7 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors flex-shrink-0"
+                              className="h-7 w-7 flex items-center justify-center rounded-md text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors flex-shrink-0"
                             >
                               <MoreVertical size={16} />
                             </button>
@@ -474,12 +474,12 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
               {provided.placeholder}
 
               {displayChapters.length === 0 && (
-                <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-100">
-                  <Folder size={40} className="mx-auto mb-3 text-gray-300" />
-                  <p className="text-sm text-gray-400">
+                <div className="text-center py-12 bg-gray-50 dark:bg-dk-inset rounded-lg border border-gray-100 dark:border-dk-line">
+                  <Folder size={40} className="mx-auto mb-3 text-gray-300 dark:text-zinc-600" />
+                  <p className="text-sm text-gray-400 dark:text-zinc-400">
                     {searchQuery ? t('dashboard.courses.structure.course_structure.no_modules_match') : t('dashboard.courses.structure.course_structure.no_modules')}
                   </p>
-                  <p className="text-xs text-gray-300 mt-1">
+                  <p className="text-xs text-gray-300 dark:text-zinc-600 mt-1">
                     {searchQuery ? t('dashboard.courses.structure.course_structure.try_different_search') : t('dashboard.courses.structure.course_structure.add_module_hint')}
                   </p>
                 </div>

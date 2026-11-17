@@ -11,10 +11,10 @@ import { useTranslation } from 'react-i18next';
 // Same input class used by the create-assignment modal, so both forms look
 // identical to the user.
 const inputClass =
-    'w-full h-9 px-3 text-sm rounded-lg bg-gray-50 border border-gray-200 outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors';
+    'w-full h-9 px-3 text-sm rounded-lg bg-gray-50 dark:bg-dk-inset/40 border border-gray-200 dark:border-dk-line-strong outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors';
 const textareaClass =
-    'w-full px-3 py-2 text-sm rounded-lg bg-gray-50 border border-gray-200 outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors resize-none';
-const labelClass = 'text-sm font-medium text-gray-700';
+    'w-full px-3 py-2 text-sm rounded-lg bg-gray-50 dark:bg-dk-inset/40 border border-gray-200 dark:border-dk-line-strong outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors resize-none';
+const labelClass = 'text-sm font-medium text-gray-700 dark:text-dk-fg-1';
 const errorClass = 'text-xs text-red-500';
 import {
     ALargeSmall,
@@ -245,7 +245,7 @@ const EditAssignmentForm: React.FC<EditAssignmentFormProps> = ({
                     <p className={labelClass}>
                         {t('dashboard.assignments.modals.edit.form.grading_type_label')}
                     </p>
-                    <p className="text-[10px] text-gray-400">
+                    <p className="text-[10px] text-gray-400 dark:text-dk-fg-3">
                         {t('dashboard.assignments.modals.edit.form.grading_type_hint')}
                     </p>
                 </div>
@@ -257,27 +257,27 @@ const EditAssignmentForm: React.FC<EditAssignmentFormProps> = ({
                                 key={gt.value}
                                 type="button"
                                 onClick={() => formik.setFieldValue('grading_type', gt.value, true)}
-                                className={`relative flex flex-col items-center text-center p-4 rounded-xl nice-shadow bg-white transition-all cursor-pointer ${
+                                className={`relative flex flex-col items-center text-center p-4 rounded-xl nice-shadow bg-white dark:bg-dk-card transition-all cursor-pointer ${
                                     isSelected
                                         ? `${gt.selectedBg} ring-2 ${gt.selectedBorder.replace('border-', 'ring-')}`
                                         : 'hover:bg-gray-50/60'
                                 }`}
                             >
                                 {isSelected && (
-                                    <div className={`absolute top-2 end-2 w-4 h-4 rounded-full flex items-center justify-center ${gt.color} bg-white nice-shadow`}>
+                                    <div className={`absolute top-2 end-2 w-4 h-4 rounded-full flex items-center justify-center ${gt.color} bg-white dark:bg-dk-card nice-shadow`}>
                                         <Check size={10} strokeWidth={3} />
                                     </div>
                                 )}
-                                <div className={`text-lg font-mono font-bold mb-2 tracking-wider ${isSelected ? gt.color : 'text-gray-300'}`}>
+                                <div className={`text-lg font-mono font-bold mb-2 tracking-wider ${isSelected ? gt.color : 'text-gray-300 dark:text-zinc-600'}`}>
                                     {gt.illustration}
                                 </div>
-                                <div className={`mb-1 ${isSelected ? gt.color : 'text-gray-400'}`}>
+                                <div className={`mb-1 ${isSelected ? gt.color : 'text-gray-400 dark:text-dk-fg-3'}`}>
                                     {gt.icon}
                                 </div>
-                                <p className={`text-xs font-bold ${isSelected ? 'text-gray-900' : 'text-gray-500'}`}>
+                                <p className={`text-xs font-bold ${isSelected ? 'text-gray-900 dark:text-dk-fg-1' : 'text-gray-500 dark:text-dk-fg-3'}`}>
                                     {t(gt.labelKey)}
                                 </p>
-                                <p className='text-[10px] text-gray-400 mt-0.5 leading-tight'>
+                                <p className='text-[10px] text-gray-400 dark:text-dk-fg-3 mt-0.5 leading-tight'>
                                     {t(gt.descriptionKey)}
                                 </p>
                             </button>
@@ -292,7 +292,7 @@ const EditAssignmentForm: React.FC<EditAssignmentFormProps> = ({
                     <p className={labelClass}>
                         {t('dashboard.assignments.modals.edit.form.grading_options_label')}
                     </p>
-                    <p className="text-[10px] text-gray-400">
+                    <p className="text-[10px] text-gray-400 dark:text-dk-fg-3">
                         {t('dashboard.assignments.modals.edit.form.grading_options_hint')}
                     </p>
                 </div>
@@ -342,7 +342,7 @@ const EditAssignmentForm: React.FC<EditAssignmentFormProps> = ({
                 <button
                     type="button"
                     onClick={onClose}
-                    className="inline-flex items-center justify-center h-9 px-5 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="inline-flex items-center justify-center h-9 px-5 text-sm font-medium text-gray-600 dark:text-dk-fg-2 hover:bg-gray-100 dark:hover:bg-dk-raised rounded-lg transition-colors"
                 >
                     {t('dashboard.assignments.modals.edit.form.cancel')}
                 </button>
@@ -406,18 +406,18 @@ function ToggleRow({
 }) {
     return (
         <div className={`flex items-start justify-between gap-3 p-3 rounded-xl border nice-shadow ${
-            disabled ? 'bg-gray-50 border-gray-100' : 'bg-white border-gray-100'
+            disabled ? 'bg-gray-50 dark:bg-dk-inset/40 border-gray-100 dark:border-dk-line' : 'bg-white dark:bg-dk-card border-gray-100 dark:border-dk-line'
         }`}>
             <div className="flex items-start gap-2.5 flex-1 min-w-0">
                 <div className="mt-0.5 flex-none">{icon}</div>
                 <div className="flex flex-col min-w-0">
                     <div className="flex items-center gap-2">
-                        <p className="text-xs font-bold text-gray-900">{label}</p>
+                        <p className="text-xs font-bold text-gray-900 dark:text-dk-fg-1">{label}</p>
                         {warning && (
                             <AlertTriangle size={12} className="text-amber-500 flex-none" />
                         )}
                     </div>
-                    <p className="text-[10px] text-gray-500 leading-snug mt-0.5">
+                    <p className="text-[10px] text-gray-500 dark:text-dk-fg-3 leading-snug mt-0.5">
                         {description}
                     </p>
                 </div>
@@ -429,14 +429,16 @@ function ToggleRow({
                 aria-pressed={checked}
                 className={`relative flex-none inline-flex h-5 w-9 items-center rounded-full transition-colors ${
                     disabled
-                        ? 'bg-gray-200 cursor-not-allowed'
+                        ? 'bg-gray-200 dark:bg-dk-track cursor-not-allowed'
                         : checked
-                            ? 'bg-gray-900'
-                            : 'bg-gray-200 hover:bg-gray-300'
+                            ? 'bg-gray-900 dark:bg-zinc-100'
+                            : 'bg-gray-200 dark:bg-dk-track hover:bg-gray-300 dark:hover:bg-dk-line'
                 }`}
             >
                 <span
                     className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
+                        checked ? 'dark:bg-zinc-900' : 'dark:bg-zinc-300'
+                    } ${
                         checked ? 'translate-x-5' : 'translate-x-1'
                     }`}
                 />
@@ -467,15 +469,15 @@ function RetryRow({
     helperBounded: string;
 }) {
     return (
-        <div className="rounded-xl border nice-shadow bg-white border-gray-100 overflow-hidden">
+        <div className="rounded-xl border nice-shadow bg-white dark:bg-dk-card border-gray-100 dark:border-dk-line overflow-hidden">
             <div className="flex items-start justify-between gap-3 p-3">
                 <div className="flex items-start gap-2.5 flex-1 min-w-0">
                     <div className="mt-0.5 flex-none">
                         <RotateCcw size={16} className="text-fuchsia-500" />
                     </div>
                     <div className="flex flex-col min-w-0">
-                        <p className="text-xs font-bold text-gray-900">{labelAllow}</p>
-                        <p className="text-[10px] text-gray-500 leading-snug mt-0.5">
+                        <p className="text-xs font-bold text-gray-900 dark:text-dk-fg-1">{labelAllow}</p>
+                        <p className="text-[10px] text-gray-500 dark:text-dk-fg-3 leading-snug mt-0.5">
                             {descriptionAllow}
                         </p>
                     </div>
@@ -485,24 +487,24 @@ function RetryRow({
                     onClick={() => onAllowChange(!allowRetries)}
                     aria-pressed={allowRetries}
                     className={`relative flex-none inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                        allowRetries ? 'bg-gray-900' : 'bg-gray-200 hover:bg-gray-300'
+                        allowRetries ? 'bg-gray-900 dark:bg-zinc-100' : 'bg-gray-200 dark:bg-dk-track hover:bg-gray-300 dark:hover:bg-dk-line'
                     }`}
                 >
                     <span
                         className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
-                            allowRetries ? 'translate-x-5' : 'translate-x-1'
+                            allowRetries ? 'translate-x-5 dark:bg-zinc-900' : 'translate-x-1 dark:bg-zinc-300'
                         }`}
                     />
                 </button>
             </div>
             {allowRetries && (
-                <div className="border-t border-gray-100 px-3 py-3 bg-gray-50/50">
+                <div className="border-t border-gray-100 dark:border-dk-line px-3 py-3 bg-gray-50/50 dark:bg-dk-inset/40">
                     <div className="flex items-center justify-between gap-3">
                         <div className="flex flex-col min-w-0">
-                            <p className="text-[11px] font-semibold text-gray-700">
+                            <p className="text-[11px] font-semibold text-gray-700 dark:text-dk-fg-1">
                                 {labelMax}
                             </p>
-                            <p className="text-[10px] text-gray-500 leading-snug mt-0.5 flex items-center gap-1">
+                            <p className="text-[10px] text-gray-500 dark:text-dk-fg-3 leading-snug mt-0.5 flex items-center gap-1">
                                 {maxRetries === 0 ? (
                                     <>
                                         <InfinityIcon size={11} className="text-fuchsia-500" />
@@ -519,7 +521,7 @@ function RetryRow({
                                 onClick={() =>
                                     onMaxChange(Math.max(0, (maxRetries || 0) - 1))
                                 }
-                                className="h-7 w-7 rounded-md bg-white border border-gray-200 nice-shadow text-gray-600 hover:bg-gray-50 text-sm font-bold"
+                                className="h-7 w-7 rounded-md bg-white dark:bg-dk-card border border-gray-200 dark:border-dk-line-strong nice-shadow text-gray-600 dark:text-dk-fg-2 hover:bg-gray-50 dark:hover:bg-dk-raised text-sm font-bold"
                             >
                                 −
                             </button>
@@ -535,14 +537,14 @@ function RetryRow({
                                         : Math.max(0, Math.min(20, raw));
                                     onMaxChange(clamped);
                                 }}
-                                className="w-12 h-7 text-center text-sm font-bold text-gray-900 bg-white border border-gray-200 rounded-md outline-none focus:ring-1 focus:ring-gray-300"
+                                className="w-12 h-7 text-center text-sm font-bold text-gray-900 dark:text-dk-fg-1 bg-white dark:bg-dk-card border border-gray-200 dark:border-dk-line-strong rounded-md outline-none focus:ring-1 focus:ring-gray-300"
                             />
                             <button
                                 type="button"
                                 onClick={() =>
                                     onMaxChange(Math.min(20, (maxRetries || 0) + 1))
                                 }
-                                className="h-7 w-7 rounded-md bg-white border border-gray-200 nice-shadow text-gray-600 hover:bg-gray-50 text-sm font-bold"
+                                className="h-7 w-7 rounded-md bg-white dark:bg-dk-card border border-gray-200 dark:border-dk-line-strong nice-shadow text-gray-600 dark:text-dk-fg-2 hover:bg-gray-50 dark:hover:bg-dk-raised text-sm font-bold"
                             >
                                 +
                             </button>

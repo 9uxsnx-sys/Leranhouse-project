@@ -119,16 +119,16 @@ function EvaluateAssignment({ user_id }: any) {
         <div className='flex flex-col min-h-fit'>
             {/* Grade preview */}
             {gradePreview && (
-                <div className='flex items-center justify-between bg-white nice-shadow rounded-xl px-5 py-3 mb-4'>
+                <div className='flex items-center justify-between bg-white dark:bg-dk-card nice-shadow rounded-xl px-5 py-3 mb-4'>
                     <div className='flex items-center space-x-3'>
                         <div className={`rounded-lg px-3 py-1.5 text-lg font-bold ${gradePreview.passed ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
                             {gradePreview.display_grade}
                         </div>
                         <div className='flex flex-col'>
-                            <p className='text-[10px] uppercase tracking-wider font-semibold text-gray-400'>
+                            <p className='text-[10px] uppercase tracking-wider font-semibold text-gray-400 dark:text-zinc-400'>
                                 {t('dashboard.assignments.submissions.preview.current_grade')}
                             </p>
-                            <p className='text-xs text-gray-600 font-medium'>
+                            <p className='text-xs text-gray-600 dark:text-zinc-300 font-medium'>
                                 {gradePreview.points_summary} · {gradePreview.percentage_display}
                             </p>
                         </div>
@@ -158,11 +158,11 @@ function EvaluateAssignment({ user_id }: any) {
                                 <div className='bg-brand text-brand-fg text-[10px] font-bold px-2 py-0.5 rounded-full'>
                                     {index + 1}
                                 </div>
-                                <p className='text-sm font-semibold text-gray-800'>{task.description || t('dashboard.assignments.submissions.task_label', { number: index + 1 })}</p>
+                                <p className='text-sm font-semibold text-gray-800 dark:text-zinc-200'>{task.description || t('dashboard.assignments.submissions.task_label', { number: index + 1 })}</p>
                                 {tb && (
                                     <div className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                                         !taskSubmitted
-                                            ? 'bg-gray-100 text-gray-500'
+                                            ? 'bg-gray-100 dark:bg-dk-inset text-gray-500 dark:text-zinc-400'
                                             : taskPassed
                                                 ? 'bg-emerald-50 text-emerald-700'
                                                 : 'bg-rose-50 text-rose-700'
@@ -219,11 +219,11 @@ function EvaluateAssignment({ user_id }: any) {
             </div>
 
             {/* Overall feedback */}
-            <div className='flex flex-col space-y-2 pt-5 mt-3 border-t border-gray-100'>
-                <div className='flex items-center space-x-1.5 text-gray-700'>
+            <div className='flex flex-col space-y-2 pt-5 mt-3 border-t border-gray-100 dark:border-dk-line'>
+                <div className='flex items-center space-x-1.5 text-gray-700 dark:text-zinc-200'>
                     <MessageSquare size={14} />
                     <p className='text-sm font-bold'>{t('dashboard.assignments.submissions.feedback.label')}</p>
-                    <span className='text-[10px] text-gray-400 font-medium'>
+                    <span className='text-[10px] text-gray-400 dark:text-zinc-400 font-medium'>
                         ({t('dashboard.assignments.submissions.feedback.optional')})
                     </span>
                 </div>
@@ -232,15 +232,15 @@ function EvaluateAssignment({ user_id }: any) {
                     onChange={(e) => setFeedback(e.target.value)}
                     placeholder={t('dashboard.assignments.submissions.feedback.placeholder')}
                     rows={3}
-                    className='w-full px-3 py-2 text-sm bg-white nice-shadow rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 placeholder:text-gray-400 resize-none'
+                    className='w-full px-3 py-2 text-sm bg-white dark:bg-dk-card nice-shadow rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 placeholder:text-gray-400 dark:placeholder:text-zinc-500 resize-none'
                 />
-                <p className='text-[10px] text-gray-400 leading-tight'>
+                <p className='text-[10px] text-gray-400 dark:text-zinc-400 leading-tight'>
                     {t('dashboard.assignments.submissions.feedback.hint')}
                 </p>
             </div>
 
             {/* Action bar */}
-            <div className='flex items-center justify-between pt-4 mt-3 border-t border-gray-100'>
+            <div className='flex items-center justify-between pt-4 mt-3 border-t border-gray-100 dark:border-dk-line'>
                 <div className='flex items-center space-x-1.5'>
                     <ConfirmationModal
                         confirmationButtonText={t('dashboard.assignments.submissions.actions.reject')}
@@ -268,13 +268,13 @@ function EvaluateAssignment({ user_id }: any) {
                     <div className='flex items-center space-x-1.5'>
                         <button
                             onClick={gradeAssignment}
-                            className='flex items-center space-x-1.5 px-3.5 py-2 text-xs font-bold text-gray-700 bg-gray-100 rounded-lg nice-shadow hover:bg-gray-200/80 transition-colors cursor-pointer'
+                            className='flex items-center space-x-1.5 px-3.5 py-2 text-xs font-bold text-gray-700 dark:text-zinc-200 bg-gray-100 dark:bg-dk-inset rounded-lg nice-shadow hover:bg-gray-200/80 transition-colors cursor-pointer'
                         >
                             <BookOpenCheck size={14} />
                             <span>{t('dashboard.assignments.submissions.actions.set_final_grade')}</span>
                         </button>
                         <ToolTip side='top' slateBlack sideOffset={6} content={t('dashboard.assignments.submissions.actions.set_final_grade_description')}>
-                            <div className='text-gray-300 hover:text-gray-500 transition-colors cursor-help'>
+                            <div className='text-gray-300 dark:text-zinc-600 hover:text-gray-500 dark:hover:text-zinc-300 transition-colors cursor-help'>
                                 <CircleHelp size={14} />
                             </div>
                         </ToolTip>
@@ -288,7 +288,7 @@ function EvaluateAssignment({ user_id }: any) {
                             <span>{t('dashboard.assignments.submissions.actions.finalize')}</span>
                         </button>
                         <ToolTip side='top' slateBlack sideOffset={6} content={t('dashboard.assignments.submissions.actions.finalize_description')}>
-                            <div className='text-gray-300 hover:text-gray-500 transition-colors cursor-help'>
+                            <div className='text-gray-300 dark:text-zinc-600 hover:text-gray-500 dark:hover:text-zinc-300 transition-colors cursor-help'>
                                 <CircleHelp size={14} />
                             </div>
                         </ToolTip>

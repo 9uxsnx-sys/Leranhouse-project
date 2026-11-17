@@ -92,7 +92,7 @@ export default function FontSelector({ value, onChange }: FontSelectorProps) {
   return (
     <div className="space-y-4">
       <div>
-        <Label className="text-sm font-medium text-gray-700 mb-3 block">
+        <Label className="text-sm font-medium text-gray-700 dark:text-zinc-200 mb-3 block">
           <Type className="inline h-4 w-4 me-1.5 -mt-0.5" />
           {t('dashboard.organization.branding.font.typography')}
         </Label>
@@ -104,7 +104,7 @@ export default function FontSelector({ value, onChange }: FontSelectorProps) {
                 variant="outline"
                 role="combobox"
                 aria-expanded={open}
-                className="w-72 justify-between h-10 bg-white font-normal"
+                className="w-72 justify-between h-10 bg-white dark:bg-dk-card font-normal"
               >
                 <span
                   className="truncate"
@@ -126,13 +126,13 @@ export default function FontSelector({ value, onChange }: FontSelectorProps) {
                 />
               </div>
               {showingFullCatalog && filteredFonts.length > 0 && (
-                <div className="px-3 py-1.5 text-[11px] text-gray-400 bg-gray-50/50">
+                <div className="px-3 py-1.5 text-[11px] text-gray-400 dark:text-zinc-400 bg-gray-50/50 dark:bg-dk-inset/40">
                   {t('dashboard.organization.branding.font.showing_all')}
                 </div>
               )}
               <div ref={listRef} className="max-h-60 overflow-y-auto p-1">
                 {filteredFonts.length === 0 ? (
-                  <div className="py-6 text-center text-sm text-gray-500">
+                  <div className="py-6 text-center text-sm text-gray-500 dark:text-zinc-400">
                     {t('dashboard.organization.branding.font.no_results')}
                   </div>
                 ) : (
@@ -141,8 +141,8 @@ export default function FontSelector({ value, onChange }: FontSelectorProps) {
                       key={font}
                       onClick={() => handleSelect(font)}
                       className={cn(
-                        'w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-md hover:bg-gray-100 text-start cursor-pointer',
-                        value === font && 'bg-gray-100'
+                        'w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-dk-raised text-start cursor-pointer',
+                        value === font && 'bg-gray-100 dark:bg-dk-inset'
                       )}
                     >
                       <Check
@@ -155,7 +155,7 @@ export default function FontSelector({ value, onChange }: FontSelectorProps) {
                         {font}
                       </span>
                       {font === DEFAULT_FONT && (
-                        <span className="ms-auto text-[10px] text-gray-400">{t('dashboard.organization.branding.font.default')}</span>
+                        <span className="ms-auto text-[10px] text-gray-400 dark:text-zinc-400">{t('dashboard.organization.branding.font.default')}</span>
                       )}
                     </button>
                   ))
@@ -170,28 +170,28 @@ export default function FontSelector({ value, onChange }: FontSelectorProps) {
               variant="ghost"
               size="sm"
               onClick={handleClear}
-              className="text-gray-400 hover:text-gray-600 h-10 px-2"
+              className="text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 h-10 px-2"
             >
               <X className="h-4 w-4" />
             </Button>
           )}
         </div>
 
-        <p className="text-xs text-gray-400 mt-2">
+        <p className="text-xs text-gray-400 dark:text-zinc-400 mt-2">
           {t('dashboard.organization.branding.font.description')}
         </p>
       </div>
 
       {/* Preview */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <p className="text-xs text-gray-400 mb-2">{t('dashboard.organization.branding.font.preview')}</p>
+      <div className="bg-white dark:bg-dk-card rounded-lg border border-gray-200 dark:border-dk-line-strong p-4">
+        <p className="text-xs text-gray-400 dark:text-zinc-400 mb-2">{t('dashboard.organization.branding.font.preview')}</p>
         <div
           style={{ fontFamily: `'${previewFont || DEFAULT_FONT}', sans-serif` }}
         >
-          <p className="text-2xl font-bold text-gray-900 mb-1">
+          <p className="text-2xl font-bold text-gray-900 dark:text-zinc-100 mb-1">
             {t('dashboard.organization.branding.font.preview_text')}
           </p>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-zinc-300">
             ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789
           </p>
         </div>

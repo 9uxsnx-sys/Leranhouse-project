@@ -85,7 +85,7 @@ function PodcastThumbnail({ podcast, orgslug, customLink, isDashboard = false }:
       : getUriWithOrg(orgslug, `/podcast/${removePodcastPrefix(podcast.podcast_uuid)}`)
 
   return (
-    <div className="group relative flex flex-col bg-white rounded-xl nice-shadow overflow-hidden w-full transition-all duration-300 hover:scale-[1.01]">
+    <div className="group relative flex flex-col bg-white dark:bg-dk-card rounded-xl nice-shadow dark:hover:border-dk-line-strong overflow-hidden w-full transition-all duration-300 hover:scale-[1.01]">
       {/* Options menu */}
       <AdminEditOptions
         podcast={podcast}
@@ -94,24 +94,24 @@ function PodcastThumbnail({ podcast, orgslug, customLink, isDashboard = false }:
         isDashboard={isDashboard}
       />
 
-      <Link prefetch href={podcastLink} className="block relative aspect-video overflow-hidden bg-gray-50">
+      <Link prefetch href={podcastLink} className="block relative aspect-video overflow-hidden bg-gray-50 dark:bg-dk-inset/40">
         <div
           className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
           style={{ backgroundImage: `url(${thumbnailImage})` }}
         />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 rounded-full p-3 shadow-lg">
-            <Play className="w-6 h-6 text-gray-900 fill-current" />
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 dark:bg-dk-card/90 rounded-full p-3 shadow-lg">
+            <Play className="w-6 h-6 text-gray-900 dark:text-dk-fg-1 fill-current" />
           </div>
         </div>
         {isDashboard && (
           <div className="absolute bottom-2 start-2">
             {podcast.published ? (
-              <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-green-100 text-green-700 rounded-full">
+              <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-300 rounded-full">
                 {t('podcasts.published')}
               </span>
             ) : (
-              <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-yellow-100 text-yellow-700 rounded-full">
+              <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-yellow-100 dark:bg-yellow-500/15 text-yellow-700 dark:text-yellow-300 rounded-full">
                 {t('podcasts.unpublished')}
               </span>
             )}
@@ -130,19 +130,19 @@ function PodcastThumbnail({ podcast, orgslug, customLink, isDashboard = false }:
           <Link
             href={podcastLink}
             dir="auto"
-            className="text-base font-bold text-gray-900 leading-tight hover:text-black transition-colors line-clamp-1"
+            className="text-base font-bold text-gray-900 dark:text-dk-fg-1 leading-tight hover:text-black dark:hover:text-white transition-colors line-clamp-1"
           >
             {podcast.name}
           </Link>
         </div>
 
         {podcast.description && (
-          <p dir="auto" className="text-[11px] text-gray-500 line-clamp-2 min-h-[1.5rem]">
+          <p dir="auto" className="text-[11px] text-gray-500 dark:text-dk-fg-3 line-clamp-2 min-h-[1.5rem]">
             {podcast.description}
           </p>
         )}
 
-        <div className="pt-1.5 flex items-center justify-between border-t border-gray-100">
+        <div className="pt-1.5 flex items-center justify-between border-t border-gray-100 dark:border-dk-line">
           <div className="flex items-center gap-2">
             {displayedAuthors.length > 0 && (
               <div className="flex -space-x-2 items-center">
@@ -165,7 +165,7 @@ function PodcastThumbnail({ podcast, orgslug, customLink, isDashboard = false }:
                 ))}
                 {hasMoreAuthors && (
                   <div className="relative z-0">
-                    <div className="flex items-center justify-center w-[20px] h-[20px] text-[8px] font-bold text-gray-600 bg-gray-100 border-2 border-white rounded-full">
+                    <div className="flex items-center justify-center w-[20px] h-[20px] text-[8px] font-bold text-gray-600 dark:text-dk-fg-2 bg-gray-100 dark:bg-dk-inset border-2 border-white dark:border-zinc-900 rounded-full">
                       +{remainingAuthorsCount}
                     </div>
                   </div>
@@ -174,7 +174,7 @@ function PodcastThumbnail({ podcast, orgslug, customLink, isDashboard = false }:
             )}
 
             {podcast.update_date && (
-              <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+              <span className="text-[9px] font-bold text-gray-400 dark:text-dk-fg-3 uppercase tracking-widest">
                 {new Date(podcast.update_date).toLocaleDateString(i18n.language, { month: 'short', day: 'numeric' })}
               </span>
             )}
@@ -182,7 +182,7 @@ function PodcastThumbnail({ podcast, orgslug, customLink, isDashboard = false }:
 
           <Link
             href={podcastLink}
-            className="text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
+            className="text-[10px] font-bold text-gray-400 dark:text-dk-fg-3 hover:text-gray-900 dark:hover:text-dk-fg-1 transition-colors uppercase tracking-wider"
           >
             {t('podcasts.listen_now')}
           </Link>
@@ -213,8 +213,8 @@ export const AdminEditOptions = ({ podcast, orgSlug, deletePodcast, isDashboard 
       }`}>
         <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
           <DropdownMenuTrigger asChild>
-            <button aria-label={t('common.aria.actions_menu')} className="p-1.5 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all shadow-md">
-              <MoreVertical size={18} className="text-gray-700" />
+            <button aria-label={t('common.aria.actions_menu')} className="p-1.5 bg-white/90 dark:bg-dk-card/90 backdrop-blur-sm rounded-full hover:bg-white dark:hover:bg-dk-raised transition-all shadow-md">
+              <MoreVertical size={18} className="text-gray-700 dark:text-dk-fg-1" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-52">
@@ -234,7 +234,7 @@ export const AdminEditOptions = ({ podcast, orgSlug, deletePodcast, isDashboard 
                 confirmationMessage={t('podcasts.delete_podcast_confirm')}
                 dialogTitle={t('podcasts.delete_podcast_title', { name: podcast.name })}
                 dialogTrigger={
-                  <button className="w-full text-start flex items-center px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-md transition-colors">
+                  <button className="w-full text-start flex items-center px-2 py-1.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-md transition-colors">
                     <Trash2 className="me-2 h-4 w-4" /> {t('podcasts.delete_podcast')}
                   </button>
                 }

@@ -35,22 +35,22 @@ const NavigationButtons = memo(({
         onClick={() => navigateToActivity(prevActivity)}
         className={`flex items-center space-x-1 sm:space-x-2 py-1.5 px-1.5 sm:px-2 rounded-md transition-all duration-200 ${
           prevActivity 
-            ? 'text-gray-700 hover:bg-gray-100' 
-            : 'text-gray-300 cursor-not-allowed'
+            ? 'text-gray-700 dark:text-dk-fg-1 hover:bg-gray-100 dark:hover:bg-dk-raised' 
+            : 'text-gray-300 dark:text-zinc-600 cursor-not-allowed'
         }`}
         disabled={!prevActivity}
         title={prevActivity ? `${t('common.previous')}: ${prevActivity.name}` : t('activities.no_previous_activity')}
       >
         <ChevronLeft size={16} className="shrink-0 sm:w-5 sm:h-5" />
         <div className="flex flex-col items-start hidden sm:flex">
-          <span className="text-xs text-gray-500">{t('common.previous')}</span>
+          <span className="text-xs text-gray-500 dark:text-dk-fg-3">{t('common.previous')}</span>
           <span className="text-sm font-medium text-start truncate max-w-[100px] sm:max-w-[150px]">
             {prevActivity ? prevActivity.name : t('activities.no_previous_activity')}
           </span>
         </div>
       </button>
 
-      <span className="text-sm font-medium text-gray-500 px-1 sm:px-2">
+      <span className="text-sm font-medium text-gray-500 dark:text-dk-fg-3 px-1 sm:px-2">
         {currentIndex + 1} {t('common.of')} {allActivities.length}
       </span>
 
@@ -61,7 +61,7 @@ const NavigationButtons = memo(({
         title={nextActivity ? `${t('common.next')}: ${nextActivity.name}` : t('activities.no_next_activity')}
       >
         <div className="flex flex-col items-end hidden sm:flex">
-          <span className={`text-xs ${nextActivity ? 'text-gray-500' : 'text-gray-500'}`}>{t('common.next')}</span>
+          <span className={`text-xs ${nextActivity ? 'text-gray-500 dark:text-dk-fg-3' : 'text-gray-500 dark:text-dk-fg-3'}`}>{t('common.next')}</span>
           <span className="text-sm font-medium text-end truncate max-w-[100px] sm:max-w-[150px]">
             {nextActivity ? nextActivity.name : t('activities.no_next_activity')}
           </span>
@@ -89,8 +89,8 @@ const CourseInfo = memo(({ course, org }: { course: any, org: any }) => {
         alt=""
       />
       <div className="flex flex-col -space-y-0.5 min-w-0 hidden sm:block">
-        <p className="text-sm font-medium text-gray-500">{t('courses.courses')}</p>
-        <h1 className="font-semibold text-gray-900 text-base truncate">
+        <p className="text-sm font-medium text-gray-500 dark:text-dk-fg-3">{t('courses.courses')}</p>
+        <h1 className="font-semibold text-gray-900 dark:text-dk-fg-1 text-base truncate">
           {course.name}
         </h1>
       </div>

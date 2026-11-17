@@ -77,7 +77,7 @@ export function UpvoteButton({
           'flex items-center gap-1 transition-colors duration-200 text-xs',
           hasVoted
             ? 'text-red-500'
-            : 'text-gray-400 hover:text-red-500',
+            : 'text-gray-400 dark:text-dk-fg-3 hover:text-red-500',
           (!canVote || disabled) && 'opacity-50 cursor-not-allowed',
           isLoading && 'opacity-70'
         )}
@@ -104,7 +104,7 @@ export function UpvoteButton({
         'flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg transition-all duration-200',
         hasVoted
           ? 'bg-red-50 text-red-600 hover:bg-red-100'
-          : 'bg-gray-100 text-gray-500 hover:bg-gray-200',
+          : 'bg-gray-100 dark:bg-dk-inset text-gray-500 dark:text-dk-fg-3 hover:bg-gray-200',
         (!canVote || disabled) && 'opacity-50 cursor-not-allowed',
         isLoading && 'opacity-70'
       )}

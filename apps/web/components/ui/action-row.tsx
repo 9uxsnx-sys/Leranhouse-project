@@ -61,7 +61,7 @@ const ActionRowSearch = React.forwardRef<HTMLInputElement, ActionRowSearchProps>
     <div className={cn('flex items-center gap-3', className)}>
       <div className="relative w-full sm:w-80">
         <Search
-          className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none"
+          className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-zinc-400 pointer-events-none"
           aria-hidden="true"
         />
         <input
@@ -69,7 +69,7 @@ const ActionRowSearch = React.forwardRef<HTMLInputElement, ActionRowSearchProps>
           type="text"
           value={value}
           onChange={(e) => onValueChange(e.target.value)}
-          className="w-full h-7 ps-8 pe-2 text-sm bg-white shadow-borders-base rounded-md placeholder:text-gray-400 focus:outline-none"
+          className="w-full h-7 ps-8 pe-2 text-sm bg-white dark:bg-dk-card text-ui-fg-base shadow-borders-base rounded-md placeholder:text-gray-400 dark:placeholder:text-dk-fg-4 focus:outline-none"
           {...props}
         />
       </div>

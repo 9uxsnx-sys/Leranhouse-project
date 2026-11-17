@@ -217,13 +217,13 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
         return (
           <div className="flex items-center gap-2.5 min-w-0">
             {isPodcast ? (
-              <Headphones size={16} className="shrink-0 text-gray-400" />
+              <Headphones size={16} className="shrink-0 text-gray-400 dark:text-zinc-400" />
             ) : (
-              <BookOpen size={16} className="shrink-0 text-gray-400" />
+              <BookOpen size={16} className="shrink-0 text-gray-400 dark:text-zinc-400" />
             )}
-            <span className="font-medium text-gray-900 truncate">{row.name}</span>
+            <span className="font-medium text-gray-900 dark:text-zinc-100 truncate">{row.name}</span>
             {!row.published && (
-              <span className="text-[11px] text-gray-400 shrink-0">
+              <span className="text-[11px] text-gray-400 dark:text-zinc-400 shrink-0">
                 {t('collections.dashboard.content.draft')}
               </span>
             )}
@@ -236,7 +236,7 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
       header: t('collections.dashboard.content.type'),
       width: '130px',
       render: (row) => (
-        <span className="inline-flex items-center gap-1.5 text-gray-600">
+        <span className="inline-flex items-center gap-1.5 text-gray-600 dark:text-zinc-300">
           <span className="w-2.5 h-2.5 rounded bg-gray-300" />
           {row.resource_type === 'podcast'
             ? t('collections.dashboard.content.podcast')
@@ -251,14 +251,14 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
       align: 'right',
       render: (row) =>
         row.access_type === 'paid' && row.price_amount ? (
-          <span className="text-[13px] text-gray-600 tabular-nums">
+          <span className="text-[13px] text-gray-600 dark:text-zinc-300 tabular-nums">
             {row.price_amount.toLocaleString()}{' '}
-            <span className="text-[11px] font-medium text-gray-400">
+            <span className="text-[11px] font-medium text-gray-400 dark:text-zinc-400">
               {row.price_currency}
             </span>
           </span>
         ) : (
-          <span className="text-[13px] text-gray-400">—</span>
+          <span className="text-[13px] text-gray-400 dark:text-zinc-400">—</span>
         ),
     },
     {
@@ -269,7 +269,7 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
       width: '140px',
       align: 'right',
       render: (row) => (
-        <span className="text-[13px] text-gray-400 whitespace-nowrap">
+        <span className="text-[13px] text-gray-400 dark:text-zinc-400 whitespace-nowrap">
           {formatDate(row.creation_date)}
         </span>
       ),
@@ -287,7 +287,7 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <button
-                className="p-1.5 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
+                className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-dk-raised text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-all"
                 aria-label={t('common.view_details')}
               >
                 <MoreHorizontal size={16} />
@@ -295,7 +295,7 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
-              className="min-w-[150px] rounded-lg border border-gray-200 bg-white p-1 shadow-md"
+              className="min-w-[150px] rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card p-1 shadow-md"
               sideOffset={6}
             >
               <DropdownMenuItem
@@ -319,13 +319,13 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
       {/* Toolbar — same pattern as the Users tab and course Access tab */}
       <div className="flex items-center gap-3 mb-5">
         <div className="relative w-80">
-          <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+          <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-zinc-400 pointer-events-none" />
           <input
             type="text"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             placeholder={t('collections.dashboard.content.search_placeholder')}
-            className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
+            className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 dark:text-zinc-200 bg-white dark:bg-dk-card shadow-borders-base rounded-md placeholder:text-gray-500 dark:placeholder:text-zinc-400 focus:outline-none"
           />
         </div>
 
@@ -334,8 +334,8 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
         <button
           onClick={handleBulkAction}
           disabled={isBulkWorking}
-          className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white border-gray-200 hover:bg-gray-50 disabled:opacity-50 ${
-            isSearching ? 'text-gray-600' : 'text-red-600'
+          className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white dark:bg-dk-card border-gray-200 dark:border-dk-line hover:bg-gray-50 dark:hover:bg-dk-raised disabled:opacity-50 ${
+            isSearching ? 'text-gray-600 dark:text-zinc-300' : 'text-red-600'
           } ${selectedIds.size === 0 ? 'invisible pointer-events-none' : ''}`}
         >
           {isBulkWorking ? (
@@ -359,7 +359,7 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
             <IconButton
               size="small"
               variant="transparent"
-              className="bg-white hover:bg-gray-50 shadow-borders-base relative"
+              className="bg-white dark:bg-dk-card hover:bg-gray-50 dark:hover:bg-dk-raised shadow-borders-base relative"
               aria-label={t('collections.dashboard.content.filter')}
             >
               <ConceptIcon.filter size={14} />
@@ -370,10 +370,10 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="end"
-            className="min-w-[190px] rounded-lg border border-gray-200 bg-white p-1 shadow-md"
+            className="min-w-[190px] rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card p-1 shadow-md"
             sideOffset={6}
           >
-            <div className="px-2.5 pt-1.5 pb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+            <div className="px-2.5 pt-1.5 pb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-zinc-400">
               {t('collections.dashboard.content.filters.type')}
             </div>
             {[
@@ -386,14 +386,14 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
                 onClick={() => setKindFilter(option.value as '' | 'course' | 'podcast')}
                 className="justify-between text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
               >
-                <span className="text-gray-700 text-xs">{option.label}</span>
-                {kindFilter === option.value && <Check size={12} className="text-gray-500" />}
+                <span className="text-gray-700 dark:text-zinc-200 text-xs">{option.label}</span>
+                {kindFilter === option.value && <Check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
             ))}
 
             <DropdownMenuSeparator />
 
-            <div className="px-2.5 pt-1.5 pb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+            <div className="px-2.5 pt-1.5 pb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-400 dark:text-zinc-400">
               {t('collections.dashboard.content.filters.status')}
             </div>
             {[
@@ -408,9 +408,9 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
                 }
                 className="justify-between text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
               >
-                <span className="text-gray-700 text-xs">{option.label}</span>
+                <span className="text-gray-700 dark:text-zinc-200 text-xs">{option.label}</span>
                 {statusFilter === option.value && (
-                  <Check size={12} className="text-gray-500" />
+                  <Check size={12} className="text-gray-500 dark:text-zinc-400" />
                 )}
               </DropdownMenuItem>
             ))}
@@ -442,7 +442,7 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
       ) : isInitialLoading ? (
         <TableCard>
           <div className="py-16 flex justify-center">
-            <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+            <Loader2 className="w-6 h-6 text-gray-400 dark:text-zinc-400 animate-spin" />
           </div>
         </TableCard>
       ) : rows.length === 0 ? (
@@ -473,7 +473,7 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
             footer={
               totalContentPages > 1 ? (
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-gray-500 dark:text-zinc-400">
                     Page {contentPage} of {totalContentPages}
                   </span>
                   <div className="flex items-center gap-1">
@@ -481,7 +481,7 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
                       type="button"
                       onClick={() => setContentPage((p) => Math.max(1, p - 1))}
                       disabled={contentPage === 1}
-                      className="px-2 py-1 text-xs font-medium rounded border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      className="px-2 py-1 text-xs font-medium rounded border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     >
                       Previous
                     </button>
@@ -489,7 +489,7 @@ function EditCollectionContent({ collection, onUpdated }: EditCollectionContentP
                       type="button"
                       onClick={() => setContentPage((p) => Math.min(totalContentPages, p + 1))}
                       disabled={contentPage === totalContentPages}
-                      className="px-2 py-1 text-xs font-medium rounded border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                      className="px-2 py-1 text-xs font-medium rounded border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     >
                       Next
                     </button>

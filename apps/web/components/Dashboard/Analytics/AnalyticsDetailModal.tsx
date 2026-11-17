@@ -41,16 +41,16 @@ export default function AnalyticsDetailModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl nice-shadow w-[90vw] max-w-[900px] max-h-[85vh] flex flex-col">
+      <div className="relative bg-white rounded-2xl nice-shadow w-[90vw] max-w-[900px] max-h-[85vh] flex flex-col dark:bg-dk-card">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-dk-line">
           <div className="flex items-center gap-2.5">
             {icon}
-            <h2 className="text-base font-semibold text-gray-900">{title}</h2>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-zinc-100">{title}</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
+            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600 dark:hover:bg-dk-raised"
           >
             <X size={18} />
           </button>

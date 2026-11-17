@@ -33,7 +33,7 @@ function PageLoading() {
           }
         }}
       >
-        <Loader2 className="w-10 h-10 text-gray-400 animate-spin" />
+        <Loader2 className="w-10 h-10 text-gray-400 dark:text-dk-fg-3 animate-spin" />
       </motion.div>
     </div>
   )

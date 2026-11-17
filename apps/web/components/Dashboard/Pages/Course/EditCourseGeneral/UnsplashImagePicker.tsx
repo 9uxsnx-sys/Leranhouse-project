@@ -170,14 +170,14 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
             placeholder={t('dashboard.courses.general.form.image_search_placeholder')}
             className="w-full p-2 ps-10 border rounded-lg focus:outline-hidden focus:ring-2 focus:ring-blue-500"
           />
-          <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-zinc-400" size={20} />
         </div>
         <div className="flex flex-wrap gap-2">
           {predefinedLabels.map(label => (
             <button
               key={label.name}
               onClick={() => handleLabelClick(label.name)}
-              className="px-3 py-1 bg-neutral-100 rounded-lg hover:bg-neutral-200 nice-shadow transition-colors flex items-center gap-1 space-x-1"
+              className="px-3 py-1 bg-neutral-100 rounded-lg hover:bg-neutral-200 dark:hover:bg-dk-raised nice-shadow transition-colors flex items-center gap-1 space-x-1 dark:bg-dk-inset"
             >
               <label.icon size={16} />
               <span>{t(`dashboard.courses.general.unsplash.categories.${label.name.toLowerCase()}`)}</span>
@@ -198,13 +198,13 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
                   onClick={() => handleImageSelect(image)}
                 />
               </div>
-              <p className="text-[11px] text-gray-500 truncate">
+              <p className="text-[11px] text-gray-500 dark:text-zinc-400 truncate">
                 {t('dashboard.courses.general.unsplash.photo_by')}{' '}
                 <a
                   href={withUtm(image.user?.links?.html)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="underline hover:text-gray-700"
+                  className="underline hover:text-gray-700 dark:hover:text-zinc-200"
                   onClick={(e) => e.stopPropagation()}
                 >
                   {image.user?.name}
@@ -214,7 +214,7 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
                   href={`https://unsplash.com/${UNSPLASH_UTM}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="underline hover:text-gray-700"
+                  className="underline hover:text-gray-700 dark:hover:text-zinc-200"
                   onClick={(e) => e.stopPropagation()}
                 >
                   Unsplash
@@ -234,13 +234,13 @@ const UnsplashImagePicker: React.FC<UnsplashImagePickerProps> = ({ onSelect, onC
         )}
       </div>
 
-      <div className="border-t border-gray-100 px-4 py-2 text-[11px] text-gray-500 text-center">
+      <div className="border-t border-gray-100 dark:border-dk-line px-4 py-2 text-[11px] text-gray-500 dark:text-zinc-400 text-center">
         {t('dashboard.courses.general.unsplash.photos_from')}{' '}
         <a
           href={`https://unsplash.com/${UNSPLASH_UTM}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="underline hover:text-gray-700"
+          className="underline hover:text-gray-700 dark:hover:text-zinc-200"
         >
           Unsplash
         </a>

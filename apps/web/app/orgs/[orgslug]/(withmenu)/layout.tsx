@@ -11,9 +11,11 @@ import { UserBreadcrumbProvider } from '@components/Objects/Breadcrumbs/UserBrea
 import { PageViewTracker } from '@components/Analytics/PageViewTracker'
 import { getGoogleFontUrl, DEFAULT_FONT } from '@/lib/fonts'
 import { getBrandStyle } from '@services/utils/ts/colorUtils'
+import { useTheme } from '@components/Contexts/ThemeContext'
 
 function LayoutContent({ children, orgslug }: { children: React.ReactNode; orgslug: string }) {
   const org = useOrg() as any
+  const { resolvedTheme } = useTheme()
   const customFont = org?.config?.config?.customization?.general?.font || org?.config?.config?.general?.font || ''
   const brandColor = org?.config?.config?.customization?.general?.color || org?.config?.config?.general?.color || ''
   const brandFg = org?.config?.config?.customization?.general?.brand_fg || org?.config?.config?.general?.brand_fg || ''
@@ -29,13 +31,13 @@ function LayoutContent({ children, orgslug }: { children: React.ReactNode; orgsl
   // Portalled dialogs/popovers live outside the shell wrapper, so the brand
   // variables are mirrored on the root element as well.
   useEffect(() => {
-    const vars = getBrandStyle(brandColor, brandFg, brandSidebar, brandHover)
+    const vars = getBrandStyle(brandColor, brandFg, brandSidebar, brandHover, resolvedTheme)
     const root = document.documentElement
     Object.entries(vars).forEach(([key, value]) => root.style.setProperty(key, value))
     return () => {
       Object.keys(vars).forEach((key) => root.style.removeProperty(key))
     }
-  }, [brandColor, brandFg, brandSidebar, brandHover])
+  }, [brandColor, brandFg, brandSidebar, brandHover, resolvedTheme])
 
   // Inject Google Font stylesheet into document head
   useEffect(() => {

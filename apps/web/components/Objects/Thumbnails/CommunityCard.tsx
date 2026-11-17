@@ -55,10 +55,10 @@ export function CommunityCard({ id, title, description, org_uuid, community_uuid
   return (
     <Link
       href={props.href || `/community/${id}`}
-      className="flex flex-col h-full bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden"
+      className="flex flex-col h-full bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line rounded-xl shadow-sm overflow-hidden transition-colors hover:border-gray-200 dark:hover:border-dk-line-strong"
     >
       {/* 16:9 Cover Image */}
-      <div className="relative overflow-hidden bg-gray-100 shrink-0" style={{ aspectRatio: '16/9' }}>
+      <div className="relative overflow-hidden bg-gray-100 dark:bg-dk-inset shrink-0" style={{ aspectRatio: '16/9' }}>
         {imageUrl ? (
           <img
             className="w-full h-full object-cover"
@@ -66,7 +66,7 @@ export function CommunityCard({ id, title, description, org_uuid, community_uuid
             alt={title}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-300">
+          <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-zinc-600">
             <Users size={40} strokeWidth={1.5} />
           </div>
         )}
@@ -74,11 +74,11 @@ export function CommunityCard({ id, title, description, org_uuid, community_uuid
       {/* Content */}
       <div className="px-4 pt-3 pb-4 flex flex-col flex-1">
         <div className="flex flex-col gap-1">
-          <h3 dir="auto" className="text-[15px] font-semibold leading-snug line-clamp-2 text-gray-900">
+          <h3 dir="auto" className="text-[15px] font-semibold leading-snug line-clamp-2 text-gray-900 dark:text-dk-fg-1">
             {title}
           </h3>
           {/* Three lines are reserved in every locale so cards keep one rhythm. */}
-          <p dir="auto" className={`text-[13px] font-normal leading-relaxed line-clamp-3 min-h-[63px] ${description ? 'text-[#6B7280]' : 'invisible'}`}>
+          <p dir="auto" className={`text-[13px] font-normal leading-relaxed line-clamp-3 min-h-[63px] ${description ? 'text-[#6B7280] dark:text-dk-fg-2' : 'invisible'}`}>
             {description || 'placeholder'}
           </p>
         </div>

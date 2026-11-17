@@ -95,40 +95,40 @@ function AssignmentSubmissionsSubPage({ assignment_uuid }: { assignment_uuid: st
             <div className="px-10 pt-6 pb-4 flex flex-col space-y-4">
                 {/* Stats row */}
                 <div className="flex gap-3">
-                    <div className="bg-white nice-shadow rounded-xl px-4 py-3 flex items-center space-x-3">
-                        <div className="bg-gray-100 rounded-lg p-1.5">
-                            <Users size={14} className="text-gray-600" />
+                    <div className="bg-white dark:bg-dk-card nice-shadow rounded-xl px-4 py-3 flex items-center space-x-3">
+                        <div className="bg-gray-100 dark:bg-dk-inset rounded-lg p-1.5">
+                            <Users size={14} className="text-gray-600 dark:text-zinc-300" />
                         </div>
                         <div>
-                            <p className="text-[10px] uppercase tracking-wide font-semibold text-gray-400">{t('dashboard.assignments.submissions.stats.total')}</p>
-                            <p className="text-lg font-bold text-gray-900 -mt-0.5">{stats.total}</p>
+                            <p className="text-[10px] uppercase tracking-wide font-semibold text-gray-400 dark:text-zinc-400">{t('dashboard.assignments.submissions.stats.total')}</p>
+                            <p className="text-lg font-bold text-gray-900 dark:text-zinc-100 -mt-0.5">{stats.total}</p>
                         </div>
                     </div>
-                    <div className="bg-white nice-shadow rounded-xl px-4 py-3 flex items-center space-x-3">
+                    <div className="bg-white dark:bg-dk-card nice-shadow rounded-xl px-4 py-3 flex items-center space-x-3">
                         <div className="bg-rose-50 rounded-lg p-1.5">
                             <Clock size={14} className="text-rose-600" />
                         </div>
                         <div>
-                            <p className="text-[10px] uppercase tracking-wide font-semibold text-gray-400">{t('dashboard.assignments.submissions.status.late')}</p>
-                            <p className="text-lg font-bold text-gray-900 -mt-0.5">{stats.late}</p>
+                            <p className="text-[10px] uppercase tracking-wide font-semibold text-gray-400 dark:text-zinc-400">{t('dashboard.assignments.submissions.status.late')}</p>
+                            <p className="text-lg font-bold text-gray-900 dark:text-zinc-100 -mt-0.5">{stats.late}</p>
                         </div>
                     </div>
-                    <div className="bg-white nice-shadow rounded-xl px-4 py-3 flex items-center space-x-3">
+                    <div className="bg-white dark:bg-dk-card nice-shadow rounded-xl px-4 py-3 flex items-center space-x-3">
                         <div className="bg-amber-50 rounded-lg p-1.5">
                             <SendHorizonal size={14} className="text-amber-600" />
                         </div>
                         <div>
-                            <p className="text-[10px] uppercase tracking-wide font-semibold text-gray-400">{t('dashboard.assignments.submissions.status.submitted')}</p>
-                            <p className="text-lg font-bold text-gray-900 -mt-0.5">{stats.submitted}</p>
+                            <p className="text-[10px] uppercase tracking-wide font-semibold text-gray-400 dark:text-zinc-400">{t('dashboard.assignments.submissions.status.submitted')}</p>
+                            <p className="text-lg font-bold text-gray-900 dark:text-zinc-100 -mt-0.5">{stats.submitted}</p>
                         </div>
                     </div>
-                    <div className="bg-white nice-shadow rounded-xl px-4 py-3 flex items-center space-x-3">
+                    <div className="bg-white dark:bg-dk-card nice-shadow rounded-xl px-4 py-3 flex items-center space-x-3">
                         <div className="bg-emerald-50 rounded-lg p-1.5">
                             <CheckCircle2 size={14} className="text-emerald-600" />
                         </div>
                         <div>
-                            <p className="text-[10px] uppercase tracking-wide font-semibold text-gray-400">{t('dashboard.assignments.submissions.status.graded')}</p>
-                            <p className="text-lg font-bold text-gray-900 -mt-0.5">{stats.graded}</p>
+                            <p className="text-[10px] uppercase tracking-wide font-semibold text-gray-400 dark:text-zinc-400">{t('dashboard.assignments.submissions.status.graded')}</p>
+                            <p className="text-lg font-bold text-gray-900 dark:text-zinc-100 -mt-0.5">{stats.graded}</p>
                         </div>
                     </div>
                 </div>
@@ -137,18 +137,18 @@ function AssignmentSubmissionsSubPage({ assignment_uuid }: { assignment_uuid: st
                 <div className="flex items-center gap-3">
                     {/* Search */}
                     <div className="relative flex-1 max-w-sm">
-                        <Search size={14} className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <Search size={14} className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-400" />
                         <input
                             type="text"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder={t('dashboard.assignments.submissions.search_placeholder')}
-                            className="w-full ps-9 pe-8 py-2 text-sm bg-white nice-shadow rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 placeholder:text-gray-400"
+                            className="w-full ps-9 pe-8 py-2 text-sm bg-white dark:bg-dk-card nice-shadow rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 placeholder:text-gray-400 dark:placeholder:text-zinc-500"
                         />
                         {searchQuery && (
                             <button
                                 onClick={() => setSearchQuery('')}
-                                className="absolute end-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                className="absolute end-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200"
                             >
                                 <X size={14} />
                             </button>
@@ -164,12 +164,12 @@ function AssignmentSubmissionsSubPage({ assignment_uuid }: { assignment_uuid: st
                                 className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
                                     statusFilter === filter.key
                                         ? filter.activeClass
-                                        : 'bg-white nice-shadow text-gray-600 hover:bg-gray-50'
+                                        : 'bg-white dark:bg-dk-card nice-shadow text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised'
                                 }`}
                             >
                                 {filter.icon}
                                 <span>{filter.label}</span>
-                                <span className={`${statusFilter === filter.key ? 'bg-white/20' : 'bg-gray-100'} px-1.5 py-0.5 rounded-full text-[10px] font-bold`}>
+                                <span className={`${statusFilter === filter.key ? 'bg-white/20' : 'bg-gray-100 dark:bg-dk-inset'} px-1.5 py-0.5 rounded-full text-[10px] font-bold`}>
                                     {filter.count}
                                 </span>
                             </button>
@@ -180,7 +180,7 @@ function AssignmentSubmissionsSubPage({ assignment_uuid }: { assignment_uuid: st
                     <div className="relative">
                         <button
                             onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
-                            className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-gray-600 bg-white nice-shadow rounded-full hover:bg-gray-50 transition-colors"
+                            className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-gray-600 dark:text-zinc-300 bg-white dark:bg-dk-card nice-shadow rounded-full hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors"
                         >
                             <ArrowUpDown size={12} />
                             <span>{t('dashboard.assignments.submissions.sort.label')}</span>
@@ -189,7 +189,7 @@ function AssignmentSubmissionsSubPage({ assignment_uuid }: { assignment_uuid: st
                         {sortDropdownOpen && (
                             <>
                                 <div className="fixed inset-0 z-10" onClick={() => setSortDropdownOpen(false)} />
-                                <div className="absolute end-0 top-full mt-2 z-20 bg-white nice-shadow rounded-xl py-1.5 min-w-[150px]">
+                                <div className="absolute end-0 top-full mt-2 z-20 bg-white dark:bg-dk-card nice-shadow rounded-xl py-1.5 min-w-[150px]">
                                     {sortOptions.map((option) => (
                                         <button
                                             key={option.field}
@@ -202,13 +202,13 @@ function AssignmentSubmissionsSubPage({ assignment_uuid }: { assignment_uuid: st
                                                 }
                                                 setSortDropdownOpen(false);
                                             }}
-                                            className={`w-full px-3 py-1.5 text-xs text-start flex items-center justify-between hover:bg-gray-50 ${
-                                                sortField === option.field ? 'text-gray-900 font-bold' : 'text-gray-500 font-medium'
+                                            className={`w-full px-3 py-1.5 text-xs text-start flex items-center justify-between hover:bg-gray-50 dark:hover:bg-dk-raised ${
+                                                sortField === option.field ? 'text-gray-900 dark:text-zinc-100 font-bold' : 'text-gray-500 dark:text-zinc-400 font-medium'
                                             }`}
                                         >
                                             <span>{option.label}</span>
                                             {sortField === option.field && (
-                                                <span className="text-gray-400 text-[10px]">
+                                                <span className="text-gray-400 dark:text-zinc-400 text-[10px]">
                                                     {sortDirection === 'asc' ? '↑' : '↓'}
                                                 </span>
                                             )}
@@ -255,7 +255,7 @@ function SubmissionsList({
 
     if (!submissions) {
         return (
-            <div className="flex items-center justify-center h-40 text-sm text-gray-400 font-medium">
+            <div className="flex items-center justify-center h-40 text-sm text-gray-400 dark:text-zinc-400 font-medium">
                 {t('dashboard.assignments.submissions.loading')}
             </div>
         );
@@ -321,8 +321,8 @@ function SubmissionsList({
 
     if (filtered.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-16 text-gray-400 gap-3">
-                <div className="bg-gray-100 rounded-2xl p-4">
+            <div className="flex flex-col items-center justify-center py-16 text-gray-400 dark:text-zinc-400 gap-3">
+                <div className="bg-gray-100 dark:bg-dk-inset rounded-2xl p-4">
                     <Inbox size={24} />
                 </div>
                 <p className="text-sm font-semibold">{t('dashboard.assignments.submissions.empty')}</p>
@@ -331,7 +331,7 @@ function SubmissionsList({
     }
 
     return (
-        <div className="bg-white nice-shadow rounded-xl overflow-hidden">
+        <div className="bg-white dark:bg-dk-card nice-shadow rounded-xl overflow-hidden">
             {filtered.map((submission: any, index: number) => (
                 <SubmissionRow
                     key={submission.assignmentusersubmission_uuid || submission.id}
@@ -410,7 +410,7 @@ function SubmissionRow({
     });
 
     return (
-        <div className={`flex items-center px-5 py-3.5 hover:bg-gray-50/60 transition-colors group ${!isLast ? 'border-b border-gray-100' : ''}`}>
+        <div className={`flex items-center px-5 py-3.5 hover:bg-gray-50/60 transition-colors group ${!isLast ? 'border-b border-gray-100 dark:border-dk-line' : ''}`}>
             {/* User info */}
             <div className="flex items-center space-x-3 flex-1 min-w-0">
                 <UserAvatar
@@ -420,14 +420,14 @@ function SubmissionRow({
                     width={36}
                 />
                 <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-zinc-100 truncate">
                         {user?.first_name && user?.last_name
                             ? `${user.first_name} ${user.last_name}`
                             : user?.username
                                 ? `@${user.username}`
                                 : '...'}
                     </p>
-                    <p className="text-xs text-gray-400 truncate">{user?.email}</p>
+                    <p className="text-xs text-gray-400 dark:text-zinc-400 truncate">{user?.email}</p>
                 </div>
             </div>
 
@@ -436,16 +436,16 @@ function SubmissionRow({
                 student's own view instead of showing a naked raw sum. */}
             {submission.submission_status === 'GRADED' && (
                 <div className="flex items-center space-x-1.5 me-5">
-                    <span className="bg-gray-100 text-gray-500 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full">{t('dashboard.assignments.submissions.grade_label')}</span>
+                    <span className="bg-gray-100 dark:bg-dk-inset text-gray-500 dark:text-zinc-400 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full">{t('dashboard.assignments.submissions.grade_label')}</span>
                     <span className={`text-sm font-bold ${
                         submission.grade_display
                             ? (submission.grade_display.passed ? 'text-emerald-700' : 'text-rose-700')
-                            : 'text-gray-900'
+                            : 'text-gray-900 dark:text-zinc-100'
                     }`}>
                         {submission.grade_display?.display_grade ?? submission.grade}
                     </span>
                     {submission.grade_display?.points_summary && (
-                        <span className="text-[10px] text-gray-400 font-medium">
+                        <span className="text-[10px] text-gray-400 dark:text-zinc-400 font-medium">
                             {submission.grade_display.points_summary}
                         </span>
                     )}
@@ -453,11 +453,11 @@ function SubmissionRow({
             )}
 
             {/* Date */}
-            <div className="flex items-center space-x-1.5 me-5 text-gray-400">
+            <div className="flex items-center space-x-1.5 me-5 text-gray-400 dark:text-zinc-400">
                 <Calendar size={12} />
                 <span className="text-xs font-medium">{dateStr}</span>
-                <span className="text-[10px] text-gray-300">|</span>
-                <span className="text-xs text-gray-300">{timeStr}</span>
+                <span className="text-[10px] text-gray-300 dark:text-zinc-600">|</span>
+                <span className="text-xs text-gray-300 dark:text-zinc-600">{timeStr}</span>
             </div>
 
             {/* Status badge */}

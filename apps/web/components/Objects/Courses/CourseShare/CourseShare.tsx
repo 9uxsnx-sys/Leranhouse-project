@@ -101,14 +101,14 @@ function CourseShare({ courseName, courseUrl }: CourseShareProps) {
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-haspopup="true"
-        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white nice-shadow text-neutral-600 hover:text-neutral-800 transition-colors text-sm font-medium"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white dark:bg-dk-card nice-shadow text-neutral-600 dark:text-dk-fg-2 hover:text-neutral-800 dark:hover:text-dk-fg-1 transition-colors text-sm font-medium"
       >
         <Share2 size={14} />
         <span>{t('courses.share_course')}</span>
       </button>
 
       {isOpen && (
-        <div className="absolute end-0 top-10 z-50 bg-white rounded-lg nice-shadow py-1 min-w-[160px]">
+        <div className="absolute end-0 top-10 z-50 bg-white dark:bg-dk-card rounded-lg nice-shadow py-1 min-w-[160px]">
           {shareLinks.map((link) => {
             const Icon = link.icon
             return (
@@ -118,7 +118,7 @@ function CourseShare({ courseName, courseUrl }: CourseShareProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-600 transition-all duration-200 ${link.color}`}
+                className={`flex items-center gap-2.5 px-3 py-2 text-sm text-neutral-600 dark:text-dk-fg-2 transition-all duration-200 ${link.color}`}
               >
                 <Icon size={16} />
                 <span>{link.name}</span>
@@ -131,7 +131,7 @@ function CourseShare({ courseName, courseUrl }: CourseShareProps) {
             className={`flex items-center gap-2.5 w-full px-3 py-2 text-sm transition-all duration-200 ${
               copied
                 ? 'bg-green-500 text-white'
-                : 'text-neutral-600 hover:bg-neutral-100'
+                : 'text-neutral-600 dark:text-dk-fg-2 hover:bg-neutral-100 dark:hover:bg-dk-raised'
             }`}
           >
             {copied ? <Check size={16} /> : <Link2 size={16} />}

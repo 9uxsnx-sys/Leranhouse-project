@@ -29,7 +29,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   return (
     <div className="flex justify-between items-center gap-4">
       <span className="text-xs text-gray-400 shrink-0">{label}</span>
-      <span className="text-sm text-gray-700 text-end">{children}</span>
+      <span className="text-sm text-gray-700 text-end dark:text-zinc-200">{children}</span>
     </div>
   )
 }
@@ -46,14 +46,14 @@ function LearnerDetailDialog({ userId, onClose }: { userId: number; onClose: () 
       <div className="fixed inset-0 z-40 bg-black/40" onClick={onClose} />
       <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
         <div
-          className="pointer-events-auto w-[340px] max-h-[85vh] overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg"
+          className="pointer-events-auto w-[340px] max-h-[85vh] overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg dark:border-dk-line-strong dark:bg-dk-card"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close */}
           <div className="flex justify-end pt-3 pe-3">
             <button
               onClick={onClose}
-              className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all"
+              className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-all dark:hover:bg-dk-raised"
             >
               <X size={16} />
             </button>
@@ -61,10 +61,10 @@ function LearnerDetailDialog({ userId, onClose }: { userId: number; onClose: () 
 
           {/* Avatar + identity */}
           <div className="flex flex-col items-center px-6 pb-4">
-            <span className="w-[52px] h-[52px] rounded-full bg-gray-100 text-gray-500 text-base font-semibold flex items-center justify-center">
+            <span className="w-[52px] h-[52px] rounded-full bg-gray-100 text-gray-500 text-base font-semibold flex items-center justify-center dark:bg-dk-inset">
               {initials(user?.name ?? '')}
             </span>
-            <span className="mt-3 text-base font-semibold text-gray-800">{user?.name ?? '—'}</span>
+            <span className="mt-3 text-base font-semibold text-gray-800 dark:text-zinc-100">{user?.name ?? '—'}</span>
             <span className="text-xs text-gray-400">@{user?.username ?? '—'}</span>
             <span className="text-sm text-gray-500 mt-0.5">{user?.email ?? ''}</span>
           </div>
@@ -91,7 +91,7 @@ function LearnerDetailDialog({ userId, onClose }: { userId: number; onClose: () 
             )}
             {courses.map((course) => (
               <div key={course.name} className="flex justify-between items-center gap-4">
-                <span className="text-sm text-gray-700 truncate">{course.name}</span>
+                <span className="text-sm text-gray-700 truncate dark:text-zinc-200">{course.name}</span>
                 <span className="text-sm text-gray-400 tabular-nums shrink-0">{course.progress}%</span>
               </div>
             ))}
@@ -131,7 +131,7 @@ export function LearnersTab({ range = '30d', query = '' }: { range?: string; que
             <button
               type="button"
               onClick={() => setDetailUserId(row.id)}
-              className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
+              className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all dark:hover:bg-dk-raised"
               title={t('analytics.learners_tab.view_details')}
             >
               <MoreHorizontal size={16} />

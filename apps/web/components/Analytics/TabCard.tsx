@@ -1,12 +1,13 @@
 'use client'
 import i18n from '@/lib/i18n'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { ChartCard, SectionCard } from './Card'
 import { TrendChart } from './TrendChart'
 import { BarsChart } from './BarsChart'
 import { RankedBars } from './RankedBars'
 import { DataTable, Column } from './DataTable'
-import { ChartSkeleton } from './Feedback'
+import { ChartSkeleton, EmptyState } from './Feedback'
 import { formatNumber } from './chartTheme'
 import { cn } from '@/lib/utils'
 import type { AnalyticsCard, CardColumn, CardFormat } from '@services/analytics/tabs'
@@ -61,30 +62,30 @@ function toTableColumns(columns: CardColumn[]): Column<Record<string, any>>[] {
       value: c.sortable ? (row) => row[c.key] : undefined,
     }
     if (c.variant === 'mono') {
-      col.render = (row) => <span className="font-mono text-xs text-gray-700">{row[c.key]}</span>
+      col.render = (row) => <span className="font-mono text-xs text-gray-700 dark:text-dk-fg-1">{row[c.key]}</span>
     } else if (c.variant === 'delta') {
       col.render = (row) => {
         const value = Number(row[c.key] ?? 0)
         return (
-          <span className="tabular-nums text-gray-600">
+          <span className="tabular-nums text-gray-600 dark:text-dk-fg-2">
             {value > 0 ? '+' : ''}
             {value}%
           </span>
         )
       }
     } else if (c.variant === 'percent') {
-      col.render = (row) => <span className="tabular-nums text-gray-700">{row[c.key]}%</span>
+      col.render = (row) => <span className="tabular-nums text-gray-700 dark:text-dk-fg-1">{row[c.key]}%</span>
     } else if (c.variant === 'person') {
       col.render = (row) => (
         <div className="flex items-center gap-2.5 min-w-0">
-          <span className="w-[30px] h-[30px] shrink-0 rounded-full bg-gray-100 text-gray-500 text-[11px] font-semibold flex items-center justify-center">
+          <span className="w-[30px] h-[30px] shrink-0 rounded-full bg-gray-100 dark:bg-dk-inset text-gray-500 dark:text-dk-fg-3 text-[11px] font-semibold flex items-center justify-center">
             {initials(String(row[c.key] ?? ''))}
           </span>
-          <span className="font-medium text-gray-900 truncate">{row[c.key]}</span>
+          <span className="font-medium text-gray-900 dark:text-dk-fg-1 truncate">{row[c.key]}</span>
         </div>
       )
     } else if (c.variant === 'username') {
-      col.render = (row) => <span className="text-gray-500">@{row[c.key]}</span>
+      col.render = (row) => <span className="text-gray-500 dark:text-dk-fg-3">@{row[c.key]}</span>
     } else if (c.variant === 'status') {
       col.render = (row) => (
         <span className="inline-flex items-center gap-1.5">
@@ -93,10 +94,25 @@ function toTableColumns(columns: CardColumn[]): Column<Record<string, any>>[] {
         </span>
       )
     } else if (c.variant === 'date') {
-      col.render = (row) => <span className="text-[13px] text-gray-400">{formatDate(row[c.key])}</span>
+      col.render = (row) => <span className="text-[13px] text-gray-400 dark:text-dk-fg-3">{formatDate(row[c.key])}</span>
     }
     return col
   })
+}
+
+/**
+ * Recharts draws nothing for an all-zero series: the bars have zero height and
+ * the value axis collapses, so the card looked broken instead of empty. Detect
+ * that case and render an empty state in its place.
+ */
+function hasAnyValue(card: AnalyticsCard) {
+  if (!card.data?.length) return false
+  return card.data.some((row) =>
+    Object.entries(row).some(
+      ([key, value]) =>
+        key !== 'name' && key !== 'label' && typeof value === 'number' && value !== 0
+    )
+  )
 }
 
 /**
@@ -121,11 +137,13 @@ export function TabCard({
   /** Chart body height when the card needs to match a neighbouring column. */
   chartHeight?: number
 }) {
+  const { t } = useTranslation()
+
   if (!card) {
     return (
       <div
         className={cn(
-          'bg-white rounded-xl border border-gray-100 shadow-sm p-6',
+          'bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6',
           className
         )}
       >
@@ -153,41 +171,50 @@ export function TabCard({
   }
 
   const formatter = formatterFor(card.format)
+  const empty = !hasAnyValue(card)
 
   return (
     <ChartCard
       title={card.title}
       className={className}
       height={chartHeight}
-      actions={card.heading ? <span className="text-xs text-gray-400">{card.heading}</span> : undefined}
+      actions={card.heading ? <span className="text-xs text-gray-400 dark:text-dk-fg-3">{card.heading}</span> : undefined}
     >
-      {card.kind === 'trend' && (
-        <TrendChart
-          data={card.data ?? []}
-          xKey={card.xKey ?? 'label'}
-          series={card.series ?? []}
-          height={chartHeight}
-          formatter={formatter}
-        />
-      )}
-      {card.kind === 'bars' && (
-        <BarsChart
-          data={card.data ?? []}
-          xKey={card.xKey ?? 'label'}
-          series={card.series ?? []}
-          height={chartHeight}
-          formatter={formatter}
-          xTickFormatter={truncateAxisLabel}
-        />
-      )}
-      {card.kind === 'ranked' && (
-        <RankedBars
-          data={card.data ?? []}
-          categoryKey={card.categoryKey ?? 'name'}
-          valueKey={card.valueKey ?? 'value'}
-          height={chartHeight}
-          formatter={formatter}
-        />
+      {empty ? (
+        <div className="flex h-full items-center justify-center">
+          <EmptyState title={t('analytics.common.no_data')} />
+        </div>
+      ) : (
+        <>
+          {card.kind === 'trend' && (
+            <TrendChart
+              data={card.data ?? []}
+              xKey={card.xKey ?? 'label'}
+              series={card.series ?? []}
+              height={chartHeight}
+              formatter={formatter}
+            />
+          )}
+          {card.kind === 'bars' && (
+            <BarsChart
+              data={card.data ?? []}
+              xKey={card.xKey ?? 'label'}
+              series={card.series ?? []}
+              height={chartHeight}
+              formatter={formatter}
+              xTickFormatter={truncateAxisLabel}
+            />
+          )}
+          {card.kind === 'ranked' && (
+            <RankedBars
+              data={card.data ?? []}
+              categoryKey={card.categoryKey ?? 'name'}
+              valueKey={card.valueKey ?? 'value'}
+              height={chartHeight}
+              formatter={formatter}
+            />
+          )}
+        </>
       )}
     </ChartCard>
   )

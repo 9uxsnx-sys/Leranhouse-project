@@ -481,7 +481,7 @@ function CoursesHome(params: CourseProps) {
             orgId={params.org_id}
           >
             {courseLimitReached && (
-              <div className="text-xs text-gray-500 bg-gray-100 px-3 py-2 rounded-lg me-2">
+              <div className="text-xs text-gray-500 dark:text-zinc-400 bg-gray-100 dark:bg-dk-raised px-3 py-2 rounded-lg me-2">
                 {t('dashboard.courses.limit_reached', { limit: courseLimit })}
               </div>
             )}
@@ -539,7 +539,7 @@ function CoursesHome(params: CourseProps) {
                   confirmationMessage={t('courses.delete_selected_confirm', { count: selectedCourses.size })}
                   dialogTitle={t('courses.delete_courses_title')}
                   dialogTrigger={
-                    <Button variant="secondary" size="small" className="gap-x-1.5 text-red-600 border-red-200 hover:bg-red-50">
+                    <Button variant="secondary" size="small" className="gap-x-1.5 text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-500/10">
                       <Trash2 size={14} />
                       <span>{t('courses.delete_selected')}</span>
                     </Button>
@@ -557,16 +557,16 @@ function CoursesHome(params: CourseProps) {
               <IconButton
                 size="small"
                 variant="transparent"
-                className="bg-white hover:bg-gray-50 shadow-borders-base"
+                className="bg-white dark:bg-dk-card hover:bg-gray-50 dark:hover:bg-dk-raised shadow-borders-base"
                 aria-label={t('common.filter')}
               >
                 <ConceptIcon.filter size={14} />
               </IconButton>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white min-w-0 w-40">
+            <DropdownMenuContent align="end" className="bg-white dark:bg-dk-raised min-w-0 w-40">
               <DropdownMenuItem onClick={() => setActiveFilter('All')} className="flex items-center justify-between">
                 <span>{t('common.all_courses')}</span>
-                {activeFilter === 'All' && <ConceptIcon.check size={12} className="text-gray-500" />}
+                {activeFilter === 'All' && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
               {DIFFICULTY_OPTIONS.map((option) => (
                 <DropdownMenuItem
@@ -575,7 +575,7 @@ function CoursesHome(params: CourseProps) {
                   className="flex items-center justify-between"
                 >
                   <span>{difficultyLabel(option)}</span>
-                  {activeFilter === option && <ConceptIcon.check size={12} className="text-gray-500" />}
+                  {activeFilter === option && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
@@ -638,7 +638,7 @@ function CoursesHome(params: CourseProps) {
                     onClick={(e) => e.stopPropagation()}
                     className="sr-only peer"
                   />
-                  <div className="w-full h-full rounded-md border border-gray-300 bg-white peer-checked:bg-gray-500 peer-checked:border-gray-500 flex items-center justify-center transition-all duration-200 shadow-sm peer-hover:border-gray-400 peer-checked:shadow-md">
+                  <div className="w-full h-full rounded-md border border-gray-300 dark:border-dk-line-strong bg-white dark:bg-dk-card peer-checked:bg-gray-500 peer-checked:border-gray-500 flex items-center justify-center transition-all duration-200 shadow-sm peer-hover:border-gray-400 peer-checked:shadow-md">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className="scale-0 peer-checked:scale-100 transition-transform duration-200">
                       <polyline points="20 6 9 17 4 12" />
                     </svg>
@@ -776,7 +776,7 @@ function CoursesHome(params: CourseProps) {
                     onClick={() => goToPage(page as number)}
                     className={`w-7 h-7 txt-compact-small-plus rounded-md transition-colors ${
                       currentPage === page
-                        ? 'bg-ui-bg-base shadow-borders-base text-ui-fg-base'
+                        ? 'bg-ui-bg-base shadow-borders-base text-ui-fg-base dark:bg-dk-raised'
                         : 'text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-base-hover'
                     }`}
                   >

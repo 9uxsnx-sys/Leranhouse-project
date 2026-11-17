@@ -263,7 +263,7 @@ const CommunitiesDashClient = ({
                 confirmationMessage={`Are you sure you want to delete ${selectedCommunities.size} communities?`}
                 dialogTitle="Delete Communities"
                 dialogTrigger={
-                  <Button variant="secondary" size="small" className="gap-x-1.5 text-red-600 border-red-200 hover:bg-red-50">
+                  <Button variant="secondary" size="small" className="gap-x-1.5 text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-500/10">
                     <ConceptIcon.delete size={14} />
                     <span>Delete {selectedCommunities.size}</span>
                   </Button>
@@ -279,28 +279,28 @@ const CommunitiesDashClient = ({
               <IconButton
                 size="small"
                 variant="transparent"
-                className="bg-white hover:bg-gray-50 shadow-borders-base"
+                className="bg-white dark:bg-dk-card hover:bg-gray-50 dark:hover:bg-dk-raised shadow-borders-base"
                 aria-label={t('common.filter')}
               >
                 <ConceptIcon.filter size={14} />
               </IconButton>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white min-w-0 w-40">
+            <DropdownMenuContent align="end" className="bg-white dark:bg-dk-raised min-w-0 w-40">
               <DropdownMenuItem onSelect={() => setActiveFilter('all')} className="flex items-center justify-between">
                 <span>{t('communities.all_communities')}</span>
-                {activeFilter === 'all' && <ConceptIcon.check size={12} className="text-gray-500" />}
+                {activeFilter === 'all' && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setActiveFilter('newest')} className="flex items-center justify-between">
                 <span>{t('communities.newest')}</span>
-                {activeFilter === 'newest' && <ConceptIcon.check size={12} className="text-gray-500" />}
+                {activeFilter === 'newest' && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setActiveFilter('course')} className="flex items-center justify-between">
                 <span>{t('communities.course_communities')}</span>
-                {activeFilter === 'course' && <ConceptIcon.check size={12} className="text-gray-500" />}
+                {activeFilter === 'course' && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => setActiveFilter('podcast')} className="flex items-center justify-between">
                 <span>{t('communities.podcast_communities')}</span>
-                {activeFilter === 'podcast' && <ConceptIcon.check size={12} className="text-gray-500" />}
+                {activeFilter === 'podcast' && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -328,7 +328,7 @@ const CommunitiesDashClient = ({
                       onClick={(e) => e.stopPropagation()}
                       className="sr-only peer"
                     />
-                    <div className="w-full h-full rounded-md border border-gray-300 bg-white peer-checked:bg-gray-500 peer-checked:border-gray-500 flex items-center justify-center transition-all duration-200 shadow-sm peer-hover:border-gray-400 peer-checked:shadow-md">
+                    <div className="w-full h-full rounded-md border border-gray-300 dark:border-dk-line-strong bg-white dark:bg-dk-card peer-checked:bg-gray-500 peer-checked:border-gray-500 flex items-center justify-center transition-all duration-200 shadow-sm peer-hover:border-gray-400 peer-checked:shadow-md">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className="scale-0 peer-checked:scale-100 transition-transform duration-200">
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
@@ -432,7 +432,7 @@ const CommunitiesDashClient = ({
                     onClick={() => goToPage(page as number)}
                     className={`w-7 h-7 txt-compact-small-plus rounded-md transition-colors ${
                       currentPage === page
-                        ? 'bg-ui-bg-base shadow-borders-base text-ui-fg-base'
+                        ? 'bg-ui-bg-base shadow-borders-base text-ui-fg-base dark:bg-dk-raised'
                         : 'text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-base-hover'
                     }`}
                   >

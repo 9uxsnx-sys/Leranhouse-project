@@ -55,7 +55,7 @@ export function PasswordStrengthIndicator({
     const strengthPercentage = (validCount / requirements.length) * 100
 
     const getStrengthColor = () => {
-        if (strengthPercentage === 0) return 'bg-gray-200'
+        if (strengthPercentage === 0) return 'bg-gray-200 dark:bg-dk-track'
         if (strengthPercentage <= 40) return 'bg-red-500'
         if (strengthPercentage <= 60) return 'bg-orange-500'
         if (strengthPercentage <= 80) return 'bg-yellow-500'
@@ -80,7 +80,7 @@ export function PasswordStrengthIndicator({
             {/* Strength bar */}
             <div className="space-y-1">
                 <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">{t('auth.password_strength')}</span>
+                    <span className="text-gray-500 dark:text-zinc-400">{t('auth.password_strength')}</span>
                     <span className={`font-medium ${
                         strengthPercentage <= 40 ? 'text-red-600' :
                         strengthPercentage <= 60 ? 'text-orange-600' :
@@ -90,7 +90,7 @@ export function PasswordStrengthIndicator({
                         {getStrengthLabel()}
                     </span>
                 </div>
-                <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-1.5 w-full bg-gray-200 dark:bg-dk-track rounded-full overflow-hidden">
                     <div
                         className={`h-full transition-all duration-300 ${getStrengthColor()}`}
                         style={{ width: `${strengthPercentage}%` }}
@@ -107,7 +107,7 @@ export function PasswordStrengthIndicator({
                             <li
                                 key={req.id}
                                 className={`flex items-center gap-1.5 ${
-                                    isValid ? 'text-green-600' : 'text-gray-500'
+                                    isValid ? 'text-green-600' : 'text-gray-500 dark:text-zinc-400'
                                 }`}
                             >
                                 {isValid ? (

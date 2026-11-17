@@ -52,7 +52,7 @@ function Chapter(props: any) {
           {...provided.dragHandleProps}
           {...provided.draggableProps}
           ref={provided.innerRef}
-          className="max-w-(--breakpoint-2xl) mx-auto bg-white px-5 mb-5 p-3 text-[15px] block rounded-[9px] border border-white/20 shadow-md transition-all duration-200"
+          className="max-w-(--breakpoint-2xl) mx-auto bg-white dark:bg-dk-card px-5 mb-5 p-3 text-[15px] block rounded-[9px] border border-white/20 shadow-md transition-all duration-200"
           key={props.info.list.chapter.id}
         >
           <div className="flex pt-3 pe-3 font-bold text-md items-center space-x-2">
@@ -110,7 +110,7 @@ function Chapter(props: any) {
                 />
               </div>
             </div>
-            <MoreVertical size={15} className="text-gray-300" />
+            <MoreVertical size={15} className="text-gray-300 dark:text-zinc-600" />
             <ConfirmationModal
               confirmationButtonText="Delete Chapter"
               confirmationMessage="Are you sure you want to delete this chapter?"

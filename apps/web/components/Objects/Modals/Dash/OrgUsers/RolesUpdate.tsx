@@ -88,7 +88,7 @@ function RolesUpdate(props: Props) {
               required
               disabled={!roles || rolesError}
             >
-              <SelectTrigger className="border border-gray-300 rounded-md p-2">
+              <SelectTrigger className="border border-gray-300 dark:border-dk-line-strong rounded-md p-2">
                 <SelectValue placeholder={!roles || rolesError ? 'Loading roles...' : 'Select a role'} />
               </SelectTrigger>
               <SelectContent>

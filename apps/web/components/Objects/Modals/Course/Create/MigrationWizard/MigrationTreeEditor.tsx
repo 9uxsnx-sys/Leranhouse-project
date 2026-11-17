@@ -37,7 +37,7 @@ function getFileIcon(ext: string) {
     return <Image size={14} className="text-green-500" />
   if (['mp3', 'wav'].includes(ext))
     return <Music size={14} className="text-purple-500" />
-  return <FileText size={14} className="text-gray-500" />
+  return <FileText size={14} className="text-gray-500 dark:text-dk-fg-3" />
 }
 
 const EXT_TO_ACTIVITY_TYPE: Record<
@@ -265,14 +265,14 @@ export default function MigrationTreeEditor({
         </div>
 
         {/* Tree editor */}
-        <div className="flex-1 bg-white rounded-xl nice-shadow p-4 overflow-y-auto">
+        <div className="flex-1 bg-white dark:bg-dk-card rounded-xl nice-shadow p-4 overflow-y-auto">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-700">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-dk-fg-1">
               {t('migration.course_structure')}
             </h3>
             <button
               onClick={addChapter}
-              className="flex items-center space-x-1 text-xs text-gray-500 hover:text-gray-700 px-2 py-1 rounded-md hover:bg-gray-50"
+              className="flex items-center space-x-1 text-xs text-gray-500 dark:text-dk-fg-3 hover:text-gray-700 dark:hover:text-dk-fg-1 px-2 py-1 rounded-md hover:bg-gray-50 dark:hover:bg-dk-raised"
             >
               <Plus size={14} />
               <span>{t('migration.add_chapter')}</span>
@@ -301,29 +301,29 @@ export default function MigrationTreeEditor({
                         }`}
                       >
                         {/* Chapter header */}
-                        <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-t-lg">
+                        <div className="flex items-center space-x-2 p-3 bg-gray-50 dark:bg-dk-inset/40 rounded-t-lg">
                           <div {...provided.dragHandleProps}>
                             <GripVertical
                               size={14}
-                              className="text-gray-300"
+                              className="text-gray-300 dark:text-zinc-600"
                             />
                           </div>
                           <button onClick={() => toggleChapter(chapterIndex)}>
                             {expandedChapters.has(chapterIndex) ? (
                               <ChevronDown
                                 size={14}
-                                className="text-gray-500"
+                                className="text-gray-500 dark:text-dk-fg-3"
                               />
                             ) : (
                               <ChevronRight
                                 size={14}
-                                className="text-gray-500"
+                                className="text-gray-500 dark:text-dk-fg-3"
                               />
                             )}
                           </button>
                           <FolderOpen
                             size={14}
-                            className="text-gray-500"
+                            className="text-gray-500 dark:text-dk-fg-3"
                           />
                           <Input
                             value={chapter.name}
@@ -337,7 +337,7 @@ export default function MigrationTreeEditor({
                           />
                           <button
                             onClick={() => removeChapter(chapterIndex)}
-                            className="text-gray-300 hover:text-red-500"
+                            className="text-gray-300 dark:text-zinc-600 hover:text-red-500"
                           >
                             <Trash2 size={14} />
                           </button>
@@ -370,7 +370,7 @@ export default function MigrationTreeEditor({
                                             className={`border rounded-md p-2 ${
                                               snapshot.isDragging
                                                 ? 'shadow-md bg-blue-50'
-                                                : 'bg-white'
+                                                : 'bg-white dark:bg-dk-card'
                                             }`}
                                           >
                                             <div className="flex items-center space-x-2">
@@ -379,7 +379,7 @@ export default function MigrationTreeEditor({
                                               >
                                                 <GripVertical
                                                   size={12}
-                                                  className="text-gray-300"
+                                                  className="text-gray-300 dark:text-zinc-600"
                                                 />
                                               </div>
                                               <Input
@@ -393,7 +393,7 @@ export default function MigrationTreeEditor({
                                                 }
                                                 className="h-6 text-xs border-0 bg-transparent focus:bg-white"
                                               />
-                                              <span className="text-[10px] text-gray-400 flex-shrink-0">
+                                              <span className="text-[10px] text-gray-400 dark:text-dk-fg-3 flex-shrink-0">
                                                 {activity.activity_type.replace(
                                                   'TYPE_',
                                                   ''
@@ -406,7 +406,7 @@ export default function MigrationTreeEditor({
                                                     actIndex
                                                   )
                                                 }
-                                                className="text-gray-300 hover:text-red-500 flex-shrink-0"
+                                                className="text-gray-300 dark:text-zinc-600 hover:text-red-500 flex-shrink-0"
                                               >
                                                 <Trash2 size={12} />
                                               </button>
@@ -435,7 +435,7 @@ export default function MigrationTreeEditor({
                                                       return (
                                                         <div
                                                           key={fid}
-                                                          className="flex items-center space-x-1 text-xs text-gray-500 py-0.5"
+                                                          className="flex items-center space-x-1 text-xs text-gray-500 dark:text-dk-fg-3 py-0.5"
                                                         >
                                                           {getFileIcon(
                                                             file.extension
@@ -451,7 +451,7 @@ export default function MigrationTreeEditor({
                                                                 fid
                                                               )
                                                             }
-                                                            className="text-gray-300 hover:text-red-500"
+                                                            className="text-gray-300 dark:text-zinc-600 hover:text-red-500"
                                                           >
                                                             <X size={10} />
                                                           </button>
@@ -463,7 +463,7 @@ export default function MigrationTreeEditor({
                                                   {activity.file_ids
                                                     .length === 0 &&
                                                     !snapshot.isDraggingOver && (
-                                                      <p className="text-[10px] text-gray-300 py-1">
+                                                      <p className="text-[10px] text-gray-300 dark:text-zinc-600 py-1">
                                                         {t(
                                                           'migration.drop_file_here'
                                                         )}
@@ -483,7 +483,7 @@ export default function MigrationTreeEditor({
                             </Droppable>
                             <button
                               onClick={() => addActivity(chapterIndex)}
-                              className="flex items-center space-x-1 text-xs text-gray-400 hover:text-gray-600 px-2 py-1"
+                              className="flex items-center space-x-1 text-xs text-gray-400 dark:text-dk-fg-3 hover:text-gray-600 dark:hover:text-dk-fg-1 px-2 py-1"
                             >
                               <Plus size={12} />
                               <span>{t('migration.add_activity')}</span>

@@ -139,7 +139,7 @@ function OptionAHorizontalCard({
 
   return (
     <div
-      className={`rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] overflow-hidden transition-all duration-200 ${
+      className={`rounded-xl bg-white dark:bg-dk-card shadow-[0_0_0_1px_rgba(0,0,0,0.08)] overflow-hidden transition-all duration-200 ${
         episode.isPlaying ? 'ring-2 ring-indigo-400' : ''
       } ${isHovered ? 'shadow-[0_0_0_1px_rgba(0,0,0,0.12),0_4px_12px_rgba(0,0,0,0.05)] -translate-y-0.5' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
@@ -148,7 +148,7 @@ function OptionAHorizontalCard({
       <div className="flex items-start gap-4 p-4">
         {/* Episode number */}
         <div className="flex-shrink-0 w-8 pt-1 text-center">
-          <span className="text-sm font-bold text-gray-400">
+          <span className="text-sm font-bold text-gray-400 dark:text-dk-fg-3">
             {episode.number}
           </span>
         </div>
@@ -172,11 +172,11 @@ function OptionAHorizontalCard({
                 : 'opacity-0'
             }`}
           >
-            <div className="bg-white rounded-full p-2">
+            <div className="bg-white dark:bg-dk-card rounded-full p-2">
               {episode.isPlaying ? (
-                <Pause size={16} className="text-gray-900" fill="currentColor" />
+                <Pause size={16} className="text-gray-900 dark:text-dk-fg-1" fill="currentColor" />
               ) : (
-                <Play size={16} className="text-gray-900 ms-0.5" fill="currentColor" />
+                <Play size={16} className="text-gray-900 dark:text-dk-fg-1 ms-0.5" fill="currentColor" />
               )}
             </div>
           </div>
@@ -187,21 +187,21 @@ function OptionAHorizontalCard({
           <div className="flex items-start justify-between gap-2">
             <h4
               className={`text-sm font-semibold truncate ${
-                episode.isPlaying ? 'text-indigo-700' : 'text-gray-900'
+                episode.isPlaying ? 'text-indigo-700' : 'text-gray-900 dark:text-dk-fg-1'
               }`}
             >
               {episode.title}
             </h4>
-            <span className="flex-shrink-0 text-xs text-gray-400 flex items-center gap-1">
+            <span className="flex-shrink-0 text-xs text-gray-400 dark:text-dk-fg-3 flex items-center gap-1">
               <Clock size={11} />
               {formatDuration(episode.duration_seconds)}
             </span>
           </div>
-          <p className="text-xs text-gray-500 line-clamp-2 mt-1 leading-relaxed">
+          <p className="text-xs text-gray-500 dark:text-dk-fg-3 line-clamp-2 mt-1 leading-relaxed">
             {episode.description}
           </p>
           <div className="flex items-center gap-3 mt-2">
-            <span className="text-[11px] text-gray-400 flex items-center gap-1">
+            <span className="text-[11px] text-gray-400 dark:text-dk-fg-3 flex items-center gap-1">
               <Calendar size={11} />
               {episode.date}
             </span>
@@ -217,13 +217,13 @@ function OptionAHorizontalCard({
           {episode.progress > 0 && !episode.completed && (
             <div className="mt-2.5">
               <div className="flex items-center gap-2">
-                <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
+                <div className="flex-1 h-1 bg-gray-100 dark:bg-dk-inset rounded-full overflow-hidden">
                   <div
                     className="h-full bg-brand rounded-full transition-all duration-300"
                     style={{ width: `${episode.progress}%` }}
                   />
                 </div>
-                <span className="text-[10px] text-gray-400 font-medium">
+                <span className="text-[10px] text-gray-400 dark:text-dk-fg-3 font-medium">
                   {episode.progress}%
                 </span>
               </div>
@@ -232,7 +232,7 @@ function OptionAHorizontalCard({
         </div>
 
         {/* Right play button */}
-        <button className="flex-shrink-0 p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors self-center">
+        <button className="flex-shrink-0 p-2 rounded-full bg-gray-100 dark:bg-dk-inset text-gray-600 dark:text-dk-fg-2 hover:bg-gray-200 transition-colors self-center">
           {episode.isPlaying ? (
             <Pause size={16} fill="currentColor" />
           ) : (
@@ -257,9 +257,9 @@ function OptionBStackedCard({
 
   return (
     <div
-      className={`rounded-xl bg-white border border-gray-200 overflow-hidden transition-all duration-200 ${
+      className={`rounded-xl bg-white dark:bg-dk-card border border-gray-200 dark:border-dk-line overflow-hidden transition-all duration-200 ${
         episode.isPlaying ? 'border-indigo-300 bg-indigo-50/20' : ''
-      } ${isHovered ? 'shadow-md border-gray-300' : ''}`}
+      } ${isHovered ? 'shadow-md border-gray-300 dark:border-dk-line-strong' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -278,7 +278,7 @@ function OptionBStackedCard({
                 className={`rounded-full p-2 transition-colors ${
                   episode.isPlaying
                     ? 'bg-zinc-800 text-white'
-                    : 'bg-white/90 text-gray-900 hover:bg-white'
+                    : 'bg-white/90 text-gray-900 dark:text-dk-fg-1 hover:bg-white'
                 }`}
               >
                 {episode.isPlaying ? (
@@ -295,22 +295,22 @@ function OptionBStackedCard({
         <div className="flex-1 min-w-0">
           <h4
             className={`text-sm font-semibold ${
-              episode.isPlaying ? 'text-indigo-700' : 'text-gray-900'
+              episode.isPlaying ? 'text-indigo-700' : 'text-gray-900 dark:text-dk-fg-1'
             }`}
           >
             {episode.title}
           </h4>
-          <p className="text-xs text-gray-500 line-clamp-2 mt-1 leading-relaxed">
+          <p className="text-xs text-gray-500 dark:text-dk-fg-3 line-clamp-2 mt-1 leading-relaxed">
             {episode.description}
           </p>
-          <div className="flex items-center gap-3 mt-2 text-[11px] text-gray-400">
+          <div className="flex items-center gap-3 mt-2 text-[11px] text-gray-400 dark:text-dk-fg-3">
             <span>Ep. {episode.number}</span>
-            <span className="text-gray-300">|</span>
+            <span className="text-gray-300 dark:text-zinc-600">|</span>
             <span className="flex items-center gap-1">
               <Clock size={11} />
               {formatDuration(episode.duration_seconds)}
             </span>
-            <span className="text-gray-300">|</span>
+            <span className="text-gray-300 dark:text-zinc-600">|</span>
             <span className="flex items-center gap-1">
               <Calendar size={11} />
               {episode.date}
@@ -321,7 +321,7 @@ function OptionBStackedCard({
           {episode.progress > 0 && (
             <div className="mt-2.5">
               <div className="flex items-center gap-2">
-                <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div className="flex-1 h-1.5 bg-gray-100 dark:bg-dk-inset rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-300 ${
                       episode.completed ? 'bg-emerald-500' : 'bg-brand'
@@ -329,7 +329,7 @@ function OptionBStackedCard({
                     style={{ width: `${episode.progress}%` }}
                   />
                 </div>
-                <span className="text-[10px] text-gray-400 font-medium">
+                <span className="text-[10px] text-gray-400 dark:text-dk-fg-3 font-medium">
                   {episode.completed ? (
                     <span className="text-emerald-600 flex items-center gap-0.5">
                       <CheckCircle2 size={11} /> Done
@@ -361,13 +361,13 @@ function OptionCMinimalRow({
   return (
     <div
       className={`flex items-center gap-3 px-4 py-3 transition-all cursor-pointer ${
-        episode.isPlaying ? 'bg-indigo-50' : isHovered ? 'bg-gray-50' : ''
-      } ${index > 0 ? 'border-t border-gray-100' : ''}`}
+        episode.isPlaying ? 'bg-indigo-50' : isHovered ? 'bg-gray-50 dark:bg-dk-inset/40' : ''
+      } ${index > 0 ? 'border-t border-gray-100 dark:border-dk-line' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Number */}
-      <span className="text-xs font-bold text-gray-400 w-6 text-center flex-shrink-0">
+      <span className="text-xs font-bold text-gray-400 dark:text-dk-fg-3 w-6 text-center flex-shrink-0">
         {episode.number}
       </span>
 
@@ -387,7 +387,7 @@ function OptionCMinimalRow({
             className={`text-sm truncate ${
               episode.isPlaying
                 ? 'font-semibold text-indigo-700'
-                : 'font-medium text-gray-800'
+                : 'font-medium text-gray-800 dark:text-dk-fg-1'
             }`}
           >
             {episode.title}
@@ -396,7 +396,7 @@ function OptionCMinimalRow({
             <CheckCircle2 size={12} className="text-emerald-500 flex-shrink-0" />
           )}
         </div>
-        <div className="flex items-center gap-2 text-[10px] text-gray-400">
+        <div className="flex items-center gap-2 text-[10px] text-gray-400 dark:text-dk-fg-3">
           <span>{formatDuration(episode.duration_seconds)}</span>
           <span>&middot;</span>
           <span>{episode.date}</span>
@@ -428,7 +428,7 @@ function OptionCMinimalRow({
                 strokeLinecap="round"
               />
             </svg>
-            <span className="absolute inset-0 flex items-center justify-center text-[7px] font-bold text-gray-500">
+            <span className="absolute inset-0 flex items-center justify-center text-[7px] font-bold text-gray-500 dark:text-dk-fg-3">
               {episode.progress}%
             </span>
           </div>
@@ -441,8 +441,8 @@ function OptionCMinimalRow({
           episode.isPlaying
             ? 'bg-zinc-800 text-white'
             : isHovered
-            ? 'bg-gray-200 text-gray-600'
-            : 'text-gray-300'
+            ? 'bg-gray-200 dark:bg-dk-track text-gray-600 dark:text-dk-fg-2'
+            : 'text-gray-300 dark:text-zinc-600'
         }`}
       >
         {episode.isPlaying ? (
@@ -466,7 +466,7 @@ export default function EpisodeDesignOptionsPreview() {
         {/* Back link */}
         <Link
           href="./"
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-dk-fg-3 hover:text-gray-900 dark:hover:text-dk-fg-1 transition-colors"
         >
           <ArrowLeft size={14} />
           Back to podcast
@@ -508,7 +508,7 @@ export default function EpisodeDesignOptionsPreview() {
 
           {expandedOption === 'a' && (
             <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-xs text-amber-800 space-y-1">
-              <p><strong>Card style:</strong> <code className="bg-amber-100 px-1 rounded">rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)]</code> — matches CourseCurriculum module cards</p>
+              <p><strong>Card style:</strong> <code className="bg-amber-100 px-1 rounded">rounded-xl bg-white dark:bg-dk-card shadow-[0_0_0_1px_rgba(0,0,0,0.08)]</code> — matches CourseCurriculum module cards</p>
               <p><strong>Separation:</strong> <code className="bg-amber-100 px-1 rounded">space-y-3</code> between cards (not divide-y)</p>
               <p><strong>Progress:</strong> Thin bar at bottom when partially done, checkmark when completed</p>
               <p><strong>Play overlay:</strong> Appears on thumbnail hover + always visible on current episode</p>
@@ -526,14 +526,14 @@ export default function EpisodeDesignOptionsPreview() {
         </div>
 
         {/* Divider */}
-        <div className="border-t border-gray-200" />
+        <div className="border-t border-gray-200 dark:border-dk-line-strong" />
 
         {/* ── Option B ── */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-bold rounded-md">
+                <span className="px-2 py-0.5 bg-gray-100 dark:bg-dk-inset text-gray-600 dark:text-dk-fg-2 text-[10px] font-bold rounded-md">
                   ALTERNATIVE
                 </span>
                 <Heading level="h3">Option B — Stacked Card</Heading>
@@ -554,7 +554,7 @@ export default function EpisodeDesignOptionsPreview() {
 
           {expandedOption === 'b' && (
             <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-xs text-amber-800 space-y-1">
-              <p><strong>Card style:</strong> <code className="bg-amber-100 px-1 rounded">rounded-xl bg-white border border-gray-200</code> — simpler border card</p>
+              <p><strong>Card style:</strong> <code className="bg-amber-100 px-1 rounded">rounded-xl bg-white dark:bg-dk-card border border-gray-200 dark:border-dk-line</code> — simpler border card</p>
               <p><strong>Thumbnail:</strong> Larger (80x80), always shows play button overlay, good for podcasts with strong episode artwork</p>
               <p><strong>Metadata:</strong> All in one row: "Ep. 2 | 42 min | Mar 12, 2026"</p>
               <p><strong>Progress bar:</strong> Thicker (1.5px), changes color to green on completion</p>
@@ -572,14 +572,14 @@ export default function EpisodeDesignOptionsPreview() {
         </div>
 
         {/* Divider */}
-        <div className="border-t border-gray-200" />
+        <div className="border-t border-gray-200 dark:border-dk-line-strong" />
 
         {/* ── Option C ── */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-bold rounded-md">
+                <span className="px-2 py-0.5 bg-gray-100 dark:bg-dk-inset text-gray-600 dark:text-dk-fg-2 text-[10px] font-bold rounded-md">
                   COMPACT
                 </span>
                 <Heading level="h3">Option C — Minimal Row</Heading>
@@ -600,7 +600,7 @@ export default function EpisodeDesignOptionsPreview() {
 
           {expandedOption === 'c' && (
             <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-xs text-amber-800 space-y-1">
-              <p><strong>Layout:</strong> Simple row with <code className="bg-amber-100 px-1 rounded">border-t border-gray-100</code> between items (like current design but cleaner)</p>
+              <p><strong>Layout:</strong> Simple row with <code className="bg-amber-100 px-1 rounded">border-t border-gray-100 dark:border-dk-line</code> between items (like current design but cleaner)</p>
               <p><strong>Thumbnail:</strong> Tiny (40x40), just a color initial — no play overlay</p>
               <p><strong>Description:</strong> Hidden — only title + duration + date shown</p>
               <p><strong>Progress:</strong> Circular SVG ring instead of a bar — compact and visual</p>
@@ -611,7 +611,7 @@ export default function EpisodeDesignOptionsPreview() {
             </div>
           )}
 
-          <div className="rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)] overflow-hidden">
+          <div className="rounded-xl bg-white dark:bg-dk-card shadow-[0_0_0_1px_rgba(0,0,0,0.08)] overflow-hidden">
             {MOCK_EPISODES.map((ep, i) => (
               <OptionCMinimalRow key={i} episode={ep} index={i} />
             ))}
@@ -619,68 +619,68 @@ export default function EpisodeDesignOptionsPreview() {
         </div>
 
         {/* ── Comparison Table ── */}
-        <div className="border-t border-gray-200 pt-8">
+        <div className="border-t border-gray-200 dark:border-dk-line-strong pt-8">
           <Heading level="h2" className="!text-xl mb-4">
             Quick Comparison
           </Heading>
-          <div className="overflow-x-auto rounded-xl bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)]">
+          <div className="overflow-x-auto rounded-xl bg-white dark:bg-dk-card shadow-[0_0_0_1px_rgba(0,0,0,0.08)]">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="text-start px-4 py-3 font-semibold text-gray-700">Aspect</th>
+                <tr className="border-b border-gray-100 dark:border-dk-line">
+                  <th className="text-start px-4 py-3 font-semibold text-gray-700 dark:text-dk-fg-1">Aspect</th>
                   <th className="text-start px-4 py-3 font-semibold text-indigo-700">A — Horizontal Card</th>
-                  <th className="text-start px-4 py-3 font-semibold text-gray-700">B — Stacked Card</th>
-                  <th className="text-start px-4 py-3 font-semibold text-gray-700">C — Minimal Row</th>
+                  <th className="text-start px-4 py-3 font-semibold text-gray-700 dark:text-dk-fg-1">B — Stacked Card</th>
+                  <th className="text-start px-4 py-3 font-semibold text-gray-700 dark:text-dk-fg-1">C — Minimal Row</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 <tr>
-                  <td className="px-4 py-2.5 text-gray-500 font-medium">Card style</td>
-                  <td className="px-4 py-2.5 text-gray-700">Shadow card (no border)</td>
-                  <td className="px-4 py-2.5 text-gray-700">Border card</td>
-                  <td className="px-4 py-2.5 text-gray-700">Divided rows (no card)</td>
+                  <td className="px-4 py-2.5 text-gray-500 dark:text-dk-fg-3 font-medium">Card style</td>
+                  <td className="px-4 py-2.5 text-gray-700 dark:text-dk-fg-1">Shadow card (no border)</td>
+                  <td className="px-4 py-2.5 text-gray-700 dark:text-dk-fg-1">Border card</td>
+                  <td className="px-4 py-2.5 text-gray-700 dark:text-dk-fg-1">Divided rows (no card)</td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-2.5 text-gray-500 font-medium">Thumbnail size</td>
-                  <td className="px-4 py-2.5 text-gray-700">64x64</td>
-                  <td className="px-4 py-2.5 text-gray-700">80x80</td>
-                  <td className="px-4 py-2.5 text-gray-700">40x40</td>
+                  <td className="px-4 py-2.5 text-gray-500 dark:text-dk-fg-3 font-medium">Thumbnail size</td>
+                  <td className="px-4 py-2.5 text-gray-700 dark:text-dk-fg-1">64x64</td>
+                  <td className="px-4 py-2.5 text-gray-700 dark:text-dk-fg-1">80x80</td>
+                  <td className="px-4 py-2.5 text-gray-700 dark:text-dk-fg-1">40x40</td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-2.5 text-gray-500 font-medium">Play button</td>
-                  <td className="px-4 py-2.5 text-gray-700">On thumbnail hover + right button</td>
-                  <td className="px-4 py-2.5 text-gray-700">Always on thumbnail</td>
-                  <td className="px-4 py-2.5 text-gray-700">On row hover</td>
+                  <td className="px-4 py-2.5 text-gray-500 dark:text-dk-fg-3 font-medium">Play button</td>
+                  <td className="px-4 py-2.5 text-gray-700 dark:text-dk-fg-1">On thumbnail hover + right button</td>
+                  <td className="px-4 py-2.5 text-gray-700 dark:text-dk-fg-1">Always on thumbnail</td>
+                  <td className="px-4 py-2.5 text-gray-700 dark:text-dk-fg-1">On row hover</td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-2.5 text-gray-500 font-medium">Description</td>
-                  <td className="px-4 py-2.5 text-gray-700">2-line clamp</td>
-                  <td className="px-4 py-2.5 text-gray-700">2-line clamp</td>
-                  <td className="px-4 py-2.5 text-gray-700">Hidden</td>
+                  <td className="px-4 py-2.5 text-gray-500 dark:text-dk-fg-3 font-medium">Description</td>
+                  <td className="px-4 py-2.5 text-gray-700 dark:text-dk-fg-1">2-line clamp</td>
+                  <td className="px-4 py-2.5 text-gray-700 dark:text-dk-fg-1">2-line clamp</td>
+                  <td className="px-4 py-2.5 text-gray-700 dark:text-dk-fg-1">Hidden</td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-2.5 text-gray-500 font-medium">Progress indicator</td>
-                  <td className="px-4 py-2.5 text-gray-700">Thin bar + percentage</td>
-                  <td className="px-4 py-2.5 text-gray-700">Thicker bar + checkmark</td>
-                  <td className="px-4 py-2.5 text-gray-700">Circular ring</td>
+                  <td className="px-4 py-2.5 text-gray-500 dark:text-dk-fg-3 font-medium">Progress indicator</td>
+                  <td className="px-4 py-2.5 text-gray-700 dark:text-dk-fg-1">Thin bar + percentage</td>
+                  <td className="px-4 py-2.5 text-gray-700 dark:text-dk-fg-1">Thicker bar + checkmark</td>
+                  <td className="px-4 py-2.5 text-gray-700 dark:text-dk-fg-1">Circular ring</td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-2.5 text-gray-500 font-medium">Episodes per scroll</td>
-                  <td className="px-4 py-2.5 text-gray-700">~6-8</td>
-                  <td className="px-4 py-2.5 text-gray-700">~5-6</td>
-                  <td className="px-4 py-2.5 text-gray-700">~12-15</td>
+                  <td className="px-4 py-2.5 text-gray-500 dark:text-dk-fg-3 font-medium">Episodes per scroll</td>
+                  <td className="px-4 py-2.5 text-gray-700 dark:text-dk-fg-1">~6-8</td>
+                  <td className="px-4 py-2.5 text-gray-700 dark:text-dk-fg-1">~5-6</td>
+                  <td className="px-4 py-2.5 text-gray-700 dark:text-dk-fg-1">~12-15</td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-2.5 text-gray-500 font-medium">Matches existing patterns</td>
+                  <td className="px-4 py-2.5 text-gray-500 dark:text-dk-fg-3 font-medium">Matches existing patterns</td>
                   <td className="px-4 py-2.5 text-indigo-700 font-medium">CourseCurriculum, CourseLearnings</td>
-                  <td className="px-4 py-2.5 text-gray-700">DiscussionCard</td>
-                  <td className="px-4 py-2.5 text-gray-700">None (custom)</td>
+                  <td className="px-4 py-2.5 text-gray-700 dark:text-dk-fg-1">DiscussionCard</td>
+                  <td className="px-4 py-2.5 text-gray-700 dark:text-dk-fg-1">None (custom)</td>
                 </tr>
                 <tr>
-                  <td className="px-4 py-2.5 text-gray-500 font-medium">Best for</td>
-                  <td className="px-4 py-2.5 text-gray-700">Most podcasts (recommended)</td>
-                  <td className="px-4 py-2.5 text-gray-700">Visual-heavy podcasts</td>
-                  <td className="px-4 py-2.5 text-gray-700">50+ episode catalogs</td>
+                  <td className="px-4 py-2.5 text-gray-500 dark:text-dk-fg-3 font-medium">Best for</td>
+                  <td className="px-4 py-2.5 text-gray-700 dark:text-dk-fg-1">Most podcasts (recommended)</td>
+                  <td className="px-4 py-2.5 text-gray-700 dark:text-dk-fg-1">Visual-heavy podcasts</td>
+                  <td className="px-4 py-2.5 text-gray-700 dark:text-dk-fg-1">50+ episode catalogs</td>
                 </tr>
               </tbody>
             </table>
@@ -688,7 +688,7 @@ export default function EpisodeDesignOptionsPreview() {
         </div>
 
         {/* ── Footer note ── */}
-        <div className="rounded-xl bg-gray-50 border border-gray-200 px-5 py-4">
+        <div className="rounded-xl bg-gray-50 dark:bg-dk-inset/40 border border-gray-200 dark:border-dk-line-strong px-5 py-4">
           <Text size="small" className="text-ui-fg-muted">
             <strong>Recommendation:</strong> Option A (Horizontal Card) balances rich content preview with visual density, matches the CourseCurriculum shadow-card pattern, and provides clear progress tracking. It is the safest and most premium option.
           </Text>

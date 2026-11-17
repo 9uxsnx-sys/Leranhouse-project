@@ -229,12 +229,12 @@ function ActivityElement(props: ActivitiyElementProps) {
     >
       {(provided, snapshot) => (
         <div
-          className={`flex items-center gap-3 py-2.5 px-3 my-2 w-full rounded-lg text-gray-500
+          className={`flex items-center gap-3 py-2.5 px-3 my-2 w-full rounded-lg text-gray-500 dark:text-zinc-400
             ${snapshot.isDragging
-              ? 'nice-shadow bg-white ring-2 ring-blue-500/20 z-drag-overlay rotate-1 scale-[1.02]'
+              ? 'nice-shadow bg-white dark:bg-dk-card ring-2 ring-blue-500/20 z-drag-overlay rotate-1 scale-[1.02]'
               : props.isSelected
               ? 'nice-shadow bg-blue-50 ring-1 ring-blue-200'
-              : 'nice-shadow bg-white hover:bg-gray-50'
+              : 'nice-shadow bg-white dark:bg-dk-card hover:bg-gray-50 dark:hover:bg-dk-raised'
             }`}
           key={props.activity.id}
           {...provided.draggableProps}
@@ -247,7 +247,7 @@ function ActivityElement(props: ActivitiyElementProps) {
             className={`flex-shrink-0 h-5 w-5 rounded border-2 flex items-center justify-center transition-colors ${
               props.isSelected
                 ? 'bg-zinc-800 border-zinc-800 text-white'
-                : 'border-gray-300 bg-white hover:border-gray-400'
+                : 'border-gray-300 dark:border-dk-line-strong bg-white dark:bg-dk-card hover:border-gray-400'
             }`}
           >
             {props.isSelected && <Check size={12} strokeWidth={3} />}
@@ -256,7 +256,7 @@ function ActivityElement(props: ActivitiyElementProps) {
           {/* Drag Handle */}
           <div
             {...provided.dragHandleProps}
-            className="flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-400 transition-colors"
+            className="flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-300 dark:text-zinc-600 hover:text-gray-400 transition-colors"
           >
             <GripVertical size={18} />
           </div>
@@ -267,10 +267,10 @@ function ActivityElement(props: ActivitiyElementProps) {
           {/* Activity Name */}
           <div className="flex-1 flex items-center gap-2 min-w-0">
             {selectedActivity === props.activity.id ? (
-              <div className="flex items-center gap-2 bg-gray-100 py-1 px-3 rounded-md">
+              <div className="flex items-center gap-2 bg-gray-100 dark:bg-dk-inset py-1 px-3 rounded-md">
                 <input
                   type="text"
-                  className="bg-transparent outline-none text-sm text-gray-600 min-w-0"
+                  className="bg-transparent outline-none text-sm text-gray-600 dark:text-zinc-300 min-w-0"
                   placeholder={t('dashboard.courses.structure.activity.name_placeholder')}
                   value={
                     modifiedActivity
@@ -287,7 +287,7 @@ function ActivityElement(props: ActivitiyElementProps) {
                 />
                 <button
                   onClick={() => updateActivityName(props.activity.id)}
-                  className="text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={isUpdatingName}
                 >
                   {isUpdatingName ? (
@@ -298,7 +298,7 @@ function ActivityElement(props: ActivitiyElementProps) {
                 </button>
               </div>
             ) : (
-              <p className="first-letter:uppercase text-sm text-gray-600 truncate">{props.activity.name}</p>
+              <p className="first-letter:uppercase text-sm text-gray-600 dark:text-zinc-300 truncate">{props.activity.name}</p>
             )}
           </div>
 
@@ -318,7 +318,7 @@ function ActivityElement(props: ActivitiyElementProps) {
                 } ${
                   props.activity.published
                     ? 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 hover:border-green-300'
-                    : 'bg-gray-100 text-gray-500 border border-gray-200 hover:bg-gray-200 hover:border-gray-300 hover:text-gray-700'
+                    : 'bg-gray-100 dark:bg-dk-inset text-gray-500 dark:text-zinc-400 border border-gray-200 dark:border-dk-line-strong hover:bg-gray-200 hover:border-gray-300 dark:hover:border-dk-line-strong hover:text-gray-700 dark:hover:text-zinc-200'
                 }`}
               >
                 {isPublishing ? (
@@ -332,13 +332,13 @@ function ActivityElement(props: ActivitiyElementProps) {
                   ? t('dashboard.courses.structure.activity.status.published')
                   : t('dashboard.courses.structure.activity.status.draft')}
               </button>
-              <div className="w-px h-5 bg-gray-200/80 mx-1" />
+              <div className="w-px h-5 bg-gray-200/80 dark:bg-dk-line mx-1" />
               <div className="flex items-center gap-1">
               {editHref ? (
                 <Link
                   href={editHref}
                   target="_blank"
-                  className="h-7 w-7 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                  className="h-7 w-7 flex items-center justify-center rounded-md text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors"
                   title={props.activity.activity_type === 'TYPE_ASSIGNMENT'
                     ? t('dashboard.courses.structure.actions.edit_assignment')
                     : t('dashboard.courses.structure.actions.edit_page')}
@@ -350,7 +350,7 @@ function ActivityElement(props: ActivitiyElementProps) {
               )}
               <Link
                 href={previewHref}
-                className="h-7 w-7 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                className="h-7 w-7 flex items-center justify-center rounded-md text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors"
                 title={t('dashboard.courses.structure.actions.preview_activity')}
               >
                 <Eye size={15} />
@@ -365,7 +365,7 @@ function ActivityElement(props: ActivitiyElementProps) {
               />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="h-7 w-7 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+                  <button className="h-7 w-7 flex items-center justify-center rounded-md text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors">
                     <MoreVertical size={16} />
                   </button>
                 </DropdownMenuTrigger>
@@ -450,9 +450,9 @@ const ActivityTypeIndicator = ({activityType, activitySubType, isMobile} : { act
 
   return (
     <div className="flex items-center gap-1.5 flex-shrink-0">
-      <Icon className="size-4 text-gray-400" />
+      <Icon className="size-4 text-gray-400 dark:text-zinc-400" />
       {!isMobile && (
-        <span className="text-xs text-gray-400 font-medium">
+        <span className="text-xs text-gray-400 dark:text-zinc-400 font-medium">
           {t(`dashboard.courses.structure.activity.types.${displayNameKey}`)}
         </span>
       )}

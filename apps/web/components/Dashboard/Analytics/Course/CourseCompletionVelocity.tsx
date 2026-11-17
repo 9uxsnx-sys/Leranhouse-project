@@ -37,7 +37,7 @@ export default function CourseCompletionVelocity({
           <div className="h-60 flex items-center justify-center text-gray-300">{t('analytics.course_analytics.common.loading')}</div>
         ) : !row || !velocity ? (
           <div className="h-60 flex flex-col items-center justify-center text-gray-400 gap-3">
-            <div className="p-4 rounded-full bg-gray-50">
+            <div className="p-4 rounded-full bg-gray-50 dark:bg-dk-inset/40">
               <Zap size={36} className="text-gray-200" />
             </div>
             <p className="text-sm font-medium">{t('analytics.course_analytics.completion_velocity.not_enough_data')}</p>
@@ -49,18 +49,18 @@ export default function CourseCompletionVelocity({
               <div className="inline-flex items-center gap-3 bg-amber-50 rounded-2xl px-8 py-5">
                 <Zap size={32} className="text-amber-500" />
                 <div>
-                  <p className="text-5xl font-black text-gray-900">{velocity.value}</p>
+                  <p className="text-5xl font-black text-gray-900 dark:text-zinc-100">{velocity.value}</p>
                   <p className="text-sm text-gray-500 mt-1">{t('analytics.course_analytics.completion_velocity.avg_between', { unit: velocity.unit })}</p>
                 </div>
               </div>
             </div>
             <div className="flex justify-center gap-6">
-              <div className="text-center px-6 py-4 bg-gray-50 rounded-xl">
-                <p className="text-2xl font-bold text-gray-700">{row.transitions}</p>
+              <div className="text-center px-6 py-4 bg-gray-50 rounded-xl dark:bg-dk-inset/40">
+                <p className="text-2xl font-bold text-gray-700 dark:text-zinc-200">{row.transitions}</p>
                 <p className="text-xs text-gray-400 mt-1">{t('analytics.course_analytics.completion_velocity.transitions_tracked')}</p>
               </div>
-              <div className="text-center px-6 py-4 bg-gray-50 rounded-xl">
-                <p className="text-2xl font-bold text-gray-700">{Math.round(row.avg_hours_between * 10) / 10}h</p>
+              <div className="text-center px-6 py-4 bg-gray-50 rounded-xl dark:bg-dk-inset/40">
+                <p className="text-2xl font-bold text-gray-700 dark:text-zinc-200">{Math.round(row.avg_hours_between * 10) / 10}h</p>
                 <p className="text-xs text-gray-400 mt-1">{t('analytics.course_analytics.completion_velocity.raw_hours_avg')}</p>
               </div>
             </div>
@@ -75,7 +75,7 @@ export default function CourseCompletionVelocity({
         <div className="h-48 flex items-center justify-center text-gray-300 text-sm">{t('analytics.course_analytics.common.loading')}</div>
       ) : !row || !velocity ? (
         <div className="h-48 flex flex-col items-center justify-center text-gray-300 gap-2">
-          <div className="p-3 rounded-full bg-gray-50">
+          <div className="p-3 rounded-full bg-gray-50 dark:bg-dk-inset/40">
             <Zap size={24} className="text-gray-200" />
           </div>
           <p className="text-sm">{t('analytics.course_analytics.completion_velocity.not_enough_data_short')}</p>
@@ -87,10 +87,10 @@ export default function CourseCompletionVelocity({
             <Zap size={28} className="text-amber-500" />
           </div>
           <div className="text-center">
-            <p className="text-4xl font-black text-gray-900">{velocity.value}</p>
+            <p className="text-4xl font-black text-gray-900 dark:text-zinc-100">{velocity.value}</p>
             <p className="text-sm text-gray-500 mt-0.5">{t('analytics.course_analytics.common.avg_prefix', { value: velocity.unit })}</p>
           </div>
-          <span className="text-[10px] text-gray-300 bg-gray-50 px-2 py-0.5 rounded-full">
+          <span className="text-[10px] text-gray-300 bg-gray-50 px-2 py-0.5 rounded-full dark:bg-dk-inset/40">
             {row.transitions} {t('analytics.course_analytics.units.transitions')}
           </span>
         </div>

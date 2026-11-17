@@ -100,10 +100,10 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
         };
       case 'minimal':
         return {
-          primary: 'text-gray-700',
-          secondary: 'text-gray-600',
-          icon: 'text-gray-600',
-          badge: 'bg-gray-50 text-gray-700 border-gray-200'
+          primary: 'text-gray-700 dark:text-zinc-200',
+          secondary: 'text-gray-600 dark:text-zinc-300',
+          icon: 'text-gray-600 dark:text-zinc-300',
+          badge: 'bg-gray-50 dark:bg-dk-inset text-gray-700 dark:text-zinc-200 border-gray-200 dark:border-dk-line-strong'
         };
       case 'professional':
         return {
@@ -128,10 +128,10 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
         };
       default:
         return {
-          primary: 'text-gray-700',
-          secondary: 'text-gray-600',
-          icon: 'text-gray-600',
-          badge: 'bg-gray-50 text-gray-700 border-gray-200'
+          primary: 'text-gray-700 dark:text-zinc-200',
+          secondary: 'text-gray-600 dark:text-zinc-300',
+          icon: 'text-gray-600 dark:text-zinc-300',
+          badge: 'bg-gray-50 dark:bg-dk-inset text-gray-700 dark:text-zinc-200 border-gray-200 dark:border-dk-line-strong'
         };
     }
   };
@@ -331,7 +331,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
         return (
           <>
             {/* Minimal clean border */}
-            <div className="absolute inset-6 border border-gray-300 opacity-60"></div>
+            <div className="absolute inset-6 border border-gray-300 dark:border-dk-line-strong opacity-60"></div>
             
             {/* Subtle corner accents */}
             <div className="absolute top-5 left-5 w-3 h-3 border-l border-t border-gray-400 opacity-40"></div>
@@ -399,7 +399,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
         return (
           <>
             {/* Modern clean asymmetric border */}
-            <div className="absolute inset-2 border-2 border-gray-300 opacity-50" style={{
+            <div className="absolute inset-2 border-2 border-gray-300 dark:border-dk-line-strong opacity-50" style={{
               clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
             }}></div>
             
@@ -433,7 +433,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
 
   return (
     <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 w-full h-full">
-      <div className="bg-white rounded-lg shadow-sm p-6 relative overflow-hidden w-full h-full flex flex-col">
+      <div className="bg-white dark:bg-dk-card rounded-lg shadow-sm p-6 relative overflow-hidden w-full h-full flex flex-col">
         {/* Dynamic Certificate Pattern */}
         {renderCertificatePattern(certificatePattern)}
 

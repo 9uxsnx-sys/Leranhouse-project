@@ -122,7 +122,7 @@ export default function CourseViewToEnrollment({
         <div>
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-gray-900">{overallRate}%</span>
+              <span className="text-2xl font-bold text-gray-900 dark:text-zinc-100">{overallRate}%</span>
               <span className="text-xs text-gray-400">{t('analytics.course_analytics.units.conversion')}</span>
             </div>
             <div className="flex gap-3 text-xs">

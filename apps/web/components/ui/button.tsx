@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils"
  * without a rename sweep.
  */
 const buttonVariants = cva(
-  "transition-fg relative inline-flex w-fit items-center justify-center rounded-md outline-none disabled:bg-ui-bg-disabled disabled:border-ui-border-base disabled:text-ui-fg-disabled disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-900/20",
+  "transition-fg relative inline-flex w-fit items-center justify-center rounded-md outline-none disabled:bg-ui-bg-disabled disabled:border-ui-border-base disabled:text-ui-fg-disabled disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-900/20 dark:focus-visible:ring-zinc-100/20 dark:focus-visible:ring-offset-zinc-900",
   {
     variants: {
       variant: {

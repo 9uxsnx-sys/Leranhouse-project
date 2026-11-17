@@ -73,15 +73,15 @@ function PaidCourseActivityDisclaimer({ course }: PaidCourseActivityProps) {
         </div>
       </div>
 
-      <div className="bg-white rounded-xl nice-shadow p-6 space-y-4">
+      <div className="bg-white dark:bg-dk-card rounded-xl nice-shadow p-6 space-y-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center">
-            <Lock size={18} className="text-gray-500" />
+          <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-dk-inset/40 flex items-center justify-center">
+            <Lock size={18} className="text-gray-500 dark:text-dk-fg-3" />
           </div>
           <div>
-            <p className="font-semibold text-gray-900">{course?.name}</p>
+            <p className="font-semibold text-gray-900 dark:text-dk-fg-1">{course?.name}</p>
             {formattedPrice && (
-              <p className="text-sm text-gray-500">{formattedPrice}</p>
+              <p className="text-sm text-gray-500 dark:text-dk-fg-3">{formattedPrice}</p>
             )}
           </div>
         </div>

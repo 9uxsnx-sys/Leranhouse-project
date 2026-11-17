@@ -139,11 +139,11 @@ export function CommentSection({ discussionUuid, communityUuid, isLocked = false
         <div className={`scroll-hide-${discussionUuid}`}>
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <Loader2 size={18} className="animate-spin text-gray-400" />
+              <Loader2 size={18} className="animate-spin text-gray-400 dark:text-dk-fg-3" />
             </div>
           ) : comments.length === 0 ? (
             <div className="py-8 text-center">
-              <p className="text-gray-400 text-sm">{t('communities.comments.no_replies')}</p>
+              <p className="text-gray-400 dark:text-dk-fg-3 text-sm">{t('communities.comments.no_replies')}</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -202,7 +202,7 @@ export function CommentSection({ discussionUuid, communityUuid, isLocked = false
                   onKeyDown={handleKeyDown}
                   aria-label={t('communities.comments.write_reply')}
                   placeholder={t('communities.comments.write_reply')}
-                  className="flex-1 text-sm bg-gray-50 border border-gray-200 rounded-md px-3 py-2 outline-none placeholder:text-gray-400 focus:border-gray-300 transition-colors"
+                  className="flex-1 text-sm bg-gray-50 dark:bg-dk-inset/40 border border-gray-200 dark:border-dk-line-strong rounded-md px-3 py-2 outline-none placeholder:text-gray-400 dark:placeholder:text-dk-fg-4 focus:border-gray-300 transition-colors"
                 />
                 <Button
                   type="submit"
@@ -223,10 +223,10 @@ export function CommentSection({ discussionUuid, communityUuid, isLocked = false
             </p>
           </div>
         ) : (
-          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-md">
-            <User size={14} className="text-gray-400" />
-            <p className="text-sm text-gray-500">
-              <span className="font-medium text-gray-700">{t('communities.comments.sign_in_to_reply')}</span> {t('communities.comments.to_reply')}
+          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-dk-inset/40 rounded-md">
+            <User size={14} className="text-gray-400 dark:text-dk-fg-3" />
+            <p className="text-sm text-gray-500 dark:text-dk-fg-3">
+              <span className="font-medium text-gray-700 dark:text-dk-fg-1">{t('communities.comments.sign_in_to_reply')}</span> {t('communities.comments.to_reply')}
             </p>
           </div>
         )}

@@ -40,7 +40,7 @@ function DocumentPdfModal({ submitFileActivity, chapterId, course }: any) {
             'repeating-linear-gradient(0deg, transparent, transparent 8px, rgba(167,243,208,0.25) 8px, rgba(167,243,208,0.25) 9px), repeating-linear-gradient(90deg, transparent, transparent 8px, rgba(167,243,208,0.25) 8px, rgba(167,243,208,0.25) 9px)',
         }}
       >
-        <span className="flex items-center gap-2 bg-white nice-shadow rounded-full px-4 py-1.5 text-sm font-medium text-gray-600">
+        <span className="flex items-center gap-2 bg-white dark:bg-dk-card nice-shadow rounded-full px-4 py-1.5 text-sm font-medium text-gray-600 dark:text-dk-fg-2">
           <FileText size={18} weight="duotone" className="text-emerald-400" />
           Document
         </span>
@@ -48,7 +48,7 @@ function DocumentPdfModal({ submitFileActivity, chapterId, course }: any) {
 
       <div className="rounded-xl nice-shadow p-4 space-y-4">
         <Form.Field name="documentpdf-activity-name" className="space-y-1.5">
-          <Form.Label className="text-sm font-medium text-gray-700">
+          <Form.Label className="text-sm font-medium text-gray-700 dark:text-dk-fg-1">
             Document name
           </Form.Label>
           <Form.Message match="valueMissing" className="text-xs text-red-500">
@@ -60,13 +60,13 @@ function DocumentPdfModal({ submitFileActivity, chapterId, course }: any) {
               type="text"
               required
               placeholder="Enter a name..."
-              className="w-full h-9 px-3 text-sm rounded-lg bg-gray-50 border border-gray-200 outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors"
+              className="w-full h-9 px-3 text-sm rounded-lg bg-gray-50 dark:bg-dk-inset/40 border border-gray-200 dark:border-dk-line-strong outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors"
             />
           </Form.Control>
         </Form.Field>
 
         <Form.Field name="documentpdf-activity-file" className="space-y-1.5">
-          <Form.Label className="text-sm font-medium text-gray-700">
+          <Form.Label className="text-sm font-medium text-gray-700 dark:text-dk-fg-1">
             PDF file
           </Form.Label>
           <Form.Message match="valueMissing" className="text-xs text-red-500">
@@ -78,7 +78,7 @@ function DocumentPdfModal({ submitFileActivity, chapterId, course }: any) {
               type="file"
               onChange={(e: any) => setDocumentPdf(e.target.files[0])}
               required
-              className="w-full text-sm text-gray-500 file:me-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition-colors"
+              className="w-full text-sm text-gray-500 dark:text-dk-fg-3 file:me-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 transition-colors"
             />
           </Form.Control>
         </Form.Field>

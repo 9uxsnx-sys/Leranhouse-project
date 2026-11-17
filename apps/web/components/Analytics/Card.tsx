@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
  * Keep this in one place — the home page tiles import it too, so the border,
  * radius and shadow can never drift between "cards" and "section cards".
  */
-export const CARD_SHELL = 'bg-white rounded-xl border border-gray-100 shadow-sm'
+export const CARD_SHELL = 'bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm'
 
 /**
  * The white section card used across the analytics tabs.
@@ -19,6 +19,7 @@ export function SectionCard({
   children,
   className,
   bodyClassName,
+  titleClassName,
   bleed,
 }: {
   title?: string
@@ -26,6 +27,8 @@ export function SectionCard({
   children: React.ReactNode
   className?: string
   bodyClassName?: string
+  /** Extra classes for the section heading (e.g. a brighter dark tone on the home page). */
+  titleClassName?: string
   /** Full-bleed body: drops the horizontal card padding so table rows hover edge-to-edge. */
   bleed?: boolean
 }) {
@@ -40,7 +43,7 @@ export function SectionCard({
       {(title || right) && (
         <div className={cn('flex items-center justify-between mb-5', bleed && 'px-6')}>
           {title ? (
-            <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500">{title}</h3>
+            <h3 className={cn('text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1', titleClassName)}>{title}</h3>
           ) : (
             <span />
           )}
@@ -69,7 +72,7 @@ export function TableCard({
   return (
     <div className={cn(CARD_SHELL, 'overflow-hidden pt-4', className)}>
       {children}
-      {footer && <div className="border-t border-gray-100 px-6 py-3">{footer}</div>}
+      {footer && <div className="border-t border-gray-100 dark:border-dk-line px-6 py-3">{footer}</div>}
     </div>
   )
 }
@@ -83,17 +86,20 @@ export function ChartCard({
   height = 260,
   children,
   className,
+  titleClassName,
 }: {
   title: string
   actions?: React.ReactNode
   height?: number
   children: React.ReactNode
   className?: string
+  /** Extra classes for the section heading (e.g. a brighter dark tone on the home page). */
+  titleClassName?: string
 }) {
   return (
     <div className={cn(CARD_SHELL, 'p-6', className)}>
       <div className="flex items-center justify-between mb-5">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500">{title}</h3>
+        <h3 className={cn('text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1', titleClassName)}>{title}</h3>
         {actions}
       </div>
       <div style={{ width: '100%', height }}>{children}</div>

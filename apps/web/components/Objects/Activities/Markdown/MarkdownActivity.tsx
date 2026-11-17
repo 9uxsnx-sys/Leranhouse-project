@@ -100,7 +100,7 @@ function MarkdownActivity({ activity, editable = false, style }: MarkdownActivit
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <SpinnerGap size={32} className="animate-spin text-gray-400" />
+        <SpinnerGap size={32} className="animate-spin text-gray-400 dark:text-dk-fg-3" />
       </div>
     )
   }
@@ -109,10 +109,10 @@ function MarkdownActivity({ activity, editable = false, style }: MarkdownActivit
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
         <WarningCircle size={40} className="text-red-400" />
-        <p className="text-sm text-gray-600">{error}</p>
+        <p className="text-sm text-gray-600 dark:text-dk-fg-2">{error}</p>
         <button
           onClick={() => fetchMarkdown(markdownUrl)}
-          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-dk-fg-1 bg-white dark:bg-dk-card border border-gray-200 dark:border-dk-line-strong rounded-lg hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors"
         >
           <ArrowClockwise size={16} />
           Retry
@@ -131,7 +131,7 @@ function MarkdownActivity({ activity, editable = false, style }: MarkdownActivit
             value={editUrl}
             onChange={(e) => setEditUrl(e.target.value)}
             placeholder="https://github.com/user/repo/blob/main/README.md"
-            className="flex-1 h-9 px-3 text-sm rounded-lg bg-gray-50 border border-gray-200 outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors"
+            className="flex-1 h-9 px-3 text-sm rounded-lg bg-gray-50 dark:bg-dk-inset/40 border border-gray-200 dark:border-dk-line-strong outline-none focus:border-gray-300 focus:ring-1 focus:ring-gray-200 transition-colors"
           />
           <button
             onClick={handleSaveUrl}

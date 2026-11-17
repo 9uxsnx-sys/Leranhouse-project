@@ -40,6 +40,7 @@ import { FeedbackModal } from '@components/Objects/Modals/FeedbackModal'
 import { AVAILABLE_LANGUAGES } from '@/lib/languages'
 import { getOrgLogoMediaDirectory, getOrgLogoIconMediaDirectory } from '@services/media/media'
 import { cn } from '@/lib/utils'
+import { ThemeToggle } from '@components/Objects/Theme/ThemeToggle'
 
 function UserLeftMenu() {
   const org = useOrg() as any
@@ -134,7 +135,7 @@ function UserLeftMenu() {
     <nav
       aria-label={t('common.aria.user_sidebar_navigation')}
       className={cn(
-        "hidden lg:flex flex-col shrink-0 h-screen sticky top-0 z-overlay border-e border-gray-200 bg-ui-bg-subtle transition-all duration-300",
+        "hidden lg:flex flex-col shrink-0 h-screen sticky top-0 z-overlay border-e border-gray-200 dark:border-dk-line bg-ui-bg-subtle transition-all duration-300",
         isCollapsed ? "w-[72px]" : "w-64"
       )}
     >
@@ -277,8 +278,11 @@ function UserLeftMenu() {
       </div>
 
       {/* Bottom Section */}
-      <div className="border-t border-gray-200 py-3 px-3 shrink-0">
+      <div className="border-t border-gray-200 dark:border-dk-line py-3 px-3 shrink-0">
         <div className="space-y-1">
+          {/* Theme switcher — light / dark / system */}
+          <ThemeToggle collapsed={isCollapsed} className="mb-1" />
+
           {/* Collapse sidebar button (expanded state) */}
           {!isCollapsed && (
             <Tooltip>
@@ -411,7 +415,7 @@ function UserLeftMenu() {
           {/* Dashboard shortcut for admins */}
           {rights?.dashboard?.action_access && (
             <>
-              {!isCollapsed && <div className="border-t border-gray-200 mt-1 mb-3" />}
+              {!isCollapsed && <div className="border-t border-gray-200 dark:border-dk-line-strong mt-1 mb-3" />}
               <div data-nav-item>
                 <MenuLink
                   href={getUriWithOrg(orgslug, '/dash')}
@@ -424,7 +428,7 @@ function UserLeftMenu() {
           )}
 
           {/* Divider */}
-          {!isCollapsed && <div className="border-t border-gray-200 mt-1 mb-3" />}
+          {!isCollapsed && <div className="border-t border-gray-200 dark:border-dk-line-strong mt-1 mb-3" />}
 
           {/* User Menu */}
           <HeaderProfileBox collapsed={isCollapsed} />

@@ -107,7 +107,7 @@ function NewActivityButton(props: NewActivityButtonProps) {
     <div className="flex items-center gap-3">
       <button
         onClick={() => setSelectedView('home')}
-        className="flex items-center justify-center h-7 w-7 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+        className="flex items-center justify-center h-7 w-7 rounded-lg text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors"
       >
         <ArrowLeft size={18} />
       </button>

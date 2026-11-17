@@ -48,7 +48,7 @@ export default function CourseEngagementByType({
             <div className="flex gap-6 text-sm">
               <div>
                 <p className="text-gray-400 text-xs">{t('analytics.course_analytics.engagement_by_type.total_events')}</p>
-                <p className="text-xl font-bold text-gray-900">{totalEvents}</p>
+                <p className="text-xl font-bold text-gray-900 dark:text-zinc-100">{totalEvents}</p>
               </div>
               <div>
                 <p className="text-gray-400 text-xs">{t('analytics.course_analytics.engagement_by_type.total_learners')}</p>
@@ -58,7 +58,7 @@ export default function CourseEngagementByType({
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-start text-xs text-gray-400 border-b border-gray-100">
+                  <tr className="text-start text-xs text-gray-400 border-b border-gray-100 dark:border-dk-line">
                     <th className="pb-2 font-medium">{t('analytics.course_analytics.common.type')}</th>
                     <th className="pb-2 font-medium text-end">{t('analytics.course_analytics.units.learners')}</th>
                     <th className="pb-2 font-medium text-end">{t('analytics.course_analytics.units.events')}</th>
@@ -69,11 +69,11 @@ export default function CourseEngagementByType({
                 <tbody>
                   {rows.map((row: any, i: number) => (
                     <tr key={i} className="border-b border-gray-50 last:border-0">
-                      <td className="py-2.5 font-medium text-gray-700">
+                      <td className="py-2.5 font-medium text-gray-700 dark:text-zinc-200">
                         {getTypeLabel(row.activity_type)}
                       </td>
-                      <td className="py-2.5 text-end text-gray-600">{row.unique_learners}</td>
-                      <td className="py-2.5 text-end text-gray-600">{row.total_events}</td>
+                      <td className="py-2.5 text-end text-gray-600 dark:text-zinc-300">{row.unique_learners}</td>
+                      <td className="py-2.5 text-end text-gray-600 dark:text-zinc-300">{row.total_events}</td>
                       <td className="py-2.5 text-end text-emerald-600 font-medium">{row.completions}</td>
                       <td className="py-2.5 text-end text-gray-500">{formatDuration(row.avg_seconds_spent)}</td>
                     </tr>
@@ -92,7 +92,7 @@ export default function CourseEngagementByType({
       ) : (
         <div className="h-40">
           <div className="flex items-baseline gap-2 mb-3">
-            <span className="text-2xl font-bold text-gray-900">
+            <span className="text-2xl font-bold text-gray-900 dark:text-zinc-100">
               <AnimatedNumber value={totalEvents} />
             </span>
             <span className="text-xs text-gray-400">{t('analytics.course_analytics.units.events')}</span>
@@ -100,7 +100,7 @@ export default function CourseEngagementByType({
           <div className="space-y-2">
             {rows.slice(0, 3).map((row: any, i: number) => (
               <div key={i} className="flex items-center justify-between text-sm">
-                <span className="text-gray-600">
+                <span className="text-gray-600 dark:text-zinc-300">
                   {getTypeLabel(row.activity_type)}
                 </span>
                 <div className="flex gap-3 text-xs">

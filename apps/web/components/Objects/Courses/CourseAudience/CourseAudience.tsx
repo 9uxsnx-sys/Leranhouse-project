@@ -18,7 +18,7 @@ export default function CourseAudience({ forItems, notForItems }: CourseAudience
   return (
     <div>
       <Heading level="h1" className="!text-2xl mb-4">{t('course.page.audience_title')}</Heading>
-      <div className="rounded-xl bg-white border border-gray-100 shadow-sm px-5 py-5">
+      <div className="rounded-xl bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line shadow-sm px-5 py-5">
         <div className="flex flex-col gap-0.5">
           <Heading level="h2">{t('course.page.audience_for_title')}</Heading>
           <Text size="base" className="text-ui-fg-muted">{t('course.page.audience_for_subtitle')}</Text>
@@ -27,7 +27,7 @@ export default function CourseAudience({ forItems, notForItems }: CourseAudience
           {forItems.map((item, idx) => (
             <li key={idx} className="flex items-start gap-3">
               <Check size={16} className="mt-[5px] text-ui-fg-muted shrink-0" />
-              <Text size="base" className="text-[15px]">{item}</Text>
+              <Text size="base" className="text-[15px] text-ui-fg-subtle">{item}</Text>
             </li>
           ))}
         </ul>
@@ -42,7 +42,7 @@ export default function CourseAudience({ forItems, notForItems }: CourseAudience
               {notForItems.map((item, idx) => (
                 <li key={idx} className="flex items-start gap-3">
                   <X size={16} className="mt-[5px] text-ui-fg-muted shrink-0" />
-                  <Text size="base" className="text-[15px]">{item}</Text>
+                  <Text size="base" className="text-[15px] text-ui-fg-subtle">{item}</Text>
                 </li>
               ))}
             </ul>

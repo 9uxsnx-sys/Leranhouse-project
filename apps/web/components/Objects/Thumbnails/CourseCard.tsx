@@ -35,14 +35,14 @@ export function CourseCard({ id, title, description, image, lessons, duration, d
   return (
     <Link
       href={href || `/course/${id}`}
-      className="flex flex-col h-full bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden"
+      className="flex flex-col h-full bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line rounded-xl shadow-sm overflow-hidden transition-colors hover:border-gray-200 dark:hover:border-dk-line-strong"
     >
       {/* 16:9 Cover Image */}
-      <div className="relative overflow-hidden bg-gray-100 shrink-0" style={{ aspectRatio: '16/9' }}>
+      <div className="relative overflow-hidden bg-gray-100 dark:bg-dk-inset shrink-0" style={{ aspectRatio: '16/9' }}>
         {image ? (
           <img className="w-full h-full object-cover" src={image} alt={title} />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-300">
+          <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-zinc-600">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
               <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
@@ -55,11 +55,11 @@ export function CourseCard({ id, title, description, image, lessons, duration, d
         {/* Top section: title + description */}
         <div className="flex flex-col gap-1">
           {/* Title: 15px, 600 weight, 2-line clamp */}
-          <h3 dir="auto" className="text-[15px] font-semibold leading-snug truncate text-gray-900">
+          <h3 dir="auto" className="text-[15px] font-semibold leading-snug truncate text-gray-900 dark:text-dk-fg-1">
             {title}
           </h3>
           {/* Description: 13px, 400 weight, 3-line clamp — always rendered to keep spacing consistent */}
-          <p dir="auto" className={`text-[13px] font-normal leading-relaxed line-clamp-3 ${description ? 'text-[#6B7280]' : 'invisible'}`}>
+          <p dir="auto" className={`text-[13px] font-normal leading-relaxed line-clamp-3 ${description ? 'text-[#6B7280] dark:text-dk-fg-2' : 'invisible'}`}>
             {description || 'placeholder'}
           </p>
         </div>

@@ -88,15 +88,15 @@ export default function PaymentsTable({
       header: t('dashboard.home.payments.learner'),
       render: (row) => (
         <div className="min-w-0">
-          <p className="text-sm font-medium text-gray-900 truncate">{row.user.name}</p>
-          <p className="text-[11px] text-gray-400 truncate">{row.user.email}</p>
+          <p className="text-sm font-medium text-gray-900 dark:text-dk-fg-1 truncate">{row.user.name}</p>
+          <p className="text-[11px] text-gray-400 dark:text-dk-fg-4 truncate">{row.user.email}</p>
         </div>
       ),
     },
     {
       key: 'course',
       header: t('dashboard.home.payments.course'),
-      render: (row) => <span className="text-gray-700 truncate">{row.course}</span>,
+      render: (row) => <span className="text-gray-700 dark:text-dk-fg-2 truncate">{row.course}</span>,
     },
     {
       key: 'amount',
@@ -106,9 +106,9 @@ export default function PaymentsTable({
       sortable: true,
       value: (row) => row.amount,
       render: (row) => (
-        <span className="tabular-nums text-gray-900">
+        <span className="tabular-nums text-gray-900 dark:text-dk-fg-1">
           {row.amount.toLocaleString(locale)}{' '}
-          <span className="text-gray-400">{row.currency}</span>
+          <span className="text-gray-400 dark:text-dk-fg-4">{row.currency}</span>
         </span>
       ),
     },
@@ -128,7 +128,7 @@ export default function PaymentsTable({
       sortable: true,
       value: (row) => row.date,
       render: (row) => (
-        <span className="text-[13px] text-gray-400 whitespace-nowrap">
+        <span className="text-[13px] text-gray-400 dark:text-dk-fg-4 whitespace-nowrap">
           {row.date ? formatDay(row.date, locale) : '—'}
         </span>
       ),
@@ -138,7 +138,7 @@ export default function PaymentsTable({
   return (
     <SectionCard title={title ?? t('dashboard.home.payments.title')} bleed>
       {isLoading && !data ? (
-        <div className="flex items-center justify-center gap-2 py-16 text-sm text-gray-500">
+        <div className="flex items-center justify-center gap-2 py-16 text-sm text-gray-500 dark:text-dk-fg-3">
           <Loader2 size={16} className="animate-spin" />
           {t('common.loading')}
         </div>

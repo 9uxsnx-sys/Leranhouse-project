@@ -84,11 +84,11 @@ const KnowledgeCheckItemsList = ({ value, onChange, error }: KnowledgeCheckItems
 
   return (
     <div className="space-y-1.5">
-      <div className="rounded-xl border border-gray-200 bg-ui-bg-field">
+      <div className="rounded-xl border border-gray-200 dark:border-dk-line-strong bg-ui-bg-field">
         {isEmpty && (
           <div className="px-4 py-8 text-center">
-            <div className="text-sm text-gray-400 mb-1">{t('dashboard.courses.general.knowledge_checks.empty_title')}</div>
-            <div className="text-xs text-gray-300">
+            <div className="text-sm text-gray-400 dark:text-zinc-400 mb-1">{t('dashboard.courses.general.knowledge_checks.empty_title')}</div>
+            <div className="text-xs text-gray-300 dark:text-zinc-600">
               {t('dashboard.courses.general.knowledge_checks.empty_description')}
             </div>
           </div>
@@ -99,7 +99,7 @@ const KnowledgeCheckItemsList = ({ value, onChange, error }: KnowledgeCheckItems
           return (
             <div
               key={idx}
-              className={`relative border-b border-gray-200 last:border-b-0 px-2.5 py-2 ${isDragging ? 'opacity-40' : ''}`}
+              className={`relative border-b border-gray-200 dark:border-dk-line-strong last:border-b-0 px-2.5 py-2 ${isDragging ? 'opacity-40' : ''}`}
               onDragOver={onDragOver}
               onDrop={onDrop(idx)}
             >
@@ -108,7 +108,7 @@ const KnowledgeCheckItemsList = ({ value, onChange, error }: KnowledgeCheckItems
                 draggable
                 onDragStart={onDragStart(idx)}
                 onDragEnd={() => setDragIdx(null)}
-                className="absolute start-2.5 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing p-0.5"
+                className="absolute start-2.5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-zinc-600 hover:text-gray-500 dark:hover:text-zinc-300 cursor-grab active:cursor-grabbing p-0.5"
                 title={t('dashboard.courses.general.knowledge_checks.drag_to_reorder')}
               >
                 <GripVertical size={14} />
@@ -121,13 +121,13 @@ const KnowledgeCheckItemsList = ({ value, onChange, error }: KnowledgeCheckItems
                   value={item.question}
                   onChange={(e) => updateField(idx, 'question', e.target.value)}
                   placeholder={t('dashboard.courses.general.knowledge_checks.question_placeholder')}
-                  className="flex-1 min-w-0 text-sm text-gray-700 bg-transparent border-none outline-none placeholder:text-gray-300 py-1"
+                  className="flex-1 min-w-0 text-sm text-gray-700 dark:text-zinc-200 bg-transparent border-none outline-none placeholder:text-gray-300 py-1"
                 />
 
                 <button
                   type="button"
                   onClick={() => removeItem(idx)}
-                  className="shrink-0 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                  className="shrink-0 p-1.5 text-gray-400 dark:text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
                   title={t('dashboard.courses.general.knowledge_checks.remove')}
                 >
                   <X size={14} />
@@ -141,7 +141,7 @@ const KnowledgeCheckItemsList = ({ value, onChange, error }: KnowledgeCheckItems
                   value={item.answer}
                   onChange={(e) => updateField(idx, 'answer', e.target.value)}
                   placeholder={t('dashboard.courses.general.knowledge_checks.answer_placeholder')}
-                  className="flex-1 min-w-0 text-sm text-gray-700 bg-transparent border-none outline-none placeholder:text-gray-300 py-1"
+                  className="flex-1 min-w-0 text-sm text-gray-700 dark:text-zinc-200 bg-transparent border-none outline-none placeholder:text-gray-300 py-1"
                 />
               </div>
             </div>
@@ -151,7 +151,7 @@ const KnowledgeCheckItemsList = ({ value, onChange, error }: KnowledgeCheckItems
         <button
           type="button"
           onClick={addItem}
-          className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors rounded-b-xl"
+          className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors rounded-b-xl dark:hover:bg-dk-raised/60"
         >
           <Plus size={13} className="text-blue-500 shrink-0" />
           {t('dashboard.courses.general.knowledge_checks.add_button')}

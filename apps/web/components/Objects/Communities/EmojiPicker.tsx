@@ -44,7 +44,7 @@ export function EmojiPicker({ value, onChange, triggerClassName, disabled = fals
         <button
           type="button"
           disabled={disabled}
-          className={triggerClassName || `flex items-center justify-center w-12 h-12 rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors ${value ? 'border-solid border-gray-200 bg-gray-50' : ''}`}
+          className={triggerClassName || `flex items-center justify-center w-12 h-12 rounded-lg border-2 border-dashed border-gray-300 dark:border-dk-line-strong hover:border-gray-400 transition-colors ${value ? 'border-solid border-gray-200 dark:border-dk-line-strong bg-gray-50 dark:bg-dk-inset/40' : ''}`}
         >
           {value ? (
             <div className="relative">
@@ -57,13 +57,13 @@ export function EmojiPicker({ value, onChange, triggerClassName, disabled = fals
               </button>
             </div>
           ) : (
-            <span className="text-xl text-gray-400">+</span>
+            <span className="text-xl text-gray-400 dark:text-dk-fg-3">+</span>
           )}
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="start" side="bottom" style={{ zIndex: 9999 }}>
         {/* Category tabs */}
-        <div className="flex overflow-x-auto border-b border-gray-100 px-1 py-1 gap-1">
+        <div className="flex overflow-x-auto border-b border-gray-100 dark:border-dk-line px-1 py-1 gap-1">
           {Object.keys(EMOJI_CATEGORIES).map((category) => (
             <button
               key={category}
@@ -71,8 +71,8 @@ export function EmojiPicker({ value, onChange, triggerClassName, disabled = fals
               onClick={() => setActiveCategory(category)}
               className={`px-2.5 py-1.5 text-xs font-medium rounded-md whitespace-nowrap transition-colors ${
                 activeCategory === category
-                  ? 'bg-gray-100 text-gray-900'
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                  ? 'bg-gray-100 dark:bg-dk-inset text-gray-900 dark:text-dk-fg-1'
+                  : 'text-gray-500 dark:text-dk-fg-3 hover:text-gray-700 dark:hover:text-dk-fg-1 hover:bg-gray-50 dark:hover:bg-dk-raised'
               }`}
             >
               {category}
@@ -88,7 +88,7 @@ export function EmojiPicker({ value, onChange, triggerClassName, disabled = fals
                 key={emoji}
                 type="button"
                 onClick={() => handleSelectEmoji(emoji)}
-                className={`w-8 h-8 flex items-center justify-center text-lg rounded hover:bg-gray-100 transition-colors ${
+                className={`w-8 h-8 flex items-center justify-center text-lg rounded hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors ${
                   value === emoji ? 'bg-indigo-100' : ''
                 }`}
               >
@@ -107,7 +107,7 @@ export function EmojiPicker({ value, onChange, triggerClassName, disabled = fals
                 onChange(null)
                 setIsOpen(false)
               }}
-              className="w-full py-1.5 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+              className="w-full py-1.5 text-xs text-gray-500 dark:text-dk-fg-3 hover:text-gray-700 dark:hover:text-dk-fg-1 hover:bg-gray-50 dark:hover:bg-dk-raised rounded-md transition-colors"
             >
               Remove emoji
             </button>

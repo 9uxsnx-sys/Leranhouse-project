@@ -330,7 +330,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">{t('certificate.loading_certificate')}</p>
+          <p className="text-gray-600 dark:text-dk-fg-2">{t('certificate.loading_certificate')}</p>
         </div>
       </div>
     );
@@ -379,13 +379,13 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-dk-inset/40 py-8">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <Link
             href={getUriWithOrg(orgslug, '') + `/course/${courseid}`}
-            className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition duration-200"
+            className="inline-flex items-center space-x-2 text-gray-600 dark:text-dk-fg-2 hover:text-gray-900 dark:hover:text-dk-fg-1 transition duration-200"
           >
             <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
             <span>{t('certificate.back_to_course')}</span>
@@ -403,7 +403,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
         </div>
 
         {/* Certificate Display */}
-        <div className="bg-white rounded-2xl shadow-lg p-8">
+        <div className="bg-white dark:bg-dk-card rounded-2xl shadow-lg p-8">
           <div className="max-w-2xl mx-auto">
             <CertificatePreview
               certificationName={userCertificate.certification.config.certification_name}
@@ -423,7 +423,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
         </div>
 
         {/* Instructions */}
-        <div className="mt-8 text-center text-gray-600">
+        <div className="mt-8 text-center text-gray-600 dark:text-dk-fg-2">
           <p className="mb-2">
             Click "Download PDF" to generate and download a high-quality certificate PDF.
           </p>

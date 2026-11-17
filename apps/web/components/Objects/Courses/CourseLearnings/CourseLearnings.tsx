@@ -30,7 +30,7 @@ export default function CourseLearnings({
   const { t } = useTranslation()
   return (
     <div>
-      <div className="rounded-xl bg-white border border-gray-100 shadow-sm px-5 py-5">
+      <div className="rounded-xl bg-white dark:bg-dk-card border border-gray-100 dark:border-dk-line shadow-sm px-5 py-5">
         <div className="flex flex-col gap-0.5">
           <Heading level="h2">{title ?? t('course.page.learnings_title')}</Heading>
           <Text size="base" className="text-ui-fg-muted">{subtitle ?? t('course.page.learnings_subtitle')}</Text>
@@ -39,7 +39,7 @@ export default function CourseLearnings({
           {items.map((item, idx) => (
             <li key={idx} className="flex items-start gap-3">
               <span className="mt-[7px] block w-1.5 h-1.5 rounded-full bg-ui-fg-muted shrink-0" />
-              <Text size="base" className="text-[15px]">{item}</Text>
+              <Text size="base" className="text-[15px] text-ui-fg-subtle">{item}</Text>
             </li>
           ))}
         </ul>

@@ -239,13 +239,13 @@ const OrgEditAPIAccess: React.FC = () => {
       <div className="flex items-center justify-between">
         {showDoc ? (
           <div className="relative w-80">
-            <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+            <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-zinc-400 pointer-events-none" />
             <input
               type="text"
               value={docSearchQuery}
               onChange={(e) => setDocSearchQuery(e.target.value)}
               placeholder={t('dashboard.organization.api_access.search_placeholder')}
-              className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
+              className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 dark:text-zinc-200 bg-white dark:bg-dk-card shadow-borders-base rounded-md placeholder:text-gray-500 dark:placeholder:text-zinc-400 focus:outline-none"
             />
           </div>
         ) : (
@@ -255,7 +255,7 @@ const OrgEditAPIAccess: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowDoc(!showDoc)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-700 cursor-pointer hover:bg-gray-50 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-700 dark:text-zinc-200 cursor-pointer hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors"
           >
             {!showDoc ? (
               <>
@@ -285,13 +285,13 @@ const OrgEditAPIAccess: React.FC = () => {
 
       {/* ===== Content ===== */}
       {!showDoc ? (
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+        <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+          <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
             {t('common.sections.api_tokens')}
           </h2>
 
           {isLoading ? (
-            <div className="flex items-center justify-center py-12 text-gray-400">
+            <div className="flex items-center justify-center py-12 text-gray-400 dark:text-zinc-400">
               <Loader2 size={24} className="animate-spin" />
             </div>
           ) : tokens && tokens.length > 0 ? (
@@ -299,35 +299,35 @@ const OrgEditAPIAccess: React.FC = () => {
               {tokens.map((token) => (
                 <div
                   key={token.token_uuid}
-                  className="flex items-center justify-between px-5 py-5 rounded-xl bg-gray-50 shadow-borders-base cursor-pointer hover:bg-gray-100 transition-colors"
+                  className="flex items-center justify-between px-5 py-5 rounded-xl bg-gray-50 dark:bg-dk-inset/40 shadow-borders-base cursor-pointer hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors"
                   onClick={() => openDetail(token.token_uuid)}
                 >
                   <div className="flex items-center gap-4 flex-1 min-w-0">
-                    <Key size={16} className="text-gray-400 shrink-0" />
+                    <Key size={16} className="text-gray-400 dark:text-zinc-400 shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="font-medium truncate">{token.name}</span>
                         <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full border ${
                           token.is_active
-                            ? 'bg-gray-200 text-gray-600 border-transparent'
+                            ? 'bg-gray-200 dark:bg-dk-track text-gray-600 dark:text-zinc-300 border-transparent'
                             : 'bg-red-100 text-red-700 border-transparent'
                         }`}>
                           {token.is_active ? t('dashboard.organization.api_access.status.active') : t('dashboard.organization.api_access.status.revoked')}
                         </span>
-                        <code className="text-xs bg-gray-200/60 px-1.5 py-0.5 rounded font-mono text-gray-500">
+                        <code className="text-xs bg-gray-200/60 px-1.5 py-0.5 rounded font-mono text-gray-500 dark:text-zinc-400">
                           {token.token_prefix}...
                         </code>
                       </div>
                       <div className="flex items-center gap-3 mt-0.5">
                         {token.description && (
-                          <p className="text-xs text-gray-500 truncate max-w-[200px]">
+                          <p className="text-xs text-gray-500 dark:text-zinc-400 truncate max-w-[200px]">
                             {token.description}
                           </p>
                         )}
-                        <span className="text-[11px] text-gray-400">
+                        <span className="text-[11px] text-gray-400 dark:text-zinc-400">
                           {t('dashboard.organization.api_access.last_used', { date: formatDate(token.last_used_at) })}
                         </span>
-                        <span className="text-[11px] text-gray-400">
+                        <span className="text-[11px] text-gray-400 dark:text-zinc-400">
                           {t('dashboard.organization.api_access.expires_at', { date: token.expires_at ? formatDate(token.expires_at) : t('dashboard.organization.api_access.never') })}
                         </span>
                       </div>
@@ -337,7 +337,7 @@ const OrgEditAPIAccess: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-gray-500 dark:text-zinc-400">
               <Key size={48} className="mx-auto mb-4 opacity-50" />
               <p>{t('dashboard.organization.api_access.empty.title')}</p>
               <p className="text-sm">{t('dashboard.organization.api_access.empty.description')}</p>
@@ -365,15 +365,15 @@ const OrgEditAPIAccess: React.FC = () => {
             <button
               type="button"
               onClick={goBackToList}
-              className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 transition-colors cursor-pointer"
             >
               <ChevronRight size={16} className="rotate-180" />
               <span>{t('dashboard.organization.api_access.back_to_tokens')}</span>
             </button>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-            <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+          <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+            <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
               {t('common.sections.token_created')}
             </h2>
 
@@ -390,7 +390,7 @@ const OrgEditAPIAccess: React.FC = () => {
             </div>
 
             <div className="space-y-3">
-              <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
+              <label className="text-sm font-semibold text-gray-700 dark:text-zinc-200 mb-1.5 block">
                 {t('dashboard.organization.api_access.token_reveal.label')}
               </label>
               <div className="flex gap-2">
@@ -403,14 +403,14 @@ const OrgEditAPIAccess: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowTokenValue(!showTokenValue)}
-                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 transition-colors cursor-pointer shrink-0"
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-500 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors cursor-pointer shrink-0"
                 >
                   {showTokenValue ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
                 <button
                   type="button"
                   onClick={() => copyToClipboard(newTokenValue!)}
-                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 transition-colors cursor-pointer shrink-0"
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-500 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors cursor-pointer shrink-0"
                 >
                   {copiedToken ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
                 </button>
@@ -429,7 +429,7 @@ const OrgEditAPIAccess: React.FC = () => {
           <button
             type="button"
             onClick={goBackToList}
-            className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 transition-colors cursor-pointer"
           >
             <ChevronRight size={16} className="rotate-180" />
             <span>{t('dashboard.organization.api_access.back_to_tokens')}</span>
@@ -439,7 +439,7 @@ const OrgEditAPIAccess: React.FC = () => {
               type="button"
               onClick={handleRegenerate}
               disabled={isActiveSaving}
-              className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong hover:bg-gray-50 dark:hover:bg-dk-raised cursor-pointer"
             >
               <RefreshCw size={14} />
               {t('dashboard.organization.api_access.regenerate')}
@@ -450,9 +450,9 @@ const OrgEditAPIAccess: React.FC = () => {
               disabled={isActiveSaving}
               className={`inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors ${
                 isActiveSaving
-                  ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                  ? 'bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong cursor-default'
                   : isSaved
-                    ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                    ? 'bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong cursor-default'
                     : 'bg-brand text-brand-fg border-brand hover:bg-brand-hover cursor-pointer'
               }`}
             >
@@ -471,13 +471,13 @@ const OrgEditAPIAccess: React.FC = () => {
         </div>
 
         {/* ===== Token Details Card ===== */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+        <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
             {t('common.sections.token_details')}
           </h3>
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
+              <label className="text-sm font-semibold text-gray-700 dark:text-zinc-200 mb-1.5 block">
                 {t('dashboard.organization.api_access.fields.token_name')} <span className="text-red-400">*</span>
               </label>
               <Input
@@ -489,7 +489,7 @@ const OrgEditAPIAccess: React.FC = () => {
               />
             </div>
             <div>
-              <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
+              <label className="text-sm font-semibold text-gray-700 dark:text-zinc-200 mb-1.5 block">
                 {t('dashboard.organization.api_access.fields.description')}
               </label>
               <Textarea
@@ -505,8 +505,8 @@ const OrgEditAPIAccess: React.FC = () => {
         </div>
 
         {/* ===== Permissions Card ===== */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+        <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
             {t('common.sections.permissions')}
           </h3>
           <div className="space-y-2">
@@ -515,12 +515,12 @@ const OrgEditAPIAccess: React.FC = () => {
               onClick={() => handlePresetChange('readonly')}
               className={`flex items-center gap-3 px-5 py-5 rounded-xl cursor-pointer transition-colors ${
                 rightsPreset === 'readonly'
-                  ? 'bg-gray-100 shadow-borders-base'
-                  : 'bg-gray-50 shadow-borders-base hover:bg-gray-100'
+                  ? 'bg-gray-100 dark:bg-dk-inset shadow-borders-base'
+                  : 'bg-gray-50 dark:bg-dk-inset/40 shadow-borders-base hover:bg-gray-100 dark:hover:bg-dk-raised'
               }`}
             >
-              <Eye size={16} className="text-gray-400 shrink-0" />
-              <span className="text-sm font-semibold text-gray-800">{t('dashboard.organization.api_access.permissions.read_only')}</span>
+              <Eye size={16} className="text-gray-400 dark:text-zinc-400 shrink-0" />
+              <span className="text-sm font-semibold text-gray-800 dark:text-zinc-200">{t('dashboard.organization.api_access.permissions.read_only')}</span>
             </div>
 
             {/* Full Access - clickable container */}
@@ -528,12 +528,12 @@ const OrgEditAPIAccess: React.FC = () => {
               onClick={() => handlePresetChange('full')}
               className={`flex items-center gap-3 px-5 py-5 rounded-xl cursor-pointer transition-colors ${
                 rightsPreset === 'full'
-                  ? 'bg-gray-100 shadow-borders-base'
-                  : 'bg-gray-50 shadow-borders-base hover:bg-gray-100'
+                  ? 'bg-gray-100 dark:bg-dk-inset shadow-borders-base'
+                  : 'bg-gray-50 dark:bg-dk-inset/40 shadow-borders-base hover:bg-gray-100 dark:hover:bg-dk-raised'
               }`}
             >
-              <Key size={16} className="text-gray-400 shrink-0" />
-              <span className="text-sm font-semibold text-gray-800">{t('dashboard.organization.api_access.permissions.full_access')}</span>
+              <Key size={16} className="text-gray-400 dark:text-zinc-400 shrink-0" />
+              <span className="text-sm font-semibold text-gray-800 dark:text-zinc-200">{t('dashboard.organization.api_access.permissions.full_access')}</span>
             </div>
 
             {/* Custom - expandable container */}
@@ -626,28 +626,28 @@ const CustomPermissionContainer: React.FC<{
   ).length
 
   return (
-    <div className="rounded-xl overflow-hidden border border-gray-100">
+    <div className="rounded-xl overflow-hidden border border-gray-100 dark:border-dk-line">
       {/* Header - clickable to expand/collapse */}
       <div
         onClick={() => setIsExpanded(!isExpanded)}
         className={`flex items-center justify-between px-5 py-5 rounded-xl cursor-pointer transition-colors ${
           isCustom
-            ? 'bg-gray-100 shadow-borders-base'
-            : 'bg-gray-50 shadow-borders-base hover:bg-gray-100'
+            ? 'bg-gray-100 dark:bg-dk-inset shadow-borders-base'
+            : 'bg-gray-50 dark:bg-dk-inset/40 shadow-borders-base hover:bg-gray-100 dark:hover:bg-dk-raised'
         }`}
       >
         <div className="flex items-center gap-3">
-          <SlidersHorizontal size={16} className="text-gray-400 shrink-0" />
-          <span className="text-sm font-semibold text-gray-800">{t('dashboard.organization.api_access.permissions.custom')}</span>
+          <SlidersHorizontal size={16} className="text-gray-400 dark:text-zinc-400 shrink-0" />
+          <span className="text-sm font-semibold text-gray-800 dark:text-zinc-200">{t('dashboard.organization.api_access.permissions.custom')}</span>
           {anyChecked && (
-            <span className="text-xs text-gray-400 tabular-nums">
+            <span className="text-xs text-gray-400 dark:text-zinc-400 tabular-nums">
               {t('dashboard.organization.api_access.permissions.resources_count', { count: selectedResourcesCount })}
             </span>
           )}
         </div>
         <ChevronRight
           size={16}
-          className={`text-gray-400 transition-transform duration-200 ${
+          className={`text-gray-400 dark:text-zinc-400 transition-transform duration-200 ${
             isExpanded ? 'rotate-90' : ''
           }`}
         />
@@ -659,11 +659,11 @@ const CustomPermissionContainer: React.FC<{
           <div className="px-5 pb-5 pt-0" onClick={(e) => e.stopPropagation()}>
             <div className="space-y-1">
               {/* Header row */}
-              <div className="flex items-center px-4 py-2 border-b border-gray-100">
-                <div className="flex-1 text-xs font-semibold text-gray-400">{t('dashboard.organization.api_access.permissions.resource')}</div>
+              <div className="flex items-center px-4 py-2 border-b border-gray-100 dark:border-dk-line">
+                <div className="flex-1 text-xs font-semibold text-gray-400 dark:text-zinc-400">{t('dashboard.organization.api_access.permissions.resource')}</div>
                 <div className="flex items-center gap-4">
                   {crudItems.map((item) => (
-                    <span key={item.key} className="w-8 text-center text-xs font-semibold text-gray-400">
+                    <span key={item.key} className="w-8 text-center text-xs font-semibold text-gray-400 dark:text-zinc-400">
                       {item.label}
                     </span>
                   ))}
@@ -671,15 +671,15 @@ const CustomPermissionContainer: React.FC<{
               </div>
               {/* Resource rows */}
               {resources.map((resource) => (
-                <div key={resource.key} className="flex items-center px-4 py-2.5 rounded-lg hover:bg-gray-50 transition-colors">
-                  <div className="flex-1 text-sm font-medium text-gray-700">{resource.label}</div>
+                <div key={resource.key} className="flex items-center px-4 py-2.5 rounded-lg hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors dark:hover:bg-dk-raised/60">
+                  <div className="flex-1 text-sm font-medium text-gray-700 dark:text-zinc-200">{resource.label}</div>
                   <div className="flex items-center gap-4">
                     {crudItems.map((item) => {
                       const disabled = isCrudDisabled(resource.key, item.key)
                       return (
                         <div key={item.key} className="w-8 flex justify-center">
                           {disabled ? (
-                             <span className="text-xs text-gray-300">-</span>
+                             <span className="text-xs text-gray-300 dark:text-zinc-600">-</span>
                            ) : (
                              <label className="cursor-pointer">
                                <div className="relative w-4 h-4 flex-shrink-0">
@@ -689,7 +689,7 @@ const CustomPermissionContainer: React.FC<{
                                    onChange={() => handleToggle(resource.key, item.key)}
                                    className="sr-only peer"
                                  />
-                                 <div className="w-full h-full rounded border border-gray-300 bg-white peer-checked:bg-gray-600 peer-checked:border-gray-600 flex items-center justify-center transition-colors">
+                                 <div className="w-full h-full rounded border border-gray-300 dark:border-dk-line-strong bg-white dark:bg-dk-card peer-checked:bg-gray-600 peer-checked:border-gray-600 flex items-center justify-center transition-colors">
                                    <Check size={12} className="text-white hidden peer-checked:block" strokeWidth={3} />
                                  </div>
                                </div>

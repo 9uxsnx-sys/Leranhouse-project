@@ -19,12 +19,12 @@ export function SearchInput({
 }) {
   return (
     <div className={cn('relative w-80', className)}>
-      <ConceptIcon.search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+      <ConceptIcon.search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-dk-fg-3 pointer-events-none" />
       <input
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
         placeholder={placeholder}
-        className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
+        className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 dark:text-dk-fg-1 bg-white dark:bg-dk-card shadow-borders-base rounded-md placeholder:text-gray-500 dark:placeholder:text-dk-fg-3 focus:outline-none"
       />
     </div>
   )
@@ -44,7 +44,7 @@ export function DateRangeFilter({
   labels?: Record<string, string>
 }) {
   return (
-    <div className="inline-flex items-center gap-0.5 p-0.5 rounded-lg bg-gray-100">
+    <div className="inline-flex items-center gap-0.5 p-0.5 rounded-lg bg-gray-100 dark:bg-dk-card">
       {options.map((o) => (
         <button
           key={o}
@@ -52,7 +52,7 @@ export function DateRangeFilter({
           onClick={() => onChange?.(o)}
           className={cn(
             'px-2.5 py-1 text-xs rounded-md transition-colors',
-            value === o ? 'bg-white text-gray-900 font-semibold shadow-sm' : 'text-gray-500 font-medium hover:text-gray-900'
+            value === o ? 'bg-white dark:bg-dk-raised text-gray-900 dark:text-dk-fg-1 font-semibold shadow-sm' : 'text-gray-500 dark:text-dk-fg-3 font-medium hover:text-gray-900 dark:hover:text-dk-fg-1'
           )}
         >
           {labels?.[o] ?? o}
@@ -81,22 +81,22 @@ export function FilterSelect({
         <IconButton
           size="small"
           variant="transparent"
-          className="bg-white hover:bg-gray-50 shadow-borders-base"
+          className="bg-white dark:bg-dk-card hover:bg-gray-50 dark:hover:bg-dk-raised shadow-borders-base"
           aria-label="Filter"
           title="Filter"
         >
           <ConceptIcon.filter size={14} />
         </IconButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[200px] rounded-lg border border-gray-200 bg-white p-1 shadow-md">
+      <DropdownMenuContent align="end" className="min-w-[200px] rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-raised p-1 shadow-md">
         {options.map((o) => (
           <DropdownMenuItem
             key={o.value}
             onClick={() => onChange?.(o.value)}
-            className="justify-between gap-6 text-sm rounded-md px-2.5 py-1.5 cursor-pointer text-gray-700 data-[highlighted]:bg-gray-100 focus:bg-gray-100"
+            className="justify-between gap-6 text-sm rounded-md px-2.5 py-1.5 cursor-pointer text-gray-700 dark:text-dk-fg-2 data-[highlighted]:bg-gray-100 dark:data-[highlighted]:bg-dk-track focus:bg-gray-100 dark:focus:bg-dk-track"
           >
             <span className="truncate">{o.label}</span>
-            {o.value === value && <ConceptIcon.check size={14} className="text-gray-500 shrink-0" />}
+            {o.value === value && <ConceptIcon.check size={14} className="text-gray-500 dark:text-dk-fg-3 shrink-0" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

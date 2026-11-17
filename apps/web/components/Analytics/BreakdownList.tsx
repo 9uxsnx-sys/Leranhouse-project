@@ -21,14 +21,14 @@ export function BreakdownList({ data, nameKey, valueKey, formatter }: BreakdownL
     <div className="space-y-3.5 pt-1">
       {data.map((d, i) => (
         <div key={i} className="flex items-center gap-3">
-          <span className="w-20 truncate text-[13px] text-gray-600">{d[nameKey]}</span>
-          <div className="flex-1 h-2 rounded-full bg-gray-100 overflow-hidden">
+          <span className="w-20 truncate text-[13px] text-gray-600 dark:text-dk-fg-2">{d[nameKey]}</span>
+          <div className="flex-1 h-2 rounded-full bg-gray-100 dark:bg-dk-inset overflow-hidden">
             <div
               className="h-full rounded-full"
               style={{ width: `${((d[valueKey] || 0) / total) * 100}%`, background: t.categorical[i % t.categorical.length] }}
             />
           </div>
-          <span className="w-20 shrink-0 border-s border-gray-100 ps-3 text-end text-[13px] font-semibold text-gray-900 tabular-nums">
+          <span className="w-20 shrink-0 border-s border-gray-100 dark:border-dk-line ps-3 text-end text-[13px] font-semibold text-gray-900 dark:text-dk-fg-1 tabular-nums">
             {formatter ? formatter(d[valueKey]) : `${Math.round(((d[valueKey] || 0) / total) * 100)}%`}
           </span>
         </div>

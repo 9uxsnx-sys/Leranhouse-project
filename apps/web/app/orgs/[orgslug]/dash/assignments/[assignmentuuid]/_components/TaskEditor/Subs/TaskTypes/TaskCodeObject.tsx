@@ -618,7 +618,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
                     }))
                     setCode(lang?.defaultCode || code)
                   }}
-                  className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-white"
+                  className="px-3 py-1.5 text-sm border border-gray-200 dark:border-dk-line-strong rounded-md bg-white dark:bg-dk-card"
                 >
                   {PLAYGROUND_LANGUAGES.map((lang) => (
                     <option key={lang.id} value={lang.id}>
@@ -634,7 +634,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
                   onChange={(e) =>
                     setContents((prev) => ({ ...prev, grading_mode: e.target.value as any }))
                   }
-                  className="px-3 py-1.5 text-sm border border-gray-200 rounded-md bg-white"
+                  className="px-3 py-1.5 text-sm border border-gray-200 dark:border-dk-line-strong rounded-md bg-white dark:bg-dk-card"
                 >
                   <option value="equal_weight">{t('dashboard.assignments.editor.task_editor.code.equal_weight')}</option>
                   <option value="binary">{t('dashboard.assignments.editor.task_editor.code.binary_option')}</option>
@@ -702,7 +702,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
               {contents.test_cases.map((tc, index) => (
                 <div
                   key={tc.id}
-                  className="flex flex-col space-y-2 p-3 border border-gray-200 rounded-md bg-white"
+                  className="flex flex-col space-y-2 p-3 border border-gray-200 dark:border-dk-line-strong rounded-md bg-white dark:bg-dk-card"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2 flex-1">
@@ -710,7 +710,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
                         value={tc.label}
                         onChange={(e) => updateTestCase(index, 'label', e.target.value)}
                         placeholder={t('dashboard.assignments.editor.task_editor.code.test_label')}
-                        className="px-2 py-1 text-sm border border-gray-200 rounded-md flex-1"
+                        className="px-2 py-1 text-sm border border-gray-200 dark:border-dk-line-strong rounded-md flex-1"
                       />
                       <button
                         onClick={() => updateTestCase(index, 'hidden', !tc.hidden)}
@@ -729,7 +729,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
                           type="number"
                           value={tc.weight}
                           onChange={(e) => updateTestCase(index, 'weight', Math.max(1, Number(e.target.value)))}
-                          className="w-16 px-2 py-1 text-sm border border-gray-200 rounded-md text-center"
+                          className="w-16 px-2 py-1 text-sm border border-gray-200 dark:border-dk-line-strong rounded-md text-center"
                           min={1}
                           title={t('dashboard.assignments.editor.task_editor.code.weight')}
                         />
@@ -750,7 +750,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
                         onChange={(e) => updateTestCase(index, 'stdin', e.target.value)}
                         placeholder={t('dashboard.assignments.editor.task_editor.code.stdin_placeholder')}
                         rows={2}
-                        className="px-2 py-1 text-sm border border-gray-200 rounded-md font-mono resize-y"
+                        className="px-2 py-1 text-sm border border-gray-200 dark:border-dk-line-strong rounded-md font-mono resize-y"
                       />
                     </div>
                     <div className="flex flex-col space-y-1 flex-1">
@@ -760,7 +760,7 @@ function TaskCodeObject({ view, assignmentTaskUUID, user_id }: TaskCodeObjectPro
                         onChange={(e) => updateTestCase(index, 'expectedStdout', e.target.value)}
                         placeholder={t('dashboard.assignments.editor.task_editor.code.expected_output_placeholder')}
                         rows={2}
-                        className="px-2 py-1 text-sm border border-gray-200 rounded-md font-mono resize-y"
+                        className="px-2 py-1 text-sm border border-gray-200 dark:border-dk-line-strong rounded-md font-mono resize-y"
                       />
                     </div>
                   </div>
@@ -1074,25 +1074,25 @@ function TestResultsPanel({
                   {result.expected_stdout !== null && (
                     <div>
                       <span className="text-slate-400">{t('dashboard.assignments.editor.task_editor.code.expected_label')} </span>
-                      <code className="text-slate-600 bg-white px-1 rounded">{result.expected_stdout}</code>
+                      <code className="text-slate-600 bg-white dark:bg-dk-card px-1 rounded">{result.expected_stdout}</code>
                     </div>
                   )}
                   {result.actual_stdout !== null && (
                     <div>
                       <span className="text-slate-400">{t('dashboard.assignments.editor.task_editor.code.got_label')} </span>
-                      <code className="text-red-600 bg-white px-1 rounded">{result.actual_stdout}</code>
+                      <code className="text-red-600 bg-white dark:bg-dk-card px-1 rounded">{result.actual_stdout}</code>
                     </div>
                   )}
                   {result.stderr && (
                     <div>
                       <span className="text-slate-400">{t('dashboard.assignments.editor.task_editor.code.error_label')} </span>
-                      <code className="text-red-600 bg-white px-1 rounded text-[11px] break-all">{result.stderr}</code>
+                      <code className="text-red-600 bg-white dark:bg-dk-card px-1 rounded text-[11px] break-all">{result.stderr}</code>
                     </div>
                   )}
                   {result.compile_output && (
                     <div>
                       <span className="text-slate-400">{t('dashboard.assignments.editor.task_editor.code.compile_label')} </span>
-                      <code className="text-red-600 bg-white px-1 rounded text-[11px] break-all">{result.compile_output}</code>
+                      <code className="text-red-600 bg-white dark:bg-dk-card px-1 rounded text-[11px] break-all">{result.compile_output}</code>
                     </div>
                   )}
                 </div>
@@ -1124,7 +1124,7 @@ function CodeOptionToggle({
   onChange: (next: boolean) => void
 }) {
   return (
-    <div className="flex items-start justify-between gap-2 p-2 rounded-md bg-white border border-slate-200">
+    <div className="flex items-start justify-between gap-2 p-2 rounded-md bg-white dark:bg-dk-card border border-slate-200">
       <div className="flex items-start gap-2 flex-1 min-w-0">
         <div className="mt-0.5 flex-none text-slate-500">{icon}</div>
         <div className="flex flex-col min-w-0">
@@ -1141,7 +1141,7 @@ function CodeOptionToggle({
         }`}
       >
         <span
-          className={`inline-block h-3 w-3 transform rounded-full bg-white shadow transition-transform ${
+          className={`inline-block h-3 w-3 transform rounded-full bg-white dark:bg-zinc-100 shadow transition-transform ${
             checked ? 'translate-x-3.5' : 'translate-x-0.5'
           }`}
         />

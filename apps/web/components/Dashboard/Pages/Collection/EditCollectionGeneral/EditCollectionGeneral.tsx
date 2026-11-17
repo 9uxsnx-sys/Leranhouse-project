@@ -341,7 +341,7 @@ function EditCollectionGeneral({ collection, orgslug, onUpdated }: EditCollectio
           <Link
             href={getUriWithOrg(orgslug, '') + `/collection/${collectionId}`}
             target="_blank"
-            className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+            className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors"
           >
             <Eye size={14} />
             <span>{t('dashboard.courses.preview')}</span>
@@ -352,14 +352,14 @@ function EditCollectionGeneral({ collection, orgslug, onUpdated }: EditCollectio
               <button
                 type="button"
                 onClick={copyFromSource}
-                className="hidden sm:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+                className="hidden sm:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors"
               >
                 <Copy size={14} />
                 <span>{t('dashboard.courses.general.locale.copy_from_source')}</span>
               </button>
             )}
             <span
-              className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600"
+              className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300"
               title={
                 isSourceLocale
                   ? t('dashboard.courses.general.locale.source')
@@ -368,7 +368,7 @@ function EditCollectionGeneral({ collection, orgslug, onUpdated }: EditCollectio
             >
               <span className={`w-1.5 h-1.5 rounded-full ${!isDirty ? 'bg-teal-500' : 'bg-amber-400'}`} />
               <span>{getCurrentLanguageNativeName(contentLocale)}</span>
-              <span className="text-gray-400">
+              <span className="text-gray-400 dark:text-zinc-400">
                 {isSourceLocale
                   ? t('dashboard.courses.general.locale.source')
                   : translation
@@ -384,7 +384,7 @@ function EditCollectionGeneral({ collection, orgslug, onUpdated }: EditCollectio
                 isSaving
                   ? 'bg-brand text-brand-fg border-brand opacity-50 cursor-not-allowed'
                   : !isDirty
-                    ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                    ? 'bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong cursor-default'
                     : 'bg-brand text-brand-fg border-brand hover:bg-brand-hover cursor-pointer'
               }`}
             >
@@ -408,7 +408,7 @@ function EditCollectionGeneral({ collection, orgslug, onUpdated }: EditCollectio
               type="button"
               onClick={togglePublish}
               disabled={isPublishing}
-              className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50 ${
+              className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line hover:bg-gray-50 dark:hover:bg-dk-raised ${
                 isPublishing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
               }`}
             >
@@ -431,14 +431,14 @@ function EditCollectionGeneral({ collection, orgslug, onUpdated }: EditCollectio
         </div>
 
         {!isSourceLocale && !translation && (
-          <div className="text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
+          <div className="text-xs text-gray-500 dark:text-zinc-400 bg-gray-50 dark:bg-dk-inset/40 border border-gray-100 dark:border-dk-line rounded-lg px-3 py-2">
             {t('dashboard.courses.general.locale.inherited')}
           </div>
         )}
 
         {/* ── BASIC INFORMATION ── */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+        <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
             {t('common.sections.overview')}
           </h3>
           <div className="space-y-4">
@@ -503,8 +503,8 @@ function EditCollectionGeneral({ collection, orgslug, onUpdated }: EditCollectio
         </div>
 
         {/* ── LEARNINGS ── */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+        <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
             {t('collections.dashboard.general.learnings_title')}
           </h3>
           <FormField name="learnings">
@@ -519,8 +519,8 @@ function EditCollectionGeneral({ collection, orgslug, onUpdated }: EditCollectio
         <CollectionMediaSection collection={collection} onUpdated={handleMediaUpdated} />
 
         {/* ── DETAILS (difficulty and duration are translatable, the certificate flag is shared) ── */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+        <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
             {t('common.sections.details')}
           </h3>
           <div className="space-y-4">
@@ -575,8 +575,8 @@ function EditCollectionGeneral({ collection, orgslug, onUpdated }: EditCollectio
             <FormField name="meta_has_certificate">
               <FormLabelAndMessage label={t('dashboard.courses.general.details.offers_certificate_label')} />
               <label className="flex items-center gap-3 pt-1 cursor-pointer">
-                <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${values.meta_has_certificate ? 'bg-black' : 'bg-gray-300'} ${isSaving || !isSourceLocale ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${values.meta_has_certificate ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
+                <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${values.meta_has_certificate ? 'bg-black dark:bg-zinc-100' : 'bg-gray-300 dark:bg-dk-track'} ${isSaving || !isSourceLocale ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${values.meta_has_certificate ? 'translate-x-[18px] dark:bg-zinc-900' : 'translate-x-[2px] dark:bg-zinc-300'}`} />
                   <input
                     type="checkbox"
                     className="sr-only"
@@ -585,12 +585,12 @@ function EditCollectionGeneral({ collection, orgslug, onUpdated }: EditCollectio
                     disabled={isSaving || !isSourceLocale}
                   />
                 </div>
-                <span className="text-sm text-gray-600 select-none">{t('dashboard.courses.general.details.offers_certificate_description')}</span>
+                <span className="text-sm text-gray-600 dark:text-zinc-300 select-none">{t('dashboard.courses.general.details.offers_certificate_description')}</span>
               </label>
             </FormField>
 
             {!isSourceLocale && (
-              <p className="text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
+              <p className="text-xs text-gray-500 dark:text-zinc-400 bg-gray-50 dark:bg-dk-inset/40 border border-gray-100 dark:border-dk-line rounded-lg px-3 py-2">
                 {t('dashboard.courses.general.locale.shared_fields')}
               </p>
             )}
@@ -598,8 +598,8 @@ function EditCollectionGeneral({ collection, orgslug, onUpdated }: EditCollectio
         </div>
 
         {/* ── TAGS ── */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+        <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
             {t('collections.dashboard.general.tags_title')}
           </h3>
           <FormField name="tags">

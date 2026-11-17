@@ -117,7 +117,7 @@ export const CustomSelectContent: React.FC<CustomSelectContentProps> = ({
   if (!isOpen || disabled) return null;
 
   return (
-    <div className={`absolute z-dropdown max-h-96 min-w-[8rem] overflow-hidden rounded-lg border bg-white text-gray-700 shadow-lg animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 ${className}`}>
+    <div className={`absolute z-dropdown max-h-96 min-w-[8rem] overflow-hidden rounded-lg border bg-white dark:bg-dk-card text-gray-700 dark:text-zinc-200 shadow-lg animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 ${className}`}>
       <div className="py-1">
         {children}
       </div>
@@ -139,7 +139,7 @@ export const CustomSelectItem: React.FC<CustomSelectItemProps> = ({
 
   return (
     <div
-      className={`relative flex w-full cursor-default select-none items-center rounded-md py-2.5 ps-3 pe-10 text-sm outline-hidden focus:bg-gray-100 focus:text-gray-900 hover:bg-gray-100 hover:text-gray-900 transition-colors ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
+      className={`relative flex w-full cursor-default select-none items-center rounded-md py-2.5 ps-3 pe-10 text-sm outline-hidden focus:bg-gray-100 focus:text-gray-900 hover:bg-gray-100 dark:hover:bg-dk-raised hover:text-gray-900 dark:hover:text-zinc-100 transition-colors ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
       onClick={() => !disabled && onValueChange(value)}
     >
       {children}

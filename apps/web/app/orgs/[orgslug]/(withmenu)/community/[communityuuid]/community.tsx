@@ -88,7 +88,7 @@ const CommunityClient = ({
     <>
       <GeneralWrapperStyled>
         {/* ── HERO BANNER IMAGE (centered, constrained) ── */}
-        <div className="relative w-full mx-auto max-w-7xl aspect-[3/1] rounded-xl overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-gray-100 ring-1 ring-inset ring-black/5">
+        <div className="relative w-full mx-auto max-w-7xl aspect-[3/1] rounded-xl overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-gray-100 ring-1 ring-inset ring-black/5 dark:ring-white/10">
           {activeCommunity.banner_image ? (
             <img
               src={getCommunityBannerMediaDirectory(org?.org_uuid, activeCommunity?.community_uuid, activeCommunity?.banner_image)}
@@ -98,7 +98,7 @@ const CommunityClient = ({
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500/5 via-white to-indigo-500/10">
               <div className="text-center">
-                <div className="w-20 h-20 rounded-2xl bg-white shadow-sm ring-1 ring-black/5 flex items-center justify-center mx-auto">
+                <div className="w-20 h-20 rounded-2xl bg-white dark:bg-dk-card shadow-sm ring-1 ring-black/5 dark:ring-white/10 flex items-center justify-center mx-auto">
                   <MessageCircle className="w-10 h-10 text-indigo-400" />
                 </div>
               </div>
@@ -140,9 +140,9 @@ const CommunityClient = ({
           <div className="flex-1 min-w-0 max-w-3xl space-y-8">
             {/* Mobile only shows community name */}
             <div className="md:hidden mb-4">
-              <h1 dir="auto" className="text-xl font-bold text-gray-900">{activeCommunity.name}</h1>
+              <h1 dir="auto" className="text-xl font-bold text-gray-900 dark:text-dk-fg-1">{activeCommunity.name}</h1>
               {activeCommunity.description && (
-                <p dir="auto" className="mt-1 text-sm text-gray-500 line-clamp-2">
+                <p dir="auto" className="mt-1 text-sm text-gray-500 dark:text-dk-fg-3 line-clamp-2">
                   {activeCommunity.description}
                 </p>
               )}
@@ -152,18 +152,18 @@ const CommunityClient = ({
             <div className="flex items-center gap-3 mb-4">
               {/* Search Bar */}
               <div className="relative w-80">
-                <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                <Search className="absolute start-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 dark:text-dk-fg-3 pointer-events-none" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t('communities.discussion_list.search_placeholder')}
-                  className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 bg-white shadow-borders-base rounded-md placeholder:text-gray-500 focus:outline-none"
+                  className="w-full h-7 ps-8 pe-2 text-sm text-gray-700 dark:text-dk-fg-1 bg-white dark:bg-dk-card shadow-borders-base rounded-md placeholder:text-gray-500 dark:placeholder:text-dk-fg-3 focus:outline-none"
                 />
               </div>
 
               {/* Results count */}
-              <span className="text-xs text-gray-400 whitespace-nowrap">
+              <span className="text-xs text-gray-400 dark:text-dk-fg-3 whitespace-nowrap">
                 {discussionCount} {discussionCount === 1 ? t('communities.discussion') : t('communities.discussions')}
               </span>
 
@@ -198,7 +198,7 @@ const CommunityClient = ({
               {/* Filter Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <IconButton size="small" variant="transparent" className="bg-white hover:bg-gray-50 shadow-borders-base relative" aria-label={t('communities.discussion_list.filter_discussions')}>
+                  <IconButton size="small" variant="transparent" className="bg-white dark:bg-dk-card hover:bg-gray-50 dark:hover:bg-dk-raised shadow-borders-base relative" aria-label={t('communities.discussion_list.filter_discussions')}>
                     <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M2.5 4.5h10M4.5 7.5h6M6.5 10.5h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
@@ -207,41 +207,41 @@ const CommunityClient = ({
                     )}
                   </IconButton>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-white min-w-0 w-44 p-2">
-                  <DropdownMenuItem onClick={() => setSortBy('recent')} className="flex items-center gap-2 text-sm cursor-pointer bg-white rounded-md">
-                    <span className="text-gray-500"><Clock size={14} /></span>
-                    <span className="text-gray-700">{t('communities.discussion_list.latest')}</span>
-                    {sortBy === 'recent' && <CheckSquare size={12} className="ms-auto text-gray-500 shrink-0" />}
+                <DropdownMenuContent align="end" className="bg-white dark:bg-dk-raised min-w-0 w-44 p-2">
+                  <DropdownMenuItem onClick={() => setSortBy('recent')} className="flex items-center gap-2 text-sm cursor-pointer bg-white dark:bg-dk-raised rounded-md">
+                    <span className="text-gray-500 dark:text-dk-fg-3"><Clock size={14} /></span>
+                    <span className="text-gray-700 dark:text-dk-fg-1">{t('communities.discussion_list.latest')}</span>
+                    {sortBy === 'recent' && <CheckSquare size={12} className="ms-auto text-gray-500 dark:text-dk-fg-3 shrink-0" />}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSortBy('upvotes')} className="flex items-center gap-2 text-sm cursor-pointer bg-white rounded-md">
-                    <span className="text-gray-500"><TrendingUp size={14} /></span>
-                    <span className="text-gray-700">{t('communities.discussion_list.top')}</span>
-                    {sortBy === 'upvotes' && <CheckSquare size={12} className="ms-auto text-gray-500 shrink-0" />}
+                  <DropdownMenuItem onClick={() => setSortBy('upvotes')} className="flex items-center gap-2 text-sm cursor-pointer bg-white dark:bg-dk-raised rounded-md">
+                    <span className="text-gray-500 dark:text-dk-fg-3"><TrendingUp size={14} /></span>
+                    <span className="text-gray-700 dark:text-dk-fg-1">{t('communities.discussion_list.top')}</span>
+                    {sortBy === 'upvotes' && <CheckSquare size={12} className="ms-auto text-gray-500 dark:text-dk-fg-3 shrink-0" />}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSortBy('hot')} className="flex items-center gap-2 text-sm cursor-pointer bg-white rounded-md">
-                    <span className="text-gray-500"><Flame size={14} /></span>
-                    <span className="text-gray-700">{t('communities.discussion_list.hot')}</span>
-                    {sortBy === 'hot' && <CheckSquare size={12} className="ms-auto text-gray-500 shrink-0" />}
+                  <DropdownMenuItem onClick={() => setSortBy('hot')} className="flex items-center gap-2 text-sm cursor-pointer bg-white dark:bg-dk-raised rounded-md">
+                    <span className="text-gray-500 dark:text-dk-fg-3"><Flame size={14} /></span>
+                    <span className="text-gray-700 dark:text-dk-fg-1">{t('communities.discussion_list.hot')}</span>
+                    {sortBy === 'hot' && <CheckSquare size={12} className="ms-auto text-gray-500 dark:text-dk-fg-3 shrink-0" />}
                   </DropdownMenuItem>
 
-                  <div className="border-t border-gray-200 my-1" />
+                  <div className="border-t border-gray-200 dark:border-dk-line-strong my-1" />
 
-                  <DropdownMenuItem onClick={() => setSelectedLabel(null)} className="flex items-center gap-2 text-sm cursor-pointer bg-white rounded-md">
-                    <span className="text-gray-500"><MessageSquare size={14} /></span>
-                    <span className="text-gray-700">{t('communities.discussion_list.all')}</span>
-                    {selectedLabel === null && <CheckSquare size={12} className="ms-auto text-gray-500 shrink-0" />}
+                  <DropdownMenuItem onClick={() => setSelectedLabel(null)} className="flex items-center gap-2 text-sm cursor-pointer bg-white dark:bg-dk-raised rounded-md">
+                    <span className="text-gray-500 dark:text-dk-fg-3"><MessageSquare size={14} /></span>
+                    <span className="text-gray-700 dark:text-dk-fg-1">{t('communities.discussion_list.all')}</span>
+                    {selectedLabel === null && <CheckSquare size={12} className="ms-auto text-gray-500 dark:text-dk-fg-3 shrink-0" />}
                   </DropdownMenuItem>
                   {DISCUSSION_LABELS.map((label) => (
-                    <DropdownMenuItem key={label.id} onClick={() => setSelectedLabel(label.id)} className="flex items-center gap-2 text-sm cursor-pointer bg-white rounded-md">
-                      <span className="text-gray-500">
+                    <DropdownMenuItem key={label.id} onClick={() => setSelectedLabel(label.id)} className="flex items-center gap-2 text-sm cursor-pointer bg-white dark:bg-dk-raised rounded-md">
+                      <span className="text-gray-500 dark:text-dk-fg-3">
                         {label.icon === 'HelpCircle' ? <HelpCircle size={14} /> :
                          label.icon === 'Lightbulb' ? <Lightbulb size={14} /> :
                          label.icon === 'Megaphone' ? <Megaphone size={14} /> :
                          label.icon === 'Star' ? <Star size={14} /> :
                          <MessageSquare size={14} />}
                       </span>
-                      <span className="text-gray-700">{t(`communities.labels.${label.id}`)}</span>
-                      {selectedLabel === label.id && <CheckSquare size={12} className="ms-auto text-gray-500 shrink-0" />}
+                      <span className="text-gray-700 dark:text-dk-fg-1">{t(`communities.labels.${label.id}`)}</span>
+                      {selectedLabel === label.id && <CheckSquare size={12} className="ms-auto text-gray-500 dark:text-dk-fg-3 shrink-0" />}
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>

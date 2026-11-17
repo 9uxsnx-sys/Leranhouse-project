@@ -60,7 +60,7 @@ function lockTriggerAppearance(lockType: LockType) {
       return {
         titleKey: 'course.lock.trigger_public_title',
         titleFallback: 'Access: open to everyone',
-        className: 'text-gray-300 hover:text-gray-500 hover:bg-gray-100',
+        className: 'text-gray-300 dark:text-zinc-600 hover:text-gray-500 dark:hover:text-zinc-300 hover:bg-gray-100 dark:hover:bg-dk-raised',
         Icon: LockOpen,
       }
   }
@@ -161,12 +161,12 @@ export default function LockPopover({
           <TriggerIcon size={14} />
         </button>
       </PopoverTrigger>
-      <PopoverContent align="end" sideOffset={6} className="w-[300px] p-0 shadow-md shadow-gray-300/25 ring-1 ring-neutral-200/70 rounded-xl overflow-hidden border-0 bg-white">
-        <div className="px-4 py-3 border-b border-gray-100">
-          <div className="text-[11px] uppercase tracking-wide text-gray-400 font-semibold">
+      <PopoverContent align="end" sideOffset={6} className="w-[300px] p-0 shadow-md shadow-gray-300/25 ring-1 ring-neutral-200/70 rounded-xl overflow-hidden border-0 bg-white dark:bg-dk-card">
+        <div className="px-4 py-3 border-b border-gray-100 dark:border-dk-line">
+          <div className="text-[11px] uppercase tracking-wide text-gray-400 dark:text-zinc-400 font-semibold">
             {t('course.lock.header_access', 'Access')}
           </div>
-          <div className="text-sm font-semibold text-gray-900">
+          <div className="text-sm font-semibold text-gray-900 dark:text-zinc-100">
             {resourceNoun === 'chapter'
               ? t('course.lock.title_chapter', 'Lock this chapter')
               : t('course.lock.title_activity', 'Lock this activity')}
@@ -184,18 +184,18 @@ export default function LockPopover({
                 disabled={saving}
                 onClick={() => handleSelect(opt.value)}
                 className={`w-full flex items-start gap-3 p-2.5 rounded-lg text-start transition-colors ${
-                  selected ? 'bg-gray-50' : 'hover:bg-gray-50'
+                  selected ? 'bg-gray-50 dark:bg-dk-inset' : 'hover:bg-gray-50 dark:hover:bg-dk-raised'
                 } ${saving ? 'opacity-50' : ''}`}
               >
                 <div className={`flex-shrink-0 mt-0.5 ${opt.tone}`}>
                   <Icon size={16} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-gray-800 flex items-center gap-1.5">
+                  <div className="text-sm font-medium text-gray-800 dark:text-zinc-200 flex items-center gap-1.5">
                     {t(`course.lock.option_${opt.value}_label`, opt.value === 'public' ? 'Public' : opt.value === 'authenticated' ? 'Signed-in only' : 'User groups only')}
-                    {selected && <Check size={13} className="text-gray-500" />}
+                    {selected && <Check size={13} className="text-gray-500 dark:text-zinc-400" />}
                   </div>
-                  <div className="text-[11px] text-gray-500 leading-snug">
+                  <div className="text-[11px] text-gray-500 dark:text-zinc-400 leading-snug">
                     {t(`course.lock.option_${opt.value}_description`, opt.value === 'public' ? 'Anyone can open this, even without signing in.' : opt.value === 'authenticated' ? 'Only logged-in users can open this.' : 'Only members of the user groups you pick below.')}
                   </div>
                 </div>
@@ -205,12 +205,12 @@ export default function LockPopover({
         </div>
 
         {lockType === 'restricted' && (
-          <div className="border-t border-gray-100 p-3 space-y-2 bg-gray-50/60">
-            <div className="text-[11px] uppercase tracking-wide text-gray-400 font-semibold">
+          <div className="border-t border-gray-100 dark:border-dk-line p-3 space-y-2 bg-gray-50/60">
+            <div className="text-[11px] uppercase tracking-wide text-gray-400 dark:text-zinc-400 font-semibold">
               {t('course.lock.usergroups_header', 'User groups')}
             </div>
             {assignedGroups.length === 0 ? (
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-gray-500 dark:text-zinc-400">
                 {t('course.lock.usergroups_none_assigned', 'No groups assigned — nobody but admins can open this.')}
               </div>
             ) : (
@@ -218,13 +218,13 @@ export default function LockPopover({
                 {assignedGroups.map((g) => (
                   <div
                     key={g.usergroup_uuid}
-                    className="flex items-center justify-between gap-2 px-2 py-1.5 bg-white rounded-md border border-gray-200/70"
+                    className="flex items-center justify-between gap-2 px-2 py-1.5 bg-white dark:bg-dk-card rounded-md border border-gray-200/70"
                   >
-                    <span className="text-xs text-gray-700 truncate">{g.name}</span>
+                    <span className="text-xs text-gray-700 dark:text-zinc-200 truncate">{g.name}</span>
                     <button
                       type="button"
                       onClick={() => handleRemove(g.usergroup_uuid)}
-                      className="text-gray-400 hover:text-red-600 transition-colors"
+                      className="text-gray-400 dark:text-zinc-400 hover:text-red-600 transition-colors"
                       title={t('course.lock.usergroups_remove_title', 'Remove')}
                     >
                       <X size={13} />
@@ -236,18 +236,18 @@ export default function LockPopover({
 
             <div className="pt-1">
               {loadingGroups ? (
-                <div className="flex items-center gap-2 text-xs text-gray-500">
+                <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-zinc-400">
                   <Loader2 size={12} className="animate-spin" /> {t('course.lock.usergroups_loading', 'Loading groups…')}
                 </div>
               ) : available.length === 0 ? (
-                <div className="text-xs text-gray-400">
+                <div className="text-xs text-gray-400 dark:text-zinc-400">
                   {(!allGroups || allGroups.length === 0)
                     ? t('course.lock.usergroups_none_in_org', 'No user groups exist yet in this org.')
                     : t('course.lock.usergroups_all_assigned', 'All groups are already assigned.')}
                 </div>
               ) : (
                 <div className="space-y-1">
-                  <div className="text-[11px] text-gray-500">
+                  <div className="text-[11px] text-gray-500 dark:text-zinc-400">
                     {t('course.lock.usergroups_add_a_group', 'Add a group')}
                   </div>
                   <div className="max-h-32 overflow-y-auto space-y-1 pe-0.5">
@@ -256,10 +256,10 @@ export default function LockPopover({
                         key={g.usergroup_uuid}
                         type="button"
                         onClick={() => handleAdd(g.usergroup_uuid)}
-                        className="w-full flex items-center justify-between gap-2 px-2 py-1.5 bg-white hover:bg-blue-50 rounded-md border border-gray-200/70 transition-colors"
+                        className="w-full flex items-center justify-between gap-2 px-2 py-1.5 bg-white dark:bg-dk-card hover:bg-blue-50 rounded-md border border-gray-200/70 transition-colors"
                       >
-                        <span className="text-xs text-gray-700 truncate">{g.name}</span>
-                        <Plus size={13} className="text-gray-400" />
+                        <span className="text-xs text-gray-700 dark:text-zinc-200 truncate">{g.name}</span>
+                        <Plus size={13} className="text-gray-400 dark:text-zinc-400" />
                       </button>
                     ))}
                   </div>

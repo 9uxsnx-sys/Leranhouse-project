@@ -10,6 +10,7 @@ import { fetchRAGChatSessions, RAGChatSession } from '@services/ai/ai'
 import UserLeftMenu from './UserLeftMenu'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import { useOrg } from '@components/Contexts/OrgContext'
+import { useTheme } from '@components/Contexts/ThemeContext'
 import { getBrandStyle } from '@services/utils/ts/colorUtils'
 import { usePathname } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
@@ -162,6 +163,7 @@ export const OrgMenu = ({
 }) => {
   const session = useLHSession() as any;
   const org = useOrg() as any;
+  const { resolvedTheme } = useTheme()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isFocusMode, setIsFocusMode] = useState(false)
   const pathname = usePathname()
@@ -268,7 +270,7 @@ export const OrgMenu = ({
         className="relative flex h-screen w-full flex-col items-start lg:flex-row"
         style={{
           ...(shellHeight ? { height: shellHeight } : {}),
-          ...getBrandStyle(primaryColor, brandFg, brandSidebar, brandHover),
+          ...getBrandStyle(primaryColor, brandFg, brandSidebar, brandHover, resolvedTheme),
         } as React.CSSProperties}
       >
         {/* Desktop sidebar — rendered directly, matching dashboard layout */}
@@ -591,7 +593,7 @@ const CopilotMenuButton = ({
             }`}
           >
             <span
-              className={`inline-block h-3 w-3 rounded-full bg-white shadow-sm transition-transform ${
+              className={`inline-block h-3 w-3 rounded-full bg-white dark:bg-zinc-100 shadow-sm transition-transform ${
                 isBubbleMode ? 'translate-x-3.5' : 'translate-x-0.5'
               }`}
             />

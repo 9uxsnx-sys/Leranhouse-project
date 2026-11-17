@@ -25,8 +25,8 @@ export default function DAUChart({ days = '30' }: { days?: string }) {
   const rows = data?.data ?? []
 
   return (
-    <div className="bg-white nice-shadow rounded-xl p-5">
-      <h3 className="text-sm font-semibold text-gray-700 mb-4">{t('analytics.overview.daily_active_users')}</h3>
+    <div className="bg-white nice-shadow rounded-xl p-5 dark:bg-dk-card">
+      <h3 className="text-sm font-semibold text-gray-700 mb-4 dark:text-zinc-200">{t('analytics.overview.daily_active_users')}</h3>
       {isLoading ? (
         <div className="h-[260px] flex items-center justify-center text-gray-300">{t('analytics.common.loading')}</div>
       ) : rows.length === 0 ? (

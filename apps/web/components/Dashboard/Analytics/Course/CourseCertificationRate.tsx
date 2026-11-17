@@ -38,7 +38,7 @@ export default function CourseCertificationRate({
               <ProgressRing percent={rate} size={160} strokeWidth={12} color={chart.primary} />
             </div>
             <div className="text-center">
-              <p className="text-5xl font-black text-gray-900">{rate}%</p>
+              <p className="text-5xl font-black text-gray-900 dark:text-zinc-100">{rate}%</p>
               <p className="text-sm text-gray-500 mt-1">{t('analytics.course_analytics.certification_rate.of_completers_claimed')}</p>
             </div>
             <div className="flex justify-center gap-6">
@@ -46,8 +46,8 @@ export default function CourseCertificationRate({
                 <p className="text-2xl font-bold text-emerald-600">{claims}</p>
                 <p className="text-xs text-gray-400 mt-1">{t('analytics.course_analytics.certification_rate.certificates_claimed')}</p>
               </div>
-              <div className="text-center px-6 py-4 bg-gray-50 rounded-xl">
-                <p className="text-2xl font-bold text-gray-700">{completions}</p>
+              <div className="text-center px-6 py-4 bg-gray-50 rounded-xl dark:bg-dk-inset/40">
+                <p className="text-2xl font-bold text-gray-700 dark:text-zinc-200">{completions}</p>
                 <p className="text-xs text-gray-400 mt-1">{t('analytics.course_analytics.certification_rate.course_completions')}</p>
               </div>
             </div>
@@ -63,11 +63,11 @@ export default function CourseCertificationRate({
         <div className="flex items-center justify-center h-48 gap-5">
           <ProgressRing percent={rate} size={80} strokeWidth={6} color={chart.primary} />
           <div>
-            <p className="text-4xl font-black text-gray-900">{rate}%</p>
+            <p className="text-4xl font-black text-gray-900 dark:text-zinc-100">{rate}%</p>
             <p className="text-sm text-gray-500">{t('analytics.course_analytics.units.claim_rate')}</p>
             <div className="flex gap-3 mt-2 text-[10px]">
               <span className="bg-emerald-50 text-emerald-500 px-2 py-0.5 rounded-full font-medium">{claims} {t('analytics.course_analytics.units.claimed')}</span>
-              <span className="bg-gray-50 text-gray-500 px-2 py-0.5 rounded-full font-medium">{completions} {t('analytics.course_analytics.units.completed')}</span>
+              <span className="bg-gray-50 text-gray-500 px-2 py-0.5 rounded-full font-medium dark:bg-dk-inset/40">{completions} {t('analytics.course_analytics.units.completed')}</span>
             </div>
           </div>
         </div>

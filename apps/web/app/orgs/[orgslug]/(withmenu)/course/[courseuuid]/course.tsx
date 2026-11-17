@@ -22,7 +22,6 @@ import toast from 'react-hot-toast'
 import { startCourse, startTrail } from '@services/courses/activity'
 import { createResourceCheckout } from '@services/payments/checkout'
 import { useTranslation } from 'react-i18next'
-import CourseCommunitySection from '@components/Objects/Communities/CourseCommunitySection'
 import CourseShare from '@components/Objects/Courses/CourseShare/CourseShare'
 import CourseLearnings from '@components/Objects/Courses/CourseLearnings/CourseLearnings'
 import CourseCurriculum from '@components/Objects/Courses/CourseCurriculum/CourseCurriculum'
@@ -214,10 +213,10 @@ const CourseClient = (props: any) => {
     return (
       <GeneralWrapperStyled>
         <div className="flex flex-col items-center justify-center min-h-[50vh] text-center px-4">
-          <h2 className="text-xl font-semibold text-gray-700 mb-2">
+          <h2 className="text-xl font-semibold text-gray-700 dark:text-dk-fg-1 mb-2">
             {t('course.accessDenied', 'Unable to access this course')}
           </h2>
-          <p className="text-gray-500 mb-4">
+          <p className="text-gray-500 dark:text-dk-fg-3 mb-4">
             {activeError?.status === 403
               ? t('course.noPermission', 'You do not have permission to view this course.')
               : t('course.loadError', 'This course could not be found or there was an error loading it.')}
@@ -292,17 +291,18 @@ const CourseClient = (props: any) => {
   }
 
   const getActivityTypeBadgeColor = (activityType: string) => {
+    const neutral = 'bg-neutral-100 text-neutral-500 dark:bg-dk-inset dark:text-dk-fg-3'
     switch (activityType) {
       case 'TYPE_VIDEO':
-        return 'bg-neutral-100 text-neutral-500'
+        return neutral
       case 'TYPE_DOCUMENT':
-        return 'bg-neutral-100 text-neutral-500'
+        return neutral
       case 'TYPE_DYNAMIC':
-        return 'bg-neutral-100 text-neutral-500'
+        return neutral
       case 'TYPE_ASSIGNMENT':
-        return 'bg-neutral-100 text-neutral-500'
+        return neutral
       default:
-        return 'bg-neutral-100 text-neutral-500'
+        return neutral
     }
   }
 
@@ -373,7 +373,7 @@ const CourseClient = (props: any) => {
         <>
           <GeneralWrapperStyled>
             {/* ── HERO BANNER IMAGE (centered, constrained) ── */}
-            <div className="relative w-full mx-auto max-w-7xl aspect-[3/1] rounded-xl overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-gray-100 ring-1 ring-inset ring-black/5">
+            <div className="relative w-full mx-auto max-w-7xl aspect-[3/1] rounded-xl overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-gray-100 dark:from-zinc-900 dark:via-zinc-900 dark:to-zinc-800 ring-1 ring-inset ring-black/5 dark:ring-white/10">
               {course.banner_image ? (
                 <img
                   src={getCourseBannerMediaDirectory(org?.org_uuid, course?.course_uuid, course?.banner_image)}
@@ -387,12 +387,12 @@ const CourseClient = (props: any) => {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500/5 via-white to-indigo-500/10">
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500/5 via-white to-indigo-500/10 dark:from-zinc-800/40 dark:via-zinc-900 dark:to-zinc-800/60">
                   <div className="text-center">
-                    <div className="w-20 h-20 rounded-2xl bg-white shadow-sm ring-1 ring-black/5 flex items-center justify-center mx-auto">
+                    <div className="w-20 h-20 rounded-2xl bg-white dark:bg-dk-card shadow-sm ring-1 ring-black/5 dark:ring-white/10 flex items-center justify-center mx-auto">
                       <BookOpen className="w-10 h-10 text-indigo-400" />
                     </div>
-                    <Text size="small" className="text-gray-400 mt-3">{t('course.page.banner')}</Text>
+                    <Text size="small" className="text-gray-400 dark:text-dk-fg-3 mt-3">{t('course.page.banner')}</Text>
                   </div>
                 </div>
               )}
@@ -407,7 +407,7 @@ const CourseClient = (props: any) => {
                   {/* ── 2. COURSE TITLE + STATS + SHARE ── */}
                   <div>
                     {course?.is_fallback && (
-                      <div className="inline-flex items-center gap-2 mb-3 rounded-lg border border-amber-100 bg-amber-50 px-3 py-1.5 text-xs text-amber-800">
+                      <div className="inline-flex items-center gap-2 mb-3 rounded-lg border border-amber-100 bg-amber-50 px-3 py-1.5 text-xs text-amber-800 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-300">
                         <Info size={13} className="shrink-0" />
                         <span>
                           {t('course.page.only_available_in', {
@@ -479,15 +479,6 @@ const CourseClient = (props: any) => {
                   {requirementsList.length > 0 && (
                     <CourseRequirements items={requirementsList} />
                   )}
-
-                  {/* ── 8. LINKED COMMUNITY ── */}
-                  {course?.course_uuid && (
-                    <CourseCommunitySection
-                      resourceUuid={course.course_uuid}
-                      resourceType="course"
-                      orgslug={orgslug}
-                    />
-                  )}
                 </div>
 
                 {/* ═══════════════ RIGHT SIDEBAR ═══════════════ */}
@@ -496,13 +487,13 @@ const CourseClient = (props: any) => {
 
                   {/* ── SIDEBAR 1: Access / Progress ── */}
                   {isEnrolled ? (
-                    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                      <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('course.page.in_progress')}</h3>
+                    <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                      <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('course.page.in_progress')}</h3>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-gray-900">{t('course.page.progress_complete', { percent: progressPercent })}</span>
-                        <span className="text-sm text-gray-500">{completedSteps}/{totalSteps}</span>
+                        <span className="text-sm font-semibold text-gray-900 dark:text-dk-fg-1">{t('course.page.progress_complete', { percent: progressPercent })}</span>
+                        <span className="text-sm text-gray-500 dark:text-dk-fg-3">{completedSteps}/{totalSteps}</span>
                       </div>
-                      <div className="w-full h-1.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
+                      <div className="w-full h-1.5 bg-gray-100 dark:bg-dk-inset rounded-full mt-2 overflow-hidden">
                         <div className="h-full bg-brand rounded-full transition-all" style={{ width: `${progressPercent}%` }} />
                       </div>
                       <Link href={getUriWithOrg(orgslug, `/course/${courseuuid}/lesson-preview`)} className="block w-full mt-4">
@@ -512,11 +503,11 @@ const CourseClient = (props: any) => {
                       </Link>
                     </div>
                   ) : (
-                    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                      <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-4">{t('course.page.get_access_title')}</h3>
+                    <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                      <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-4">{t('course.page.get_access_title')}</h3>
                       {isPaidCourse && coursePrice !== null && coursePrice > 0 && (
-                        <p className="text-2xl font-semibold text-gray-900 mb-4">
-                          {coursePrice.toLocaleString()} <span className="text-sm font-normal text-gray-500">DZD</span>
+                        <p className="text-2xl font-semibold text-gray-900 dark:text-dk-fg-1 mb-4">
+                          {coursePrice.toLocaleString()} <span className="text-sm font-normal text-gray-500 dark:text-dk-fg-3">DZD</span>
                         </p>
                       )}
                       <Button
@@ -541,47 +532,47 @@ const CourseClient = (props: any) => {
                   )}
 
                   {/* ── SIDEBAR 2: Course Includes ── */}
-                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('course.page.includes_title')}</h3>
+                  <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('course.page.includes_title')}</h3>
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
-                        <Clock size={16} className="text-gray-400 shrink-0" />
-                        <span className="text-sm text-gray-600">{t('course.page.video_hours', { count: courseIncludes.videoHours })}</span>
+                        <Clock size={16} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
+                        <span className="text-sm text-gray-600 dark:text-dk-fg-2">{t('course.page.video_hours', { count: courseIncludes.videoHours })}</span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <BookOpen size={16} className="text-gray-400 shrink-0" />
-                        <span className="text-sm text-gray-600">{t('course.page.lessons', { count: courseIncludes.totalLessons })}</span>
+                        <BookOpen size={16} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
+                        <span className="text-sm text-gray-600 dark:text-dk-fg-2">{t('course.page.lessons', { count: courseIncludes.totalLessons })}</span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <Download size={16} className="text-gray-400 shrink-0" />
-                        <span className="text-sm text-gray-600">{t('course.page.resources', { count: courseIncludes.resources })}</span>
+                        <Download size={16} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
+                        <span className="text-sm text-gray-600 dark:text-dk-fg-2">{t('course.page.resources', { count: courseIncludes.resources })}</span>
                       </div>
                       <div className="flex items-center gap-3">
-                        <Award size={16} className="text-gray-400 shrink-0" />
-                        <span className="text-sm text-gray-600">{t('course.page.certificate')}</span>
+                        <Award size={16} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
+                        <span className="text-sm text-gray-600 dark:text-dk-fg-2">{t('course.page.certificate')}</span>
                       </div>
                     </div>
                   </div>
 
                   {/* ── SIDEBAR 3: Instructors ── */}
                   {instructors.length > 0 && (
-                    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                      <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('course.page.instructors_title')}</h3>
+                    <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                      <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('course.page.instructors_title')}</h3>
                       <div className="space-y-3">
                         {instructors.map((instructor, index) => (
                           <div key={index} className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-dk-track overflow-hidden shrink-0">
                               {instructor.avatar ? (
                                 <img src={instructor.avatar} alt={instructor.name} className="w-full h-full object-cover" />
                               ) : (
-                                <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-gray-400">
+                                <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-gray-400 dark:text-dk-fg-3">
                                   {instructor.name.charAt(0).toUpperCase()}
                                 </div>
                               )}
                             </div>
                             <div>
-                              <p className="text-sm font-medium tracking-wide text-gray-900">{instructor.name}</p>
-                              {instructor.title && <p className="text-xs text-gray-500">{instructor.title}</p>}
+                              <p className="text-sm font-medium tracking-wide text-gray-900 dark:text-dk-fg-1">{instructor.name}</p>
+                              {instructor.title && <p className="text-xs text-gray-500 dark:text-dk-fg-3">{instructor.title}</p>}
                             </div>
                           </div>
                         ))}
@@ -590,19 +581,19 @@ const CourseClient = (props: any) => {
                   )}
 
                   {/* ── SIDEBAR 4: Community ── */}
-                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('course.page.community_title')}</h3>
-                    <p className="text-sm text-gray-600">
+                  <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('course.page.community_title')}</h3>
+                    <p className="text-sm text-gray-600 dark:text-dk-fg-2">
                       {t('course.page.community_description')}
                     </p>
                   </div>
 
                   {/* ── SIDEBAR 5: Updates ── */}
-                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('course.page.updates_title')}</h3>
+                  <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                    <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('course.page.updates_title')}</h3>
                     <div className="flex items-center gap-3">
-                      <RefreshCw size={16} className="text-gray-400 shrink-0" />
-                      <span className="text-sm text-gray-600">
+                      <RefreshCw size={16} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
+                      <span className="text-sm text-gray-600 dark:text-dk-fg-2">
                         {t('course.page.last_updated', {
                           date: course.update_date
                             ? new Date(course.update_date).toLocaleDateString(i18n.language || 'en', { year: 'numeric', month: 'short', day: 'numeric' })

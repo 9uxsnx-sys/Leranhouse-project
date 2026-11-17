@@ -37,7 +37,7 @@ function ExpandButton({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
-      className="p-1 rounded-md hover:bg-gray-100 transition-colors text-gray-300 hover:text-gray-500"
+      className="p-1 rounded-md hover:bg-gray-100 transition-colors text-gray-300 hover:text-gray-500 dark:hover:bg-dk-raised"
       title={t('analytics.common.expand')}
     >
       <Maximize2 size={14} />
@@ -81,12 +81,12 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
 
   return (
     <>
-      <div className="bg-white nice-shadow rounded-xl overflow-hidden flex divide-x divide-gray-100">
+      <div className="bg-white nice-shadow rounded-xl overflow-hidden flex divide-x divide-gray-100 dark:bg-dk-card dark:divide-dk-line">
         {/* {t('analytics.overview.enrollment_funnel')} */}
         <div className="flex-1 p-5 min-w-0">
           <div className="flex items-center gap-2 mb-4">
             <Funnel size={16} className="text-indigo-400" />
-            <h3 className="text-sm font-semibold text-gray-700">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-zinc-200">
               {t('analytics.overview.enrollment_funnel')}
             </h3>
             <div className="ms-auto">
@@ -145,7 +145,7 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
         <div className="flex-1 p-5 min-w-0">
           <div className="flex items-center gap-2 mb-4">
             <Trophy size={16} className="text-amber-400" />
-            <h3 className="text-sm font-semibold text-gray-700">{t('analytics.overview.top_courses')}</h3>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-zinc-200">{t('analytics.overview.top_courses')}</h3>
             <div className="ms-auto">
               <ExpandButton onClick={() => setCoursesOpen(true)} />
             </div>
@@ -171,7 +171,7 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
         <div className="flex-1 p-5 min-w-0">
           <div className="flex items-center gap-2 mb-4">
             <Zap size={16} className="text-green-400" />
-            <h3 className="text-sm font-semibold text-gray-700">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-zinc-200">
               {t('analytics.overview.activity_engagement')}
             </h3>
             <div className="ms-auto">
@@ -272,10 +272,10 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
                 return (
                   <div
                     key={step.label}
-                    className="bg-gray-50 rounded-xl p-4 text-center"
+                    className="bg-gray-50 rounded-xl p-4 text-center dark:bg-dk-inset/40"
                   >
                     <p className="text-xs text-gray-400 mb-1">{step.label}</p>
-                    <p className="text-2xl font-bold text-gray-900">{rate}%</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-zinc-100">{rate}%</p>
                     <p className="text-[11px] text-gray-400 mt-0.5">
                       {(step.to ?? 0).toLocaleString()} / {(step.from ?? 0).toLocaleString()}
                     </p>
@@ -331,10 +331,10 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
                 <Link
                   key={i}
                   href={href}
-                  className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 items-center px-3 py-2.5 rounded-lg hover:bg-gray-50 transition-colors group"
+                  className="grid grid-cols-[1fr_80px_80px_80px_100px] gap-2 items-center px-3 py-2.5 rounded-lg hover:bg-gray-50 transition-colors group dark:hover:bg-dk-raised/60"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden flex items-center justify-center">
+                    <div className="w-9 h-9 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden flex items-center justify-center dark:bg-dk-inset">
                       {thumbnail ? (
                         <img
                           src={thumbnail}
@@ -348,17 +348,17 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
                         />
                       )}
                     </div>
-                    <span className="text-sm text-gray-700 truncate group-hover:text-gray-900 font-medium">
+                    <span className="text-sm text-gray-700 truncate group-hover:text-gray-900 font-medium dark:text-zinc-200">
                       {row.course_name || t('analytics.common.course_fallback', { id: row.course_uuid })}
                     </span>
                   </div>
-                  <span className="text-sm text-gray-600 text-end tabular-nums">
+                  <span className="text-sm text-gray-600 text-end tabular-nums dark:text-zinc-300">
                     {row.views.toLocaleString()}
                   </span>
-                  <span className="text-sm text-gray-600 text-end tabular-nums">
+                  <span className="text-sm text-gray-600 text-end tabular-nums dark:text-zinc-300">
                     {row.enrollments.toLocaleString()}
                   </span>
-                  <span className="text-sm text-gray-600 text-end tabular-nums">
+                  <span className="text-sm text-gray-600 text-end tabular-nums dark:text-zinc-300">
                     {row.completions.toLocaleString()}
                   </span>
                   <span className="text-sm text-end tabular-nums">
@@ -422,26 +422,26 @@ export default function CoreWidgetsRow({ days = '30' }: { days?: string }) {
                 <Wrapper
                   key={i}
                   {...(wrapperProps as any)}
-                  className="grid grid-cols-[1fr_60px_70px_80px_90px] gap-2 items-center px-3 py-2.5 rounded-lg hover:bg-gray-50 transition-colors group"
+                  className="grid grid-cols-[1fr_60px_70px_80px_90px] gap-2 items-center px-3 py-2.5 rounded-lg hover:bg-gray-50 transition-colors group dark:hover:bg-dk-raised/60"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-gray-50 flex-shrink-0 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-lg bg-gray-50 flex-shrink-0 flex items-center justify-center dark:bg-dk-inset/40">
                       {typeIcon}
                     </div>
-                    <span className="text-sm text-gray-700 truncate group-hover:text-gray-900 font-medium">
+                    <span className="text-sm text-gray-700 truncate group-hover:text-gray-900 font-medium dark:text-zinc-200">
                       {row.activity_name || row.activity_uuid}
                     </span>
                   </div>
                   <span className="text-xs text-gray-400 text-end capitalize">
                     {row.activity_type}
                   </span>
-                  <span className="text-sm text-gray-600 text-end tabular-nums">
+                  <span className="text-sm text-gray-600 text-end tabular-nums dark:text-zinc-300">
                     {row.views.toLocaleString()}
                   </span>
-                  <span className="text-sm text-gray-600 text-end tabular-nums">
+                  <span className="text-sm text-gray-600 text-end tabular-nums dark:text-zinc-300">
                     {row.completions.toLocaleString()}
                   </span>
-                  <span className="text-sm text-gray-600 text-end tabular-nums">
+                  <span className="text-sm text-gray-600 text-end tabular-nums dark:text-zinc-300">
                     {avgTime}
                   </span>
                 </Wrapper>
@@ -475,9 +475,9 @@ function CourseRow({ row, org }: { row: any; org: any }) {
   return (
     <Link
       href={href}
-      className="flex items-center gap-3 p-2 -mx-1 rounded-lg hover:bg-gray-50 transition-colors group cursor-pointer"
+      className="flex items-center gap-3 p-2 -mx-1 rounded-lg hover:bg-gray-50 transition-colors group cursor-pointer dark:hover:bg-dk-raised/60"
     >
-      <div className="w-10 h-10 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden flex items-center justify-center">
+      <div className="w-10 h-10 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden flex items-center justify-center dark:bg-dk-inset">
         {thumbnail ? (
           <img src={thumbnail} alt="" className="w-full h-full object-cover" />
         ) : (
@@ -485,7 +485,7 @@ function CourseRow({ row, org }: { row: any; org: any }) {
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-700 truncate group-hover:text-gray-900">
+        <p className="text-sm font-medium text-gray-700 truncate group-hover:text-gray-900 dark:text-zinc-200">
           {row.course_name || t('analytics.common.course_fallback', { id: row.course_uuid })}
         </p>
         <div className="flex items-center gap-3 text-[11px] text-gray-400">
@@ -526,13 +526,13 @@ function ActivityRow({ row }: { row: any }) {
   return (
     <Wrapper
       {...(wrapperProps as any)}
-      className="flex items-center gap-3 p-2 -mx-1 rounded-lg hover:bg-gray-50 transition-colors group cursor-pointer"
+      className="flex items-center gap-3 p-2 -mx-1 rounded-lg hover:bg-gray-50 transition-colors group cursor-pointer dark:hover:bg-dk-raised/60"
     >
-      <div className="w-8 h-8 rounded-lg bg-gray-50 flex-shrink-0 flex items-center justify-center">
+      <div className="w-8 h-8 rounded-lg bg-gray-50 flex-shrink-0 flex items-center justify-center dark:bg-dk-inset/40">
         {typeIcon}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-700 truncate group-hover:text-gray-900">
+        <p className="text-sm font-medium text-gray-700 truncate group-hover:text-gray-900 dark:text-zinc-200">
           {row.activity_name || row.activity_uuid}
         </p>
         <div className="flex items-center gap-3 text-[11px] text-gray-400">

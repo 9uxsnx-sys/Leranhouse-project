@@ -20,8 +20,8 @@ export default function CohortRetention({ days = '90' }: { days?: string }) {
   }
 
   return (
-    <div className="bg-white rounded-xl nice-shadow p-5 min-h-[300px] overflow-hidden min-w-0">
-      <h3 className="text-sm font-semibold text-gray-700 mb-1">{t('analytics.advanced_widgets.cohort_retention.title')}</h3>
+    <div className="bg-white rounded-xl nice-shadow p-5 min-h-[300px] overflow-hidden min-w-0 dark:bg-dk-card">
+      <h3 className="text-sm font-semibold text-gray-700 mb-1 dark:text-zinc-200">{t('analytics.advanced_widgets.cohort_retention.title')}</h3>
       <p className="text-xs text-gray-400 mb-4">{t('analytics.advanced_widgets.cohort_retention.description')}</p>
       {isLoading ? (
         <div className="h-48 flex items-center justify-center text-gray-300">{t('analytics.common.loading')}</div>
@@ -31,7 +31,7 @@ export default function CohortRetention({ days = '90' }: { days?: string }) {
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr className="text-gray-400 uppercase tracking-wider border-b border-gray-100">
+              <tr className="text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-dk-line">
                 <th className="pb-2 text-start">{t('analytics.advanced_widgets.cohort_retention.cohort')}</th>
                 <th className="pb-2">{t('analytics.advanced_widgets.cohort_retention.size')}</th>
                 <th className="pb-2">{t('analytics.advanced_widgets.cohort_retention.week_1')}</th>
@@ -43,7 +43,7 @@ export default function CohortRetention({ days = '90' }: { days?: string }) {
             <tbody>
               {rows.map((r: any, i: number) => (
                 <tr key={i} className="border-b border-gray-50 text-center">
-                  <td className="py-1.5 text-start text-gray-600">{r.cohort_week?.slice(0, 10)}</td>
+                  <td className="py-1.5 text-start text-gray-600 dark:text-zinc-300">{r.cohort_week?.slice(0, 10)}</td>
                   <td className="py-1.5 font-medium">{r.cohort_size}</td>
                   <td className={`py-1.5 ${cellColor(r.week_1, r.cohort_size)}`}>{pct(r.week_1, r.cohort_size)}</td>
                   <td className={`py-1.5 ${cellColor(r.week_2, r.cohort_size)}`}>{pct(r.week_2, r.cohort_size)}</td>

@@ -79,7 +79,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
   const IconComponent = ({ iconName }: { iconName: string }) => {
     const IconElement = ICON_MAP[iconName as keyof typeof ICON_MAP]
     if (!IconElement) return null
-    return <IconElement className="w-4 h-4 text-gray-500" />
+    return <IconElement className="w-4 h-4 text-gray-500 dark:text-dk-fg-3" />
   }
 
   const handleViewProfile = () => {
@@ -94,12 +94,12 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
       </HoverCardTrigger>
       <HoverCardContent className="w-96 bg-white/95 backdrop-blur-md p-0 nice-shadow">
         {!isAuthenticated ? (
-          <div className="px-5 py-4 text-sm text-gray-600">
+          <div className="px-5 py-4 text-sm text-gray-600 dark:text-dk-fg-2">
             Sign in to view this profile.
           </div>
         ) : isLoading && !userData ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+            <Loader2 className="w-6 h-6 animate-spin text-gray-400 dark:text-dk-fg-3" />
           </div>
         ) : error && !userData ? (
           <div className="text-sm text-red-500 p-4">{error}</div>
@@ -124,11 +124,11 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
-                        <h4 className="font-semibold text-gray-900 truncate">
+                        <h4 className="font-semibold text-gray-900 dark:text-dk-fg-1 truncate">
                           {userData.first_name} {userData.last_name}
                         </h4>
                         {userData.username && (
-                          <Badge variant="outline" className="text-xs font-normal text-gray-500 px-2 truncate">
+                          <Badge variant="outline" className="text-xs font-normal text-gray-500 dark:text-dk-fg-3 px-2 truncate">
                             @{userData.username}
                           </Badge>
                         )}
@@ -137,7 +137,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6 text-gray-600 hover:text-gray-900 flex-shrink-0"
+                          className="h-6 w-6 text-gray-600 dark:text-dk-fg-2 hover:text-gray-900 dark:hover:text-dk-fg-1 flex-shrink-0"
                           onClick={handleViewProfile}
                         >
                           <ExternalLink className="w-4 h-4" />
@@ -145,7 +145,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
                       )}
                     </div>
                     {userData.bio && (
-                      <p dir="auto" className="text-sm text-gray-500 mt-1.5 line-clamp-4 leading-normal">
+                      <p dir="auto" className="text-sm text-gray-500 dark:text-dk-fg-3 mt-1.5 line-clamp-4 leading-normal">
                         {userData.bio}
                       </p>
                     )}
@@ -156,13 +156,13 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
 
             {/* Details */}
             {userData.details && Object.values(userData.details).length > 0 && (
-              <div className="px-5 pb-4 space-y-2.5 border-t border-gray-100 pt-3.5">
+              <div className="px-5 pb-4 space-y-2.5 border-t border-gray-100 dark:border-dk-line pt-3.5">
                 {Object.values(userData.details).map((detail) => (
                   <div key={detail.id} className="flex items-center gap-2.5">
                     <IconComponent iconName={detail.icon} />
                     <div className="flex flex-col">
-                      <span className="text-xs text-gray-500">{detail.label}</span>
-                      <span className="text-sm text-gray-700">{detail.text}</span>
+                      <span className="text-xs text-gray-500 dark:text-dk-fg-3">{detail.label}</span>
+                      <span className="text-sm text-gray-700 dark:text-dk-fg-1">{detail.text}</span>
                     </div>
                   </div>
                 ))}

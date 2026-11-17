@@ -18,7 +18,7 @@ export function CardMetaRow({ parts }: CardMetaRowProps) {
 
   return (
     <div
-      className={`mt-1.5 flex flex-wrap items-center gap-1.5 text-[12px] text-gray-400 ${items.length === 0 ? 'invisible' : ''}`}
+      className={`mt-1.5 flex flex-wrap items-center gap-1.5 text-[12px] text-gray-400 dark:text-dk-fg-4 ${items.length === 0 ? 'invisible' : ''}`}
     >
       {items.length > 0 ? (
         items.map((part, index) => (

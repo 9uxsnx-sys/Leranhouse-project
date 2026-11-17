@@ -121,7 +121,7 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
   // Show loading state while rights are being fetched
   if (rightsLoading) {
     return (
-      <div className="h-screen w-full bg-[#f8f8f8] flex items-center justify-center">
+      <div className="h-screen w-full bg-[#f8f8f8] dark:bg-transparent flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
       </div>
     )
@@ -130,18 +130,18 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
   // Show access denied if no tabs are available
   if (!rightsLoading && visibleTabs.length === 0) {
     return (
-      <div className="h-screen w-full bg-[#f8f8f8] flex items-center justify-center">
+      <div className="h-screen w-full bg-[#f8f8f8] dark:bg-transparent flex items-center justify-center">
         <div className="text-center">
-          <Lock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">{t('dashboard.courses.settings.access_denied.title')}</h3>
-          <p className="text-gray-500">{t('dashboard.courses.settings.access_denied.message')}</p>
+          <Lock className="mx-auto h-12 w-12 text-gray-400 dark:text-zinc-400 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-zinc-100 mb-2">{t('dashboard.courses.settings.access_denied.title')}</h3>
+          <p className="text-gray-500 dark:text-zinc-400">{t('dashboard.courses.settings.access_denied.message')}</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen w-full bg-[#f8f8f8]">
+    <div className="min-h-screen w-full bg-[#f8f8f8] dark:bg-transparent">
       <CourseProvider courseuuid={courseuuid} withUnpublishedActivities={true}>
         {/* Row 1: Page title — matching lesson-preview page style */}
         <div className="max-w-7xl mx-auto w-full pt-8 px-4 sm:px-6 lg:px-8">
@@ -164,8 +164,8 @@ function CourseOverviewPage(props: { params: Promise<CourseOverviewParams> }) {
                 disabled: !hasAccess,
                 tooltip: !hasAccess ? (
                   <div className="text-center">
-                    <div className="font-medium text-gray-900">{t('dashboard.courses.settings.access_restricted.title')}</div>
-                    <div className="text-sm text-gray-600">
+                    <div className="font-medium text-gray-900 dark:text-zinc-100">{t('dashboard.courses.settings.access_restricted.title')}</div>
+                    <div className="text-sm text-gray-600 dark:text-zinc-300">
                       {t('dashboard.courses.settings.access_restricted.message', { tab: tab.label })}
                     </div>
                   </div>

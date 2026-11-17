@@ -210,7 +210,7 @@ const OrgEditDomains: React.FC = () => {
   const getSSLBadge = (domain: CustomDomain) => {
     if (domain.status !== 'verified') {
       return (
-        <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500">
+        <Badge variant="outline" className="border-transparent bg-gray-100 dark:bg-dk-inset text-gray-500 dark:text-zinc-400">
           <Shield size={12} className="me-1" />
           N/A
         </Badge>
@@ -222,7 +222,7 @@ const OrgEditDomains: React.FC = () => {
 
     if (loading && !sslStatus) {
       return (
-        <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-600">
+        <Badge variant="outline" className="border-transparent bg-gray-100 dark:bg-dk-inset text-gray-600 dark:text-zinc-300">
           <Loader2 size={12} className="me-1 animate-spin" />
           {t('dashboard.organization.domains.ssl.checking')}
         </Badge>
@@ -231,7 +231,7 @@ const OrgEditDomains: React.FC = () => {
 
     if (!sslStatus) {
       return (
-        <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500">
+        <Badge variant="outline" className="border-transparent bg-gray-100 dark:bg-dk-inset text-gray-500 dark:text-zinc-400">
           <Shield size={12} className="me-1" />
           {t('dashboard.organization.domains.ssl.checking')}
         </Badge>
@@ -262,7 +262,7 @@ const OrgEditDomains: React.FC = () => {
         )
       default:
         return (
-          <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-600" title={sslStatus.message}>
+          <Badge variant="outline" className="border-transparent bg-gray-100 dark:bg-dk-inset text-gray-600 dark:text-zinc-300" title={sslStatus.message}>
             <ShieldAlert size={12} className="me-1" />
             {t('common.unknown')}
           </Badge>
@@ -274,28 +274,28 @@ const OrgEditDomains: React.FC = () => {
     switch (status) {
       case 'verified':
         return (
-          <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500">
+          <Badge variant="outline" className="border-transparent bg-gray-100 dark:bg-dk-inset text-gray-500 dark:text-zinc-400">
             <CheckCircle2 size={12} className="me-1" />
             {t('dashboard.organization.domains.status.verified')}
           </Badge>
         )
       case 'pending':
         return (
-          <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500">
+          <Badge variant="outline" className="border-transparent bg-gray-100 dark:bg-dk-inset text-gray-500 dark:text-zinc-400">
             <Clock size={12} className="me-1" />
             {t('dashboard.organization.domains.status.pending')}
           </Badge>
         )
       case 'failed':
         return (
-          <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500">
+          <Badge variant="outline" className="border-transparent bg-gray-100 dark:bg-dk-inset text-gray-500 dark:text-zinc-400">
             <XCircle size={12} className="me-1" />
             {t('dashboard.organization.domains.status.failed')}
           </Badge>
         )
       default:
         return (
-          <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500">
+          <Badge variant="outline" className="border-transparent bg-gray-100 dark:bg-dk-inset text-gray-500 dark:text-zinc-400">
             {status}
           </Badge>
         )
@@ -339,37 +339,37 @@ const OrgEditDomains: React.FC = () => {
         </div>
 
         {/* ===== Main Card ===== */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+        <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+          <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
             {t('common.sections.custom_domains')}
           </h2>
           {isLoading ? (
             <div className="flex justify-center py-8">
-              <RefreshCw className="animate-spin text-gray-400" size={24} />
+              <RefreshCw className="animate-spin text-gray-400 dark:text-zinc-400" size={24} />
             </div>
           ) : domains && domains.length > 0 ? (
               <div className="space-y-2">
                 {domains.map((domain) => (
                   <div
                     key={domain.domain_uuid}
-                    className="flex items-center justify-between px-5 py-5 rounded-xl bg-gray-50 shadow-borders-base"
+                    className="flex items-center justify-between px-5 py-5 rounded-xl bg-gray-50 dark:bg-dk-inset/40 shadow-borders-base"
                   >
                     <div className="flex items-center gap-4 flex-1 min-w-0">
-                      <Globe size={16} className="text-gray-400 shrink-0" />
+                      <Globe size={16} className="text-gray-400 dark:text-zinc-400 shrink-0" />
                       <span className="font-medium truncate">{domain.domain}</span>
                       {domain.status === 'verified' && (
                         <a
                           href={`https://${domain.domain}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-gray-400 hover:text-gray-600 shrink-0"
+                          className="text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 shrink-0"
                         >
                           <ExternalLink size={14} />
                         </a>
                       )}
                       {getStatusBadge(domain.status)}
                       {getSSLBadge(domain)}
-                      <span className="text-xs text-gray-400 shrink-0">
+                      <span className="text-xs text-gray-400 dark:text-zinc-400 shrink-0">
                         {formatDate(domain.creation_date)}
                       </span>
                     </div>
@@ -377,7 +377,7 @@ const OrgEditDomains: React.FC = () => {
                       {domain.status === 'pending' && (
                         <button
                           type="button"
-                          className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors cursor-pointer"
                           onClick={async () => {
                             setSelectedDomain(domain)
                             await loadVerificationInfo(domain.domain_uuid)
@@ -390,7 +390,7 @@ const OrgEditDomains: React.FC = () => {
                       )}
                       <button
                         type="button"
-                        className="p-1.5 text-gray-300 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50 cursor-pointer"
+                        className="p-1.5 text-gray-300 dark:text-zinc-600 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50 cursor-pointer"
                         onClick={() => {
                           setSelectedDomain(domain)
                           setIsDeleteDialogOpen(true)
@@ -403,7 +403,7 @@ const OrgEditDomains: React.FC = () => {
                 ))}
               </div>
           ) : (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-gray-500 dark:text-zinc-400">
               <Globe size={48} className="mx-auto mb-4 opacity-50" />
               <p>{t('dashboard.organization.domains.empty.title')}</p>
               <p className="text-sm">{t('dashboard.organization.domains.empty.description')}</p>
@@ -430,7 +430,7 @@ const OrgEditDomains: React.FC = () => {
                   onChange={(e) => setNewDomain(e.target.value)}
                   placeholder={t('dashboard.organization.domains.fields.domain_placeholder')}
                 />
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-zinc-400">
                   {t('dashboard.organization.domains.add_dialog.hint')}
                 </p>
               </div>
@@ -451,32 +451,32 @@ const OrgEditDomains: React.FC = () => {
             <div className="space-y-4 max-h-[60vh] overflow-y-auto">
               {verificationInfo && (
                 <>
-                  <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-100">
-                    <AlertTriangle className="text-gray-400 shrink-0 mt-0.5" size={20} />
+                  <div className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-dk-inset/40 rounded-xl border border-gray-100 dark:border-dk-line">
+                    <AlertTriangle className="text-gray-400 dark:text-zinc-400 shrink-0 mt-0.5" size={20} />
                     <div>
-                      <p className="text-sm font-semibold text-gray-700">{t('dashboard.organization.domains.verify_dialog.dns_required_title')}</p>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-sm font-semibold text-gray-700 dark:text-zinc-200">{t('dashboard.organization.domains.verify_dialog.dns_required_title')}</p>
+                      <p className="text-xs text-gray-500 dark:text-zinc-400 mt-1">
                         {t('dashboard.organization.domains.verify_dialog.dns_required_description')}
                       </p>
                     </div>
                   </div>
 
                   {/* TXT Record */}
-                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
+                  <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-5 space-y-4">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500 text-xs">{t('dashboard.organization.domains.verify_dialog.txt_record')}</Badge>
-                      <span className="text-xs text-gray-400">{t('dashboard.organization.domains.verify_dialog.for_verification')}</span>
+                      <Badge variant="outline" className="border-transparent bg-gray-100 dark:bg-dk-inset text-gray-500 dark:text-zinc-400 text-xs">{t('dashboard.organization.domains.verify_dialog.txt_record')}</Badge>
+                      <span className="text-xs text-gray-400 dark:text-zinc-400">{t('dashboard.organization.domains.verify_dialog.for_verification')}</span>
                     </div>
                     <div className="space-y-3">
                       <div>
-                        <label className="text-xs font-semibold text-gray-500">{t('dashboard.organization.domains.verify_dialog.host_name')}</label>
+                        <label className="text-xs font-semibold text-gray-500 dark:text-zinc-400">{t('dashboard.organization.domains.verify_dialog.host_name')}</label>
                         <div className="flex gap-2 mt-1.5">
-                          <code className="flex-1 bg-gray-50 px-3 py-2 rounded-lg text-sm font-mono text-gray-700 border border-gray-100 break-all">
+                          <code className="flex-1 bg-gray-50 dark:bg-dk-inset/40 px-3 py-2 rounded-lg text-sm font-mono text-gray-700 dark:text-zinc-200 border border-gray-100 dark:border-dk-line break-all">
                             {verificationInfo.txt_record_host}
                           </code>
                           <button
                             type="button"
-                            className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-white text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer shrink-0"
+                            className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors cursor-pointer shrink-0"
                             onClick={() => copyToClipboard(verificationInfo.txt_record_host, 'txt_host')}
                           >
                             {copiedField === 'txt_host' ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
@@ -484,14 +484,14 @@ const OrgEditDomains: React.FC = () => {
                         </div>
                       </div>
                       <div>
-                        <label className="text-xs font-semibold text-gray-500">{t('dashboard.organization.domains.verify_dialog.value')}</label>
+                        <label className="text-xs font-semibold text-gray-500 dark:text-zinc-400">{t('dashboard.organization.domains.verify_dialog.value')}</label>
                         <div className="flex gap-2 mt-1.5">
-                          <code className="flex-1 bg-gray-50 px-3 py-2 rounded-lg text-sm font-mono text-gray-700 border border-gray-100 break-all">
+                          <code className="flex-1 bg-gray-50 dark:bg-dk-inset/40 px-3 py-2 rounded-lg text-sm font-mono text-gray-700 dark:text-zinc-200 border border-gray-100 dark:border-dk-line break-all">
                             {verificationInfo.txt_record_value}
                           </code>
                           <button
                             type="button"
-                            className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-white text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer shrink-0"
+                            className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors cursor-pointer shrink-0"
                             onClick={() => copyToClipboard(verificationInfo.txt_record_value, 'txt_value')}
                           >
                             {copiedField === 'txt_value' ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
@@ -502,21 +502,21 @@ const OrgEditDomains: React.FC = () => {
                   </div>
 
                   {/* CNAME Record */}
-                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
+                  <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-5 space-y-4">
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500 text-xs">{t('dashboard.organization.domains.verify_dialog.cname_record')}</Badge>
-                      <span className="text-xs text-gray-400">{t('dashboard.organization.domains.verify_dialog.for_routing')}</span>
+                      <Badge variant="outline" className="border-transparent bg-gray-100 dark:bg-dk-inset text-gray-500 dark:text-zinc-400 text-xs">{t('dashboard.organization.domains.verify_dialog.cname_record')}</Badge>
+                      <span className="text-xs text-gray-400 dark:text-zinc-400">{t('dashboard.organization.domains.verify_dialog.for_routing')}</span>
                     </div>
                     <div className="space-y-3">
                       <div>
-                        <label className="text-xs font-semibold text-gray-500">{t('dashboard.organization.domains.verify_dialog.host_name')}</label>
+                        <label className="text-xs font-semibold text-gray-500 dark:text-zinc-400">{t('dashboard.organization.domains.verify_dialog.host_name')}</label>
                         <div className="flex gap-2 mt-1.5">
-                          <code className="flex-1 bg-gray-50 px-3 py-2 rounded-lg text-sm font-mono text-gray-700 border border-gray-100 break-all">
+                          <code className="flex-1 bg-gray-50 dark:bg-dk-inset/40 px-3 py-2 rounded-lg text-sm font-mono text-gray-700 dark:text-zinc-200 border border-gray-100 dark:border-dk-line break-all">
                             {verificationInfo.cname_record_host}
                           </code>
                           <button
                             type="button"
-                            className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-white text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer shrink-0"
+                            className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors cursor-pointer shrink-0"
                             onClick={() => copyToClipboard(verificationInfo.cname_record_host, 'cname_host')}
                           >
                             {copiedField === 'cname_host' ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
@@ -524,14 +524,14 @@ const OrgEditDomains: React.FC = () => {
                         </div>
                       </div>
                       <div>
-                        <label className="text-xs font-semibold text-gray-500">{t('dashboard.organization.domains.verify_dialog.value_target')}</label>
+                        <label className="text-xs font-semibold text-gray-500 dark:text-zinc-400">{t('dashboard.organization.domains.verify_dialog.value_target')}</label>
                         <div className="flex gap-2 mt-1.5">
-                          <code className="flex-1 bg-gray-50 px-3 py-2 rounded-lg text-sm font-mono text-gray-700 border border-gray-100 break-all">
+                          <code className="flex-1 bg-gray-50 dark:bg-dk-inset/40 px-3 py-2 rounded-lg text-sm font-mono text-gray-700 dark:text-zinc-200 border border-gray-100 dark:border-dk-line break-all">
                             {verificationInfo.cname_record_value}
                           </code>
                           <button
                             type="button"
-                            className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-white text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer shrink-0"
+                            className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors cursor-pointer shrink-0"
                             onClick={() => copyToClipboard(verificationInfo.cname_record_value, 'cname_value')}
                           >
                             {copiedField === 'cname_value' ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
@@ -543,15 +543,15 @@ const OrgEditDomains: React.FC = () => {
 
                   {/* SSL Certificate Status */}
                   {selectedDomain && selectedDomain.status === 'verified' && (
-                    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-4">
+                    <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-5 space-y-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="border-transparent bg-gray-100 text-gray-500 text-xs">{t('dashboard.organization.domains.verify_dialog.ssl_certificate')}</Badge>
-                          <span className="text-xs text-gray-400">{t('dashboard.organization.domains.verify_dialog.https_status')}</span>
+                          <Badge variant="outline" className="border-transparent bg-gray-100 dark:bg-dk-inset text-gray-500 dark:text-zinc-400 text-xs">{t('dashboard.organization.domains.verify_dialog.ssl_certificate')}</Badge>
+                          <span className="text-xs text-gray-400 dark:text-zinc-400">{t('dashboard.organization.domains.verify_dialog.https_status')}</span>
                         </div>
                         <button
                           type="button"
-                          className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors cursor-pointer"
                           onClick={() => handleCheckSSL(selectedDomain)}
                           disabled={sslLoading[selectedDomain.domain_uuid]}
                         >
@@ -603,7 +603,7 @@ const OrgEditDomains: React.FC = () => {
                           </div>
                         </div>
                       ) : (
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-zinc-400">
                           <Loader2 size={14} className="animate-spin" />
                           {t('dashboard.organization.domains.verify_dialog.checking_ssl')}
                         </div>
@@ -614,10 +614,10 @@ const OrgEditDomains: React.FC = () => {
               )}
             </div>
 
-            <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t border-gray-100">
+            <div className="flex items-center justify-end gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-dk-line">
               <button
                 type="button"
-                className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors cursor-pointer"
                 onClick={() => {
                   setIsVerifyDialogOpen(false)
                   setSelectedDomain(null)
@@ -662,9 +662,9 @@ const OrgEditDomains: React.FC = () => {
             </DialogHeader>
             <div className="px-6 pb-6">
               {selectedDomain && (
-                <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                <div className="bg-gray-50 dark:bg-dk-inset/40 rounded-lg p-3 mb-4">
                   <div className="flex items-center gap-2">
-                    <Globe size={16} className="text-gray-400" />
+                    <Globe size={16} className="text-gray-400 dark:text-zinc-400" />
                     <span className="font-medium">{selectedDomain.domain}</span>
                   </div>
                 </div>

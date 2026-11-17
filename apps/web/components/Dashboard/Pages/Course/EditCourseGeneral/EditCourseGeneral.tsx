@@ -579,7 +579,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                 <Link
                   href={getUriWithOrg(org?.slug, '') + `/course/${courseUUIDForUrl}`}
                   target="_blank"
-                  className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+                  className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors"
                 >
                   <Eye size={14} />
                   <span>{t('dashboard.courses.preview')}</span>
@@ -591,14 +591,14 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                     <button
                       type="button"
                       onClick={copyFromSource}
-                      className="hidden sm:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+                      className="hidden sm:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors"
                     >
                       <Copy size={14} />
                       <span>{t('dashboard.courses.general.locale.copy_from_source')}</span>
                     </button>
                   )}
                   <span
-                    className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600"
+                    className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300"
                     title={
                       isSourceLocale
                         ? t('dashboard.courses.general.locale.source')
@@ -609,7 +609,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                       className={`w-1.5 h-1.5 rounded-full ${isSaved ? 'bg-teal-500' : 'bg-amber-400'}`}
                     />
                     <span>{getCurrentLanguageNativeName(contentLocale)}</span>
-                    <span className="text-gray-400">
+                    <span className="text-gray-400 dark:text-zinc-400">
                       {isSourceLocale
                         ? t('dashboard.courses.general.locale.source')
                         : translation
@@ -624,7 +624,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                       isActiveSaving
                         ? 'bg-brand text-brand-fg border-brand opacity-50 cursor-not-allowed'
                         : isSaved
-                          ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                          ? 'bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong cursor-default'
                           : 'bg-brand text-brand-fg border-brand hover:bg-brand-hover cursor-pointer'
                     }`}
                   >
@@ -646,7 +646,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                   <button
                     onClick={togglePublishStatus}
                     disabled={isPublishing}
-                    className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50 ${isPublishing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                    className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong hover:bg-gray-50 dark:hover:bg-dk-raised ${isPublishing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                   >
                     {isPublishing ? (
                       <Loader2 size={14} className="animate-spin" />
@@ -667,14 +667,14 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
               </div>
 
               {!isSourceLocale && !translation && (
-                <div className="text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
+                <div className="text-xs text-gray-500 dark:text-zinc-400 bg-gray-50 dark:bg-dk-inset border border-gray-100 dark:border-dk-line rounded-lg px-3 py-2">
                   {t('dashboard.courses.general.locale.inherited')}
                 </div>
               )}
 
               {/* ── BASIC INFORMATION ── */}
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('common.sections.overview')}</h3>
+              <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('common.sections.overview')}</h3>
                 <div className="space-y-4">
                   <FormField name="name">
                     <FormLabelAndMessage label={t('dashboard.courses.general.form.name_label')} message={formik.errors.name as string} />
@@ -778,8 +778,8 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
               <CourseMediaSection />
 
               {/* ── COURSE DETAILS ── */}
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('common.sections.details')}</h3>
+              <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('common.sections.details')}</h3>
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField name="meta_difficulty">
@@ -862,8 +862,8 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                   <FormField name="meta_has_certificate">
                     <FormLabelAndMessage label={t('dashboard.courses.general.details.offers_certificate_label')} />
                     <label className="flex items-center gap-3 pt-1 cursor-pointer">
-                      <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${formik.values.meta_has_certificate ? 'bg-black' : 'bg-gray-300'} ${isSaving || !isSourceLocale ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${formik.values.meta_has_certificate ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
+                      <div className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${formik.values.meta_has_certificate ? 'bg-black dark:bg-zinc-100' : 'bg-gray-300 dark:bg-dk-track'} ${isSaving || !isSourceLocale ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${formik.values.meta_has_certificate ? 'translate-x-[18px] dark:bg-zinc-900' : 'translate-x-[2px] dark:bg-zinc-300'}`} />
                         <input
                           type="checkbox"
                           className="sr-only"
@@ -872,12 +872,12 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                           disabled={isSaving || !isSourceLocale}
                         />
                       </div>
-                      <span className="text-sm text-gray-600 select-none">{t('dashboard.courses.general.details.offers_certificate_description')}</span>
+                      <span className="text-sm text-gray-600 dark:text-zinc-300 select-none">{t('dashboard.courses.general.details.offers_certificate_description')}</span>
                     </label>
                   </FormField>
 
                   {!isSourceLocale && (
-                    <p className="text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
+                    <p className="text-xs text-gray-500 dark:text-zinc-400 bg-gray-50 dark:bg-dk-inset border border-gray-100 dark:border-dk-line rounded-lg px-3 py-2">
                       {t('dashboard.courses.general.locale.shared_fields')}
                     </p>
                   )}
@@ -886,13 +886,13 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
               </div>
 
               {/* ── INSTRUCTORS (names/titles per locale, photo shared) ── */}
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('dashboard.courses.general.details.instructors_label')}</h3>
+              <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                  <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('dashboard.courses.general.details.instructors_label')}</h3>
                   <div className="space-y-3">
                     {formik.values.meta_instructors.map((instructor: CourseInstructor, index: number) => (
-                      <div key={index} className="bg-gray-50 rounded-xl border border-gray-100 p-4 space-y-3">
+                      <div key={index} className="bg-gray-50 dark:bg-dk-inset rounded-xl border border-gray-100 dark:border-dk-line p-4 space-y-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-semibold text-gray-800">
+                          <span className="text-sm font-semibold text-gray-800 dark:text-zinc-200">
                             {t('dashboard.courses.general.details.instructor_label', { number: index + 1 })}
                           </span>
                           {isSourceLocale && (
@@ -909,42 +909,42 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <div>
-                            <label className="text-xs font-medium text-gray-500 mb-1 block">
+                            <label className="text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1 block">
                               {t('dashboard.courses.general.details.instructor_name_label')}
                             </label>
                             <Input
                               value={instructor.name}
                               onChange={(e) => setInstructorField(index, { name: e.target.value })}
                               placeholder={t('dashboard.courses.general.details.instructor_name_placeholder')}
-                              className={`${fieldClassName} bg-white`}
+                              className={`${fieldClassName} bg-white dark:bg-dk-card`}
                               disabled={isSaving}
                             />
                           </div>
                           <div>
-                            <label className="text-xs font-medium text-gray-500 mb-1 block">
+                            <label className="text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1 block">
                               {t('dashboard.courses.general.details.instructor_title_label')}
                             </label>
                             <Input
                               value={instructor.title}
                               onChange={(e) => setInstructorField(index, { title: e.target.value })}
                               placeholder={t('dashboard.courses.general.details.instructor_title_placeholder')}
-                              className={`${fieldClassName} bg-white`}
+                              className={`${fieldClassName} bg-white dark:bg-dk-card`}
                               disabled={isSaving}
                             />
                           </div>
                         </div>
 
                         <div>
-                          <label className="text-xs font-medium text-gray-500 mb-1 block">
+                          <label className="text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1 block">
                             {t('dashboard.courses.general.details.instructor_photo_label')}
                           </label>
                           {instructor.avatar ? (
-                            <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-white">
-                              <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden border border-gray-200">
+                            <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-white dark:bg-dk-card">
+                              <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden border border-gray-200 dark:border-dk-line-strong">
                                 <img src={instructor.avatar} alt={instructor.name} className="w-full h-full object-cover" />
                               </div>
                               <div className="flex-1">
-                                <p className="text-sm font-medium text-gray-700">{t('dashboard.courses.general.details.instructor_photo_uploaded')}</p>
+                                <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('dashboard.courses.general.details.instructor_photo_uploaded')}</p>
                               </div>
                               {isSourceLocale && (
                                 <button
@@ -959,7 +959,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                             </div>
                           ) : isSourceLocale ? (
                             <div
-                              className="flex items-center gap-4 p-4 border border-dashed border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors cursor-pointer"
+                              className="flex items-center gap-4 p-4 border border-dashed border-gray-200 dark:border-dk-line-strong rounded-xl bg-white dark:bg-dk-card hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors cursor-pointer"
                               onClick={() => {
                                 const input = document.createElement('input')
                                 input.type = 'file'
@@ -977,12 +977,12 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                               }}
                             >
                               <div className="flex-shrink-0">
-                                <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
+                                <ImageIcon size={24} className="text-gray-400 dark:text-zinc-400" strokeWidth={1.5} />
                               </div>
                               <div className="flex-1">
-                                <p className="text-sm font-medium text-gray-700">{t('dashboard.courses.general.details.instructor_upload_photo')}</p>
+                                <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('dashboard.courses.general.details.instructor_upload_photo')}</p>
                               </div>
-                              <UploadCloud size={18} className="text-gray-400" />
+                              <UploadCloud size={18} className="text-gray-400 dark:text-zinc-400" />
                             </div>
                           ) : null}
                         </div>
@@ -993,7 +993,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                       <button
                         type="button"
                         onClick={() => setInstructorList([...formik.values.meta_instructors, { name: '', title: '', avatar: '' }])}
-                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl border-2 border-dashed border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl border-2 border-dashed border-gray-200 dark:border-dk-line-strong text-gray-500 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-dk-line-strong hover:text-gray-700 dark:hover:text-zinc-200 hover:bg-gray-50 dark:hover:bg-dk-raised transition-all cursor-pointer dark:hover:bg-dk-raised/60"
                       >
                         <Plus size={16} />
                         {t('dashboard.courses.general.details.add_instructor')}

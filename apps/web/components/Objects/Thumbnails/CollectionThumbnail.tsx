@@ -78,33 +78,33 @@ function CollectionThumbnail(props: PropsType) {
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full w-full bg-gray-50 text-gray-300 gap-1.5">
+          <div className="flex flex-col items-center justify-center h-full w-full bg-gray-50 dark:bg-dk-inset/40 text-gray-300 dark:text-zinc-600 gap-1.5">
             <Library size={32} strokeWidth={1.5} />
-            <Text size="xsmall" className="text-gray-400">{t('collections.empty_collection')}</Text>
+            <Text size="xsmall" className="text-gray-400 dark:text-dk-fg-3">{t('collections.empty_collection')}</Text>
           </div>
         )}
       </Link>
 
       <div className="p-3 flex flex-col gap-y-1.5">
-        <Text asChild size="base" weight="plus" className="text-gray-900 leading-tight">
+        <Text asChild size="base" weight="plus" className="text-gray-900 dark:text-dk-fg-1 leading-tight">
           <Link
             href={getUriWithOrg(props.orgslug, `/collection/${collectionId}`)}
-            className="hover:text-black transition-colors line-clamp-1"
+            className="hover:text-black dark:hover:text-white transition-colors line-clamp-1"
           >
             {props.collection.name}
           </Link>
         </Text>
         
         {props.collection.description && (
-          <Text size="small" className="text-gray-500 line-clamp-2 min-h-[1.5rem]">
+          <Text size="small" className="text-gray-500 dark:text-dk-fg-3 line-clamp-2 min-h-[1.5rem]">
             {props.collection.description}
           </Text>
         )}
 
         <div className="pt-1.5 flex items-center justify-between border-t border-[#e4e4e7]">
-          <div className="flex items-center gap-1.5 text-gray-500">
-            <BookCopy size={12} className="text-gray-400" />
-            <Text size="xsmall" className="text-gray-500">
+          <div className="flex items-center gap-1.5 text-gray-500 dark:text-dk-fg-3">
+            <BookCopy size={12} className="text-gray-400 dark:text-dk-fg-3" />
+            <Text size="xsmall" className="text-gray-500 dark:text-dk-fg-3">
               {courses.length === 1 ? t('courses.course_count', { count: 1 }) : t('courses.course_count_plural', { count: courses.length })}
             </Text>
           </div>
@@ -145,7 +145,7 @@ const CollectionAdminEditsArea = (props: any) => {
               variant="transparent"
               size="small"
               aria-label={t('common.aria.actions_menu')}
-              className="bg-white/90 backdrop-blur-sm"
+              className="bg-white/90 dark:bg-dk-card/90 backdrop-blur-sm"
             >
               <EllipsisHorizontal />
             </IconButton>

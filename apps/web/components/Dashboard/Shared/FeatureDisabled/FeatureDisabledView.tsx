@@ -92,23 +92,23 @@ const FeatureDisabledView: React.FC<FeatureDisabledViewProps> = ({
   // Dashboard: Show full-screen disabled view with settings link
   if (context === 'dashboard') {
     return (
-      <div className="flex items-center justify-center min-h-[60vh] w-full p-6 bg-[#f8f8f8]">
+      <div className="flex items-center justify-center min-h-[60vh] w-full p-6 bg-[#f8f8f8] dark:bg-transparent">
         <div className="w-full max-w-md">
-          <div className="bg-white rounded-xl nice-shadow overflow-hidden">
+          <div className="bg-white dark:bg-dk-card rounded-xl nice-shadow overflow-hidden">
             <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
-              <div className="bg-gray-50 p-4 rounded-xl nice-shadow mb-6">
+              <div className="bg-gray-50 dark:bg-dk-inset/40 p-4 rounded-xl nice-shadow mb-6">
                 {Icon ? (
-                  <Icon className="w-10 h-10 text-gray-400" />
+                  <Icon className="w-10 h-10 text-gray-400 dark:text-zinc-400" />
                 ) : (
-                  <Ban className="w-10 h-10 text-gray-400" strokeWidth={1.5} />
+                  <Ban className="w-10 h-10 text-gray-400 dark:text-zinc-400" strokeWidth={1.5} />
                 )}
               </div>
 
-              <h2 className="text-xl font-bold text-gray-800 mb-2">
+              <h2 className="text-xl font-bold text-gray-800 dark:text-zinc-200 mb-2">
                 {t('common.features.disabled.dashboard.title', { feature: featureDisplayName })}
               </h2>
 
-              <p className="text-gray-500 text-sm mb-6 max-w-sm">
+              <p className="text-gray-500 dark:text-zinc-400 text-sm mb-6 max-w-sm">
                 {t('common.features.disabled.dashboard.description')}
               </p>
 
@@ -128,27 +128,27 @@ const FeatureDisabledView: React.FC<FeatureDisabledViewProps> = ({
 
   // Public: Show full-screen disabled view
   return (
-    <div className="flex items-center justify-center min-h-[60vh] w-full p-6 bg-[#f8f8f8]">
+    <div className="flex items-center justify-center min-h-[60vh] w-full p-6 bg-[#f8f8f8] dark:bg-transparent">
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-xl nice-shadow overflow-hidden">
+        <div className="bg-white dark:bg-dk-card rounded-xl nice-shadow overflow-hidden">
           <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
-            <div className="bg-gray-50 p-4 rounded-xl nice-shadow mb-6">
+            <div className="bg-gray-50 dark:bg-dk-inset/40 p-4 rounded-xl nice-shadow mb-6">
               {Icon ? (
-                <Icon className="w-10 h-10 text-gray-400" />
+                <Icon className="w-10 h-10 text-gray-400 dark:text-zinc-400" />
               ) : (
-                <Ban className="w-10 h-10 text-gray-400" strokeWidth={1.5} />
+                <Ban className="w-10 h-10 text-gray-400 dark:text-zinc-400" strokeWidth={1.5} />
               )}
             </div>
 
-            <h2 className="text-xl font-bold text-gray-800 mb-2">
+            <h2 className="text-xl font-bold text-gray-800 dark:text-zinc-200 mb-2">
               {t('common.features.disabled.public.title', { feature: featureDisplayName })}
             </h2>
 
-            <p className="text-gray-500 text-sm mb-6 max-w-sm">
+            <p className="text-gray-500 dark:text-zinc-400 text-sm mb-6 max-w-sm">
               {t('common.features.disabled.public.description')}
             </p>
 
-            <div className="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg text-sm font-medium">
+            <div className="bg-gray-100 dark:bg-dk-inset text-gray-600 dark:text-zinc-300 px-4 py-2 rounded-lg text-sm font-medium">
               {t('common.features.disabled.status')}
             </div>
           </div>

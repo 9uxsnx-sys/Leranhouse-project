@@ -39,7 +39,7 @@ function CopyButton({ text, children }: { text: string; children?: React.ReactNo
   return (
     <button
       onClick={handleCopy}
-      className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+      className="p-1 rounded hover:bg-gray-100 dark:hover:bg-dk-raised text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-colors"
       title={t('dashboard.users.signups.invite_codes.copy_actions.copy_to_clipboard')}
     >
       {copied ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5" />}
@@ -142,7 +142,7 @@ function OrgAccess() {
             <button
               onClick={handleGenerate}
               disabled={isGenerating}
-              className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isGenerating ? <Loader2 size={14} className="animate-spin" /> : <Ticket size={14} />}
               <span>{isGenerating ? t('dashboard.users.signups.invite_codes.actions.generating') : t('dashboard.users.signups.invite_codes.actions.generate')}</span>
@@ -153,7 +153,7 @@ function OrgAccess() {
               <button
                 onClick={handleToggle}
                 disabled={isToggling}
-                className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong hover:bg-gray-50 dark:hover:bg-dk-raised disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isToggling ? (
                   <Loader2 size={14} className="animate-spin" />
@@ -166,8 +166,8 @@ function OrgAccess() {
           </div>
 
           {/* Invite Codes Card */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-            <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+          <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+            <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
               {t('dashboard.users.signups.invite_codes.title')}
             </h3>
 
@@ -176,24 +176,24 @@ function OrgAccess() {
                 {invites?.map((invite: any) => (
                   <div
                     key={invite.invite_code_uuid}
-                    className="flex items-center justify-between px-5 py-4 rounded-xl bg-gray-50 shadow-borders-base"
+                    className="flex items-center justify-between px-5 py-4 rounded-xl bg-gray-50 dark:bg-dk-inset/40 shadow-borders-base"
                   >
                     <div className="flex items-center gap-4 flex-1 min-w-0">
                       <CopyButton text={invite.invite_code}>
-                        <code className="bg-white px-2.5 py-1 rounded text-sm font-mono text-gray-700 shrink-0 cursor-pointer hover:bg-gray-100 transition-colors">
+                        <code className="bg-white dark:bg-dk-card px-2.5 py-1 rounded text-sm font-mono text-gray-700 dark:text-zinc-200 shrink-0 cursor-pointer hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors">
                           {invite.invite_code}
                         </code>
                       </CopyButton>
                       <CopyButton text={getUriWithOrg(org.slug, `/signup?inviteCode=${invite.invite_code}`)}>
-                        <span className="text-gray-400 text-xs truncate font-mono hover:text-gray-600 transition-colors cursor-pointer">
+                        <span className="text-gray-400 dark:text-zinc-400 text-xs truncate font-mono hover:text-gray-600 dark:hover:text-zinc-200 transition-colors cursor-pointer">
                           {getUriWithOrg(org.slug, `/signup?inviteCode=${invite.invite_code}`)}
                         </span>
                       </CopyButton>
-                      <span className="inline-flex items-center gap-1 text-gray-400 text-xs shrink-0">
+                      <span className="inline-flex items-center gap-1 text-gray-400 dark:text-zinc-400 text-xs shrink-0">
                         <Users className="w-3.5 h-3.5" />
                         <span>{t('dashboard.users.signups.invite_codes.types.normal')}</span>
                       </span>
-                      <span className="text-xs text-gray-300 shrink-0">
+                      <span className="text-xs text-gray-300 dark:text-zinc-600 shrink-0">
                         {dayjs(invite.created_at).add(1, 'year').format('DD/MM/YYYY')}
                       </span>
                     </div>
@@ -204,7 +204,7 @@ function OrgAccess() {
                         confirmationMessage={t('dashboard.users.signups.invite_codes.actions.delete_confirmation_message')}
                         dialogTitle={t('dashboard.users.signups.invite_codes.actions.delete_confirmation_title')}
                         dialogTrigger={
-                          <button className="text-gray-300 hover:text-red-500 transition-colors">
+                          <button className="text-gray-300 dark:text-zinc-600 hover:text-red-500 transition-colors">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         }
@@ -217,14 +217,14 @@ function OrgAccess() {
               </div>
             ) : (
               <div className="text-center py-8">
-                <Ticket className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                <p className="text-sm text-gray-400">{t('dashboard.users.signups.invite_codes.no_codes')}</p>
-                <p className="text-xs text-gray-300 mt-1">{t('dashboard.users.signups.invite_codes.no_codes_hint')}</p>
+                <Ticket className="w-10 h-10 text-gray-300 dark:text-zinc-600 mx-auto mb-3" />
+                <p className="text-sm text-gray-400 dark:text-zinc-400">{t('dashboard.users.signups.invite_codes.no_codes')}</p>
+                <p className="text-xs text-gray-300 dark:text-zinc-600 mt-1">{t('dashboard.users.signups.invite_codes.no_codes_hint')}</p>
               </div>
             )}
 
             <div className="flex items-center justify-between mt-4">
-              <span className="text-xs text-gray-400">{t('dashboard.users.signups.invite_codes.usage', { used: inviteCount })}</span>
+              <span className="text-xs text-gray-400 dark:text-zinc-400">{t('dashboard.users.signups.invite_codes.usage', { used: inviteCount })}</span>
             </div>
           </div>
 

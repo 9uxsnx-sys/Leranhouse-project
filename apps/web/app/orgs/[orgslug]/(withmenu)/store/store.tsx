@@ -58,7 +58,7 @@ function productIcon(kind: StoreProduct['kind']) {
   switch (kind) {
     case 'course': return <BookOpen size={15} className="text-indigo-400" />
     case 'podcast': return <Mic size={15} className="text-pink-400" />
-    default: return <Layers size={15} className="text-gray-400" />
+    default: return <Layers size={15} className="text-gray-400 dark:text-dk-fg-3" />
   }
 }
 
@@ -68,8 +68,8 @@ function ProductCard({ product, orgslug, orgUuid }: { product: StoreProduct; org
 
   return (
     <Link href={getProductUrl(orgslug, product)}>
-      <div className="group bg-white rounded-xl nice-shadow overflow-hidden flex flex-col h-full cursor-pointer transition-all duration-200 hover:scale-[1.01]">
-        <div className="relative aspect-video overflow-hidden flex items-center justify-center bg-gray-50">
+      <div className="group bg-white dark:bg-dk-card rounded-xl nice-shadow overflow-hidden flex flex-col h-full cursor-pointer transition-all duration-200 hover:scale-[1.01]">
+        <div className="relative aspect-video overflow-hidden flex items-center justify-center bg-gray-50 dark:bg-dk-inset/40">
           {thumbnail ? (
             <div
               className="w-full h-full"
@@ -84,7 +84,7 @@ function ProductCard({ product, orgslug, orgUuid }: { product: StoreProduct; org
           )}
 
           <div className="absolute top-2.5 start-2.5">
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-700 bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-0.5">
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-700 dark:text-dk-fg-1 bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-0.5">
               {productIcon(product.kind)}
               {t(`store.badge.${product.kind}`)}
             </span>
@@ -92,15 +92,15 @@ function ProductCard({ product, orgslug, orgUuid }: { product: StoreProduct; org
         </div>
 
         <div className="p-4 flex flex-col flex-1 gap-2">
-          <h2 className="font-bold text-base text-gray-900 leading-snug group-hover:text-indigo-700 transition-colors">
+          <h2 className="font-bold text-base text-gray-900 dark:text-dk-fg-1 leading-snug group-hover:text-indigo-700 transition-colors">
             {product.name}
           </h2>
           {product.description && (
-            <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">{product.description}</p>
+            <p className="text-sm text-gray-500 dark:text-dk-fg-3 line-clamp-2 leading-relaxed">{product.description}</p>
           )}
 
-          <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
-            <div className="text-xl font-black text-gray-900">
+          <div className="mt-auto pt-3 border-t border-gray-100 dark:border-dk-line flex items-center justify-between">
+            <div className="text-xl font-black text-gray-900 dark:text-dk-fg-1">
               {new Intl.NumberFormat(i18n.language || 'en', {
                 style: 'currency',
                 currency: product.price_currency,
@@ -127,11 +127,11 @@ function Store({ orgslug, products, enabled = true }: StoreProps) {
       <div className="w-full">
         <GeneralWrapperStyled>
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-            <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center mb-4 nice-shadow">
-              <ShoppingBag size={28} className="text-gray-300" strokeWidth={1.5} />
+            <div className="w-16 h-16 rounded-2xl bg-white dark:bg-dk-card flex items-center justify-center mb-4 nice-shadow">
+              <ShoppingBag size={28} className="text-gray-300 dark:text-zinc-600" strokeWidth={1.5} />
             </div>
-            <h2 className="text-xl font-bold text-gray-600 mb-2">{t('store.not_available_title')}</h2>
-            <p className="text-gray-400 text-sm max-w-sm">
+            <h2 className="text-xl font-bold text-gray-600 dark:text-dk-fg-2 mb-2">{t('store.not_available_title')}</h2>
+            <p className="text-gray-400 dark:text-dk-fg-3 text-sm max-w-sm">
               {t('store.not_available_description')}
             </p>
           </div>
@@ -144,30 +144,30 @@ function Store({ orgslug, products, enabled = true }: StoreProps) {
     <div className="w-full">
       <GeneralWrapperStyled>
         <div className="flex items-center gap-3 my-6">
-          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-white nice-shadow">
-            <ShoppingBag size={18} className="text-gray-800" />
+          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-white dark:bg-dk-card nice-shadow">
+            <ShoppingBag size={18} className="text-gray-800 dark:text-dk-fg-1" />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight">{t('store.title')}</h1>
+            <h1 className="text-2xl font-black text-gray-900 dark:text-dk-fg-1 tracking-tight">{t('store.title')}</h1>
             {org?.name && (
-              <p className="text-sm text-gray-400 mt-0.5">{t('store.subtitle', { org: org.name })}</p>
+              <p className="text-sm text-gray-400 dark:text-dk-fg-3 mt-0.5">{t('store.subtitle', { org: org.name })}</p>
             )}
           </div>
         </div>
 
         {products.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center mb-4 nice-shadow">
-              <ShoppingBag size={28} className="text-gray-300" strokeWidth={1.5} />
+            <div className="w-16 h-16 rounded-2xl bg-white dark:bg-dk-card flex items-center justify-center mb-4 nice-shadow">
+              <ShoppingBag size={28} className="text-gray-300 dark:text-zinc-600" strokeWidth={1.5} />
             </div>
-            <h2 className="text-xl font-bold text-gray-600 mb-2">{t('store.empty_title')}</h2>
-            <p className="text-gray-400 text-sm max-w-sm">
+            <h2 className="text-xl font-bold text-gray-600 dark:text-dk-fg-2 mb-2">{t('store.empty_title')}</h2>
+            <p className="text-gray-400 dark:text-dk-fg-3 text-sm max-w-sm">
               {t('store.empty_description')}
             </p>
           </div>
         ) : (
           <>
-            <p className="text-sm text-gray-400 mb-5">
+            <p className="text-sm text-gray-400 dark:text-dk-fg-3 mb-5">
               {t('store.offers_available', { count: products.length })}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">

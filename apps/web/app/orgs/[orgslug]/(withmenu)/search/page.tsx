@@ -221,9 +221,9 @@ const sections: SectionDescriptor<any>[] = [
                 userId={course.authors[0].user.id.toString()}
                 showProfilePopup={false}
                 rounded="rounded-full"
-                backgroundColor="bg-gray-100"
+                backgroundColor="bg-gray-100 dark:bg-dk-inset"
               />
-              <span className="text-xs text-black/50">
+              <span className="text-xs text-black/50 dark:text-white/50">
                 {course.authors[0].user.first_name} {course.authors[0].user.last_name}
               </span>
             </div>
@@ -343,7 +343,7 @@ const sections: SectionDescriptor<any>[] = [
     renderCard: (user: ApiUser, ctx) => (
       <Link
         href={getUriWithOrg(ctx.orgSlug, `/user/${user.username}`)}
-        className="flex items-center gap-4 p-3 bg-white rounded-lg border border-black/5 hover:border-black/15 transition-colors"
+        className="flex items-center gap-4 p-3 bg-white dark:bg-dk-card rounded-lg border border-black/5 dark:border-white/10 hover:border-black/15 dark:hover:border-white/25 transition-colors"
       >
         <UserAvatar
           width={40}
@@ -352,13 +352,13 @@ const sections: SectionDescriptor<any>[] = [
           userId={user.id.toString()}
           showProfilePopup
           rounded="rounded-full"
-          backgroundColor="bg-gray-100"
+          backgroundColor="bg-gray-100 dark:bg-dk-inset"
         />
         <div className="min-w-0">
-          <h3 className="text-sm font-medium text-black/80 truncate">
+          <h3 className="text-sm font-medium text-black/80 dark:text-white/80 truncate">
             {user.first_name} {user.last_name}
           </h3>
-          <p className="text-xs text-black/50 truncate">@{user.username}</p>
+          <p className="text-xs text-black/50 dark:text-white/50 truncate">@{user.username}</p>
         </div>
       </Link>
     ),
@@ -473,10 +473,10 @@ function SearchPage() {
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 pt-10 pb-4 max-w-5xl">
-        <h1 className="text-2xl font-semibold text-black/80 mb-1">
+        <h1 className="text-2xl font-semibold text-black/80 dark:text-white/80 mb-1">
           {t('common.search')}
         </h1>
-        <p className="text-sm text-black/50 mb-6">{t('search.start_subtitle')}</p>
+        <p className="text-sm text-black/50 dark:text-white/50 mb-6">{t('search.start_subtitle')}</p>
 
         <form onSubmit={handleSubmit} className="relative group">
           <input
@@ -485,13 +485,13 @@ function SearchPage() {
             onChange={(e) => setInputValue(e.target.value)}
             aria-label={t('search.search_placeholder')}
             placeholder={t('search.search_placeholder')}
-            className="w-full h-12 ps-12 pe-24 rounded-xl bg-white nice-shadow
+            className="w-full h-12 ps-12 pe-24 rounded-xl bg-white dark:bg-dk-card nice-shadow
                        focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-1
-                       text-sm placeholder:text-black/40 transition-all"
+                       text-sm placeholder:text-black/40 dark:placeholder:text-white/40 transition-all"
           />
           <div className="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none">
             <SearchIcon
-              className="text-black/40 group-focus-within:text-black/70 transition-colors"
+              className="text-black/40 dark:text-white/40 group-focus-within:text-black/70 dark:group-focus-within:text-white/70 transition-colors"
               size={18}
             />
           </div>
@@ -535,7 +535,7 @@ function SearchPage() {
           <EmptyState query={urlQuery} t={t} />
         ) : (
           <>
-            <p className="text-xs text-black/50 mb-5">
+            <p className="text-xs text-black/50 dark:text-white/50 mb-5">
               {t('search.found_results', { count: activeTotal, query: urlQuery })}
             </p>
 
@@ -548,10 +548,10 @@ function SearchPage() {
                 const items = section.items(results)
                 return (
                   <section key={section.key}>
-                    <h2 className="text-[11px] font-semibold uppercase tracking-wider text-black/50 mb-3 flex items-center gap-2">
+                    <h2 className="text-[11px] font-semibold uppercase tracking-wider text-black/50 dark:text-white/50 mb-3 flex items-center gap-2">
                       <section.icon size={13} />
                       {t(`search.types.${section.key}`)}
-                      <span className="text-black/30 font-normal normal-case tracking-normal">
+                      <span className="text-black/30 dark:text-white/30 font-normal normal-case tracking-normal">
                         ({section.total(results)})
                       </span>
                     </h2>
@@ -603,12 +603,12 @@ function TabButton({
       className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
         active
           ? 'bg-brand text-brand-fg'
-          : 'bg-black/5 text-black/70 hover:bg-black/10'
+          : 'bg-black/5 dark:bg-white/5 text-black/70 dark:text-white/70 hover:bg-black/10 dark:hover:bg-white/10'
       }`}
     >
       <Icon size={14} />
       {label}
-      <span className={active ? 'text-brand-fg opacity-70' : 'text-black/40'}>{count}</span>
+      <span className={active ? 'text-brand-fg opacity-70' : 'text-black/40 dark:text-white/40'}>{count}</span>
     </button>
   )
 }
@@ -631,9 +631,9 @@ function ResourceCard({
   return (
     <Link
       href={href}
-      className="bg-white rounded-lg border border-black/5 hover:border-black/15 transition-colors overflow-hidden group flex flex-col"
+      className="bg-white dark:bg-dk-card rounded-lg border border-black/5 dark:border-white/10 hover:border-black/15 dark:hover:border-white/25 transition-colors overflow-hidden group flex flex-col"
     >
-      <div className="relative aspect-video bg-black/5 flex items-center justify-center">
+      <div className="relative aspect-video bg-black/5 dark:bg-white/5 flex items-center justify-center">
         {imageUrl ? (
           <img
             src={imageUrl}
@@ -641,13 +641,13 @@ function ResourceCard({
             className="w-full h-full object-cover"
           />
         ) : (
-          <FallbackIcon size={28} className="text-black/30" />
+          <FallbackIcon size={28} className="text-black/30 dark:text-white/30" />
         )}
       </div>
       <div className="p-3 flex-1 flex flex-col">
-        <h3 dir="auto" className="text-sm font-medium text-black/80 line-clamp-1">{title}</h3>
+        <h3 dir="auto" className="text-sm font-medium text-black/80 dark:text-white/80 line-clamp-1">{title}</h3>
         {subtitle && (
-          <p dir="auto" className="text-xs text-black/50 line-clamp-2 mt-1">{subtitle}</p>
+          <p dir="auto" className="text-xs text-black/50 dark:text-white/50 line-clamp-2 mt-1">{subtitle}</p>
         )}
         {footer}
       </div>
@@ -671,15 +671,15 @@ function InlineCard({
   return (
     <Link
       href={href}
-      className="flex items-start gap-3 p-3 bg-white rounded-lg border border-black/5 hover:border-black/15 transition-colors"
+      className="flex items-start gap-3 p-3 bg-white dark:bg-dk-card rounded-lg border border-black/5 dark:border-white/10 hover:border-black/15 dark:hover:border-white/25 transition-colors"
     >
-      <div className="w-9 h-9 bg-black/5 rounded-md flex items-center justify-center flex-shrink-0 text-base">
-        {emoji ? <span>{emoji}</span> : <Icon size={18} className="text-black/50" />}
+      <div className="w-9 h-9 bg-black/5 dark:bg-white/5 rounded-md flex items-center justify-center flex-shrink-0 text-base">
+        {emoji ? <span>{emoji}</span> : <Icon size={18} className="text-black/50 dark:text-white/50" />}
       </div>
       <div className="min-w-0 flex-1">
-        <h3 dir="auto" className="text-sm font-medium text-black/80 line-clamp-1">{title}</h3>
+        <h3 dir="auto" className="text-sm font-medium text-black/80 dark:text-white/80 line-clamp-1">{title}</h3>
         {subtitle && (
-          <p dir="auto" className="text-xs text-black/50 line-clamp-2 mt-0.5">{subtitle}</p>
+          <p dir="auto" className="text-xs text-black/50 dark:text-white/50 line-clamp-2 mt-0.5">{subtitle}</p>
         )}
       </div>
     </Link>
@@ -692,11 +692,11 @@ function LoadingGrid() {
       {Array.from({ length: 6 }).map((_, i) => (
         <div
           key={i}
-          className="bg-white rounded-lg border border-black/5 p-3 animate-pulse"
+          className="bg-white dark:bg-dk-card rounded-lg border border-black/5 dark:border-white/10 p-3 animate-pulse"
         >
-          <div className="w-full aspect-video bg-black/5 rounded mb-3" />
-          <div className="w-3/4 h-3 bg-black/5 rounded mb-1.5" />
-          <div className="w-1/2 h-3 bg-black/5 rounded" />
+          <div className="w-full aspect-video bg-black/5 dark:bg-white/5 rounded mb-3" />
+          <div className="w-3/4 h-3 bg-black/5 dark:bg-white/5 rounded mb-1.5" />
+          <div className="w-1/2 h-3 bg-black/5 dark:bg-white/5 rounded" />
         </div>
       ))}
     </div>
@@ -706,13 +706,13 @@ function LoadingGrid() {
 function EmptyState({ query, t }: { query: string; t: (k: string, o?: any) => string }) {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="mb-4 p-4 bg-black/5 rounded-full">
-        <SearchIcon className="w-8 h-8 text-black/40" />
+      <div className="mb-4 p-4 bg-black/5 dark:bg-white/5 rounded-full">
+        <SearchIcon className="w-8 h-8 text-black/40 dark:text-white/40" />
       </div>
-      <h3 className="text-lg font-medium text-black/80 mb-2">
+      <h3 className="text-lg font-medium text-black/80 dark:text-white/80 mb-2">
         {t('search.no_results_found')}
       </h3>
-      <p className="text-sm text-black/50 max-w-md">
+      <p className="text-sm text-black/50 dark:text-white/50 max-w-md">
         {t('search.no_results_description', { query })}
       </p>
     </div>
@@ -722,10 +722,10 @@ function EmptyState({ query, t }: { query: string; t: (k: string, o?: any) => st
 function StartState({ label }: { label: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="mb-4 p-4 bg-black/5 rounded-full">
-        <SearchIcon className="w-8 h-8 text-black/40" />
+      <div className="mb-4 p-4 bg-black/5 dark:bg-white/5 rounded-full">
+        <SearchIcon className="w-8 h-8 text-black/40 dark:text-white/40" />
       </div>
-      <h3 className="text-lg font-medium text-black/70">{label}</h3>
+      <h3 className="text-lg font-medium text-black/70 dark:text-white/70">{label}</h3>
     </div>
   )
 }
@@ -754,7 +754,7 @@ function Pagination({
       <button
         onClick={() => onChange(page - 1)}
         disabled={page <= 1}
-        className={`${baseBtn} text-black/60 hover:bg-black/5 disabled:opacity-40 disabled:cursor-not-allowed`}
+        className={`${baseBtn} text-black/60 dark:text-white/60 hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed`}
         aria-label={t('search.previous')}
       >
         <ChevronLeft size={14} />
@@ -768,7 +768,7 @@ function Pagination({
             className={`w-8 h-8 rounded-md text-xs font-medium transition-colors ${
               p === page
                 ? 'bg-brand text-brand-fg'
-                : 'text-black/60 hover:bg-black/5'
+                : 'text-black/60 dark:text-white/60 hover:bg-black/5 dark:hover:bg-white/5'
             }`}
             aria-current={p === page ? 'page' : undefined}
           >
@@ -779,7 +779,7 @@ function Pagination({
       <button
         onClick={() => onChange(page + 1)}
         disabled={page >= totalPages}
-        className={`${baseBtn} text-black/60 hover:bg-black/5 disabled:opacity-40 disabled:cursor-not-allowed`}
+        className={`${baseBtn} text-black/60 dark:text-white/60 hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed`}
         aria-label={t('search.next')}
       >
         <span className="hidden sm:inline">{t('search.next')}</span>

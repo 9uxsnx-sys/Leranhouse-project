@@ -340,7 +340,7 @@ const UserProfileBuilder = () => {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-xl nice-shadow p-6">
+      <div className="bg-white dark:bg-dk-card rounded-xl nice-shadow p-6">
         <div className="flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
         </div>
@@ -349,16 +349,16 @@ const UserProfileBuilder = () => {
   }
 
   return (
-    <div className="bg-white rounded-xl nice-shadow">
+    <div className="bg-white dark:bg-dk-card rounded-xl nice-shadow">
       <div className="flex flex-col gap-0">
         {/* Header */}
-        <div className="flex items-center justify-between bg-gray-50 px-5 py-3 mx-3 my-3 rounded-md">
+        <div className="flex items-center justify-between bg-gray-50 dark:bg-dk-inset/40 px-5 py-3 mx-3 my-3 rounded-md">
           <div className="flex flex-col -space-y-1">
-            <h1 className="font-bold text-xl text-gray-800 flex items-center">
+            <h1 className="font-bold text-xl text-gray-800 dark:text-zinc-200 flex items-center">
               {t('user.settings.profile_builder.title')}
-              <span className="text-xs ms-2 bg-gray-200 text-gray-700 px-2 py-1 rounded-full">{t('user.settings.profile_builder.beta')}</span>
+              <span className="text-xs ms-2 bg-gray-200 dark:bg-dk-track text-gray-700 dark:text-zinc-200 px-2 py-1 rounded-full">{t('user.settings.profile_builder.beta')}</span>
             </h1>
-            <h2 className="text-gray-500 text-md">{t('user.settings.profile_builder.subtitle')}</h2>
+            <h2 className="text-gray-500 dark:text-zinc-400 text-md">{t('user.settings.profile_builder.subtitle')}</h2>
           </div>
           <Button
             variant="default"
@@ -399,7 +399,7 @@ const UserProfileBuilder = () => {
                             className={`p-4 bg-white/80 backdrop-blur-xs rounded-lg cursor-pointer border ${
                               selectedSection === index 
                                 ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-500/20 shadow-xs' 
-                                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50/50 hover:shadow-xs'
+                                : 'border-gray-200 dark:border-dk-line-strong hover:border-gray-300 dark:hover:border-dk-line-strong hover:bg-gray-50/50 hover:shadow-xs'
                             } ${snapshot.isDragging ? 'shadow-lg ring-2 ring-blue-500/20 rotate-2' : ''}`}
                           >
                             <div className="flex items-center justify-between group">
@@ -408,14 +408,14 @@ const UserProfileBuilder = () => {
                                   className={`p-1.5 rounded-md transition-colors duration-200 ${
                                     selectedSection === index 
                                       ? 'text-blue-500 bg-blue-100/50' 
-                                      : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                                      : 'text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 hover:bg-gray-100 dark:hover:bg-dk-raised'
                                   }`}>
                                   <GripVertical size={16} />
                                 </div>
                                 <div className={`p-1.5 rounded-md ${
                                   selectedSection === index 
                                     ? 'text-blue-600 bg-blue-100/50' 
-                                    : 'text-gray-600 bg-gray-100/50'
+                                    : 'text-gray-600 dark:text-zinc-300 bg-gray-100/50'
                                 }`}>
                                   {React.createElement(SECTION_TYPES[section.type].icon, {
                                     size: 16
@@ -424,7 +424,7 @@ const UserProfileBuilder = () => {
                                 <span className={`text-sm font-medium truncate ${
                                   selectedSection === index 
                                     ? 'text-blue-700' 
-                                    : 'text-gray-700'
+                                    : 'text-gray-700 dark:text-zinc-200'
                                 }`}>
                                   {section.title}
                                 </span>
@@ -438,7 +438,7 @@ const UserProfileBuilder = () => {
                                   className={`p-1.5 rounded-md transition-colors duration-200 ${
                                     selectedSection === index
                                       ? 'text-blue-500 hover:bg-blue-100'
-                                      : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                                      : 'text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 hover:bg-gray-100 dark:hover:bg-dk-raised'
                                   }`}
                                 >
                                   <ConceptIcon.edit size={14} />
@@ -484,12 +484,12 @@ const UserProfileBuilder = () => {
                   {Object.entries(SECTION_TYPES).map(([type, { icon: Icon, labelKey, descriptionKey }]) => (
                     <SelectItem key={type} value={type}>
                       <div className="flex items-center space-x-3 py-1">
-                        <div className="p-1.5 bg-gray-50 rounded-md">
-                          <Icon size={16} className="text-gray-600" />
+                        <div className="p-1.5 bg-gray-50 dark:bg-dk-inset/40 rounded-md">
+                          <Icon size={16} className="text-gray-600 dark:text-zinc-300" />
                         </div>
                         <div className="flex-1">
-                          <div className="font-medium text-sm text-gray-700">{t(labelKey)}</div>
-                          <div className="text-xs text-gray-500">{t(descriptionKey)}</div>
+                          <div className="font-medium text-sm text-gray-700 dark:text-zinc-200">{t(labelKey)}</div>
+                          <div className="text-xs text-gray-500 dark:text-zinc-400">{t(descriptionKey)}</div>
                         </div>
                       </div>
                     </SelectItem>
@@ -507,7 +507,7 @@ const UserProfileBuilder = () => {
                 onChange={(updatedSection) => updateSection(selectedSection, updatedSection as ProfileSection)}
               />
             ) : (
-              <div className="h-full flex items-center justify-center text-gray-500">
+              <div className="h-full flex items-center justify-center text-gray-500 dark:text-zinc-400">
                 {t('user.settings.profile_builder.select_section')}
               </div>
             )}
@@ -554,9 +554,9 @@ const ImageGalleryEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 bg-white dark:bg-dk-card rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
-        <ImageIcon className="w-5 h-5 text-gray-500" />
+        <ImageIcon className="w-5 h-5 text-gray-500 dark:text-zinc-400" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.image_gallery.title')}</h3>
       </div>
       
@@ -657,9 +657,9 @@ const TextEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 bg-white dark:bg-dk-card rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
-        <TextIcon className="w-5 h-5 text-gray-500" />
+        <TextIcon className="w-5 h-5 text-gray-500 dark:text-zinc-400" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.text.title')}</h3>
       </div>
       
@@ -697,9 +697,9 @@ const LinksEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 bg-white dark:bg-dk-card rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
-        <LinkIcon className="w-5 h-5 text-gray-500" />
+        <LinkIcon className="w-5 h-5 text-gray-500 dark:text-zinc-400" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.links.title')}</h3>
       </div>
       
@@ -782,9 +782,9 @@ const SkillsEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 bg-white dark:bg-dk-card rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
-        <Award className="w-5 h-5 text-gray-500" />
+        <Award className="w-5 h-5 text-gray-500 dark:text-zinc-400" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.skills.title')}</h3>
       </div>
       
@@ -885,9 +885,9 @@ const ExperienceEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 bg-white dark:bg-dk-card rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
-        <Briefcase className="w-5 h-5 text-gray-500" />
+        <Briefcase className="w-5 h-5 text-gray-500 dark:text-zinc-400" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.experience.title')}</h3>
       </div>
       
@@ -977,7 +977,7 @@ const ExperienceEditor: React.FC<{
                           }
                           onChange({ ...section, experiences: newExperiences })
                         }}
-                        className="rounded border-gray-300"
+                        className="rounded border-gray-300 dark:border-dk-line-strong"
                       />
                       <Label htmlFor={`current-${index}`}>{t('user.settings.profile_builder.editors.experience.current')}</Label>
                     </div>
@@ -1047,9 +1047,9 @@ const EducationEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 bg-white dark:bg-dk-card rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
-        <GraduationCap className="w-5 h-5 text-gray-500" />
+        <GraduationCap className="w-5 h-5 text-gray-500 dark:text-zinc-400" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.education.title')}</h3>
       </div>
       
@@ -1152,7 +1152,7 @@ const EducationEditor: React.FC<{
                           }
                           onChange({ ...section, education: newEducation })
                         }}
-                        className="rounded border-gray-300"
+                        className="rounded border-gray-300 dark:border-dk-line-strong"
                       />
                       <Label htmlFor={`current-edu-${index}`}>{t('user.settings.profile_builder.editors.education.current')}</Label>
                     </div>
@@ -1223,9 +1223,9 @@ const AffiliationEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 bg-white dark:bg-dk-card rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
-        <MapPin className="w-5 h-5 text-gray-500" />
+        <MapPin className="w-5 h-5 text-gray-500 dark:text-zinc-400" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.affiliation.title')}</h3>
       </div>
       
@@ -1334,9 +1334,9 @@ const CoursesEditor: React.FC<{
 }> = ({ section, onChange }) => {
   const { t } = useTranslation()
   return (
-    <div className="space-y-6 p-6 bg-white rounded-lg nice-shadow">
+    <div className="space-y-6 p-6 bg-white dark:bg-dk-card rounded-lg nice-shadow">
       <div className="flex items-center space-x-2">
-        <BookOpen className="w-5 h-5 text-gray-500" />
+        <BookOpen className="w-5 h-5 text-gray-500 dark:text-zinc-400" />
         <h3 className="font-medium text-lg">{t('user.settings.profile_builder.editors.courses.title')}</h3>
       </div>
       
@@ -1352,7 +1352,7 @@ const CoursesEditor: React.FC<{
           />
         </div>
 
-        <div className="text-sm text-gray-500 italic">
+        <div className="text-sm text-gray-500 dark:text-zinc-400 italic">
           {t('user.settings.profile_builder.editors.courses.info')}
         </div>
       </div>

@@ -33,7 +33,7 @@ const getPlanStyles = (plan: PlanLevel): string => {
     case 'enterprise':
       return 'bg-gradient-to-br from-amber-100 to-amber-200 text-amber-800 border-amber-200 shadow-sm shadow-amber-200/50'
     default:
-      return 'bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700 border-gray-200 shadow-sm shadow-gray-200/50'
+      return 'bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700 dark:text-zinc-200 border-gray-200 dark:border-dk-line-strong shadow-sm shadow-gray-200/50'
   }
 }
 
@@ -49,7 +49,7 @@ const getDarkPlanStyles = (plan: PlanLevel): string => {
     case 'enterprise':
       return 'bg-gradient-to-br from-amber-900/40 to-amber-800/30 text-amber-300 border-amber-700/30 shadow-sm shadow-amber-900/30'
     default:
-      return 'bg-gradient-to-br from-gray-800/40 to-gray-700/30 text-gray-300 border-gray-600/30 shadow-sm shadow-gray-900/30'
+      return 'bg-gradient-to-br from-gray-800/40 to-gray-700/30 text-gray-300 dark:text-zinc-600 border-gray-600/30 shadow-sm shadow-gray-900/30'
   }
 }
 

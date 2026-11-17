@@ -77,11 +77,11 @@ export function CommunitySidebar({
 
       {/* ── CARD 1: Linked course or podcast ── */}
       {linkedCourse ? (
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+        <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
             {t('communities.linked_course')}
           </h3>
-          <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+          <p className="text-sm text-gray-600 dark:text-dk-fg-2 mb-4 leading-relaxed">
             {t('communities.linked_course_description')}
           </p>
           <Link
@@ -93,11 +93,11 @@ export function CommunitySidebar({
           </Link>
         </div>
       ) : linkedPodcast ? (
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+        <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
             {t('communities.linked_podcast')}
           </h3>
-          <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+          <p className="text-sm text-gray-600 dark:text-dk-fg-2 mb-4 leading-relaxed">
             {t('communities.linked_podcast_description')}
           </p>
           <Link
@@ -111,28 +111,28 @@ export function CommunitySidebar({
       ) : null}
 
       {/* ── CARD 2: This Community Includes ── */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+      <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
           {t('communities.sidebar_includes')}
         </h3>
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            <Users size={16} className="text-gray-400 shrink-0" />
-            <span className="text-sm text-gray-600">
+            <Users size={16} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
+            <span className="text-sm text-gray-600 dark:text-dk-fg-2">
               {memberCount}{' '}
               {memberCount === 1 ? t('communities.member') : t('communities.members')}
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <MessageCircle size={16} className="text-gray-400 shrink-0" />
-            <span className="text-sm text-gray-600">
+            <MessageCircle size={16} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
+            <span className="text-sm text-gray-600 dark:text-dk-fg-2">
               {discussionCount}{' '}
               {discussionCount === 1 ? t('communities.discussion') : t('communities.discussions')}
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <Calendar size={16} className="text-gray-400 shrink-0" />
-            <span className="text-sm text-gray-600">
+            <Calendar size={16} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
+            <span className="text-sm text-gray-600 dark:text-dk-fg-2">
               {t('communities.created_on', { date: createdDate })}
             </span>
           </div>
@@ -140,24 +140,24 @@ export function CommunitySidebar({
       </div>
 
       {/* ── CARD 3: Updates ── */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+      <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
           {t('communities.updates')}
         </h3>
         <div className="flex items-center gap-3">
-          <RefreshCw size={16} className="text-gray-400 shrink-0" />
-          <span className="text-sm text-gray-600">
+          <RefreshCw size={16} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
+          <span className="text-sm text-gray-600 dark:text-dk-fg-2">
             {t('communities.last_updated', { date: updatedDate })}
           </span>
         </div>
       </div>
 
       {/* ── CARD 4: Community Guidelines ── */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+      <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+        <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
           {t('communities.community_guidelines')}
         </h3>
-        <p className="text-sm text-gray-600 leading-relaxed">
+        <p className="text-sm text-gray-600 dark:text-dk-fg-2 leading-relaxed">
           {t('communities.community_guidelines_text')}
         </p>
       </div>

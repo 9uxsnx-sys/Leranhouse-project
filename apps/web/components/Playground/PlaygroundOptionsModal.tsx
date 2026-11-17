@@ -69,8 +69,8 @@ export default function PlaygroundOptionsModal({
       dialogContent={
         <div className="flex h-full min-h-[680px]">
           {/* Sidebar */}
-          <div className="w-44 flex-shrink-0 border-r border-gray-100 bg-gray-50/60 flex flex-col py-4 px-3 gap-1">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2 mb-2">
+          <div className="w-44 flex-shrink-0 border-r border-gray-100 dark:border-dk-line bg-gray-50/60 flex flex-col py-4 px-3 gap-1">
+            <p className="text-[10px] font-bold text-gray-400 dark:text-zinc-400 uppercase tracking-widest px-2 mb-2">
               {t('playground.options.sidebar_label')}
             </p>
             {tabs.map((tab) => (
@@ -79,8 +79,8 @@ export default function PlaygroundOptionsModal({
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all text-left ${
                   activeTab === tab.id
-                    ? 'bg-white nice-shadow text-gray-900'
-                    : 'text-gray-500 hover:text-gray-800 hover:bg-white/60'
+                    ? 'bg-white dark:bg-dk-card nice-shadow text-gray-900 dark:text-zinc-100'
+                    : 'text-gray-500 dark:text-zinc-400 hover:text-gray-800 hover:bg-white/60'
                 }`}
               >
                 {tab.icon}
@@ -158,28 +158,28 @@ function GeneralTab({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-base font-bold text-gray-900 mb-0.5">{t('playground.options.general.title')}</h2>
-        <p className="text-xs text-gray-400">{t('playground.options.general.description')}</p>
+        <h2 className="text-base font-bold text-gray-900 dark:text-zinc-100 mb-0.5">{t('playground.options.general.title')}</h2>
+        <p className="text-xs text-gray-400 dark:text-zinc-400">{t('playground.options.general.description')}</p>
       </div>
 
       <div className="space-y-4">
         <div>
-          <label className="block text-xs font-semibold text-gray-600 mb-1.5">{t('playground.options.general.name')}</label>
+          <label className="block text-xs font-semibold text-gray-600 dark:text-zinc-300 mb-1.5">{t('playground.options.general.name')}</label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-dk-line-strong text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
             placeholder={t('playground.options.general.name_placeholder')}
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-gray-600 mb-1.5">{t('playground.options.general.description_label')}</label>
+          <label className="block text-xs font-semibold text-gray-600 dark:text-zinc-300 mb-1.5">{t('playground.options.general.description_label')}</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent resize-none"
+            className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-dk-line-strong text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent resize-none"
             placeholder={t('playground.options.general.description_placeholder')}
           />
         </div>
@@ -289,8 +289,8 @@ function AccessTab({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-base font-bold text-gray-900 mb-0.5">{t('playground.options.access.title')}</h2>
-        <p className="text-xs text-gray-400">{t('playground.options.access.description')}</p>
+        <h2 className="text-base font-bold text-gray-900 dark:text-zinc-100 mb-0.5">{t('playground.options.access.title')}</h2>
+        <p className="text-xs text-gray-400 dark:text-zinc-400">{t('playground.options.access.description')}</p>
       </div>
 
       {/* Access type cards */}
@@ -304,19 +304,19 @@ function AccessTab({
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all text-left ${
                 active
                   ? 'border-sky-500 bg-sky-50/50'
-                  : 'border-gray-100 bg-gray-50/60 hover:border-gray-200 hover:bg-white'
+                  : 'border-gray-100 dark:border-dk-line bg-gray-50/60 hover:border-gray-200 hover:bg-white'
               }`}
             >
               <div className="flex-shrink-0">{opt.icon}</div>
               <div className="flex-1 min-w-0">
-                <p className={`text-sm font-bold ${active ? 'text-sky-700' : 'text-gray-700'}`}>
+                <p className={`text-sm font-bold ${active ? 'text-sky-700' : 'text-gray-700 dark:text-zinc-200'}`}>
                   {opt.label}
                 </p>
-                <p className="text-xs text-gray-400 mt-0.5">{opt.description}</p>
+                <p className="text-xs text-gray-400 dark:text-zinc-400 mt-0.5">{opt.description}</p>
               </div>
               {active && (
                 <div className="flex-shrink-0 w-4 h-4 rounded-full bg-sky-500 flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-white dark:bg-zinc-100" />
                 </div>
               )}
             </button>
@@ -329,8 +329,8 @@ function AccessTab({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-bold text-gray-800">{t('playground.options.access.user_groups')}</p>
-              <p className="text-xs text-gray-400">{t('playground.options.access.user_groups_description')}</p>
+              <p className="text-sm font-bold text-gray-800 dark:text-zinc-200">{t('playground.options.access.user_groups')}</p>
+              <p className="text-xs text-gray-400 dark:text-zinc-400">{t('playground.options.access.user_groups_description')}</p>
             </div>
             <Modal
               isDialogOpen={linkModalOpen}
@@ -358,11 +358,11 @@ function AccessTab({
             />
           </div>
 
-          <div className="rounded-xl border border-gray-100 overflow-hidden">
+          <div className="rounded-xl border border-gray-100 dark:border-dk-line overflow-hidden">
             {!usergroups || usergroups.length === 0 ? (
               <div className="py-8 text-center">
-                <Lock size={20} className="text-gray-300 mx-auto mb-2" />
-                <p className="text-xs text-gray-400">{t('playground.options.access.no_groups')}</p>
+                <Lock size={20} className="text-gray-300 dark:text-zinc-600 mx-auto mb-2" />
+                <p className="text-xs text-gray-400 dark:text-zinc-400">{t('playground.options.access.no_groups')}</p>
                 <Link
                   href={getUriWithOrg(orgslug, '/dash/users/settings/usergroups')}
                   target="_blank"
@@ -374,15 +374,15 @@ function AccessTab({
             ) : (
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-gray-50 border-b border-gray-100">
-                    <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500">{t('playground.options.access.group')}</th>
+                  <tr className="bg-gray-50 dark:bg-dk-inset/40 border-b border-gray-100 dark:border-dk-line">
+                    <th className="text-left px-4 py-2.5 text-xs font-semibold text-gray-500 dark:text-zinc-400">{t('playground.options.access.group')}</th>
                     <th className="px-4 py-2.5" />
                   </tr>
                 </thead>
                 <tbody>
                   {usergroups.map((ug: any) => (
                     <tr key={ug.usergroup_uuid} className="border-b border-gray-50 last:border-0">
-                      <td className="px-4 py-3 font-medium text-gray-800">{ug.name}</td>
+                      <td className="px-4 py-3 font-medium text-gray-800 dark:text-zinc-200">{ug.name}</td>
                       <td className="px-4 py-3 text-right">
                         <button
                           onClick={() => removeUserGroup(ug.usergroup_uuid)}
@@ -497,12 +497,12 @@ function ThumbnailTab({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-base font-bold text-gray-900 mb-0.5">{t('playground.options.thumbnail.title')}</h2>
-        <p className="text-xs text-gray-400">{t('playground.options.thumbnail.description')}</p>
+        <h2 className="text-base font-bold text-gray-900 dark:text-zinc-100 mb-0.5">{t('playground.options.thumbnail.title')}</h2>
+        <p className="text-xs text-gray-400 dark:text-zinc-400">{t('playground.options.thumbnail.description')}</p>
       </div>
 
       {/* Preview */}
-      <div className="rounded-xl overflow-hidden border border-gray-100 aspect-video bg-gray-50 flex items-center justify-center">
+      <div className="rounded-xl overflow-hidden border border-gray-100 dark:border-dk-line aspect-video bg-gray-50 dark:bg-dk-inset/40 flex items-center justify-center">
         {thumbnailUrl ? (
           <img
             src={thumbnailUrl}
@@ -510,7 +510,7 @@ function ThumbnailTab({
             className={`w-full h-full object-cover ${isUploading ? 'opacity-60' : ''}`}
           />
         ) : (
-          <div className="flex flex-col items-center gap-2 text-gray-300">
+          <div className="flex flex-col items-center gap-2 text-gray-300 dark:text-zinc-600">
             <Image size={36} weight="duotone" />
             <span className="text-xs">{t('playground.options.thumbnail.none')}</span>
           </div>
@@ -527,7 +527,7 @@ function ThumbnailTab({
       />
 
       {isUploading ? (
-        <div className="flex items-center gap-2 text-sm text-gray-500">
+        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-zinc-400">
           <CircleNotch size={14} weight="bold" className="animate-spin text-sky-500" />
           {t('playground.options.thumbnail.uploading')}
         </div>
@@ -535,21 +535,21 @@ function ThumbnailTab({
         <div className="flex gap-2">
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-1.5 h-9 px-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm font-medium text-gray-700 transition-all nice-shadow"
+            className="flex items-center gap-1.5 h-9 px-4 rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card hover:bg-gray-50 dark:hover:bg-dk-raised text-sm font-medium text-gray-700 dark:text-zinc-200 transition-all nice-shadow"
           >
             <UploadSimple size={14} weight="bold" />
             {t('playground.options.thumbnail.upload')}
           </button>
           <button
             onClick={() => setShowUnsplash(true)}
-            className="flex items-center gap-1.5 h-9 px-4 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm font-medium text-gray-700 transition-all nice-shadow"
+            className="flex items-center gap-1.5 h-9 px-4 rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card hover:bg-gray-50 dark:hover:bg-dk-raised text-sm font-medium text-gray-700 dark:text-zinc-200 transition-all nice-shadow"
           >
             <Image size={14} weight="bold" />
             {t('playground.options.thumbnail.unsplash')}
           </button>
         </div>
       )}
-      <p className="text-xs text-gray-400">{t('playground.options.thumbnail.hint')}</p>
+      <p className="text-xs text-gray-400 dark:text-zinc-400">{t('playground.options.thumbnail.hint')}</p>
 
       {showUnsplash && (
         <UnsplashImagePicker
@@ -603,13 +603,13 @@ function LinkUserGroupForm({
   }
 
   if (!allGroups) {
-    return <div className="py-4 text-center text-sm text-gray-400">{t('playground.loading')}</div>
+    return <div className="py-4 text-center text-sm text-gray-400 dark:text-zinc-400">{t('playground.loading')}</div>
   }
 
   if (allGroups.length === 0) {
     return (
       <div className="py-6 text-center space-y-2">
-        <p className="text-sm text-gray-500">{t('playground.options.access.no_groups_available')}</p>
+        <p className="text-sm text-gray-500 dark:text-zinc-400">{t('playground.options.access.no_groups_available')}</p>
         <Link
           href={getUriWithOrg(orgslug, '/dash/users/settings/usergroups')}
           target="_blank"
@@ -626,7 +626,7 @@ function LinkUserGroupForm({
       <select
         value={selected}
         onChange={(e) => setSelected(e.target.value)}
-        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-dk-line-strong text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
       >
         {allGroups.map((g: any) => (
           <option key={g.usergroup_uuid} value={g.usergroup_uuid}>{g.name}</option>

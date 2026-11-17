@@ -196,7 +196,7 @@ export default function PlaygroundsListClient({ org_id, orgslug }: PlaygroundsLi
       descriptionKey="Create interactive AI-generated experiences for your learners."
     >
       <FeatureDisabledView featureName="playgrounds" orgslug={orgslug} context="dashboard">
-        <div className="h-full w-full bg-[#f8f8f8] pl-10 pr-10">
+        <div className="h-full w-full bg-[#f8f8f8] dark:bg-transparent pl-10 pr-10">
 
           {/* Header */}
           <div className="mb-6 pt-6">
@@ -228,18 +228,18 @@ export default function PlaygroundsListClient({ org_id, orgslug }: PlaygroundsLi
               {/* Search — hidden while selection is active */}
               {!hasSelection && (
                 <div className="relative w-full sm:w-80">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-400 w-4 h-4" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search playgrounds..."
-                    className="w-full pl-10 pr-10 py-2.5 bg-white nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0"
+                    className="w-full pl-10 pr-10 py-2.5 bg-white dark:bg-dk-card nice-shadow rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 border-0"
                   />
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -249,20 +249,20 @@ export default function PlaygroundsListClient({ org_id, orgslug }: PlaygroundsLi
 
               {/* Selection action bar */}
               {hasSelection && (
-                <div className="flex items-center gap-2 bg-white nice-shadow rounded-lg px-3 py-2">
-                  <span className="text-xs font-semibold text-gray-700 pr-2 border-r border-gray-200">
+                <div className="flex items-center gap-2 bg-white dark:bg-dk-card nice-shadow rounded-lg px-3 py-2">
+                  <span className="text-xs font-semibold text-gray-700 dark:text-zinc-200 pr-2 border-r border-gray-200 dark:border-dk-line-strong">
                     {selectedUuids.size} selected
                   </span>
                   <button
                     onClick={handleDuplicate}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-dk-raised rounded-md transition-colors"
                   >
                     <Copy className="w-3.5 h-3.5" />
                     Duplicate
                   </button>
                   <button
                     onClick={handleDownload}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-dk-raised rounded-md transition-colors"
                   >
                     <Download className="w-3.5 h-3.5" />
                     Download
@@ -276,7 +276,7 @@ export default function PlaygroundsListClient({ org_id, orgslug }: PlaygroundsLi
                   </button>
                   <button
                     onClick={clearSelection}
-                    className="ml-1 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="ml-1 text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-colors"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -289,11 +289,11 @@ export default function PlaygroundsListClient({ org_id, orgslug }: PlaygroundsLi
           {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="animate-pulse rounded-xl bg-white nice-shadow overflow-hidden">
-                  <div className="aspect-video bg-gray-200" />
+                <div key={i} className="animate-pulse rounded-xl bg-white dark:bg-dk-card nice-shadow overflow-hidden">
+                  <div className="aspect-video bg-gray-200 dark:bg-dk-track" />
                   <div className="p-3 space-y-2">
-                    <div className="h-4 bg-gray-200 rounded w-3/4" />
-                    <div className="h-3 bg-gray-100 rounded w-full" />
+                    <div className="h-4 bg-gray-200 dark:bg-dk-track rounded w-3/4" />
+                    <div className="h-3 bg-gray-100 dark:bg-dk-inset rounded w-full" />
                   </div>
                 </div>
               ))}
@@ -312,9 +312,9 @@ export default function PlaygroundsListClient({ org_id, orgslug }: PlaygroundsLi
               {filtered.length === 0 && searchQuery && (
                 <div className="col-span-full flex justify-center items-center py-8 text-center">
                   <div>
-                    <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                    <h2 className="text-xl font-semibold text-gray-600 mb-2">No playgrounds found</h2>
-                    <p className="text-gray-400">Try a different search term</p>
+                    <Search className="w-12 h-12 text-gray-300 dark:text-zinc-600 mx-auto mb-4" />
+                    <h2 className="text-xl font-semibold text-gray-600 dark:text-zinc-300 mb-2">No playgrounds found</h2>
+                    <p className="text-gray-400 dark:text-zinc-400">Try a different search term</p>
                   </div>
                 </div>
               )}
@@ -322,11 +322,11 @@ export default function PlaygroundsListClient({ org_id, orgslug }: PlaygroundsLi
               {allPlaygrounds.length === 0 && !searchQuery && (
                 <div className="col-span-full flex justify-center items-center py-8 text-center">
                   <div>
-                    <div className="rounded-full bg-gray-100 p-4 w-fit mx-auto mb-4">
-                      <Cube size={24} className="text-gray-400" />
+                    <div className="rounded-full bg-gray-100 dark:bg-dk-inset p-4 w-fit mx-auto mb-4">
+                      <Cube size={24} className="text-gray-400 dark:text-zinc-400" />
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-600 mb-2">No playgrounds yet</h2>
-                    <p className="text-lg text-gray-400">
+                    <h2 className="text-2xl font-bold text-gray-600 dark:text-zinc-300 mb-2">No playgrounds yet</h2>
+                    <p className="text-lg text-gray-400 dark:text-zinc-400">
                       Create interactive AI-generated experiences for your learners.
                     </p>
                   </div>
@@ -342,7 +342,7 @@ export default function PlaygroundsListClient({ org_id, orgslug }: PlaygroundsLi
                 <button
                   onClick={() => goToPage(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 bg-white nice-shadow rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 dark:text-zinc-300 bg-white dark:bg-dk-card nice-shadow rounded-lg hover:bg-gray-50 dark:hover:bg-dk-raised disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   <span className="hidden sm:inline">Previous</span>
@@ -351,14 +351,14 @@ export default function PlaygroundsListClient({ org_id, orgslug }: PlaygroundsLi
                   {getVisiblePages().map((page, index) => (
                     <React.Fragment key={index}>
                       {page === '...' ? (
-                        <span className="px-2 py-1 text-gray-400">...</span>
+                        <span className="px-2 py-1 text-gray-400 dark:text-zinc-400">...</span>
                       ) : (
                         <button
                           onClick={() => goToPage(page as number)}
                           className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                             currentPage === page
                               ? 'bg-brand text-brand-fg'
-                              : 'bg-white text-gray-600 nice-shadow hover:bg-gray-50'
+                              : 'bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 nice-shadow hover:bg-gray-50 dark:hover:bg-dk-raised'
                           }`}
                         >
                           {page}
@@ -370,13 +370,13 @@ export default function PlaygroundsListClient({ org_id, orgslug }: PlaygroundsLi
                 <button
                   onClick={() => goToPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 bg-white nice-shadow rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-600 dark:text-zinc-300 bg-white dark:bg-dk-card nice-shadow rounded-lg hover:bg-gray-50 dark:hover:bg-dk-raised disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <span className="hidden sm:inline">Next</span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
-              <div className="mb-6 text-center text-sm text-gray-500">
+              <div className="mb-6 text-center text-sm text-gray-500 dark:text-zinc-400">
                 Page {currentPage} of {totalPages}
               </div>
             </>
@@ -391,11 +391,11 @@ export default function PlaygroundsListClient({ org_id, orgslug }: PlaygroundsLi
           onClick={() => setShowNameModal(false)}
         >
           <div
-            className="bg-white rounded-2xl nice-shadow p-6 w-full max-w-sm mx-4"
+            className="bg-white dark:bg-dk-card rounded-2xl nice-shadow p-6 w-full max-w-sm mx-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-base font-bold text-gray-900 mb-1">New Playground</h2>
-            <p className="text-xs text-gray-400 mb-4">Give your playground a name to get started.</p>
+            <h2 className="text-base font-bold text-gray-900 dark:text-zinc-100 mb-1">New Playground</h2>
+            <p className="text-xs text-gray-400 dark:text-zinc-400 mb-4">Give your playground a name to get started.</p>
             <input
               autoFocus
               type="text"
@@ -406,12 +406,12 @@ export default function PlaygroundsListClient({ org_id, orgslug }: PlaygroundsLi
                 if (e.key === 'Escape') setShowNameModal(false)
               }}
               placeholder="e.g. Photosynthesis Quiz"
-              className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-black focus:border-transparent mb-4"
+              className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-dk-line-strong rounded-lg outline-none focus:ring-2 focus:ring-black focus:border-transparent mb-4"
             />
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setShowNameModal(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 transition-colors"
               >
                 Cancel
               </button>
@@ -434,19 +434,19 @@ export default function PlaygroundsListClient({ org_id, orgslug }: PlaygroundsLi
           onClick={() => setShowDeleteConfirm(false)}
         >
           <div
-            className="bg-white rounded-2xl nice-shadow p-6 w-full max-w-sm mx-4"
+            className="bg-white dark:bg-dk-card rounded-2xl nice-shadow p-6 w-full max-w-sm mx-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-base font-bold text-gray-900 mb-1">
+            <h2 className="text-base font-bold text-gray-900 dark:text-zinc-100 mb-1">
               Delete {selectedUuids.size} playground{selectedUuids.size > 1 ? 's' : ''}
             </h2>
-            <p className="text-sm text-gray-500 mb-5">
+            <p className="text-sm text-gray-500 dark:text-zinc-400 mb-5">
               This action is permanent and cannot be undone.
             </p>
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200 transition-colors"
               >
                 Cancel
               </button>
@@ -477,7 +477,7 @@ function PlaygroundCard({
     public: { icon: <Globe size={10} />, label: 'Public', className: 'bg-green-100 text-green-700' },
     authenticated: { icon: <Users size={10} />, label: 'Members', className: 'bg-blue-100 text-blue-700' },
     restricted: { icon: <Lock size={10} />, label: 'Restricted', className: 'bg-amber-100 text-amber-700' },
-  }[playground.access_type as string] ?? { icon: <Lock size={10} />, label: 'Private', className: 'bg-gray-100 text-gray-600' }
+  }[playground.access_type as string] ?? { icon: <Lock size={10} />, label: 'Private', className: 'bg-gray-100 dark:bg-dk-inset text-gray-600 dark:text-zinc-300' }
 
   const thumbnailUrl =
     playground.thumbnail_image && playground.org_uuid
@@ -490,7 +490,7 @@ function PlaygroundCard({
 
   return (
     <div
-      className={`group relative flex flex-col bg-white rounded-xl nice-shadow overflow-hidden w-full transition-all duration-200 hover:scale-[1.01] cursor-pointer ${
+      className={`group relative flex flex-col bg-white dark:bg-dk-card rounded-xl nice-shadow overflow-hidden w-full transition-all duration-200 hover:scale-[1.01] cursor-pointer ${
         selected ? 'ring-2 ring-black' : ''
       }`}
       onClick={onToggleSelect}
@@ -500,7 +500,7 @@ function PlaygroundCard({
         className={`absolute top-2 right-2 z-20 w-5 h-5 rounded flex items-center justify-center transition-all border ${
           selected
             ? 'bg-primary border-primary'
-            : 'bg-white/80 border-gray-300 opacity-0 group-hover:opacity-100'
+            : 'bg-white/80 border-gray-300 dark:border-dk-line-strong opacity-0 group-hover:opacity-100'
         }`}
       >
         {selected && (
@@ -510,7 +510,7 @@ function PlaygroundCard({
         )}
       </div>
 
-      <div className="relative aspect-video overflow-hidden bg-gray-50 flex items-center justify-center">
+      <div className="relative aspect-video overflow-hidden bg-gray-50 dark:bg-dk-inset/40 flex items-center justify-center">
         {thumbnailUrl ? (
           <img
             src={thumbnailUrl}
@@ -519,7 +519,7 @@ function PlaygroundCard({
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-            <Cube size={32} className="text-gray-300" />
+            <Cube size={32} className="text-gray-300 dark:text-zinc-600" />
           </div>
         )}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
@@ -529,7 +529,7 @@ function PlaygroundCard({
             {accessBadge.label}
           </span>
           {!playground.published && (
-            <span className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-gray-100 text-gray-500 rounded-full">
+            <span className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-gray-100 dark:bg-dk-inset text-gray-500 dark:text-zinc-400 rounded-full">
               Draft
             </span>
           )}
@@ -537,20 +537,20 @@ function PlaygroundCard({
       </div>
 
       <div className="p-3 flex flex-col space-y-1.5">
-        <h3 className="text-base font-bold text-gray-900 leading-tight line-clamp-1">
+        <h3 className="text-base font-bold text-gray-900 dark:text-zinc-100 leading-tight line-clamp-1">
           {playground.name}
         </h3>
         {playground.description && (
-          <p className="text-[11px] text-gray-500 line-clamp-2 min-h-[1.5rem]">
+          <p className="text-[11px] text-gray-500 dark:text-zinc-400 line-clamp-2 min-h-[1.5rem]">
             {playground.description}
           </p>
         )}
       </div>
 
-      <div className="px-3 pb-3 pt-0 flex items-center justify-end border-t border-gray-100 mt-auto">
+      <div className="px-3 pb-3 pt-0 flex items-center justify-end border-t border-gray-100 dark:border-dk-line mt-auto">
         <Link
           href={`/editor/playground/${playground.playground_uuid}/edit`}
-          className="pt-2 flex items-center gap-1 text-[10px] font-bold text-gray-400 hover:text-gray-900 transition-colors uppercase tracking-wider"
+          className="pt-2 flex items-center gap-1 text-[10px] font-bold text-gray-400 dark:text-zinc-400 hover:text-gray-900 dark:hover:text-zinc-100 transition-colors uppercase tracking-wider"
           onClick={(e) => e.stopPropagation()}
         >
           <Pencil size={12} />

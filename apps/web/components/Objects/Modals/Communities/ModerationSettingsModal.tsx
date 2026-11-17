@@ -134,7 +134,7 @@ export function ModerationSettingsModal({
 
           {/* Add word input */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-dk-fg-1 mb-2">
               Add blocked word
             </label>
             <div className="flex gap-2">
@@ -148,7 +148,7 @@ export function ModerationSettingsModal({
                 }}
                 onKeyDown={handleKeyDown}
                 placeholder="Enter a word or phrase..."
-                className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-black/20 focus:border-transparent outline-none text-sm"
+                className="flex-1 px-3 py-2 border border-gray-200 dark:border-dk-line-strong rounded-lg focus:ring-2 focus:ring-black/20 focus:border-transparent outline-none text-sm"
               />
               <button
                 type="button"
@@ -167,29 +167,29 @@ export function ModerationSettingsModal({
 
           {/* Words list */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-dk-fg-1 mb-2">
               Blocked words ({words.length})
             </label>
             {words.length === 0 ? (
-              <div className="py-8 text-center border border-dashed border-gray-200 rounded-lg">
-                <Shield size={24} className="mx-auto text-gray-300 mb-2" />
-                <p className="text-sm text-gray-500">No blocked words yet</p>
-                <p className="text-xs text-gray-400 mt-1">
+              <div className="py-8 text-center border border-dashed border-gray-200 dark:border-dk-line-strong rounded-lg">
+                <Shield size={24} className="mx-auto text-gray-300 dark:text-zinc-600 mb-2" />
+                <p className="text-sm text-gray-500 dark:text-dk-fg-3">No blocked words yet</p>
+                <p className="text-xs text-gray-400 dark:text-dk-fg-3 mt-1">
                   Add words above to enable content moderation
                 </p>
               </div>
             ) : (
-              <div className="max-h-[200px] overflow-y-auto border border-gray-200 rounded-lg divide-y divide-gray-100">
+              <div className="max-h-[200px] overflow-y-auto border border-gray-200 dark:border-dk-line-strong rounded-lg divide-y divide-gray-100 dark:divide-dk-line">
                 {words.map((word, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between px-3 py-2 hover:bg-gray-50 group"
+                    className="flex items-center justify-between px-3 py-2 hover:bg-gray-50 dark:hover:bg-dk-raised group"
                   >
-                    <span className="text-sm text-gray-700 font-mono">{word}</span>
+                    <span className="text-sm text-gray-700 dark:text-dk-fg-1 font-mono">{word}</span>
                     <button
                       type="button"
                       onClick={() => handleRemoveWord(word)}
-                      className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100"
+                      className="p-1 text-gray-400 dark:text-dk-fg-3 hover:text-red-500 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -201,11 +201,11 @@ export function ModerationSettingsModal({
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+        <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-dk-line">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-dk-fg-1 hover:bg-gray-100 dark:hover:bg-dk-raised rounded-lg transition-colors"
           >
             Cancel
           </button>

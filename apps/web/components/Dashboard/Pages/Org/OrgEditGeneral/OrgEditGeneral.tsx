@@ -122,7 +122,7 @@ const OrgEditGeneral: React.FC = () => {
                       isActiveSaving
                         ? 'bg-brand text-brand-fg border-brand opacity-50 cursor-not-allowed'
                         : isSaved
-                          ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                          ? 'bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong cursor-default'
                           : 'bg-brand text-brand-fg border-brand hover:bg-brand-hover cursor-pointer'
                     }`}
                   >
@@ -145,8 +145,8 @@ const OrgEditGeneral: React.FC = () => {
               </div>
 
               {/* ===== Card 1: Basic Information ===== */}
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 overflow-visible">
-                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+              <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6 overflow-visible">
+                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
                   {t('dashboard.organization.settings.title')}
                 </h3>
                 <div className="space-y-4">
@@ -230,7 +230,7 @@ const LanguageSection: React.FC<{
   const currentLang = AVAILABLE_LANGUAGES.find((l) => l.code === value)
 
   return (
-    <div className="bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
+    <div className="bg-gray-50 dark:bg-dk-inset/40 rounded-xl overflow-hidden border border-gray-100 dark:border-dk-line">
       {/* Header - clickable to expand/collapse */}
       <button
         type="button"
@@ -238,10 +238,10 @@ const LanguageSection: React.FC<{
         className="w-full flex items-center justify-between px-4 py-3 text-start hover:bg-gray-100/50 transition-colors"
       >
         <div className="flex items-center gap-2.5">
-          <Globe className="w-4 h-4 text-gray-500 flex-shrink-0" />
-          <span className="text-sm font-semibold text-gray-800">
+          <Globe className="w-4 h-4 text-gray-500 dark:text-zinc-400 flex-shrink-0" />
+          <span className="text-sm font-semibold text-gray-800 dark:text-zinc-200">
             {currentLang ? (
-              <><span className="font-mono text-gray-400 me-1.5">{currentLang.code.toUpperCase()}</span>{currentLang.nativeName}</>
+              <><span className="font-mono text-gray-400 dark:text-zinc-400 me-1.5">{currentLang.code.toUpperCase()}</span>{currentLang.nativeName}</>
             ) : (
               t('dashboard.organization.settings.default_language')
             )}
@@ -249,7 +249,7 @@ const LanguageSection: React.FC<{
         </div>
         <ChevronRight
           size={16}
-          className={`text-gray-400 transition-transform duration-200 ${
+          className={`text-gray-400 dark:text-zinc-400 transition-transform duration-200 ${
             isExpanded ? 'rotate-90' : ''
           }`}
         />
@@ -270,16 +270,16 @@ const LanguageSection: React.FC<{
                   <div
                     key={lang.code}
                     onClick={() => { onChange(lang.code); setIsExpanded(false) }}
-                    className={`relative flex cursor-pointer items-center rounded-md py-2 ps-3 pe-8 text-sm hover:bg-gray-100 transition-colors ${
-                      isSelected ? 'bg-gray-100 font-medium' : ''
+                    className={`relative flex cursor-pointer items-center rounded-md py-2 ps-3 pe-8 text-sm hover:bg-gray-100 dark:hover:bg-dk-raised transition-colors ${
+                      isSelected ? 'bg-gray-100 dark:bg-dk-inset font-medium' : ''
                     }`}
                   >
-                    <span className="text-xs text-gray-700">
-                      <span className="font-mono text-gray-400 me-1.5">{lang.code.toUpperCase()}</span>
+                    <span className="text-xs text-gray-700 dark:text-zinc-200">
+                      <span className="font-mono text-gray-400 dark:text-zinc-400 me-1.5">{lang.code.toUpperCase()}</span>
                       {lang.nativeName}
                     </span>
                     {isSelected && (
-                      <span className="absolute end-2 text-gray-600">
+                      <span className="absolute end-2 text-gray-600 dark:text-zinc-300">
                         <Check size={14} strokeWidth={2.5} />
                       </span>
                     )}

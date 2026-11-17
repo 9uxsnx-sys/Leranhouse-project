@@ -22,15 +22,15 @@ export default function CheckEmailState({
 
   return (
     <div className="text-center py-2">
-      <div className="mx-auto w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-        <Check size={22} className="text-gray-800" />
+      <div className="mx-auto w-12 h-12 rounded-full bg-gray-100 dark:bg-dk-inset flex items-center justify-center">
+        <Check size={22} className="text-gray-800 dark:text-zinc-200" />
       </div>
-      <h2 className="mt-4 text-base font-semibold text-gray-900">
+      <h2 className="mt-4 text-base font-semibold text-gray-900 dark:text-zinc-100">
         {t('auth.check_email_title')}
       </h2>
-      <p className="mt-1.5 text-sm text-gray-500">
+      <p className="mt-1.5 text-sm text-gray-500 dark:text-zinc-400">
         {message}{' '}
-        <span className="text-gray-700">{email || t('auth.your_inbox')}</span>.
+        <span className="text-gray-700 dark:text-zinc-200">{email || t('auth.your_inbox')}</span>.
       </p>
 
       <div className="mt-6 flex flex-col items-center gap-3">

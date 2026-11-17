@@ -269,7 +269,7 @@ const CollectionClient = ({
   return (
     <GeneralWrapperStyled>
       {/* ── HERO BANNER ── */}
-      <div className="relative w-full mx-auto max-w-7xl aspect-[3/1] rounded-xl overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-gray-100 ring-1 ring-inset ring-black/5">
+      <div className="relative w-full mx-auto max-w-7xl aspect-[3/1] rounded-xl overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-gray-100 ring-1 ring-inset ring-black/5 dark:ring-white/10">
         {heroImage ? (
           <img
             src={heroImage}
@@ -279,10 +279,10 @@ const CollectionClient = ({
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500/5 via-white to-indigo-500/10">
             <div className="text-center">
-              <div className="w-20 h-20 rounded-2xl bg-white shadow-sm ring-1 ring-black/5 flex items-center justify-center mx-auto">
+              <div className="w-20 h-20 rounded-2xl bg-white dark:bg-dk-card shadow-sm ring-1 ring-black/5 dark:ring-white/10 flex items-center justify-center mx-auto">
                 <Layers className="w-10 h-10 text-indigo-400" />
               </div>
-              <Text size="small" className="text-gray-400 mt-3">
+              <Text size="small" className="text-gray-400 dark:text-dk-fg-3 mt-3">
                 {t('collections.collection')}
               </Text>
             </div>
@@ -481,8 +481,8 @@ const CollectionClient = ({
           {/* ═══════════════ RIGHT SIDEBAR ═══════════════ */}
           <div className="w-full lg:w-72 xl:w-80 shrink-0">
             <div className="lg:sticky lg:top-8 space-y-4">
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-4">
+              <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-4">
                   {isOwned
                     ? t('collections.owned_title')
                     : t('collections.get_access')}
@@ -516,9 +516,9 @@ const CollectionClient = ({
                 ) : (
                   <>
                     {isPaid && price !== null && price > 0 && (
-                      <p className="text-2xl font-semibold text-gray-900 mb-4">
+                      <p className="text-2xl font-semibold text-gray-900 dark:text-dk-fg-1 mb-4">
                         {price.toLocaleString()}{' '}
-                        <span className="text-sm font-normal text-gray-500">DZD</span>
+                        <span className="text-sm font-normal text-gray-500 dark:text-dk-fg-3">DZD</span>
                       </p>
                     )}
                     <Button
@@ -541,14 +541,14 @@ const CollectionClient = ({
                 )}
               </div>
 
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+              <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
                   {t('collections.bundle_includes')}
                 </h3>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
-                    <Layers size={16} className="text-gray-400 shrink-0" />
-                    <span className="text-sm text-gray-600">
+                    <Layers size={16} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
+                    <span className="text-sm text-gray-600 dark:text-dk-fg-2">
                       {t('collections.dashboard.content.item_count', {
                         count: members.length,
                       })}
@@ -556,30 +556,30 @@ const CollectionClient = ({
                   </div>
                   {totalLessons > 0 && (
                     <div className="flex items-center gap-3">
-                      <BookOpen size={16} className="text-gray-400 shrink-0" />
-                      <span className="text-sm text-gray-600">
+                      <BookOpen size={16} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
+                      <span className="text-sm text-gray-600 dark:text-dk-fg-2">
                         {totalLessons} {t('collections.lessons')}
                       </span>
                     </div>
                   )}
                   {totalEpisodes > 0 && (
                     <div className="flex items-center gap-3">
-                      <Mic size={16} className="text-gray-400 shrink-0" />
-                      <span className="text-sm text-gray-600">
+                      <Mic size={16} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
+                      <span className="text-sm text-gray-600 dark:text-dk-fg-2">
                         {totalEpisodes} {t('collections.episodes')}
                       </span>
                     </div>
                   )}
                   <div className="flex items-center gap-3">
-                    <Clock size={16} className="text-gray-400 shrink-0" />
-                    <span className="text-sm text-gray-600">
+                    <Clock size={16} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
+                    <span className="text-sm text-gray-600 dark:text-dk-fg-2">
                       {stats.duration || t('collections.self_paced')}
                     </span>
                   </div>
                   {stats.hasCertificate && (
                     <div className="flex items-center gap-3">
-                      <Award size={16} className="text-gray-400 shrink-0" />
-                      <span className="text-sm text-gray-600">
+                      <Award size={16} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
+                      <span className="text-sm text-gray-600 dark:text-dk-fg-2">
                         {t('collections.certificate')}
                       </span>
                     </div>
@@ -587,20 +587,20 @@ const CollectionClient = ({
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">{t('course.page.community_title')}</h3>
-                <p className="text-sm text-gray-600">
+              <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('course.page.community_title')}</h3>
+                <p className="text-sm text-gray-600 dark:text-dk-fg-2">
                   {t('course.page.community_description')}
                 </p>
               </div>
 
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+              <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
                   {t('collections.updates')}
                 </h3>
                 <div className="flex items-center gap-3">
-                  <RefreshCw size={16} className="text-gray-400 shrink-0" />
-                  <span className="text-sm text-gray-600">
+                  <RefreshCw size={16} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
+                  <span className="text-sm text-gray-600 dark:text-dk-fg-2">
                     {t('collections.last_updated', {
                       date: collection.update_date
                         ? new Date(collection.update_date).toLocaleDateString(i18n.language, {

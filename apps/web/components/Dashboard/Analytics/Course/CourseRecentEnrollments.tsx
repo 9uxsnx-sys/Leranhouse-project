@@ -27,7 +27,7 @@ function EnrollmentRow({
     : ''
 
   return (
-    <div className="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-gray-50">
+    <div className="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-gray-50 dark:hover:bg-dk-raised/60">
       <UserAvatar
         border="border-2"
         rounded="rounded-full"
@@ -36,7 +36,7 @@ function EnrollmentRow({
         width={compact ? 24 : 32}
       />
       <div className="flex-1 min-w-0">
-        <p className={`${compact ? 'text-xs' : 'text-sm'} font-medium text-gray-900 truncate`}>{name}</p>
+        <p className={`${compact ? 'text-xs' : 'text-sm'} font-medium text-gray-900 truncate dark:text-zinc-100`}>{name}</p>
         {!compact && user?.email && (
           <p className="text-xs text-gray-400 truncate">{user.email}</p>
         )}
@@ -106,7 +106,7 @@ export default function CourseRecentEnrollments({
       ) : (
         <div className="h-40">
           <div className="flex items-baseline gap-2 mb-2">
-            <span className="text-2xl font-bold text-gray-900">
+            <span className="text-2xl font-bold text-gray-900 dark:text-zinc-100">
               <AnimatedNumber value={rows.length} />
             </span>
             <span className="text-xs text-gray-400">{t('analytics.course_analytics.units.recent_enrollments')}</span>

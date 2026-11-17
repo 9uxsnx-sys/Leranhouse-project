@@ -56,7 +56,7 @@ function AssignmentTaskEditor({ page }: any) {
                         top of the editor panel. No sticky/overflow here — the
                         surrounding page's tabs bar shadow renders cleanly
                         above it. */}
-                    <div className='flex flex-col bg-white px-10 text-sm tracking-tight z-10 nice-shadow pt-5 mb-3 relative flex-none'>
+                    <div className='flex flex-col bg-white dark:bg-dk-card px-10 text-sm tracking-tight z-10 nice-shadow pt-5 mb-3 relative flex-none'>
                         <div className='flex py-1 justify-between items-center'>
                             <div className='font-semibold text-lg '>
                                 {assignmentTaskState?.assignmentTask.title}
@@ -102,7 +102,7 @@ function AssignmentTaskEditor({ page }: any) {
                         child to shrink below its content size so the
                         overflow kicks in correctly. */}
                     <div className='flex-1 min-h-0 overflow-y-auto pb-10'>
-                        <div className='mx-10 mt-10 bg-white rounded-xl shadow-xs px-6 py-5 nice-shadow'>
+                        <div className='mx-10 mt-10 bg-white dark:bg-dk-card rounded-xl shadow-xs px-6 py-5 nice-shadow'>
                             {selectedSubPage === 'general' && <AssignmentTaskGeneralEdit />}
                             {selectedSubPage === 'content' && <AssignmentTaskContentEdit />}
                         </div>
@@ -110,8 +110,8 @@ function AssignmentTaskEditor({ page }: any) {
                 </>
             )}
             {Object.keys(assignmentTaskState.assignmentTask).length == 0 && (
-                <div className='flex flex-col h-full bg-white px-10 text-sm tracking-tight z-10 nice-shadow pt-5 relative'>
-                    <div className='flex justify-center items-center h-full text-gray-300 antialiased'>
+                <div className='flex flex-col h-full bg-white dark:bg-dk-card px-10 text-sm tracking-tight z-10 nice-shadow pt-5 relative'>
+                    <div className='flex justify-center items-center h-full text-gray-300 dark:text-zinc-600 antialiased'>
                         <div className='flex flex-col space-y-2 items-center'>
                             <TentTree size={60} />
                             <div className='font-semibold text-2xl py-1'>

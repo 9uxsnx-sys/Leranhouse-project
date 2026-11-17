@@ -218,7 +218,7 @@ function ChapterElement(props: ChapterElementProps) {
     >
       {(provided, snapshot) => (
         <div
-          className={`mx-2 sm:mx-4 md:mx-6 lg:mx-10 bg-white rounded-xl nice-shadow px-3 sm:px-4 md:px-6 pt-4 sm:pt-6 ${
+          className={`mx-2 sm:mx-4 md:mx-6 lg:mx-10 bg-white dark:bg-dk-card rounded-xl nice-shadow px-3 sm:px-4 md:px-6 pt-4 sm:pt-6 ${
             snapshot.isDragging ? 'shadow-xl ring-2 ring-blue-500/20 rotate-1' : ''
           }`}
           key={props.chapter.chapter_uuid}
@@ -228,19 +228,19 @@ function ChapterElement(props: ChapterElementProps) {
         >
           <div className="flex flex-wrap items-center justify-between pb-3">
             <div className="flex grow items-center space-x-2 mb-2 sm:mb-0">
-              <div className="bg-neutral-100 rounded-md p-2">
+              <div className="bg-neutral-100 rounded-md p-2 dark:bg-dk-inset">
                 <Hexagon
                   strokeWidth={3}
                   size={16}
-                  className="text-neutral-600"
+                  className="text-neutral-600 dark:text-zinc-300"
                 />
               </div>
               <div className="flex items-center space-x-2">
                 {selectedChapter === props.chapter.id ? (
-                  <div className="chapter-modification-zone bg-neutral-100 py-1 px-2 sm:px-4 rounded-lg flex items-center space-x-2">
+                  <div className="chapter-modification-zone bg-neutral-100 py-1 px-2 sm:px-4 rounded-lg flex items-center space-x-2 dark:bg-dk-inset">
                     <input
                       type="text"
-                      className="bg-transparent outline-hidden text-sm text-neutral-700 w-full max-w-[150px] sm:max-w-none"
+                      className="bg-transparent outline-hidden text-sm text-neutral-700 w-full max-w-[150px] sm:max-w-none dark:text-zinc-200"
                       placeholder={t('dashboard.courses.structure.chapter_element.chapter_name_placeholder')}
                       value={
                         modifiedChapter
@@ -256,20 +256,20 @@ function ChapterElement(props: ChapterElementProps) {
                     />
                     <button
                       onClick={() => updateChapterName(props.chapter.id)}
-                      className="bg-transparent text-neutral-700 hover:cursor-pointer hover:text-neutral-900"
+                      className="bg-transparent text-neutral-700 hover:cursor-pointer hover:text-neutral-900 dark:text-zinc-200"
                     >
                       <ConceptIcon.save size={15} />
                     </button>
                   </div>
                 ) : (
-                  <p className="text-neutral-700 first-letter:uppercase text-sm sm:text-base">
+                  <p className="text-neutral-700 first-letter:uppercase text-sm sm:text-base dark:text-zinc-200">
                     {props.chapter.name}
                   </p>
                 )}
                 <Pencil
                   size={15}
                   onClick={() => setSelectedChapter(props.chapter.id)}
-                  className="text-neutral-600 hover:cursor-pointer"
+                  className="text-neutral-600 hover:cursor-pointer dark:text-zinc-300"
                 />
               </div>
             </div>
@@ -282,7 +282,7 @@ function ChapterElement(props: ChapterElementProps) {
                 removeUserGroup={removeChapterUserGroup}
                 resourceNoun="chapter"
               />
-              <MoreVertical size={15} className="text-gray-300" />
+              <MoreVertical size={15} className="text-gray-300 dark:text-zinc-600" />
               <ConfirmationModal
                 confirmationButtonText={t('dashboard.courses.structure.modals.delete_chapter.button')}
                 confirmationMessage={t('dashboard.courses.structure.modals.delete_chapter.message')}
@@ -309,7 +309,7 @@ function ChapterElement(props: ChapterElementProps) {
                 className={`h-5 w-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
                   allSelected
                     ? 'bg-zinc-800 border-zinc-800 text-white'
-                    : 'border-gray-300 bg-white hover:border-gray-400'
+                    : 'border-gray-300 dark:border-dk-line-strong bg-white dark:bg-dk-card hover:border-gray-400'
                 }`}
               >
                 {allSelected && <Check size={12} strokeWidth={3} />}
@@ -331,7 +331,7 @@ function ChapterElement(props: ChapterElementProps) {
                   </button>
                   <button
                     onClick={() => bulkUpdatePublished(false)}
-                    className="h-7 px-2.5 rounded-md text-xs font-bold flex items-center gap-1 bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200 transition-colors"
+                    className="h-7 px-2.5 rounded-md text-xs font-bold flex items-center gap-1 bg-gray-50 dark:bg-dk-inset text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-dk-raised border border-gray-200 dark:border-dk-line-strong transition-colors"
                   >
                     <Lock size={12} />
                     <span className="hidden sm:inline">{t('dashboard.courses.structure.actions.unpublish')}</span>
@@ -396,7 +396,7 @@ function ChapterElement(props: ChapterElementProps) {
           />
           <div className="h-6">
             <div className="flex items-center">
-              <MoreHorizontal size={19} className="text-gray-300 mx-auto" />
+              <MoreHorizontal size={19} className="text-gray-300 dark:text-zinc-600 mx-auto" />
             </div>
           </div>
         </div>

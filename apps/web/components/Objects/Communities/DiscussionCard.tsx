@@ -112,22 +112,22 @@ function ReplyItem({ reply, replyName, replyTime }: {
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
-          <span className="text-sm font-semibold text-gray-900">{replyName}</span>
-          <span className="text-xs text-gray-400">·</span>
-          <span className="text-xs text-gray-400">{replyTime}</span>
+          <span className="text-sm font-semibold text-gray-900 dark:text-dk-fg-1">{replyName}</span>
+          <span className="text-xs text-gray-400 dark:text-dk-fg-3">·</span>
+          <span className="text-xs text-gray-400 dark:text-dk-fg-3">{replyTime}</span>
         </div>
         <div className="relative">
           <p
             ref={replyContentRef}
             dir="auto"
-            className={`text-sm text-gray-500 mt-0.5 whitespace-pre-wrap ${!replyExpanded && replyNeedsTruncation ? 'line-clamp-2' : ''}`}
+            className={`text-sm text-gray-500 dark:text-dk-fg-3 mt-0.5 whitespace-pre-wrap ${!replyExpanded && replyNeedsTruncation ? 'line-clamp-2' : ''}`}
           >
             {reply.content}
           </p>
           {replyNeedsTruncation && (
             <button
               onClick={() => setReplyExpanded(!replyExpanded)}
-              className="text-sm font-semibold tracking-wide text-gray-500 hover:text-gray-700 transition-colors mt-0.5"
+              className="text-sm font-semibold tracking-wide text-gray-500 dark:text-dk-fg-3 hover:text-gray-700 dark:hover:text-dk-fg-1 transition-colors mt-0.5"
             >
               {replyExpanded ? t('common.see_less') : t('common.see_more')}
             </button>
@@ -310,14 +310,14 @@ export function DiscussionCard({
     <div
       dir="ltr"
       onClick={isSelectMode ? handleClick : undefined}
-      className={`relative flex h-fit w-full flex-col gap-3 overflow-hidden rounded-2xl border bg-white shadow-sm transition-colors p-6 ${
+      className={`relative flex h-fit w-full flex-col gap-3 overflow-hidden rounded-2xl border bg-white dark:bg-dk-card shadow-sm transition-colors p-6 ${
         isSelectMode ? 'cursor-pointer' : ''
       } ${
         isSelected
           ? 'border-indigo-300 bg-indigo-50/50'
           : discussion.is_pinned
           ? 'border-amber-200 bg-amber-50/30'
-          : 'border-gray-100'
+          : 'border-gray-100 dark:border-dk-line'
       }`}
     >
       {/* Header row: Avatar + Name + Time on left, Label on right */}
@@ -330,7 +330,7 @@ export function DiscussionCard({
                 className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
                   isSelected
                     ? 'bg-zinc-800 border-zinc-800'
-                    : 'border-gray-300 bg-white'
+                    : 'border-gray-300 dark:border-dk-line-strong bg-white dark:bg-dk-card'
                 }`}
               >
                 {isSelected && (
@@ -359,24 +359,24 @@ export function DiscussionCard({
 
           {/* Name + time inline */}
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className="text-[15px] font-semibold text-gray-900 truncate">{authorName}</span>
-            <span className="text-xs text-gray-300 shrink-0">·</span>
-            <span className="text-xs text-gray-400 whitespace-nowrap shrink-0">{timeAgo}</span>
+            <span className="text-[15px] font-semibold text-gray-900 dark:text-dk-fg-1 truncate">{authorName}</span>
+            <span className="text-xs text-gray-300 dark:text-zinc-600 shrink-0">·</span>
+            <span className="text-xs text-gray-400 dark:text-dk-fg-3 whitespace-nowrap shrink-0">{timeAgo}</span>
             {/* Pinned/Locked indicators */}
             {discussion.is_pinned && <Pin size={14} className="text-amber-500 shrink-0" />}
-            {discussion.is_locked && <Lock size={14} className="text-gray-400 shrink-0" />}
+            {discussion.is_locked && <Lock size={14} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />}
           </div>
         </div>
 
         {/* Label badge */}
         <span
           className={`inline-flex items-center gap-x-0.5 border box-border rounded-md h-5 px-1.5 text-[11px] font-medium flex-shrink-0 ${
-            labelInfo.id === 'general' ? 'bg-gray-100 text-gray-700 border-gray-200' :
+            labelInfo.id === 'general' ? 'bg-gray-100 dark:bg-dk-inset text-gray-700 dark:text-dk-fg-1 border-gray-200 dark:border-dk-line-strong' :
             labelInfo.id === 'question' ? 'bg-amber-50 text-amber-700 border-amber-200' :
             labelInfo.id === 'idea' ? 'bg-purple-50 text-purple-700 border-purple-200' :
             labelInfo.id === 'announcement' ? 'bg-blue-50 text-blue-700 border-blue-200' :
             labelInfo.id === 'showcase' ? 'bg-green-50 text-green-700 border-green-200' :
-            'bg-gray-100 text-gray-700 border-gray-200'
+            'bg-gray-100 dark:bg-dk-inset text-gray-700 dark:text-dk-fg-1 border-gray-200 dark:border-dk-line-strong'
           }`}
         >
           {t(`communities.labels.${discussion.label || 'general'}`)}
@@ -385,14 +385,14 @@ export function DiscussionCard({
 
       {/* Title */}
       <div>
-        <h3 dir="auto" className="text-[17px] font-semibold text-gray-900 leading-snug">
+        <h3 dir="auto" className="text-[17px] font-semibold text-gray-900 dark:text-dk-fg-1 leading-snug">
           {discussion.title}
         </h3>
       </div>
 
       {/* Content preview — inline Instagram-style expand */}
       {contentText && (
-        <div className="relative text-sm text-gray-500 leading-relaxed">
+        <div className="relative text-sm text-gray-500 dark:text-dk-fg-3 leading-relaxed">
           {/* Truncated preview — fades out when expanded */}
           {needsTruncation && (
             <div
@@ -409,7 +409,7 @@ export function DiscussionCard({
                 </span>
                 <button
                   onClick={(e) => { e.stopPropagation(); setIsExpanded(true); }}
-                  className="inline text-sm font-semibold tracking-wide text-gray-500 hover:text-gray-700"
+                  className="inline text-sm font-semibold tracking-wide text-gray-500 dark:text-dk-fg-3 hover:text-gray-700 dark:hover:text-dk-fg-1"
                 >
                   {t('common.see_more')}
                 </button>
@@ -431,7 +431,7 @@ export function DiscussionCard({
                     {' '}
                     <button
                       onClick={(e) => { e.stopPropagation(); setIsExpanded(false); }}
-                      className="inline ms-1.5 text-sm font-semibold tracking-wide text-gray-500 hover:text-gray-700"
+                      className="inline ms-1.5 text-sm font-semibold tracking-wide text-gray-500 dark:text-dk-fg-3 hover:text-gray-700 dark:hover:text-dk-fg-1"
                     >
                       {t('common.see_less')}
                     </button>
@@ -466,7 +466,7 @@ export function DiscussionCard({
             />
             <button
               onClick={handleReplyToggle}
-              className="flex items-center gap-1.5 text-gray-400 hover:text-indigo-500 transition-colors"
+              className="flex items-center gap-1.5 text-gray-400 dark:text-dk-fg-3 hover:text-indigo-500 transition-colors"
             >
               <MessageCircle size={15} />
               <span className="text-xs">{replies.length || commentCount}</span>
@@ -478,18 +478,18 @@ export function DiscussionCard({
                 <>
                   <button
                     onClick={() => setShowAllReplies(!showAllReplies)}
-                    className="text-sm font-semibold tracking-wide text-gray-500 hover:text-gray-700 transition-colors"
+                    className="text-sm font-semibold tracking-wide text-gray-500 dark:text-dk-fg-3 hover:text-gray-700 dark:hover:text-dk-fg-1 transition-colors"
                   >
                     {showAllReplies
                       ? t('common.show_less')
                       : `${t('common.see_more')} (${replies.length - 3})`}
                   </button>
-                  <span className="text-gray-300 text-xs">|</span>
+                  <span className="text-gray-300 dark:text-zinc-600 text-xs">|</span>
                 </>
               )}
               <button
                 onClick={() => { setIsRepliesExpanded(false); setShowAllReplies(false); }}
-                className="text-sm font-semibold tracking-wide text-gray-500 hover:text-gray-700 transition-colors"
+                className="text-sm font-semibold tracking-wide text-gray-500 dark:text-dk-fg-3 hover:text-gray-700 dark:hover:text-dk-fg-1 transition-colors"
               >
                 {t('common.close')}
               </button>
@@ -500,7 +500,7 @@ export function DiscussionCard({
 
       {/* Select mode: show upvote count */}
       {isSelectMode && (
-        <div className="flex items-center gap-1 text-gray-400">
+        <div className="flex items-center gap-1 text-gray-400 dark:text-dk-fg-3">
           <span className="text-xs">{discussion.upvote_count} {tCard('communities.discussion_card.votes')}</span>
         </div>
       )}
@@ -516,10 +516,10 @@ export function DiscussionCard({
             {/* Replies list */}
             {isLoadingReplies ? (
               <div className="flex items-center justify-center py-4 transition-opacity duration-200">
-                <Loader2 size={16} className="animate-spin text-gray-400" />
+                <Loader2 size={16} className="animate-spin text-gray-400 dark:text-dk-fg-3" />
               </div>
             ) : replies.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-2">{tCard('communities.comments.no_replies')}</p>
+              <p className="text-sm text-gray-400 dark:text-dk-fg-3 text-center py-2">{tCard('communities.comments.no_replies')}</p>
             ) : (
               <>
                 {/* First 3 replies always visible */}
@@ -610,12 +610,12 @@ export function DiscussionCard({
                     }}
                     rows={1}
                     placeholder={tCard('communities.comments.write_reply')}
-                    className="flex-1 text-sm bg-gray-50/80 border-0 ring-1 ring-inset ring-gray-200 rounded-lg px-3 py-[7px] outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-gray-300 transition-all resize-none overflow-hidden"
+                    className="flex-1 text-sm bg-gray-50/80 border-0 ring-1 ring-inset ring-gray-200 rounded-lg px-3 py-[7px] outline-none placeholder:text-gray-400 dark:placeholder:text-dk-fg-4 focus:ring-2 focus:ring-gray-300 transition-all resize-none overflow-hidden"
                   />
                   <button
                     onClick={handleSendReply}
                     disabled={!replyText.trim() || isSendingReply}
-                    className="p-[9px] rounded-lg bg-gray-50/80 border-0 ring-1 ring-inset ring-gray-200 hover:bg-gray-100 text-gray-500 hover:text-gray-700 disabled:opacity-40 transition-all"
+                    className="p-[9px] rounded-lg bg-gray-50/80 border-0 ring-1 ring-inset ring-gray-200 hover:bg-gray-100 dark:hover:bg-dk-raised text-gray-500 dark:text-dk-fg-3 hover:text-gray-700 dark:hover:text-dk-fg-1 disabled:opacity-40 transition-all"
                   >
                     {isSendingReply ? (
                       <Loader2 size={16} className="animate-spin" />

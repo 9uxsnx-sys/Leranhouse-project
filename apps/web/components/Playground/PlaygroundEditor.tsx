@@ -271,8 +271,8 @@ export default function PlaygroundEditor({
         <div className="flex-1 flex items-center gap-1.5 min-w-0 group">
           <div className={`flex-1 flex items-center gap-1.5 px-2 py-1 rounded-lg transition-all min-w-0 ${
             titleFocused
-              ? 'bg-gray-100 ring-1 ring-gray-300'
-              : 'hover:bg-gray-50'
+              ? 'bg-gray-100 dark:bg-dk-inset ring-1 ring-gray-300'
+              : 'hover:bg-gray-50 dark:hover:bg-dk-raised'
           }`}>
             <input
               ref={titleInputRef}
@@ -282,14 +282,14 @@ export default function PlaygroundEditor({
               onFocus={() => setTitleFocused(true)}
               onBlur={handleTitleBlur}
               onKeyDown={(e) => { if (e.key === 'Enter') titleInputRef.current?.blur() }}
-              className="flex-1 text-sm font-semibold text-gray-800 bg-transparent border-0 outline-none focus:ring-0 min-w-0"
+              className="flex-1 text-sm font-semibold text-gray-800 dark:text-zinc-200 bg-transparent border-0 outline-none focus:ring-0 min-w-0"
               placeholder="Playground title"
             />
             {!titleFocused && !isSavingTitle && (
               <PencilSimple
                 size={11}
                 weight="bold"
-                className="text-gray-300 group-hover:text-gray-400 flex-shrink-0 transition-colors cursor-pointer"
+                className="text-gray-300 dark:text-zinc-600 group-hover:text-gray-400 flex-shrink-0 transition-colors cursor-pointer"
                 onClick={() => titleInputRef.current?.focus()}
               />
             )}
@@ -297,7 +297,7 @@ export default function PlaygroundEditor({
 
           {/* Title status indicators */}
           {isSavingTitle && (
-            <CircleNotch size={12} weight="bold" className="animate-spin text-gray-400 flex-shrink-0" />
+            <CircleNotch size={12} weight="bold" className="animate-spin text-gray-400 dark:text-zinc-400 flex-shrink-0" />
           )}
           {titleSaveStatus === 'saved' && !isSavingTitle && (
             <span className="flex items-center gap-0.5 text-[10px] font-semibold text-green-500 flex-shrink-0">

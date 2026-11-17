@@ -179,24 +179,24 @@ const PodcastMediaSection: React.FC = () => {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-      <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+    <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+      <h2 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
         {t('common.sections.media')}
       </h2>
 
       <div className="space-y-3">
         {/* ════════ Podcast Card Cover ════════ */}
-        <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50">
+        <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-gray-50/50 dark:bg-dk-inset/40">
           <div className="flex-shrink-0">
-            <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
+            <ImageIcon size={24} className="text-gray-400 dark:text-zinc-400" strokeWidth={1.5} />
           </div>
 
           <div className="flex-1">
-            <p className="text-sm font-medium text-gray-700">{t('podcasts.dashboard.media.podcast_card_cover')}</p>
+            <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('podcasts.dashboard.media.podcast_card_cover')}</p>
           </div>
 
           {isCoverLoading ? (
-            <div className="w-[18px] h-[18px] border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+            <div className="w-[18px] h-[18px] border-2 border-gray-300 dark:border-dk-line-strong border-t-gray-600 rounded-full animate-spin" />
           ) : (
             <>
               <input
@@ -219,7 +219,7 @@ const PodcastMediaSection: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => coverInputRef.current?.click()}
-                  className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                  className="flex items-center justify-center text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
                   title={t('podcasts.dashboard.media.upload_cover')}
                 >
                   <UploadCloud size={18} />
@@ -230,17 +230,17 @@ const PodcastMediaSection: React.FC = () => {
         </div>
 
         {/* ════════ Podcast Banner Image ════════ */}
-        <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50/50">
+        <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-gray-50/50 dark:bg-dk-inset/40">
           <div className="flex-shrink-0">
-            <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
+            <ImageIcon size={24} className="text-gray-400 dark:text-zinc-400" strokeWidth={1.5} />
           </div>
 
           <div className="flex-1">
-            <p className="text-sm font-medium text-gray-700">{t('podcasts.dashboard.media.podcast_banner_image')}</p>
+            <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('podcasts.dashboard.media.podcast_banner_image')}</p>
           </div>
 
           {isBannerLoading ? (
-            <div className="w-[18px] h-[18px] border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+            <div className="w-[18px] h-[18px] border-2 border-gray-300 dark:border-dk-line-strong border-t-gray-600 rounded-full animate-spin" />
           ) : (
             <>
               <input
@@ -263,7 +263,7 @@ const PodcastMediaSection: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => bannerInputRef.current?.click()}
-                  className="flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                  className="flex items-center justify-center text-gray-400 dark:text-zinc-400 hover:text-gray-600 dark:hover:text-zinc-200 transition-colors cursor-pointer"
                   title={t('podcasts.dashboard.media.upload_banner')}
                 >
                   <UploadCloud size={18} />

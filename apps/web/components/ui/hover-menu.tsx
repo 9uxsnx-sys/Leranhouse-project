@@ -133,7 +133,7 @@ const HoverMenuContent = React.forwardRef<HTMLDivElement, HoverMenuContentProps>
       <div
         ref={ref}
         className={cn(
-          "min-w-[220px] rounded-xl bg-white border border-gray-100 shadow-sm p-1.5",
+          "min-w-[220px] rounded-xl bg-white dark:bg-dk-raised border border-gray-100 dark:border-dk-line shadow-sm p-1.5",
           className
         )}
       >

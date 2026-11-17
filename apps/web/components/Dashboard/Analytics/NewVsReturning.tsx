@@ -27,8 +27,8 @@ export default function NewVsReturning({ days = '30' }: { days?: string }) {
   }))
 
   return (
-    <div className="bg-white rounded-xl nice-shadow p-5 min-h-[300px] overflow-hidden min-w-0">
-      <h3 className="text-sm font-semibold text-gray-700 mb-1">{t('analytics.advanced_widgets.new_vs_returning.title')}</h3>
+    <div className="bg-white rounded-xl nice-shadow p-5 min-h-[300px] overflow-hidden min-w-0 dark:bg-dk-card">
+      <h3 className="text-sm font-semibold text-gray-700 mb-1 dark:text-zinc-200">{t('analytics.advanced_widgets.new_vs_returning.title')}</h3>
       <p className="text-xs text-gray-400 mb-4">{t('analytics.advanced_widgets.new_vs_returning.description')}</p>
       {isLoading ? (
         <div className="h-48 flex items-center justify-center text-gray-300">{t('analytics.common.loading')}</div>

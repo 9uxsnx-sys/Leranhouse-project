@@ -126,7 +126,7 @@ export default function WelcomeModal() {
           transition={{ duration: 0.5, ease }}
           className="relative w-full max-w-3xl mx-4"
         >
-          <div className="bg-white rounded-2xl nice-shadow relative overflow-hidden">
+          <div className="bg-white dark:bg-dk-card rounded-2xl nice-shadow relative overflow-hidden">
             {/* Top content */}
             <AnimatePresence mode="wait">
               {!showFeatures ? (
@@ -146,7 +146,7 @@ export default function WelcomeModal() {
                       transition={{ delay: 0.2, duration: 0.5, ease }}
                     />
                     <motion.h1
-                      className="text-2xl font-bold text-gray-900 tracking-tight"
+                      className="text-2xl font-bold text-gray-900 dark:text-zinc-100 tracking-tight"
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.3, duration: 0.5, ease }}
@@ -154,7 +154,7 @@ export default function WelcomeModal() {
                       {t('onboarding.welcome.title')}
                     </motion.h1>
                     <motion.p
-                      className="text-sm text-gray-400 mt-2"
+                      className="text-sm text-gray-400 dark:text-zinc-400 mt-2"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.45, duration: 0.5 }}
@@ -171,10 +171,10 @@ export default function WelcomeModal() {
                   transition={{ duration: 0.4, ease }}
                 >
                   <div className="px-10 pt-8 pb-4 text-center">
-                    <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-zinc-100 tracking-tight">
                       {t('onboarding.welcome.features_title')}
                     </h2>
-                    <p className="text-sm text-gray-400 mt-2">
+                    <p className="text-sm text-gray-400 dark:text-zinc-400 mt-2">
                       {t('onboarding.welcome.features_subtitle')}
                     </p>
                   </div>
@@ -202,8 +202,8 @@ export default function WelcomeModal() {
                             <f.icon size={28} className={f.iconColor} />
                           </div>
                           <div className="relative text-center">
-                            <p className="text-sm font-semibold text-gray-700">{t(f.labelKey)}</p>
-                            <p className="text-xs text-gray-500 mt-0.5 leading-snug">{t(f.descKey)}</p>
+                            <p className="text-sm font-semibold text-gray-700 dark:text-zinc-200">{t(f.labelKey)}</p>
+                            <p className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5 leading-snug">{t(f.descKey)}</p>
                           </div>
                         </motion.div>
                       ))}

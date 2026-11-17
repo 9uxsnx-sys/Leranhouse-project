@@ -248,12 +248,12 @@ function EditCollectionSEO({ collection, orgslug, onUpdated }: EditCollectionSEO
     <label className="flex items-center gap-3 cursor-pointer">
       <div
         className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-          checked ? 'bg-black' : 'bg-gray-300'
+          checked ? 'bg-black dark:bg-zinc-100' : 'bg-gray-300 dark:bg-dk-track'
         } ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         <span
           className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
-            checked ? 'translate-x-[18px]' : 'translate-x-[2px]'
+            checked ? 'translate-x-[18px] dark:bg-zinc-900' : 'translate-x-[2px] dark:bg-zinc-300'
           }`}
         />
         <input
@@ -265,7 +265,7 @@ function EditCollectionSEO({ collection, orgslug, onUpdated }: EditCollectionSEO
           disabled={isSaving}
         />
       </div>
-      <span className="text-sm text-gray-600 select-none">{label}</span>
+      <span className="text-sm text-gray-600 dark:text-zinc-300 select-none">{label}</span>
     </label>
   )
 
@@ -284,7 +284,7 @@ function EditCollectionSEO({ collection, orgslug, onUpdated }: EditCollectionSEO
           <Link
             href={getUriWithOrg(orgslug, '') + `/collection/${collectionId}`}
             target="_blank"
-            className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+            className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors"
           >
             <Eye size={14} />
             <span>{t('dashboard.courses.preview')}</span>
@@ -292,7 +292,7 @@ function EditCollectionSEO({ collection, orgslug, onUpdated }: EditCollectionSEO
 
           <div className="flex items-center gap-2">
             <span
-              className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600"
+              className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300"
               title={
                 isSourceLocale
                   ? t('dashboard.courses.general.locale.source')
@@ -301,7 +301,7 @@ function EditCollectionSEO({ collection, orgslug, onUpdated }: EditCollectionSEO
             >
               <span className={`w-1.5 h-1.5 rounded-full ${!isDirty ? 'bg-teal-500' : 'bg-amber-400'}`} />
               <span>{getCurrentLanguageNativeName(contentLocale)}</span>
-              <span className="text-gray-400">
+              <span className="text-gray-400 dark:text-zinc-400">
                 {isSourceLocale
                   ? t('dashboard.courses.general.locale.source')
                   : translation
@@ -318,7 +318,7 @@ function EditCollectionSEO({ collection, orgslug, onUpdated }: EditCollectionSEO
                 isSavingRequest
                   ? 'bg-brand text-brand-fg border-brand opacity-50 cursor-not-allowed'
                   : !isDirty || isTranslationLocked
-                    ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                    ? 'bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong cursor-default'
                     : 'bg-brand text-brand-fg border-brand hover:bg-brand-hover cursor-pointer'
               }`}
             >
@@ -341,14 +341,14 @@ function EditCollectionSEO({ collection, orgslug, onUpdated }: EditCollectionSEO
         </div>
 
         {isTranslationLocked && (
-          <div className="text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
+          <div className="text-xs text-gray-500 dark:text-zinc-400 bg-gray-50 dark:bg-dk-inset/40 border border-gray-100 dark:border-dk-line rounded-lg px-3 py-2">
             {t('dashboard.courses.general.locale.inherited')}
           </div>
         )}
 
         {/* ── BASIC SEO ── */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+        <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
             {t('dashboard.courses.seo.sections.basic.title')}
           </h3>
           <div className="space-y-4">
@@ -414,8 +414,8 @@ function EditCollectionSEO({ collection, orgslug, onUpdated }: EditCollectionSEO
         </div>
 
         {/* ── OPEN GRAPH ── */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+        <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
             {t('dashboard.courses.seo.sections.opengraph.title')}
           </h3>
           <div className="space-y-4">
@@ -466,8 +466,8 @@ function EditCollectionSEO({ collection, orgslug, onUpdated }: EditCollectionSEO
         </div>
 
         {/* ── TWITTER CARD ── */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+        <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
             {t('dashboard.courses.seo.sections.twitter.title')}
           </h3>
           <div className="space-y-4">
@@ -528,8 +528,8 @@ function EditCollectionSEO({ collection, orgslug, onUpdated }: EditCollectionSEO
         </div>
 
         {/* ── ROBOTS & STRUCTURED DATA ── */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+        <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+          <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
             {t('dashboard.courses.seo.sections.robots.title')}
           </h3>
           <div className="space-y-4">

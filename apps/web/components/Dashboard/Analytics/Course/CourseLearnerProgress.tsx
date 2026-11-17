@@ -79,10 +79,10 @@ export default function CourseLearnerProgress({
             <ModalChart />
             <div className="flex flex-wrap gap-4">
               {rows.map((row: any, i: number) => (
-                <div key={i} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
+                <div key={i} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 dark:bg-dk-inset/40">
                   <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: chart.categorical[i % chart.categorical.length] }} />
-                  <span className="text-sm text-gray-600">{row.bracket}</span>
-                  <span className="text-sm font-bold text-gray-900">{row.user_count}</span>
+                  <span className="text-sm text-gray-600 dark:text-zinc-300">{row.bracket}</span>
+                  <span className="text-sm font-bold text-gray-900 dark:text-zinc-100">{row.user_count}</span>
                 </div>
               ))}
             </div>
@@ -97,7 +97,7 @@ export default function CourseLearnerProgress({
       ) : (
         <div>
           <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-2xl font-bold text-gray-900"><AnimatedNumber value={totalLearners} /></span>
+            <span className="text-2xl font-bold text-gray-900 dark:text-zinc-100"><AnimatedNumber value={totalLearners} /></span>
             <span className="text-xs text-gray-400">{t('analytics.course_analytics.units.learners')}</span>
           </div>
           <MiniChart />

@@ -64,7 +64,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
   if (isLoading || !podcast) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        <Loader2 className="w-8 h-8 animate-spin text-gray-400 dark:text-zinc-400" />
       </div>
     )
   }
@@ -208,7 +208,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
               <Link
                 href={getUriWithOrg(org?.slug, '') + `/podcast/${shortUuid}`}
                 target="_blank"
-                className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+                className="inline-flex items-center gap-2 px-2 py-1 text-sm font-semibold rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors"
               >
                 <Eye size={14} />
                 <span>{t('common.preview')}</span>
@@ -219,14 +219,14 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                   <button
                     type="button"
                     onClick={copyFromSource}
-                    className="hidden sm:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+                    className="hidden sm:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors"
                   >
                     <Copy size={14} />
                     <span>{t('dashboard.courses.general.locale.copy_from_source')}</span>
                   </button>
                 )}
                 <span
-                  className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-600"
+                  className="hidden md:inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium rounded-lg border border-gray-200 dark:border-dk-line-strong bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300"
                   title={
                     isSourceLocale
                       ? t('dashboard.courses.general.locale.source')
@@ -235,7 +235,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                 >
                   <span className={`w-1.5 h-1.5 rounded-full ${!dirty ? 'bg-teal-500' : 'bg-amber-400'}`} />
                   <span>{getCurrentLanguageNativeName(contentLocale)}</span>
-                  <span className="text-gray-400">
+                  <span className="text-gray-400 dark:text-zinc-400">
                     {isSourceLocale
                       ? t('dashboard.courses.general.locale.source')
                       : translation
@@ -251,7 +251,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                     isSaving
                       ? 'bg-brand text-brand-fg border-brand opacity-50 cursor-not-allowed'
                       : !dirty
-                        ? 'bg-white text-gray-600 border-gray-200 cursor-default'
+                        ? 'bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong cursor-default'
                         : 'bg-brand text-brand-fg border-brand hover:bg-brand-hover cursor-pointer'
                   }`}
                 >
@@ -274,7 +274,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                   type="button"
                   onClick={togglePublishStatus}
                   disabled={isPublishing}
-                  className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white text-gray-600 border-gray-200 hover:bg-gray-50 ${isPublishing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  className={`inline-flex items-center gap-1.5 px-2 py-1 text-sm font-semibold rounded-lg border transition-colors bg-white dark:bg-dk-card text-gray-600 dark:text-zinc-300 border-gray-200 dark:border-dk-line-strong hover:bg-gray-50 dark:hover:bg-dk-raised ${isPublishing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                 >
                   {isPublishing ? (
                     <Loader2 size={14} className="animate-spin" />
@@ -295,14 +295,14 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
             </div>
 
             {!isSourceLocale && !translation && (
-              <div className="text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2">
+              <div className="text-xs text-gray-500 dark:text-zinc-400 bg-gray-50 dark:bg-dk-inset/40 border border-gray-100 dark:border-dk-line rounded-lg px-3 py-2">
                 {t('dashboard.courses.general.locale.inherited')}
               </div>
             )}
 
             {/* ── BASIC INFORMATION ── */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-              <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+            <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+              <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
                 {t('common.sections.overview')}
               </h3>
               <div className="space-y-4">
@@ -366,8 +366,8 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
             </div>
 
             {/* ── PODCAST DETAILS (hosts are per locale, the rest is shared) ── */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-              <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 mb-5">
+            <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+              <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
                 {t('common.sections.details')}
               </h3>
               <div className="space-y-4">
@@ -397,9 +397,9 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                     </label>
                     <div className="space-y-3">
                       {values.meta_hosts.map((host: any, index: number) => (
-                        <div key={index} className="bg-gray-50 rounded-xl border border-gray-100 p-4 space-y-3">
+                        <div key={index} className="bg-gray-50 dark:bg-dk-inset/40 rounded-xl border border-gray-100 dark:border-dk-line p-4 space-y-3">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm font-semibold text-gray-800">
+                            <span className="text-sm font-semibold text-gray-800 dark:text-zinc-200">
                               {t('podcasts.dashboard.general.host_label', { number: index + 1 })}
                             </span>
                             {isSourceLocale && (
@@ -419,7 +419,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div>
-                              <label className="text-xs font-medium text-gray-500 mb-1 block">
+                              <label className="text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1 block">
                                 {t('podcasts.dashboard.general.name_label')}
                               </label>
                               <Input
@@ -431,11 +431,11 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                                   setFieldValue('meta_hosts', updated)
                                 }}
                                 placeholder={t('podcasts.dashboard.general.name_placeholder')}
-                                className={`${fieldClassName} bg-white`}
+                                className={`${fieldClassName} bg-white dark:bg-dk-card`}
                               />
                             </div>
                             <div>
-                              <label className="text-xs font-medium text-gray-500 mb-1 block">
+                              <label className="text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1 block">
                                 {t('podcasts.dashboard.general.title_label')}
                               </label>
                               <Input
@@ -447,22 +447,22 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                                   setFieldValue('meta_hosts', updated)
                                 }}
                                 placeholder={t('podcasts.dashboard.general.title_placeholder')}
-                                className={`${fieldClassName} bg-white`}
+                                className={`${fieldClassName} bg-white dark:bg-dk-card`}
                               />
                             </div>
                           </div>
 
                           <div>
-                            <label className="text-xs font-medium text-gray-500 mb-1 block">
+                            <label className="text-xs font-medium text-gray-500 dark:text-zinc-400 mb-1 block">
                               {t('podcasts.dashboard.general.photo_label')}
                             </label>
                             {host.avatar ? (
-                              <div className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl bg-white">
-                                <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden border border-gray-200">
+                              <div className="flex items-center gap-4 p-4 border border-gray-200 dark:border-dk-line-strong rounded-xl bg-white dark:bg-dk-card">
+                                <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden border border-gray-200 dark:border-dk-line-strong">
                                   <img src={host.avatar} alt={host.name || t('podcasts.dashboard.general.host_avatar_alt')} className="w-full h-full object-cover" />
                                 </div>
                                 <div className="flex-1">
-                                  <p className="text-sm font-medium text-gray-700">{t('podcasts.dashboard.general.photo_uploaded')}</p>
+                                  <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('podcasts.dashboard.general.photo_uploaded')}</p>
                                 </div>
                                 <button
                                   type="button"
@@ -479,7 +479,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                               </div>
                             ) : isSourceLocale ? (
                               <div
-                                className="flex items-center gap-4 p-4 border border-dashed border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors cursor-pointer"
+                                className="flex items-center gap-4 p-4 border border-dashed border-gray-200 dark:border-dk-line-strong rounded-xl bg-white dark:bg-dk-card hover:bg-gray-50 dark:hover:bg-dk-raised transition-colors cursor-pointer"
                                 onClick={() => {
                                   const input = document.createElement('input')
                                   input.type = 'file'
@@ -500,12 +500,12 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                                 }}
                               >
                                 <div className="flex-shrink-0">
-                                  <ImageIcon size={24} className="text-gray-400" strokeWidth={1.5} />
+                                  <ImageIcon size={24} className="text-gray-400 dark:text-zinc-400" strokeWidth={1.5} />
                                 </div>
                                 <div className="flex-1">
-                                  <p className="text-sm font-medium text-gray-700">{t('podcasts.dashboard.general.click_to_upload_photo')}</p>
+                                  <p className="text-sm font-medium text-gray-700 dark:text-zinc-200">{t('podcasts.dashboard.general.click_to_upload_photo')}</p>
                                 </div>
-                                <UploadCloud size={18} className="text-gray-400" />
+                                <UploadCloud size={18} className="text-gray-400 dark:text-zinc-400" />
                               </div>
                             ) : null}
                           </div>
@@ -518,7 +518,7 @@ function EditPodcastGeneral({ orgslug }: EditPodcastGeneralProps) {
                           onClick={() => {
                             setFieldValue('meta_hosts', [...values.meta_hosts, { name: '', title: '', avatar: '' }])
                           }}
-                          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl border-2 border-dashed border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700 hover:bg-gray-50 transition-all cursor-pointer"
+                          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl border-2 border-dashed border-gray-200 dark:border-dk-line-strong text-gray-500 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-dk-line-strong hover:text-gray-700 dark:hover:text-zinc-200 hover:bg-gray-50 dark:hover:bg-dk-raised transition-all cursor-pointer dark:hover:bg-dk-raised/60"
                         >
                           <Plus size={16} />
                           {t('podcasts.dashboard.general.add_host')}

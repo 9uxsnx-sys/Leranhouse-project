@@ -31,7 +31,7 @@ function getAvatarUrl(user: any): string | null {
 }
 
 function UserAvatar({ user }: { user?: any }) {
-  if (!user) return <div className="w-7 h-7 rounded-full bg-gray-200 flex-shrink-0" />
+  if (!user) return <div className="w-7 h-7 rounded-full bg-gray-200 flex-shrink-0 dark:bg-dk-track" />
   const avatarUrl = getAvatarUrl(user)
   if (avatarUrl) {
     return (
@@ -151,7 +151,7 @@ export function LiveUsersDetail({ days }: { days: string }) {
   return (
     <table className="w-full text-sm">
       <thead>
-        <tr className="text-start text-xs text-gray-400 border-b border-gray-100">
+        <tr className="text-start text-xs text-gray-400 border-b border-gray-100 dark:border-dk-line">
           <th className="pb-2 font-medium">{t('analytics.common.user')}</th>
           <th className="pb-2 font-medium">{t('analytics.modals.live_users_table.current_page')}</th>
           <th className="pb-2 font-medium">{t('analytics.modals.live_users_table.device')}</th>
@@ -170,7 +170,7 @@ export function LiveUsersDetail({ days }: { days: string }) {
                   className="flex items-center gap-2 hover:underline"
                 >
                   <UserAvatar user={user} />
-                  <span className="text-gray-700 font-medium truncate max-w-[140px]">
+                  <span className="text-gray-700 font-medium truncate max-w-[140px] dark:text-zinc-200">
                     {userName(user, t)}
                   </span>
                 </a>
@@ -192,7 +192,7 @@ export function LiveUsersDetail({ days }: { days: string }) {
               <td className="py-2.5 text-gray-500 capitalize">{row.device_type || '—'}</td>
               <td className="py-2.5">
                 {row.country_code ? (
-                  <span className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-mono">
+                  <span className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-mono dark:bg-dk-inset dark:text-zinc-300">
                     {row.country_code}
                   </span>
                 ) : (
@@ -226,7 +226,7 @@ export function SignupsDetail({ days }: { days: string }) {
   return (
     <table className="w-full text-sm">
       <thead>
-        <tr className="text-start text-xs text-gray-400 border-b border-gray-100">
+        <tr className="text-start text-xs text-gray-400 border-b border-gray-100 dark:border-dk-line">
           <th className="pb-2 font-medium">{t('analytics.common.user')}</th>
           <th className="pb-2 font-medium">{t('analytics.modals.signups_table.email')}</th>
           <th className="pb-2 font-medium">{t('analytics.modals.signups_table.method')}</th>
@@ -244,7 +244,7 @@ export function SignupsDetail({ days }: { days: string }) {
                   className="flex items-center gap-2 hover:underline"
                 >
                   <UserAvatar user={user} />
-                  <span className="text-gray-700 font-medium truncate max-w-[140px]">
+                  <span className="text-gray-700 font-medium truncate max-w-[140px] dark:text-zinc-200">
                     {userName(user, t)}
                   </span>
                 </a>
@@ -254,7 +254,7 @@ export function SignupsDetail({ days }: { days: string }) {
               </td>
               <td className="py-2.5">
                 {row.signup_method ? (
-                  <span className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded capitalize">
+                  <span className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded capitalize dark:bg-dk-inset dark:text-zinc-300">
                     {row.signup_method}
                   </span>
                 ) : (
@@ -288,7 +288,7 @@ export function EnrollmentsDetail({ days }: { days: string }) {
   return (
     <table className="w-full text-sm">
       <thead>
-        <tr className="text-start text-xs text-gray-400 border-b border-gray-100">
+        <tr className="text-start text-xs text-gray-400 border-b border-gray-100 dark:border-dk-line">
           <th className="pb-2 font-medium">{t('analytics.common.user')}</th>
           <th className="pb-2 font-medium">{t('analytics.common.course')}</th>
           <th className="pb-2 font-medium text-end">{t('analytics.common.date')}</th>
@@ -308,7 +308,7 @@ export function EnrollmentsDetail({ days }: { days: string }) {
                   className="flex items-center gap-2 hover:underline"
                 >
                   <UserAvatar user={user} />
-                  <span className="text-gray-700 font-medium truncate max-w-[140px]">
+                  <span className="text-gray-700 font-medium truncate max-w-[140px] dark:text-zinc-200">
                     {userName(user, t)}
                   </span>
                 </a>
@@ -349,7 +349,7 @@ export function CompletionsDetail({ days }: { days: string }) {
   return (
     <table className="w-full text-sm">
       <thead>
-        <tr className="text-start text-xs text-gray-400 border-b border-gray-100">
+        <tr className="text-start text-xs text-gray-400 border-b border-gray-100 dark:border-dk-line">
           <th className="pb-2 font-medium">{t('analytics.common.user')}</th>
           <th className="pb-2 font-medium">{t('analytics.common.course')}</th>
           <th className="pb-2 font-medium text-end">{t('analytics.common.date')}</th>
@@ -369,7 +369,7 @@ export function CompletionsDetail({ days }: { days: string }) {
                   className="flex items-center gap-2 hover:underline"
                 >
                   <UserAvatar user={user} />
-                  <span className="text-gray-700 font-medium truncate max-w-[140px]">
+                  <span className="text-gray-700 font-medium truncate max-w-[140px] dark:text-zinc-200">
                     {userName(user, t)}
                   </span>
                 </a>

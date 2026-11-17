@@ -281,7 +281,7 @@ function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubb
       {/* Floating panel */}
       {panelMounted && (
         <div
-          className="fixed bottom-[72px] end-4 z-[9998] flex flex-col bg-white dark:bg-neutral-900 rounded-2xl overflow-hidden nice-shadow"
+          className="fixed bottom-[72px] end-4 z-[9998] flex flex-col bg-white dark:bg-dk-inset rounded-2xl overflow-hidden nice-shadow"
           style={{
             width: 'min(340px, calc(100vw - 24px))',
             height: 'min(480px, calc(100vh - 110px))',
@@ -293,12 +293,12 @@ function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubb
           }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-3 h-11 border-b border-neutral-100 dark:border-neutral-800/60 flex-shrink-0">
+          <div className="flex items-center justify-between px-3 h-11 border-b border-neutral-100 dark:border-dk-line/60 flex-shrink-0">
             <div className="flex items-center gap-1.5">
               <button
                 aria-label={t('copilot.toggle_conversations')}
                 onClick={() => setShowSessions(!showSessions)}
-                className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all"
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-dk-raised transition-all"
                 title={t('copilot.conversations')}
               >
                 <List size={14} />
@@ -319,7 +319,7 @@ function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubb
               <button
                 aria-label={t('copilot.close_copilot')}
                 onClick={() => onOpenChange(false)}
-                className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-all"
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-dk-raised transition-all"
               >
                 <X size={14} />
               </button>
@@ -423,7 +423,7 @@ function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubb
                       <button
                         key={i}
                         onClick={() => sendMessage(s)}
-                        className="group flex items-center gap-1.5 w-fit max-w-full text-start px-2.5 py-1.5 text-[11px] rounded-xl text-neutral-600 dark:text-neutral-300 bg-neutral-50 dark:bg-neutral-800/50 hover:bg-violet-50 dark:hover:bg-violet-500/10 hover:text-violet-700 transition-all"
+                        className="group flex items-center gap-1.5 w-fit max-w-full text-start px-2.5 py-1.5 text-[11px] rounded-xl text-neutral-600 dark:text-neutral-300 bg-neutral-50 dark:bg-dk-inset/50 hover:bg-violet-50 dark:hover:bg-violet-500/10 hover:text-violet-700 transition-all"
                       >
                         <ArrowRight size={10} weight="bold" className="flex-shrink-0 text-neutral-400 group-hover:text-violet-500 rtl:rotate-180" />
                         <span className="truncate">{s}</span>
@@ -440,14 +440,14 @@ function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubb
               </div>
 
               {/* Input bar */}
-              <div className="flex items-center gap-1 px-2.5 py-2 border-t border-neutral-100 dark:border-neutral-800/60 flex-shrink-0">
+              <div className="flex items-center gap-1 px-2.5 py-2 border-t border-neutral-100 dark:border-dk-line/60 flex-shrink-0">
                 <button
                   aria-label={t('copilot.select_chat_mode')}
                   onClick={() => setChatMode(chatMode === 'course_only' ? 'general' : 'course_only')}
                   className={`flex items-center gap-1 px-1.5 py-1.5 text-xs rounded-lg transition-all flex-shrink-0 ${
                     chatMode === 'general'
                       ? 'bg-violet-50 dark:bg-violet-500/10 text-violet-600'
-                      : 'text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800'
+                      : 'text-neutral-400 hover:bg-neutral-50 dark:hover:bg-dk-raised'
                   }`}
                   title={chatMode === 'general' ? t('copilot.general_mode') : t('copilot.course_only_mode')}
                 >
@@ -459,7 +459,7 @@ function BubbleInner({ orgslug, open, onOpenChange, sessionToLoad }: CopilotBubb
                     <button
                       aria-label={t('copilot.select_course')}
                       onClick={() => setCourseDropdownOpen(!courseDropdownOpen)}
-                      className="flex items-center gap-0.5 px-1.5 py-1.5 text-xs rounded-lg text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-all"
+                      className="flex items-center gap-0.5 px-1.5 py-1.5 text-xs rounded-lg text-neutral-400 hover:bg-neutral-50 dark:hover:bg-dk-raised transition-all"
                     >
                       {selectedCourse ? <Books size={13} weight="duotone" className="text-violet-500" /> : <Sparkle size={13} weight="duotone" className="text-violet-500" />}
                       <CaretDown aria-hidden="true" size={8} className={`text-neutral-400 transition-transform ${courseDropdownOpen ? 'rotate-180' : ''}`} />

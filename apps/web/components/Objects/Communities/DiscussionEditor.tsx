@@ -106,8 +106,8 @@ export function DiscussionEditor({
       title={title}
       className={`p-1.5 rounded transition-colors ${
         isActive
-          ? 'bg-gray-200 text-gray-900'
-          : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700'
+          ? 'bg-gray-200 dark:bg-dk-track text-gray-900 dark:text-dk-fg-1'
+          : 'text-gray-500 dark:text-dk-fg-3 hover:bg-gray-100 dark:hover:bg-dk-raised hover:text-gray-700 dark:hover:text-dk-fg-1'
       }`}
     >
       {children}
@@ -119,7 +119,7 @@ export function DiscussionEditor({
       {editable && (
         <>
           {/* Toolbar */}
-          <div className="flex items-center gap-0.5 p-2 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+          <div className="flex items-center gap-0.5 p-2 border-b border-gray-200 dark:border-dk-line-strong bg-gray-50 dark:bg-dk-inset/40 rounded-t-lg">
             <ToolbarButton
               onClick={() => editor.chain().focus().toggleBold().run()}
               isActive={editor.isActive('bold')}
@@ -149,7 +149,7 @@ export function DiscussionEditor({
               <Code size={16} />
             </ToolbarButton>
 
-            <div className="w-px h-5 bg-gray-300 mx-1" />
+            <div className="w-px h-5 bg-gray-300 dark:bg-dk-track mx-1" />
 
             <ToolbarButton
               onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
@@ -180,7 +180,7 @@ export function DiscussionEditor({
               <Quote size={16} />
             </ToolbarButton>
 
-            <div className="w-px h-5 bg-gray-300 mx-1" />
+            <div className="w-px h-5 bg-gray-300 dark:bg-dk-track mx-1" />
 
             <ToolbarButton
               onClick={setLink}
