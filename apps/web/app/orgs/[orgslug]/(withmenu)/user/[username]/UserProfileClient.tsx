@@ -227,7 +227,7 @@ function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProp
         ) : (
           <>
             {activeTab === 'courses' && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 auto-rows-fr">
                 {userCourses.length > 0 ? (
                   userCourses.map((course: any) => {
                     const imageUrl = course.thumbnail_image && orgUuid
@@ -262,7 +262,7 @@ function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProp
             )}
 
             {activeTab === 'podcasts' && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 auto-rows-fr">
                 {userPodcasts.length > 0 ? (
                   userPodcasts.map((podcast: any) => (
                     <PodcastCard
@@ -293,7 +293,7 @@ function UserProfileClient({ userData, profile, orgslug }: UserProfileClientProp
             )}
 
             {activeTab === 'communities' && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 auto-rows-fr">
                 {userCommunities.length > 0 ? (
                   userCommunities.map((community: any) => (
                     <CommunityCard

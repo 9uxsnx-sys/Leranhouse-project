@@ -26,6 +26,7 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
+import { useMediaQuery } from 'usehooks-ts'
 
 const removeCoursePrefix = (course_uuid: string) => course_uuid.replace('course_', '')
 
@@ -149,12 +150,17 @@ function Courses(props: CourseProps) {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 8
+  // 4-up from `2xl` (1536px) fits two rows of 8; the 3-up grid below it fills
+  // four rows with 12 so laptops get a full page instead of a short one.
+  // `initializeWithValue: false` keeps the server and first client render in
+  // sync (both 12); the layout effect then resolves the real width pre-paint.
+  const isWide = useMediaQuery('(min-width: 1536px)', { initializeWithValue: false })
+  const itemsPerPage = isWide ? 8 : 12
 
-  // Reset to page 1 when search or filter changes
+  // Reset to page 1 when search, filter or page size changes
   React.useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, activeFilter, selectedUsergroupId])
+  }, [searchQuery, activeFilter, selectedUsergroupId, isWide])
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredCourses.length / itemsPerPage)
@@ -288,7 +294,7 @@ function Courses(props: CourseProps) {
       )}
 
       {/* Course grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 content-start">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 content-start">
         {paginatedCourses.map((course: any) => {
           const imageUrl = course.thumbnail_image
             ? getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)

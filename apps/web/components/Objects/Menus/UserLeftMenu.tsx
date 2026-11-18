@@ -59,12 +59,16 @@ function UserLeftMenu() {
   const orgslug = org?.slug || ''
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('user-menu-collapsed')
-      if (saved !== null) {
-        setIsCollapsed(saved === 'true')
-      }
+    if (typeof window === 'undefined') return
+    const saved = localStorage.getItem('user-menu-collapsed')
+    if (saved !== null) {
+      setIsCollapsed(saved === 'true')
+      return
     }
+    // Compact desktop: the icon rail gives the content back the ~184px it needs
+    // to keep four cards at their design width. 1536px (`2xl`) is the grid's
+    // 4-up threshold, so the two switches happen together.
+    setIsCollapsed(window.innerWidth < 1536)
   }, [])
 
   // Sync sidebar width as a CSS variable so fixed-position elements (e.g. PodcastPlayer) can align after the sidebar
@@ -187,9 +191,9 @@ function UserLeftMenu() {
         </div>
       </div>
 
-      {/* Main Navigation - Vertically Centered */}
-      <div className="flex-1 flex flex-col justify-center py-4 px-3">
-        <div className="relative" ref={navContainerRef}>
+      {/* Main Navigation — centred when it fits, scrolls when the screen is short */}
+      <div className="flex-1 flex flex-col min-h-0 overflow-y-auto py-4 px-3">
+        <div className="relative my-auto" ref={navContainerRef}>
           {/* Floating active indicator */}
           <div
             className="absolute start-0 end-0 border rounded-xl shadow-sm transition-all duration-200 ease-out pointer-events-none"

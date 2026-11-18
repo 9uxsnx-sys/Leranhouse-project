@@ -24,6 +24,7 @@ import { swrFetcher } from '@services/utils/ts/requests'
 import { getAPIUrl } from '@services/config/config'
 import { Button } from '@/components/ui/button'
 import { IconButton } from '@components/ui/icon-button'
+import { useMediaQuery } from 'usehooks-ts'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -96,11 +97,14 @@ const PodcastsDashClient = ({
   }, [effectivePodcasts, searchQuery, activeFilter])
 
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 8
+  // 4-up from `2xl` (1536px) fits two rows of 8; the 3-up grid below it fills
+  // four rows with 12 so laptops get a full page instead of a short one.
+  const isWide = useMediaQuery('(min-width: 1536px)', { initializeWithValue: false })
+  const itemsPerPage = isWide ? 8 : 12
 
   React.useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, activeFilter])
+  }, [searchQuery, activeFilter, isWide])
 
   const totalPages = Math.ceil(filteredPodcasts.length / itemsPerPage)
   const paginatedPodcasts = useMemo(() => {
@@ -282,7 +286,7 @@ const PodcastsDashClient = ({
       )}
 
       <div className="flex-1 flex flex-col">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-6">
           {paginatedPodcasts.map((podcast: any) => {
             const isSelected = selectedPodcasts.has(podcast.podcast_uuid)
 

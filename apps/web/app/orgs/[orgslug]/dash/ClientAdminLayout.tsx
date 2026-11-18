@@ -80,7 +80,7 @@ function ClientAdminLayout({
                         ) : (
                             <DashLeftMenu />
                         )}
-                        <div className="flex flex-col w-full min-h-dvh relative isolate">
+                        <div className="flex flex-col w-full min-w-0 min-h-dvh relative isolate">
                             <AdminTopBar />
                             {children}
                             <OnboardingBar />

@@ -38,6 +38,7 @@ import FeatureDisabledView from '@components/Dashboard/Shared/FeatureDisabled/Fe
 import { usePlan } from '@components/Hooks/usePlan'
 import { searchMatchesAny } from '@/lib/search/normalize'
 import { IconButton } from '@components/ui/icon-button'
+import { useMediaQuery } from 'usehooks-ts'
 import { ActionRow, ActionRowSearch, ActionRowSpacer, ActionRowActions } from '@components/ui/action-row'
 import { ConceptIcon } from '@components/ui/icons'
 import {
@@ -185,12 +186,15 @@ function CoursesHome(params: CourseProps) {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 8
+  // 4-up from `2xl` (1536px) fits two rows of 8; the 3-up grid below it fills
+  // four rows with 12 so laptops get a full page instead of a short one.
+  const isWide = useMediaQuery('(min-width: 1536px)', { initializeWithValue: false })
+  const itemsPerPage = isWide ? 8 : 12
 
-  // Reset to page 1 when search or filter changes
+  // Reset to page 1 when search, filter or page size changes
   React.useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, activeFilter, selectedUsergroupId])
+  }, [searchQuery, activeFilter, selectedUsergroupId, isWide])
 
   // Calculate pagination (client-side)
   const totalPages = Math.ceil(filteredCourses.length / itemsPerPage)
@@ -624,7 +628,7 @@ function CoursesHome(params: CourseProps) {
       )}
 
       {/* Course Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 content-start">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 content-start">
         {paginatedCourses.map((course: any) => {
           const imageUrl = course.thumbnail_image
             ? getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)

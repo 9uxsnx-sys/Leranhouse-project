@@ -7,6 +7,7 @@ import type { AnalyticsCard } from '@services/analytics/tabs'
 import { DateRangeFilter, FilterSelect } from '@components/Analytics/Filters'
 import { TabCard } from '@components/Analytics/TabCard'
 import PaymentsTable from './PaymentsTable'
+import { useMediaQuery } from 'usehooks-ts'
 
 const RANGES = ['7d', '30d', '90d']
 
@@ -58,6 +59,10 @@ export default function DashboardHome() {
   const [range, setRange] = useState('30d')
   const [course, setCourse] = useState('all')
   const courseOptions = useOrgCourses()
+
+  // Same 1536px (`2xl`) threshold as the listings: from here up the two charts
+  // sit stacked beside the payments table, below it they share a row.
+  const isWide = useMediaQuery('(min-width: 1536px)', { initializeWithValue: false })
 
   const { data, isLoading } = useAnalyticsTab(
     'courses',
@@ -111,18 +116,26 @@ export default function DashboardHome() {
       {/* Full-row chart */}
       <TabCard card={enrollmentTrend} loading={isLoading} />
 
-      {/* Row 2 — payments (UI only) + completion funnel */}
-      <div className="grid grid-cols-12 gap-6 mt-6">
-        <div className="col-span-12 lg:col-span-7">
+      {/* Wide: payments (7) with the two charts stacked beside it (5).
+          Compact (< 2xl, i.e. where the listings drop to 3 cards): the two
+          charts share one row and the payments table moves below them. */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-12 gap-6 mt-6">
+        <div className="order-3 lg:col-span-2 2xl:order-none 2xl:col-start-1 2xl:col-span-7 2xl:row-start-1 2xl:row-span-2">
           <PaymentsTable />
         </div>
-        <div className="col-span-12 lg:col-span-5 flex flex-col justify-between gap-6">
+        <div className="order-1 2xl:col-start-8 2xl:col-span-5 2xl:row-start-1">
           <TabCard
             card={completionFunnel}
             loading={isLoading}
-            chartHeight={280}
+            chartHeight={isWide ? 280 : 260}
           />
-          <TabCard card={learnerProgress} loading={isLoading} chartHeight={268} />
+        </div>
+        <div className="order-2 2xl:col-start-8 2xl:col-span-5 2xl:row-start-2">
+          <TabCard
+            card={learnerProgress}
+            loading={isLoading}
+            chartHeight={isWide ? 268 : 260}
+          />
         </div>
       </div>
     </div>

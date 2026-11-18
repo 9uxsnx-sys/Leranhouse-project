@@ -25,7 +25,7 @@ export function SectionRow({ title, seeAllHref, seeAllLabel = 'See All', childre
         </Link>
       </div>
       {/* Grid — matching listing page grid layout */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
         {children}
       </div>
     </section>

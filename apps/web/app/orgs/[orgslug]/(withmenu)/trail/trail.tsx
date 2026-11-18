@@ -19,6 +19,7 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
+import { useMediaQuery } from 'usehooks-ts'
 
 function Trail(params: any) {
   const { t } = useTranslation()
@@ -44,7 +45,12 @@ function Trail(params: any) {
   const [filterStatus, setFilterStatus] = useState('all')
   const [sortOrder, setSortOrder] = useState('newest')
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 8
+  // 4-up from `2xl` (1536px) fits two rows of 8; the 3-up grid below it fills
+  // four rows with 12 so laptops get a full page instead of a short one.
+  // `initializeWithValue: false` keeps the server and first client render in
+  // sync (both 12); the layout effect then resolves the real width pre-paint.
+  const isWide = useMediaQuery('(min-width: 1536px)', { initializeWithValue: false })
+  const itemsPerPage = isWide ? 8 : 12
 
   // Filter + sort courses
   const filteredRuns = useMemo(() => {
@@ -81,11 +87,12 @@ function Trail(params: any) {
   const paginatedRuns = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage
     return filteredRuns.slice(start, start + itemsPerPage)
-  }, [filteredRuns, currentPage])
+  }, [filteredRuns, currentPage, itemsPerPage])
 
+  // Reset to page 1 when search, filter or page size changes
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, filterStatus, sortOrder])
+  }, [searchQuery, filterStatus, sortOrder, isWide])
 
   const goToPage = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -211,7 +218,7 @@ function Trail(params: any) {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
               {paginatedRuns
                 .filter((run: any) => run.course?.course_uuid)
                 .map((run: any) => (

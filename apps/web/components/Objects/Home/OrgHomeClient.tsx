@@ -10,6 +10,7 @@ import { getCourseThumbnailMediaDirectory } from '@services/media/media'
 import useSWR from 'swr'
 import { swrFetcher } from '@services/utils/ts/requests'
 import { getAPIUrl } from '@services/config/config'
+import { useMediaQuery } from 'usehooks-ts'
 
 interface OrgHomeClientProps {
   orgslug: string
@@ -33,6 +34,12 @@ export function OrgHomeClient({
   const org = useOrg() as any
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
+
+  // Each row must fill exactly one grid row: the grid is 4-up from `2xl`
+  // (1536px) and 3-up below it, so the slice follows the same threshold.
+  // Otherwise a section leaves an orphan card alone on a second row.
+  const isWide = useMediaQuery('(min-width: 1536px)')
+  const perSection = isWide ? 4 : 3
 
   // SWR: re-fetch courses and podcasts when locale changes on the client
   const contentLocale = (i18n.language || 'en').split('-')[0]
@@ -86,7 +93,7 @@ export function OrgHomeClient({
           seeAllHref="/courses"
           seeAllLabel={t('home.see_all', { defaultValue: 'See All' })}
         >
-          {resolvedTrendingCourses.slice(0, 4).map((course: any) => {
+          {resolvedTrendingCourses.slice(0, perSection).map((course: any) => {
             const imageUrl = course.thumbnail_image
               ? getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)
               : ''
@@ -113,7 +120,7 @@ export function OrgHomeClient({
           seeAllHref="/podcasts"
           seeAllLabel={t('home.see_all', { defaultValue: 'See All' })}
         >
-          {resolvedTrendingPodcasts.slice(0, 4).map((podcast: any) => (
+          {resolvedTrendingPodcasts.slice(0, perSection).map((podcast: any) => (
             <PodcastCard
               key={podcast.podcast_uuid}
               id={removePodcastPrefix(podcast.podcast_uuid)}
@@ -136,7 +143,7 @@ export function OrgHomeClient({
           seeAllHref="/courses"
           seeAllLabel={t('home.see_all', { defaultValue: 'See All' })}
         >
-          {resolvedCourses.slice(0, 4).map((course: any) => {
+          {resolvedCourses.slice(0, perSection).map((course: any) => {
             const imageUrl = course.thumbnail_image
               ? getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)
               : ''
@@ -163,7 +170,7 @@ export function OrgHomeClient({
           seeAllHref="/podcasts"
           seeAllLabel={t('home.see_all', { defaultValue: 'See All' })}
         >
-          {resolvedPodcasts.slice(0, 4).map((podcast: any) => (
+          {resolvedPodcasts.slice(0, perSection).map((podcast: any) => (
             <PodcastCard
               key={podcast.podcast_uuid}
               id={removePodcastPrefix(podcast.podcast_uuid)}

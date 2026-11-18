@@ -28,13 +28,12 @@ import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { createCollection, deleteCollection } from '@services/courses/collections'
 import { revalidateTags, swrFetcher } from '@services/utils/ts/requests'
 import { searchMatchesAny } from '@/lib/search/normalize'
+import { useMediaQuery } from 'usehooks-ts'
 
 type CollectionsHomeProps = {
   orgslug: string
   org_id: string | number
 }
-
-const ITEMS_PER_PAGE = 8
 
 const removeCollectionPrefix = (uuid: string) => uuid.replace('collection_', '')
 
@@ -63,6 +62,10 @@ function CollectionsHome(params: CollectionsHomeProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<'all' | 'public' | 'users_only' | 'paid'>('all')
   const [currentPage, setCurrentPage] = useState(1)
+  // 4-up from `2xl` (1536px) fits two rows of 8; the 3-up grid below it fills
+  // four rows with 12 so laptops get a full page instead of a short one.
+  const isWide = useMediaQuery('(min-width: 1536px)', { initializeWithValue: false })
+  const itemsPerPage = isWide ? 8 : 12
   const [isCreating, setIsCreating] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [newName, setNewName] = useState('')
@@ -71,10 +74,10 @@ function CollectionsHome(params: CollectionsHomeProps) {
   const [selectedCollections, setSelectedCollections] = useState<Set<string>>(new Set())
   const [isSelectMode, setIsSelectMode] = useState(false)
 
-  // Reset to page 1 when search or filter changes
+  // Reset to page 1 when search, filter or page size changes
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, activeFilter])
+  }, [searchQuery, activeFilter, isWide])
 
   const filtered = useMemo(() => {
     let list = collections
@@ -97,11 +100,11 @@ function CollectionsHome(params: CollectionsHomeProps) {
     return list
   }, [collections, searchQuery, activeFilter])
 
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE)
+  const totalPages = Math.ceil(filtered.length / itemsPerPage)
   const paginated = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE
-    return filtered.slice(start, start + ITEMS_PER_PAGE)
-  }, [filtered, currentPage])
+    const start = (currentPage - 1) * itemsPerPage
+    return filtered.slice(start, start + itemsPerPage)
+  }, [filtered, currentPage, itemsPerPage])
 
   // Pagination handlers
   const goToPage = (page: number) => {
@@ -360,7 +363,7 @@ function CollectionsHome(params: CollectionsHomeProps) {
         </ActionRow>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 content-start">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 content-start">
         {paginated.map((collection: any) => (
           <div key={collection.collection_uuid} className="relative group">
             {/* Selection checkbox - visible in select mode */}
