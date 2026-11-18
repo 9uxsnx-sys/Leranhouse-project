@@ -44,15 +44,17 @@ export function DateRangeFilter({
   labels?: Record<string, string>
 }) {
   return (
-    <div className="inline-flex items-center gap-0.5 p-0.5 rounded-lg bg-gray-100 dark:bg-dk-card">
+    <div className="inline-flex items-center gap-0.5 p-1 rounded-xl bg-gray-50/80 dark:bg-dk-card">
       {options.map((o) => (
         <button
           key={o}
           type="button"
           onClick={() => onChange?.(o)}
           className={cn(
-            'px-2.5 py-1 text-xs rounded-md transition-colors',
-            value === o ? 'bg-white dark:bg-dk-raised text-gray-900 dark:text-dk-fg-1 font-semibold shadow-sm' : 'text-gray-500 dark:text-dk-fg-3 font-medium hover:text-gray-900 dark:hover:text-dk-fg-1'
+            'px-2.5 py-1 text-xs rounded-lg border transition-colors',
+            value === o
+              ? 'bg-white dark:bg-dk-raised border-neutral-200/80 dark:border-dk-line-strong text-ui-fg-base font-semibold shadow-sm'
+              : 'border-transparent text-gray-500 dark:text-dk-fg-3 font-medium hover:text-gray-700 dark:hover:text-dk-fg-1'
           )}
         >
           {labels?.[o] ?? o}
@@ -93,10 +95,10 @@ export function FilterSelect({
           <DropdownMenuItem
             key={o.value}
             onClick={() => onChange?.(o.value)}
-            className="justify-between gap-6 text-sm rounded-md px-2.5 py-1.5 cursor-pointer text-gray-700 dark:text-dk-fg-2 data-[highlighted]:bg-gray-100 dark:data-[highlighted]:bg-dk-track focus:bg-gray-100 dark:focus:bg-dk-track"
+            data-active={o.value === value}
+            className="text-sm rounded-md px-2.5 py-1.5 cursor-pointer text-gray-700 dark:text-dk-fg-2 data-[highlighted]:bg-gray-100 dark:data-[highlighted]:bg-dk-track focus:bg-gray-100 dark:focus:bg-dk-track data-[active=true]:bg-gray-100 dark:data-[active=true]:bg-dk-track"
           >
             <span className="truncate">{o.label}</span>
-            {o.value === value && <ConceptIcon.check size={14} className="text-gray-500 dark:text-dk-fg-3 shrink-0" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

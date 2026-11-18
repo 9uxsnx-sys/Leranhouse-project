@@ -1,8 +1,12 @@
-> Status: as-built · Last verified: 2026-11-17
+> Status: as-built · Last verified: 2026-11-18
 
 # Changelog
 
 Entries below are derived from the commit history of the current branch (`feat/learnhouse-1.2.0-custom`); dates are commit dates. Work landed on the branch but not yet released is grouped at the end.
+
+## 2026-11-18
+
+- Researched and documented the desktop scaling strategy for keeping the same layout proportions across desktop screen sizes (24" monitor down to a 13" laptop). Three approaches were evaluated: `transform: scale()` (drifts click coordinates, and portalled menus stay unscaled), CSS `zoom` (layout-aware, no click offset, less blur, and now standardised in the CSS Viewport Module Level 1 spec / Interop 2025 — Chrome since v1, Firefox since v126, Safari since v3.1), and max-width containers (safe, but it inserts side margins and changes the wide-screen look). Selected a **hybrid `zoom` approach**: the dashboard content area scales proportionally on narrower desktop viewports while the sidebar stays at native size, and the Radix portal components (dropdowns, tooltips, dialogs, popovers) are routed into the zoomed container via their `container` prop so they scale with the content. The 24" reference look stays at `zoom: 1` — no reflow, no breakage, no added margins. Implementation is pending (`DesktopScaler` wrapper, `ScaleContext`, portal patches).
 
 ## 2026-11-17
 
@@ -33,6 +37,8 @@ Entries below are derived from the commit history of the current branch (`feat/l
 - Removed the Help option (documentation / website / Discord / report feedback) from both sidebars, together with the feedback modal it opened, and moved the Collapse / Expand control above the Theme option in the footer.
 - Aligned the podcast right-rail access card with the course page: the progress fill now uses `bg-brand` instead of plain black (it was detached from the tenant colour), the Continue Listening button lost its play icon, and the Get Access state mirrors the course — paid shows the amount with a small currency suffix, free drops the hint line and labels the button "Add to progress".
 - Finished the auth surfaces (login, signup / open / invite-only, forgot, reset, verify-email, SSO and Google callbacks, token exchange). The split shell painted its page with the inset well (`#0d0d0f`, *below* the canvas) so the panel had no perceivable surface — it is now the page colour, with the form card on `dk-card`. Inputs used the card fill (invisible against the card) with off-palette zinc text — they are now recessed wells (`dk-inset`, strong hairline, `dk-fg-1` text, `dk-fg-4` placeholder) and a `.dark .auth-field:-webkit-autofill` rule stops Chrome repainting autofilled fields white. The shared label / link / secondary-button recipes moved off zinc onto `dk-fg-1…3`; alerts lost their light-only pastel slabs (`dark:bg-*-500/10`, `*-500/30` borders, `*-200` text) and the success / error icon circles lifted from the invisible inset to `dk-raised`; the terms checkbox inverts to a light fill with a dark tick; the callback error tips / code badge got dark values; and the form card gained a `dk-line` hairline (its shadow does not render on dark). The image panel stays a bare `<img>` — no overlay or seam gradient, so the tenant's artwork keeps its real colours in both modes. Light mode is unchanged.
+- Replaced the check mark in the sidebar option menus (theme, language) and the dashboard filter dropdowns (courses, podcasts, collections, communities, users → roles, analytics entity filter) with a persistent selection pill: the active option keeps the hover surface (`bg-ui-bg-subtle-hover` / `dark:bg-dk-track` in the hover menus, `ui-bg-component-hover` / `dk-track` in the Radix dropdowns), so the current choice is read from the row itself instead of a trailing icon. The roles filter's hover also stopped flashing `gray-100` in dark.
+- Rebuilt the analytics date-range switcher (`DateRangeFilter`, used above every dashboard analytics tab) on the same recipe as the edit-page pill tabs: `rounded-xl` container in `gray-50/80` / `dk-card`, and the active segment is a `dk-raised` pill with the `dk-line-strong` hairline plus `shadow-sm`. Previously the active segment had no border, so on dark it was a raised fill on a raised-adjacent card and the whole control read as one flat black block.
 
 ## 2026-11-16
 

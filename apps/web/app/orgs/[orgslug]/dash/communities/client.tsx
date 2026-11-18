@@ -286,21 +286,17 @@ const CommunitiesDashClient = ({
               </IconButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white dark:bg-dk-raised min-w-0 w-40">
-              <DropdownMenuItem onSelect={() => setActiveFilter('all')} className="flex items-center justify-between">
+              <DropdownMenuItem onSelect={() => setActiveFilter('all')} data-active={activeFilter === 'all'} className="data-[active=true]:bg-ui-bg-component-hover">
                 <span>{t('communities.all_communities')}</span>
-                {activeFilter === 'all' && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setActiveFilter('newest')} className="flex items-center justify-between">
+              <DropdownMenuItem onSelect={() => setActiveFilter('newest')} data-active={activeFilter === 'newest'} className="data-[active=true]:bg-ui-bg-component-hover">
                 <span>{t('communities.newest')}</span>
-                {activeFilter === 'newest' && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setActiveFilter('course')} className="flex items-center justify-between">
+              <DropdownMenuItem onSelect={() => setActiveFilter('course')} data-active={activeFilter === 'course'} className="data-[active=true]:bg-ui-bg-component-hover">
                 <span>{t('communities.course_communities')}</span>
-                {activeFilter === 'course' && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setActiveFilter('podcast')} className="flex items-center justify-between">
+              <DropdownMenuItem onSelect={() => setActiveFilter('podcast')} data-active={activeFilter === 'podcast'} className="data-[active=true]:bg-ui-bg-component-hover">
                 <span>{t('communities.podcast_communities')}</span>
-                {activeFilter === 'podcast' && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

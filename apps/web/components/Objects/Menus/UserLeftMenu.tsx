@@ -10,7 +10,6 @@ import {
   Globe,
 
   PanelLeftClose,
-  Check,
 
 
   Headphones,
@@ -326,15 +325,12 @@ function UserLeftMenu() {
                   <HoverMenuItem
                     key={language.code}
                     onClick={() => changeLanguage(language.code)}
-                    className="justify-between"
+                    selected={i18n.language.split('-')[0] === language.code}
                   >
                     <div className="flex flex-col">
                       <span className="font-medium text-sm">{language.nativeName}</span>
                       <span className="text-xs text-ui-fg-muted dark:text-dk-fg-3">{t(language.translationKey)}</span>
                     </div>
-                    {i18n.language.split('-')[0] === language.code && (
-                      <Check className="w-4 h-4 text-green-500" />
-                    )}
                   </HoverMenuItem>
                 ))}
               </HoverMenuContent>

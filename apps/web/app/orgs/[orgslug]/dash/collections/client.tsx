@@ -343,21 +343,17 @@ function CollectionsHome(params: CollectionsHomeProps) {
               </IconButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white dark:bg-dk-raised min-w-0 w-48">
-              <DropdownMenuItem onClick={() => setActiveFilter('all')} className="flex items-center justify-between">
+              <DropdownMenuItem onClick={() => setActiveFilter('all')} data-active={activeFilter === 'all'} className="data-[active=true]:bg-ui-bg-component-hover">
                 <span>{t('collections.filter.all_collections')}</span>
-                {activeFilter === 'all' && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setActiveFilter('public')} className="flex items-center justify-between">
+              <DropdownMenuItem onClick={() => setActiveFilter('public')} data-active={activeFilter === 'public'} className="data-[active=true]:bg-ui-bg-component-hover">
                 <span>{t('collections.filter.public')}</span>
-                {activeFilter === 'public' && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setActiveFilter('users_only')} className="flex items-center justify-between">
+              <DropdownMenuItem onClick={() => setActiveFilter('users_only')} data-active={activeFilter === 'users_only'} className="data-[active=true]:bg-ui-bg-component-hover">
                 <span>{t('collections.filter.private')}</span>
-                {activeFilter === 'users_only' && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setActiveFilter('paid')} className="flex items-center justify-between">
+              <DropdownMenuItem onClick={() => setActiveFilter('paid')} data-active={activeFilter === 'paid'} className="data-[active=true]:bg-ui-bg-component-hover">
                 <span>{t('collections.filter.paid')}</span>
-                {activeFilter === 'paid' && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

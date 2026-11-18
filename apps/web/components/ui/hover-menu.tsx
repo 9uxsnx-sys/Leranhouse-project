@@ -149,13 +149,23 @@ interface HoverMenuItemProps {
   className?: string
   onClick?: () => void
   asChild?: boolean
+  /** Selected option keeps the hover look permanently (no check mark). */
+  selected?: boolean
 }
 
 const HoverMenuItem = React.forwardRef<HTMLDivElement, HoverMenuItemProps>(
-  ({ children, className, onClick, asChild }, ref) => {
+  ({ children, className, onClick, asChild, selected }, ref) => {
+    const base = cn(
+      'flex items-center gap-2 px-3 py-2.5 text-sm rounded-lg cursor-pointer transition-colors',
+      selected
+        ? 'bg-ui-bg-subtle-hover text-ui-fg-base dark:bg-dk-track dark:text-dk-fg-1'
+        : 'text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover dark:text-dk-fg-2 dark:hover:text-dk-fg-1',
+      className
+    )
+
     if (asChild) {
       return (
-        <div ref={ref} className={cn("flex items-center gap-2 px-3 py-2.5 text-sm text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover dark:text-dk-fg-2 dark:hover:text-dk-fg-1 rounded-lg cursor-pointer transition-colors", className)}>
+        <div ref={ref} className={base}>
           {children}
         </div>
       )
@@ -165,10 +175,7 @@ const HoverMenuItem = React.forwardRef<HTMLDivElement, HoverMenuItemProps>(
       <div
         ref={ref}
         onClick={onClick}
-        className={cn(
-          "flex items-center gap-2 px-3 py-2.5 text-sm text-ui-fg-muted hover:text-ui-fg-base hover:bg-ui-bg-subtle-hover dark:text-dk-fg-2 dark:hover:text-dk-fg-1 rounded-lg cursor-pointer transition-colors",
-          className
-        )}
+        className={base}
       >
         {children}
       </div>

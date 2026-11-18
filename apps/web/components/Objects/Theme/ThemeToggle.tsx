@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Check, Monitor, Moon, Sun } from 'lucide-react'
+import { Monitor, Moon, Sun } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { useTheme, type ThemeMode } from '@components/Contexts/ThemeContext'
@@ -25,8 +25,8 @@ interface ThemeToggleProps {
 
 /**
  * Theme picker as a sidebar option — the same hover menu used by the language
- * switcher: a normal row that opens a card on hover, with a check on the
- * active mode.
+ * switcher: a normal row that opens a card on hover, with the active mode
+ * keeping the hover look instead of a check mark.
  */
 export function ThemeToggle({ collapsed = false, className }: ThemeToggleProps) {
   const { t } = useTranslation()
@@ -44,13 +44,12 @@ export function ThemeToggle({ collapsed = false, className }: ThemeToggleProps) 
             <HoverMenuItem
               key={mode}
               onClick={() => setTheme(mode)}
-              className="justify-between"
+              selected={theme === mode}
             >
               <div className="flex items-center gap-2">
                 <Icon className="w-4 h-4" />
                 <span className="font-medium text-sm">{t(labelKey)}</span>
               </div>
-              {theme === mode && <Check className="w-4 h-4 text-green-500" />}
             </HoverMenuItem>
           ))}
         </HoverMenuContent>

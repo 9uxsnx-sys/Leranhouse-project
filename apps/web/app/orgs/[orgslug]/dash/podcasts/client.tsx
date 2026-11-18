@@ -267,17 +267,14 @@ const PodcastsDashClient = ({
               </IconButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white dark:bg-dk-raised min-w-0 w-40">
-              <DropdownMenuItem onSelect={() => setActiveFilter('all')} className="flex items-center justify-between">
+              <DropdownMenuItem onSelect={() => setActiveFilter('all')} data-active={activeFilter === 'all'} className="data-[active=true]:bg-ui-bg-component-hover">
                 <span>{t('podcasts.all_podcasts')}</span>
-                {activeFilter === 'all' && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setActiveFilter('published')} className="flex items-center justify-between">
+              <DropdownMenuItem onSelect={() => setActiveFilter('published')} data-active={activeFilter === 'published'} className="data-[active=true]:bg-ui-bg-component-hover">
                 <span>{t('podcasts.published')}</span>
-                {activeFilter === 'published' && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setActiveFilter('unpublished')} className="flex items-center justify-between">
+              <DropdownMenuItem onSelect={() => setActiveFilter('unpublished')} data-active={activeFilter === 'unpublished'} className="data-[active=true]:bg-ui-bg-component-hover">
                 <span>{t('podcasts.unpublished')}</span>
-                {activeFilter === 'unpublished' && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

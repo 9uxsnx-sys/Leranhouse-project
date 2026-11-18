@@ -812,10 +812,10 @@ function OrgRoles() {
                             <DropdownMenuItem
                                 key={option.value}
                                 onClick={() => setRoleFilter(option.value as 'all' | 'system' | 'custom')}
-                                className="justify-between text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-gray-100 focus:bg-gray-100"
+                                data-active={roleFilter === option.value}
+                                className="text-sm rounded-md px-2.5 py-1.5 cursor-pointer data-[highlighted]:bg-ui-bg-component-hover focus:bg-ui-bg-component-hover data-[active=true]:bg-ui-bg-component-hover"
                             >
-                                <span className="text-gray-700 dark:text-zinc-200 text-xs">{option.label}</span>
-                                {roleFilter === option.value && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
+                                <span className="text-gray-700 dark:text-dk-fg-2 text-xs">{option.label}</span>
                             </DropdownMenuItem>
                         ))}
                     </DropdownMenuContent>

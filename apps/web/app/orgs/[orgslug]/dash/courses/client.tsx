@@ -564,18 +564,21 @@ function CoursesHome(params: CourseProps) {
               </IconButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white dark:bg-dk-raised min-w-0 w-40">
-              <DropdownMenuItem onClick={() => setActiveFilter('All')} className="flex items-center justify-between">
+              <DropdownMenuItem
+                onClick={() => setActiveFilter('All')}
+                data-active={activeFilter === 'All'}
+                className="data-[active=true]:bg-ui-bg-component-hover"
+              >
                 <span>{t('common.all_courses')}</span>
-                {activeFilter === 'All' && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
               </DropdownMenuItem>
               {DIFFICULTY_OPTIONS.map((option) => (
                 <DropdownMenuItem
                   key={option}
                   onClick={() => setActiveFilter(option)}
-                  className="flex items-center justify-between"
+                  data-active={activeFilter === option}
+                  className="data-[active=true]:bg-ui-bg-component-hover"
                 >
                   <span>{difficultyLabel(option)}</span>
-                  {activeFilter === option && <ConceptIcon.check size={12} className="text-gray-500 dark:text-zinc-400" />}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
