@@ -28,7 +28,7 @@ import { getAPIUrl, getUriWithOrg } from '@services/config/config'
 import { createCollection, deleteCollection } from '@services/courses/collections'
 import { revalidateTags, swrFetcher } from '@services/utils/ts/requests'
 import { searchMatchesAny } from '@/lib/search/normalize'
-import { useMediaQuery } from 'usehooks-ts'
+import { useListingPageSize } from '@components/Hooks/useListingPageSize'
 
 type CollectionsHomeProps = {
   orgslug: string
@@ -62,10 +62,8 @@ function CollectionsHome(params: CollectionsHomeProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<'all' | 'public' | 'users_only' | 'paid'>('all')
   const [currentPage, setCurrentPage] = useState(1)
-  // 4-up from `2xl` (1536px) fits two rows of 8; the 3-up grid below it fills
-  // four rows with 12 so laptops get a full page instead of a short one.
-  const isWide = useMediaQuery('(min-width: 1536px)', { initializeWithValue: false })
-  const itemsPerPage = isWide ? 8 : 12
+  // Page size follows the grid: 8 at 4-up, 12 at 3-up, 8 at 2-up, 6 at 1-up
+  const itemsPerPage = useListingPageSize()
   const [isCreating, setIsCreating] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [newName, setNewName] = useState('')
@@ -77,7 +75,7 @@ function CollectionsHome(params: CollectionsHomeProps) {
   // Reset to page 1 when search, filter or page size changes
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, activeFilter, isWide])
+  }, [searchQuery, activeFilter, itemsPerPage])
 
   const filtered = useMemo(() => {
     let list = collections

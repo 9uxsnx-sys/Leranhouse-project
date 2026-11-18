@@ -72,7 +72,8 @@ const CommunityClient = ({
   const [sortBy, setSortBy] = useState<DiscussionSortBy>('recent')
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null)
   const [discussionCount, setDiscussionCount] = useState(0)
-  const isMobile = useMediaQuery('(max-width: 768px)')
+  // 768 is the tablet breakpoint (`md`): the bar must not fire at tablet width.
+  const isMobile = useMediaQuery('(max-width: 767px)')
   const { canManageCommunity, canCreateDiscussion: hasCreatePermission } = useCommunityRights(activeCommunity.community_uuid)
   const { isUserPartOfTheOrg } = useOrgMembership()
   const canCreateDiscussion = hasCreatePermission && isUserPartOfTheOrg
@@ -274,8 +275,10 @@ const CommunityClient = ({
             )}
           </div>
 
-          {/* Right Sidebar - Community Info (Desktop only) */}
-          <div className="w-full lg:w-72 xl:w-80 shrink-0">
+          {/* Right Sidebar - Community Info (desktop only). Below `lg` it is
+              dropped entirely so the discussion feed starts immediately —
+              stacking these cards under an endless feed would bury them. */}
+          <div className="hidden lg:block lg:w-72 xl:w-80 lg:shrink-0">
             <div className="lg:sticky lg:top-8 space-y-4">
               <CommunitySidebar
                 community={activeCommunity}

@@ -264,7 +264,7 @@ export const OrgMenu = ({
     <>
       <NavigationBar />
       <div
-        className="relative flex h-screen w-full flex-col items-start lg:flex-row"
+        className="relative flex h-screen w-full flex-col items-start md:flex-row"
         style={{
           ...(shellHeight ? { height: shellHeight } : {}),
           ...getBrandStyle(
@@ -287,7 +287,7 @@ export const OrgMenu = ({
             <div className="flex min-w-0 items-center gap-x-1.5">
               {/* Mobile hamburger */}
               <IconButton
-                className="hidden max-lg:flex"
+                className="md:hidden"
                 variant="transparent"
                 size="small"
                 aria-label={isMenuOpen ? t('common.aria.close_menu') : t('common.aria.open_menu')}
@@ -419,7 +419,7 @@ export const OrgMenu = ({
 
       {/* Mobile drawer — shell.tsx MobileSidebarContainer */}
       <div
-        className={`fixed inset-0 z-50 lg:hidden ${isMenuOpen ? '' : 'pointer-events-none'}`}
+        className={`fixed inset-0 z-50 md:hidden ${isMenuOpen ? '' : 'pointer-events-none'}`}
         style={{ zIndex: 'var(--z-nav-menu)' }}
       >
         <div
@@ -447,7 +447,7 @@ export const OrgMenu = ({
               <h2 className="sr-only">{t('app.nav.accessibility.title', 'Navigation')}</h2>
             </div>
           </div>
-          <UserLeftMenu />
+          <UserLeftMenu variant="drawer" />
         </div>
       </div>
 

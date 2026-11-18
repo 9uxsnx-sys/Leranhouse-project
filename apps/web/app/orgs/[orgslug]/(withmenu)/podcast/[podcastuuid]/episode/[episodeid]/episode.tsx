@@ -330,9 +330,11 @@ export default function EpisodeClient({
 
       {/* ── CONTENT (two-column layout) ── */}
       <div className="w-full mx-auto max-w-7xl mt-8 space-y-8">
-        <div className="flex flex-col lg:flex-row gap-10 justify-between">
+        {/* Portrait tablet: 2-column grid, nav cards below the content.
+            From `lg`: content + single rail column. */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 items-start lg:items-stretch lg:flex lg:flex-row lg:gap-10 lg:justify-between">
           {/* ═══ LEFT COLUMN ═══ */}
-          <div className="flex-1 min-w-0 max-w-3xl space-y-12">
+          <div className="order-2 lg:order-none sm:col-span-2 flex-1 min-w-0 max-w-3xl space-y-12">
             {/* 1. What You'll Learn (first, like lesson page) */}
             {learningObjectives.length > 0 && (
               <section id="what-youll-learn" className="scroll-mt-24">
@@ -509,8 +511,9 @@ export default function EpisodeClient({
           </div>
 
           {/* ═══ RIGHT SIDEBAR ═══ */}
-          <div className="w-full lg:w-72 xl:w-80 shrink-0">
-            <div className="lg:sticky lg:top-8 space-y-4">
+          <div className="contents lg:block lg:w-72 xl:w-80 lg:shrink-0">
+            <div className="contents lg:block lg:sticky lg:top-8 lg:space-y-4">
+              <div className="order-3 sm:col-start-1 lg:order-none">
               <EpisodeOutlineSidebar
                 episodes={episodes}
                 currentEpisodeId={episode.episode_uuid}
@@ -518,10 +521,13 @@ export default function EpisodeClient({
                 podcastUuid={podcastUuid}
                 trailData={trailData}
               />
+              </div>
+              <div className="order-4 sm:col-start-2 lg:order-none">
               <OnThisPageSidebar
                 activeSection={activeSection}
                 sections={visibleSections}
               />
+              </div>
             </div>
           </div>
         </div>

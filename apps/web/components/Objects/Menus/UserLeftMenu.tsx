@@ -39,14 +39,17 @@ import { getOrgLogoMediaDirectory, getOrgLogoIconMediaDirectory } from '@service
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from '@components/Objects/Theme/ThemeToggle'
 
-function UserLeftMenu() {
+function UserLeftMenu({ variant = 'sidebar' }: { variant?: 'sidebar' | 'drawer' }) {
   const org = useOrg() as any
   const session = useLHSession() as any
   const { t, i18n } = useTranslation()
   const rawPathname = usePathname() || ''
   // Strip /orgs/{slug} prefix
   const pathname = rawPathname.replace(/^\/orgs\/[^/]+/, '')
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isCollapsedPref, setIsCollapsedPref] = useState(false)
+  // Tablet shows the icon rail whatever the saved preference says; the drawer
+  // always shows full labels.
+  const isCollapsed = variant === 'drawer' ? false : isCollapsedPref
   const { rights } = useAdminStatus()
 
   const isActivePath = (path: string) => {
@@ -60,15 +63,26 @@ function UserLeftMenu() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-    const saved = localStorage.getItem('user-menu-collapsed')
-    if (saved !== null) {
-      setIsCollapsed(saved === 'true')
-      return
+    const apply = () => {
+      // Below `lg` the shell is a tablet: the rail is not a preference, an
+      // expanded sidebar would eat a third of a 768px screen.
+      if (window.innerWidth < 1024) {
+        setIsCollapsedPref(true)
+        return
+      }
+      const saved = localStorage.getItem('user-menu-collapsed')
+      if (saved !== null) {
+        setIsCollapsedPref(saved === 'true')
+        return
+      }
+      // Compact desktop: the icon rail gives the content back the ~184px it
+      // needs to keep four cards at their design width. 1536px (`2xl`) is the
+      // grid's 4-up threshold, so the two switches happen together.
+      setIsCollapsedPref(window.innerWidth < 1536)
     }
-    // Compact desktop: the icon rail gives the content back the ~184px it needs
-    // to keep four cards at their design width. 1536px (`2xl`) is the grid's
-    // 4-up threshold, so the two switches happen together.
-    setIsCollapsed(window.innerWidth < 1536)
+    apply()
+    window.addEventListener('resize', apply)
+    return () => window.removeEventListener('resize', apply)
   }, [])
 
   // Sync sidebar width as a CSS variable so fixed-position elements (e.g. PodcastPlayer) can align after the sidebar
@@ -78,8 +92,8 @@ function UserLeftMenu() {
   }, [isCollapsed])
 
   const toggleCollapse = () => {
-    const newState = !isCollapsed
-    setIsCollapsed(newState)
+    const newState = !isCollapsedPref
+    setIsCollapsedPref(newState)
     localStorage.setItem('user-menu-collapsed', String(newState))
   }
 
@@ -135,8 +149,13 @@ function UserLeftMenu() {
     <nav
       aria-label={t('common.aria.user_sidebar_navigation')}
       className={cn(
-        "hidden lg:flex flex-col shrink-0 h-screen sticky top-0 z-overlay border-e border-gray-200 dark:border-dk-line bg-ui-bg-subtle transition-all duration-300",
-        isCollapsed ? "w-[72px]" : "w-64"
+        "flex-col shrink-0 z-overlay bg-ui-bg-subtle",
+        variant === 'drawer'
+          ? "flex h-full w-full"
+          : cn(
+              "hidden md:flex h-screen sticky top-0 border-e border-gray-200 dark:border-dk-line transition-all duration-300",
+              isCollapsed ? "w-[72px]" : "w-64"
+            )
       )}
     >
       {/* Header */}
@@ -280,6 +299,8 @@ function UserLeftMenu() {
       {/* Bottom Section */}
       <div className="border-t border-gray-200 dark:border-dk-line py-3 px-3 shrink-0">
         <div className="space-y-1">
+          {/* Rail/expanded toggle — desktop only, the tablet rail is fixed */}
+          <div className="hidden lg:block">
           {/* Collapse sidebar button (expanded state) */}
           {!isCollapsed && (
             <Tooltip>
@@ -316,6 +337,8 @@ function UserLeftMenu() {
               </TooltipContent>
             </Tooltip>
           )}
+
+          </div>
 
           {/* Theme switcher — light / dark / system */}
           <ThemeToggle collapsed={isCollapsed} className="mb-1" />

@@ -13,8 +13,6 @@ import {
 import { Backpack, Check, File, StickyNote, Video, Square, Image as ImageIcon, Lock, Clock, BookOpen, Award, Download, ChevronDown, BarChart3, RefreshCw, Loader2, Info } from 'lucide-react'
 import { getCurrentLanguageNativeName } from '@/lib/languages'
 import { useOrg } from '@components/Contexts/OrgContext'
-import { useMediaQuery } from 'usehooks-ts'
-import CourseActionsMobile from '@components/Objects/Courses/CourseActions/CourseActionsMobile'
 import { useRegisterBreadcrumb } from '@components/Objects/Breadcrumbs/UserBreadcrumbContext'
 import { useLHSession } from '@components/Contexts/LHSessionContext'
 import useSWR, { mutate as globalMutate } from 'swr'
@@ -69,7 +67,6 @@ const CourseClient = (props: any) => {
   }, [i18n.language])
   const org = useOrg() as any
   const router = useRouter()
-  const isMobile = useMediaQuery('(max-width: 768px)')
   const session = useLHSession() as any;
   const access_token = session?.data?.tokens?.access_token;
 
@@ -400,10 +397,14 @@ const CourseClient = (props: any) => {
 
             {/* ── CONTENT (below hero, same width as hero) ── */}
             <div className="w-full mx-auto max-w-7xl mt-8 space-y-8">
-              {/* ── TWO-COLUMN LAYOUT (content + sidebar) ── */}
-              <div className="flex flex-col lg:flex-row gap-10 justify-between">
+              {/* ── TWO-COLUMN LAYOUT (content + sidebar) ──
+                  Portrait tablet: a 2-column grid where the actionable card
+                  comes first, then the content, then the info cards 2-up.
+                  From `lg`: the rail is a single column beside the content
+                  (`contents` dissolves the rail wrapper below `lg`). */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 items-start lg:items-stretch lg:flex lg:flex-row lg:gap-6 xl:gap-10 lg:justify-between">
                 {/* ═══════════════ LEFT COLUMN ═══════════════ */}
-                <div className="flex-1 min-w-0 max-w-3xl space-y-8">
+                <div className="order-2 lg:order-none sm:col-span-2 flex-1 min-w-0 max-w-3xl space-y-8">
                   {/* ── 2. COURSE TITLE + STATS + SHARE ── */}
                   <div>
                     {course?.is_fallback && (
@@ -482,10 +483,14 @@ const CourseClient = (props: any) => {
                 </div>
 
                 {/* ═══════════════ RIGHT SIDEBAR ═══════════════ */}
-                <div className="w-full lg:w-72 xl:w-80 shrink-0">
-                  <div className="lg:sticky lg:top-8 space-y-4">
+                {/* `contents` below `lg` so each card becomes a direct grid item
+                    of the row above (this is what allows the access card to sit
+                    before the content and the info cards after it). */}
+                <div className="contents lg:block lg:w-72 xl:w-80 lg:shrink-0">
+                  <div className="contents lg:block lg:sticky lg:top-8 lg:space-y-4">
 
                   {/* ── SIDEBAR 1: Access / Progress ── */}
+                  <div className="order-1 sm:col-span-2 lg:order-none">
                   {isEnrolled ? (
                     <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
                       <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('course.page.in_progress')}</h3>
@@ -530,9 +535,10 @@ const CourseClient = (props: any) => {
                       </Button>
                     </div>
                   )}
+                  </div>
 
                   {/* ── SIDEBAR 2: Course Includes ── */}
-                  <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                  <div className="order-4 sm:col-start-2 lg:order-none bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
                     <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('course.page.includes_title')}</h3>
                     <div className="space-y-3">
                       <div className="flex items-center gap-3">
@@ -556,7 +562,7 @@ const CourseClient = (props: any) => {
 
                   {/* ── SIDEBAR 3: Instructors ── */}
                   {instructors.length > 0 && (
-                    <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                    <div className="order-5 sm:col-start-1 lg:order-none bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
                       <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('course.page.instructors_title')}</h3>
                       <div className="space-y-3">
                         {instructors.map((instructor, index) => (
@@ -581,7 +587,7 @@ const CourseClient = (props: any) => {
                   )}
 
                   {/* ── SIDEBAR 4: Community ── */}
-                  <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                  <div className="order-3 sm:col-start-1 sm:self-stretch lg:order-none bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
                     <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('course.page.community_title')}</h3>
                     <p className="text-sm text-gray-600 dark:text-dk-fg-2">
                       {t('course.page.community_description')}
@@ -589,7 +595,7 @@ const CourseClient = (props: any) => {
                   </div>
 
                   {/* ── SIDEBAR 5: Updates ── */}
-                  <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                  <div className="order-6 sm:col-start-2 sm:self-stretch lg:order-none bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
                     <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('course.page.updates_title')}</h3>
                     <div className="flex items-center gap-3">
                       <RefreshCw size={16} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
@@ -609,11 +615,6 @@ const CourseClient = (props: any) => {
             </div>
 
           </GeneralWrapperStyled>
-
-          {/* Mobile Actions Box */}
-          {isMobile && (
-            <CourseActionsMobile courseuuid={courseuuid} orgslug={orgslug} course={course} trailData={trailData} />
-          )}
         </>
       )}
     </>

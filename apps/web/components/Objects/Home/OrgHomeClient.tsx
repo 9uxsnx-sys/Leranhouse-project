@@ -35,11 +35,13 @@ export function OrgHomeClient({
   const session = useLHSession() as any
   const access_token = session?.data?.tokens?.access_token
 
-  // Each row must fill exactly one grid row: the grid is 4-up from `2xl`
-  // (1536px) and 3-up below it, so the slice follows the same threshold.
-  // Otherwise a section leaves an orphan card alone on a second row.
-  const isWide = useMediaQuery('(min-width: 1536px)')
-  const perSection = isWide ? 4 : 3
+  // Each row must fill exactly one grid row, so the slice follows the grid:
+  // 4-up from `2xl` (1536px), 3-up from `lg` (1024px), 2-up from `sm` (640px)
+  // and 1-up below. Otherwise a section leaves an orphan card on a second row.
+  const is2xl = useMediaQuery('(min-width: 1536px)', { initializeWithValue: false })
+  const isLg = useMediaQuery('(min-width: 1024px)', { initializeWithValue: false })
+  const isSm = useMediaQuery('(min-width: 640px)', { initializeWithValue: false })
+  const perSection = is2xl ? 4 : isLg ? 3 : isSm ? 2 : 1
 
   // SWR: re-fetch courses and podcasts when locale changes on the client
   const contentLocale = (i18n.language || 'en').split('-')[0]

@@ -291,9 +291,11 @@ const CollectionClient = ({
       </div>
 
       <div className="w-full mx-auto max-w-7xl mt-8 space-y-8">
-        <div className="flex flex-col lg:flex-row gap-10 justify-between">
+        {/* Portrait tablet: 2-column grid (access card, content, info cards).
+            From `lg`: content + single rail column. */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 items-start lg:items-stretch lg:flex lg:flex-row lg:gap-10 lg:justify-between">
           {/* ═══════════════ LEFT COLUMN ═══════════════ */}
-          <div className="flex-1 min-w-0 max-w-3xl space-y-8">
+          <div className="order-2 lg:order-none sm:col-span-2 flex-1 min-w-0 max-w-3xl space-y-8">
             <div>
               {collection.is_fallback && (
                 <div className="inline-flex items-center gap-2 mb-3 rounded-lg border border-amber-100 bg-amber-50 px-3 py-1.5 text-xs text-amber-800">
@@ -479,9 +481,9 @@ const CollectionClient = ({
           </div>
 
           {/* ═══════════════ RIGHT SIDEBAR ═══════════════ */}
-          <div className="w-full lg:w-72 xl:w-80 shrink-0">
-            <div className="lg:sticky lg:top-8 space-y-4">
-              <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+          <div className="contents lg:block lg:w-72 xl:w-80 lg:shrink-0">
+            <div className="contents lg:block lg:sticky lg:top-8 lg:space-y-4">
+              <div className="order-1 sm:col-span-2 lg:order-none bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
                 <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-4">
                   {isOwned
                     ? t('collections.owned_title')
@@ -541,7 +543,7 @@ const CollectionClient = ({
                 )}
               </div>
 
-              <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+              <div className="order-3 sm:col-start-1 lg:order-none bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
                 <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
                   {t('collections.bundle_includes')}
                 </h3>
@@ -587,14 +589,14 @@ const CollectionClient = ({
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+              <div className="order-4 sm:col-start-2 sm:self-stretch lg:order-none bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
                 <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('course.page.community_title')}</h3>
                 <p className="text-sm text-gray-600 dark:text-dk-fg-2">
                   {t('course.page.community_description')}
                 </p>
               </div>
 
-              <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+              <div className="order-5 sm:col-start-1 lg:order-none bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
                 <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">
                   {t('collections.updates')}
                 </h3>

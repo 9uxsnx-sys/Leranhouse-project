@@ -38,7 +38,7 @@ import FeatureDisabledView from '@components/Dashboard/Shared/FeatureDisabled/Fe
 import { usePlan } from '@components/Hooks/usePlan'
 import { searchMatchesAny } from '@/lib/search/normalize'
 import { IconButton } from '@components/ui/icon-button'
-import { useMediaQuery } from 'usehooks-ts'
+import { useListingPageSize } from '@components/Hooks/useListingPageSize'
 import { ActionRow, ActionRowSearch, ActionRowSpacer, ActionRowActions } from '@components/ui/action-row'
 import { ConceptIcon } from '@components/ui/icons'
 import {
@@ -186,15 +186,13 @@ function CoursesHome(params: CourseProps) {
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
-  // 4-up from `2xl` (1536px) fits two rows of 8; the 3-up grid below it fills
-  // four rows with 12 so laptops get a full page instead of a short one.
-  const isWide = useMediaQuery('(min-width: 1536px)', { initializeWithValue: false })
-  const itemsPerPage = isWide ? 8 : 12
+  // Page size follows the grid: 8 at 4-up, 12 at 3-up, 8 at 2-up, 6 at 1-up
+  const itemsPerPage = useListingPageSize()
 
   // Reset to page 1 when search, filter or page size changes
   React.useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, activeFilter, selectedUsergroupId, isWide])
+  }, [searchQuery, activeFilter, selectedUsergroupId, itemsPerPage])
 
   // Calculate pagination (client-side)
   const totalPages = Math.ceil(filteredCourses.length / itemsPerPage)

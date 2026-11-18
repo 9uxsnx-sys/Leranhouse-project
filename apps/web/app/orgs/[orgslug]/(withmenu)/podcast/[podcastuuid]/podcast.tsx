@@ -213,9 +213,11 @@ export default function PodcastClient({
 
         {/* Layout - Content Left, Sidebar Right */}
         <div className="w-full mx-auto max-w-7xl mt-8 space-y-8">
-          <div className="flex flex-col lg:flex-row gap-10 justify-between">
+          {/* Portrait tablet: 2-column grid (access card, content, info cards).
+              From `lg`: content + single rail column. */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 items-start lg:items-stretch lg:flex lg:flex-row lg:gap-10 lg:justify-between">
             {/* ═══════════════ LEFT COLUMN ═══════════════ */}
-            <div className="flex-1 min-w-0 max-w-3xl space-y-8">
+            <div className="order-2 lg:order-none sm:col-span-2 flex-1 min-w-0 max-w-3xl space-y-8">
               {/* ── PODCAST TITLE + STATS ── */}
               <div>
                 {podcast.is_fallback && (
@@ -295,10 +297,11 @@ export default function PodcastClient({
             </div>
 
             {/* ═══════════════ RIGHT SIDEBAR ═══════════════ */}
-            <div className="w-full lg:w-72 xl:w-80 shrink-0">
-              <div className="lg:sticky lg:top-8 space-y-4">
+            <div className="contents lg:block lg:w-72 xl:w-80 lg:shrink-0">
+              <div className="contents lg:block lg:sticky lg:top-8 lg:space-y-4">
 
                 {/* ── SIDEBAR 1: In Progress / Get Access ── */}
+                <div className="order-1 sm:col-span-2 lg:order-none">
                 {isEnrolled ? (
                   <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
                     <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('podcast.page.in_progress')}</h3>
@@ -346,9 +349,10 @@ export default function PodcastClient({
                     </Button>
                   </div>
                 )}
+                </div>
 
                 {/* ── SIDEBAR 2: Podcast Stats ── */}
-                <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                <div className="order-3 sm:col-start-1 lg:order-none bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
                   <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('podcast.page.includes_title')}</h3>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
@@ -376,7 +380,7 @@ export default function PodcastClient({
 
                 {/* ── SIDEBAR 3: Host ── */}
                 {(podcast.authors && podcast.authors.length > 0) || (meta.hosts && meta.hosts.length > 0) ? (
-                  <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                  <div className="order-4 sm:col-start-2 lg:order-none bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
                     <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('podcasts.hosted_by')}</h3>
                     <div className="space-y-3">
                       {meta.hosts && meta.hosts.length > 0 ? (
@@ -429,7 +433,7 @@ export default function PodcastClient({
                 ) : null}
 
                 {/* ── SIDEBAR 5: Updates ── */}
-                <div className="bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
+                <div className="order-5 sm:col-start-1 lg:order-none bg-white dark:bg-dk-card rounded-xl border border-gray-100 dark:border-dk-line shadow-sm p-6">
                   <h3 className="text-sm font-semibold tracking-wide uppercase text-gray-500 dark:text-dk-fg-1 mb-5">{t('podcast.page.updates_title')}</h3>
                   <div className="flex items-center gap-3">
                     <RefreshCw size={16} className="text-gray-400 dark:text-dk-fg-3 shrink-0" />
